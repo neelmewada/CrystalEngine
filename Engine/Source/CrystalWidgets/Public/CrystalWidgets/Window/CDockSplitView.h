@@ -40,6 +40,8 @@ namespace CE::Widgets
 		u32 GetSplitCount() const { return children.GetSize(); }
 		CDockSplitView* GetSplit(u32 index) const { return children[index]; }
 
+		CDockWindow* GetActiveWindow();
+
 		bool IsLayoutCalculationRoot() override { return true; }
 
 		bool IsSubWidgetAllowed(Class* subWidgetClass) override;

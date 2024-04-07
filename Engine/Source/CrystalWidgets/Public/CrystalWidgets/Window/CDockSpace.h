@@ -25,7 +25,7 @@ namespace CE::Widgets
 
 		void SetDockType(CDockType dockType) { this->dockType = dockType; }
 
-	crystalwidgets_internal:
+	crystalwidgets_protected_internal:
 
 		void HandleEvent(CEvent* event) override;
 
@@ -43,6 +43,10 @@ namespace CE::Widgets
 
 		FIELD()
 		CDockType dockType = CDockType::Major;
+
+		Array<Rect> menuItemRects{};
+		int hoveredMenuItem = -1;
+		int activeMenuItem = -1;
 
 		b8 isDetachedMode = false;
 	};

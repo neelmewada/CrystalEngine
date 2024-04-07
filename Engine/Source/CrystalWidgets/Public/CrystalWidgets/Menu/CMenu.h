@@ -11,8 +11,19 @@ namespace CE::Widgets
         CMenu();
         virtual ~CMenu();
 
+        void Show() override;
+
+        void Hide() override;
+
+        void Show(Vec2i screenPosition, Vec2i size);
+
     protected:
-        
+
+        void OnSubobjectAttached(Object* subobject) override;
+        void OnSubobjectDetached(Object* subobject) override;
+
+        FIELD()
+        Array<CMenuItem*> menuItems{};
 
     };
     

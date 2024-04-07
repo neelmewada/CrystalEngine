@@ -33,13 +33,15 @@ namespace CE::Widgets
 
         virtual void Hide();
 
+        bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
         // - Rendering -
 
         RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
-    protected:
+    crystalwidgets_protected_internal:
 
         virtual void OnPlatformWindowSet() {}
 
@@ -102,6 +104,7 @@ namespace CE::Widgets
 
         friend class CApplication;
         friend class CWidget;
+        friend class CDockSpace;
 
         template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
         friend TWindow* CreateWindow(const String& name, CWidget* parent, PlatformWindow* nativeWindow, Class* windowClass);

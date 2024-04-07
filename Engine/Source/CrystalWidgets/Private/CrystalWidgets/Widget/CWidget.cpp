@@ -414,6 +414,34 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::OnAfterUpdateLayout()
+	{
+		Vec2 originalSize = GetComputedLayoutSize();
+		f32 contentMaxY = originalSize.height;
+		f32 contentMaxX = originalSize.width;
+
+		for (CWidget* widget : attachedWidgets)
+		{
+			if (!widget->IsEnabled())
+				continue;
+
+			Vec2 pos = widget->GetComputedLayoutTopLeft();
+			Vec2 size = widget->GetComputedLayoutSize();
+			f32 maxY = pos.y + size.height;
+			f32 maxX = pos.x + size.width;
+			if (isnan(maxX))
+				maxX = 0;
+			if (isnan(maxY))
+				maxY = 0;
+
+			contentMaxY = Math::Max(contentMaxY, maxY);
+			contentMaxX = Math::Max(contentMaxX, maxX);
+		}
+
+		contentSize = Vec2(contentMaxX, contentMaxY);
+	}
+
+
 	bool CWidget::SubWidgetExistsRecursive(CWidget* subWidget)
 	{
 		if (!subWidget)
@@ -808,6 +836,43 @@ namespace CE::Widgets
 			Vec2 pos = Vec2(posInt.x, posInt.y);
 
 			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
+		}
+	}
+
+	Vec2 CWidget::LocalToScreenSpacePos(const Vec2& point)
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2 pos = Vec2(posInt.x, posInt.y);
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return pos + rootOrigin + point;
+				}
+			}
+
+			return point;
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		if (nativeWindow == nullptr)
+			return point;
+
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		{
+			Vec2i posInt = nativeWindow->GetWindowPosition();
+			Vec2 pos = posInt.ToVec2();
+
+			return pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + point;
 		}
 	}
 

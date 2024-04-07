@@ -161,6 +161,10 @@ CTreeView {
     flex-shrink: 2;
 }
 
+CTreeView::alternate {
+    background-color: rgb(21, 21, 21);
+}
+
 CTreeView::header {
     color: white;
     background-color: rgb(47, 47, 47);
@@ -180,6 +184,14 @@ CTreeView::cell {
 }
 
 CMenuItem {
+    font-size: 14px;
     flex-direction: row;
     align-items: center;
+    padding: 15px 5px;
+}
+
+CMenu {
+    padding: 0px 10px;
+    background: rgb(56, 56, 56);
+    border-width: 0px;
 }

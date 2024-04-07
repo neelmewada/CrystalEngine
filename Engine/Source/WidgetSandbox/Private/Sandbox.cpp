@@ -73,19 +73,58 @@ namespace CE
 	void WidgetSandbox::InitWidgets()
 	{
 		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
+
 		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace->GetRootDockSplit());
 		mainDockWindow->SetAsMainWindow(true);
+		{
+			CMenuItem* fileMenuItem = CreateObject<CMenuItem>(mainDockWindow, "FileMenuItem");
+			fileMenuItem->SetText("File");
+			{
+				CMenu* fileMenu = CreateObject<CMenu>(fileMenuItem, "FileMenu");
+
+				CMenuItem* newFile = CreateObject<CMenuItem>(fileMenu, "New");
+				newFile->SetText("New");
+
+				CMenuItem* open = CreateObject<CMenuItem>(fileMenu, "Open");
+				open->SetText("Open");
+
+				CMenuItem* openAs = CreateObject<CMenuItem>(fileMenu, "OpenAs");
+				openAs->SetText("Open As...");
+
+				CMenuItem* save = CreateObject<CMenuItem>(fileMenu, "Save");
+				save->SetText("Save");
+
+				CMenuItem* saveAs = CreateObject<CMenuItem>(fileMenu, "SaveAs");
+				saveAs->SetText("Save As...");
+
+				CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
+				exit->SetText("Exit");
+			}
+
+			CMenuItem* editMenuItem = CreateObject<CMenuItem>(mainDockWindow, "EditMenuItem");
+			editMenuItem->SetText("Edit");
+			{
+				CMenu* editMenu = CreateObject<CMenu>(editMenuItem, "EditMenu");
+			}
+
+			CMenuItem* toolsMenuItem = CreateObject<CMenuItem>(mainDockWindow, "ToolsMenuItem");
+			toolsMenuItem->SetText("Tools");
+			{
+				CMenu* menu = CreateObject<CMenu>(toolsMenuItem, "ToolsMenu");
+			}
+
+			CMenuItem* helpMenuItem = CreateObject<CMenuItem>(mainDockWindow, "HelpMenuItem");
+			helpMenuItem->SetText("Help");
+			{
+				CMenu* menu = CreateObject<CMenu>(helpMenuItem, "HelpMenu");
+			}
+		}
 
 		AssetManager* assetManager = gEngine->GetAssetManager();
 
 		topViewTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Sandbox/TopView");
 
 		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
-
-		for (int i = 0; i < 4; ++i)
-		{
-			CWidget* btn = CreateObject<CWidget>(toolBar, "TestButton");
-		}
 		
 		minorDockSpace = CreateWindow<CDockSpace>("MinorDockSpace", nullptr);
 		minorDockSpace->SetDockType(CDockType::Minor);

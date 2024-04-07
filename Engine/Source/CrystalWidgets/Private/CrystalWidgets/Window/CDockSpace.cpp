@@ -6,7 +6,7 @@ namespace CE::Widgets
 	CDockSpace::CDockSpace()
 	{
         allowVerticalScroll = allowHorizontalScroll = false;
-        receiveMouseEvents = false;
+        receiveMouseEvents = true;
         rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
 
         CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("DockSplitView");
@@ -59,6 +59,69 @@ namespace CE::Widgets
 
     void CDockSpace::HandleEvent(CEvent* event)
     {
+        if (dockType == CDockType::Major && dockSplits.NonEmpty())
+        {
+            if (event->IsMouseEvent())
+            {
+                CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+                Vec2 mousePos = mouseEvent->mousePos;
+
+                if (event->type == CEventType::MouseEnter || event->type == CEventType::MouseMove)
+                {
+                    int hoveredItem = -1;
+
+                    for (int i = 0; i < menuItemRects.GetSize(); ++i)
+                    {
+                        Rect menuItemRect = LocalToScreenSpaceRect(menuItemRects[i]);
+
+                        if (menuItemRect.Contains(mousePos))
+                        {
+                            hoveredItem = i;
+                        }
+                    }
+
+                    if (hoveredMenuItem != hoveredItem)
+                    {
+                        hoveredMenuItem = hoveredItem;
+                        if (activeMenuItem >= 0 && hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem)
+                        {
+                            activeMenuItem = hoveredMenuItem;
+                        }
+                        SetNeedsPaint();
+                    }
+                }
+                else if (event->type == CEventType::MouseLeave)
+                {
+                    hoveredMenuItem = -1;
+                    SetNeedsPaint();
+                }
+                else if (event->type == CEventType::MousePress)
+                {
+                    CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
+
+                    if (hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem && mouseEvent->button == MouseButton::Left)
+                    {
+                        activeMenuItem = hoveredMenuItem;
+                        CMenu* menuPopup = dockWindow->menuItems[activeMenuItem]->GetSubMenu();
+                        Vec2 pos = menuItemRects[activeMenuItem].min + Vec2(0, menuItemRects[activeMenuItem].GetSize().height);
+
+                        menuPopup->UpdateStyleIfNeeded();
+                        menuPopup->UpdateLayoutIfNeeded();
+
+                        menuPopup->GetComputedLayoutSize();
+
+                        Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
+                        menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), Vec2i(200, 400));
+                    }
+                    else
+                    {
+                        activeMenuItem = -1;
+                    }
+
+                    SetNeedsPaint();
+                }
+            }
+        }
         
 	    Super::HandleEvent(event);
     }
@@ -150,13 +213,61 @@ namespace CE::Widgets
 
             painter->DrawRect(Rect::FromSize(0, 0, w, h));
 
+            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless() && !this->nativeWindow->IsMaximized() && !this->nativeWindow->IsFullscreen())
+            {
+                f32 windowEdgeSize = 1.25f;
+                pen.SetWidth(windowEdgeSize);
+                pen.SetColor(Color::RGBA(15, 15, 15));
+                painter->SetPen(pen);
+
+                painter->SetBrush(CBrush());
+
+                painter->DrawRect(Rect::FromSize(0, 0, w, h));
+            }
+
             // Draw menu items
 
-            for (int i = 0; i < menuItems.GetSize(); ++i)
+            if (dockSplits.NonEmpty() && dockSplits[0]->GetSubWidgetCount() > 0 && dockSplits[0]->GetSubWidget(0)->IsOfType<CWindow>())
             {
-                CMenuItem* menuItem = menuItems[i];
+                CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
 
-                
+                f32 posX = 20.0f;
+
+                menuItemRects.Clear();
+                menuItemRects.Reserve(dockWindow->menuItems.GetSize());
+
+                for (int i = 0; i < dockWindow->menuItems.GetSize(); ++i)
+                {
+                    CMenuItem* menuItem = dockWindow->menuItems[i];
+
+                    font = CFont(menuItem->computedStyle.GetFontName(), menuItem->computedStyle.GetFontSize());
+                    painter->SetFont(font);
+
+                    Vec2 textSize = painter->CalculateTextSize(menuItem->GetText());
+                    const Vec2 padding = Vec2(10, 4);
+
+                    Rect rect = Rect::FromSize(posX, 2.0f, padding.x * 2 + textSize.width, padding.y * 2 + textSize.height);
+                    menuItemRects.Add(rect);
+
+                    menuItem->UpdateStyleIfNeeded();
+
+                    Color textColor = Color::White();
+                    pen = CPen(textColor);
+                    painter->SetPen(pen);
+
+                    if (i == hoveredMenuItem || i == activeMenuItem)
+                    {
+                        Color menuItemColor = i == activeMenuItem ? Color::RGBA(0, 112, 224) : Color::RGBA(87, 87, 87);
+
+                        painter->SetBrush(CBrush(menuItemColor));
+
+                        painter->DrawRect(rect);
+                    }
+
+                    painter->DrawText(menuItem->GetText(), padding + Vec2(posX, 2.0f));
+
+                    posX += rect.GetSize().width;
+                }
             }
         }
         else if (GetDockType() == CDockType::Minor)
@@ -194,7 +305,14 @@ namespace CE::Widgets
                 return false;
         }
 
-        if (position.y < 60) // Add width offset for menu bar: (position.x > 256)
+        if (PlatformMisc::GetCurrentPlatform() != PlatformName::Mac && menuItemRects.NonEmpty())
+        {
+            Rect rect = menuItemRects.Top();
+            if (position.y < rect.max.y && position.x < rect.max.x)
+                return false;
+        }
+
+        if (position.y < 60)
             return true;
         return false;
     }

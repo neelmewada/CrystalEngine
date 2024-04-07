@@ -109,7 +109,7 @@ namespace CE::Widgets
 
         void SetFocus(CWidget* widget);
 
-    private:
+    crystalwidgets_internal:
 
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;

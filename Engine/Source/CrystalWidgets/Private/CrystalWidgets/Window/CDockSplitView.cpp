@@ -37,6 +37,14 @@ namespace CE::Widgets
         return nullptr;
     }
 
+    CDockWindow* CDockSplitView::GetActiveWindow()
+    {
+        if (selectedTab < 0 || selectedTab >= dockedWindows.GetSize())
+            return nullptr;
+
+        return dockedWindows[selectedTab];
+    }
+
     bool CDockSplitView::IsSubWidgetAllowed(Class* subWidgetClass)
     {
         if (!subWidgetClass)

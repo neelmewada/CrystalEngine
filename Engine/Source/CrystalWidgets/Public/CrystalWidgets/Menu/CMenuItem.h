@@ -17,7 +17,19 @@ namespace CE::Widgets
 
         void SetText(const String& text);
 
+        Name GetIcon() const { return icon->GetBackgroundImage(); }
+
+        const String& GetText() const { return label->GetText(); }
+
+        CMenu* GetSubMenu() const { return subMenu; }
+
+        bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
     protected:
+
+        void OnSubobjectAttached(Object* subobject) override;
+
+        void OnSubobjectDetached(Object* subobject) override;
 
         FIELD()
         CMenu* subMenu = nullptr;

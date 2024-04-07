@@ -395,7 +395,11 @@ namespace CE::Widgets
 
 			if (row % 2 != 0 && alternateBgColor.a > 0)
 			{
-				// TODO: Paint alternate Background
+				CBrush brush = CBrush(alternateBgColor);
+				painter->SetBrush(brush);
+				painter->SetPen(CPen());
+
+				painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, ceil(rowHeightsByParent[parentIndex][row])));
 			}
 
 			if (selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow) // Draw row selection

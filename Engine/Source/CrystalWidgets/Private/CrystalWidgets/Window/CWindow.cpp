@@ -120,8 +120,6 @@ namespace CE::Widgets
 
     void CWindow::ConstructWindow()
     {
-        if (parent != nullptr) // Renderer2D is created only for root native windows
-            return;
         if (nativeWindow == nullptr)
             return;
 
@@ -140,9 +138,9 @@ namespace CE::Widgets
             
             desc.initialDrawItemStorage = 1'000;
             desc.drawItemStorageIncrement = 1'000;
-
+            
             u32 screenWidth = 0, screenHeight = 0;
-            PlatformWindow* platformWindow = GetRootNativeWindow();
+            PlatformWindow* platformWindow = nativeWindow;
             CE_ASSERT(platformWindow != nullptr, "CWindow could not find a PlatformWindow in parent hierarchy!");
 
             platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
@@ -678,6 +676,11 @@ namespace CE::Widgets
         Super::HandleEvent(event);
     }
 
+    bool CWindow::IsSubWidgetAllowed(Class* subWidgetClass)
+    {
+        return subWidgetClass->IsSubclassOf<CWidget>() && !subWidgetClass->IsSubclassOf<CMenuItem>();
+    }
+
     void CWindow::OnSubobjectAttached(Object* object)
     {
         Super::OnSubobjectAttached(object);
@@ -689,18 +692,28 @@ namespace CE::Widgets
         {
             ((CWidget*)object)->ownerWindow = this;
         }
+
+        if (object->IsOfType<CMenuItem>())
+        {
+            menuItems.Add(static_cast<CMenuItem*>(object));
+        }
     }
 
     void CWindow::OnSubobjectDetached(Object* object)
     {
         Super::OnSubobjectDetached(object);
-
+        
         if (!object)
             return;
 
         if (object->IsOfType<CWidget>())
         {
             ((CWidget*)object)->ownerWindow = nullptr;
+        }
+
+    	if (object->IsOfType<CMenuItem>())
+        {
+            menuItems.Remove(static_cast<CMenuItem*>(object));
         }
     }
 

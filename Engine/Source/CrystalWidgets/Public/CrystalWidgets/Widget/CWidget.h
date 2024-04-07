@@ -70,7 +70,7 @@ namespace CE::Widgets
         void UpdateStyleIfNeeded();
         virtual void UpdateLayoutIfNeeded();
 
-        virtual void OnAfterUpdateLayout() {}
+        virtual void OnAfterUpdateLayout();
 
         virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
 
@@ -138,6 +138,7 @@ namespace CE::Widgets
         }
 
         Rect GetScreenSpaceRect();
+        Vec2 LocalToScreenSpacePos(const Vec2& point);
         Rect LocalToScreenSpaceRect(const Rect& localRect);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
         Vec2 ScreenSpaceToLocalPoint(const Vec2& point);
