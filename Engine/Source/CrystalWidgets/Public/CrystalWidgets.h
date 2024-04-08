@@ -15,6 +15,7 @@
 // App & Utils
 #include "CrystalWidgets/Event/CTimer.h"
 #include "CrystalWidgets/CApplication.h"
+#include "CrystalWidgets/Window/CPlatformWindow.h"
 
 #include "CrystalWidgets/Style/CStyleSheet.h"
 

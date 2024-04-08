@@ -79,6 +79,7 @@ namespace CE
 		if (mainWindow == nullptr)
 		{
 			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen, resizable);
+			mainWindow->initialFlags |= PlatformWindowFlags::DestroyOnClose;
 			mainWindow->isMainWindow = true;
 			windowList.Add(mainWindow);
 
@@ -98,6 +99,7 @@ namespace CE
 		if (mainWindow == nullptr)
 		{
 			mainWindow = new SDLPlatformWindow(title, width, height, info);
+			mainWindow->initialFlags |= PlatformWindowFlags::DestroyOnClose;
 			mainWindow->isMainWindow = true;
 			windowList.Add(mainWindow);
 
@@ -325,7 +327,17 @@ namespace CE
 			{
 				if (event.window.windowID == window->GetWindowId())
 				{
-					DestroyWindow(window);
+					if (window->GetInitialFlags() & PlatformWindowFlags::DestroyOnClose != 0)
+					{
+						DestroyWindow(window);
+					}
+					else
+					{
+						for (auto messageHandler : messageHandlers)
+						{
+							messageHandler->OnWindowClosed(window);
+						}
+					}
 					break;
 				}
 			}

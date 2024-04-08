@@ -108,7 +108,7 @@ namespace CE::Widgets
                         menuPopup->UpdateStyleIfNeeded();
                         menuPopup->UpdateLayoutIfNeeded();
 
-                        menuPopup->GetComputedLayoutSize();
+                        Vec2 menuSize = menuPopup->GetComputedLayoutSize();
 
                         Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
                         menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), Vec2i(200, 400));
@@ -132,7 +132,7 @@ namespace CE::Widgets
 
         if (nativeWindow)
         {
-	        nativeWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+	        nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
     }
 
@@ -195,7 +195,7 @@ namespace CE::Widgets
 
         if (GetDockType() == CDockType::Major) // Major dock space
         {
-            PlatformWindow* nativeWindow = GetRootNativeWindow();
+        	PlatformWindow* nativeWindow = GetRootNativeWindow()->platformWindow;
 
             u32 w = 0, h = 0;
             nativeWindow->GetDrawableWindowSize(&w, &h);
@@ -204,7 +204,7 @@ namespace CE::Widgets
 
             painter->SetBrush(brush);
 
-            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless() && !this->nativeWindow->IsMaximized() && !this->nativeWindow->IsFullscreen())
+            if (nativeWindow != nullptr && nativeWindow->IsBorderless() && !nativeWindow->IsMaximized() && !nativeWindow->IsFullscreen())
             {
                 f32 windowEdgeSize = 2.0f;
                 pen.SetWidth(windowEdgeSize);
@@ -213,7 +213,7 @@ namespace CE::Widgets
 
             painter->DrawRect(Rect::FromSize(0, 0, w, h));
 
-            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless() && !this->nativeWindow->IsMaximized() && !this->nativeWindow->IsFullscreen())
+            if (nativeWindow != nullptr && nativeWindow->IsBorderless() && !nativeWindow->IsMaximized() && !nativeWindow->IsFullscreen())
             {
                 f32 windowEdgeSize = 1.25f;
                 pen.SetWidth(windowEdgeSize);

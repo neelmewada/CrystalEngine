@@ -150,9 +150,9 @@ namespace CE::Widgets
 		CWidget* hoveredWidget = nullptr;
 		CWindow* hoveredWindow = nullptr;
 
-		for (int i = 0; i < windows.GetSize(); ++i)
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			hoveredWidget = getBottomMostHoveredWidget(windows[i]);
+			hoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->owner);
 			if (hoveredWidget)
 			{
 				hoveredWindow = hoveredWidget->ownerWindow;
@@ -497,9 +497,9 @@ namespace CE::Widgets
 
 		// Per window events inside Tick()
 
-		for (int i = 0; i < windows.GetSize(); i++)
+		for (int i = 0; i < platformWindows.GetSize(); i++)
 		{
-			windows[i]->Tick();
+			platformWindows[i]->Tick();
 		}
 	}
 
@@ -515,7 +515,7 @@ namespace CE::Widgets
 	{
 		registeredFonts[fontName] = fontAtlas;
 		
-		for (auto window : windows)
+		for (auto window : platformWindows)
 		{
 			if (window->renderer != nullptr)
 			{
@@ -536,9 +536,9 @@ namespace CE::Widgets
 
 	void CApplication::BuildFrameGraph()
 	{
-		for (int i = 0; i < windows.GetSize(); ++i)
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			PlatformWindow* platformWindow = windows[i]->nativeWindow;
+			PlatformWindow* platformWindow = platformWindows[i]->platformWindow;
 
 			if (!platformWindow)
 				continue;
@@ -547,7 +547,7 @@ namespace CE::Widgets
 
 			Name id = String::Format("{}", platformWindow->GetWindowId());
 
-			attachmentDatabase.EmplaceFrameAttachment(id, windows[i]->swapChain);
+			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->swapChain);
 
 			if (!platformWindow->IsMinimized() && platformWindow->IsShown())
 			{
@@ -561,7 +561,7 @@ namespace CE::Widgets
 					swapChainAttachment.multisampleState.sampleCount = 1;
 					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-					scheduler->PresentSwapChain(windows[i]->swapChain);
+					scheduler->PresentSwapChain(platformWindows[i]->swapChain);
 				}
 				scheduler->EndScope();
 			}
@@ -570,20 +570,20 @@ namespace CE::Widgets
 
 	void CApplication::SetDrawListMasks(RHI::DrawListMask& outMask)
 	{
-		for (int i = 0; i < windows.GetSize(); ++i)
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			outMask.Set(windows[i]->GetDrawListTag());
+			outMask.Set(platformWindows[i]->drawListTag);
 		}
 	}
 
 	void CApplication::FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
 	{
-		for (int i = 0; i < windows.GetSize(); ++i)
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			if (!windows[i]->IsVisible() || !windows[i]->IsEnabled())
+			if (!platformWindows[i]->owner->IsVisible() || !platformWindows[i]->owner->IsEnabled())
 				continue;
 
-			const auto& packets = windows[i]->FlushDrawPackets(imageIndex);
+			const auto& packets = platformWindows[i]->FlushDrawPackets(imageIndex);
 
 			for (RHI::DrawPacket* drawPacket : packets)
 			{
@@ -594,27 +594,42 @@ namespace CE::Widgets
 
 	void CApplication::SubmitDrawPackets(RHI::DrawListContext& drawList)
 	{
-		for (int i = 0; i < windows.GetSize(); ++i)
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			PlatformWindow* platformWindow = windows[i]->nativeWindow;
+			PlatformWindow* platformWindow = platformWindows[i]->platformWindow;
 
 			if (!platformWindow)
 				continue;
 
 			Name id = String::Format("{}", platformWindow->GetWindowId());
 
-			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(windows[i]->GetDrawListTag()));
+			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->drawListTag);
 		}
 	}
 
 	void CApplication::OnWindowDestroyed(PlatformWindow* nativeWindow)
 	{
-		for (int i = windows.GetSize() - 1; i >= 0; --i)
+		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
-			if (windows[i]->nativeWindow == nativeWindow)
+			if (platformWindows[i]->platformWindow == nativeWindow)
 			{
-				windows[i]->Destroy();
-				windows.RemoveAt(i);
+				platformWindows[i]->owner->nativeWindow = nullptr;
+				platformWindows[i]->owner->Destroy();
+				platformWindows.RemoveAt(i);
+				break;
+			}
+		}
+	}
+
+	void CApplication::OnWindowClosed(PlatformWindow* nativeWindow)
+	{
+		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
+		{
+			if (platformWindows[i]->platformWindow == nativeWindow)
+			{
+
+				platformWindows.RemoveAt(i);
+				break;
 			}
 		}
 	}

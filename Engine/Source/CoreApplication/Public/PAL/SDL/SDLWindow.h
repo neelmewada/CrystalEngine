@@ -29,6 +29,8 @@ namespace CE
         virtual void SetWindowSize(Vec2i newSize) override;
         virtual void SetMinimumSize(Vec2i minSize) override;
 
+        virtual PlatformWindowFlags GetInitialFlags() override { return initialFlags; }
+
         virtual void SetOpacity(f32 opacity) override;
         virtual void SetAlwaysOnTop(bool alwaysOnTop) override;
 
@@ -63,6 +65,8 @@ namespace CE
         SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info);
 
         SDL_Window* handle = nullptr;
+
+        PlatformWindowFlags initialFlags{};
 
     private:
 

@@ -27,19 +27,13 @@ namespace CE::Widgets
 
         bool IsDockSpace();
 
-        PlatformWindow* GetRootNativeWindow();
+        CPlatformWindow* GetRootNativeWindow();
 
         virtual void Show();
 
         virtual void Hide();
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
-
-        // - Rendering -
-
-        RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
-
-        const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
     crystalwidgets_protected_internal:
 
@@ -49,21 +43,15 @@ namespace CE::Widgets
 
         void OnAfterUpdateLayout() override;
 
-        virtual void ConstructWindow();
-
         void OnPaint(CPaintEvent* paintEvent) override;
 
         void OnPaintOverlay(CPaintEvent* paintEvent) override;
 
         void HandleEvent(CEvent* event) override;
 
-        void Tick();
-
         void OnBeforeDestroy() override;
 
         void Construct() override;
-
-        void OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight);
 
         void OnSubobjectAttached(Object* object) override;
         void OnSubobjectDetached(Object* object) override;
@@ -94,13 +82,13 @@ namespace CE::Widgets
         b8 isVerticalScrollPressed = false;
         b8 isVerticalScrollHovered = false;
 
-        PlatformWindow* nativeWindow = nullptr;
-        DelegateHandle windowResizeDelegate = 0;
+        //PlatformWindow* nativeWindow = nullptr;
+        CPlatformWindow* nativeWindow = nullptr;
+        //DelegateHandle windowResizeDelegate = 0;
 
-        CPainter* painter = nullptr;
-        RPI::Renderer2D* renderer = nullptr;
-        RHI::DrawListTag drawListTag = 0;
-        RHI::SwapChain* swapChain = nullptr;
+        //CPainter* painter = nullptr;
+        //RPI::Renderer2D* renderer = nullptr;
+        //RHI::DrawListTag drawListTag = 0;
 
         friend class CApplication;
         friend class CWidget;
@@ -111,18 +99,16 @@ namespace CE::Widgets
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
-    TWindow* CreateWindow(const String& name, CWidget* parent = nullptr, PlatformWindow* nativeWindow = nullptr, Class* windowClass = GetStaticClass<TWindow>())
+    TWindow* CreateWindow(const String& name, PlatformWindow* nativeWindow, Class* windowClass = GetStaticClass<TWindow>())
     {
         if (windowClass == nullptr)
             windowClass = GetStaticClass<TWindow>();
-        Object* outer = parent;
-        if (outer == nullptr)
-            outer = CApplication::Get();
+
+        Object* outer = CApplication::Get();
 
         TWindow* window = CreateObject<TWindow>(outer, name, OF_NoFlags, windowClass);
         window->SetTitle(name);
         window->SetPlatformWindow(nativeWindow);
-        window->ConstructWindow();
         return window;
     }
 

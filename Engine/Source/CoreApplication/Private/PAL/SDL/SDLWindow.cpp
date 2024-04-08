@@ -98,6 +98,7 @@ namespace CE
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
+		: initialFlags(info.windowFlags)
 	{
 		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
 		if (info.resizable)

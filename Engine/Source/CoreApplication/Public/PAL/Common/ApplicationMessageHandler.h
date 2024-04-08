@@ -28,6 +28,7 @@ namespace CE
 
         virtual void OnWindowRestored(PlatformWindow* window) {}
         virtual void OnWindowDestroyed(PlatformWindow* window) {}
+        virtual void OnWindowClosed(PlatformWindow* window) {}
         virtual void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) {}
         virtual void OnWindowMinimized(PlatformWindow* window) {}
         virtual void OnWindowCreated(PlatformWindow* window) {}

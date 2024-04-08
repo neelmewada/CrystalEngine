@@ -3,7 +3,7 @@
 namespace CE::Widgets
 {
     CLASS()
-    class CRYSTALWIDGETS_API CPopup : public CWindow, public ApplicationMessageHandler
+    class CRYSTALWIDGETS_API CPopup : public CWindow
     {
         CE_CLASS(CPopup, CWindow)
     public:
@@ -20,8 +20,6 @@ namespace CE::Widgets
         void Show(Vec2i screenPosition, Vec2i size);
 
     protected:
-
-        void OnWindowDestroyed(PlatformWindow* window) override;
 
         void HandleEvent(CEvent* event) override;
 

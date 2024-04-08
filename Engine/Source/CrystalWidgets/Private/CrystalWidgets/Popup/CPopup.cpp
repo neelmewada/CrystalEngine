@@ -7,15 +7,11 @@ namespace CE::Widgets
 	{
 		allowVerticalScroll = false;
 		allowHorizontalScroll = false;
-
-		if (PlatformApplication::TryGet())
-			PlatformApplication::TryGet()->AddMessageHandler(this);
 	}
 
 	CPopup::~CPopup()
 	{
-		if (PlatformApplication::TryGet())
-			PlatformApplication::TryGet()->RemoveMessageHandler(this);
+
 	}
 
 	void CPopup::OnBeforeDestroy()
@@ -36,14 +32,12 @@ namespace CE::Widgets
 		windowInfo.fullscreen = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.hidden = true;
 
-		nativeWindow = PlatformApplication::Get()->CreatePlatformWindow(title, showSize.width, showSize.height, windowInfo);
-		nativeWindow->SetWindowPosition(showPosition);
-		//nativeWindow->SetBorderless(true);
+		nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo);
+
+		nativeWindow->platformWindow->SetWindowPosition(showPosition);
+		nativeWindow->platformWindow->SetBorderless(true);
+		nativeWindow->platformWindow->SetAlwaysOnTop(true);
 		nativeWindow->Show();
-
-		ConstructWindow();
-
-		CApplication::Get()->windows.Add(this);
 	}
 
 	void CPopup::Hide()
@@ -51,16 +45,8 @@ namespace CE::Widgets
 		if (!nativeWindow)
 			return;
 		
-		PlatformApplication::Get()->DestroyWindow(nativeWindow);
+		delete nativeWindow;
 		nativeWindow = nullptr;
-
-		CApplication::Get()->windows.Remove(this);
-
-		if (swapChain)
-		{
-			RHI::gDynamicRHI->DestroySwapChain(swapChain);
-			swapChain = nullptr;
-		}
 	}
 
 	void CPopup::Show(Vec2i screenPosition, Vec2i size)
@@ -70,14 +56,6 @@ namespace CE::Widgets
 		windowSize = showSize.ToVec2();
 
 		Show();
-	}
-
-	void CPopup::OnWindowDestroyed(PlatformWindow* window)
-	{
-		if (window == nativeWindow)
-		{
-			nativeWindow = nullptr;
-		}
 	}
 
 	void CPopup::HandleEvent(CEvent* event)

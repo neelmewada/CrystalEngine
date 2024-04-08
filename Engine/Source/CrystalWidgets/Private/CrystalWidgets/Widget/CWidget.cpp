@@ -352,7 +352,7 @@ namespace CE::Widgets
 				if (window->parent && window->parent->IsOfType<CWindow>())
 					parentWindow = (CWindow*)window->parent;
 
-				PlatformWindow* nativeWindow = window->nativeWindow;
+				PlatformWindow* nativeWindow = window->nativeWindow->platformWindow;
 
 				if (nativeWindow)
 				{
@@ -811,7 +811,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
 					Vec2 pos = Vec2(posInt.x, posInt.y);
 					u32 w, h;
 					window->nativeWindow->GetWindowSize(&w, &h);
@@ -848,7 +848,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
 					Vec2 pos = Vec2(posInt.x, posInt.y);
 					u32 w, h;
 					window->nativeWindow->GetWindowSize(&w, &h);
@@ -887,7 +887,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
 					Vec2 pos = Vec2(posInt.x, posInt.y);
 					u32 w, h;
 					window->nativeWindow->GetWindowSize(&w, &h);
@@ -924,7 +924,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2 pos = window->nativeWindow->GetWindowPosition().ToVec2();
+					Vec2 pos = window->nativeWindow->platformWindow->GetWindowPosition().ToVec2();
 
 					return point - (pos + rootOrigin);
 				}
@@ -984,7 +984,7 @@ namespace CE::Widgets
 		{
 			if (owner->ownerWindow == nullptr)
 			{
-				renderer = owner->renderer;
+				renderer = owner->nativeWindow->renderer;
 				break;
 			}
 			owner = owner->ownerWindow;
@@ -1014,7 +1014,7 @@ namespace CE::Widgets
 		}
 		else if (IsOfType<CWindow>())
 		{
-			CApplication::Get()->windows.Remove((CWindow*)this);
+			//CApplication::Get()->windows.Remove((CWindow*)this);
 		}
 		
 		CApplication::Get()->destructionQueue.Add(this);
@@ -1028,7 +1028,7 @@ namespace CE::Widgets
 		{
 			if (owner->ownerWindow == nullptr)
 			{
-				renderer = owner->renderer;
+				renderer = owner->nativeWindow->renderer;
 				break;
 			}
 			owner = owner->ownerWindow;
@@ -1352,7 +1352,8 @@ namespace CE::Widgets
 			CWindow* window = (CWindow*)this;
 			if (window->nativeWindow != nullptr)
 			{
-				PlatformApplication::Get()->DestroyWindow(window->nativeWindow);
+				//PlatformApplication::Get()->DestroyWindow(window->nativeWindow);
+				delete window->nativeWindow;
 				window->nativeWindow = nullptr;
 			}
 		}

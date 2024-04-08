@@ -46,7 +46,7 @@ namespace CE::Widgets
         bool ClipRectExists();
         Rect GetLastClipRect();
 
-    private:
+    crystalwidgets_internal:
 
         Array<Vec2> coordinateSpaceStack{};
 

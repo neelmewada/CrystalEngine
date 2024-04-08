@@ -41,7 +41,8 @@ namespace CE
         SkipTaskbar = BIT(0),
         ToolTip = BIT(1),
         PopupMenu = BIT(2),
-        Utility = BIT(3)
+        Utility = BIT(3),
+        DestroyOnClose = BIT(4)
     };
     ENUM_CLASS_FLAGS(PlatformWindowFlags);
 
@@ -51,7 +52,7 @@ namespace CE
     	bool fullscreen = false;
     	bool resizable = true;
         bool hidden = false;
-        PlatformWindowFlags windowFlags = PlatformWindowFlags::None;
+        PlatformWindowFlags windowFlags = PlatformWindowFlags::DestroyOnClose;
     };
 
     class COREAPPLICATION_API PlatformApplication

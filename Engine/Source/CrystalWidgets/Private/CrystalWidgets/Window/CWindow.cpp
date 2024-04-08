@@ -11,29 +11,15 @@ namespace CE::Widgets
         receiveMouseEvents = false;
         clipChildren = true;
 
-        painter = CreateDefaultSubobject<CPainter>("Painter");
-
         if (!IsDefaultInstance())
         {
             title = GetName().GetString();
-
-            windowResizeDelegate =
-                PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(
-                    MemberDelegate(&Self::OnWindowSizeChanged, this));
         }
     }
 
     CWindow::~CWindow()
     {
-        RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
-        drawListTag = 0;
 
-        delete swapChain; swapChain = nullptr;
-
-        if (windowResizeDelegate != 0)
-        {
-            PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
-        }
     }
 
     void CWindow::Show()
@@ -54,33 +40,11 @@ namespace CE::Widgets
 
     void CWindow::SetPlatformWindow(PlatformWindow* window)
     {
-        this->nativeWindow = window;
+        this->nativeWindow = new CPlatformWindow(this, window);
 
-        if (!swapChain && nativeWindow)
-        {
-            receiveMouseEvents = true;
-
-            RHI::SwapChainDescriptor desc{};
-            desc.imageCount = CApplication::Get()->numFramesInFlight;
-            desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
-            
-            nativeWindow->GetWindowSize(&desc.preferredWidth, &desc.preferredHeight);
-
-            swapChain = RHI::gDynamicRHI->CreateSwapChain(nativeWindow, desc);
-        }
+        receiveMouseEvents = true;
 
         OnPlatformWindowSet();
-    }
-
-    const Array<RHI::DrawPacket*>& CWindow::FlushDrawPackets(u32 imageIndex)
-    {
-        static const Array<RHI::DrawPacket*> empty{};
-        if (!IsVisible() || !IsEnabled())
-        {
-            return empty;
-        }
-        
-        return renderer->FlushDrawPackets(imageIndex);
     }
 
     void CWindow::UpdateLayoutIfNeeded()
@@ -118,179 +82,17 @@ namespace CE::Widgets
         contentSize = Vec2(contentMaxX, contentMaxY);
     }
 
-    void CWindow::ConstructWindow()
-    {
-        if (nativeWindow == nullptr)
-            return;
-
-        if (renderer == nullptr)
-        {
-            auto app = CApplication::Get();
-            auto platformApp = PlatformApplication::Get();
-
-            Renderer2DDescriptor desc{};
-            desc.drawShader = app->draw2dShader;
-            desc.multisampling.sampleCount = 1;
-            desc.multisampling.quality = 1.0f;
-            desc.drawListTag = drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(GetName());
-            desc.drawShader = CApplication::Get()->draw2dShader;
-            desc.numFramesInFlight = CApplication::Get()->numFramesInFlight;
-            
-            desc.initialDrawItemStorage = 1'000;
-            desc.drawItemStorageIncrement = 1'000;
-            
-            u32 screenWidth = 0, screenHeight = 0;
-            PlatformWindow* platformWindow = nativeWindow;
-            CE_ASSERT(platformWindow != nullptr, "CWindow could not find a PlatformWindow in parent hierarchy!");
-
-            platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-
-            desc.viewConstantData.viewMatrix = Matrix4x4::Identity();
-            desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) *
-                Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) *
-                Quat::EulerDegrees(0, 0, 0).ToMatrix();
-            desc.viewConstantData.viewProjectionMatrix = desc.viewConstantData.projectionMatrix * desc.viewConstantData.viewMatrix;
-            desc.viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
-            desc.viewConstantData.pixelResolution = Vec2(screenWidth, screenHeight);
-            desc.screenSize = Vec2i(screenWidth, screenHeight);
-
-            renderer = new RPI::Renderer2D(desc);
-            
-            for (auto [family, fontAtlas] : app->registeredFonts)
-            {
-                renderer->RegisterFont(family, fontAtlas);
-            }
-        }
-        else
-        {
-            u32 screenWidth = 0, screenHeight = 0;
-            nativeWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-
-            OnWindowSizeChanged(nativeWindow, screenWidth, screenHeight);
-        }
-    }
-
-    void CWindow::OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight)
-    {
-        if (!nativeWindow || !renderer)
-            return;
-
-        if (swapChain)
-        {
-            swapChain->Rebuild();
-        }
-
-        u32 screenWidth = 0; u32 screenHeight = 0;
-        nativeWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-        //CE_LOG(Info, All, "Resize: {}x{}", screenWidth, screenHeight);
-
-        RPI::PerViewConstants viewConstantData{};
-        viewConstantData.viewMatrix = Matrix4x4::Identity();
-        viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * 
-            Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * 
-            Quat::EulerDegrees(0, 0, 0).ToMatrix();
-
-        viewConstantData.viewProjectionMatrix = viewConstantData.projectionMatrix * viewConstantData.viewMatrix;
-        viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
-        viewConstantData.pixelResolution = Vec2(screenWidth, screenHeight);
-        
-        renderer->SetScreenSize(Vec2i(screenWidth, screenHeight));
-        renderer->SetViewConstants(viewConstantData);
-
-        SetNeedsLayout();
-        SetNeedsPaint();
-    }
-
-    void CWindow::Tick()
-    {
-        if (!renderer)
-            return;
-
-        // Tick: Input Handling
-        Vec2 globalMousePos = InputManager::GetGlobalMousePosition().ToVec2();
-        Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
-        //if (prevMousePos == Vec2())
-    	//  prevMousePos = globalMousePos;
-
-        MouseButton curButton = MouseButton::None;
-        if (InputManager::IsMouseButtonHeld(MouseButton::Left))
-        {
-            curButton = MouseButton::Left;
-        }
-        else if (InputManager::IsMouseButtonHeld(MouseButton::Right))
-        {
-            curButton = MouseButton::Right;
-        }
-        else if (InputManager::IsMouseButtonHeld(MouseButton::Middle))
-        {
-            curButton = MouseButton::Middle;
-        }
-
-        if (nativeWindow != nullptr)
-        {
-	        if (nativeWindow->IsFocussed() && !IsFocussed())
-	        {
-                CFocusEvent focusEvent{};
-                focusEvent.name = "GotFocus";
-                focusEvent.gotFocus = true;
-                focusEvent.type = CEventType::FocusChanged;
-                focusEvent.focusedWidget = this;
-
-                HandleEvent(&focusEvent);
-	        }
-            else if (!nativeWindow->IsFocussed() && IsFocussed())
-            {
-                CFocusEvent focusEvent{};
-                focusEvent.name = "LostFocus";
-                focusEvent.gotFocus = false;
-                focusEvent.type = CEventType::FocusChanged;
-                focusEvent.focusedWidget = this;
-                focusEvent.direction = CEventDirection::TopToBottom;
-
-                HandleEvent(&focusEvent);
-            }
-        }
-
-        // Tick: Styling
-        UpdateStyleIfNeeded();
-
-        // Tick: Layout
-        UpdateLayoutIfNeeded();
-
-        // Tick: Painting
-        if (NeedsPaint())
-        {
-            SetNeedsPaintRecursively(false);
-            
-            painter->renderer = renderer;
-
-            renderer->Begin();
-            {
-                renderer->PushFont(CApplication::Get()->defaultFontName, 16);
-
-                auto thisPaint = CPaintEvent();
-                thisPaint.painter = painter;
-                thisPaint.sender = this;
-                thisPaint.name = "PaintEvent";
-                
-                this->HandleEvent(&thisPaint);
-                
-                renderer->PopFont();
-            }
-            renderer->End();
-        }
-    }
 
     void CWindow::OnBeforeDestroy()
     {
         Super::OnBeforeDestroy();
 
+        delete nativeWindow; nativeWindow = nullptr;
+
         if (!IsDefaultInstance())
         {
             CApplication::Get()->GetFrameScheduler()->WaitUntilIdle();
         }
-
-        delete renderer; renderer = nullptr;
     }
 
     void CWindow::Construct()
@@ -310,7 +112,7 @@ namespace CE::Widgets
         return IsOfType<CDockSpace>();
     }
 
-    PlatformWindow* CWindow::GetRootNativeWindow()
+    CPlatformWindow* CWindow::GetRootNativeWindow()
     {
         if (nativeWindow)
             return nativeWindow;
@@ -404,7 +206,7 @@ namespace CE::Widgets
                     painter->SetPen(pen);
                 }
 
-	            if (!nativeWindow->IsMaximized())
+	            if (!nativeWindow->platformWindow->IsMaximized())
 	            {
                     painter->DrawRect(ScaleRect(controlRects[1], 0.98f));
 	            }
@@ -631,11 +433,11 @@ namespace CE::Widgets
                             if (i == clickedControlIdx)
                             {
                                 if (clickedControlIdx == 0)
-                                    nativeWindow->Minimize();
-                                else if (clickedControlIdx == 1 && nativeWindow->IsMaximized())
-                                    nativeWindow->Restore();
+                                    nativeWindow->platformWindow->Minimize();
+                                else if (clickedControlIdx == 1 && nativeWindow->platformWindow->IsMaximized())
+                                    nativeWindow->platformWindow->Restore();
                                 else if (clickedControlIdx == 1)
-                                    nativeWindow->Maximize();
+                                    nativeWindow->platformWindow->Maximize();
                                 else if (clickedControlIdx == 2)
                                     QueueDestroy();
                             }

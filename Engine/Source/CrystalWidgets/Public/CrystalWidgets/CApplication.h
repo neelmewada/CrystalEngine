@@ -5,6 +5,7 @@ namespace CE::Widgets
     class CWidget;
     class CWindow;
     class CStyleSheet;
+    class CPlatformWindow;
 
     class CWidgetException : public std::exception
     {
@@ -94,6 +95,8 @@ namespace CE::Widgets
 
         void OnWindowDestroyed(PlatformWindow* window) override;
 
+        void OnWindowClosed(PlatformWindow* window) override;
+
         void OnWindowCreated(PlatformWindow* window) override;
 
         RPI::Shader* draw2dShader = nullptr;
@@ -114,11 +117,12 @@ namespace CE::Widgets
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
 
-        FIELD(ReadOnly)
-        Array<CWindow*> windows{};
-
         FIELD()
         CStyleSheet* globalStyleSheet = nullptr;
+
+        //Array<CWindow*> windows{};
+
+        Array<CPlatformWindow*> platformWindows{};
 
         RHI::FrameScheduler* scheduler = nullptr;
 

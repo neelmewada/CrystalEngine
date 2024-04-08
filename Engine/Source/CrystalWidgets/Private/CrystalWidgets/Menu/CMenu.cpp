@@ -15,39 +15,7 @@ namespace CE::Widgets
 
     void CMenu::Show()
     {
-        if (nativeWindow)
-        {
-            nativeWindow->Show();
-            return;
-        }
-
-        PlatformWindowInfo windowInfo{};
-        windowInfo.windowFlags = PlatformWindowFlags::SkipTaskbar | PlatformWindowFlags::PopupMenu;
-        windowInfo.fullscreen = windowInfo.maximised = windowInfo.resizable = false;
-        windowInfo.hidden = true;
-
-        nativeWindow = PlatformApplication::Get()->CreatePlatformWindow(title, showSize.width, showSize.height, windowInfo);
-        nativeWindow->SetWindowPosition(showPosition);
-        nativeWindow->SetBorderless(true);
-        nativeWindow->SetAlwaysOnTop(true);
-        nativeWindow->Show();
-
-        RHI::SwapChainDescriptor desc{};
-        desc.imageCount = CApplication::Get()->numFramesInFlight;
-        desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
-
-        nativeWindow->GetWindowSize(&desc.preferredWidth, &desc.preferredHeight);
-
-        if (swapChain)
-        {
-            RHI::gDynamicRHI->DestroySwapChain(swapChain);
-        }
-
-        swapChain = RHI::gDynamicRHI->CreateSwapChain(nativeWindow, desc);
-
-        ConstructWindow();
-
-        CApplication::Get()->windows.Add(this);
+        Super::Show();
     }
 
     void CMenu::Show(Vec2i screenPosition, Vec2i size)

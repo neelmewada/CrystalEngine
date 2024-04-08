@@ -72,9 +72,9 @@ namespace CE
 
 	void WidgetSandbox::InitWidgets()
 	{
-		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
+		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, mainWindow);
 
-		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace->GetRootDockSplit());
+		mainDockWindow = CreateObject<CDockWindow>(mainDockSpace->GetRootDockSplit(), MODULE_NAME);
 		mainDockWindow->SetAsMainWindow(true);
 		{
 			CMenuItem* fileMenuItem = CreateObject<CMenuItem>(mainDockWindow, "FileMenuItem");
@@ -126,7 +126,7 @@ namespace CE
 
 		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
 		
-		minorDockSpace = CreateWindow<CDockSpace>("MinorDockSpace", nullptr);
+		minorDockSpace = CreateObject<CDockSpace>(nullptr, "MinorDockSpace");
 		minorDockSpace->SetDockType(CDockType::Minor);
 		mainDockWindow->AddSubWidget(minorDockSpace);
 
@@ -139,10 +139,10 @@ namespace CE
 		auto rightTop = right->GetSplit(0);
 		auto rightBottom = right->GetSplit(1);
 
-		secondDockWindow = CreateWindow<CDockWindow>("Second", left);
-		thirdDockWindow = CreateWindow<CDockWindow>("Third", rightTop);
-		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", rightBottom);
-		fifthDockWindow = CreateWindow<CDockWindow>("Fifth", rightBottom);
+		secondDockWindow = CreateObject<CDockWindow>(left, "Second");
+		thirdDockWindow = CreateObject<CDockWindow>(rightTop, "Third");
+		fourthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fourth");
+		fifthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fifth");
 
 		for (int i = 100; i < 24; ++i) // Disabled
 		{
