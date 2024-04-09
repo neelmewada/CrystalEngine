@@ -38,8 +38,8 @@ namespace CE
         virtual Vec2i GetDrawableWindowSize() override;
 
 		virtual void SetResizable(bool resizable) override;
-
         virtual void SetBorderless(bool borderless) override;
+        virtual void SetInputFocus() override;
 
         virtual bool IsBorderless() override;
         virtual bool IsMinimized() override;
@@ -47,6 +47,8 @@ namespace CE
         virtual bool IsFullscreen() override;
         virtual bool IsShown() override;
         virtual bool IsHidden() override;
+        virtual bool IsAlwaysOnTop() override;
+        virtual bool IsResizable() override;
 
         virtual void Minimize() override;
         virtual void Restore() override;

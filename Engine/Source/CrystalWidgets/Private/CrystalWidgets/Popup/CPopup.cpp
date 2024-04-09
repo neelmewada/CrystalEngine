@@ -37,12 +37,16 @@ namespace CE::Widgets
 		windowInfo.fullscreen = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.hidden = true;
 
-		nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo);
+		CPlatformWindow* parentWindow = GetNativeWindow();
+
+		nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo, parentWindow);
 
 		nativeWindow->platformWindow->SetWindowPosition(showPosition);
 		nativeWindow->platformWindow->SetBorderless(true);
 		nativeWindow->platformWindow->SetAlwaysOnTop(true);
 		nativeWindow->Show();
+
+		nativeWindow->platformWindow->SetInputFocus();
 	}
 
 	void CPopup::Hide()

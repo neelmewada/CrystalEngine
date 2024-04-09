@@ -99,6 +99,8 @@ namespace CE::Widgets
                 {
                     CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
 
+                    CE_LOG(Info, All, "Press: {}", event->sender->GetName());
+
                     if (hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem && mouseEvent->button == MouseButton::Left)
                     {
                         activeMenuItem = hoveredMenuItem;
@@ -117,10 +119,23 @@ namespace CE::Widgets
                     }
                     else
                     {
+                        if (curMenuPopup)
+                        {
+                            curMenuPopup->Hide();
+                            curMenuPopup = nullptr;
+                        }
+
                         activeMenuItem = -1;
                     }
 
                     SetNeedsPaint();
+                }
+                else if (event->type == CEventType::MouseRelease)
+                {
+                    if (hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem && mouseEvent->button == MouseButton::Left)
+                    {
+	                    
+                    }
                 }
             }
         }

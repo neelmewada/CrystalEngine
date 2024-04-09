@@ -3,25 +3,35 @@
 namespace CE::Widgets
 {
 
-    CPlatformWindow::CPlatformWindow(CWindow* owner, u32 width, u32 height, const PlatformWindowInfo& info)
-	    : owner(owner)
+    CPlatformWindow::CPlatformWindow(CWindow* owner, u32 width, u32 height, const PlatformWindowInfo& info, CPlatformWindow* parentWindow)
+	    : owner(owner), parentWindow(parentWindow)
     {
         platformWindow = PlatformApplication::Get()->CreatePlatformWindow("", width, height, info);
 
         Init();
     }
 
-    CPlatformWindow::CPlatformWindow(CWindow* owner, PlatformWindow* nativeWindow)
-	    : owner(owner), platformWindow(nativeWindow)
+    CPlatformWindow::CPlatformWindow(CWindow* owner, PlatformWindow* nativeWindow, CPlatformWindow* parentWindow)
+	    : owner(owner), platformWindow(nativeWindow), parentWindow(parentWindow)
     {
         Init();
     }
 
     CPlatformWindow::~CPlatformWindow()
     {
+        if (parentWindow)
+        {
+	        parentWindow->childrenWindows.Remove(this);
+        }
+
         isDeleted = true;
         painter->Destroy();
         painter = nullptr;
+
+        if (renderer || swapChain)
+        {
+            CApplication::Get()->GetFrameScheduler()->WaitUntilIdle();
+        }
 
         delete renderer; renderer = nullptr;
 
@@ -45,6 +55,11 @@ namespace CE::Widgets
 
     void CPlatformWindow::Init()
     {
+        if (parentWindow)
+        {
+            parentWindow->childrenWindows.Add(this);
+        }
+
 	    {
 		    RHI::SwapChainDescriptor desc{};
 	    	desc.imageCount = CApplication::Get()->numFramesInFlight;
@@ -156,7 +171,7 @@ namespace CE::Widgets
 
         if (platformWindow != nullptr)
         {
-            if (platformWindow->IsFocused() && !owner->IsFocussed())
+            if (IsFocused() && !owner->IsFocussed())
             {
                 CFocusEvent focusEvent{};
                 focusEvent.name = "GotFocus";
@@ -166,7 +181,7 @@ namespace CE::Widgets
 
                 owner->HandleEvent(&focusEvent);
             }
-            else if (!platformWindow->IsFocused() && owner->IsFocussed())
+            else if (!IsFocused() && owner->IsFocussed())
             {
                 CFocusEvent focusEvent{};
                 focusEvent.name = "LostFocus";
@@ -238,12 +253,26 @@ namespace CE::Widgets
 
     bool CPlatformWindow::IsFocused()
     {
-        return platformWindow->IsFocused();
+        if (platformWindow->IsFocused())
+            return true;
+
+        for (CPlatformWindow* childWindow : childrenWindows)
+        {
+            if (childWindow && childWindow->IsFocused())
+                return true;
+        }
+
+        return false;
     }
 
     bool CPlatformWindow::IsMinimized()
     {
         return platformWindow->IsMinimized();
+    }
+
+    bool CPlatformWindow::IsAlwaysOnTop()
+    {
+        return platformWindow->IsAlwaysOnTop();
     }
 
     const Array<RHI::DrawPacket*>& CPlatformWindow::FlushDrawPackets(u32 imageIndex)

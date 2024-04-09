@@ -98,6 +98,8 @@ namespace CE
 
         virtual void Tick();
 
+        virtual bool IsFocused() = 0;
+
         virtual PlatformBackend GetBackend() = 0;
 
         virtual void SetSystemCursor(SystemCursor cursor) = 0;

@@ -27,44 +27,47 @@ namespace CE
 		SDL_GetWindowSize(window, &Width, &Height);
 
 		SDLPlatformWindow* platformWindow = (SDLPlatformWindow*)data;
-
-		if (area->y < MOUSE_GRAB_PADDING)
+		
+		if (platformWindow->IsResizable())
 		{
-			if (area->x < MOUSE_GRAB_PADDING)
+			if (area->y < MOUSE_GRAB_PADDING)
 			{
-				return SDL_HITTEST_RESIZE_TOPLEFT;
+				if (area->x < MOUSE_GRAB_PADDING)
+				{
+					return SDL_HITTEST_RESIZE_TOPLEFT;
+				}
+				else if (area->x > Width - MOUSE_GRAB_PADDING)
+				{
+					return SDL_HITTEST_RESIZE_TOPRIGHT;
+				}
+				else
+				{
+					return SDL_HITTEST_RESIZE_TOP;
+				}
+			}
+			else if (area->y > Height - MOUSE_GRAB_PADDING)
+			{
+				if (area->x < MOUSE_GRAB_PADDING)
+				{
+					return SDL_HITTEST_RESIZE_BOTTOMLEFT;
+				}
+				else if (area->x > Width - MOUSE_GRAB_PADDING)
+				{
+					return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
+				}
+				else
+				{
+					return SDL_HITTEST_RESIZE_BOTTOM;
+				}
+			}
+			else if (area->x < MOUSE_GRAB_PADDING)
+			{
+				return SDL_HITTEST_RESIZE_LEFT;
 			}
 			else if (area->x > Width - MOUSE_GRAB_PADDING)
 			{
-				return SDL_HITTEST_RESIZE_TOPRIGHT;
+				return SDL_HITTEST_RESIZE_RIGHT;
 			}
-			else
-			{
-				return SDL_HITTEST_RESIZE_TOP;
-			}
-		}
-		else if (area->y > Height - MOUSE_GRAB_PADDING)
-		{
-			if (area->x < MOUSE_GRAB_PADDING)
-			{
-				return SDL_HITTEST_RESIZE_BOTTOMLEFT;
-			}
-			else if (area->x > Width - MOUSE_GRAB_PADDING)
-			{
-				return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
-			}
-			else
-			{
-				return SDL_HITTEST_RESIZE_BOTTOM;
-			}
-		}
-		else if (area->x < MOUSE_GRAB_PADDING)
-		{
-			return SDL_HITTEST_RESIZE_LEFT;
-		}
-		else if (area->x > Width - MOUSE_GRAB_PADDING)
-		{
-			return SDL_HITTEST_RESIZE_RIGHT;
 		}
 
 		if (platformWindow->dragHitTest.IsValid())
@@ -157,6 +160,7 @@ namespace CE
 	void SDLPlatformWindow::SetAlwaysOnTop(bool alwaysOnTop)
 	{
 		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop ? SDL_TRUE : SDL_FALSE);
+		SDL_GetWindowFlags(handle)& SDL_WINDOW_ALWAYS_ON_TOP;
 	}
 
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
@@ -203,6 +207,12 @@ namespace CE
 		}
 	}
 
+	void SDLPlatformWindow::SetInputFocus()
+	{
+		SDL_RaiseWindow(handle);
+		//SDL_SetWindowInputFocus(handle);
+	}
+
 	bool SDLPlatformWindow::IsBorderless()
 	{
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_BORDERLESS) != 0;
@@ -231,6 +241,16 @@ namespace CE
 	bool SDLPlatformWindow::IsHidden()
 	{
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_HIDDEN) != 0;
+	}
+
+	bool SDLPlatformWindow::IsAlwaysOnTop()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_ALWAYS_ON_TOP) != 0;
+	}
+
+	bool SDLPlatformWindow::IsResizable()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_RESIZABLE) != 0;
 	}
 
 	void SDLPlatformWindow::Minimize()

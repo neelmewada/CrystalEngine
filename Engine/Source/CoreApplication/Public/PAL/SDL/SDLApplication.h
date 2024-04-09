@@ -29,6 +29,8 @@ namespace CE
             return PlatformBackend::SDL;
         }
 
+        virtual bool IsFocused() override;
+
         virtual void SetSystemCursor(SystemCursor cursor) override;
 
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) override;

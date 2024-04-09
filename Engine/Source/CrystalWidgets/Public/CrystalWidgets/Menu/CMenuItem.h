@@ -27,6 +27,8 @@ namespace CE::Widgets
 
     protected:
 
+        void HandleEvent(CEvent* event) override;
+
         void OnSubobjectAttached(Object* subobject) override;
 
         void OnSubobjectDetached(Object* subobject) override;

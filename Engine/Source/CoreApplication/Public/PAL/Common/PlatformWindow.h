@@ -42,20 +42,17 @@ namespace CE
 
         virtual PlatformWindowFlags GetInitialFlags() = 0;
 
-        virtual void SetMinimumSize(Vec2i minSize) = 0;
-
-        virtual void SetOpacity(f32 opacity) = 0;
-
-        virtual void SetAlwaysOnTop(bool alwaysOnTop) = 0;
-
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual Vec2i GetDrawableWindowSize() = 0;
 
         virtual VkSurfaceKHR CreateVulkanSurface(VkInstance instance) = 0;
 
+        virtual void SetMinimumSize(Vec2i minSize) = 0;
+        virtual void SetOpacity(f32 opacity) = 0;
+        virtual void SetAlwaysOnTop(bool alwaysOnTop) = 0;
 		virtual void SetResizable(bool resizable) = 0;
-
         virtual void SetBorderless(bool borderless) = 0;
+        virtual void SetInputFocus() = 0;
 
         virtual bool IsBorderless() = 0;
         virtual bool IsMinimized() = 0;
@@ -63,6 +60,8 @@ namespace CE
         virtual bool IsFullscreen() = 0;
         virtual bool IsShown() = 0;
         virtual bool IsHidden() = 0;
+        virtual bool IsAlwaysOnTop() = 0;
+        virtual bool IsResizable() = 0;
 
         virtual void Minimize() = 0;
         virtual void Restore() = 0;

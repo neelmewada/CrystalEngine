@@ -11,10 +11,10 @@ namespace CE::Widgets
     crystalwidgets_protected_internal:
         virtual ~CPlatformWindow();
 
-    public:
+	public:
 
-        CPlatformWindow(CWindow* owner, u32 width, u32 height, const PlatformWindowInfo& info);
-        CPlatformWindow(CWindow* owner, PlatformWindow* nativeWindow);
+        CPlatformWindow(CWindow* owner, u32 width, u32 height, const PlatformWindowInfo& info, CPlatformWindow* parentWindow = nullptr);
+        CPlatformWindow(CWindow* owner, PlatformWindow* nativeWindow, CPlatformWindow* parentWindow = nullptr);
 
         void GetWindowSize(u32* preferredWidth, u32* preferredHeight);
 
@@ -26,6 +26,8 @@ namespace CE::Widgets
 
         bool IsFocused();
         bool IsMinimized();
+
+        bool IsAlwaysOnTop();
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
@@ -41,6 +43,8 @@ namespace CE::Widgets
 
         CWindow* owner = nullptr;
         b8 isDeleted = false;
+        CPlatformWindow* parentWindow = nullptr;
+        Array<CPlatformWindow*> childrenWindows{};
 
         PlatformWindow* platformWindow = nullptr;
         RHI::SwapChain* swapChain = nullptr;

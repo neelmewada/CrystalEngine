@@ -61,4 +61,26 @@ namespace CE::Widgets
         }
     }
 
+    void CMenuItem::HandleEvent(CEvent* event)
+    {
+        if (!event->isConsumed && event->IsMouseEvent())
+        {
+            CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+
+            if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
+            {
+                CE_LOG(Info, All, "MenuItem Press");
+                event->Consume(this);
+            }
+            else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
+            {
+                CE_LOG(Info, All, "MenuItem Release: {}", mouseEvent->isInside);
+                event->Consume(this);
+            }
+        }
+
+        Super::HandleEvent(event);
+    }
+
+
 } // namespace CE::Widgets

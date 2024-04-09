@@ -11,10 +11,7 @@ namespace CE::Widgets
         receiveMouseEvents = false;
         clipChildren = true;
 
-        if (!IsDefaultInstance())
-        {
-            title = GetName().GetString();
-        }
+        title = GetName().GetString();
     }
 
     CWindow::~CWindow()
@@ -99,7 +96,7 @@ namespace CE::Widgets
     {
         Super::Construct();
 
-        
+        this->title = GetName().GetString();
     }
 
     Vec2 CWindow::CalculateIntrinsicSize(f32 width, f32 height)

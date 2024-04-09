@@ -118,15 +118,17 @@ namespace CE::Widgets
 
 				Rect widgetRect = widget->GetScreenSpaceRect();
 
-				CWindow* ownerWindow = widget->ownerWindow;
-				if (ownerWindow)
+				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
+				if (nativeWindow)
 				{
-					if (CPlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow())
+					if (widget->IsOfType<CDockSpace>() && widget->parent == nullptr)
 					{
-						if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
-						{
-							return nullptr;
-						}
+						//CE_LOG(Info, All, "{} | {} | {}", nativeWindow->IsFocused(), nativeWindow->IsShown(), nativeWindow->IsMinimized());
+					}
+
+					if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
+					{
+						return nullptr;
 					}
 				}
 
@@ -152,11 +154,23 @@ namespace CE::Widgets
 
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			hoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->owner);
-			if (hoveredWidget)
+			CWidget* curHoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->owner);
+			if (curHoveredWidget != nullptr)
 			{
-				hoveredWindow = hoveredWidget->ownerWindow;
-				break;
+				hoveredWidget = curHoveredWidget;
+			}
+		}
+
+		if (hoveredWidget)
+		{
+			hoveredWindow = hoveredWidget->ownerWindow;
+
+			CPlatformWindow* hoveredNativeWindow = hoveredWidget->GetNativeWindow();
+			if (hoveredNativeWindow != nullptr && PlatformApplication::Get()->IsFocused())
+			{
+				hoveredNativeWindow->platformWindow->SetInputFocus();
+
+				
 			}
 		}
 

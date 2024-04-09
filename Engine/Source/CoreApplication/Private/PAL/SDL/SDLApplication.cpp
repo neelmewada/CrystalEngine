@@ -64,6 +64,17 @@ namespace CE
 		SDL_Quit();
 	}
 
+	bool SDLApplication::IsFocused()
+	{
+		for (auto window : windowList)
+		{
+			if (window->IsFocused())
+				return true;
+		}
+
+		return false;
+	}
+
 	void SDLApplication::SetSystemCursor(SystemCursor cursor)
 	{
 		if (systemCursors[(int)cursor] == nullptr)

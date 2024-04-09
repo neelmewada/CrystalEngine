@@ -813,23 +813,18 @@ namespace CE::Widgets
 
 	Rect CWidget::GetScreenSpaceRect()
 	{
-		if (ownerWindow == nullptr)
+		if (IsWindow())
 		{
-			if (IsWindow())
+			CWindow* window = (CWindow*)this;
+			if (window->nativeWindow != nullptr)
 			{
-				CWindow* window = (CWindow*)this;
-				if (window->nativeWindow != nullptr)
-				{
-					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
-					Vec2 pos = Vec2(posInt.x, posInt.y);
-					u32 w, h;
-					window->nativeWindow->GetWindowSize(&w, &h);
+				Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
+				Vec2 pos = Vec2(posInt.x, posInt.y);
+				u32 w, h;
+				window->nativeWindow->GetWindowSize(&w, &h);
 
-					return Rect::FromSize(pos + rootOrigin, Vec2(w, h));
-				}
+				return Rect::FromSize(pos + rootOrigin, Vec2(w, h));
 			}
-
-			return {};
 		}
 
 		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
@@ -1004,9 +999,16 @@ namespace CE::Widgets
 
 	CPlatformWindow* CWidget::GetNativeWindow()
 	{
-		if (!ownerWindow)
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+			if (window->nativeWindow)
+				return window->nativeWindow;
+		}
+
+		if (!parent)
 			return nullptr;
-		return ownerWindow->GetRootNativeWindow();
+		return parent->GetNativeWindow();
 	}
 
 	void CWidget::QueueDestroy()

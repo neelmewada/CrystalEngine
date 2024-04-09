@@ -184,7 +184,7 @@ CTreeView::cell {
 }
 
 CMenuItem {
-    font-size: 14px;
+    font-size: 13px;
     flex-direction: row;
     align-items: center;
     padding: 15px 5px;

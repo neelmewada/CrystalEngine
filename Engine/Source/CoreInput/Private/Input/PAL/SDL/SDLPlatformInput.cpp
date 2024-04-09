@@ -56,7 +56,6 @@ namespace CE
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
         u32 mouseBtnMask = SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
         
-        
         switch (event->type)
         {
         case SDL_KEYDOWN:
