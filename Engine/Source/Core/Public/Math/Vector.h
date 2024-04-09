@@ -72,6 +72,11 @@ namespace CE
             return Vec2(x, y);
 		}
 
+        TVector2<s32> ToVec2i() const
+        {
+            return TVector2<s32>((s32)x, (s32)y);
+        }
+
         inline TVector2 operator+(const TVector2& rhs) const
         {
             return TVector2(x + rhs.x, y + rhs.y);
@@ -261,6 +266,11 @@ namespace CE
         Vec3 ToVec3() const
         {
             return Vec3(x, y, z);
+        }
+
+        TVector3<s32> ToVec3i() const
+        {
+            return TVector3<s32>((s32)x, (s32)y, (s32)z);
         }
 
         inline TVector3 operator+(const TVector3& rhs) const
@@ -476,6 +486,11 @@ namespace CE
         Vec4 ToVec4() const
         {
             return Vec4(x, y, z, w);
+        }
+
+        TVector4<s32> ToVec4i() const
+        {
+            return TVector4<s32>((s32)x, (s32)y, (s32)z, (s32)z);
         }
 
         inline T& operator[](int index)

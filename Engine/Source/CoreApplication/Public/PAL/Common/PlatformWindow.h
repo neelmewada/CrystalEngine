@@ -31,7 +31,7 @@ namespace CE
         virtual void Show() = 0;
         virtual void Hide() = 0;
 
-		virtual bool IsFocussed() = 0;
+		virtual bool IsFocused() = 0;
 
         virtual Vec2i GetWindowPosition() = 0;
         virtual void SetWindowPosition(Vec2i position) = 0;

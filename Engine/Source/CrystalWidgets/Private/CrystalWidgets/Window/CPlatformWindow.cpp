@@ -20,6 +20,10 @@ namespace CE::Widgets
     CPlatformWindow::~CPlatformWindow()
     {
         isDeleted = true;
+        painter->Destroy();
+        painter = nullptr;
+
+        delete renderer; renderer = nullptr;
 
         PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
         windowResizeDelegate = 0;
@@ -89,6 +93,8 @@ namespace CE::Widgets
                 renderer->RegisterFont(family, fontAtlas);
             }
 
+            painter = CreateObject<CPainter>(nullptr, "Painter", OF_Transient);
+
             windowResizeDelegate =
                 PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(
                     MemberDelegate(&CPlatformWindow::OnWindowSizeChanged, this));
@@ -150,7 +156,7 @@ namespace CE::Widgets
 
         if (platformWindow != nullptr)
         {
-            if (platformWindow->IsFocussed() && !owner->IsFocussed())
+            if (platformWindow->IsFocused() && !owner->IsFocussed())
             {
                 CFocusEvent focusEvent{};
                 focusEvent.name = "GotFocus";
@@ -160,7 +166,7 @@ namespace CE::Widgets
 
                 owner->HandleEvent(&focusEvent);
             }
-            else if (!platformWindow->IsFocussed() && owner->IsFocussed())
+            else if (!platformWindow->IsFocused() && owner->IsFocussed())
             {
                 CFocusEvent focusEvent{};
                 focusEvent.name = "LostFocus";
@@ -211,6 +217,8 @@ namespace CE::Widgets
     void CPlatformWindow::Show()
     {
         platformWindow->Show();
+
+        CApplication::Get()->SetFocus(owner);
     }
 
     void CPlatformWindow::Hide()
@@ -221,6 +229,21 @@ namespace CE::Widgets
     bool CPlatformWindow::IsShown()
     {
         return platformWindow->IsShown();
+    }
+
+    bool CPlatformWindow::IsHidden()
+    {
+        return platformWindow->IsHidden();
+    }
+
+    bool CPlatformWindow::IsFocused()
+    {
+        return platformWindow->IsFocused();
+    }
+
+    bool CPlatformWindow::IsMinimized()
+    {
+        return platformWindow->IsMinimized();
     }
 
     const Array<RHI::DrawPacket*>& CPlatformWindow::FlushDrawPackets(u32 imageIndex)

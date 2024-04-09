@@ -19,8 +19,14 @@ namespace CE::Widgets
 
     protected:
 
+        void OnPlatformWindowSet() override;
+
+        void HandleEvent(CEvent* event) override;
+
         void OnSubobjectAttached(Object* subobject) override;
         void OnSubobjectDetached(Object* subobject) override;
+
+        bool WindowHitTest(PlatformWindow* window, Vec2 position);
 
         FIELD()
         Array<CMenuItem*> menuItems{};

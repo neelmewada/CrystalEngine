@@ -19,7 +19,7 @@ namespace CE
 
         void Hide() override;
 
-		bool IsFocussed() override;
+		bool IsFocused() override;
 
         Vec2i GetWindowPosition() override;
         void SetWindowPosition(Vec2i position) override;

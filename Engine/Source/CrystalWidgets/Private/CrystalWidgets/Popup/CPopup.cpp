@@ -19,6 +19,11 @@ namespace CE::Widgets
 		//Hide();
 	}
 
+	bool CPopup::IsSubWidgetAllowed(Class* subWidgetClass)
+	{
+		return subWidgetClass->IsSubclassOf<CWidget>();
+	}
+
 	void CPopup::Show()
 	{
 		if (nativeWindow)

@@ -145,7 +145,7 @@ namespace CE::Widgets
 
         Renderer2D* GetRenderer();
 
-        PlatformWindow* GetNativeWindow();
+        CPlatformWindow* GetNativeWindow();
 
         void QueueDestroy();
 

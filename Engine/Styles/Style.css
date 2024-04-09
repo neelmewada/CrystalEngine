@@ -190,8 +190,13 @@ CMenuItem {
     padding: 15px 5px;
 }
 
+CMenuItem:hovered {
+    background: rgb(0, 112, 224);
+}
+
 CMenu {
     padding: 0px 10px;
     background: rgb(56, 56, 56);
     border-width: 0px;
+    flex-direction: column;
 }

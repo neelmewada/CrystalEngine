@@ -121,9 +121,9 @@ namespace CE::Widgets
 				CWindow* ownerWindow = widget->ownerWindow;
 				if (ownerWindow)
 				{
-					if (PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow())
+					if (CPlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow())
 					{
-						if (!nativeWindow->IsFocussed() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
+						if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
 						{
 							return nullptr;
 						}
@@ -160,10 +160,10 @@ namespace CE::Widgets
 			}
 		}
 
-		if (hoveredWidget)
+		if (hoveredWidget && hoveredWidget->GetNativeWindow())
 		{
-			PlatformWindow* platformWindow = hoveredWidget->GetNativeWindow();
-			if (platformWindow && !platformWindow->IsFocussed())
+			PlatformWindow* platformWindow = hoveredWidget->GetNativeWindow()->platformWindow;
+			if (platformWindow && !platformWindow->IsFocused())
 			{
 				hoveredWidget = nullptr;
 			}
@@ -603,7 +603,7 @@ namespace CE::Widgets
 
 			Name id = String::Format("{}", platformWindow->GetWindowId());
 
-			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->drawListTag);
+			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->drawListTag));
 		}
 	}
 
@@ -613,9 +613,17 @@ namespace CE::Widgets
 		{
 			if (platformWindows[i]->platformWindow == nativeWindow)
 			{
-				platformWindows[i]->owner->nativeWindow = nullptr;
+				platformWindows[i]->owner->nativeWindow = nullptr; // Clear the nativeWindow pointer
 				platformWindows[i]->owner->Destroy();
-				platformWindows.RemoveAt(i);
+				if (!platformWindows[i]->isDeleted)
+				{
+					platformWindows[i]->platformWindow = nullptr;
+					delete platformWindows[i];
+				}
+				else
+				{
+					platformWindows.RemoveAt(i);
+				}
 				break;
 			}
 		}
@@ -627,7 +635,6 @@ namespace CE::Widgets
 		{
 			if (platformWindows[i]->platformWindow == nativeWindow)
 			{
-
 				platformWindows.RemoveAt(i);
 				break;
 			}
@@ -653,7 +660,7 @@ namespace CE::Widgets
 
 	Vec2 CApplication::CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width)
 	{
-		for (CWindow* window : windows)
+		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->renderer != nullptr)
 			{
@@ -667,7 +674,7 @@ namespace CE::Widgets
 	Vec2 CApplication::CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize,
 		Name fontName, f32 width)
 	{
-		for (CWindow* window : windows)
+		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->renderer != nullptr)
 			{
@@ -691,13 +698,13 @@ namespace CE::Widgets
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
 	{
-		for (CWindow* window : windows)
+		for (CPlatformWindow* window : platformWindows)
 		{
-			if (window->nativeWindow == nativeWindow)
+			if (window->platformWindow == nativeWindow)
 			{
-				window->SetNeedsStyle();
-				window->SetNeedsLayout();
-				window->SetNeedsPaint();
+				window->owner->SetNeedsStyle();
+				window->owner->SetNeedsLayout();
+				window->owner->SetNeedsPaint();
 			}
 		}
 	}
@@ -748,7 +755,7 @@ namespace CE::Widgets
 
 		if (object->IsOfType<CWindow>())
 		{
-			windows.Remove((CWindow*)object);
+			platformWindows.Remove(((CWindow*)object)->nativeWindow);
 		}
 	}
 
@@ -761,7 +768,8 @@ namespace CE::Widgets
 
 		if (object->IsOfType<CWindow>())
 		{
-			windows.Add((CWindow*)object);
+			if (((CWindow*)object)->nativeWindow != nullptr)
+				platformWindows.Add(((CWindow*)object)->nativeWindow);
 		}
 	}
 

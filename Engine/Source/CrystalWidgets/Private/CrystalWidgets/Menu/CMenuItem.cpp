@@ -5,10 +5,14 @@ namespace CE::Widgets
 
     CMenuItem::CMenuItem()
     {
+        receiveMouseEvents = receiveKeyEvents = true;
+
         icon = CreateDefaultSubobject<CWidget>("Icon");
         label = CreateDefaultSubobject<CLabel>("Label");
 
         label->SetText(GetName().GetString());
+
+
     }
 
     CMenuItem::~CMenuItem()

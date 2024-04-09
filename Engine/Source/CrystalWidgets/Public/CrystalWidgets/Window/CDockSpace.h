@@ -44,6 +44,8 @@ namespace CE::Widgets
 		FIELD()
 		CDockType dockType = CDockType::Major;
 
+		CMenu* curMenuPopup = nullptr;
+
 		Array<Rect> menuItemRects{};
 		int hoveredMenuItem = -1;
 		int activeMenuItem = -1;

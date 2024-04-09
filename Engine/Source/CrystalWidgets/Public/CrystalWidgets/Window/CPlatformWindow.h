@@ -8,7 +8,7 @@ namespace CE::Widgets
 
     class CRYSTALWIDGETS_API CPlatformWindow
     {
-    protected:
+    crystalwidgets_protected_internal:
         virtual ~CPlatformWindow();
 
     public:
@@ -22,6 +22,10 @@ namespace CE::Widgets
         void Hide();
 
         bool IsShown();
+        bool IsHidden();
+
+        bool IsFocused();
+        bool IsMinimized();
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 

@@ -345,6 +345,8 @@ namespace CE::Widgets
 
 			Vec2 availableSize = Vec2(YGUndefined, YGUndefined);
 
+			bool isMenu = IsOfType<CMenu>();
+
 			if (IsOfType<CWindow>())
 			{
 				CWindow* window = (CWindow*)this;
@@ -352,7 +354,7 @@ namespace CE::Widgets
 				if (window->parent && window->parent->IsOfType<CWindow>())
 					parentWindow = (CWindow*)window->parent;
 
-				PlatformWindow* nativeWindow = window->nativeWindow->platformWindow;
+				CPlatformWindow* nativeWindow = window->nativeWindow;
 
 				if (nativeWindow)
 				{
@@ -387,11 +389,12 @@ namespace CE::Widgets
 				YGNodeCalculateLayout(node, availableSize.width, availableSize.height, YGDirectionLTR);
 			}
 
+			auto size = GetComputedLayoutSize();
+
 			if (IsOfType<CWindow>())
 			{
 				CWindow* window = (CWindow*)this;
 
-				auto size = GetComputedLayoutSize();
 				if (size != Vec2(0, 0) && !isnan(size.x) && !isnan(size.y))
 				{
 					window->windowSize = size;
@@ -406,6 +409,12 @@ namespace CE::Widgets
 			for (CWidget* widget : attachedWidgets)
 			{
 				widget->UpdateLayoutIfNeeded();
+
+				auto size2 = widget->GetComputedLayoutSize();
+				if (size2.x > 0)
+				{
+					
+				}
 			}
 
 			OnAfterUpdateLayout();
@@ -823,7 +832,7 @@ namespace CE::Widgets
 			return {};
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
 		if (nativeWindow == nullptr)
 			return {};
 
@@ -860,7 +869,7 @@ namespace CE::Widgets
 			return point;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
 		if (nativeWindow == nullptr)
 			return point;
 
@@ -899,7 +908,7 @@ namespace CE::Widgets
 			return rect;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
 		if (nativeWindow == nullptr)
 			return rect;
 
@@ -933,7 +942,7 @@ namespace CE::Widgets
 			return point;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
 		if (nativeWindow == nullptr)
 			return point; // Should never happen
 
@@ -993,7 +1002,7 @@ namespace CE::Widgets
 		return renderer;
 	}
 
-	PlatformWindow* CWidget::GetNativeWindow()
+	CPlatformWindow* CWidget::GetNativeWindow()
 	{
 		if (!ownerWindow)
 			return nullptr;
@@ -1189,9 +1198,11 @@ namespace CE::Widgets
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			paintEvent->direction = CEventDirection::TopToBottom;
 
+			b8 isMenu = IsOfType<CMenu>();
+
 			Vec2 scrollOffset = Vec2();
 
-			if (parent != nullptr)
+			if (parent != nullptr && (allowVerticalScroll || allowHorizontalScroll))
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
 			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())

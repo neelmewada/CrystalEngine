@@ -20,7 +20,7 @@ namespace CE::Widgets
 	{
         if (nativeWindow)
         {
-            nativeWindow->SetHitTestDelegate(nullptr);
+            nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
         }
 	}
 
@@ -109,9 +109,11 @@ namespace CE::Widgets
                         menuPopup->UpdateLayoutIfNeeded();
 
                         Vec2 menuSize = menuPopup->GetComputedLayoutSize();
-
                         Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
-                        menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), Vec2i(200, 400));
+
+                        menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), menuSize.ToVec2i());
+
+                        curMenuPopup = menuPopup;
                     }
                     else
                     {

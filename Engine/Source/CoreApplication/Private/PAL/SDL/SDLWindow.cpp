@@ -120,7 +120,7 @@ namespace CE
 			flags |= SDL_WINDOW_TOOLTIP;
 		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::Utility))
 			flags |= SDL_WINDOW_UTILITY;
-
+		
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 	}
 
@@ -294,7 +294,7 @@ namespace CE
 		SDL_HideWindow(handle);
 	}
 
-	bool SDLPlatformWindow::IsFocussed()
+	bool SDLPlatformWindow::IsFocused()
 	{
 		Uint32 flags = SDL_GetWindowFlags(handle);
 		return (flags & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS)) != 0;

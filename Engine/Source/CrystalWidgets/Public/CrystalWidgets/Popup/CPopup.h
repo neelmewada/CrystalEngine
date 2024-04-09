@@ -13,6 +13,8 @@ namespace CE::Widgets
 
         bool IsLayoutCalculationRoot() override final { return true; }
 
+        bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
         void Show() override;
 
         void Hide() override;
