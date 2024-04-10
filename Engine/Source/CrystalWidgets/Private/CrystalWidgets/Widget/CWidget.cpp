@@ -1141,6 +1141,9 @@ namespace CE::Widgets
 			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
 			if (texture)
 			{
+				brush.SetColor(Color::White());
+				painter->SetBrush(brush);
+
 				painter->DrawTexture(rect, texture);
 			}
 		}
@@ -1204,7 +1207,7 @@ namespace CE::Widgets
 
 			Vec2 scrollOffset = Vec2();
 
-			if (parent != nullptr && (allowVerticalScroll || allowHorizontalScroll))
+			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
 			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())

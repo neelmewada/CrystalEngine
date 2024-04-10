@@ -25,6 +25,10 @@ namespace CE::Widgets
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
+        void HideSubMenu();
+
+        void ShowSubMenu();
+
     protected:
 
         void HandleEvent(CEvent* event) override;
@@ -41,6 +45,12 @@ namespace CE::Widgets
 
         FIELD()
         CLabel* label = nullptr;
+
+        FIELD()
+        CWidget* spacer = nullptr;
+
+        FIELD()
+        CWidget* forwardArrow = nullptr;
 
     };
     

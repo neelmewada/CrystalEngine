@@ -23,6 +23,8 @@ namespace CE::Widgets
         {
             nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
+
+        isShown = true;
     }
 
     void CMenu::Show(Vec2i screenPosition, Vec2i size)
@@ -33,6 +35,8 @@ namespace CE::Widgets
         {
             nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
+
+        isShown = true;
     }
 
     void CMenu::OnPlatformWindowSet()
@@ -42,12 +46,19 @@ namespace CE::Widgets
 
     void CMenu::Hide()
     {
-        Super::Hide();
-
         if (nativeWindow)
         {
             nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
+
+            for (auto menuItem : menuItems)
+            {
+                menuItem->HideSubMenu();
+            }
         }
+
+        Super::Hide();
+
+        isShown = false;
     }
 
     void CMenu::OnSubobjectAttached(Object* subobject)

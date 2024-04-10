@@ -233,6 +233,11 @@ namespace CE::Widgets
 			contentSize.height = totalContentHeight;
 			contentSize.width = regionSize.width;
 		}
+		else
+		{
+			contentSize.height = totalContentHeight;
+			contentSize.width = regionSize.width;
+		}
 
 		for (int col = 0; col < numColumns; ++col)
 		{
@@ -333,13 +338,15 @@ namespace CE::Widgets
 			headerOrigin += Vec2(headerSize.width, 0);
 		}
 
-		// - Scroll Rect -
+		// - Paint scroll bar -
 
 		if (allowVerticalScroll) // Draw Vertical Scroll Bar
 		{
 			Vec2 originalSize = GetComputedLayoutSize();
 			f32 originalHeight = originalSize.height;
 			f32 contentMaxY = contentSize.height;
+
+			//CE_LOG(Info, All, "Content: {} , {} | {}", contentMaxY, originalHeight, totalContentHeight);
 
 			if (contentMaxY > originalHeight + ScrollSizeBuffer)
 			{

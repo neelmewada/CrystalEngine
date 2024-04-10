@@ -110,6 +110,8 @@ namespace CE::RPI
             return DrawRoundedRect(rect.GetSize(), cornerRadius);
         }
 
+        Vec2 DrawArrow(Vec2 size, f32 thickness);
+
         Vec2 DrawRoundedX(Vec2 size);
 
         Vec2 DrawRoundedX(const Rect& rect)
@@ -276,7 +278,7 @@ namespace CE::RPI
         HashMap<Name, RPI::FontAtlasAsset*> fontAtlasesByName{};
         HashMap<MaterialHash, RPI::Material*> materials{};
         HashMap<MaterialHash, RHI::DrawPacket*> drawPacketsByMaterial{};
-
+        HashMap<RPI::Texture*, int> textureIndices{};
     };
 
 } // namespace CE::RPI

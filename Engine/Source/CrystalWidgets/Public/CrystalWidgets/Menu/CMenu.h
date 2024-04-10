@@ -17,6 +17,10 @@ namespace CE::Widgets
 
         void Show(Vec2i screenPosition, Vec2i size);
 
+        u32 GetMenuItemCount() const { return menuItems.GetSize(); }
+
+        CMenuItem* GetMenuItem(u32 index) const { return menuItems[index]; }
+
     protected:
 
         void OnPlatformWindowSet() override;
@@ -30,6 +34,10 @@ namespace CE::Widgets
 
         FIELD()
         Array<CMenuItem*> menuItems{};
+
+    private:
+
+        b8 isShown = false;
 
     };
     

@@ -134,6 +134,7 @@ namespace CE::RPI
 
 		drawBatches.Clear();
 		clipRectStack.Clear();
+		textureIndices.Clear();
 
 		drawItemCount = 0;
 		clipRectCount = 0;
@@ -872,6 +873,29 @@ namespace CE::RPI
 		return size;
 	}
 
+	Vec2 Renderer2D::DrawArrow(Vec2 size, f32 thickness)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		size = Vec2(1, 1) * Math::Min(size.x, size.y);
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		Matrix4x4 mainTransform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+
+
+
+		return size;
+	}
+
 	Vec2 Renderer2D::DrawRoundedX(Vec2 size)
 	{
 		if (size.x <= 0 || size.y <= 0)
@@ -945,14 +969,30 @@ namespace CE::RPI
 
 		if (drawItems.GetSize() < drawItemCount + 1)
 			drawItems.Resize(drawItemCount + 1);
-		if (textures.GetSize() < textureCount + 1)
-			textures.Resize(textureCount + 1);
+
+
+		int textureIndex = 0;
+
+		if (textureIndices.KeyExists(texture))
+		{
+			textureIndex = textureIndices[texture];
+		}
+		else
+		{
+			textureIndex = textureCount;
+			if (textures.GetSize() < textureCount + 1)
+				textures.Resize(textureCount + 1);
+
+			textureIndices[texture] = textureIndex;
+
+			textureCount++;
+		}
 		
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
 
-		textures[textureCount] = texture;
+		textures[textureIndex] = texture;
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -971,12 +1011,11 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
-		drawItem.textureIndex = textureCount;
+		drawItem.textureIndex = textureIndex;
 		
 		curDrawBatch.drawItemCount++;
 
 		drawItemCount++;
-		textureCount++;
 		return size;
 	}
 

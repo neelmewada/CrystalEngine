@@ -287,7 +287,7 @@ Shader "2D/SDF Geometry"
                 case DRAW_RoundedX:
                     return RenderRoundedX(info, p);
                 case DRAW_Texture:
-                    return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0);
+                    return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
                 }
 
                 return float4(0, 0, 0, 0);

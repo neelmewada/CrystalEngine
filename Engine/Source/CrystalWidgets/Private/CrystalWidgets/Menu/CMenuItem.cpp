@@ -12,7 +12,13 @@ namespace CE::Widgets
 
         label->SetText(GetName().GetString());
 
+        spacer = CreateDefaultSubobject<CWidget>("Spacer");
+        spacer->AddStyleClass("Spacer");
 
+        forwardArrow = CreateDefaultSubobject<CWidget>("ForwardArrow");
+        forwardArrow->SetBackgroundImage("/Engine/Assets/Icons/ForwardArrow");
+
+        forwardArrow->SetVisible(false);
     }
 
     CMenuItem::~CMenuItem()
@@ -32,7 +38,34 @@ namespace CE::Widgets
 
     bool CMenuItem::IsSubWidgetAllowed(Class* subWidgetClass)
     {
-        return subWidgetClass->IsSubclassOf<CWidget>();
+        return subWidgetClass->IsSubclassOf<CWidget>() && !subWidgetClass->IsSubclassOf<CMenu>();
+    }
+
+    void CMenuItem::HideSubMenu()
+    {
+        if (subMenu)
+        {
+            stateFlags &= ~CStateFlag::Active;
+
+            subMenu->Hide();
+        }
+    }
+
+    void CMenuItem::ShowSubMenu()
+    {
+        if (subMenu)
+        {
+            Rect rect = GetScreenSpaceRect();
+            Vec2 pos = rect.min + Vec2(rect.GetSize().width, 0);
+            subMenu->UpdateStyleIfNeeded();
+            subMenu->UpdateLayoutIfNeeded();
+
+            Vec2 menuSize = subMenu->GetComputedLayoutSize();
+
+            stateFlags |= CStateFlag::Active;
+
+            subMenu->Show(pos.ToVec2i(), menuSize.ToVec2i());
+        }
     }
 
     void CMenuItem::OnSubobjectAttached(Object* object)
@@ -45,6 +78,7 @@ namespace CE::Widgets
         if (object->IsOfType<CMenu>())
         {
             subMenu = static_cast<CMenu*>(object);
+            forwardArrow->SetVisible(true);
         }
     }
 
@@ -58,6 +92,7 @@ namespace CE::Widgets
         if (object->IsOfType<CMenu>() && subMenu == (CMenu*)object)
         {
             subMenu = nullptr;
+            forwardArrow->SetVisible(false);
         }
     }
 
@@ -76,6 +111,22 @@ namespace CE::Widgets
             {
                 CE_LOG(Info, All, "MenuItem Release: {}", mouseEvent->isInside);
                 event->Consume(this);
+            }
+            else if (event->type == CEventType::MouseEnter && parent && parent->IsOfType<CMenu>())
+            {
+                CMenu* parentMenu = static_cast<CMenu*>(parent);
+
+                for (int i = 0; i < parentMenu->GetMenuItemCount(); ++i)
+                {
+                    CMenuItem* menuItem = parentMenu->GetMenuItem(i);
+
+                    if (menuItem != this)
+                    {
+                        menuItem->HideSubMenu();
+                    }
+                }
+
+                ShowSubMenu();
             }
         }
 

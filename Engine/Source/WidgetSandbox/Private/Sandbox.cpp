@@ -91,6 +91,33 @@ namespace CE
 				CMenuItem* openAs = CreateObject<CMenuItem>(fileMenu, "OpenAs");
 				openAs->SetText("Open As...");
 
+				CMenuItem* openRecent = CreateObject<CMenuItem>(fileMenu, "OpenRecent");
+				openRecent->SetText("Open Recent");
+				{
+					CMenu* openRecentMenu = CreateObject<CMenu>(openRecent, "OpenRecentMenu");
+
+					CMenuItem* proj1 = CreateObject<CMenuItem>(openRecentMenu, "Proj1");
+					proj1->SetText("Project 1");
+
+					CMenuItem* proj2 = CreateObject<CMenuItem>(openRecentMenu, "Proj2");
+					proj2->SetText("Project 2");
+
+					CMenuItem* proj3 = CreateObject<CMenuItem>(openRecentMenu, "Proj3");
+					proj3->SetText("Project 3");
+
+					CMenuItem* otherProjects = CreateObject<CMenuItem>(openRecentMenu, "Others");
+					otherProjects->SetText("Other Projects");
+					{
+						CMenu* otherProjectsMenu = CreateObject<CMenu>(otherProjects, "OthersMenu");
+
+						CMenuItem* other1 = CreateObject<CMenuItem>(otherProjectsMenu, "Other1");
+						other1->SetText("Other 1");
+
+						CMenuItem* other2 = CreateObject<CMenuItem>(otherProjectsMenu, "Other2");
+						other2->SetText("Other 2");
+					}
+				}
+
 				CMenuItem* save = CreateObject<CMenuItem>(fileMenu, "Save");
 				save->SetText("Save");
 
@@ -105,6 +132,24 @@ namespace CE
 			editMenuItem->SetText("Edit");
 			{
 				CMenu* editMenu = CreateObject<CMenu>(editMenuItem, "EditMenu");
+
+				CMenuItem* newFile = CreateObject<CMenuItem>(editMenu, "New");
+				newFile->SetText("New");
+
+				CMenuItem* open = CreateObject<CMenuItem>(editMenu, "Open");
+				open->SetText("Open");
+
+				CMenuItem* openAs = CreateObject<CMenuItem>(editMenu, "OpenAs");
+				openAs->SetText("Open As...");
+
+				CMenuItem* save = CreateObject<CMenuItem>(editMenu, "Save");
+				save->SetText("Save");
+
+				CMenuItem* saveAs = CreateObject<CMenuItem>(editMenu, "SaveAs");
+				saveAs->SetText("Save As...");
+
+				CMenuItem* exit = CreateObject<CMenuItem>(editMenu, "Exit");
+				exit->SetText("Exit");
 			}
 
 			CMenuItem* toolsMenuItem = CreateObject<CMenuItem>(mainDockWindow, "ToolsMenuItem");
@@ -116,7 +161,10 @@ namespace CE
 			CMenuItem* helpMenuItem = CreateObject<CMenuItem>(mainDockWindow, "HelpMenuItem");
 			helpMenuItem->SetText("Help");
 			{
-				CMenu* menu = CreateObject<CMenu>(helpMenuItem, "HelpMenu");
+				CMenu* helpMenu = CreateObject<CMenu>(helpMenuItem, "HelpMenu");
+
+				CMenuItem* about = CreateObject<CMenuItem>(helpMenu, "About");
+				about->SetText("About");
 			}
 		}
 
@@ -174,6 +222,8 @@ namespace CE
 		CWidget* imageWidget = CreateObject<CWidget>(thirdDockWindow, "ImageWidget");
 
 		CWidget* imageWidget2 = CreateObject<CWidget>(thirdDockWindow, "ImageWidget2");
+		CWidget* imageWidget3 = CreateObject<CWidget>(thirdDockWindow, "ImageWidget2");
+		CWidget* imageWidget4 = CreateObject<CWidget>(thirdDockWindow, "ImageWidget2");
 
 		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
 			{

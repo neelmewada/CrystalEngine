@@ -164,14 +164,6 @@ namespace CE::Widgets
 		if (hoveredWidget)
 		{
 			hoveredWindow = hoveredWidget->ownerWindow;
-
-			CPlatformWindow* hoveredNativeWindow = hoveredWidget->GetNativeWindow();
-			if (hoveredNativeWindow != nullptr && PlatformApplication::Get()->IsFocused())
-			{
-				hoveredNativeWindow->platformWindow->SetInputFocus();
-
-				
-			}
 		}
 
 		if (hoveredWidget && hoveredWidget->GetNativeWindow())

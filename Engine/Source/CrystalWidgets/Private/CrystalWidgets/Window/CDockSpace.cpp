@@ -86,6 +86,25 @@ namespace CE::Widgets
                         if (activeMenuItem >= 0 && hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem)
                         {
                             activeMenuItem = hoveredMenuItem;
+
+                            if (curMenuPopup != nullptr)
+                            {
+                                CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
+                                curMenuPopup->Hide();
+
+                                CMenu* menuPopup = dockWindow->menuItems[activeMenuItem]->GetSubMenu();
+                                Vec2 pos = menuItemRects[activeMenuItem].min + Vec2(0, menuItemRects[activeMenuItem].GetSize().height);
+
+                                menuPopup->UpdateStyleIfNeeded();
+                                menuPopup->UpdateLayoutIfNeeded();
+
+                                Vec2 menuSize = menuPopup->GetComputedLayoutSize();
+                                Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
+
+                                menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), menuSize.ToVec2i());
+
+                                curMenuPopup = menuPopup;
+                            }
                         }
                         SetNeedsPaint();
                     }
@@ -98,8 +117,6 @@ namespace CE::Widgets
                 else if (event->type == CEventType::MousePress)
                 {
                     CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
-
-                    CE_LOG(Info, All, "Press: {}", event->sender->GetName());
 
                     if (hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem && mouseEvent->button == MouseButton::Left)
                     {
@@ -132,10 +149,7 @@ namespace CE::Widgets
                 }
                 else if (event->type == CEventType::MouseRelease)
                 {
-                    if (hoveredMenuItem >= 0 && activeMenuItem != hoveredMenuItem && mouseEvent->button == MouseButton::Left)
-                    {
-	                    
-                    }
+                    
                 }
             }
         }

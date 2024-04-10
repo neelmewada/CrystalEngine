@@ -36,6 +36,8 @@ namespace CE
 			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
 		}
 
+		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+
 		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 	}

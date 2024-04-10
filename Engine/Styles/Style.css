@@ -190,13 +190,29 @@ CMenuItem {
     padding: 15px 5px;
 }
 
-CMenuItem:hovered {
+CMenuItem:hovered, CMenuItem:active {
     background: rgb(0, 112, 224);
+}
+
+CMenuItem #Label {
+    margin: 0px 0px 10px 0px;
 }
 
 CMenu {
     padding: 0px 10px;
     background: rgb(56, 56, 56);
-    border-width: 0px;
+    border-color: rgb(63, 63, 63);
+    border-width: 1px;
     flex-direction: column;
+    min-width: 150px;
+}
+
+.Spacer {
+    flex-grow: 4;
+    flex-shrink: 2;
+}
+
+#ForwardArrow {
+    width: 12px;
+    height: 12px;
 }

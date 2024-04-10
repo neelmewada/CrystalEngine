@@ -47,6 +47,10 @@ namespace CE::Widgets
 		nativeWindow->Show();
 
 		nativeWindow->platformWindow->SetInputFocus();
+
+		SetNeedsLayout();
+		SetNeedsStyle();
+		SetNeedsPaint();
 	}
 
 	void CPopup::Hide()
