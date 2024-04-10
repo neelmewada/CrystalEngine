@@ -126,6 +126,8 @@ namespace CE::Widgets
                 }
 
                 ShowSubMenu();
+
+                SetNeedsPaint();
             }
         }
 

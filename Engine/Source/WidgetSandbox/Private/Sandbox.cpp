@@ -193,6 +193,11 @@ namespace CE
 		auto rightBottom = right->GetSplit(1);
 
 		secondDockWindow = CreateObject<CDockWindow>(left, "Second");
+		{
+			CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
+
+		}
+
 		thirdDockWindow = CreateObject<CDockWindow>(rightTop, "Third");
 		fourthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fourth");
 		fifthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fifth");

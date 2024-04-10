@@ -271,6 +271,8 @@ namespace CE::Widgets
                 {
                     CMenuItem* menuItem = dockWindow->menuItems[i];
 
+                    menuItem->UpdateStyleIfNeeded();
+
                     font = CFont(menuItem->computedStyle.GetFontName(), menuItem->computedStyle.GetFontSize());
                     painter->SetFont(font);
 
@@ -279,8 +281,6 @@ namespace CE::Widgets
 
                     Rect rect = Rect::FromSize(posX, 2.0f, padding.x * 2 + textSize.width, padding.y * 2 + textSize.height);
                     menuItemRects.Add(rect);
-
-                    menuItem->UpdateStyleIfNeeded();
 
                     Color textColor = Color::White();
                     pen = CPen(textColor);
