@@ -155,7 +155,7 @@ namespace CE
 
 		if (listener != nullptr)
 			listener->OnAssetImported(packageName, sourcePath);
-
+		
 		onAssetImported.Broadcast(packageName);
 		onAssetRegistryModified.Broadcast();
 	}

@@ -16,7 +16,10 @@ namespace CE::Widgets
 
     CWindow::~CWindow()
     {
-
+        if (nativeWindow)
+        {
+            delete nativeWindow; nativeWindow = nullptr;
+        }
     }
 
     void CWindow::Show()

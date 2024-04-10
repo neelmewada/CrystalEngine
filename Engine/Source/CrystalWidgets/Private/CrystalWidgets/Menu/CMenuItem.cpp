@@ -104,12 +104,11 @@ namespace CE::Widgets
 
             if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
-                CE_LOG(Info, All, "MenuItem Press");
                 event->Consume(this);
             }
             else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
             {
-                CE_LOG(Info, All, "MenuItem Release: {}", mouseEvent->isInside);
+                emit OnMenuItemClicked();
                 event->Consume(this);
             }
             else if (event->type == CEventType::MouseEnter && parent && parent->IsOfType<CMenu>())

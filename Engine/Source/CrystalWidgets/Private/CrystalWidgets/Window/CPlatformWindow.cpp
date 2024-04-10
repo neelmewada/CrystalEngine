@@ -35,6 +35,11 @@ namespace CE::Widgets
 
         delete renderer; renderer = nullptr;
 
+        if (owner)
+        {
+	        owner->nativeWindow = nullptr;
+        }
+
         PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
         windowResizeDelegate = 0;
 

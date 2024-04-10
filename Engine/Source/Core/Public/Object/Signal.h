@@ -46,3 +46,4 @@ namespace CE
     CE::Object::EmitSignal(this, #SignalName,  CE::Array<CE::Variant>{ CE_EXPAND(CE_CONCATENATE(__CE_ARG_LIST_,CE_ARG_COUNT(__VA_ARGS__))) });\
 }
 
+#define emit

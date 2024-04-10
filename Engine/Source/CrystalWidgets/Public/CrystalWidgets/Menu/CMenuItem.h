@@ -29,6 +29,10 @@ namespace CE::Widgets
 
         void ShowSubMenu();
 
+        // - Signals -
+
+        CE_SIGNAL(OnMenuItemClicked);
+
     protected:
 
         void HandleEvent(CEvent* event) override;

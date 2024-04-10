@@ -53,12 +53,24 @@ namespace CE::Widgets
 
 	void CApplication::Shutdown()
 	{
+		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
+		{
+			destructionQueue[i]->Destroy();
+			destructionQueue.RemoveAt(i);
+		}
+
+		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
+		{
+			delete platformWindows[i];
+		}
+		platformWindows.Clear();
+
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 	}
 
 	void CApplication::Tick()
 	{
-		constexpr u32 destroyAfterFrames = 8;
+		constexpr u32 destroyAfterFrames = Limits::MaxSwapChainImageCount;
 
 		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
 		{
@@ -703,6 +715,19 @@ namespace CE::Widgets
 	}
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
+	{
+		for (CPlatformWindow* window : platformWindows)
+		{
+			if (window->platformWindow == nativeWindow)
+			{
+				window->owner->SetNeedsStyle();
+				window->owner->SetNeedsLayout();
+				window->owner->SetNeedsPaint();
+			}
+		}
+	}
+
+	void CApplication::OnWindowRestored(PlatformWindow* nativeWindow)
 	{
 		for (CPlatformWindow* window : platformWindows)
 		{

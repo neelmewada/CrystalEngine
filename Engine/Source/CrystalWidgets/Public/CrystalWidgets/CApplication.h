@@ -93,6 +93,8 @@ namespace CE::Widgets
 
         void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 
+        void OnWindowRestored(PlatformWindow* window) override;
+
         void OnWindowDestroyed(PlatformWindow* window) override;
 
         void OnWindowClosed(PlatformWindow* window) override;

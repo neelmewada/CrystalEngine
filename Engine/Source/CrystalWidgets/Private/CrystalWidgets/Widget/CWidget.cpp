@@ -230,7 +230,7 @@ namespace CE::Widgets
 		if (parent != nullptr && !parent->IsInteractable())
 			return false;
 
-		return interactable;
+		return interactable && IsVisible();
 	}
 
 	void CWidget::SetInteractable(bool interactable)
@@ -1363,7 +1363,7 @@ namespace CE::Widgets
 			app->OnWidgetDestroyed(this);
 		}
 
-		if (IsWindow())
+		/*if (IsWindow())
 		{
 			CWindow* window = (CWindow*)this;
 			if (window->nativeWindow != nullptr)
@@ -1372,7 +1372,7 @@ namespace CE::Widgets
 				delete window->nativeWindow;
 				window->nativeWindow = nullptr;
 			}
-		}
+		}*/
 	}
     
 } // namespace CE::Widgets

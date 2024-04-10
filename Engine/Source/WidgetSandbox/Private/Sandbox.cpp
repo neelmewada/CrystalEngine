@@ -126,6 +126,11 @@ namespace CE
 
 				CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
 				exit->SetText("Exit");
+
+				Object::Bind(exit, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), []
+					{
+						RequestEngineExit("USER_QUIT");
+					});
 			}
 
 			CMenuItem* editMenuItem = CreateObject<CMenuItem>(mainDockWindow, "EditMenuItem");
