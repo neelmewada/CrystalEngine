@@ -1174,6 +1174,25 @@ namespace CE::Widgets
 		
 	}
 
+	bool CWidget::IsClipped(CPainter* painter)
+	{
+		if (painter->ClipRectExists() && parent)
+		{
+			// TODO: Do NOT OnPaint() if outside clip rect
+			Vec2 scrollOffset = Vec2();
+			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
+				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+			auto rect = Rect::FromSize(GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
+			Rect windowSpaceRect = parent->LocalToWindowSpaceRect(rect);
+			Rect prevClipRect = painter->GetLastClipRect();
+
+			return !windowSpaceRect.Overlaps(prevClipRect);
+		}
+
+		return false;
+	}
+
 	void CWidget::HandleEvent(CEvent* event)
 	{
 		if (event == nullptr)
@@ -1193,12 +1212,12 @@ namespace CE::Widgets
 			if (focusEvent->GotFocus() && !IsFocussed())
 			{
 				OnFocusGained();
-				OnFocused();
+				emit OnFocused();
 			}
 			else if (focusEvent->LostFocus() && IsFocussed())
 			{
 				OnFocusLost();
-				OnUnfocused();
+				emit OnUnfocused();
 			}
 
 			if (focusEvent->GotFocus() && !IsFocussed())
@@ -1220,6 +1239,7 @@ namespace CE::Widgets
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			paintEvent->direction = CEventDirection::TopToBottom;
+			CPainter* painter = paintEvent->painter;
 
 			b8 isMenu = IsOfType<CMenu>();
 
@@ -1228,7 +1248,7 @@ namespace CE::Widgets
 			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
-			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
+			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled() && !IsClipped(painter))
 			{
 				paintEvent->painter->Reset();
 				popPaintCoords = true;
@@ -1238,16 +1258,10 @@ namespace CE::Widgets
 					origin = parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
 				}
 				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
+
 				if (clipChildren)
 				{
 					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
-					if (paintEvent->painter->ClipRectExists())
-					{
-						// TODO: Do NOT OnPaint() if outside clip rect
-						Rect windowSpaceContentRect = LocalToWindowSpaceRect(contentRect);
-						Rect prevClipRect = paintEvent->painter->GetLastClipRect();
-
-					}
 					paintEvent->painter->PushClipRect(contentRect);
 				}
 

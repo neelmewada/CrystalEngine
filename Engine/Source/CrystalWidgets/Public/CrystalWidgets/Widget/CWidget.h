@@ -284,6 +284,8 @@ namespace CE::Widgets
 
     protected:
 
+        bool IsClipped(CPainter* painter);
+
         virtual void OnBeforeDestroy() override;
 
         static YGSize MeasureFunctionCallback(YGNodeConstRef node,

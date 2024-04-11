@@ -194,7 +194,7 @@ namespace CE
 
 		secondDockWindow = CreateObject<CDockWindow>(left, "Second");
 		{
-			CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
+			//CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
 
 			CTabWidget* tabWidget = CreateObject<CTabWidget>(secondDockWindow, "TabWidget");
 			{

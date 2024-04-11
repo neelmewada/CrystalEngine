@@ -398,19 +398,23 @@ namespace CE::Widgets
 		{
 			if (rowPosY - scrollOffset.y > regionRect.GetSize().height)
 			{
-				return; // Out of bounds
+				break; // Out of bounds
 			}
 
-			if (row % 2 != 0 && alternateBgColor.a > 0)
+			f32 cellHeight = ceil(rowHeightsByParent[parentIndex][row]);
+
+			bool isClipped = (rowPosY + cellHeight - scrollOffset.y) < 0;
+
+			if (row % 2 != 0 && alternateBgColor.a > 0 && !isClipped)
 			{
 				CBrush brush = CBrush(alternateBgColor);
 				painter->SetBrush(brush);
 				painter->SetPen(CPen());
 
-				painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, ceil(rowHeightsByParent[parentIndex][row])));
+				painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, cellHeight));
 			}
 
-			if (selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow) // Draw row selection
+			if (!isClipped && selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow) // Draw row selection
 			{
 				for (int col = 0; col < numColumns; ++col)
 				{
@@ -421,7 +425,7 @@ namespace CE::Widgets
 						painter->SetBrush(brush);
 						painter->SetPen(CPen());
 
-						painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, ceil(rowHeightsByParent[parentIndex][row])));
+						painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, cellHeight));
 
 						break;
 					}
@@ -430,7 +434,7 @@ namespace CE::Widgets
 
 			f32 posX = 0.0f;
 
-			for (int col = 0; col < numColumns; ++col)
+			for (int col = 0; !isClipped && col < numColumns; ++col)
 			{
 				CModelIndex index = model->GetIndex(row, col, parentIndex);
 				CViewItemStyle itemStyle{};
