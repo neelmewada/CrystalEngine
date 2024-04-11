@@ -53,6 +53,8 @@ namespace CE::Widgets
 
         bool NeedsStyle();
 
+        void LoadStyleSheet(const IO::Path& fullPath);
+
         void AddSubWidget(CWidget* widget);
         void RemoveSubWidget(CWidget* widget);
 

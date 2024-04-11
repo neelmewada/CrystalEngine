@@ -199,11 +199,19 @@ namespace CE::Widgets
             }
         }
 
+        auto prevTime = clock();
+
         // Tick: Styling
         owner->UpdateStyleIfNeeded();
 
+        auto styleTime = (f32)(clock() - prevTime) / CLOCKS_PER_SEC;
+        prevTime = clock();
+
         // Tick: Layout
         owner->UpdateLayoutIfNeeded();
+
+        auto layoutTime = (f32)(clock() - prevTime) / CLOCKS_PER_SEC;
+        prevTime = clock();
 
         // Tick: Painting
         if (owner->NeedsPaint())
@@ -227,6 +235,10 @@ namespace CE::Widgets
             }
             renderer->End();
         }
+
+        auto paintTime = (f32)(clock() - prevTime) / CLOCKS_PER_SEC;
+
+        CE_LOG(Info, All, "Total Time: {} | {} | {}", styleTime, layoutTime, paintTime);
     }
 
     void CPlatformWindow::GetWindowSize(u32* preferredWidth, u32* preferredHeight)

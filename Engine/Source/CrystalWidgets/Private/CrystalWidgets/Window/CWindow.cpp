@@ -2,9 +2,9 @@
 
 namespace CE::Widgets
 {
-    constexpr f32 ScrollRectWidth = 10.0f;
-    constexpr f32 MinScrollRectSize = 20.0f;
-    constexpr f32 ScrollSizeBuffer = 1.0f;
+    //constexpr f32 ScrollRectWidth = 10.0f;
+    //constexpr f32 MinScrollRectSize = 20.0f;
+    //constexpr f32 ScrollSizeBuffer = 1.0f;
     
     CWindow::CWindow()
     {
@@ -253,13 +253,15 @@ namespace CE::Widgets
 
         CPainter* painter = paintEvent->painter;
 
+        auto app = CApplication::Get();
+
         if (allowVerticalScroll) // Draw Vertical Scroll Bar
         {
             Vec2 originalSize = GetComputedLayoutSize();
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
-            if (contentMaxY > originalHeight + ScrollSizeBuffer)
+            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
             {
                 Rect scrollRect = GetVerticalScrollBarRect();
 
@@ -274,7 +276,7 @@ namespace CE::Widgets
                 painter->SetPen(pen);
                 painter->SetBrush(brush);
 
-                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * ScrollRectWidth * 0.5f);
+                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * app->styleConstants.scrollRectWidth * 0.5f);
             }
             else
             {
@@ -287,17 +289,21 @@ namespace CE::Widgets
     {
         if (allowVerticalScroll)
         {
+            auto app = CApplication::Get();
+
             Vec2 originalSize = GetComputedLayoutSize();
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
-            if (contentMaxY > originalHeight + ScrollSizeBuffer)
+            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
             {
-                Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
+                Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - app->styleConstants.scrollRectWidth, 0), 
+                    Vec2(app->styleConstants.scrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
 
                 Rect scrollRect = Rect::FromSize(scrollRegion.min,
-                    Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
+                    Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, 
+                        app->styleConstants.minScrollRectSize)));
                 scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScroll.y));
 
                 return scrollRect;
@@ -311,6 +317,8 @@ namespace CE::Widgets
     {
         if (allowVerticalScroll || allowHorizontalScroll)
             receiveDragEvents = true;
+
+        auto app = CApplication::Get();
 
         if (event->IsMouseEvent())
         {
@@ -331,7 +339,7 @@ namespace CE::Widgets
                     f32 originalHeight = originalSize.height;
                     f32 contentMaxY = contentSize.height;
 
-                    if (contentMaxY > originalHeight + ScrollSizeBuffer)
+                    if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
                         scrollRect = LocalToScreenSpaceRect(scrollRect);
@@ -358,7 +366,7 @@ namespace CE::Widgets
                     f32 originalHeight = originalSize.height;
                     f32 contentMaxY = contentSize.height;
 
-                    if (contentMaxY > originalHeight + ScrollSizeBuffer)
+                    if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
                         scrollRect = LocalToScreenSpaceRect(scrollRect);
@@ -402,7 +410,7 @@ namespace CE::Widgets
                 f32 originalHeight = originalSize.height;
                 f32 contentMaxY = contentSize.height;
 
-                if (contentMaxY > originalHeight + ScrollSizeBuffer) // If scrolling is possible
+                if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
                 {
                     normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity / (contentMaxY - originalHeight);
                     normalizedScroll.y = Math::Clamp01(normalizedScroll.y);

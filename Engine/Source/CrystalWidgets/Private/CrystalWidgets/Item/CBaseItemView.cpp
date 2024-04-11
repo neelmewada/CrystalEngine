@@ -2,7 +2,7 @@
 
 namespace CE::Widgets
 {
-	constexpr f32 DefaultDecorationSize = 10.0f;
+	constexpr f32 DefaultDecorationSize = 16.0f;
 
 	constexpr f32 ScrollRectWidth = 10.0f;
 	constexpr f32 MinScrollRectSize = 20.0f;
@@ -84,6 +84,7 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
+		
 	}
 
 	void CBaseItemView::OnPaint(CPaintEvent* paintEvent)
@@ -443,10 +444,11 @@ namespace CE::Widgets
 				}
 
 				Variant icon = model->GetData(index, CItemDataUsage::Decoration);
-				if (icon.HasValue() && icon.IsTextType())
+				//if (icon.HasValue() && icon.IsTextType())
 				{
 					itemStyle.features |= CViewItemFeature::HasDecoration;
-					itemStyle.icon = icon.GetNameValue();
+					if (icon.HasValue() && icon.IsTextType())
+						itemStyle.icon = icon.GetNameValue();
 					itemStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 				}
 

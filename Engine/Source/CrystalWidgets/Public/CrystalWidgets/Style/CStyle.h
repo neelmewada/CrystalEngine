@@ -43,6 +43,7 @@ namespace CE::Widgets
 		Hint,
 		Alternate,
 		Splitter,
+		ScrollBar,
 
 		Cell,
 
@@ -404,6 +405,20 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::Foreground))
 				return Color::White();
 			return properties.Get(CStylePropertyType::Foreground).color;
+		}
+
+		Color GetBackgroundColor() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::Background))
+				return Color::Clear();
+			return properties.Get(CStylePropertyType::Background).color;
+		}
+
+		Vec4 GetBorderRadius() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BorderRadius))
+				return Vec4();
+			return properties.Get(CStylePropertyType::BorderRadius).vector;
 		}
 
 	crystalwidgets_internal:

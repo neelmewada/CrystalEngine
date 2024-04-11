@@ -96,7 +96,7 @@ namespace CE::Widgets
     {
         if (event->IsMouseEvent())
         {
-            //CE_LOG(Info, All, "CMenu {}", event->type);
+            
         }
 
         Super::HandleEvent(event);

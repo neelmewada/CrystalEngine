@@ -99,7 +99,14 @@ namespace CE::Widgets
             }
             else if (usage == CItemDataUsage::Decoration)
             {
-                return Variant();
+                if (node->IsTerminal() && node->name.GetString().Contains('.'))
+                {
+                    return "/Engine/Assets/Sandbox/File";
+                }
+                else
+                {
+                    return "/Engine/Assets/Sandbox/Folder";
+                }
             }
         }
         else if (index.GetColumn() == 1) // Type column

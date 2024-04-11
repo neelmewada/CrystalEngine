@@ -36,6 +36,13 @@ namespace CE::Widgets
 
     };
 
+    struct CApplicationStyleConstants
+    {
+        f32 scrollRectWidth = 10.0f;
+        f32 minScrollRectSize = 20.0f;
+        f32 scrollSizeBuffer = 1.0f;
+    };
+
     struct CApplicationInitInfo
     {
         RPI::Shader* draw2dShader = nullptr;
@@ -44,6 +51,7 @@ namespace CE::Widgets
         u32 numFramesInFlight = 2;
         RHI::FrameScheduler* scheduler = nullptr;
         CWidgetResourceLoader* resourceLoader = nullptr;
+        CApplicationStyleConstants styleConstants{};
     };
 
     CLASS()
@@ -87,6 +95,8 @@ namespace CE::Widgets
         Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
         Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
 
+        CApplicationStyleConstants& GetStyleConstants() { return styleConstants; }
+
     crystalwidgets_internal:
 
         void OnWidgetDestroyed(CWidget* widget);
@@ -122,7 +132,7 @@ namespace CE::Widgets
         FIELD()
         CStyleSheet* globalStyleSheet = nullptr;
 
-        //Array<CWindow*> windows{};
+        CApplicationStyleConstants styleConstants{};
 
         Array<CPlatformWindow*> platformWindows{};
 

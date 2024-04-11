@@ -50,6 +50,9 @@
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
 #include "CrystalWidgets/Widget/CTextInput.h"
+#include "CrystalWidgets/Widget/CTabWidget.h"
+#include "CrystalWidgets/Widget/CTabWidgetContainer.h"
+#include "CrystalWidgets/Widget/CScrollArea.h"
 
 // Popups
 #include "CrystalWidgets/Popup/CPopup.h"

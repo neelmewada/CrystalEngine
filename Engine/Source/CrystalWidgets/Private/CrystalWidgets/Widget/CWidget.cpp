@@ -90,8 +90,6 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		bool isFourth = GetName() == "Fourth";
-
 		// DockSpace has its own SubWidget logic
 		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
@@ -271,8 +269,8 @@ namespace CE::Widgets
 			YGNodeMarkDirty(node);
 		}
 
-		YGNodeSetHasNewLayout(node, true);
-		YGNodeSetHasNewLayout(detachedNode, true);
+		//YGNodeSetHasNewLayout(node, true);
+		//YGNodeSetHasNewLayout(detachedNode, true);
 
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
 		{
@@ -323,6 +321,21 @@ namespace CE::Widgets
 		return needsStyle;
 	}
 
+	void CWidget::LoadStyleSheet(const IO::Path& fullPath)
+	{
+		String css = "";
+		FileStream reader = FileStream(fullPath, Stream::Permissions::ReadOnly);
+		if (!reader.IsOpen())
+			return;
+
+		u64 length = reader.GetLength();
+		css.Reserve(length + 1);
+		reader.Read(css.GetData(), length);
+		css.UpdateLength();
+
+		CSSParser::ParseStyleSheet((CSSStyleSheet*)styleSheet, css);
+	}
+
 	bool CWidget::NeedsLayout()
 	{
 		if (needsLayout)
@@ -341,7 +354,7 @@ namespace CE::Widgets
 	{
 		if (NeedsLayout())
 		{
-			UpdateStyleIfNeeded();
+			//UpdateStyleIfNeeded();
 
 			Vec2 availableSize = Vec2(YGUndefined, YGUndefined);
 

@@ -196,6 +196,31 @@ namespace CE
 		{
 			CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
 
+			CTabWidget* tabWidget = CreateObject<CTabWidget>(secondDockWindow, "TabWidget");
+			{
+				CTabWidgetContainer* tab1 = CreateObject<CTabWidgetContainer>(tabWidget, "Tab1");
+				tab1->SetTitle("Tab 1");
+				{
+					CScrollArea* scrollArea = CreateObject<CScrollArea>(tab1, "ScrollArea");
+					scrollArea->SetAllowVerticalScroll(true);
+					scrollArea->SetAllowHorizontalScroll(false);
+
+					for (int i = 0; i < 128; ++i)
+					{
+						CButton* button = CreateObject<CButton>(scrollArea, "Button");
+						button->SetAlternateStyle(true);
+						button->SetText(String::Format("Click Me {}", i));
+					}
+				}
+
+				CTabWidgetContainer* tab2 = CreateObject<CTabWidgetContainer>(tabWidget, "Tab2");
+				tab2->SetTitle("Tab 2");
+				{
+					CButton* button = CreateObject<CButton>(tab2, "Button");
+					button->SetAlternateStyle(false);
+					button->SetText("Click Me 2");
+				}
+			}
 		}
 
 		thirdDockWindow = CreateObject<CDockWindow>(rightTop, "Third");

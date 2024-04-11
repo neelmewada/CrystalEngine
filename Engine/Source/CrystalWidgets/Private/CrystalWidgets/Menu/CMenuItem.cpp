@@ -43,7 +43,7 @@ namespace CE::Widgets
 
     void CMenuItem::HideSubMenu()
     {
-        if (subMenu)
+        if (subMenu && subMenu->IsShown())
         {
             stateFlags &= ~CStateFlag::Active;
 
@@ -104,6 +104,7 @@ namespace CE::Widgets
 
             if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
+                SetNeedsPaint();
                 event->Consume(this);
             }
             else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
@@ -126,9 +127,10 @@ namespace CE::Widgets
                 }
 
                 ShowSubMenu();
-
-                SetNeedsPaint();
+                event->Consume(this);
             }
+
+            SetNeedsPaint();
         }
 
         Super::HandleEvent(event);

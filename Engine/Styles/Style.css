@@ -216,3 +216,42 @@ CMenu {
     width: 12px;
     height: 12px;
 }
+
+CTabWidget::tab {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 15px 7px;
+    border-radius: 5px 5px 0px 0px;
+}
+
+CTabWidget::tab:hovered {
+    background-color: rgb(33, 33, 33);
+}
+
+CTabWidget::tab:active {
+    background-color: rgb(36, 36, 36);
+}
+
+#TabWidget {
+    flex-grow: 4;
+    flex-shrink: 2;
+}
+
+CDockWindow#Second {
+    background: black;
+}
+
+CScrollArea::scroll-bar {
+    background-color: rgb(87, 87, 87);
+}
+
+CScrollArea::scroll-bar:active {
+    background-color: rgb(128, 128, 128);
+}
+
+#ScrollArea {
+    flex-direction: column;
+    background-color: black;
+    border-width: 1.5px;
+    border-color: rgb(64, 64, 64);
+    height: 250px;
+}

@@ -32,14 +32,29 @@ namespace CE::Widgets
 
         size.x += itemStyle.padding.left;
 
-        if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDecoration) && model->GetData(index, CItemDataUsage::Decoration).HasValue())
+        if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDecoration))
         {
             size.x += itemStyle.decorationRect.min.x;
+
+            if (itemStyle.icon.IsValid())
+            {
+                RPI::Texture* icon = CApplication::Get()->LoadImage(itemStyle.icon);
+                if (icon)
+                {
+                    painter->SetBrush(CBrush(Color::White()));
+
+                    painter->DrawTexture(Rect::FromSize(size.x + itemStyle.decorationRect.min.x,
+                        itemStyle.padding.top + itemStyle.decorationRect.min.y, 
+                        itemStyle.decorationRect.GetSize().width,
+                        itemStyle.decorationRect.GetSize().height), icon);
+                }
+            }
+
             size.x += itemStyle.decorationRect.GetSize().width;
 
             if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDisplay))
             {
-                size.x += 2.5f; // padding between decoration & text
+                size.x += 5.0f; // padding between decoration & text
             }
         }
 
@@ -101,7 +116,7 @@ namespace CE::Widgets
 
             if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDisplay))
             {
-                size.x += 2.5f; // padding between decoration & text
+                size.x += 5.0f; // padding between decoration & text
             }
         }
 
