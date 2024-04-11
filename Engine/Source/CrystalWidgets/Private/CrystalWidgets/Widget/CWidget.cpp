@@ -269,9 +269,6 @@ namespace CE::Widgets
 			YGNodeMarkDirty(node);
 		}
 
-		//YGNodeSetHasNewLayout(node, true);
-		//YGNodeSetHasNewLayout(detachedNode, true);
-
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
 		{
 			attachedWidgets[i]->SetNeedsLayout();
@@ -1040,10 +1037,6 @@ namespace CE::Widgets
 		if (parent)
 		{
 			parent->RemoveSubWidget(this);
-		}
-		else if (IsOfType<CWindow>())
-		{
-			//CApplication::Get()->windows.Remove((CWindow*)this);
 		}
 		
 		CApplication::Get()->destructionQueue.Add(this);

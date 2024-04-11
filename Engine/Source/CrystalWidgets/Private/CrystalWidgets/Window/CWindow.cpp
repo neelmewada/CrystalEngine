@@ -28,6 +28,8 @@ namespace CE::Widgets
 	    {
             nativeWindow->Show();
 	    }
+
+        //SetEnabled(true);
     }
 
     void CWindow::Hide()
@@ -36,6 +38,8 @@ namespace CE::Widgets
 	    {
             nativeWindow->Hide();
 	    }
+
+        //SetEnabled(false);
     }
 
     void CWindow::SetPlatformWindow(PlatformWindow* window)
@@ -383,7 +387,7 @@ namespace CE::Widgets
             else if (mouseEvent->type == CEventType::DragMove && isVerticalScrollPressed)
             {
                 CDragEvent* dragEvent = (CDragEvent*)event;
-
+                
                 if (allowVerticalScroll && isVerticalScrollPressed)
                 {
                     Vec2 originalSize = GetComputedLayoutSize();
@@ -419,6 +423,8 @@ namespace CE::Widgets
                     SetNeedsPaint();
                 }
             }
+
+            // Window controls on top-right corner
 
             if (controlRects.NonEmpty() && nativeWindow != nullptr)
             {

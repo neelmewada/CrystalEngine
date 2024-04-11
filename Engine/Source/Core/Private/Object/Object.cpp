@@ -728,6 +728,8 @@ namespace CE
 			if (destField->GetName() == "outer" && destField->GetOwnerType()->GetTypeId() == TYPEID(Object))
 				continue;
 
+			// TODO: Do not modify fields of a Default Instance!
+
 			if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
 			{
 				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(templateObject);

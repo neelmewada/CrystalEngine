@@ -254,4 +254,5 @@ CScrollArea::scroll-bar:active {
     border-width: 1.5px;
     border-color: rgb(64, 64, 64);
     height: 250px;
+    padding: 0px 0px 5px 0px;
 }

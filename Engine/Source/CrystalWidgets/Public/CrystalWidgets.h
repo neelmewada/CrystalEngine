@@ -42,6 +42,10 @@
 #include "CrystalWidgets/Data/CBaseItemModel.h"
 #include "CrystalWidgets/Data/CFileSystemModel.h"
 
+// Behaviors
+#include "CrystalWidgets/Behavior/CBehavior.h"
+#include "CrystalWidgets/Behavior/CScrollBehavior.h"
+
 // Base Classes
 #include "CrystalWidgets/Widget/CWidget.h"
 #include "CrystalWidgets/Window/CWindow.h"

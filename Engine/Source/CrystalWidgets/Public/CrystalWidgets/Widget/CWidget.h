@@ -259,6 +259,9 @@ namespace CE::Widgets
         FIELD()
         Name backgroundImageOverride{};
 
+        FIELD()
+        Array<CBehavior*> behaviors{};
+
         // - Configs -
 
         FIELD(Config)
