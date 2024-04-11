@@ -444,7 +444,7 @@ namespace CE::Widgets
 				}
 
 				Variant icon = model->GetData(index, CItemDataUsage::Decoration);
-				//if (icon.HasValue() && icon.IsTextType())
+				if (icon.HasValue() && icon.IsTextType())
 				{
 					itemStyle.features |= CViewItemFeature::HasDecoration;
 					if (icon.HasValue() && icon.IsTextType())

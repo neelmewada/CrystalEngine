@@ -491,9 +491,13 @@ namespace CE::Widgets
 		return parent->ParentWidgetExistsRecursive(parentWidget);
 	}
 
+	static f32 maxStyleTime = 0.0f;
+
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (NeedsStyle())
+		bool neededStyle = NeedsStyle();
+
+		if (neededStyle)
 		{
 			CStyle prevComputedStyle = computedStyle;
 			computedStyle = {};
@@ -521,8 +525,9 @@ namespace CE::Widgets
 				stateFlags |= CStateFlag::Enabled;
 				stateFlags &= ~CStateFlag::Disabled;
 			}
-			
+
 			auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
+
 			computedStyle.ApplyProperties(selectStyle);
 
 			bool layoutChanged = computedStyle.CompareLayoutProperties(prevComputedStyle);
@@ -802,7 +807,7 @@ namespace CE::Widgets
 
 			needsStyle = false;
 
-			if (layoutChanged)
+			if (layoutChanged && !needsLayout)
 			{
 				SetNeedsLayout();
 			}
@@ -1238,8 +1243,10 @@ namespace CE::Widgets
 					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
 					if (paintEvent->painter->ClipRectExists())
 					{
+						// TODO: Do NOT OnPaint() if outside clip rect
 						Rect windowSpaceContentRect = LocalToWindowSpaceRect(contentRect);
 						Rect prevClipRect = paintEvent->painter->GetLastClipRect();
+
 					}
 					paintEvent->painter->PushClipRect(contentRect);
 				}

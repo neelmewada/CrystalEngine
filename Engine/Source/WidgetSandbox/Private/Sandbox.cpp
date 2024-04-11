@@ -207,7 +207,7 @@ namespace CE
 
 					for (int i = 0; i < 128; ++i)
 					{
-						CButton* button = CreateObject<CButton>(scrollArea, "Button");
+						CButton* button = CreateObject<CButton>(scrollArea, "Scroll_Button");
 						button->SetAlternateStyle(true);
 						button->SetText(String::Format("Click Me {}", i));
 					}

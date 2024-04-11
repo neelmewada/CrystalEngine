@@ -238,7 +238,7 @@ namespace CE::Widgets
 
         auto paintTime = (f32)(clock() - prevTime) / CLOCKS_PER_SEC;
 
-        CE_LOG(Info, All, "Total Time: {} | {} | {}", styleTime, layoutTime, paintTime);
+        //CE_LOG(Info, All, "Total Time: {} | {} | {}", styleTime, layoutTime, paintTime);
     }
 
     void CPlatformWindow::GetWindowSize(u32* preferredWidth, u32* preferredHeight)

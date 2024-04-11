@@ -8,6 +8,28 @@ namespace CE::Widgets
 		if (widget == nullptr)
 			return {};
 
+		if (isDirty)
+		{
+			cachedStyle.Clear();
+			isDirty = false;
+		}
+
+		SIZE_T hash = widget->GetName().GetHashValue();
+		CombineHash(hash, widget->GetClass()->GetName());
+
+		for (const auto& styleClass : widget->styleClasses)
+		{
+			CombineHash(hash, styleClass);
+		}
+
+		CombineHash(hash, state);
+		CombineHash(hash, subControl);
+
+		if (cachedStyle.KeyExists(hash))
+		{
+			return cachedStyle[hash];
+		}
+
 		CStyle result{};
 
 		CStyleSheet* globalStyleSheet = CApplication::Get()->GetGlobalStyleSheet();
@@ -28,6 +50,8 @@ namespace CE::Widgets
 		}
 
 		// TODO: Inherit style from parent widget
+
+		cachedStyle[hash] = result;
 
 		return result;
 	}

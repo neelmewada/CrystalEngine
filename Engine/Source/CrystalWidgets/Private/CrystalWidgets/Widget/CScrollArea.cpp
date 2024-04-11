@@ -6,6 +6,7 @@ namespace CE::Widgets
 	CScrollArea::CScrollArea()
 	{
 		allowVerticalScroll = true;
+		clipChildren = true;
 	}
 
 	CScrollArea::~CScrollArea()

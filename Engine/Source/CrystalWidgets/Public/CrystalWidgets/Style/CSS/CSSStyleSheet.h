@@ -22,6 +22,8 @@ namespace CE::Widgets
 
 		Array<CSSRule> rules{};
 
+		HashMap<SIZE_T, CStyle> cachedStyle{};
+
 		friend class CSSParser;
 	};
 

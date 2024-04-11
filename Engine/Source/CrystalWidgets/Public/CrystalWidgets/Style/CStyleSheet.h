@@ -17,11 +17,21 @@ namespace CE::Widgets
 
         virtual void Clear() = 0;
 
+        void MarkDirty()
+        {
+            isDirty = true;
+        }
+
+        bool IsDirty() const { return isDirty; }
+
     crystalwidgets_internal:
 
         FIELD()
 		CStyleSheet* parent = nullptr;
 
+    protected:
+
+        b8 isDirty = true;
 
     };
     
