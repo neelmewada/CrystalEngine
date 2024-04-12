@@ -88,7 +88,6 @@ namespace CE::Widgets
         contentSize = Vec2(contentMaxX, contentMaxY);
     }
 
-
     void CWindow::OnBeforeDestroy()
     {
         Super::OnBeforeDestroy();
@@ -325,6 +324,11 @@ namespace CE::Widgets
 
     bool CWindow::WindowHitTest(PlatformWindow* window, Vec2 position)
     {
+        if (controlRects.NonEmpty() && nativeWindow != nullptr)
+        {
+	        
+        }
+
         return false;
     }
 

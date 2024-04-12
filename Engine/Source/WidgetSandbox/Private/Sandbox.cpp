@@ -180,6 +180,19 @@ namespace CE
 
 				CMenuItem* about = CreateObject<CMenuItem>(helpMenu, "About");
 				about->SetText("About");
+
+				Object::Bind(about, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [this]
+					{
+						PlatformWindowInfo windowInfo{};
+						windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+						windowInfo.windowFlags = PlatformWindowFlags::SkipTaskbar | PlatformWindowFlags::Utility;
+						PlatformWindow* nativeWindow = PlatformApplication::Get()->CreatePlatformWindow("About", 500, 600, windowInfo);
+						nativeWindow->SetBorderless(true);
+						nativeWindow->SetAlwaysOnTop(true);
+						
+						CToolWindow* aboutWindow = CreateWindow<CToolWindow>("AboutWindow", nativeWindow);
+						aboutWindow->SetTitle("About");
+					});
 			}
 		}
 

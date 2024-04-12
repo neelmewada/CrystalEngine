@@ -281,6 +281,10 @@ CListWidget {
     border-color: rgb(21, 21, 21);
 }
 
+CToolWindow {
+    background-color: rgb(26, 26, 26);
+}
+
 #TitleLabel {
     font-size: 18px;
 }
