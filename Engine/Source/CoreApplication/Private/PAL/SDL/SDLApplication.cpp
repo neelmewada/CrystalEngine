@@ -77,6 +77,13 @@ namespace CE
 		return false;
 	}
 
+	Rect SDLApplication::GetScreenBounds(int displayIndex)
+	{
+		SDL_Rect rect{};
+		SDL_GetDisplayBounds(displayIndex, &rect);
+		return Rect::FromSize(rect.x, rect.y, rect.w, rect.h);
+	}
+
 	void SDLApplication::SetSystemCursor(SystemCursor cursor)
 	{
 		if (systemCursors[(int)cursor] == nullptr)
@@ -231,7 +238,7 @@ namespace CE
 		auto sdlWindow = (SDLPlatformWindow*)window;
 
 		windowList.Remove(sdlWindow);
-
+		
 		if (sdlWindow->GetWindowId() == mainWindow->GetWindowId())
 		{
 			SDL_DelEventWatch(SDLWindowEventWatch, mainWindow->handle);

@@ -19,24 +19,14 @@ namespace CE::Widgets
     {
         Super::Show();
 
-        if (nativeWindow)
-        {
-            //nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
-        }
-
-        isShown = true;
+        //isShown = true;
     }
 
     void CMenu::Show(Vec2i screenPosition, Vec2i size)
     {
         Super::Show(screenPosition, size);
 
-        if (nativeWindow)
-        {
-            //nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
-        }
-
-        isShown = true;
+        //isShown = true;
     }
 
     void CMenu::OnPlatformWindowSet()
@@ -56,7 +46,7 @@ namespace CE::Widgets
 
         Super::Hide();
 
-        isShown = false;
+        //isShown = false;
     }
 
     void CMenu::OnSubobjectAttached(Object* subobject)

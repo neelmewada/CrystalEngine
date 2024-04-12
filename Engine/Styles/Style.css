@@ -273,9 +273,12 @@ CListWidget {
 }
 
 #TestPopup {
+    background-color: rgb(47, 47, 47);
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border-width: 2px;
+    border-color: rgb(21, 21, 21);
 }
 
 #TitleLabel {

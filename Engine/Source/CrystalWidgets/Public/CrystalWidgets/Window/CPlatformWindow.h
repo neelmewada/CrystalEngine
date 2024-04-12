@@ -31,6 +31,8 @@ namespace CE::Widgets
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
+        PlatformWindow* GetPlatformWindow() const { return platformWindow; }
+
     private:
 
         void Init();

@@ -17,8 +17,6 @@ namespace CE::Widgets
 
         void Show(Vec2i screenPosition, Vec2i size);
 
-        bool IsShown() const { return isShown; }
-
         u32 GetMenuItemCount() const { return menuItems.GetSize(); }
 
         CMenuItem* GetMenuItem(u32 index) const { return menuItems[index]; }
@@ -38,8 +36,6 @@ namespace CE::Widgets
         Array<CMenuItem*> menuItems{};
 
     private:
-
-        b8 isShown = false;
 
     };
     

@@ -107,7 +107,7 @@ namespace CE::Widgets
                 SetNeedsPaint();
                 event->Consume(this);
             }
-            else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
+            else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
             {
                 emit OnMenuItemClicked();
                 event->Consume(this);

@@ -262,7 +262,15 @@ namespace CE
 
 		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
 			{
-				testPopup->Show(Vec2i(500, 500), Vec2i(400, 150));
+				CPlatformWindow* mainNativeWindow = mainDockSpace->GetNativeWindow();
+				Vec2i mainWindowSize = mainNativeWindow->GetPlatformWindow()->GetWindowSize();
+				Vec2i mainWindowPos = mainNativeWindow->GetPlatformWindow()->GetWindowPosition();
+				Vec2i popupSize = Vec2i(400, 150);
+				
+				if (!testPopup->IsShown())
+					testPopup->Show(mainWindowPos + mainWindowSize / 2 - popupSize / 2, popupSize);
+				else
+					testPopup->Hide();
 			});
 
 		CTreeView* treeView = CreateObject<CTreeView>(fourthDockWindow, "TreeView");

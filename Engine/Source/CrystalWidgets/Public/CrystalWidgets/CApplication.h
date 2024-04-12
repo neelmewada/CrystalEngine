@@ -97,6 +97,8 @@ namespace CE::Widgets
 
         CApplicationStyleConstants& GetStyleConstants() { return styleConstants; }
 
+        Rect GetScreenBounds(int displayIndex);
+
     crystalwidgets_internal:
 
         void OnWidgetDestroyed(CWidget* widget);

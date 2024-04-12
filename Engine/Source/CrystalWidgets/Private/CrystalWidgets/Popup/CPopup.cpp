@@ -50,7 +50,7 @@ namespace CE::Widgets
 
 		nativeWindow->platformWindow->SetInputFocus();
 
-		nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&CWindow::WindowHitTest, (CWindow*)this));
+		nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
 
 		SetNeedsLayout();
 		SetNeedsStyle();
@@ -77,12 +77,29 @@ namespace CE::Widgets
 		Show();
 	}
 
+	void CPopup::ShowCenteredScreen(Vec2i size)
+	{
+		Vec2i screenSize = CApplication::Get()->GetScreenBounds(0).GetSize().ToVec2i();
+
+		showPosition = screenSize / 2 - size / 2;
+		showSize = size;
+		windowSize = showSize.ToVec2();
+
+		Show();
+	}
+
+	bool CPopup::IsShown()
+	{
+		return nativeWindow != nullptr;
+	}
+
+	bool CPopup::WindowHitTest(PlatformWindow* window, Vec2 position)
+	{
+		return false;
+	}
+
 	void CPopup::HandleEvent(CEvent* event)
 	{
-		if (event->type == CEventType::FocusChanged)
-		{
-			CFocusEvent* focusEvent = (CFocusEvent*)event;
-		}
 
 		Super::HandleEvent(event);
 	}

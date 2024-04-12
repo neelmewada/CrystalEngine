@@ -102,6 +102,8 @@ namespace CE
 
         virtual PlatformBackend GetBackend() = 0;
 
+        virtual Rect GetScreenBounds(int displayIndex = 0) = 0;
+
         virtual void SetSystemCursor(SystemCursor cursor) = 0;
 
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;

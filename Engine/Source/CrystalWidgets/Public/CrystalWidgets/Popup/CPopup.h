@@ -21,7 +21,13 @@ namespace CE::Widgets
 
         void Show(Vec2i screenPosition, Vec2i size);
 
+        void ShowCenteredScreen(Vec2i size);
+
+        bool IsShown();
+
     protected:
+
+        bool WindowHitTest(PlatformWindow* window, Vec2 position) override;
 
         void HandleEvent(CEvent* event) override;
 

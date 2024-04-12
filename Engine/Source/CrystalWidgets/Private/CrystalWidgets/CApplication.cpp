@@ -703,6 +703,11 @@ namespace CE::Widgets
 		return Vec2();
 	}
 
+	Rect CApplication::GetScreenBounds(int displayIndex)
+	{
+		return PlatformApplication::Get()->GetScreenBounds(displayIndex);
+	}
+
 	void CApplication::OnWidgetDestroyed(CWidget* widget)
 	{
 		for (int i = 0; i < widgetsPressedPerMouseButton.GetSize(); i++)
