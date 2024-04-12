@@ -187,11 +187,15 @@ CMenuItem {
     font-size: 13px;
     flex-direction: row;
     align-items: center;
-    padding: 15px 5px;
+    padding: 15px 5px 15px 5px;
 }
 
 CMenuItem:hovered, CMenuItem:active {
     background: rgb(0, 112, 224);
+}
+
+CMenuItem:pressed {
+    padding: 15px 6.5px 15px 3.5px;
 }
 
 CMenuItem #Label {
@@ -248,11 +252,32 @@ CScrollArea::scroll-bar:active {
     background-color: rgb(128, 128, 128);
 }
 
-#ScrollArea {
+CListWidget {
     flex-direction: column;
+    align-items: stretch;
+}
+
+#ListWidget {
     background-color: black;
     border-width: 1.5px;
     border-color: rgb(64, 64, 64);
     height: 250px;
     padding: 0px 0px 5px 0px;
+}
+
+#ListItem #TitleLabel {
+    font-size: 18px;
+}
+
+CListWidgetItem {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 10px 10px;
+}
+
+CListWidgetItem:hovered {
+    background-color: rgb(64, 87, 111);
+}
+
+CListWidgetItem:active {
+    background-color: rgb(0, 112, 224);
 }

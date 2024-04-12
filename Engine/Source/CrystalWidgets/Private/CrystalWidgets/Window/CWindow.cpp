@@ -12,6 +12,8 @@ namespace CE::Widgets
         clipChildren = true;
 
         title = GetName().GetString();
+
+        AddDefaultBehavior<CScrollBehavior>();
     }
 
     CWindow::~CWindow()
@@ -164,6 +166,8 @@ namespace CE::Widgets
             painter->SetPen(pen);
             painter->SetBrush(brush);
 
+            auto rootPadding = GetFinalRootPadding();
+
             Vec2 size = GetComputedLayoutSize() - Vec2(rootPadding.x + rootPadding.z, rootPadding.y + rootPadding.w);
             Vec2 pos = GetComputedLayoutTopLeft() + rootPadding.min;
             constexpr f32 controlWidth = 40;
@@ -255,6 +259,8 @@ namespace CE::Widgets
     {
         Super::OnPaintOverlay(paintEvent);
 
+        return;
+
         CPainter* painter = paintEvent->painter;
 
         auto app = CApplication::Get();
@@ -332,7 +338,7 @@ namespace CE::Widgets
             Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
-            if (mouseEvent->type == CEventType::MouseMove && (allowVerticalScroll || allowHorizontalScroll))
+            /*if (mouseEvent->type == CEventType::MouseMove && (allowVerticalScroll || allowHorizontalScroll))
             {
                 isVerticalScrollHovered = false;
                 SetNeedsPaint();
@@ -422,7 +428,7 @@ namespace CE::Widgets
                     SetNeedsLayout();
                     SetNeedsPaint();
                 }
-            }
+            }*/
 
             // Window controls on top-right corner
 

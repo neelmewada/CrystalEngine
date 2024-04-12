@@ -15,9 +15,9 @@ namespace CE::Widgets
 
         void SetAllowHorizontalScroll(bool allow);
 
-    protected:
+        bool IsContainer() const override final { return true; }
 
-        Rect GetVerticalScrollBarRect();
+    protected:
 
         void OnPaint(CPaintEvent* paintEvent) override;
 

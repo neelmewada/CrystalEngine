@@ -90,6 +90,13 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
+		if (object->IsOfType<CBehavior>())
+		{
+			CBehavior* behavior = static_cast<CBehavior*>(object);
+			behavior->self = this;
+			behaviors.Add(behavior);
+		}
+
 		// DockSpace has its own SubWidget logic
 		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
@@ -134,6 +141,13 @@ namespace CE::Widgets
 
 		if (!object)
 			return;
+
+		if (object->IsOfType<CBehavior>())
+		{
+			CBehavior* behavior = static_cast<CBehavior*>(object);
+			behavior->self = nullptr;
+			behaviors.Remove(behavior);
+		}
 
 		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
@@ -351,7 +365,7 @@ namespace CE::Widgets
 	{
 		if (NeedsLayout())
 		{
-			//UpdateStyleIfNeeded();
+			auto rootPadding = GetFinalRootPadding();
 
 			Vec2 availableSize = Vec2(YGUndefined, YGUndefined);
 
@@ -379,19 +393,23 @@ namespace CE::Widgets
 					auto parentSize = parentWindow->windowSize;//parentWindow->GetComputedLayoutSize();
 					if (parentSize == Vec2(0, 0))
 						parentSize = parentWindow->GetComputedLayoutSize();
+					auto parentWindowRootPadding = parentWindow->GetFinalRootPadding();
+
 					window->windowSize = parentSize -
-						Vec2(parentWindow->rootPadding.left + parentWindow->rootPadding.right,
-							parentWindow->rootPadding.top + parentWindow->rootPadding.bottom);
+						Vec2(parentWindowRootPadding.left + parentWindowRootPadding.right,
+							parentWindowRootPadding.top + parentWindowRootPadding.bottom);
 					availableSize = window->windowSize;
 				}
 			}
 
 			if (parent)
 			{
+				auto parentRootPadding = parent->GetFinalRootPadding();
+
 				Vec2 parentSize = parent->GetComputedLayoutSize();
 				availableSize = parentSize -
-					Vec2(parent->rootPadding.left + parent->rootPadding.right,
-						parent->rootPadding.top + parent->rootPadding.bottom);
+					Vec2(parentRootPadding.left + parentRootPadding.right,
+						parentRootPadding.top + parentRootPadding.bottom);
 			}
 
 			if (IsLayoutCalculationRoot()) // Found a widget with independent layout calculation
@@ -413,7 +431,7 @@ namespace CE::Widgets
 			
 			if (parent)
 			{
-				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
+				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->GetFinalRootPadding().min;
 			}
 
 			for (CWidget* widget : attachedWidgets)
@@ -460,6 +478,29 @@ namespace CE::Widgets
 		contentSize = Vec2(contentMaxX, contentMaxY);
 	}
 
+	CBehavior* CWidget::AddBehavior(SubClass<CBehavior> behaviorClass)
+	{
+		if (behaviorClass == nullptr)
+			return nullptr;
+
+		for (CBehavior* behavior : behaviors)
+		{
+			if (behavior->GetClass() == behaviorClass) // Same behavior class already exists!
+				return nullptr;
+		}
+
+		return CreateObject<CBehavior>(this, behaviorClass->GetName().GetLastComponent(), OF_Transient, behaviorClass);
+	}
+
+	Vec4 CWidget::GetFinalRootPadding()
+	{
+		Vec4 extras = Vec4();
+		for (CBehavior* behavior : behaviors)
+		{
+			extras += behavior->GetExtraRootPadding();
+		}
+		return rootPadding + extras;
+	}
 
 	bool CWidget::SubWidgetExistsRecursive(CWidget* subWidget)
 	{
@@ -1158,13 +1199,32 @@ namespace CE::Widgets
 				painter->DrawTexture(rect, texture);
 			}
 		}
+
+		for (CBehavior* behavior : behaviors)
+		{
+			behavior->OnPaint(painter);
+		}
 	}
 
 	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
 	{
 		CPainter* painter = paintEvent->painter;
 
-		
+		for (CBehavior* behavior : behaviors)
+		{
+			behavior->OnPaintOverlay(painter);
+		}
+	}
+
+	CBehavior* CWidget::AddDefaultBehavior(SubClass<CBehavior> behaviorClass)
+	{
+		for (CBehavior* behavior : behaviors)
+		{
+			if (behavior->GetClass() == behaviorClass)
+				return nullptr;
+		}
+
+		return CreateDefaultSubobject<CBehavior>(behaviorClass, behaviorClass->GetName().GetLastComponent());
 	}
 
 	bool CWidget::IsClipped(CPainter* painter)
@@ -1248,7 +1308,7 @@ namespace CE::Widgets
 				Vec2 origin = Vec2();
 				if (parent != nullptr)
 				{
-					origin = parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
+					origin = parent->GetComputedLayoutTopLeft() + parent->GetFinalRootPadding().min;
 				}
 				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
 
@@ -1331,6 +1391,15 @@ namespace CE::Widgets
 					CApplication::Get()->PopCursor();
 				}
 				SetNeedsStyle();
+			}
+		}
+
+		// Handle behavior events
+		if (event->type != CEventType::PaintEvent)
+		{
+			for (CBehavior* behavior : behaviors)
+			{
+				behavior->HandleEvent(event);
 			}
 		}
 		

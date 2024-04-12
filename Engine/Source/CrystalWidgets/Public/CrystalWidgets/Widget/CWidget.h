@@ -76,7 +76,17 @@ namespace CE::Widgets
 
         virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
 
+        CBehavior* AddBehavior(SubClass<CBehavior> behaviorClass);
+
+        template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
+        T* AddBehavior()
+        {
+            return (T*)AddBehavior(GetStaticClass<T>());
+        }
+
         // - Style API -
+
+        Vec4 GetFinalRootPadding();
 
         void SetBackgroundImage(const Name& imagePath) { this->backgroundImageOverride = imagePath; SetNeedsPaint(); }
 
@@ -286,6 +296,14 @@ namespace CE::Widgets
         Name backgroundImagePath{};
 
     protected:
+
+        CBehavior* AddDefaultBehavior(SubClass<CBehavior> behaviorClass);
+
+        template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
+        T* AddDefaultBehavior()
+        {
+            return (T*)AddDefaultBehavior(GetStaticClass<T>());
+        }
 
         bool IsClipped(CPainter* painter);
 

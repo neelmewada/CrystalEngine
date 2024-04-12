@@ -194,14 +194,28 @@ namespace CE
 
 		secondDockWindow = CreateObject<CDockWindow>(left, "Second");
 		{
-			//CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
+			CWidget* imageWidget1 = CreateObject<CWidget>(secondDockWindow, "ImageWidget");
 
 			CTabWidget* tabWidget = CreateObject<CTabWidget>(secondDockWindow, "TabWidget");
 			{
 				CTabWidgetContainer* tab1 = CreateObject<CTabWidgetContainer>(tabWidget, "Tab1");
 				tab1->SetTitle("Tab 1");
 				{
-					CScrollArea* scrollArea = CreateObject<CScrollArea>(tab1, "ScrollArea");
+					CListWidget* listWidget = CreateObject<CListWidget>(tab1, "ListWidget");
+					{
+						for (int i = 0; i < 32; ++i)
+						{
+							CListWidgetItem* listItem = CreateObject<CListWidgetItem>(listWidget, "ListItem");
+
+							CLabel* titleLabel = CreateObject<CLabel>(listItem, "TitleLabel");
+							titleLabel->SetText(String::Format("Empty Project {}", i));
+
+							CLabel* descLabel = CreateObject<CLabel>(listItem, "DescLabel");
+							descLabel->SetText("Create an empty project!");
+						}
+					}
+
+					/*CScrollArea* scrollArea = CreateObject<CScrollArea>(tab1, "ScrollArea");
 					scrollArea->SetAllowVerticalScroll(true);
 					scrollArea->SetAllowHorizontalScroll(false);
 
@@ -210,7 +224,7 @@ namespace CE
 						CButton* button = CreateObject<CButton>(scrollArea, "Scroll_Button");
 						button->SetAlternateStyle(true);
 						button->SetText(String::Format("Click Me {}", i));
-					}
+					}*/
 				}
 
 				CTabWidgetContainer* tab2 = CreateObject<CTabWidgetContainer>(tabWidget, "Tab2");

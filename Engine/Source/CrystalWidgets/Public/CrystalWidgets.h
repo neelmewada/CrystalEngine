@@ -50,6 +50,10 @@
 #include "CrystalWidgets/Widget/CWidget.h"
 #include "CrystalWidgets/Window/CWindow.h"
 
+#include "CrystalWidgets/Item/CItemSelectionModel.h"
+#include "CrystalWidgets/Item/CBaseItemDelegate.h"
+#include "CrystalWidgets/Item/CStandardItemDelegate.h"
+
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
@@ -57,6 +61,10 @@
 #include "CrystalWidgets/Widget/CTabWidget.h"
 #include "CrystalWidgets/Widget/CTabWidgetContainer.h"
 #include "CrystalWidgets/Widget/CScrollArea.h"
+#include "CrystalWidgets/Item/CBaseItemView.h"
+#include "CrystalWidgets/Item/CTreeView.h"
+#include "CrystalWidgets/Widget/CListWidgetItem.h"
+#include "CrystalWidgets/Widget/CListWidget.h"
 
 // Popups
 #include "CrystalWidgets/Popup/CPopup.h"
@@ -64,12 +72,6 @@
 //Menu
 #include "CrystalWidgets/Menu/CMenu.h"
 #include "CrystalWidgets/Menu/CMenuItem.h"
-
-#include "CrystalWidgets/Item/CItemSelectionModel.h"
-#include "CrystalWidgets/Item/CBaseItemDelegate.h"
-#include "CrystalWidgets/Item/CStandardItemDelegate.h"
-#include "CrystalWidgets/Item/CBaseItemView.h"
-#include "CrystalWidgets/Item/CTreeView.h"
 
 // Windows
 #include "CrystalWidgets/Window/CDockSplitView.h"

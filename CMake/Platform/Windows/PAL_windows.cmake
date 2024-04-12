@@ -41,7 +41,6 @@ if(${CE_BUILD_TESTS} AND NOT ${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
     set(CE_BUILD_TESTS FALSE)
 endif()
 
-
 if(${CE_BUILD_TESTS})
     add_compile_definitions(PAL_TRAIT_BUILD_TESTS=1)
 endif()
