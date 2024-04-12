@@ -37,7 +37,7 @@ namespace CE::Widgets
 
     crystalwidgets_protected_internal:
 
-        virtual void OnPlatformWindowSet() {}
+        virtual void OnPlatformWindowSet();
 
         void UpdateLayoutIfNeeded() override;
 
@@ -57,6 +57,8 @@ namespace CE::Widgets
         void OnSubobjectDetached(Object* object) override;
 
         Rect GetVerticalScrollBarRect();
+
+        virtual bool WindowHitTest(PlatformWindow* window, Vec2 position);
 
         FIELD()
         String title = "";

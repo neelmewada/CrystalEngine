@@ -19,9 +19,9 @@ namespace CE::Widgets
         {
             CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
 
-            if (event->type == CEventType::MousePress && owner)
+            if (event->type == CEventType::MousePress && owner && mouseEvent->button == MouseButton::Left)
             {
-                owner->Select(this);
+                owner->OnItemClicked(this, mouseEvent->keyModifiers);
             }
         }
 

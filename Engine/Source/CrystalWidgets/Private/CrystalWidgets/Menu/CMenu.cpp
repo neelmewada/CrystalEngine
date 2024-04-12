@@ -21,7 +21,7 @@ namespace CE::Widgets
 
         if (nativeWindow)
         {
-            nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+            //nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
 
         isShown = true;
@@ -33,7 +33,7 @@ namespace CE::Widgets
 
         if (nativeWindow)
         {
-            nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+            //nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
 
         isShown = true;
@@ -48,8 +48,6 @@ namespace CE::Widgets
     {
         if (nativeWindow)
         {
-            nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
-
             for (auto menuItem : menuItems)
             {
                 menuItem->HideSubMenu();

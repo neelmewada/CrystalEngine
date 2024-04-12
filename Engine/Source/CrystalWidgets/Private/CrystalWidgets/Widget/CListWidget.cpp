@@ -22,30 +22,99 @@ namespace CE::Widgets
         return subWidgetClass->IsSubclassOf<CListWidgetItem>();
     }
 
-    void CListWidget::Select(CListWidgetItem* item)
+    void CListWidget::Select(CListWidgetItem* item, bool additive)
     {
-        SetNeedsStyle();
-        SetNeedsPaint();
-
-        if (!item || item->owner != this)
+        if (item == nullptr)
         {
-            this->selectedItem = nullptr;
+            selectedItems.Clear();
+            UpdateSelectionState();
+            return;
+        }
+
+        if (item->owner != this)
+        {
 	        return;
         }
 
-        this->selectedItem = item;
-
-        for (CListWidgetItem* listItem : items)
+        if (selectionMode == CItemSelectionMode::NoSelection)
         {
-	        if (listItem == selectedItem)
+            if (selectedItems.NonEmpty())
+            {
+                selectedItems.Clear();
+                UpdateSelectionState();
+            }
+        }
+        else if (selectionMode == CItemSelectionMode::SingleSelection)
+        {
+	        if (selectedItems.NonEmpty())
 	        {
-                listItem->stateFlags |= CStateFlag::Active;
+                selectedItems.Clear();
 	        }
+            selectedItems.Add(item);
+            UpdateSelectionState();
+        }
+        else
+        {
+	        if (!additive)
+	        {
+                selectedItems.Clear();
+	        }
+
+            selectedItems.Add(item);
+            UpdateSelectionState();
+        }
+    }
+
+    void CListWidget::Select(int index, bool additive)
+    {
+        if (index < 0 || index >= items.GetSize())
+            return;
+
+        Select(items[index], additive);
+    }
+
+    void CListWidget::SetSelectionMode(CItemSelectionMode mode)
+    {
+        this->selectionMode = mode;
+
+        if (selectionMode == CItemSelectionMode::NoSelection)
+        {
+            selectedItems.Clear();
+        }
+        else if (selectionMode == CItemSelectionMode::SingleSelection)
+        {
+	        while (selectedItems.GetSize() > 1)
+	        {
+                selectedItems.RemoveAt(0);
+	        }
+        }
+
+        UpdateSelectionState();
+    }
+
+    void CListWidget::UpdateSelectionState()
+    {
+        for (int i = 0; i < items.GetSize(); i++)
+        {
+            CListWidgetItem* listItem = items[i];
+            listItem->index = i;
+            if (selectedItems.Exists(listItem))
+            {
+                listItem->stateFlags |= CStateFlag::Active;
+            }
             else
             {
                 listItem->stateFlags &= ~CStateFlag::Active;
             }
         }
+
+        SetNeedsStyle();
+        SetNeedsPaint();
+    }
+
+    void CListWidget::OnItemClicked(CListWidgetItem* item, KeyModifier modifiers)
+    {
+        Select(item, EnumHasAnyFlags(modifiers, KeyModifier::Ctrl));
     }
 
     void CListWidget::OnSubobjectAttached(Object* object)
@@ -58,6 +127,7 @@ namespace CE::Widgets
         if (object->IsOfType<CListWidgetItem>())
         {
             CListWidgetItem* item = static_cast<CListWidgetItem*>(object);
+            item->index = items.GetSize();
             items.Add(item);
             item->owner = this;
         }
@@ -73,6 +143,7 @@ namespace CE::Widgets
         if (object->IsOfType<CListWidgetItem>())
         {
             CListWidgetItem* item = static_cast<CListWidgetItem*>(object);
+            item->index = -1;
             items.Remove(item);
             item->owner = nullptr;
         }

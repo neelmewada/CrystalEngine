@@ -200,6 +200,8 @@ namespace CE::Widgets
 
     Vec4 CScrollBehavior::GetExtraRootPadding()
     {
+        auto app = CApplication::Get();
+
 	    return Super::GetExtraRootPadding();
     }
 

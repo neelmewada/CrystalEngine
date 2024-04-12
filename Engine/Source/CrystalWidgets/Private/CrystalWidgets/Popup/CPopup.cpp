@@ -7,6 +7,8 @@ namespace CE::Widgets
 	{
 		allowVerticalScroll = false;
 		allowHorizontalScroll = false;
+
+		canBeClosed = canBeMaximized = canBeMinimized = false;
 	}
 
 	CPopup::~CPopup()
@@ -16,7 +18,7 @@ namespace CE::Widgets
 
 	void CPopup::OnBeforeDestroy()
 	{
-		//Hide();
+		Super::OnBeforeDestroy();
 	}
 
 	bool CPopup::IsSubWidgetAllowed(Class* subWidgetClass)
@@ -48,6 +50,8 @@ namespace CE::Widgets
 
 		nativeWindow->platformWindow->SetInputFocus();
 
+		nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&CWindow::WindowHitTest, (CWindow*)this));
+
 		SetNeedsLayout();
 		SetNeedsStyle();
 		SetNeedsPaint();
@@ -57,7 +61,9 @@ namespace CE::Widgets
 	{
 		if (!nativeWindow)
 			return;
-		
+
+		nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
+
 		delete nativeWindow;
 		nativeWindow = nullptr;
 	}

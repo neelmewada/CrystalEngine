@@ -93,6 +93,8 @@ namespace CE
 		// Root windows that represent a native PlatformWindow directly
 		Array<CWindow*> rootWindows{};
 
+		CPopup* testPopup = nullptr;
+
 		CDockSpace* mainDockSpace = nullptr;
 		CDockSpace* minorDockSpace = nullptr;
 		CDockWindow* mainDockWindow = nullptr;
@@ -102,8 +104,6 @@ namespace CE
 		CDockWindow* fifthDockWindow = nullptr;
 
 		CE::Texture* topViewTex = nullptr;
-
-		Array<CButton*> buttons{};
 
 		CDockSpace* secondDockSpace = nullptr;
 

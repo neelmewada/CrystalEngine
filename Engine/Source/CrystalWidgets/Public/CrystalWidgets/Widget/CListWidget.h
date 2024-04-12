@@ -14,9 +14,19 @@ namespace CE::Widgets
 
 		bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
-		void Select(CListWidgetItem* item);
+		void Select(CListWidgetItem* item, bool additive = false);
+
+		void Select(int index, bool additive = false);
+
+		void SetSelectionMode(CItemSelectionMode mode);
+
+		const Array<CListWidgetItem*>& GetSelection() const { return selectedItems; }
 
 	protected:
+
+		void UpdateSelectionState();
+
+		void OnItemClicked(CListWidgetItem* item, KeyModifier modifiers);
 
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;
@@ -27,8 +37,11 @@ namespace CE::Widgets
 		Array<CListWidgetItem*> items{};
 
 		FIELD()
-		CListWidgetItem* selectedItem = nullptr;
+		CItemSelectionMode selectionMode = CItemSelectionMode::SingleSelection;
 
+		Array<CListWidgetItem*> selectedItems{};
+
+		friend class CListWidgetItem;
 	};
 
 } // namespace CE::Widgets

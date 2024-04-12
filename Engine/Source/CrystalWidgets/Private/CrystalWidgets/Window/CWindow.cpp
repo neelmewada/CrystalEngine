@@ -323,6 +323,11 @@ namespace CE::Widgets
         return Rect();
     }
 
+    bool CWindow::WindowHitTest(PlatformWindow* window, Vec2 position)
+    {
+        return false;
+    }
+
     void CWindow::HandleEvent(CEvent* event)
     {
         if (allowVerticalScroll || allowHorizontalScroll)
@@ -337,98 +342,6 @@ namespace CE::Widgets
             Rect screenSpaceWindowRect = GetScreenSpaceRect();
             Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
-
-            /*if (mouseEvent->type == CEventType::MouseMove && (allowVerticalScroll || allowHorizontalScroll))
-            {
-                isVerticalScrollHovered = false;
-                SetNeedsPaint();
-
-	            if (allowVerticalScroll)
-	            {
-                    Vec2 originalSize = GetComputedLayoutSize();
-                    f32 originalHeight = originalSize.height;
-                    f32 contentMaxY = contentSize.height;
-
-                    if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
-                    {
-                        Rect scrollRect = GetVerticalScrollBarRect();
-                        scrollRect = LocalToScreenSpaceRect(scrollRect);
-
-                        if (scrollRect.Contains(globalMousePos))
-                        {
-                            isVerticalScrollHovered = true;
-                        }
-                    }
-	            }
-            }
-            else if (mouseEvent->type == CEventType::MouseLeave && (allowVerticalScroll || allowHorizontalScroll))
-            {
-                isVerticalScrollHovered = false;
-                SetNeedsPaint();
-            }
-            else if (mouseEvent->type == CEventType::DragBegin && (allowVerticalScroll || allowHorizontalScroll))
-            {
-                CDragEvent* dragEvent = (CDragEvent*)event;
-
-	            if (allowVerticalScroll)
-	            {
-                    Vec2 originalSize = GetComputedLayoutSize();
-                    f32 originalHeight = originalSize.height;
-                    f32 contentMaxY = contentSize.height;
-
-                    if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
-                    {
-                        Rect scrollRect = GetVerticalScrollBarRect();
-                        scrollRect = LocalToScreenSpaceRect(scrollRect);
-
-                        if (scrollRect.Contains(globalMousePos))
-                        {
-                            dragEvent->draggedWidget = this;
-                            dragEvent->ConsumeAndStopPropagation(this);
-                            isVerticalScrollPressed = true;
-                        }
-                    }
-	            }
-            }
-            else if (mouseEvent->type == CEventType::DragMove && isVerticalScrollPressed)
-            {
-                CDragEvent* dragEvent = (CDragEvent*)event;
-                
-                if (allowVerticalScroll && isVerticalScrollPressed)
-                {
-                    Vec2 originalSize = GetComputedLayoutSize();
-                    f32 originalHeight = originalSize.height;
-
-                    normalizedScroll.y += mouseDelta.y / (originalHeight - GetVerticalScrollBarRect().GetSize().height);
-                    normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
-
-                    dragEvent->ConsumeAndStopPropagation(this);
-                    SetNeedsLayout();
-                    SetNeedsPaint();
-                }
-            }
-            else if (mouseEvent->type == CEventType::DragEnd && isVerticalScrollPressed)
-            {
-                CDragEvent* dragEvent = (CDragEvent*)event;
-                
-                isVerticalScrollPressed = false;
-                dragEvent->ConsumeAndStopPropagation(this);
-            }
-            else if (mouseEvent->type == CEventType::MouseWheel && allowVerticalScroll)
-            {
-                Vec2 originalSize = GetComputedLayoutSize();
-                f32 originalHeight = originalSize.height;
-                f32 contentMaxY = contentSize.height;
-
-                if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
-                {
-                    normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity / (contentMaxY - originalHeight);
-                    normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
-
-                    SetNeedsLayout();
-                    SetNeedsPaint();
-                }
-            }*/
 
             // Window controls on top-right corner
 
@@ -501,6 +414,11 @@ namespace CE::Widgets
     bool CWindow::IsSubWidgetAllowed(Class* subWidgetClass)
     {
         return subWidgetClass->IsSubclassOf<CWidget>() && !subWidgetClass->IsSubclassOf<CMenuItem>();
+    }
+
+    void CWindow::OnPlatformWindowSet()
+    {
+
     }
 
     void CWindow::OnSubobjectAttached(Object* object)

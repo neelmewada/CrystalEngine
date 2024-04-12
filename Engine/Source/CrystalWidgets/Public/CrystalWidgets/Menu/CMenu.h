@@ -32,7 +32,7 @@ namespace CE::Widgets
         void OnSubobjectAttached(Object* subobject) override;
         void OnSubobjectDetached(Object* subobject) override;
 
-        bool WindowHitTest(PlatformWindow* window, Vec2 position);
+        bool WindowHitTest(PlatformWindow* window, Vec2 position) override;
 
         FIELD()
         Array<CMenuItem*> menuItems{};

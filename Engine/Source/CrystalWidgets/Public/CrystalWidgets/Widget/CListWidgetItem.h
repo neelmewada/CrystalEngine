@@ -20,6 +20,9 @@ namespace CE::Widgets
 		FIELD()
 		CListWidget* owner = nullptr;
 
+		FIELD()
+		int index = -1;
+
 		friend class CListWidget;
 	};
 

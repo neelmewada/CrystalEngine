@@ -36,7 +36,7 @@ namespace CE::Widgets
 
 		void OnPaint(CPaintEvent* paintEvent) override;
 
-		bool WindowHitTest(PlatformWindow* window, Vec2 position);
+		bool WindowHitTest(PlatformWindow* window, Vec2 position) override;
 
 		FIELD()
 		Array<CDockSplitView*> dockSplits{};

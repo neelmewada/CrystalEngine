@@ -247,7 +247,12 @@ namespace CE::Widgets
 
 	void CWidget::SetInteractable(bool interactable)
 	{
+		if (this->interactable == interactable)
+			return;
+
 		this->interactable = interactable;
+		SetNeedsStyle();
+		SetNeedsPaint();
 	}
 
 	bool CWidget::IsSubWidgetAllowed(Class* subWidgetClass)
@@ -494,12 +499,7 @@ namespace CE::Widgets
 
 	Vec4 CWidget::GetFinalRootPadding()
 	{
-		Vec4 extras = Vec4();
-		for (CBehavior* behavior : behaviors)
-		{
-			extras += behavior->GetExtraRootPadding();
-		}
-		return rootPadding + extras;
+		return rootPadding;
 	}
 
 	bool CWidget::SubWidgetExistsRecursive(CWidget* subWidget)

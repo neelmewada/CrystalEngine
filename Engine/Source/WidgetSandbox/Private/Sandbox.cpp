@@ -163,6 +163,16 @@ namespace CE
 				CMenu* menu = CreateObject<CMenu>(toolsMenuItem, "ToolsMenu");
 			}
 
+			testPopup = CreateObject<CPopup>(CApplication::Get(), "TestPopup");
+			testPopup->SetTitle("Sample Popup");
+			{
+				CLabel* popupLabel = CreateObject<CLabel>(testPopup, "TitleLabel");
+				popupLabel->SetText("This is a popup");
+
+				CLabel* descLabel = CreateObject<CLabel>(testPopup, "Label");
+				descLabel->SetText("This is a long description text. This is the second sentence.");
+			}
+
 			CMenuItem* helpMenuItem = CreateObject<CMenuItem>(mainDockWindow, "HelpMenuItem");
 			helpMenuItem->SetText("Help");
 			{
@@ -214,17 +224,6 @@ namespace CE
 							descLabel->SetText("Create an empty project!");
 						}
 					}
-
-					/*CScrollArea* scrollArea = CreateObject<CScrollArea>(tab1, "ScrollArea");
-					scrollArea->SetAllowVerticalScroll(true);
-					scrollArea->SetAllowHorizontalScroll(false);
-
-					for (int i = 0; i < 128; ++i)
-					{
-						CButton* button = CreateObject<CButton>(scrollArea, "Scroll_Button");
-						button->SetAlternateStyle(true);
-						button->SetText(String::Format("Click Me {}", i));
-					}*/
 				}
 
 				CTabWidgetContainer* tab2 = CreateObject<CTabWidgetContainer>(tabWidget, "Tab2");
@@ -241,19 +240,6 @@ namespace CE
 		fourthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fourth");
 		fifthDockWindow = CreateObject<CDockWindow>(rightBottom, "Fifth");
 
-		for (int i = 100; i < 24; ++i) // Disabled
-		{
-			CButton* btn = CreateObject<CButton>(fourthDockWindow, "Button");
-			btn->SetText(String("Button ") + i);
-			if (i % 2 == 0)
-				btn->SetAlternateStyle(true);
-
-			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [btn, i]
-				{
-					btn->SetInteractable(false);
-					CE_LOG(Info, All, "Button {} Clicked!", i);
-				});
-		}
 
 		CButton* newBtn = CreateObject<CButton>(thirdDockWindow, "Button");
 		newBtn->SetText("New Button");
@@ -276,7 +262,7 @@ namespace CE
 
 		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
 			{
-				
+				testPopup->Show(Vec2i(500, 500), Vec2i(400, 150));
 			});
 
 		CTreeView* treeView = CreateObject<CTreeView>(fourthDockWindow, "TreeView");
@@ -298,14 +284,6 @@ namespace CE
 	{
 		if (destroyed)
 			return;
-
-		if (InputManager::IsKeyDown(KeyCode::Space))
-		{
-			for (CButton* button : buttons)
-			{
-				button->SetEnabled(true);
-			}
-		}
 
 		u32 curWidth = 0, curHeight = 0;
 		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
