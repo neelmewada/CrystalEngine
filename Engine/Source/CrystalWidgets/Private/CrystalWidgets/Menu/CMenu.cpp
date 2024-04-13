@@ -7,6 +7,7 @@ namespace CE::Widgets
     {
         canBeClosed = canBeMaximized = canBeMinimized = false;
 
+
         receiveMouseEvents = receiveKeyEvents = true;
     }
 

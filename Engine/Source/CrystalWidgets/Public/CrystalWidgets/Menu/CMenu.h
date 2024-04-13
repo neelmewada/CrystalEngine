@@ -35,8 +35,11 @@ namespace CE::Widgets
         FIELD()
         Array<CMenuItem*> menuItems{};
 
-    private:
+        FIELD()
+        CMenuItem* ownerItem = nullptr;
 
+
+        friend class CMenuItem;
     };
     
 } // namespace CE::Widgets

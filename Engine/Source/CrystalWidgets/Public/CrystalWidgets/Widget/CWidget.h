@@ -86,6 +86,10 @@ namespace CE::Widgets
 
         // - Style API -
 
+        CStateFlag GetStateFlags() const { return stateFlags; }
+
+        void SetStateFlags(CStateFlag flags) { stateFlags = flags; SetNeedsStyle(); SetNeedsPaint(); }
+
         Vec4 GetFinalRootPadding();
 
         void SetBackgroundImage(const Name& imagePath) { this->backgroundImageOverride = imagePath; SetNeedsPaint(); }

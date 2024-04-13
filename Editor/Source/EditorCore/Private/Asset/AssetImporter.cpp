@@ -113,7 +113,7 @@ namespace CE::Editor
 
 		if (job->success)
 		{
-			gEngine->GetAssetManager()->GetRegistry();
+			AssetManager::GetRegistry()->OnAssetImported(job->packageName);
 		}
 
 		importResults.Add(importResult);

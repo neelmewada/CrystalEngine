@@ -3,7 +3,10 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class EditorAssetManager; }
+	namespace Editor {
+		class AssetImporter;
+		class EditorAssetManager;
+	}
 #endif
 
 	struct IAssetRegistryListener
@@ -96,6 +99,7 @@ namespace CE
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::EditorAssetManager;
+		friend class CE::Editor::AssetImporter;
 #endif
 		IO::FileWatcher fileWatcher{};
 		IO::WatchID fileWatchID = 0;

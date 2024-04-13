@@ -78,6 +78,7 @@ namespace CE::Widgets
         if (object->IsOfType<CMenu>())
         {
             subMenu = static_cast<CMenu*>(object);
+            subMenu->ownerItem = this;
             forwardArrow->SetVisible(true);
         }
     }
@@ -91,6 +92,7 @@ namespace CE::Widgets
 
         if (object->IsOfType<CMenu>() && subMenu == (CMenu*)object)
         {
+            subMenu->ownerItem = nullptr;
             subMenu = nullptr;
             forwardArrow->SetVisible(false);
         }
@@ -111,8 +113,34 @@ namespace CE::Widgets
             {
                 emit OnMenuItemClicked();
                 event->Consume(this);
+
+                if (subMenu == nullptr) // A leaf menu item
+                {
+                    auto parent = this->parent;
+                    CMenu* topMostMenu = nullptr;
+
+                    while (parent != nullptr)
+                    {
+	                    if (parent->IsOfType<CMenu>())
+	                    {
+                            CMenu* menu = static_cast<CMenu*>(parent);
+                            topMostMenu = menu;
+
+                            parent = topMostMenu->ownerItem;
+	                    }
+                        else
+                        {
+                            parent = parent->parent;
+                        }
+                    }
+
+                    if (topMostMenu)
+                    {
+                        topMostMenu->Hide();
+                    }
+                }
             }
-            else if (event->type == CEventType::MouseEnter && parent && parent->IsOfType<CMenu>())
+            else if (event->type == CEventType::MouseEnter && parent && parent->IsOfType<CMenu>() && SubWidgetExistsRecursive(event->sender))
             {
                 CMenu* parentMenu = static_cast<CMenu*>(parent);
 

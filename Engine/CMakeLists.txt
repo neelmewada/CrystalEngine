@@ -25,8 +25,8 @@ add_subdirectory(Source/CoreRPI)
 add_subdirectory(Source/CoreSettings)
 
 # Unused modules:
-add_subdirectory(Source/CoreGUI)
-add_subdirectory(Source/CoreWidgets)
+#add_subdirectory(Source/CoreGUI)
+#add_subdirectory(Source/CoreWidgets)
 
 # Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})

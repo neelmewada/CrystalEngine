@@ -33,6 +33,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::System
             CE::EditorCore
+            CE::EditorWidgets
     RUNTIME_DEPENDENCIES
         
 )

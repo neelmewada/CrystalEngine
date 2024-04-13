@@ -6,7 +6,6 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} CONSOLEAPP
     VS_STARTUP_PROJECT
-    AUTORTTI
     NAMESPACE CE
     FOLDER Editor/Source
     PCHHEADER
@@ -27,7 +26,9 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::EditorWidgets
             CE::CrystalEditor
         TARGETS
-            ProjectBrowser
+            Config 
+            EngineAssets 
+            EngineStyles
     RUNTIME_DEPENDENCIES
 
 )

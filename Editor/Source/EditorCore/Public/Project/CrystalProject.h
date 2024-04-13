@@ -10,10 +10,11 @@ namespace CE::Editor
 	public:
 
 		FIELD()
-		String projectName{};
+		Name projectName = "Untitled";
         
         FIELD()
-        String engineVersion = "0.1.0";
+        String engineVersion = CE_ENGINE_VERSION_STRING;
+
 	};
 
 } // namespace CE::Editor

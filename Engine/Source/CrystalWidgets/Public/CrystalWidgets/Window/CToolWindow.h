@@ -21,6 +21,8 @@ namespace CE::Widgets
 
         void OnPaint(CPaintEvent* paintEvent) override;
 
+        void OnPaintOverlay(CPaintEvent* paintEvent) override;
+
         void HandleEvent(CEvent* event) override;
 
     };

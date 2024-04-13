@@ -40,13 +40,7 @@ private:
 	// Application
 	CE::PlatformApplication* app = nullptr;
 
-	// RHI
-	CE::RHI::Viewport* viewport = nullptr;
-	CE::RHI::GraphicsCommandList* cmdList = nullptr;
-
 	IO::Path projectPath{};
-
-	CrystalEditorWindow* editorWindow = nullptr;
 
 	clock_t previousTime{};
 };

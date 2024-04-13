@@ -6,7 +6,6 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
-    RESOURCES
     NAMESPACE CE
     FOLDER Editor/Source
     PCHHEADER
@@ -29,7 +28,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::cxxopts
         PUBLIC
-            CE::Core
             CE::EditorCore
             CE::EditorWidgets
             CE::EditorSystem

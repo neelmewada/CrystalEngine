@@ -185,10 +185,9 @@ namespace CE
 					{
 						PlatformWindowInfo windowInfo{};
 						windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
-						windowInfo.windowFlags = PlatformWindowFlags::SkipTaskbar | PlatformWindowFlags::Utility;
+						windowInfo.windowFlags = PlatformWindowFlags::Utility;
 						PlatformWindow* nativeWindow = PlatformApplication::Get()->CreatePlatformWindow("About", 500, 600, windowInfo);
 						nativeWindow->SetBorderless(true);
-						nativeWindow->SetAlwaysOnTop(true);
 						
 						CToolWindow* aboutWindow = CreateWindow<CToolWindow>("AboutWindow", nativeWindow);
 						aboutWindow->SetTitle("About");

@@ -29,13 +29,14 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
+            CE::CrystalWidgets
             CE::EditorCore
     RUNTIME_DEPENDENCIES
 
 )
 
 
-if(${PAL_TRAIT_BUILD_TESTS})
+if(${CE_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
 

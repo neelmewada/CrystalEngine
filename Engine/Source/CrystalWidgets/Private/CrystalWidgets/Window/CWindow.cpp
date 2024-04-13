@@ -153,9 +153,23 @@ namespace CE::Widgets
     {
         Super::OnPaint(paintEvent);
 
+    }
+
+    void CWindow::OnPaintOverlay(CPaintEvent* paintEvent)
+    {
+        Super::OnPaintOverlay(paintEvent);
+
         CPainter* painter = paintEvent->painter;
 
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
+
+        auto style = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::TitleBar);
+
+        Color titleBarBgColor = style.GetBackgroundColor();
+        if (titleBarBgColor.a > 0)
+        {
+            bgColor = titleBarBgColor;
+        }
 
         CPen pen = CPen(); pen.SetColor(Color(1, 1, 1, 1)); pen.SetWidth(2.0f);
         CBrush brush = CBrush();
@@ -170,21 +184,21 @@ namespace CE::Widgets
             Vec2 size = GetComputedLayoutSize() - Vec2(rootPadding.x + rootPadding.z, rootPadding.y + rootPadding.w);
             Vec2 pos = GetComputedLayoutTopLeft() + rootPadding.min;
             constexpr f32 controlWidth = 40;
-            
+
             controlRects.Resize(3);
 
             for (int i = 0; i < 3; i++)
             {
-                controlRects[i] = Rect::FromSize(pos + Vec2(size.width - controlWidth * (3 - i), 0), 
+                controlRects[i] = Rect::FromSize(pos - rootPadding.min + Vec2(size.width - controlWidth * (3 - i), 0),
                     Vec2(controlWidth, controlWidth));
                 // Shrink the rect perpendicular to it's edges
-                controlRects[i] = Rect::FromSize(controlRects[i].min + Vec2(controlWidth, controlWidth) * 0.35f, 
+                controlRects[i] = Rect::FromSize(controlRects[i].min + Vec2(controlWidth, controlWidth) * 0.35f,
                     Vec2(controlWidth, controlWidth) * 0.3f);
             }
 
             if (canBeClosed)
             {
-                if (!hoveredControls[2])
+                if (!hoveredControls[2] || clickedControlIdx == 2)
                 {
                     pen.SetColor(Color::RGBA8(180, 180, 180));
                     painter->SetPen(pen);
@@ -198,11 +212,11 @@ namespace CE::Widgets
                 painter->DrawRoundedX(controlRects[2]);
             }
 
-            pen.SetWidth(1.25f);
+            pen.SetWidth(1.5f);
 
             if (canBeMaximized)
             {
-                if (!hoveredControls[1])
+                if (!hoveredControls[1] || clickedControlIdx == 1)
                 {
                     pen.SetColor(Color::RGBA8(200, 200, 200));
                     painter->SetPen(pen);
@@ -213,26 +227,26 @@ namespace CE::Widgets
                     painter->SetPen(pen);
                 }
 
-	            if (!nativeWindow->platformWindow->IsMaximized())
-	            {
+                if (!nativeWindow->platformWindow->IsMaximized())
+                {
                     painter->DrawRect(ScaleRect(controlRects[1], 0.98f));
-	            }
-	            else
-	            {
+                }
+                else
+                {
                     brush.SetColor(bgColor);
                     painter->SetBrush(brush);
 
                     auto rectSize = controlRects[1].GetSize();
                     painter->DrawRect(TranslateRect(ScaleRect(controlRects[1], 0.8f), Vec2(1, -1) * 2.0f));
                     painter->DrawRect(ScaleRect(controlRects[1], 0.8f));
-	            }
+                }
             }
 
             brush.SetColor(Color::Clear());
             pen.SetColor(Color::Clear());
             pen.SetWidth(0.0f);
 
-            if (!hoveredControls[0])
+            if (!hoveredControls[0] || clickedControlIdx == 0)
             {
                 brush.SetColor(Color::RGBA8(180, 180, 180));
                 painter->SetPen(pen);
@@ -250,46 +264,6 @@ namespace CE::Widgets
                 Vec2 rectSize = controlRects[0].GetSize();
                 painter->DrawRect(Rect::FromSize(Vec2(controlRects[0].min.x, controlRects[0].min.y + rectSize.y / 2 - 2.0f / 2.0f),
                     Vec2(rectSize.width, 2.0f)));
-            }
-        }
-    }
-
-    void CWindow::OnPaintOverlay(CPaintEvent* paintEvent)
-    {
-        Super::OnPaintOverlay(paintEvent);
-
-        return;
-
-        CPainter* painter = paintEvent->painter;
-
-        auto app = CApplication::Get();
-
-        if (allowVerticalScroll) // Draw Vertical Scroll Bar
-        {
-            Vec2 originalSize = GetComputedLayoutSize();
-            f32 originalHeight = originalSize.height;
-            f32 contentMaxY = contentSize.height;
-
-            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
-            {
-                Rect scrollRect = GetVerticalScrollBarRect();
-
-                CPen pen{};
-                CBrush brush = CBrush(Color::RGBA(87, 87, 87));
-
-                if (isVerticalScrollHovered || isVerticalScrollPressed)
-                {
-                    brush.SetColor(Color::RGBA(128, 128, 128));
-                }
-
-                painter->SetPen(pen);
-                painter->SetBrush(brush);
-
-                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * app->styleConstants.scrollRectWidth * 0.5f);
-            }
-            else
-            {
-                normalizedScroll = Vec2(0, 0);
             }
         }
     }
@@ -326,7 +300,22 @@ namespace CE::Widgets
     {
         if (controlRects.NonEmpty() && nativeWindow != nullptr)
         {
-	        
+            f32 minX = UINT_MAX;
+
+            for (int i = 0; i < controlRects.GetSize(); ++i)
+            {
+                if (i == 0 && !canBeMinimized)
+                    continue;
+                if (i == 1 && !canBeMaximized)
+                    continue;
+                if (i == 2 && !canBeClosed)
+                    continue;
+
+                minX = Math::Min(minX, controlRects[i].min.x);
+            }
+
+            if (position.y < rootPadding.y && position.x < minX)
+                return true;
         }
 
         return false;

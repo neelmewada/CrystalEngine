@@ -4,6 +4,7 @@
 #include "CoreApplication.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
+#include "CrystalWidgets.h"
 
 #include "EditorCore.h"
 #include "EditorWidgets.h"
@@ -16,7 +17,7 @@ using namespace CE::Editor;
 
 #include "EditorLoop.h"
 
-namespace CE
+namespace CE::Editor
 {
     
 }

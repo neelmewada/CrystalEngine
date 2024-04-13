@@ -52,7 +52,7 @@ namespace CE::Editor
 		void OnAssetImportJobFinish(AssetImportJob* job);
         
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets) = 0;
-
+		
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
 		bool enableLogging = false;

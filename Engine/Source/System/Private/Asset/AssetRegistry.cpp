@@ -98,6 +98,7 @@ namespace CE
 		Package* load = Package::LoadPackage(nullptr, packageName, LOAD_Default);
 		if (load == nullptr)
 			return;
+
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
 		String relativePathStr = "";
 		String parentRelativePathStr = "";

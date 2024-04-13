@@ -58,6 +58,10 @@ namespace CE
 
     IO::Path WindowsDirectories::GetLogDir()
     {
+        if (gProjectPath.Exists() && (gProjectPath / "Logs").Exists())
+        {
+            return gProjectPath / "Logs";
+        }
         return GetLaunchDir() / "Logs";
     }
 

@@ -5,4 +5,4 @@ namespace CE::Editor
     
 } // namespace CE::Editor
 
-#include "NewAssetMenu.rtti.h"
+#include "ProjectBrowser.rtti.h"

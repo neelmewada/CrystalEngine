@@ -11,15 +11,8 @@ void EditorLoop::PreInit(int argc, char** argv)
 	// Set Core Globals before loading Core
 	gProjectName = "CrystalEngine";
 
-	if (gDefaultWindowWidth == 0)
-		gDefaultWindowWidth = 1280;
-	if (gDefaultWindowHeight == 0)
-		gDefaultWindowHeight = 720;
-
-	// Initialize logging
-	Logger::Initialize();
-	Logger::SetConsoleLogLevel(LogLevel::Trace);
-	Logger::SetFileDumpLogLevel(LogLevel::Trace);
+	gDefaultWindowWidth = 1280;
+	gDefaultWindowHeight = 720;
 
 	gProgramArguments.Clear();
 	for (int i = 0; i < argc; i++)
@@ -43,7 +36,6 @@ void EditorLoop::PreInit(int argc, char** argv)
 		{
 			std::cout << options.help() << std::endl;
 			exit(0);
-			return;
 		}
 
 		auto positionalArgs = result.unmatched();
@@ -61,22 +53,19 @@ void EditorLoop::PreInit(int argc, char** argv)
 			}
 		}
 
-		if (!foundProject)
-		{
-			// Open the project browser as an external process and exit
-			PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
-			exit(0);
-			return;
-		}
-
 		gProjectPath = projectPath.GetParentPath();
 		gProjectName = projectPath.GetFilename().RemoveExtension().GetString();
 	}
-	catch (std::exception exc)
+	catch (const std::exception& exc)
 	{
 		CE_LOG(Error, All, "Failed to parse arguments: {}", exc.what());
 		exit(-1);
 	}
+
+	// Initialize logging
+	Logger::Initialize();
+	Logger::SetConsoleLogLevel(LogLevel::Trace);
+	Logger::SetFileDumpLogLevel(LogLevel::Trace);
 }
 
 void EditorLoop::LoadStartupCoreModules()
@@ -84,6 +73,7 @@ void EditorLoop::LoadStartupCoreModules()
 	// Load Startup Modules
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
+	ModuleManager::Get().LoadModule("CoreInput");
 
 	// Settings module
 	ModuleManager::Get().LoadModule("CoreSettings");
@@ -93,7 +83,7 @@ void EditorLoop::LoadStartupCoreModules()
 #if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().LoadModule("VulkanRHI");
 #else
-#	error Vulkan API is required but not supported
+#	error Vulkan API is required
 #endif
 }
 
@@ -101,13 +91,14 @@ void EditorLoop::LoadCoreModules()
 {
 	// Load other Core modules
 	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("CoreMesh");
 
-	ModuleManager::Get().LoadModule("CoreGUI");
-	ModuleManager::Get().LoadModule("CoreWidgets");
+	ModuleManager::Get().LoadModule("CrystalWidgets");
 }
 
 void EditorLoop::LoadEngineModules()
 {
+	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("System");
 }
 
@@ -153,93 +144,10 @@ void EditorLoop::PostInit()
 {
 	using namespace CE::Widgets;
 
-	// Load non-important core modules
 	LoadCoreModules();
-
-	RHI::gDynamicRHI = new VulkanRHI();
-	RHI::gDynamicRHI->Initialize();
-
-	AppInit();
-
-	RHI::gDynamicRHI->PostInitialize();
-
-	// Load engine modules
 	LoadEngineModules();
 
-	// Load editor modules
-	LoadEditorModules();
-
-	gEngine->PreInit();
-
-	// Load RHI::Viewport and initialize GUI
-
-	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
-	u32 width = 0, height = 0;
-	mainWindow->GetDrawableWindowSize(&width, &height);
-	mainWindow->GetUnderlyingHandle();
-
-	RHI::RenderTargetColorOutputDesc colorDesc{};
-	colorDesc.loadAction = RHI::RenderPassLoadAction::Clear;
-	colorDesc.storeAction = RHI::RenderPassStoreAction::Store;
-	colorDesc.sampleCount = 1;
-	colorDesc.preferredFormat = RHI::ColorFormat::Auto;
-
-	RHI::RenderTargetLayout rtLayout{};
-	rtLayout.backBufferCount = 2;
-	rtLayout.numColorOutputs = 1;
-	rtLayout.colorOutputs[0] = colorDesc;
-	rtLayout.presentationRTIndex = 0;
-	rtLayout.depthStencilFormat = RHI::DepthStencilFormat::None;
-
-	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
-
-	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
-
-	unsigned char* defaultFont = nullptr;
-	unsigned int defaultFontByteSize = 0;
-	EditorStyles::Get().GetDefaultFont(&defaultFont, &defaultFontByteSize);
-
-	Array<RHI::FontDesc> fontList{};
-
-	fontList.Add({ defaultFontByteSize, 16, "Open Sans", false, defaultFont }); // Default Font & Size
-
-	fontList.AddRange({
-		{ defaultFontByteSize, 12, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 13, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 14, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 19, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 21, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 26, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 30, "Open Sans", false, defaultFont },
-		{ defaultFontByteSize, 32, "Open Sans", false, defaultFont },
-	});
-
-	RHI::FontPreloadConfig fontConfig{};
-	fontConfig.preloadFontCount = fontList.GetSize();
-	fontConfig.preloadFonts = fontList.GetData();
-
-	Array<void*> fontHandles{};
-
-	cmdList->InitImGui(&fontConfig, fontHandles);
-
-	CFontManager::Get().Initialize(fontList, fontHandles);
-	EditorStyles::Get().InitDefaultStyle();
-
-	InitStyles();
-
-	gEngine->Initialize();
-
-	editorWindow = CreateWidget<CrystalEditorWindow>(nullptr, "EditorWindow");
-	editorWindow->SetAsDockSpaceWindow(true);
-	editorWindow->SetTitle("Crystal Editor");
-	editorWindow->SetFullscreen(true);
+	AppInit();
 }
 
 void EditorLoop::InitStyles()
@@ -261,27 +169,7 @@ void EditorLoop::RunLoop()
 		// Engine
 		gEngine->Tick(deltaTime);
 		
-		// Render
-		viewport->SetClearColor(Color::Black());
-
-		cmdList->Begin();
-		cmdList->ImGuiNewFrame();
-
-		editorWindow->Render();
-
-		static bool showDemo = false;
-		if (showDemo)
-			GUI::ShowDemoWindow(&showDemo);
-
-		cmdList->ImGuiRender();
-		cmdList->End();
-
-		cmdList->ImGuiPlatformUpdate();
-
-		if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))
-		{
-			RHI::gDynamicRHI->PresentViewport(cmdList);
-		}
+		
 
 		previousTime = curTime;
 	}
@@ -289,17 +177,13 @@ void EditorLoop::RunLoop()
 
 void EditorLoop::PreShutdown()
 {
-	editorWindow->Destroy();
-	editorWindow = nullptr;
+	
 
 	// Save project & settings, and unload
 	SaveSettings();
 	UnloadSettings();
 
 	gEngine->PreShutdown();
-
-	GetStyleManager()->PreShutdown();
-	cmdList->ShutdownImGui();
 
 	gEngine->Shutdown();
 
@@ -309,23 +193,19 @@ void EditorLoop::PreShutdown()
 	// Unload engine modules
 	UnloadEngineModules();
 
-	RHI::gDynamicRHI->DestroyCommandList(cmdList);
-	RHI::gDynamicRHI->DestroyViewport(viewport);
-
 	RHI::gDynamicRHI->PreShutdown();
 
 	AppPreShutdown();
 
 	// Shutdown core widgets before RHI device
-	ModuleManager::Get().UnloadModule("CoreWidgets");
+	ModuleManager::Get().UnloadModule("CrystalWidgets");
 
 	RHI::gDynamicRHI->Shutdown();
 
 	// Unload modules
 
-	ModuleManager::Get().UnloadModule("CoreGUI");
-
 	ModuleManager::Get().UnloadModule("CoreMedia");
+	ModuleManager::Get().UnloadModule("CoreMesh");
 
 #if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");
@@ -342,6 +222,7 @@ void EditorLoop::Shutdown()
 	ModuleManager::Get().UnloadModule("CoreSettings");
 
 	// Unload most important modules at last
+	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 
@@ -350,23 +231,39 @@ void EditorLoop::Shutdown()
 
 void EditorLoop::LoadProject()
 {
-	if (!ProjectManager::Get().LoadProject(projectPath))
+	gProjectPath = PlatformDirectories::GetLaunchDir();
+
+	if (!projectPath.IsEmpty())
 	{
-		PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
-		RequestEngineExit("INVALID_PROJECT");
+		
 	}
 }
 
 void EditorLoop::AppPreInit()
 {
 	app = PlatformApplication::Get();
+	app->Initialize();
+	InputManager::Get().Initialize(app);
+
+	gEngine->PreInit();
+
+	gDefaultWindowWidth = 1280;
+	gDefaultWindowHeight = 720;
+
+	PlatformWindowInfo windowInfo{};
+	windowInfo.maximised = windowInfo.fullscreen = windowInfo.hidden = false;
+	windowInfo.resizable = true;
+	windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
+
+	PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+	mainWindow->SetBorderless(true);
+
+	
 }
 
 void EditorLoop::AppInit()
 {
-	app->Initialize();
-
-	app->InitMainWindow("Crystal Editor", gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+	
 }
 
 void EditorLoop::AppPreShutdown()

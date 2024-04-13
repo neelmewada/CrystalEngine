@@ -84,20 +84,11 @@ namespace CE::Widgets
         b8 isVerticalScrollPressed = false;
         b8 isVerticalScrollHovered = false;
 
-        //PlatformWindow* nativeWindow = nullptr;
         CPlatformWindow* nativeWindow = nullptr;
-        //DelegateHandle windowResizeDelegate = 0;
-
-        //CPainter* painter = nullptr;
-        //RPI::Renderer2D* renderer = nullptr;
-        //RHI::DrawListTag drawListTag = 0;
 
         friend class CApplication;
         friend class CWidget;
         friend class CDockSpace;
-
-        template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
-        friend TWindow* CreateWindow(const String& name, CWidget* parent, PlatformWindow* nativeWindow, Class* windowClass);
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value

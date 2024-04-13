@@ -12,7 +12,7 @@ namespace CE::Editor
 
         void StartupModule() override
         {
-			GetStyleManager()->AddResourceSearchModule(MODULE_NAME);
+			
 
 			onClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&EditorWidgetsModule::OnClassRegistered, this));
 			onClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&EditorWidgetsModule::OnClassDeregistered, this));
@@ -20,13 +20,10 @@ namespace CE::Editor
 
         void ShutdownModule() override
         {
-			ObjectEditor::classTypeToEditorMap.Clear();
-
 			CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(onClassRegistered);
 			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(onClassDeregistered);
 			onClassRegistered = onClassDeregistered = 0;
 
-			GetStyleManager()->RemoveResourceSearchModule(MODULE_NAME);
         }
 
         void RegisterTypes() override
@@ -39,22 +36,7 @@ namespace CE::Editor
 			if (classType == nullptr)
 				return;
 			
-			if (classType->IsSubclassOf<ObjectEditor>() && classType->HasAttribute("TargetType"))
-			{
-				Name targetTypeName = classType->GetAttribute("TargetType").GetStringValue();
-				if (targetTypeName.IsValid())
-				{
-					ObjectEditor::classTypeToEditorMap[targetTypeName].Add(classType);
-				}
-			}
-			else if (classType->IsSubclassOf<FieldEditor>() && classType != GetStaticClass<FieldEditor>() && classType->HasAttribute("TargetType"))
-			{
-				Name targetTypeName = classType->GetAttribute("TargetType").GetStringValue();
-				if (targetTypeName.IsValid())
-				{
-					FieldEditor::editorClassesByFieldType[targetTypeName].Add(classType);
-				}
-			}
+			
 		}
 
 		void OnClassDeregistered(ClassType* classType)
@@ -62,22 +44,7 @@ namespace CE::Editor
 			if (classType == nullptr)
 				return;
 
-			if (classType->IsSubclassOf<ObjectEditor>() && classType->HasAttribute("TargetType"))
-			{
-				Name targetTypeName = classType->GetAttribute("TargetType").GetStringValue();
-				if (targetTypeName.IsValid())
-				{
-					ObjectEditor::classTypeToEditorMap[targetTypeName].Remove(classType);
-				}
-			}
-			else if (classType->IsSubclassOf<FieldEditor>() && classType != GetStaticClass<FieldEditor>() && classType->HasAttribute("TargetType"))
-			{
-				Name targetTypeName = classType->GetAttribute("TargetType").GetStringValue();
-				if (targetTypeName.IsValid())
-				{
-					FieldEditor::editorClassesByFieldType[targetTypeName].Remove(classType);
-				}
-			}
+			
 		}
 
 		DelegateHandle onClassRegistered = 0;

@@ -76,12 +76,13 @@ namespace CE::Editor
 
 		IO::Path::CreateDirectories(projectFolder / "Config");
 		IO::Path::CreateDirectories(projectFolder / "Logs");
+		IO::Path::CreateDirectories(projectFolder / "Temp");
 
 		Package* settingsPackage = GetSettingsPackage();
 		
 		ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 		projectSettings->projectName = projectName;
-		projectSettings->projectVersion = "0.1.0.0";
+		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING;
 
 		SaveSettings(); // Saves the settings package in the global project path gProjectPath
 

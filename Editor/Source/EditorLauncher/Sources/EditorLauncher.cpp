@@ -1,8 +1,6 @@
 
 #include "EditorLauncher.h"
 
-#include "EditorLauncher.private.h"
-
 int GuardedMain(int argc, char** argv)
 {
 	gEditorLoop.PreInit(argc, argv);
@@ -11,11 +9,7 @@ int GuardedMain(int argc, char** argv)
 
 	gEditorLoop.PostInit();
 
-	CERegisterModuleTypes();
-
 	gEditorLoop.RunLoop();
-
-	CEDeregisterModuleTypes();
 
 	gEditorLoop.PreShutdown();
 	gEditorLoop.Shutdown();

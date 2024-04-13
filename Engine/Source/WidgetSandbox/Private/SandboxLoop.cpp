@@ -60,7 +60,7 @@ namespace CE
 				return;
 			}
 		}
-		catch (std::exception exc)
+		catch (const std::exception& exc)
 		{
 			CE_LOG(Error, All, "Failed to parse arguments: {}", exc.what());
 			exit(-1);

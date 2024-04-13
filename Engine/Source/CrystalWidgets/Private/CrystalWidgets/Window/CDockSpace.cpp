@@ -87,7 +87,7 @@ namespace CE::Widgets
                         {
                             activeMenuItem = hoveredMenuItem;
 
-                            if (curMenuPopup != nullptr)
+                            if (curMenuPopup != nullptr && curMenuPopup->IsShown())
                             {
                                 CWindow* dockWindow = dockSplits[0]->GetActiveWindow();
                                 curMenuPopup->Hide();
@@ -104,6 +104,12 @@ namespace CE::Widgets
                                 menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), menuSize.ToVec2i());
 
                                 curMenuPopup = menuPopup;
+                            }
+                            else if (curMenuPopup != nullptr)
+                            {
+                                activeMenuItem = -1;
+                                hoveredMenuItem = -1;
+                                curMenuPopup = nullptr;
                             }
                         }
                         SetNeedsPaint();
@@ -257,6 +263,12 @@ namespace CE::Widgets
             }
 
             // Draw menu items
+
+            if (curMenuPopup != nullptr && !curMenuPopup->IsShown())
+            {
+                activeMenuItem = -1;
+                curMenuPopup = nullptr;
+            }
 
             if (dockSplits.NonEmpty() && dockSplits[0]->GetSubWidgetCount() > 0 && dockSplits[0]->GetSubWidget(0)->IsOfType<CWindow>())
             {
