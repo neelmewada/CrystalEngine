@@ -34,6 +34,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
             CE::CoreApplication
             CE::CoreSettings
+            CE::CoreShader
             CE::CoreMedia
             CE::CoreRHI
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>

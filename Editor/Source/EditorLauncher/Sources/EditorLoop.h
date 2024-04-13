@@ -21,6 +21,7 @@ private:
 	void LoadProject();
 
 	void InitStyles();
+	void AlternateTick();
 
 	void AppPreInit();
 	void AppInit();
@@ -43,6 +44,9 @@ private:
 	IO::Path projectPath{};
 
 	clock_t previousTime{};
+	f32 deltaTime = 0.0f;
+
+	DelegateHandle tickDelegateHandle = 0;
 };
 
 extern EditorLoop gEditorLoop;

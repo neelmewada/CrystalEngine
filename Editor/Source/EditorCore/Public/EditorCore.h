@@ -9,6 +9,7 @@
 
 // Editor Prefs
 #include "Editor/EditorPrefs.h"
+#include "Editor/EditorGlobals.h"
 
 // Project
 #include "Project/CrystalProject.h"

@@ -34,6 +34,7 @@ ce_add_target(System SHARED
             CE::CoreShader
             CE::CoreRHI
             CE::CoreRPI
+            CE::CrystalWidgets
         TARGETS 
             Config
     RUNTIME_DEPENDENCIES

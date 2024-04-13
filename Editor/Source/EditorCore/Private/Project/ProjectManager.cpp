@@ -30,8 +30,8 @@ namespace CE::Editor
 		currentProject = project;
 
 		// Set global project vars
-		gProjectName = currentProject.projectName;
 		gProjectPath = projectFilePath.GetParentPath();
+		gProjectName = gProjectPath.GetFilename();
 
 		// Load settings package
 		Package* settingsPackage = GetSettingsPackage();
@@ -58,7 +58,6 @@ namespace CE::Editor
 		gProjectName = projectName;
         
         CrystalProject project{};
-        project.projectName = projectName;
         project.engineVersion = CE_ENGINE_VERSION_STRING_SHORT;
         
         FileStream stream = FileStream(projectFolder / projectFile, Stream::Permissions::WriteOnly);
@@ -70,7 +69,7 @@ namespace CE::Editor
         {
             serializer.WriteNext(&stream);
         }
-
+		
 		IO::Path::CreateDirectories(projectFolder / "Game");
 		IO::Path::CreateDirectories(projectFolder / "Game" / "Assets");
 

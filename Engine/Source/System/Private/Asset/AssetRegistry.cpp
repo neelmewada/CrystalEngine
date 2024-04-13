@@ -217,7 +217,7 @@ namespace CE
 		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
 		{
 			auto projectAssetsPath = gProjectPath / "Game/Assets";
-
+			
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
 					auto relativePath = IO::Path::GetRelative(item, gProjectPath);

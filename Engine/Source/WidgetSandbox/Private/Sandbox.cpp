@@ -32,7 +32,6 @@ namespace CE
 		appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
 		appInitInfo.defaultFont = atlasData;
 		appInitInfo.defaultFontName = "Roboto";
-		appInitInfo.numFramesInFlight = 2;
 		appInitInfo.scheduler = scheduler;
 		appInitInfo.resourceLoader = this;
 

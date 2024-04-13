@@ -113,7 +113,9 @@ namespace CE
 		{
 			individualAssetPaths.Add(input);
 		}
-	
+
+		gShouldInitializeWidgets = false; // Do not initialize Crystal widgets
+
 		gProjectPath = PlatformDirectories::GetLaunchDir();
 		if (projectPath.NonEmpty())
 			gProjectPath = projectPath;

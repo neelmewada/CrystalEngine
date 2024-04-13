@@ -28,8 +28,8 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::cxxopts
         PUBLIC
+            CE::CrystalWidgets
             CE::EditorCore
-            CE::EditorWidgets
             CE::EditorSystem
     RUNTIME_DEPENDENCIES
 

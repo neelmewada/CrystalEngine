@@ -41,7 +41,7 @@ namespace CE::Widgets
 		defaultFontName = initInfo.defaultFontName;
 		defaultFont = initInfo.defaultFont;
 		scheduler = initInfo.scheduler;
-		numFramesInFlight = initInfo.numFramesInFlight;
+		numFramesInFlight = scheduler->GetFramesInFlight();
 		resourceLoader = initInfo.resourceLoader;
 
 		CE_ASSERT(resourceLoader != nullptr, "CApplication passed with null resource loader!");

@@ -6,7 +6,7 @@
 #include "CoreShader.h"
 #include "CoreSettings.h"
 #include "CoreInput.h"
-//#include "CrystalWidgets.h"
+#include "CrystalWidgets.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"
@@ -66,4 +66,5 @@ namespace CE
 	extern SYSTEM_API Engine* gEngine;
 
 	SYSTEM_API JobManager* GetJobManager();
+
 }

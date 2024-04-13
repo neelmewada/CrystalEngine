@@ -174,7 +174,8 @@ namespace CE::Widgets
         CPen pen = CPen(); pen.SetColor(Color(1, 1, 1, 1)); pen.SetWidth(2.0f);
         CBrush brush = CBrush();
 
-        if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac) // The CWindow is a native window
+        if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac &&
+            nativeWindow->GetPlatformWindow()->IsBorderless()) // The CWindow is a native window
         {
             painter->SetPen(pen);
             painter->SetBrush(brush);

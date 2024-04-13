@@ -23,7 +23,6 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::Core
             CE::CoreApplication
             CE::EditorCore
-            CE::EditorWidgets
             CE::CrystalEditor
         TARGETS
             Config 

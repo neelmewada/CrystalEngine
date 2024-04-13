@@ -2,6 +2,18 @@
 
 namespace CE::Editor
 {
+    CLASS()
+    class CRYSTALEDITOR_API ProjectBrowser : public CE::Widgets::CToolWindow
+    {
+        CE_CLASS(ProjectBrowser, CE::Widgets::CToolWindow)
+    public:
+
+        ProjectBrowser();
+        virtual ~ProjectBrowser();
+
+    protected:
+
+    };
     
 } // namespace CE::Editor
 

@@ -48,7 +48,6 @@ namespace CE::Widgets
         RPI::Shader* draw2dShader = nullptr;
         Name defaultFontName = "";
         RPI::FontAtlasAsset* defaultFont = nullptr;
-        u32 numFramesInFlight = 2;
         RHI::FrameScheduler* scheduler = nullptr;
         CWidgetResourceLoader* resourceLoader = nullptr;
         CApplicationStyleConstants styleConstants{};

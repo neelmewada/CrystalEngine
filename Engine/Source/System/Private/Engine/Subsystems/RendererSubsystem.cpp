@@ -9,9 +9,50 @@ namespace CE
 		
     }
 
-	void RendererSubsystem::Initialize()
+    RPI::Texture* RendererSubsystem::LoadImage(const Name& assetPath)
+    {
+		AssetManager* assetManager = gEngine->GetAssetManager();
+		CE::Texture* texture = assetManager->LoadAssetAtPath<CE::Texture>(assetPath);
+		if (!texture)
+			return nullptr;
+		return texture->GetRpiTexture();
+    }
+
+    void RendererSubsystem::OnWindowCreated(PlatformWindow* window)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::OnWindowDestroyed(PlatformWindow* window)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::OnWindowClosed(PlatformWindow* window)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::OnWindowMinimized(PlatformWindow* window)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::OnWindowRestored(PlatformWindow* window)
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    void RendererSubsystem::Initialize()
 	{
 		Super::Initialize();
+
+
 	}
 
 	void RendererSubsystem::PostInitialize()
@@ -20,53 +61,135 @@ namespace CE
 
 		sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-		
+		RHI::FrameSchedulerDescriptor desc{};
+		desc.numFramesInFlight = 2;
+
+		scheduler = FrameScheduler::Create(desc);
+
+		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
+
+		if (mainWindow)
+		{
+			PlatformApplication::Get()->AddMessageHandler(this);
+
+			auto assetManager = gEngine->GetAssetManager();
+
+			auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
+
+			auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
+			auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
+
+			auto atlasData = fontAsset->GetAtlasData();
+
+			CApplicationInitInfo appInitInfo{};
+			appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
+			appInitInfo.defaultFont = atlasData;
+			appInitInfo.defaultFontName = "Roboto";
+			appInitInfo.scheduler = GetScheduler();
+			appInitInfo.resourceLoader = this;
+
+			CApplication::Get()->Initialize(appInitInfo);
+
+			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
+		}
+	}
+
+	void RendererSubsystem::PreShutdown()
+	{
+		Super::PreShutdown();
+
+		CApplication* app = CApplication::TryGet();
+
+		if (app)
+		{
+			PlatformApplication::Get()->RemoveMessageHandler(this);
+
+			app->Shutdown();
+			app->Destroy();
+		}
+
+		delete scheduler; scheduler = nullptr;
 	}
 
 	void RendererSubsystem::Shutdown()
 	{
-		if (srg0 != nullptr)
-			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg0);
-		if (srgEmpty != nullptr)
-			RHI::gDynamicRHI->DestroyShaderResourceGroup(srgEmpty);
-		if (srg1 != nullptr)
-			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg1);
-
 		Super::Shutdown();
+
+		
 	}
 
 	void RendererSubsystem::Tick(f32 delta)
 	{
 		Super::Tick(delta);
-		
+
+		if (rebuildFrameGraph)
+		{
+			rebuildFrameGraph = false;
+			recompileFrameGraph = true;
+
+			BuildFrameGraph();
+		}
+
+		if (recompileFrameGraph)
+		{
+			recompileFrameGraph = false;
+
+			CompileFrameGraph();
+		}
+
+		u32 imageIndex = scheduler->BeginExecution();
+
+		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
+		{
+			rebuildFrameGraph = recompileFrameGraph = true;
+			return;
+		}
+
+		SubmitDrawPackets(imageIndex);
+
+		scheduler->EndExecution();
 	}
 
 	void RendererSubsystem::Render()
 	{
-		if (sceneSubsystem == nullptr)
-			return;
+		
+	}
 
-		auto scene = sceneSubsystem->GetActiveScene();
-		if (scene == nullptr)
-			return;
+	void RendererSubsystem::BuildFrameGraph()
+	{
 
-		CameraComponent* mainCamera = scene->GetMainCamera();
-		if (mainCamera == nullptr)
-			return;
+	}
 
-		auto cameraMatrix = mainCamera->GetTransform();
+	void RendererSubsystem::CompileFrameGraph()
+	{
+	}
 
-		auto viewMatrix = cameraMatrix.GetInverse();
+	void RendererSubsystem::SubmitDrawPackets(int imageIndex)
+	{
+		drawList.Shutdown();
 
-		const auto& components = scene->componentsByType[TYPEID(MeshComponent)];
+		RHI::DrawListMask drawListMask{};
 
-		for (auto [uuid, component] : components)
+		CApplication* app = CApplication::TryGet();
+
+		if (app)
 		{
-			StaticMeshComponent* meshComponent = Object::CastTo<StaticMeshComponent>(component);
-			if (meshComponent == nullptr)
-				continue;
+			CApplication::Get()->SetDrawListMasks(drawListMask);
+		}
 
-			
+		drawList.Init(drawListMask);
+
+		if (app)
+		{
+			app->FlushDrawPackets(drawList, imageIndex);
+		}
+
+		// Finalize
+		drawList.Finalize();
+
+		if (app)
+		{
+			app->SubmitDrawPackets(drawList);
 		}
 	}
 
