@@ -104,7 +104,6 @@ namespace CE::Widgets
     {
         Super::Construct();
 
-        this->title = GetName().GetString();
     }
 
     Vec2 CWindow::CalculateIntrinsicSize(f32 width, f32 height)
@@ -228,7 +227,7 @@ namespace CE::Widgets
                     painter->SetPen(pen);
                 }
 
-                if (!nativeWindow->platformWindow->IsMaximized())
+                if (!nativeWindow->GetPlatformWindow()->IsMaximized())
                 {
                     painter->DrawRect(ScaleRect(controlRects[1], 0.98f));
                 }
@@ -360,11 +359,11 @@ namespace CE::Widgets
                             if (i == clickedControlIdx)
                             {
                                 if (clickedControlIdx == 0)
-                                    nativeWindow->platformWindow->Minimize();
-                                else if (clickedControlIdx == 1 && nativeWindow->platformWindow->IsMaximized())
-                                    nativeWindow->platformWindow->Restore();
+                                    nativeWindow->GetPlatformWindow()->Minimize();
+                                else if (clickedControlIdx == 1 && nativeWindow->GetPlatformWindow()->IsMaximized())
+                                    nativeWindow->GetPlatformWindow()->Restore();
                                 else if (clickedControlIdx == 1)
-                                    nativeWindow->platformWindow->Maximize();
+                                    nativeWindow->GetPlatformWindow()->Maximize();
                                 else if (clickedControlIdx == 2)
                                     QueueDestroy();
                             }

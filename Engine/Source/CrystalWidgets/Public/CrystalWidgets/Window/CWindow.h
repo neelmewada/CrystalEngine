@@ -35,7 +35,7 @@ namespace CE::Widgets
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
-    crystalwidgets_protected_internal:
+    protected:
 
         virtual void OnPlatformWindowSet();
 
@@ -89,6 +89,8 @@ namespace CE::Widgets
         friend class CApplication;
         friend class CWidget;
         friend class CDockSpace;
+
+        CE_WIDGET_FRIENDS()
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
@@ -100,7 +102,6 @@ namespace CE::Widgets
         Object* outer = CApplication::Get();
 
         TWindow* window = CreateObject<TWindow>(outer, name, OF_NoFlags, windowClass);
-        window->SetTitle(name);
         window->SetPlatformWindow(nativeWindow);
         return window;
     }

@@ -321,6 +321,8 @@ namespace CE::Widgets
 			cursor++;
 		}
 
+		CStyleSheet::MarkAllDirty();
+
 	    return true;
     }
 

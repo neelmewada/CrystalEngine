@@ -31,7 +31,7 @@ namespace CE::Widgets
 
         CE_SIGNAL(OnTimeOut);
 
-    crystalwidgets_internal:
+    private:
 
         void Tick();
 
@@ -44,6 +44,9 @@ namespace CE::Widgets
 
         FIELD()
         b8 isSingleShot = false;
+
+        friend class CApplication;
+        friend class CWidget;
     };
     
 } // namespace CE::Widgets

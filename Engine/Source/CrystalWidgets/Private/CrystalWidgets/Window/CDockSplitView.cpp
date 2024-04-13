@@ -314,7 +314,7 @@ namespace CE::Widgets
             
             if (!event->isConsumed)
             {
-                PlatformWindow* platformWindow = dockSpace->GetRootNativeWindow()->platformWindow;
+                PlatformWindow* platformWindow = dockSpace->GetRootNativeWindow()->GetPlatformWindow();
                 Vec2 windowPos = platformWindow->GetWindowPosition().ToVec2();
                 Vec2i windowSize = platformWindow->GetWindowSize();
                 platformWindow->GetWindowSize();

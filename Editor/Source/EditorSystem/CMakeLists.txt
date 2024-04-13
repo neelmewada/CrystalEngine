@@ -27,6 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
         PUBLIC
+            CE::CrystalWidgets
             CE::EditorCore
     RUNTIME_DEPENDENCIES
         

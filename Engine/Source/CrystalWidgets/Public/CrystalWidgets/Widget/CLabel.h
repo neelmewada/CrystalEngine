@@ -16,7 +16,7 @@ namespace CE::Widgets
         void SetText(const String& text);
         const String& GetText() const;
 
-    crystalwidgets_internal:
+    private:
 
         void OnPaint(CPaintEvent* paintEvent) override;
 

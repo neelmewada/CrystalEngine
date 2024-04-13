@@ -38,6 +38,8 @@ namespace CE::Widgets
 
         Vec2i showSize = Vec2i(0, 0);
 
+
+        CE_WIDGET_FRIENDS();
     };
     
 } // namespace CE::Widgets

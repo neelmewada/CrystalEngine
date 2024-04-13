@@ -28,7 +28,7 @@ namespace CE::Widgets
         {
             if (owner->ownerWindow == nullptr)
             {
-                renderer = owner->nativeWindow->renderer;
+                renderer = owner->GetNativeWindow()->renderer;
 	            break;
             }
             owner = owner->ownerWindow;

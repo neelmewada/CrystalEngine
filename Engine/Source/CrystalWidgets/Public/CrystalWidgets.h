@@ -8,6 +8,20 @@
 // Yoga
 #include "yoga/Yoga.h"
 
+#define CE_WIDGET_FRIENDS()\
+    friend class CWidget;\
+    friend class CWindow;\
+    friend class CToolWindow;\
+	friend class CApplication;\
+	friend class CTextInput;\
+	friend class CLabel;\
+	friend class CDockWindow;\
+	friend class CDockSpace;\
+	friend class CDockSplitView;\
+	friend class CPlatformWindow;\
+	friend class CStyleSheet;\
+	friend class CSSStyleSheet;\
+
 // Style
 #include "CrystalWidgets/Style/FlexEnums.h"
 #include "CrystalWidgets/Style/CStyle.h"

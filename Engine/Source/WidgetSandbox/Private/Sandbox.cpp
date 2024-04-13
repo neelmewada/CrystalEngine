@@ -13,31 +13,6 @@ namespace CE
 
 		localCounter = counter++;
 		rpiSystem.Initialize();
-		
-		RHI::FrameSchedulerDescriptor desc{};
-		desc.numFramesInFlight = 2;
-		
-		scheduler = RHI::FrameScheduler::Create(desc);
-
-		auto assetManager = gEngine->GetAssetManager();
-
-		auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
-
-		auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
-		auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
-
-		auto atlasData = fontAsset->GetAtlasData();
-
-		CApplicationInitInfo appInitInfo{};
-		appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
-		appInitInfo.defaultFont = atlasData;
-		appInitInfo.defaultFontName = "Roboto";
-		appInitInfo.scheduler = scheduler;
-		appInitInfo.resourceLoader = this;
-
-		CApplication::Get()->Initialize(appInitInfo);
-
-		CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
 
 		mainWindow = window;
 		mainWindow->SetBorderless(true);
@@ -301,53 +276,12 @@ namespace CE
 
 	void WidgetSandbox::Tick(f32 deltaTime)
 	{
-		if (destroyed)
-			return;
-
-		u32 curWidth = 0, curHeight = 0;
-		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
-
-		if (width != curWidth || height != curHeight)
-		{
-			rebuild = recompile = true;
-			width = curWidth;
-			height = curHeight;
-		}
-
-		if (rebuild)
-		{
-			rebuild = false;
-			recompile = true;
-
-			BuildFrameGraph();
-		}
-
-		if (recompile)
-		{
-			recompile = false;
-			resubmit = true;
-
-			CompileFrameGraph();
-		}
-
-		u32 imageIndex = scheduler->BeginExecution();
-
-		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
-		{
-			rebuild = recompile = true;
-			return;
-		}
-
-		SubmitWork(imageIndex);
-
-		scheduler->EndExecution();
+		
 	}
 
 	void WidgetSandbox::Shutdown()
 	{
 		DestroyWidgets();
-
-		delete scheduler;
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 
@@ -377,24 +311,12 @@ namespace CE
 		rebuild = false;
 		recompile = true;
 
-		scheduler->BeginFrameGraph();
-		{
-			CApplication::Get()->BuildFrameGraph();
-		}
-		scheduler->EndFrameGraph();
 	}
 
 	void WidgetSandbox::CompileFrameGraph()
 	{
 		recompile = false;
-		scheduler->Compile();
-
-		RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
-		RHI::MemoryHeap* imageHeap = pool->GetImagePool();
-		if (imageHeap != nullptr)
-		{
-			CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
-		}
+		
 	}
 
 	void WidgetSandbox::SubmitWork(u32 imageIndex)
@@ -409,10 +331,6 @@ namespace CE
 
 		CApplication::Get()->FlushDrawPackets(drawList, imageIndex);
 
-		auto prevTime = clock();
-
-		static bool firstTime = true;
-
 		// Finalize
 		drawList.Finalize();
 
@@ -423,8 +341,6 @@ namespace CE
 	void WidgetSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
 	{
 		rebuild = recompile = true;
-
-		scheduler->WaitUntilIdle();
 
 		//if (!mainWindow->IsMinimized())
 		//	swapChain->Rebuild();

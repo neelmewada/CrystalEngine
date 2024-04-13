@@ -109,6 +109,7 @@ namespace CE::Widgets
 			painter->DrawRect(Rect::FromSize(Vec2(), Vec2(w, h)));
 
 			pen.SetColor(Color::RGBA(50, 50, 50));
+			pen.SetWidth(1.0f);
 			painter->SetPen(pen);
 
 			painter->DrawRect(Rect::FromSize(Vec2(2, 2), Vec2(w - 4, h - 4)));

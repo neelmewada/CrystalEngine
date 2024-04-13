@@ -61,6 +61,8 @@ namespace CE
 
 		sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
+		RPISystem::Get().Initialize();
+
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
 
@@ -100,6 +102,8 @@ namespace CE
 
 		CApplication* app = CApplication::TryGet();
 
+		RPISystem::Get().Shutdown();
+
 		if (app)
 		{
 			PlatformApplication::Get()->RemoveMessageHandler(this);
@@ -121,6 +125,13 @@ namespace CE
 	void RendererSubsystem::Tick(f32 delta)
 	{
 		Super::Tick(delta);
+
+		CApplication* app = CApplication::TryGet();
+
+		if (app)
+		{
+			app->Tick();
+		}
 
 		if (rebuildFrameGraph)
 		{
@@ -157,11 +168,28 @@ namespace CE
 
 	void RendererSubsystem::BuildFrameGraph()
 	{
+		rebuildFrameGraph = false;
+		recompileFrameGraph = true;
 
+		scheduler->BeginFrameGraph();
+		{
+			CApplication::Get()->BuildFrameGraph();
+		}
+		scheduler->EndFrameGraph();
 	}
 
 	void RendererSubsystem::CompileFrameGraph()
 	{
+		recompileFrameGraph = false;
+
+		scheduler->Compile();
+
+		RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
+		RHI::MemoryHeap* imageHeap = pool->GetImagePool();
+		if (imageHeap != nullptr)
+		{
+			CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
+		}
 	}
 
 	void RendererSubsystem::SubmitDrawPackets(int imageIndex)

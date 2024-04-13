@@ -7,7 +7,6 @@
 #include "CrystalWidgets.h"
 
 #include "EditorCore.h"
-#include "EditorWidgets.h"
 #include "CrystalEditor.h"
 
 #include <cxxopts.hpp>

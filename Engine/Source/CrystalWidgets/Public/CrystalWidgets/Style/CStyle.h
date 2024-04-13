@@ -421,8 +421,6 @@ namespace CE::Widgets
 			return properties.Get(CStylePropertyType::BorderRadius).vector;
 		}
 
-	crystalwidgets_internal:
-
 		HashMap<CStylePropertyType, CStyleValue> properties{};
 
 	};

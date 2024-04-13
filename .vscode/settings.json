@@ -18,5 +18,16 @@
     "esbonio.sphinx.confDir": "",
     "binary-file-viewer.parserFolders": [
         "./Tools/VSTools/BinaryParsers"
-    ]
+    ],
+    "files.associations": {
+        "*.hlslinc": "hlsl",
+        "*.pipeline": "jsonc",
+        "*.shader": "shaderlab",
+        "*.hlsl": "hlsl",
+        "deque": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "vector": "cpp"
+    }
 }

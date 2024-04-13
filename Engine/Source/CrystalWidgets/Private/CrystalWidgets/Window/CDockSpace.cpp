@@ -20,7 +20,7 @@ namespace CE::Widgets
 	{
         if (nativeWindow)
         {
-            nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
+            nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
         }
 	}
 
@@ -169,7 +169,7 @@ namespace CE::Widgets
 
         if (nativeWindow)
         {
-	        nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+	        nativeWindow->GetPlatformWindow()->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
     }
 
@@ -232,7 +232,7 @@ namespace CE::Widgets
 
         if (GetDockType() == CDockType::Major) // Major dock space
         {
-        	PlatformWindow* nativeWindow = GetRootNativeWindow()->platformWindow;
+        	PlatformWindow* nativeWindow = GetRootNativeWindow()->GetPlatformWindow();
 
             u32 w = 0, h = 0;
             nativeWindow->GetDrawableWindowSize(&w, &h);

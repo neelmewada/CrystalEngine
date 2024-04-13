@@ -98,7 +98,9 @@ namespace CE::Widgets
 
         Rect GetScreenBounds(int displayIndex);
 
-    crystalwidgets_internal:
+        void OnStyleSheetsReloaded();
+
+    private:
 
         void OnWidgetDestroyed(CWidget* widget);
 
@@ -125,7 +127,7 @@ namespace CE::Widgets
 
         void SetFocus(CWidget* widget);
 
-    crystalwidgets_internal:
+    private:
 
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
@@ -161,6 +163,11 @@ namespace CE::Widgets
 
         friend class CWidget;
         friend class CTimer;
+        friend class CScrollBehavior;
+        friend class CDockWindow;
+        friend class CDockSpace;
+        friend class CPlatformWindow;
+        CE_WIDGET_FRIENDS();
     };
 
 } // namespace CE::Widgets

@@ -27,7 +27,9 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
         TARGETS
             Config 
             EngineAssets 
+            EditorAssets
             EngineStyles
+            EditorStyles
     RUNTIME_DEPENDENCIES
 
 )

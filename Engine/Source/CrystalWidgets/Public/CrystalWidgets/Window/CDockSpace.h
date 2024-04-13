@@ -25,7 +25,7 @@ namespace CE::Widgets
 
 		void SetDockType(CDockType dockType) { this->dockType = dockType; }
 
-	crystalwidgets_protected_internal:
+	protected:
 
 		void HandleEvent(CEvent* event) override;
 

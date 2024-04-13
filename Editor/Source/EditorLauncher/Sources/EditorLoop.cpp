@@ -99,6 +99,7 @@ void EditorLoop::LoadCoreModules()
 	// Load other Core modules
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreMesh");
+	ModuleManager::Get().LoadModule("CoreShader");
 
 	ModuleManager::Get().LoadModule("CrystalWidgets");
 }
@@ -166,9 +167,17 @@ void EditorLoop::PostInit()
 
 	gEngine->PostInitialize();
 
+	CApplication::Get()->LoadGlobalStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/EditorStyle.css");
+
 	auto tickDelegate = MemberDelegate(&EditorLoop::AlternateTick, this);
 	this->tickDelegateHandle = tickDelegate.GetHandle();
 	app->AddTickHandler(tickDelegate);
+
+	if (!projectPath.Exists())
+	{
+		ProjectBrowser* projectBrowser = CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
+		projectBrowser->Show();
+	}
 }
 
 void EditorLoop::InitStyles()
@@ -181,12 +190,9 @@ void EditorLoop::AlternateTick()
 	auto app = PlatformApplication::Get();
 
 	auto curTime = clock();
-	deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+	deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
 	gEngine->Tick(deltaTime);
-
-	// TODO
-	//main->Tick(deltaTime);
 
 	previousTime = curTime;
 }
@@ -206,8 +212,6 @@ void EditorLoop::RunLoop()
 
 		// Engine tick
 		gEngine->Tick(deltaTime);
-
-		//main->Tick(deltaTime);
 
 		previousTime = curTime;
 	}
@@ -249,6 +253,7 @@ void EditorLoop::PreShutdown()
 
 	// Unload modules
 
+	ModuleManager::Get().UnloadModule("CoreShader");
 	ModuleManager::Get().UnloadModule("CoreMedia");
 	ModuleManager::Get().UnloadModule("CoreMesh");
 
@@ -310,11 +315,11 @@ void EditorLoop::AppInit()
 	if (projectPath.IsEmpty())
 	{
 		windowInfo.windowFlags |= PlatformWindowFlags::Utility;
-		gDefaultWindowWidth = 720;
-		gDefaultWindowHeight = 480;
+		gDefaultWindowWidth = 1024;
+		gDefaultWindowHeight = 640;
 	}
 
-	PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);
+	mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);
 
 	mainWindow->SetMinimumSize(Vec2i(gDefaultWindowWidth, gDefaultWindowHeight));
 	mainWindow->SetBorderless(true);

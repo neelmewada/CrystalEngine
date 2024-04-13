@@ -176,8 +176,6 @@ namespace CE::Widgets
 
         CE_SIGNAL(OnUnfocused);
 
-    crystalwidgets_protected_internal:
-
         virtual void OnFocusGained() {}
         virtual void OnFocusLost() {}
 
@@ -281,8 +279,6 @@ namespace CE::Widgets
         FIELD(Config)
         f32 scrollSensitivity = 1.0f;
 
-    crystalwidgets_internal:
-
         void ClearChildNodes();
         void ReAddChildNodes();
 
@@ -319,6 +315,7 @@ namespace CE::Widgets
             float height,
             YGMeasureMode heightMode);
 
+        CE_WIDGET_FRIENDS()
     };
 
 } // namespace CE::Widgets

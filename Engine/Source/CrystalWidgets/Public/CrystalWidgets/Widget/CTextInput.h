@@ -56,8 +56,6 @@ namespace CE::Widgets
 
 		void OnFocusLost() override;
 
-	crystalwidgets_protected_internal:
-
 		FIELD()
 		String text{};
 

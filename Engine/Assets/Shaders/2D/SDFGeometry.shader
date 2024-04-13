@@ -169,7 +169,7 @@ Shader "2D/SDF Geometry"
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold)
             {
-                const float screenPxRange = itemSize.x / 7.5; // 7.5
+                const float screenPxRange = itemSize.x / 9.0; // 7.5
                 float sdf = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
                 float screenPxDistance = screenPxRange * (sdf - 0.45);
                 float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);

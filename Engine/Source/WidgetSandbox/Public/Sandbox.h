@@ -107,7 +107,7 @@ namespace CE
 
 		CDockSpace* secondDockSpace = nullptr;
 
-		RHI::FrameScheduler* scheduler = nullptr;
+		//RHI::FrameScheduler* scheduler = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
 		Array<PlatformWindow*> platformWindows{};

@@ -26,7 +26,7 @@ namespace CE::Widgets
 
         void HandleEvent(CEvent* event) override;
 
-    crystalwidgets_internal:
+    private:
 
         FIELD()
         Array<CTabWidgetContainer*> containers{};

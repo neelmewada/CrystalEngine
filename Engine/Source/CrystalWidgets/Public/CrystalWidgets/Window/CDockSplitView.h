@@ -49,7 +49,7 @@ namespace CE::Widgets
 		virtual Vec2 GetComputedLayoutTopLeft() override;
 		virtual Vec2 GetComputedLayoutSize() override;
 
-	crystalwidgets_internal:
+	private:
 
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;

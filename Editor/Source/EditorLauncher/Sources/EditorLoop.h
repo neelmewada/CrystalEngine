@@ -40,6 +40,7 @@ private:
 
 	// Application
 	CE::PlatformApplication* app = nullptr;
+	PlatformWindow* mainWindow = nullptr;
 
 	IO::Path projectPath{};
 

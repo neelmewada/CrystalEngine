@@ -23,7 +23,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             Public/
     COMPILE_DEFINITIONS
         PRIVATE
-            ${PROJECT_NAME}_EXPORTS
+            
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::cxxopts
