@@ -24,24 +24,46 @@ namespace CE::Editor
         void OnProjectTemplateSelectionChanged();
 
         FUNCTION()
+        void OnRecentProjectSelectionChanged();
+
+        FUNCTION()
         void CreateProject();
+
+        FUNCTION()
+        void OpenProject();
 
         Array<IO::Path> recentProjectPaths{};
 
         CWidget* newErrorBox = nullptr;
         CLabel* newErrorLabel = nullptr;
 
+        CWidget* openErrorBox = nullptr;
+        CLabel* openErrorLabel = nullptr;
+
         CTabWidget* tabWidget = nullptr;
+        CListWidget* recentsList = nullptr;
 
         CButton* createButton = nullptr;
+        CButton* openButton = nullptr;
+
+        CTextInput* openProjectLocation = nullptr;
 
         CTextInput* newProjectLocation = nullptr;
         CTextInput* newProjectName = nullptr;
 
         bool isValidInput = true;
 
+        // - Prefs -
+        // Preferences are automatically cached and saved to AppData folder and
+        // reloaded whenever a ProjectBrowser object is created.
+
+        FIELD(Prefs)
+        String defaultOpenProjectLocation = "";
+
         FIELD(Prefs)
         String defaultNewProjectLocation = "";
+
+        // - Fields -
 
         FIELD()
         String projectName{};

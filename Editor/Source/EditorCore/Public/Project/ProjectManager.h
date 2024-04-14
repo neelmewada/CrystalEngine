@@ -9,6 +9,10 @@ namespace CE::Editor
 	private:
 		ProjectManager() = default;
 
+	protected:
+
+		void OnAfterConstruct() override;
+
 	public:
 
 		virtual ~ProjectManager();
@@ -25,6 +29,8 @@ namespace CE::Editor
 		inline String GetProjectFileExtension() const { return ".cproject"; }
 
 		const Array<String>& GetRecentProjectsList() const { return recentProjects; }
+
+		void RemoveRecentProject(const IO::Path& path);
 
 		const CrystalProject& GetCurrentProject() const { return currentProject; }
 

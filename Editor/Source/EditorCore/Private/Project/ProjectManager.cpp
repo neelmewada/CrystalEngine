@@ -4,6 +4,21 @@ namespace CE::Editor
 {
 	static ProjectManager* instance = nullptr;
 
+	void ProjectManager::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+
+		for (int i = recentProjects.GetSize() - 1; i >= 0; --i)
+		{
+			IO::Path path = recentProjects[i];
+
+			if (!path.Exists() || path.IsDirectory() || path.GetExtension() != GetProjectFileExtension())
+			{
+				recentProjects.RemoveAt(i);
+			}
+		}
+	}
+
 	ProjectManager::~ProjectManager()
 	{
 		if (instance == this)
@@ -96,7 +111,7 @@ namespace CE::Editor
 		projectSettings->projectName = projectName;
 		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING;
 
-		SaveSettings(projectFolder); // Saves the settings package in the global project path gProjectPath
+		SaveSettings(projectFolder / "Game/Settings.casset"); // Saves the settings package in the global project path gProjectPath
 
 		// Config files
 		{
@@ -121,7 +136,23 @@ namespace CE::Editor
 				defaultProjectIni.Close();
 			}
 		}
-		
+
+		IO::Path projectFilePath = projectFolder / projectFile;
+		RemoveRecentProject(projectFilePath);
+		recentProjects.Add(projectFilePath.GetString().Replace({ '\\' }, '/'));
+
         return true;
+    }
+
+    void ProjectManager::RemoveRecentProject(const IO::Path& path)
+    {
+	    for (int i = 0; i < recentProjects.GetSize(); ++i)
+	    {
+		    if (recentProjects[i] == path)
+		    {
+				recentProjects.RemoveAt(i);
+			    return;
+		    }
+	    }
     }
 }

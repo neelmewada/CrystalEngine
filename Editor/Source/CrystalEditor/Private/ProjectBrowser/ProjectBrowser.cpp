@@ -26,7 +26,7 @@ namespace CE::Editor
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
         recentsTab->SetTitle("Recent Projects");
 	    {
-            CListWidget* recentsList = CreateObject<CListWidget>(recentsTab, "RecentsList");
+            recentsList = CreateObject<CListWidget>(recentsTab, "RecentsList");
 
             const Array<String>& recentProjectPaths = projectManager->GetRecentProjectsList();
             this->recentProjectPaths.Clear();
@@ -38,13 +38,92 @@ namespace CE::Editor
                 if (path.Exists() && path.GetExtension().GetString() == projectManager->GetProjectFileExtension())
                 {
                     this->recentProjectPaths.Add(path);
-
-
                 }
             }
 
+            for (int i = this->recentProjectPaths.GetSize() - 1; i >= 0; --i)
+            {
+                const IO::Path& path = this->recentProjectPaths[i];
+
+                CListWidgetItem* item = CreateObject<CListWidgetItem>(recentsList, "ListWidgetItem");
+
+                CLabel* titleLabel = CreateObject<CLabel>(item, "Title");
+                titleLabel->AddStyleClass("Title");
+                titleLabel->SetText(path.GetFilename().RemoveExtension().GetString());
+                
+                CLabel* descLabel = CreateObject<CLabel>(item, "DescLabel");
+                descLabel->SetText(path.GetString().Replace({'\\'}, '/'));
+            }
+
+            Bind(recentsList, MEMBER_FUNCTION(CListWidget, OnSelectionChanged),
+                this, MEMBER_FUNCTION(Self, OnProjectTemplateSelectionChanged));
+
             CWidget* bottomSection = CreateObject<CWidget>(recentsTab, "BottomSection");
-            
+
+            CWidget* hstack1 = CreateObject<CWidget>(bottomSection, "HStack");
+            hstack1->AddStyleClass("HStack");
+            {
+                CLabel* locationLabel = CreateObject<CLabel>(hstack1, "InputLabel");
+                locationLabel->SetText("Project Location");
+
+                CTextInput* input = CreateObject<CTextInput>(hstack1, "InputField");
+                input->SetHint("Enter project location...");
+                input->SetText(defaultOpenProjectLocation);
+                openProjectLocation = input;
+
+                CButton* openFolderBtn = CreateObject<CButton>(hstack1, "OpenFolderBtn");
+                openFolderBtn->SetText("...");
+
+                Bind(openFolderBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [input, this]
+                    {
+                        static const Array<EditorPlatform::FileType> fileTypes = { {.desc = "Crystal Project File", .extensions = { "*.cproject" } } };
+						
+                        String newLocation = EditorPlatform::ShowFileSelectionDialog(defaultOpenProjectLocation, fileTypes)
+                            .GetString()
+                            .Replace({ '\\' }, '/');
+                        if (newLocation.IsEmpty())
+                            return;
+
+                        defaultOpenProjectLocation = newLocation;
+                        input->SetText(defaultOpenProjectLocation);
+                    });
+
+                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextChanged),
+                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+
+                Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
+                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+            }
+
+            openErrorBox = CreateObject<CWidget>(bottomSection, "ErrorBox");
+            {
+                CWidget* icon = CreateObject<CWidget>(openErrorBox, "ErrorIcon");
+                icon->SetBackgroundImage("/Editor/Assets/Icons/Warning");
+
+                openErrorLabel = CreateObject<CLabel>(openErrorBox, "ErrorLabel");
+                openErrorLabel->SetText("Please enter a valid project name");
+            }
+
+            openErrorBox->SetVisible(false);
+
+            CWidget* buttonGroup = CreateObject<CWidget>(bottomSection, "ButtonGroup");
+            {
+                openButton = CreateObject<CButton>(buttonGroup, "PrimaryBtn");
+                openButton->SetText("Open");
+                openButton->SetAlternateStyle(true);
+
+                Bind(openButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked),
+                    this, MEMBER_FUNCTION(Self, OpenProject));
+
+                CButton* cancelButton = CreateObject<CButton>(buttonGroup, "CancelBtn");
+                cancelButton->SetText("Cancel");
+
+                Bind(cancelButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
+                    {
+                        this->Hide();
+                        this->QueueDestroy();
+                    });
+            }
 	    }
 
         // ---------------------------------
@@ -68,7 +147,7 @@ namespace CE::Editor
 
             newList->Select(0);
 
-            Object::Bind(newList, MEMBER_FUNCTION(CListWidget, OnSelectionChanged),
+            Bind(newList, MEMBER_FUNCTION(CListWidget, OnSelectionChanged),
                 this, MEMBER_FUNCTION(Self, OnProjectTemplateSelectionChanged));
 
             CWidget* bottomSection = CreateObject<CWidget>(newTab, "BottomSection");
@@ -164,9 +243,34 @@ namespace CE::Editor
 
     void ProjectBrowser::ValidateInputFields(CTextInput*)
     {
+        static const HashSet<Name> reservedNames = {
+            "Game", "Engine", "Editor", "Plugin"
+        };
+
         if (tabWidget->GetActiveTabIndex() == 0)
         {
+            defer(
+                openButton->SetInteractable(isValidInput);
+				openErrorBox->SetVisible(!isValidInput);
+            );
+
             // Recent Projects tab
+            IO::Path location = openProjectLocation->GetText();
+            if (location.Exists() && location.IsDirectory())
+            {
+                isValidInput = false;
+                openErrorLabel->SetText("Please enter valid project location.");
+                return;
+            }
+
+            if (location.GetExtension() != ProjectManager::Get()->GetProjectFileExtension())
+            {
+                isValidInput = false;
+                openErrorLabel->SetText("Please enter valid project location.");
+	            return;
+            }
+
+            isValidInput = true;
         }
         else // New Project tab
         {
@@ -197,6 +301,13 @@ namespace CE::Editor
                 newErrorLabel->SetText("The project with given name already exists at specified location.");
                 return;
             }
+
+            if (reservedNames.Exists(projectName))
+            {
+                isValidInput = false;
+                newErrorLabel->SetText(String::Format("The project name {} is reserved. Please use something else.", projectName));
+	            return;
+            }
             
             isValidInput = true;
         }
@@ -205,6 +316,15 @@ namespace CE::Editor
     void ProjectBrowser::OnProjectTemplateSelectionChanged()
     {
         
+    }
+
+    void ProjectBrowser::OnRecentProjectSelectionChanged()
+    {
+        const auto& selection = recentsList->GetSelection();
+        if (selection.IsEmpty())
+            return;
+
+
     }
 
     void ProjectBrowser::CreateProject()
@@ -219,7 +339,9 @@ namespace CE::Editor
             {
                 IO::Path::CreateDirectories(location);
             }
-            ProjectManager::Get()->CreateEmptyProject(location, projectName);
+            ProjectManager::Get()->CreateEmptyProject(location / projectName, projectName);
+
+            // TODO: Pass project path as argument
 
             gExitLaunchProcess = PlatformDirectories::GetLaunchDir() / "EditorLauncher";
             gExitLaunchArguments = "";
@@ -229,6 +351,28 @@ namespace CE::Editor
         else
         {
             createButton->SetInteractable(false);
+        }
+    }
+
+    void ProjectBrowser::OpenProject()
+    {
+        ValidateInputFields(openProjectLocation);
+
+        if (isValidInput)
+        {
+            IO::Path location = openProjectLocation->GetText();
+            defaultOpenProjectLocation = location.GetString();
+
+            // TODO: Pass project path as argument
+
+            gExitLaunchProcess = PlatformDirectories::GetLaunchDir() / "EditorLauncher";
+            gExitLaunchArguments = "";
+
+            this->QueueDestroy();
+        }
+        else
+        {
+            openButton->SetInteractable(false);
         }
     }
 

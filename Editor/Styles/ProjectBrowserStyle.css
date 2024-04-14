@@ -11,7 +11,7 @@ ProjectBrowser #TabWidget {
 
 #TabWidget::tab {
     padding: 40px 10px;
-    border-radius: 7.5px 7.5px 0px 0px;
+    border-radius: 5px 5px 0px 0px;
 }
 
 #NewTab, #RecentsTab {
@@ -27,6 +27,7 @@ ProjectBrowser #TabWidget {
     background-color: rgb(26, 26, 26);
     flex-grow: 3;
     flex-shrink: 1;
+    padding: 10px 10px 10px 10px;
 }
 
 CListWidgetItem {

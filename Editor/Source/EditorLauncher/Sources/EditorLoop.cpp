@@ -226,6 +226,13 @@ void EditorLoop::PreShutdown()
 	auto app = PlatformApplication::Get();
 	app->RemoveTickHandler(tickDelegateHandle);
 
+	// Destroy the project manager, which consequently saves it's Prefs.
+	auto projectManager = ProjectManager::TryGet();
+	if (projectManager)
+	{
+		projectManager->Destroy();
+	}
+
 	// Save project & settings, and unload
 	if (projectPath.Exists())
 	{
@@ -285,7 +292,7 @@ void EditorLoop::Shutdown()
 
 	Logger::Shutdown();
 
-	if (exitLaunchProcess.Exists() && !exitLaunchProcess.IsDirectory())
+	if (!exitLaunchProcess.IsEmpty())
 	{
 		PlatformProcess::LaunchProcess(exitLaunchProcess, exitLaunchArgs);
 	}

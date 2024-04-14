@@ -21,6 +21,11 @@ namespace CE::Widgets
 
         CTabWidgetContainer* GetActiveTab() const { return activeTab; }
 
+        // - Signals -
+
+        // Params: int newTabIndex
+        CE_SIGNAL(OnTabSelectionChanged, int);
+
     protected:
 
         void OnAfterComputeStyle() override;
