@@ -327,18 +327,6 @@ namespace CE::Widgets
     }
 
 	static HashMap<String, Color> colorIdentifiersMap{
-		/*{ "white", Color::White() },
-		{ "black", Color::Black() },
-		{ "red", Color::Red() },
-		{ "green", Color::Green() },
-		{ "blue", Color::Blue() },
-		{ "yellow", Color::RGBA8(255, 255, 0) },
-		{ "cyan", Color::RGBA8(0, 255, 255) },
-		{ "pink", Color::RGBA8(255, 0, 255) },
-		{ "orange", Color::RGBA8(255, 128, 0) },
-		{ "teal", Color::RGBA8(0, 128, 128) },
-		{ "gray", Color::RGBA8(128, 128, 128) },
-		{ "violet", Color::RGBA(238,130,238) },*/
 		{ "black", Color::RGBHex(0x000000) },
 		{ "silver", Color::RGBHex(0xc0c0c0) },
 		{ "gray", Color::RGBHex(0x808080) },

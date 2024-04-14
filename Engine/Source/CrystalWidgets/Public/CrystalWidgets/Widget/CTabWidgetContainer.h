@@ -11,6 +11,8 @@ namespace CE::Widgets
         CTabWidgetContainer();
         virtual ~CTabWidgetContainer();
 
+        bool IsLayoutCalculationRoot() override;
+
         const String& GetTitle() const { return title; }
 
         void SetTitle(const String& title) { this->title = title; }

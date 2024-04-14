@@ -2737,6 +2737,91 @@ TEST(Serialization, BasicBinarySerialization)
 	TEST_END;
 }
 
+struct TestPrefsStruct
+{
+	CE_STRUCT(TestPrefsStruct)
+public:
+
+	Array<Name> nameList{};
+
+	Color colorValue{};
+};
+
+CE_RTTI_STRUCT(,,TestPrefsStruct,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(nameList)
+		CE_FIELD(colorValue)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,,TestPrefsStruct)
+
+class TestPrefsClass : public Object
+{
+	CE_CLASS(TestPrefsClass, Object)
+public:
+
+	Array<String> stringList{};
+
+	TestPrefsStruct prefsStruct{};
+};
+
+CE_RTTI_CLASS(,,TestPrefsClass,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(Prefs = Test),
+	CE_FIELD_LIST(
+		CE_FIELD(stringList, Prefs)
+		CE_FIELD(prefsStruct, Prefs)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(,,TestPrefsClass)
+
+TEST(Serialization, Prefs)	
+{
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(TestPrefsStruct);
+	CE_REGISTER_TYPES(TestPrefsClass);
+	Prefs::Get().LoadPrefsJson();
+	{
+		TestPrefsClass* prefsObject = CreateObject<TestPrefsClass>(nullptr, "TestObject");
+		prefsObject->stringList.Clear();
+		prefsObject->stringList.AddRange({ "item0", "item1", "item2", "item3" });
+
+		prefsObject->prefsStruct.nameList.Clear();
+		prefsObject->prefsStruct.nameList.AddRange({ "name0", "name1" });
+		prefsObject->prefsStruct.colorValue = Color::RGBA(128, 64, 32);
+
+		prefsObject->Destroy();
+	}
+	Prefs::Get().SavePrefsJson();
+
+	Prefs::Get().LoadPrefsJson();
+	{
+		TestPrefsClass* prefsObject = CreateObject<TestPrefsClass>(nullptr, "TestObject");
+		EXPECT_EQ(prefsObject->stringList.GetSize(), 4);
+		for (int i = 0; i < 4; ++i)
+		{
+			EXPECT_EQ(prefsObject->stringList[i], String::Format("item{}", i));
+		}
+
+		EXPECT_EQ(prefsObject->prefsStruct.nameList.GetSize(), 2);
+		for (int i = 0; i < 2; ++i)
+		{
+			EXPECT_EQ(prefsObject->prefsStruct.nameList[i], String::Format("name{}", i));
+		}
+
+		EXPECT_EQ(prefsObject->prefsStruct.colorValue.ToU32(), Color::RGBA(128, 64, 32).ToU32());
+
+		prefsObject->Destroy();
+	}
+	CE_DEREGISTER_TYPES(TestPrefsClass, TestPrefsStruct);
+	TEST_END;
+}
+
 #pragma endregion
 
 

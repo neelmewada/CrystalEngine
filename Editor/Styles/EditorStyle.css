@@ -35,7 +35,7 @@ CButton {
     flex-direction: row;
     min-width: 40px;
     min-height: 20px;
-    padding: 10px 5px;
+    padding: 15px 5px;
     border-radius: 5px 5px;
     border-color: rgb(24, 24, 24);
     border-width: 1px;
@@ -47,7 +47,7 @@ CButton:hovered {
 
 CButton:pressed {
     background: rgb(50, 50, 50);
-    padding: 10px 6px 10px 4px;
+    padding: 15px 6px 15px 4px;
 }
 
 CButton:disabled {
@@ -60,7 +60,7 @@ CButton::alternate {
     flex-direction: row;
     min-width: 40px;
     min-height: 20px;
-    padding: 10px 5px;
+    padding: 15px 5px;
     border-radius: 5px 5px;
     border-color: rgb(24, 24, 24);
     border-width: 1px;
@@ -72,7 +72,7 @@ CButton::alternate:hovered {
 
 CButton::alternate:pressed {
     background: rgb(0, 100, 200);
-    padding: 10px 6px 10px 4px;
+    padding: 15px 6px 15px 4px;
 }
 
 CButton::alternate:disabled {
@@ -210,7 +210,6 @@ CScrollArea::scroll-bar:active {
 CListWidget {
     flex-direction: column;
     align-items: stretch;
-    background-color: black;
     border-width: 1.5px;
     border-color: rgb(64, 64, 64);
     height: 250px;
@@ -232,7 +231,6 @@ CToolWindow {
 }
 
 CListWidgetItem {
-    background-color: rgba(0, 0, 0, 0);
     padding: 10px 10px;
 }
 
@@ -242,4 +240,27 @@ CListWidgetItem:hovered {
 
 CListWidgetItem:active {
     background-color: rgb(0, 112, 224);
+}
+
+#HStack, .HStack {
+    flex-direction: row;
+    align-items: center;
+}
+
+#VStack, .VStack {
+    flex-direction: column;
+}
+
+.IconButton {
+    border-width: 0.0px;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.IconButton:hovered {
+    background-color: rgb(56, 56, 56);
+}
+
+.IconButton:pressed {
+    background-color: rgb(40, 40, 40);
 }

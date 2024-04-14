@@ -339,6 +339,99 @@ namespace CE
 		return "";
 	}
 
+	f64 FieldType::GetNumericFieldValue(void* instance)
+	{
+		if (GetDeclarationType() == nullptr)
+			return 0;;
+
+		auto declTypeId = GetDeclarationTypeId();
+		auto declType = GetDeclarationType();
+
+		if (declType->IsPOD())
+		{
+			if (declTypeId == TYPEID(String))
+			{
+				String string = GetFieldValue<String>(instance);
+				f64 value = 0;
+				if (String::TryParse(string, value))
+				{
+					return value;
+				}
+			}
+			else if (declTypeId == TYPEID(Name))
+			{
+				String string = GetFieldValue<Name>(instance).GetString();
+				f64 value = 0;
+				if (String::TryParse(string, value))
+				{
+					return value;
+				}
+			}
+			else if (fieldTypeId == TYPEID(Uuid))
+			{
+				return (u64)GetFieldValue<Uuid>(instance);
+			}
+			else if (fieldTypeId == TYPEID(UUID32))
+			{
+				return  (u32)GetFieldValue<UUID32>(instance);
+			}
+			else if (fieldTypeId == TYPEID(c8))
+			{
+				return (int)GetFieldValue<c8>(instance);
+			}
+			else if (fieldTypeId == TYPEID(c16))
+			{
+				return (int)GetFieldValue<c16>(instance);
+			}
+			else if (fieldTypeId == TYPEID(u8))
+			{
+				return (int)GetFieldValue<u8>(instance);
+			}
+			else if (fieldTypeId == TYPEID(s8))
+			{
+				return (int)GetFieldValue<s8>(instance);
+			}
+			else if (fieldTypeId == TYPEID(u16))
+			{
+				return GetFieldValue<u16>(instance);
+			}
+			else if (fieldTypeId == TYPEID(s16))
+			{
+				return GetFieldValue<s16>(instance);
+			}
+			else if (fieldTypeId == TYPEID(u32))
+			{
+				return GetFieldValue<u32>(instance);
+			}
+			else if (fieldTypeId == TYPEID(s32))
+			{
+				return GetFieldValue<s32>(instance);
+			}
+			else if (fieldTypeId == TYPEID(u64))
+			{
+				return GetFieldValue<u64>(instance);
+			}
+			else if (fieldTypeId == TYPEID(s64))
+			{
+				return GetFieldValue<s64>(instance);
+			}
+			else if (fieldTypeId == TYPEID(bool))
+			{
+				return GetFieldValue<bool>(instance) ? 1 : 0;
+			}
+			else if (fieldTypeId == TYPEID(f32))
+			{
+				return GetFieldValue<f32>(instance);
+			}
+			else if (fieldTypeId == TYPEID(f64))
+			{
+				return GetFieldValue<f64>(instance);
+			}
+		}
+
+		return 0;
+	}
+
 	bool FieldType::CopyTo(void* srcInstance, FieldType* destField, void* destInstance)
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)

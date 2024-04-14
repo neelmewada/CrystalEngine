@@ -1044,7 +1044,8 @@ namespace CE::Widgets
 		{
 			if (owner->ownerWindow == nullptr)
 			{
-				renderer = owner->nativeWindow->renderer;
+				if (owner->nativeWindow)
+					renderer = owner->nativeWindow->renderer;
 				break;
 			}
 			owner = owner->ownerWindow;
@@ -1172,6 +1173,8 @@ namespace CE::Widgets
 			borderRadius = computedStyle.properties[CStylePropertyType::BorderRadius].vector;
 		}
 
+		Color foreground = computedStyle.GetForegroundColor();
+
 		CPen pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
 		CBrush brush = CBrush(); brush.SetColor(bgColor);
 		painter->SetPen(pen);
@@ -1199,7 +1202,7 @@ namespace CE::Widgets
 			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
 			if (texture)
 			{
-				brush.SetColor(Color::White());
+				brush.SetColor(foreground);
 				painter->SetBrush(brush);
 
 				painter->DrawTexture(rect, texture);

@@ -17,7 +17,13 @@ namespace CE::Widgets
 
         void SetActiveTab(int tabIndex);
 
+        int GetActiveTabIndex() const;
+
+        CTabWidgetContainer* GetActiveTab() const { return activeTab; }
+
     protected:
+
+        void OnAfterComputeStyle() override;
 
         void OnPaint(CPaintEvent* paintEvent) override;
 

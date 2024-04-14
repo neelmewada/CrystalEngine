@@ -17,6 +17,9 @@ namespace CE
     CORE_API bool gIsEngineRequestingExit = false;
     CORE_API String gEngineExitMessage{};
 
+    CORE_API IO::Path gExitLaunchProcess{};
+    CORE_API String gExitLaunchArguments{};
+
     CORE_API Array<String> gProgramArguments{};
     
     CORE_API ConfigCache* gConfigCache = nullptr;

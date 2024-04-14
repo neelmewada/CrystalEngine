@@ -47,6 +47,18 @@ namespace CE
 		Package::SavePackage(settingsPackage, nullptr);
 	}
 
+	void SettingsBase::SaveSettings(const IO::Path& customPath)
+	{
+		Package* settingsPackage = GetSettingsPackage();
+		if (settingsPackage == nullptr)
+			return;
+
+		if (!settingsPackage->IsFullyLoaded())
+			settingsPackage->LoadFully();
+
+		Package::SavePackage(settingsPackage, nullptr, customPath);
+	}
+
 	Array<ClassType*> SettingsBase::GetSettingsClassesWithCategory(const String& settingsCategory)
     {
 		Array<ClassType*> result{};

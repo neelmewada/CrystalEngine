@@ -44,7 +44,7 @@ void EditorLoop::PreInit(int argc, char** argv)
 		{
 			IO::Path path = IO::Path(arg);
 
-			if (path.Exists() && path.GetExtension() == ProjectManager::Get().GetProjectFileExtension())
+			if (path.Exists() && path.GetExtension() == ProjectManager::Get()->GetProjectFileExtension())
 			{
 				projectPath = path;
 				break;
@@ -123,10 +123,14 @@ void EditorLoop::LoadEditorModules()
 	ModuleManager::Get().LoadModule("EditorSystem");
 
 	ModuleManager::Get().LoadModule("CrystalEditor");
+
+	Prefs::Get().LoadPrefsJson();
 }
 
 void EditorLoop::UnloadEditorModules()
 {
+	Prefs::Get().SavePrefsJson();
+
 	ModuleManager::Get().UnloadModule("CrystalEditor");
 
 	ModuleManager::Get().UnloadModule("EditorSystem");
@@ -265,6 +269,9 @@ void EditorLoop::PreShutdown()
 
 void EditorLoop::Shutdown()
 {
+	IO::Path exitLaunchProcess = gExitLaunchProcess;
+	String exitLaunchArgs = gExitLaunchArguments;
+
 	// Shutdown application
 	AppShutdown();
 
@@ -277,13 +284,18 @@ void EditorLoop::Shutdown()
 	ModuleManager::Get().UnloadModule("Core");
 
 	Logger::Shutdown();
+
+	if (exitLaunchProcess.Exists() && !exitLaunchProcess.IsDirectory())
+	{
+		PlatformProcess::LaunchProcess(exitLaunchProcess, exitLaunchArgs);
+	}
 }
 
 void EditorLoop::LoadProject()
 {
 	if (!projectPath.IsEmpty())
 	{
-		bool success = ProjectManager::Get().LoadProject(projectPath);
+		bool success = ProjectManager::Get()->LoadProject(projectPath);
 		if (!success)
 		{
 			PlatformProcess::LaunchProcess(PlatformDirectories::GetLaunchDir() / MODULE_NAME, "");

@@ -52,6 +52,9 @@ namespace CE::Widgets
     void CLabel::SetText(const String& text)
     {
         this->text = text;
+
+        SetNeedsLayout();
+        SetNeedsPaint();
     }
 
     const String& CLabel::GetText() const

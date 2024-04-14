@@ -16,6 +16,9 @@ namespace CE
         DelegateHandle onBeforeModuleUnloadHandle = 0;
 		DelegateHandle settingsBaseOnClassRegistered = 0;
 		DelegateHandle settingsBaseOnClassDeregistered = 0;
+
+        DelegateHandle prefsOnClassRegistered = 0;
+        DelegateHandle prefsOnClassDeregistered = 0;
     };
 
 
@@ -36,8 +39,12 @@ namespace CE
 		gConfigCache->LoadStartupConfigs();
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
+
 		settingsBaseOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&SettingsBase::OnClassRegistered);
 		settingsBaseOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&SettingsBase::OnClassDeregistered);
+
+        prefsOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&Prefs::OnClassRegistered);
+        prefsOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&Prefs::OnClassDeregistered);
     }
 
     void CoreModule::ShutdownModule()
@@ -61,11 +68,17 @@ namespace CE
 		}
 
         gProjectPath = "";
-        
+
+        CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(prefsOnClassDeregistered);
+        prefsOnClassDeregistered = 0;
+        CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(prefsOnClassRegistered);
+        prefsOnClassRegistered = 0;
+
 		CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(settingsBaseOnClassDeregistered);
 		settingsBaseOnClassDeregistered = 0;
 		CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(settingsBaseOnClassRegistered);
 		settingsBaseOnClassRegistered = 0;
+
         CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(onBeforeModuleUnloadHandle);
         onBeforeModuleUnloadHandle = 0;
     }

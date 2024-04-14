@@ -2,8 +2,31 @@
 
 namespace CE::Editor
 {
+	static ProjectManager* instance = nullptr;
 
-    bool ProjectManager::LoadProject(const IO::Path& projectFilePath)
+	ProjectManager::~ProjectManager()
+	{
+		if (instance == this)
+		{
+			instance = nullptr;
+		}
+	}
+
+	ProjectManager* ProjectManager::Get()
+	{
+		if (instance == nullptr)
+		{
+			instance = CreateObject<ProjectManager>(nullptr, "ProjectManager");
+		}
+		return instance;
+	}
+
+	ProjectManager* ProjectManager::TryGet()
+	{
+		return instance;
+	}
+
+	bool ProjectManager::LoadProject(const IO::Path& projectFilePath)
     {
         if (!projectFilePath.Exists() || projectFilePath.GetExtension().GetString() != GetProjectFileExtension())
             return false;
@@ -13,25 +36,17 @@ namespace CE::Editor
         
         FileStream stream = FileStream(projectFilePath);
         stream.SetAsciiMode(true);
-		bool result = true;
 
-        while (deserializer.HasNext())
-        {
-			if (!deserializer.ReadNext(&stream))
-				result = false;
-        }
+		deserializer.Deserialize(&stream);
 
 		stream.Close();
-
-		if (!result)
-			return false;
 
 		isProjectOpen = true;
 		currentProject = project;
 
 		// Set global project vars
 		gProjectPath = projectFilePath.GetParentPath();
-		gProjectName = gProjectPath.GetFilename();
+		gProjectName = projectFilePath.GetFilename().RemoveExtension().GetString();
 
 		// Load settings package
 		Package* settingsPackage = GetSettingsPackage();
@@ -54,21 +69,19 @@ namespace CE::Editor
 		projectFile += extension;
 
 		// Set global project path
-		gProjectPath = projectFolder;
-		gProjectName = projectName;
+		//gProjectPath = projectFolder;
+		//gProjectName = projectName;
         
         CrystalProject project{};
-        project.engineVersion = CE_ENGINE_VERSION_STRING_SHORT;
+        project.engineVersion = CE_ENGINE_VERSION_STRING;
         
         FileStream stream = FileStream(projectFolder / projectFile, Stream::Permissions::WriteOnly);
         stream.SetAsciiMode(true);
         
         JsonFieldSerializer serializer = JsonFieldSerializer(CrystalProject::Type(), &project);
-        
-        while (serializer.HasNext())
-        {
-            serializer.WriteNext(&stream);
-        }
+
+		serializer.Serialize(&stream);
+		stream.Close();
 		
 		IO::Path::CreateDirectories(projectFolder / "Game");
 		IO::Path::CreateDirectories(projectFolder / "Game" / "Assets");
@@ -83,7 +96,7 @@ namespace CE::Editor
 		projectSettings->projectName = projectName;
 		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING;
 
-		SaveSettings(); // Saves the settings package in the global project path gProjectPath
+		SaveSettings(projectFolder); // Saves the settings package in the global project path gProjectPath
 
 		// Config files
 		{

@@ -24,6 +24,12 @@ namespace CE
 
     extern CORE_API bool gIsEngineRequestingExit;
     extern CORE_API String gEngineExitMessage;
+    
+    /// Path to the executable to run when this program shuts down and exits.
+    extern CORE_API IO::Path gExitLaunchProcess;
+
+    /// The arguments to pass for gExitLaunchProcess executable.
+    extern CORE_API String gExitLaunchArguments;
 
     extern CORE_API Array<String> gProgramArguments;
     

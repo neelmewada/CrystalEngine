@@ -8,7 +8,6 @@
 #include "PAL/Common/EditorPlatform.h"
 
 // Editor Prefs
-#include "Editor/EditorPrefs.h"
 #include "Editor/EditorGlobals.h"
 
 // Project

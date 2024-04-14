@@ -26,6 +26,10 @@ namespace CE
 			return;
 		
 		OnBeforeDestroy();
+		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
+		{
+			Prefs::Get().SavePrefs(this);
+		}
 
 		// Unbind signals
 		UnbindAllSignals(this);
@@ -1094,7 +1098,6 @@ namespace CE
 
 	// - Bindings API -
 
-	// TODO: Change it to a SharedMutex & run tests.
 	static SharedRecursiveMutex bindingsMutex{};
 
 	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
@@ -1132,6 +1135,8 @@ namespace CE
 
 		if (!IsDefaultInstance())
 		{
+			Prefs::Get().LoadPrefs(this);
+
 			OnAfterConstruct();
 		}
 	}

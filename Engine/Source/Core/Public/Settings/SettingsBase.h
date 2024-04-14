@@ -12,18 +12,24 @@ namespace CE
         
         static SettingsBase* LoadSettings(ClassType* settingsClass, String settingsName = "");
 
-		static void SaveSettings();
+        static void SaveSettings();
+
+#if PAL_TRAIT_BUILD_EDITOR
+        static void SaveSettings(const IO::Path& customPath);
+#endif
 
 		static Array<ClassType*> GetSettingsClassesWithCategory(const String& settingsCategory);
 
 		FORCE_INLINE static const Array<ClassType*>& GetAllSettingsClasses() { return settingsClasses; }
         
-	core_internal:
+	private:
 
 		static void OnClassRegistered(ClassType* classType);
 		static void OnClassDeregistered(ClassType* classType);
 
 		static Array<ClassType*> settingsClasses;
+
+        friend class CoreModule;
     };
 
 	template<typename TSettings> requires TIsBaseClassOf<SettingsBase, TSettings>::Value
@@ -36,6 +42,13 @@ namespace CE
 	{
 		SettingsBase::SaveSettings();
 	}
+
+#if PAL_TRAIT_BUILD_EDITOR
+    FORCE_INLINE void SaveSettings(const IO::Path& outPackagePath)
+	{
+        SettingsBase::SaveSettings(outPackagePath);
+	}
+#endif
 }
 
 

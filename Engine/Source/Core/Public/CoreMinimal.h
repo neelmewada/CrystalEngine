@@ -98,6 +98,7 @@
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
 #include "Object/BasePrefs.h"
+#include "Object/Prefs.h"
 #include "Component/Component.h"
 #include "Object/Package.h"
 

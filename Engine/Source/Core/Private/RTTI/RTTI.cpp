@@ -220,12 +220,12 @@ namespace CE
         return attributes;
     }
 
-    Attribute TypeInfo::GetAttribute(const String& key)
+    Attribute TypeInfo::GetAttribute(const Name& key)
     {
         return attributes.HasKey(key) ? attributes.GetKeyValue(key) : Attribute();
     }
 
-    bool TypeInfo::HasAttribute(const String& key)
+    bool TypeInfo::HasAttribute(const Name& key)
     {
         return attributes.HasKey(key);
     }

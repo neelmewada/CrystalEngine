@@ -103,9 +103,9 @@ namespace CE
 
         const Attribute& GetAttributes() override;
 
-        bool HasAttribute(const CE::String& key) override;
+        bool HasAttribute(const CE::Name& key) override;
 
-        Attribute GetAttribute(const CE::String& key) override;
+        Attribute GetAttribute(const CE::Name& key) override;
 
 		IntPtr TryCast(IntPtr ptr, TypeId castToType) const
 		{

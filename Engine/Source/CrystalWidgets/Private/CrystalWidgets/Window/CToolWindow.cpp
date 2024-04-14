@@ -12,7 +12,7 @@ namespace CE::Widgets
 
 		allowVerticalScroll = allowHorizontalScroll = false;
 
-		rootPadding = Vec4(0, 40, 0, 0);
+		rootPadding = Vec4(2, 40, 2, 2);
 	}
 
 	CToolWindow::~CToolWindow()
