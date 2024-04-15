@@ -341,8 +341,6 @@ namespace CE::Editor
             }
             ProjectManager::Get()->CreateEmptyProject(location / projectName, projectName);
 
-            // TODO: Pass project path as argument
-
             gExitLaunchProcess = PlatformDirectories::GetLaunchDir() / "EditorLauncher";
             gExitLaunchArguments = location / projectName;
 

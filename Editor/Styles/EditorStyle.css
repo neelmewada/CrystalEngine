@@ -264,3 +264,8 @@ CListWidgetItem:active {
 .IconButton:pressed {
     background-color: rgb(40, 40, 40);
 }
+
+ViewportWindow {
+    border-width: 10px;
+    border-color: green;
+}

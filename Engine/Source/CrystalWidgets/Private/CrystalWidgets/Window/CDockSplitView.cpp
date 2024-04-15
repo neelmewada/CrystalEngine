@@ -102,6 +102,14 @@ namespace CE::Widgets
         return Vec2(parentSize.x, parentSize.y * splitRatio - (numChildren - 1) * splitterWidth);
     }
 
+    void CDockSplitView::SetAutoHideTabs(bool set)
+    {
+        autoHideTabs = set;
+        SetNeedsStyle();
+        SetNeedsLayout();
+        SetNeedsPaint();
+    }
+
     void CDockSplitView::OnSubobjectAttached(Object* subobject)
     {
         Super::OnSubobjectAttached(subobject);
@@ -468,82 +476,86 @@ namespace CE::Widgets
 
             tabOffsetY += startYOffset;
 
-            // Draw non-selected tabs first
-            for (int i = 0; i < GetSubWidgetCount(); ++i)
+            if (tabs.GetSize() > 1 || !autoHideTabs)
             {
-                CWidget* subWidget = GetSubWidget(i);
-
-                if (subWidget->IsOfType<CDockWindow>())
+                // Draw non-selected tabs first
+                for (int i = 0; i < GetSubWidgetCount(); ++i)
                 {
-                    CDockWindow* dockWindow = (CDockWindow*)subWidget;
+                    CWidget* subWidget = GetSubWidget(i);
 
-                    Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
-
-                    pen.SetWidth(0.0f);
-                    pen.SetColor(Color::Clear());
-                    brush.SetColor(Color::RGBA8(36, 36, 36));
-                    if (i != selectedTab)
-                        brush.SetColor(bgColor);
-                    painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
-
-                    if (i >= tabsCount)
+                    if (subWidget->IsOfType<CDockWindow>())
                     {
-                        Rect rect = Rect::FromSize(xOffset, tabOffsetY, Math::Min(tabTitleSize.width + 70, maxTabWidth), tabHeight);
-                        tabs[i] = { rect };
+                        CDockWindow* dockWindow = (CDockWindow*)subWidget;
+
+                        Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
+
+                        pen.SetWidth(0.0f);
+                        pen.SetColor(Color::Clear());
+                        brush.SetColor(Color::RGBA8(36, 36, 36));
+                        if (i != selectedTab)
+                            brush.SetColor(bgColor);
+                        painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
+
+                        if (i >= tabsCount)
+                        {
+                            Rect rect = Rect::FromSize(xOffset, tabOffsetY, Math::Min(tabTitleSize.width + 70, maxTabWidth), tabHeight);
+                            tabs[i] = { rect };
+                        }
+
+                        Rect tabRect = tabs[i].rect;
+
+                        if (selectedTab != i)
+                        {
+                            painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
+
+                            pen.SetColor(Color::White());
+                            painter->SetPen(pen);
+
+                            painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
+                        }
+
+                        xOffset += tabRect.GetSize().width + 2.5f;
                     }
-
-                    Rect tabRect = tabs[i].rect;
-
-                    if (selectedTab != i)
-                    {
-                        painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
-
-                        pen.SetColor(Color::White());
-                        painter->SetPen(pen);
-
-                        painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
-                    }
-
-                    xOffset += tabRect.GetSize().width + 2.5f;
                 }
-            }
 
-            // Draw selected tab at last
-            xOffset = startXOffset;
+                // Draw selected tab at last
+                xOffset = startXOffset;
 
-            for (int i = 0; i < GetSubWidgetCount(); ++i)
-            {
-                CWidget* subWidget = GetSubWidget(i);
-
-                if (subWidget->IsOfType<CDockWindow>())
+                // Draw selected tab
+                for (int i = 0; i < GetSubWidgetCount(); ++i)
                 {
-                    CDockWindow* dockWindow = (CDockWindow*)subWidget;
+                    CWidget* subWidget = GetSubWidget(i);
 
-                    Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
-
-                    pen.SetWidth(0.0f);
-                    pen.SetColor(Color::Clear());
-                    brush.SetColor(Color::RGBA8(36, 36, 36));
-                    if (i != selectedTab)
-                    	brush.SetColor(bgColor);
-                    painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
-
-                    Rect tabRect = tabs[i].rect;
-
-                    if (selectedTab == i)
+                    if (subWidget->IsOfType<CDockWindow>())
                     {
-                        painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
+                        CDockWindow* dockWindow = (CDockWindow*)subWidget;
 
-                        pen.SetColor(Color::White());
-                        painter->SetPen(pen);
+                        Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
 
-                        painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
+                        pen.SetWidth(0.0f);
+                        pen.SetColor(Color::Clear());
+                        brush.SetColor(Color::RGBA8(36, 36, 36));
+                        if (i != selectedTab)
+                            brush.SetColor(bgColor);
+                        painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
+
+                        Rect tabRect = tabs[i].rect;
+
+                        if (selectedTab == i)
+                        {
+                            painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
+
+                            pen.SetColor(Color::White());
+                            painter->SetPen(pen);
+
+                            painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
+                        }
+
+                        xOffset += tabRect.GetSize().width + 2.5f;
                     }
-
-                    xOffset += tabRect.GetSize().width + 2.5f;
                 }
-            }
 
+            }
         }
         else
         {

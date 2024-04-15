@@ -44,7 +44,7 @@ void EditorLoop::PreInit(int argc, char** argv)
 		{
 			IO::Path path = IO::Path(arg);
 
-			if (path.Exists() && path.GetExtension() == ProjectManager::Get()->GetProjectFileExtension())
+			if (path.Exists() && path.GetExtension() == ProjectManager::GetProjectFileExtension())
 			{
 				projectPath = path;
 				break;
@@ -145,9 +145,6 @@ void EditorLoop::Init()
 	// Load most important core modules for startup
 	LoadStartupCoreModules();
 
-	// Load Project
-	LoadProject();
-
 	// Load application
 	AppPreInit();
 }
@@ -159,6 +156,9 @@ void EditorLoop::PostInit()
 	LoadCoreModules();
 	LoadEngineModules();
 	LoadEditorModules();
+
+	// Load Project
+	LoadProject();
 
 	AppInit();
 
@@ -181,6 +181,12 @@ void EditorLoop::PostInit()
 	{
 		ProjectBrowser* projectBrowser = CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
 		projectBrowser->Show();
+	}
+	else
+	{
+		CrystalEditorWindow* editorWindow = CreateWindow<CrystalEditorWindow>("CrystalEditor", mainWindow);
+		editorWindow->SetTitle("Crystal Editor");
+		editorWindow->Show();
 	}
 }
 

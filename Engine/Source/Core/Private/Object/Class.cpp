@@ -469,6 +469,12 @@ namespace CE
         if (superTypesCached)
             return;
 
+        bool isModuleLoaded = ModuleManager::Get().IsModuleLoaded(GetClassModule());
+        if (!isModuleLoaded)
+        {
+            CE_LOG(Warn, All, "ClassType accessed without loading the module the class belongs to!");
+        }
+
 		superTypesCached = true;
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)

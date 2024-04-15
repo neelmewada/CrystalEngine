@@ -175,8 +175,8 @@ Shader "2D/SDF Geometry"
                 _FontAtlas.GetDimensions(w, h);
                 float2 origSize = float2(uvBounds.zw - uvBounds.xy) * float2(w, h);
 
-                float numerator = (itemSize.x + itemSize.y) * 0.5;
-                float denominator = (origSize.x + origSize.y) * 0.5;
+                float numerator = max(itemSize.x, itemSize.y) * 0.5;
+                float denominator = max(origSize.x, origSize.y) * 0.5;
 
                 const float screenPxRange = numerator / denominator * 3.0; // / 10.0
                 float sdf = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
