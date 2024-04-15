@@ -305,7 +305,7 @@ void EditorLoop::LoadProject()
 		bool success = ProjectManager::Get()->LoadProject(projectPath);
 		if (!success)
 		{
-			PlatformProcess::LaunchProcess(PlatformDirectories::GetLaunchDir() / MODULE_NAME, "");
+			PlatformProcess::LaunchProcess(PlatformDirectories::GetLaunchDir() / "EditorLauncher", "");
 			exit(0);
 		}
 	}

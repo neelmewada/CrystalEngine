@@ -344,7 +344,7 @@ namespace CE::Editor
             // TODO: Pass project path as argument
 
             gExitLaunchProcess = PlatformDirectories::GetLaunchDir() / "EditorLauncher";
-            gExitLaunchArguments = "";
+            gExitLaunchArguments = location / projectName;
 
             this->QueueDestroy();
         }
@@ -366,7 +366,7 @@ namespace CE::Editor
             // TODO: Pass project path as argument
 
             gExitLaunchProcess = PlatformDirectories::GetLaunchDir() / "EditorLauncher";
-            gExitLaunchArguments = "";
+            gExitLaunchArguments = defaultOpenProjectLocation;
 
             this->QueueDestroy();
         }
