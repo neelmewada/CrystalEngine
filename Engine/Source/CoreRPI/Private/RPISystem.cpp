@@ -2,7 +2,7 @@
 
 namespace CE::RPI
 {
-    static f32 quadVertexData[] = {
+    static constexpr f32 quadVertexData[] = {
         // Positions
         -1.0f, -1.0f, 0, 0,
         1.0f, -1.0f, 0, 0,
@@ -19,7 +19,7 @@ namespace CE::RPI
         1.0f, 1.0f,
     };
 
-    static f32 textQuadVertexData[] = {
+    static constexpr f32 textQuadVertexData[] = {
         // Positions
         0.0f, 0.0f, 0, 0,
         1.0f, 0.0f, 0, 0,
@@ -61,7 +61,7 @@ namespace CE::RPI
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
 
         {
-            LockGuard<SharedMutex> lock{ samplerCacheMutex };
+            LockGuard lock{ samplerCacheMutex };
 
             for (auto [_, sampler] : samplerCache)
             {

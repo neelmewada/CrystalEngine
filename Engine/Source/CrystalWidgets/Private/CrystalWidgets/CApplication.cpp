@@ -573,8 +573,15 @@ namespace CE::Widgets
 				{
 					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 					swapChainAttachment.attachmentId = id;
-					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
-					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					if (platformWindows[i]->owner->clearScreen)
+					{
+						swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+						swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					}
+					else
+					{
+						swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+					}
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 					swapChainAttachment.multisampleState.sampleCount = 1;
 					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);

@@ -11,10 +11,12 @@ namespace CE::Editor
         ViewportWindow();
         virtual ~ViewportWindow();
 
-    protected:
+    private:
 
         void Construct() override;
 
+
+        
     };
     
 } // namespace CE::Editor

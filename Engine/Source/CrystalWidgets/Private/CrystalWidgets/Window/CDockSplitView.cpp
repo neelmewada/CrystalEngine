@@ -105,6 +105,18 @@ namespace CE::Widgets
     void CDockSplitView::SetAutoHideTabs(bool set)
     {
         autoHideTabs = set;
+        if (!autoHideTabs || dockedWindows.GetSize() > 1)
+        {
+            if (dockSpace->GetDockType() == CDockType::Major)
+                rootPadding = Vec4(0, 60, 0, 0);
+            else
+                rootPadding = Vec4(0, 27, 0, 0);
+        }
+        else
+        {
+            rootPadding = Vec4();
+        }
+
         SetNeedsStyle();
         SetNeedsLayout();
         SetNeedsPaint();
@@ -160,6 +172,10 @@ namespace CE::Widgets
 
     void CDockSplitView::HandleEvent(CEvent* event)
     {
+        bool areTabsVisible = true;
+        if (autoHideTabs && dockedWindows.GetSize() <= 1)
+            areTabsVisible = false;
+
         if (event->IsMouseEvent() || event->IsDragEvent())
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
@@ -320,7 +336,7 @@ namespace CE::Widgets
                 draggedSplitIdx = -1;
             }
             
-            if (!event->isConsumed)
+            if (!event->isConsumed && areTabsVisible)
             {
                 PlatformWindow* platformWindow = dockSpace->GetRootNativeWindow()->GetPlatformWindow();
                 Vec2 windowPos = platformWindow->GetWindowPosition().ToVec2();
@@ -426,6 +442,10 @@ namespace CE::Widgets
         CBrush brush = CBrush(bgColor);//CBrush(Color::FromRGBA32(21, 21, 21));
         CFont font = CFont("Roboto", 15, false);
 
+        bool areTabsVisible = true;
+        if (autoHideTabs && dockedWindows.GetSize() <= 1)
+            areTabsVisible = false;
+
         // - Draw Tabs -
         tabs.Clear();
 
@@ -476,7 +496,7 @@ namespace CE::Widgets
 
             tabOffsetY += startYOffset;
 
-            if (tabs.GetSize() > 1 || !autoHideTabs)
+            if (areTabsVisible)
             {
                 // Draw non-selected tabs first
                 for (int i = 0; i < GetSubWidgetCount(); ++i)

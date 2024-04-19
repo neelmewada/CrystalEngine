@@ -59,7 +59,7 @@ namespace CE::RPI
 		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
 		RHI::DrawLinearArguments textQuadDrawArgs{};
 
-		Array<ScenePtr> scenes{};
+		Array<Scene*> scenes{};
 
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;
@@ -67,6 +67,8 @@ namespace CE::RPI
 
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
+
+		friend class RPI::Scene;
 	};
     
 } // namespace CE::RPI

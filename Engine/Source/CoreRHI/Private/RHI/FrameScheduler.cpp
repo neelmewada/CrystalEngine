@@ -36,6 +36,8 @@ namespace CE::RHI
 
 	void FrameScheduler::BeginFrameGraph()
 	{
+		GetAttachmentDatabase().Clear();
+
 		FrameGraphBuilder::BeginFrameGraph(frameGraph);
 	}
 

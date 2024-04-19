@@ -229,10 +229,11 @@ namespace CE
 		PlatformWindow* secondWindow = nullptr;
 		bool secondWindowHidden = false;
 
-		RHI::FrameScheduler* scheduler = nullptr;
+		//RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;
-		RHI::SwapChain* swapChain2 = nullptr;
+		//RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
+		CGameWindow* gameWindow = nullptr;
 
 		RPI::Model* chairModel = nullptr;
 

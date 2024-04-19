@@ -76,6 +76,9 @@ namespace CE::Widgets
         b8 canBeMaximized = true;
 
         FIELD()
+        b8 clearScreen = true;
+
+        FIELD()
         Array<CMenuItem*> menuItems{};
 
         Array<Rect> controlRects{};

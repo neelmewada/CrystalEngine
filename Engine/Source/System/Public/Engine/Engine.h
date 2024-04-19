@@ -22,8 +22,6 @@ namespace CE
 
 		virtual void Tick(f32 deltaTime);
 
-		virtual void Render();
-
 		void DispatchOnMainThread(const Delegate<void(void)>& action);
 
 		virtual GameInstance* GetGameInstance();
@@ -39,8 +37,6 @@ namespace CE
 		{
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
-
-	system_internal:
 
 		// - Internal API -
 
@@ -69,7 +65,7 @@ namespace CE
 
 		b8 isInitialized = false;
 
-	system_internal:
+
 		static Array<ClassType*> subsystemClassQueue;
 
 	};

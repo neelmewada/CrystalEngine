@@ -8,6 +8,7 @@ namespace CE::RPI
 {
 	class PassTree;
 	class Scene;
+	class View;
 
 	enum class PipelineViewType
 	{
@@ -21,23 +22,19 @@ namespace CE::RPI
 		PipelineViewTag viewTag{};
 		PipelineViewType viewType{};
 
-		Array<ViewPtr> views{};
+		Array<View*> views{};
+
+		RHI::DrawListMask drawListMask{};
 	};
 
 	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
 
-	class CORERPI_API RenderPipeline final
+	class CORERPI_API RenderPipeline
 	{
 		friend class RenderPipelineBuilder;
 	public:
 
 		virtual ~RenderPipeline();
-
-		static RenderPipeline* Create(const RenderPipelineDescriptor& descriptor, Scene* ownerScene);
-
-		static RenderPipeline* CreateFromJson(const String& jsonString, Scene* ownerScene);
-
-		static RenderPipeline* CreateFromJson(Stream* jsonStream, Scene* ownerScene);
         
         inline PassTree* GetPassTree() const
         {
@@ -45,27 +42,10 @@ namespace CE::RPI
         }
 
 	private:
-        
-        bool CompilePipeline();
-
-		void SetupRootPass(ParentPass* rootPass);
-
-		Pass* InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass);
-
-		void BuildPassConnectionsRecursively(const PassRequest& passRequest);
-
-		void InitializeInternal();
-
-		bool IsRootPass(const Name& passName);
 
 	protected:
 
 		RenderPipeline();
-
-		RenderPipelineDescriptor descriptor{};
-
-		/// @brief The output render target of this render pipeline.
-		RHI::RenderTarget* renderTarget = nullptr;
 
 		/// @brief Name of the pipeline
 		Name name{};
@@ -91,3 +71,5 @@ namespace CE::RPI
 	};
     
 } // namespace CE::RPI
+
+#include "RenderPipeline.rtti.h"

@@ -18,7 +18,8 @@ namespace CE::Editor
         Super::Construct();
 
         SetTitle("Viewport");
-    }
 
+        
+    }
     
 } // namespace CE::Editor

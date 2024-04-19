@@ -161,11 +161,6 @@ namespace CE
 		scheduler->EndExecution();
 	}
 
-	void RendererSubsystem::Render()
-	{
-		
-	}
-
 	void RendererSubsystem::BuildFrameGraph()
 	{
 		rebuildFrameGraph = false;
@@ -173,7 +168,14 @@ namespace CE
 
 		scheduler->BeginFrameGraph();
 		{
-			CApplication::Get()->BuildFrameGraph();
+			auto app = CApplication::TryGet();
+
+			// TODO: Build render pipeline passes
+
+			if (app)
+			{
+				app->BuildFrameGraph();
+			}
 		}
 		scheduler->EndFrameGraph();
 	}

@@ -519,8 +519,6 @@ namespace CE::RPI
 
 				outRects[i].max = outRects[i].min + Vec2((f32)glyphLayout.advance * fontSize / atlasFontSize, hLayout.GetHeight() * fontSize / atlasFontSize);
 			}
-			//outRects[i].max.x = outRects[i].min.x + (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
-			//outRects[i].max.y = outRects[i].min.y + glyphHeight * fontSize / atlasFontSize;
 
 			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > startX + width)
 			{

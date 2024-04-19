@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	class CORERPI_API Scene final : public IntrusiveBase
+	class CORERPI_API Scene final
 	{
 	public:
 
@@ -14,8 +14,7 @@ namespace CE::RPI
 
 		Array<RenderPipeline*> renderPipelines{};
 
+		Array<FeatureProcessor*> featureProcessors{};
 	};
-
-	typedef Ptr<Scene> ScenePtr;
     
 } // namespace CE::RPI

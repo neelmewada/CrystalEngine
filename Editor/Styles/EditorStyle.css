@@ -266,6 +266,5 @@ CListWidgetItem:active {
 }
 
 ViewportWindow {
-    border-width: 10px;
-    border-color: green;
+    background-color: black;
 }

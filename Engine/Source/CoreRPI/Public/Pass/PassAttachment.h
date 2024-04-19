@@ -5,7 +5,7 @@ namespace CE::RPI
 	class Pass;
 
 	/// @brief Describes the attachment used by a pass
-	struct CORERPI_API PassAttachment final : public IntrusiveBase
+	struct CORERPI_API PassAttachment final : IntrusiveBase
 	{
 	public:
 

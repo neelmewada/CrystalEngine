@@ -23,9 +23,6 @@ namespace CE::RPI
 	{
 		CE_CLASS(Pass, Object)
 	public:
-		friend class ParentPass;
-		friend class PassTree;
-		friend class PassRegistry;
 
 		virtual ~Pass();
 
@@ -39,7 +36,7 @@ namespace CE::RPI
 
 		inline const Name& GetPassName() const { return GetName(); }
 
-	corerpi_protected_internal:
+	protected:
 
 		Pass();
 
@@ -59,6 +56,8 @@ namespace CE::RPI
 		Array<Ptr<PassAttachment>> passAttachments{};
 
 		friend class RenderPipeline;
+
+		RPI_PASS(Pass);
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RenderPipeline_DefaultPipelineTree_Test;

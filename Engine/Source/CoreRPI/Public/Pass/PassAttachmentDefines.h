@@ -153,9 +153,6 @@ namespace CE::RPI
 		ImageDescriptor imageDescriptor{};
 
 		FIELD()
-		b8 generateFullMipChain = false;
-
-		FIELD()
 		Array<RHI::Format> fallbackFormats{};
     };
 
@@ -189,10 +186,9 @@ namespace CE::RPI
 	struct UnifiedAttachmentDescriptor
 	{
 		UnifiedAttachmentDescriptor()
-            : type(RHI::AttachmentType::Image)
-            , imageDesc({})
         {
-            
+			memset(this, 0, sizeof(*this));
+			type = AttachmentType::None;
         }
 
 		UnifiedAttachmentDescriptor(const ImageDescriptor& imageDesc)
@@ -280,16 +276,16 @@ namespace CE::RPI
 			{
 				imageDesc.~ImageDescriptor();
 			}
-			else
+			else if (type == AttachmentType::Buffer)
 			{
 				bufferDesc.~BufferDescriptor();
 			}
 		}
 
-		AttachmentType type = AttachmentType::Image;
+		AttachmentType type = AttachmentType::None;
 
 		union {
-			ImageDescriptor imageDesc{};
+			ImageDescriptor imageDesc;
 			BufferDescriptor bufferDesc;
 		};
 	};

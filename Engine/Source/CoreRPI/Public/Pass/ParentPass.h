@@ -10,11 +10,6 @@ namespace CE::RPI
 	{
 		CE_CLASS(ParentPass, Pass)
 	public:
-		friend class Pass;
-		friend class PassRegistry;
-		friend class RenderPipeline;
-		friend class PassSystem;
-		friend class PassTree;
 
 		~ParentPass();
 
@@ -27,10 +22,11 @@ namespace CE::RPI
         
         Pass* GetPass(const Name& passName);
 
-	corerpi_internal:
+	protected:
 
 		Array<Pass*> passes{};
 
+		RPI_PASS(ParentPass);
 	};
     
 } // namespace CE::RPI

@@ -35,8 +35,6 @@ namespace CE
 
 		void Tick(f32 delta) override;
 
-		void Render() override;
-
 		void BuildFrameGraph();
 		void CompileFrameGraph();
 

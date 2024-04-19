@@ -14,7 +14,7 @@ namespace CE::RPI
 		Vec2 pixelResolution = Vec2();
 	};
     
-	class CORERPI_API View final : public IntrusiveBase
+	class CORERPI_API View final
 	{
 	public:
 
@@ -42,6 +42,10 @@ namespace CE::RPI
 			return &drawListContext;
 		}
 
+		UsageFlags GetUsageFlags() const { return usageFlags; }
+
+		void SetUsageFlags(UsageFlags usageFlags) { this->usageFlags = usageFlags; }
+
 	private:
 
 		RHI::DrawListContext drawListContext{};
@@ -54,8 +58,6 @@ namespace CE::RPI
 
 		UsageFlags usageFlags = UsageCamera;
 	};
-
-	typedef Ptr<View> ViewPtr;
 
 	ENUM_CLASS_FLAGS(View::UsageFlags);
 

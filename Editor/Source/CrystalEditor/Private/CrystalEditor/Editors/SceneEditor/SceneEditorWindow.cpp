@@ -18,6 +18,7 @@ namespace CE::Editor
 	    Super::Construct();
 
         SetTitle("DefaultScene");
+        SetAsMainWindow(true);
 
         // - Menu -
 
@@ -70,8 +71,10 @@ namespace CE::Editor
         auto centerBottom = center->GetSplit(1);
 
         ViewportWindow* viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
+        centerTop->SetAutoHideTabs(true);
 
         AssetBrowserWindow* assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
+
     }
 
 } // namespace CE::Editor

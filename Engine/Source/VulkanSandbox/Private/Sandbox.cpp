@@ -38,20 +38,11 @@ namespace CE
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
 		
-		scheduler = RHI::FrameScheduler::Create(desc);
+		//scheduler = RHI::FrameScheduler::Create(desc);
 
 		mainWindow = window;
 
-		RHI::SwapChainDescriptor swapChainDesc{};
-		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
-#if FORCE_SRGB
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
-#endif
-
-		swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
-
-		swapChain2 = RHI::gDynamicRHI->CreateSwapChain(secondWindow, swapChainDesc);
+		CApplication* app = CApplication::Get();
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
@@ -66,6 +57,8 @@ namespace CE
 		depthTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("depth");
 		opaqueTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("opaque");
 		shadowTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("shadow");
+
+		gameWindow = CreateWindow<CGameWindow>(MODULE_NAME, mainWindow);
 		
 		InitModels();
 		InitCubeMaps();
@@ -1801,6 +1794,7 @@ namespace CE
 	{
 		rebuild = false;
 		recompile = true;
+		return;
 
 		RHI::MultisampleState msaa{};
 		msaa.sampleCount = SampleCount;

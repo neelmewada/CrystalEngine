@@ -43,8 +43,10 @@ namespace CE::RPI
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
 
+#include "Feature/FeatureProcessor.h"
+#include "Feature/FeatureProcessorRegistry.h"
+
 #include "View.h"
-#include "RenderPipelineBuilder.h"
 #include "RenderPipeline.h"
 #include "Scene.h"
 
@@ -71,7 +73,4 @@ namespace CE::RPI
 #include "Text/FontAtlas.h"
 
 #include "Renderer2D.h"
-
-#include "Feature/FeatureProcessor.h"
-#include "Feature/FeatureProcessorRegistry.h"
 
