@@ -130,7 +130,7 @@ namespace CE
 
             {
                 PassSlot outputSlot{};
-                outputSlot.name = "ShadowListOutput";
+                outputSlot.name = "DirectionalShadowListOutput";
                 outputSlot.slotType = PassSlotType::Output;
                 outputSlot.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
                 outputSlot.dimensions = { Dimension::Dim2D };
@@ -141,6 +141,7 @@ namespace CE
                 outputSlot.loadStoreAction.storeActionStencil = AttachmentStoreAction::DontCare;
                 outputSlot.loadStoreAction.clearValueDepth = 1.0f;
                 outputSlot.isArray = true;
+                outputSlot.shaderInputName = "DirectionalShadowMapList";
 
                 shadowPass->AddSlot(outputSlot);
             }

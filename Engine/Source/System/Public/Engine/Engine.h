@@ -6,7 +6,7 @@ namespace CE
 	class GameInstance;
 	class EngineSubsystem;
 
-	CLASS(Abstract, NonSerialized, Config = Engine)
+	CLASS(Abstract, Config = Engine)
 	class SYSTEM_API Engine : public Object
 	{
 		CE_CLASS(Engine, Object)
@@ -26,9 +26,9 @@ namespace CE
 
 		virtual GameInstance* GetGameInstance();
 
-		inline bool IsInitialized() const { return isInitialized; }
+		bool IsInitialized() const { return isInitialized; }
 
-		inline AssetManager* GetAssetManager() const { return assetManager; }
+		AssetManager* GetAssetManager() const { return assetManager; }
 
 		EngineSubsystem* GetSubsystem(ClassType* subsystemClass);
 
