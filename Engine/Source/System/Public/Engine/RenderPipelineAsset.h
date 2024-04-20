@@ -5,4 +5,4 @@ namespace CE
     
 } // namespace CE
 
-#include "MainRenderPipeline.rtti.h"
+#include "RenderPipelineAsset.rtti.h"

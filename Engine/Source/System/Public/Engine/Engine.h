@@ -68,6 +68,7 @@ namespace CE
 
 		static Array<ClassType*> subsystemClassQueue;
 
+		friend class SystemModule;
 	};
     
 } // namespace CE

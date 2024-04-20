@@ -25,7 +25,7 @@ namespace CE::RPI
 		/// @param currentPassContext denotes the pass defined by `$this` key.
 		Pass* GetPassAtPath(const Name& path, Pass* currentPassContext = nullptr);
 
-		inline ParentPass* GetRootPas() const
+		inline ParentPass* GetRootPass() const
 		{
 			return rootPass;
 		}

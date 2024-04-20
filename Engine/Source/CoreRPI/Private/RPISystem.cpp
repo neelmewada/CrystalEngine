@@ -46,10 +46,14 @@ namespace CE::RPI
     {
         CreateDefaultTextures();
         CreateFullScreenQuad();
+
+        PassSystem::Get().Initialize();
     }
 
     void RPISystem::Shutdown()
     {
+        PassSystem::Get().Shutdown();
+
         for (auto buffer : vertexBuffers)
         {
             RHI::gDynamicRHI->DestroyBuffer(buffer);

@@ -23,64 +23,40 @@ namespace CE::RPI
 	{
 		CE_STRUCT(PassSlot)
 	public:
-        
+
+		/// @brief Name of the slot.
 		FIELD()
-		Name name{}; /// @brief Name of the slot.
-        
+		Name name{};
+
+		/// @brief Attachment type of the slot.
 		FIELD()
-		PassSlotType slotType = PassSlotType::Undefined; /// @brief Attachment type of the slot.
+		PassSlotType slotType = PassSlotType::Undefined;
 
 		FIELD()
 		Name shaderInputName{};
 
 		FIELD()
 		RHI::ScopeAttachmentUsage attachmentUsage{};
-        
+
 		FIELD()
-		RHI::AttachmentLoadStoreAction loadStoreAction{}; /// @brief Attachment's load and store action.
-        
+		b8 isArray = false;
+
+		/// @brief Attachment's load and store action.
 		FIELD()
-        Array<RHI::Format> formats{}; /// @brief List of formats supported by this pass slot.
-        
+		RHI::AttachmentLoadStoreAction loadStoreAction{};
+
+		/// @brief List of formats supported by this pass slot.
 		FIELD()
-        Array<RHI::Dimension> dimensions{}; /// @brief List of image dimensions supported by this pass slot.
+        Array<RHI::Format> formats{};
+
+		/// @brief List of image dimensions supported by this pass slot.
+		FIELD()
+        Array<RHI::Dimension> dimensions = { Dimension::Dim2D };
 	};
-    
-	STRUCT()
-    struct CORERPI_API PassAttachmentRef
-    {
-		CE_STRUCT(PassAttachmentRef)
-	public:
 
-		FIELD()
-        Name pass{};
+	//! @brief Name of the PassAttachment to use as reference
+	typedef Name PassAttachmentRef;
 
-		FIELD()
-        Name attachment{};
-
-		inline bool IsValid() const
-		{
-			return pass.IsValid() && attachment.IsValid();
-		}
-    };
-    
-	STRUCT()
-    struct CORERPI_API PassConnection
-    {
-		CE_STRUCT(PassConnection)
-	public:
-
-		FIELD()
-        Name localSlot{};
-
-		FIELD()
-		PassAttachmentRef attachmentRef{};
-
-		inline bool IsValid() const
-		{
-			return localSlot.IsValid() && attachmentRef.IsValid();
-		}
-    };
 
 	STRUCT()
 	struct CORERPI_API PassAttachmentSizeSource
@@ -140,7 +116,8 @@ namespace CE::RPI
 		FIELD()
 		RHI::Format format = RHI::Format::Undefined;
 
-
+		FIELD()
+		u8 sampleCount = 1;
 	};
     
 	STRUCT()
@@ -288,96 +265,6 @@ namespace CE::RPI
 			ImageDescriptor imageDesc;
 			BufferDescriptor bufferDesc;
 		};
-	};
-
-	STRUCT()
-	struct CORERPI_API PassData
-	{
-		CE_STRUCT(PassData)
-	public:
-
-		FIELD()
-		Name drawListTag{};
-
-		FIELD()
-		Name viewTag{};
-
-	};
-
-	/// @brief Describes the pass to create as a subpass of current pass.
-	STRUCT()
-	struct CORERPI_API PassRequest
-	{
-		CE_STRUCT(PassRequest)
-	public:
-
-		/// @brief Name of the pass after instantiation.
-		FIELD()
-		Name passName{};
-
-		/// @brief Name of pass template we will instantiate from.
-		FIELD()
-		Name passDefinition{};
-
-		/// @brief Connections of the instantiated pass.
-		FIELD()
-		Array<PassConnection> connections{};
-
-		/// @brief List of child passes through pass requests.
-		FIELD()
-		Array<PassRequest> childPasses{};
-
-	};
-
-	STRUCT()
-	struct CORERPI_API PassDefinition
-	{
-		CE_STRUCT(PassDefinition)
-	public:
-
-		FIELD()
-		Name name{};
-
-		FIELD()
-		Name passClass{};
-
-		FIELD()
-		Array<PassSlot> slots{};
-
-		FIELD()
-		Array<PassConnection> connections{};
-
-		FIELD()
-		Array<PassImageAttachmentDesc> imageAttachments{};
-
-		FIELD()
-		Array<PassBufferAttachmentDesc> bufferAttachments{};
-
-		FIELD()
-		PassData passData{};
-
-		inline PassSlot* FindSlot(const Name& slotName) const
-		{
-			for (int i = 0; i < slots.GetSize(); i++)
-			{
-				if (slots[i].name == slotName)
-					return const_cast<PassSlot*>(&slots[i]);
-			}
-			return nullptr;
-		}
-
-		inline int GetPassSlotIndex(const Name& slotName) const
-		{
-			return slots.IndexOf([&](const PassSlot& slot) { return slot.name == slotName; });
-		}
-
-	private:
-
-		void OnAfterDeserialize();
-
-		HashMap<Name, int> slotNamesToIndex{};
-		HashMap<Name, int> imageAttachmentNameToIndex{};
-		HashMap<Name, int> bufferAttachmentNameToIndex{};
 	};
     
 } // namespace CE::RPI

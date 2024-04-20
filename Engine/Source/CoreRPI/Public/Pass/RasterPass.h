@@ -8,6 +8,10 @@ namespace CE::RPI
 		CE_CLASS(RasterPass, GpuPass)
 	public:
 
+		RasterPass();
+
+		virtual ~RasterPass();
+
 	private:
 
 	};

@@ -8,6 +8,27 @@ namespace CE::RPI
 		
 	}
 
+	void Pass::AddAttachmentBinding(const PassAttachmentBinding& attachmentBinding)
+	{
+		if (attachmentBinding.slotType == PassSlotType::Input)
+		{
+			inputBindings.Add(attachmentBinding);
+		}
+		else if (attachmentBinding.slotType == PassSlotType::Output)
+		{
+			outputBindings.Add(attachmentBinding);
+		}
+		else if (attachmentBinding.slotType == PassSlotType::InputOutput)
+		{
+			inputOutputBindings.Add(attachmentBinding);
+		}
+	}
+
+	void Pass::AddSlot(const PassSlot& slot)
+	{
+		slots.Add(slot);
+	}
+
 	PassAttachmentBinding* Pass::FindInputBinding(const Name& name)
 	{
 		for (int i = 0; i < inputBindings.GetSize(); i++)

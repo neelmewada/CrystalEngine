@@ -134,6 +134,9 @@ namespace CE::RPI
 			pipelineDesc.depthStencilState.depthState.enable = false;
 		}
 
+		// TODO: Add support for stencil state
+		pipelineDesc.depthStencilState.stencilState.enable = false;
+
 		if (desc.TagExists("Cull"))
 		{
 			String cullValue = desc.GetTagValue("Cull");

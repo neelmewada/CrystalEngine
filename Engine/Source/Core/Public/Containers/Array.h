@@ -235,6 +235,7 @@ namespace CE
 		List<T> Transform(std::function<T(ElementType&)> selector)
 		{
 			List<T> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				result.Add(selector(At(i)));
@@ -246,6 +247,7 @@ namespace CE
 		List<T> Transform(std::function<T(const ElementType&)> selector) const
 		{
 			List<T> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				result.Add(selector(At(i)));
@@ -256,6 +258,7 @@ namespace CE
 		List<ElementType> Where(std::function<bool(const ElementType& item)> predicate) const
 		{
 			List<ElementType> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				if (predicate(At(i)))
@@ -269,6 +272,7 @@ namespace CE
 		List<ElementType> Where(std::function<bool(const ElementType& item, int index)> predicate) const
 		{
 			List<ElementType> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				if (predicate(At(i), i))
@@ -614,6 +618,7 @@ namespace CE
 		Array<T> Transform(std::function<T(ElementType&)> selector)
 		{
 			Array<T> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				result.Add(selector(At(i)));
@@ -625,6 +630,7 @@ namespace CE
 		Array<T> Transform(std::function<T(const ElementType&)> selector) const
 		{
 			Array<T> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				result.Add(selector(At(i)));
@@ -635,6 +641,7 @@ namespace CE
 		Array<ElementType> Where(std::function<bool(const ElementType& item)> predicate) const
 		{
 			Array<ElementType> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				if (predicate(At(i)))
@@ -648,6 +655,7 @@ namespace CE
 		Array<ElementType> Where(std::function<bool(const ElementType& item, int index)> predicate) const
 		{
 			Array<ElementType> result{};
+            result.Reserve(GetSize());
 			for (int i = 0; i < GetSize(); i++)
 			{
 				if (predicate(At(i), i))

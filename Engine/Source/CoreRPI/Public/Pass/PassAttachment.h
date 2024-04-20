@@ -14,9 +14,6 @@ namespace CE::RPI
 
 		/// @brief Name of the attachment.
 		Name name{};
-        
-		/// @brief Path to this attachment. Path of owning pass and the attachment name.
-		AttachmentID path{};
 
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
@@ -51,7 +48,7 @@ namespace CE::RPI
 		/// @brief The pass that owns this binding.
 		Pass* ownerPass = nullptr;
         
-		/// @brief The pass attachment this binding points to. Connected binding should be null if this is used.
+		/// @brief The pass attachment this binding points to. connectedBinding should be null if this is used.
 		Ptr<PassAttachment> attachment = nullptr;
         
 		Ptr<PassAttachment> originalAttachment = nullptr;

@@ -13,6 +13,10 @@
 #include "Asset/AssetRegistry.h"
 #include "Engine/AssetManager.h"
 
+///////////////////////////////////////////////////////
+// Engine
+///////////////////////////////////////////////////////
+
 // Asset Types
 #include "Engine/TextureDefines.h"
 #include "Engine/SamplerState.h"
@@ -36,6 +40,14 @@
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 
+///////////////////////////////////////////////////////
+// Renderer
+///////////////////////////////////////////////////////
+
+#include "Renderer/RenderPipelineAsset.h"
+#include "Renderer/RenderPipeline.h"
+#include "Renderer/MainRenderPipeline/MainRenderPipelineAsset.h"
+#include "Renderer/MainRenderPipeline/MainRenderPipeline.h"
 
 ///////////////////////////////////////////////////////
 // GameFramework

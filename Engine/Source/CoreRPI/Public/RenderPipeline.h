@@ -29,23 +29,24 @@ namespace CE::RPI
 
 	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
 
+	
 	class CORERPI_API RenderPipeline
 	{
-		friend class RenderPipelineBuilder;
 	public:
+
+		RenderPipeline();
 
 		virtual ~RenderPipeline();
         
-        inline PassTree* GetPassTree() const
+        PassTree* GetPassTree() const
         {
             return passTree;
         }
 
-	private:
+		Ptr<PassAttachment> FindAttachment(Name name);
 
-	protected:
-
-		RenderPipeline();
+		PassAttachment* AddAttachment(const RPI::PassImageAttachmentDesc& imageDesc);
+		PassAttachment* AddAttachment(const RPI::PassBufferAttachmentDesc& bufferDesc);
 
 		/// @brief Name of the pipeline
 		Name name{};
@@ -62,14 +63,13 @@ namespace CE::RPI
 		/// @brief The pass tree hierarchy. Pipeline owns & manages the passes.
 		PassTree* passTree = nullptr;
 
-		/// @brief A hash map of all views owned by this pipeline accessed by their respective tags
-		PipelineViewsByTag pipelineViewsByTag{};
+		Array<Ptr<PassAttachment>> attachments{};
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RenderPipeline_DefaultPipelineTree_Test;
 #endif
+
+		friend class RenderPipelineBuilder;
 	};
     
 } // namespace CE::RPI
-
-#include "RenderPipeline.rtti.h"

@@ -4,7 +4,7 @@ namespace CE::RPI
 {
 	PassTree::PassTree()
 	{
-
+		rootPass = CreateDefaultSubobject<ParentPass>("RootPass");
 	}
 
 	PassTree::~PassTree()
@@ -14,11 +14,7 @@ namespace CE::RPI
 
     void PassTree::Clear()
     {
-        if (rootPass != nullptr)
-        {
-            rootPass->Destroy();
-            rootPass = nullptr;
-        }
+        
     }
 
     Pass* PassTree::FindPass(const Name& passName)

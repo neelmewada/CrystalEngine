@@ -28,13 +28,17 @@ namespace CE::RPI
 
 		virtual bool IsParentPass() const { return false; }
 
+		void AddAttachmentBinding(const PassAttachmentBinding& attachmentBinding);
+
+		void AddSlot(const PassSlot& slot);
+
 		PassAttachmentBinding* FindInputBinding(const Name& name);
 		PassAttachmentBinding* FindInputOutputBinding(const Name& name);
 		PassAttachmentBinding* FindOutputBinding(const Name& name);
 
 		PassAttachmentBinding* FindBinding(const Name& name);
 
-		inline const Name& GetPassName() const { return GetName(); }
+		const Name& GetPassName() const { return GetName(); }
 
 	protected:
 
@@ -47,13 +51,15 @@ namespace CE::RPI
 		/// The view that matches this tag will be queried by this pass.
 		PipelineViewTag pipelineViewTag{};
 
+		FIELD()
 		ParentPass* parentPass = nullptr;
+
+		FIELD()
+		Array<PassSlot> slots{};
 
 		Array<PassAttachmentBinding> inputBindings{};
 		Array<PassAttachmentBinding> inputOutputBindings{};
 		Array<PassAttachmentBinding> outputBindings{};
-
-		Array<Ptr<PassAttachment>> passAttachments{};
 
 		friend class RenderPipeline;
 

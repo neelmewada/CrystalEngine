@@ -31,6 +31,10 @@ namespace CE::RPI
 
     void ParentPass::Clear()
     {
+		for (Pass* pass : passes)
+		{
+			pass->Destroy();
+		}
 		passes.Clear();
     }
 

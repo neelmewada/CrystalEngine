@@ -15,6 +15,10 @@ namespace CE::RPI
 		Array<RenderPipeline*> renderPipelines{};
 
 		Array<FeatureProcessor*> featureProcessors{};
+
+		/// @brief A hash map of all views owned by this scene accessed by their respective tags
+		PipelineViewsByTag pipelineViewsByTag{};
+
 	};
     
 } // namespace CE::RPI

@@ -51,7 +51,7 @@ namespace CE
 			if (type->GetTypeId() != TYPEID(EngineSubsystem) && 
 				type->IsSubclassOf<EngineSubsystem>())
 			{
-				if (gEngine == nullptr || !gEngine->IsInitialized()) // Engine has not been initialize yet, cache the subsystem class type.
+				if (gEngine == nullptr || !gEngine->IsInitialized()) // Engine has not been initialized yet, cache the subsystem class type.
 				{
 					Engine::subsystemClassQueue.Add(type);
 				}
