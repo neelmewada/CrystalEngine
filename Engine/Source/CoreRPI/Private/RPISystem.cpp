@@ -44,6 +44,8 @@ namespace CE::RPI
 
     void RPISystem::Initialize()
     {
+        isFirstTick = true;
+
         CreateDefaultTextures();
         CreateFullScreenQuad();
 
@@ -52,6 +54,12 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
+	    for (int i = scenes.GetSize() - 1; i >= 0; --i)
+	    {
+			delete scenes[i];
+	    }
+        scenes.Clear();
+
         PassSystem::Get().Shutdown();
 
         for (auto buffer : vertexBuffers)
@@ -73,6 +81,35 @@ namespace CE::RPI
             }
             samplerCache.Clear();
         }
+    }
+
+    void RPISystem::SimulationTick()
+    {
+        if (isFirstTick)
+        {
+            startTime = clock();
+            isFirstTick = false;
+        }
+
+        currentTime = (f32)(clock() - startTime) / CLOCKS_PER_SEC;
+
+        for (Scene* scene : scenes)
+        {
+            scene->Simulate(currentTime);
+        }
+    }
+
+    void RPISystem::RenderTick()
+    {
+        for (Scene* scene : scenes)
+        {
+            scene->PrepareRender(currentTime);
+        }
+    }
+
+    f32 RPISystem::GetCurrentTime() const
+    {
+        return (f32)(clock() - startTime) / CLOCKS_PER_SEC;
     }
 
     void RPISystem::CreateFullScreenQuad()

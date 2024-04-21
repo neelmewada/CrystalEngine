@@ -23,7 +23,8 @@ namespace CE
         ParentPass* rootPass = passTree->GetRootPass();
 
         // -------------------------------
-        // - Attachments
+        // Attachments
+        // -------------------------------
 
         PassAttachment* depthStencilAttachment;
 	    {
@@ -33,7 +34,7 @@ namespace CE
             depthStencilAttachmentDesc.sizeSource.source = "PipelineOutput";
 
             depthStencilAttachmentDesc.imageDescriptor.format = Format::D32_SFLOAT_S8_UINT;
-            depthStencilAttachmentDesc.imageDescriptor.arraySize = 1;
+            depthStencilAttachmentDesc.imageDescriptor.arrayLayers = 1;
             depthStencilAttachmentDesc.imageDescriptor.mipCount = 1;
             depthStencilAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
             depthStencilAttachmentDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil;
@@ -67,8 +68,9 @@ namespace CE
 
             colorMsaaAttachmentDesc.imageDescriptor.format = Format::R8G8B8A8_UNORM;
             colorMsaaAttachmentDesc.imageDescriptor.mipCount = 1;
-            colorMsaaAttachmentDesc.imageDescriptor.arraySize = 1;
+            colorMsaaAttachmentDesc.imageDescriptor.arrayLayers = 1;
             colorMsaaAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
+            colorMsaaAttachmentDesc.imageDescriptor.bindFlags = TextureBindFlags::Color;
             colorMsaaAttachmentDesc.fallbackFormats = { Format::B8G8R8A8_UNORM };
 
             switch (mainRenderPipelineAsset->msaa)
@@ -90,28 +92,47 @@ namespace CE
             colorMsaa = renderPipeline->AddAttachment(colorMsaaAttachmentDesc);
 	    }
 
-        // -------------------------------
-        // - Passes
-
+        PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
 	    {
-            RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass("DepthPass");
+            PassImageAttachmentDesc directionalShadowMapListDesc{};
+            directionalShadowMapListDesc.name = "DirectionalShadowMapList";
+            directionalShadowMapListDesc.lifetime = AttachmentLifetimeType::External;
 
+            directionalShadowMapListDesc.imageDescriptor.format = Format::D32_SFLOAT;
+            directionalShadowMapListDesc.imageDescriptor.mipCount = 1;
+            directionalShadowMapListDesc.imageDescriptor.arrayLayers = 1;
+            directionalShadowMapListDesc.imageDescriptor.dimension = Dimension::Dim2D;
+            directionalShadowMapListDesc.imageDescriptor.sampleCount = 1;
+            directionalShadowMapListDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil | TextureBindFlags::ShaderRead;
+            directionalShadowMapListDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
+
+            directionalShadowMapList = renderPipeline->AddAttachment(directionalShadowMapListDesc);
+	    }
+
+        // -------------------------------
+        // Passes
+        // -------------------------------
+
+        // - Depth Pass
+
+        RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass("DepthPass");
+	    {
             PassAttachmentBinding outputBinding{};
             outputBinding.slotType = PassSlotType::Output;
             outputBinding.attachment = depthStencilAttachment;
             outputBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
             outputBinding.name = "DepthOutput";
             outputBinding.connectedBinding = outputBinding.fallbackBinding = nullptr;
+
+            depthPass->AddAttachmentBinding(outputBinding);
             
             rootPass->AddChild(depthPass);
 	    }
 
-        // -------------------------------
         // - Skybox Pass
 
+        RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass("SkyboxPass");
 	    {
-            RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass("SkyboxPass");
-
             PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = PassSlotType::Output;
             colorOutputBinding.attachment = colorMsaa;
@@ -119,15 +140,17 @@ namespace CE
             colorOutputBinding.name = "ColorOutput";
             colorOutputBinding.connectedBinding = colorOutputBinding.fallbackBinding = nullptr;
 
+            skyboxPass->AddAttachmentBinding(colorOutputBinding);
+
             rootPass->AddChild(skyboxPass);
 	    }
 
-        // -------------------------------
         // - Directional Shadow Pass
 
+        RasterPass* shadowPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DirectionalShadowPass");
 	    {
-            RasterPass* shadowPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DirectionalShadowPass");
 
+            // Array of Texture2D<float> i.e. Shadow maps
             {
                 PassSlot outputSlot{};
                 outputSlot.name = "DirectionalShadowListOutput";
@@ -144,9 +167,95 @@ namespace CE
                 outputSlot.shaderInputName = "DirectionalShadowMapList";
 
                 shadowPass->AddSlot(outputSlot);
+
+                PassAttachmentBinding shadowMapListBinding{};
+                shadowMapListBinding.name = "DirectionalShadowListOutput";
+                shadowMapListBinding.slotType = PassSlotType::Output;
+                shadowMapListBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+                shadowMapListBinding.attachment = directionalShadowMapList;
+                shadowMapListBinding.connectedBinding = shadowMapListBinding.fallbackBinding = nullptr;
+
+                shadowPass->AddAttachmentBinding(shadowMapListBinding);
             }
 
-            
+            rootPass->AddChild(shadowPass);
+	    }
+
+        // - Opaque Pass
+
+        RasterPass* opaquePass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "OpaquePass");
+	    {
+
+            // DepthInput
+            {
+                PassSlot depthSlot{};
+                depthSlot.name = "DepthInput";
+                depthSlot.slotType = PassSlotType::Input;
+                depthSlot.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+                depthSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+                depthSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+                opaquePass->AddSlot(depthSlot);
+
+                PassAttachmentBinding depthSlotBinding{};
+                depthSlotBinding.name = "DepthInput";
+                depthSlotBinding.slotType = PassSlotType::Input;
+                depthSlotBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+                depthSlotBinding.connectedBinding = depthPass->FindOutputBinding("DepthOutput");
+
+                opaquePass->AddAttachmentBinding(depthSlotBinding);
+            }
+
+            // ColorMSAA
+            {
+                PassSlot colorSlot{};
+                colorSlot.name = "ColorMSAA";
+                colorSlot.slotType = PassSlotType::InputOutput;
+                colorSlot.attachmentUsage = ScopeAttachmentUsage::Color;
+                colorSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+                colorSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+                opaquePass->AddSlot(colorSlot);
+
+                PassAttachmentBinding colorBinding{};
+                colorBinding.name = "ColorMSAA";
+                colorBinding.slotType = PassSlotType::InputOutput;
+                colorBinding.attachmentUsage = ScopeAttachmentUsage::Color;
+                colorBinding.connectedBinding = skyboxPass->FindOutputBinding("ColorOutput");
+
+                opaquePass->AddAttachmentBinding(colorBinding);
+            }
+
+            rootPass->AddChild(opaquePass);
+	    }
+
+        // - Resolve Pass
+
+        RasterPass* resolvePass = (RasterPass*)PassSystem::Get().CreatePass("ResolvePass");
+	    {
+		    {
+                PassAttachmentBinding colorBinding{};
+                colorBinding.name = "ColorMSAA";
+                colorBinding.slotType = PassSlotType::InputOutput;
+                colorBinding.attachmentUsage = ScopeAttachmentUsage::Color;
+                colorBinding.connectedBinding = opaquePass->FindInputOutputBinding("ColorMSAA");
+                colorBinding.fallbackBinding = nullptr;
+
+                resolvePass->AddAttachmentBinding(colorBinding);
+		    }
+
+		    {
+                PassAttachmentBinding resolveBinding{};
+                resolveBinding.name = "Resolve";
+                resolveBinding.slotType = PassSlotType::Output;
+                resolveBinding.attachmentUsage = ScopeAttachmentUsage::Resolve;
+                resolveBinding.attachment = renderPipeline->FindAttachment("PipelineOutput");
+                resolveBinding.connectedBinding = resolveBinding.fallbackBinding = nullptr;
+
+                resolvePass->AddAttachmentBinding(resolveBinding);
+		    }
+
+            rootPass->AddChild(resolvePass);
 	    }
     }
 

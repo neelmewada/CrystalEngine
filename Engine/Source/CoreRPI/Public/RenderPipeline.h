@@ -22,7 +22,7 @@ namespace CE::RPI
 		PipelineViewTag viewTag{};
 		PipelineViewType viewType{};
 
-		Array<View*> views{};
+		Array<ViewPtr> views{};
 
 		RHI::DrawListMask drawListMask{};
 	};

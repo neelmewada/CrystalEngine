@@ -14,7 +14,7 @@ namespace CE::RPI
 		Vec2 pixelResolution = Vec2();
 	};
     
-	class CORERPI_API View final
+	class CORERPI_API View final : public InstanceBase
 	{
 	public:
 

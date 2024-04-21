@@ -13,14 +13,17 @@ namespace CE::RPI
 		if (attachmentBinding.slotType == PassSlotType::Input)
 		{
 			inputBindings.Add(attachmentBinding);
+			inputBindings.Top().ownerPass = this;
 		}
 		else if (attachmentBinding.slotType == PassSlotType::Output)
 		{
 			outputBindings.Add(attachmentBinding);
+			outputBindings.Top().ownerPass = this;
 		}
 		else if (attachmentBinding.slotType == PassSlotType::InputOutput)
 		{
 			inputOutputBindings.Add(attachmentBinding);
+			inputOutputBindings.Top().ownerPass = this;
 		}
 	}
 

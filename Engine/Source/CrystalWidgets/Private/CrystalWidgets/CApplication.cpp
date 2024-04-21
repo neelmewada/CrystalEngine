@@ -70,7 +70,7 @@ namespace CE::Widgets
 
 	void CApplication::Tick()
 	{
-		constexpr u32 destroyAfterFrames = Limits::MaxSwapChainImageCount;
+		constexpr u32 destroyAfterFrames = RHI::Limits::MaxSwapChainImageCount;
 
 		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
 		{

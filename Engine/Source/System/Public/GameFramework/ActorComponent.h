@@ -22,19 +22,19 @@ namespace CE
 
 		virtual void Tick(f32 delta);
 
-		inline Actor* GetActor() const { return owner; }
+		Actor* GetActor() const { return owner; }
 
 		CE::Scene* GetScene() const;
 
-		inline bool IsEnabled() const { return isEnabled; }
+		bool IsEnabled() const { return isEnabled; }
 
-		inline void SetEnabled(bool enabled) { isEnabled = enabled; }
+		void SetEnabled(bool enabled) { isEnabled = enabled; }
 
-		inline bool CanTick() const { return canTick; }
+		bool CanTick() const { return canTick; }
 
-		inline void SetCanTick(bool canTick) { this->canTick = canTick; }
+		void SetCanTick(bool canTick) { this->canTick = canTick; }
 
-		inline bool HasBegunPlaying() const { return hasBegunPlaying; }
+		bool HasBegunPlaying() const { return hasBegunPlaying; }
 
 	protected:
 
@@ -51,7 +51,10 @@ namespace CE
 
 		b8 hasBegunPlaying = false;
 
+		s64 featureProcessorHandle = 0;
+
 		friend class Actor;
+		friend class RendererSubsystem;
 	};
 
 } // namespace CE

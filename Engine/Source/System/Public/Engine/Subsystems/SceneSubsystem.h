@@ -10,21 +10,23 @@ namespace CE
 		CE_CLASS(SceneSubsystem, EngineSubsystem)
 	public:
 		SceneSubsystem();
-		
 
-		inline CE::Scene* GetActiveScene() { return scene; }
-
-		void OnBeginPlay();
+		CE::Scene* GetActiveScene() { return scene; }
 
 	protected:
 
 		void Initialize() override;
+		void PostInitialize() override;
 		void Shutdown() override;
 
 		void Tick(f32 deltaTime) override;
 
 		FIELD()
 		CE::Scene* scene = nullptr;
+
+    private:
+
+		bool isPlaying = false;
 	};
 
 } // namespace CE

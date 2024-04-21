@@ -77,6 +77,47 @@ namespace CE::RPI
 	};
 
 	STRUCT()
+	struct CORERPI_API ImageDescriptor
+	{
+		CE_STRUCT(ImageDescriptor)
+	public:
+
+		FIELD()
+		RHI::TextureBindFlags bindFlags{};
+
+		FIELD()
+		RHI::Dimension dimension = RHI::Dimension::Dim2D;
+
+		FIELD()
+		u16 arrayLayers = 1;
+
+		FIELD()
+		u16 mipCount = 1;
+
+		FIELD()
+		RHI::Format format = RHI::Format::Undefined;
+
+		FIELD()
+		u8 sampleCount = 1;
+	};
+
+	STRUCT()
+	struct CORERPI_API BufferDescriptor
+	{
+		CE_STRUCT(BufferDescriptor)
+	public:
+
+		FIELD()
+		RHI::BufferBindFlags bindFlags{};
+
+		FIELD()
+		u64 byteSize = 0;
+
+
+	};
+    
+
+	STRUCT()
 	struct CORERPI_API PassAttachmentDesc
 	{
 		CE_STRUCT(PassAttachmentDesc)
@@ -96,31 +137,6 @@ namespace CE::RPI
 	};
 
 	STRUCT()
-	struct CORERPI_API ImageDescriptor
-	{
-		CE_STRUCT(ImageDescriptor)
-	public:
-
-		FIELD()
-		RHI::TextureBindFlags bindFlags{};
-
-		FIELD()
-		RHI::Dimension dimension = RHI::Dimension::Dim2D;
-
-		FIELD()
-		u16 arraySize = 1;
-
-		FIELD()
-		u16 mipCount = 1;
-
-		FIELD()
-		RHI::Format format = RHI::Format::Undefined;
-
-		FIELD()
-		u8 sampleCount = 1;
-	};
-    
-	STRUCT()
     struct CORERPI_API PassImageAttachmentDesc : PassAttachmentDesc
     {
 		CE_STRUCT(PassImageAttachmentDesc, PassAttachmentDesc)
@@ -133,20 +149,6 @@ namespace CE::RPI
 		Array<RHI::Format> fallbackFormats{};
     };
 
-	STRUCT()
-	struct CORERPI_API BufferDescriptor
-	{
-		CE_STRUCT(BufferDescriptor)
-	public:
-
-		FIELD()
-		RHI::BufferBindFlags bindFlags{};
-
-		FIELD()
-		u64 byteSize = 0;
-
-
-	};
 
 	STRUCT()
 	struct CORERPI_API PassBufferAttachmentDesc : public PassAttachmentDesc

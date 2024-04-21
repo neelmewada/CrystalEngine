@@ -3,6 +3,7 @@
 namespace CE
 {
 	class SceneSubsystem;
+	class ActorComponent;
 
 	CLASS()
 	class SYSTEM_API RendererSubsystem : public EngineSubsystem, ApplicationMessageHandler, CWidgetResourceLoader
@@ -13,6 +14,10 @@ namespace CE
 		RendererSubsystem();
 
 		FrameScheduler* GetScheduler() const { return scheduler; }
+
+		void RebuildFrameGraph();
+
+		int GetTickPriority() const override;
 
 	protected:
 
@@ -40,12 +45,27 @@ namespace CE
 
 		void SubmitDrawPackets(int imageIndex);
 
+		void RegisterFeatureProcessor(SubClass<ActorComponent> componentClass, SubClass<FeatureProcessor> fpClass);
+
+		template<typename TActorComponent, typename TFeatureProcessor>
+		requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value and TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
+		void RegisterFeatureProcessor()
+		{
+			RegisterFeatureProcessor(TActorComponent::StaticType(), TFeatureProcessor::StaticType());
+		}
+
+		SubClass<FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
+
 	protected:
 
 		// - Fields -
 
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
+
+		HashMap<ClassType*, SubClass<FeatureProcessor>> componentClassToFeatureProcessorClass{};
+
+		// - Frame Graph -
 
 		RHI::FrameScheduler* scheduler = nullptr;
 

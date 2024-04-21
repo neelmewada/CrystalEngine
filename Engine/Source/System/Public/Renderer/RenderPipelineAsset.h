@@ -20,7 +20,9 @@ namespace CE
         FIELD()
         MSAA msaa = MSAA2;
 
-        
+        FIELD()
+        int directionalShadowResolution = 512;
+
     };
     
 } // namespace CE

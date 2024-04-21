@@ -16,14 +16,14 @@ namespace CE
 	struct alignas(16) DirectionalLight
 	{
 		Matrix4x4 lightSpaceMatrix;
-		Vec3 direction;
+		Vec4 direction;
 		Vec4 colorAndIntensity;
 		float temperature;
 	};
 
 	struct alignas(16) PointLight
 	{
-		Vec3 position;
+		Vec4 position;
 		Vec4 colorAndIntensity;
 		float radius;
 		float attenuation;

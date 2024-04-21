@@ -5,11 +5,13 @@ namespace CE::RPI
 
     void PassSystem::Initialize()
     {
+        Package* transient = GetTransientPackage(MODULE_NAME);
+
 		// - Pass Templates -
 
         // - Depth Stencil Pass -
         {
-            RasterPass* depthPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DepthStencilPass");
+            RasterPass* depthPass = CreateObject<RasterPass>(transient, "DepthStencilPass");
 
             PassSlot depthStencilOutput{};
             depthStencilOutput.name = "DepthStencilOutput";
@@ -31,7 +33,7 @@ namespace CE::RPI
 
         // - Depth Pass -
         {
-            RasterPass* depthPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DepthPass");
+            RasterPass* depthPass = CreateObject<RasterPass>(transient, "DepthPass");
 
             PassSlot depthOutput{};
             depthOutput.name = "DepthOutput";
@@ -52,7 +54,7 @@ namespace CE::RPI
 
         // - Skybox Pass -
         {
-            RasterPass* skyboxPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "SkyboxPass");
+            RasterPass* skyboxPass = CreateObject<RasterPass>(transient, "SkyboxPass");
 
             PassSlot colorOutput{};
             colorOutput.name = "ColorOutput";
@@ -71,7 +73,7 @@ namespace CE::RPI
 
         // - Opaque Pass -
         {
-            RasterPass* opaquePass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "OpaquePass");
+            RasterPass* opaquePass = CreateObject<RasterPass>(transient, "OpaquePass");
 
             PassSlot depthInput{};
             depthInput.name = "DepthInput";
@@ -97,6 +99,32 @@ namespace CE::RPI
             opaquePass->AddSlot(colorOutput);
 
             RegisterTemplate(opaquePass);
+        }
+
+        // - Resolve Pass -
+        {
+            RasterPass* resolvePass = CreateObject<RasterPass>(transient, "ResolvePass");
+
+            PassSlot colorSlot{};
+            colorSlot.name = "ColorMSAA";
+            colorSlot.slotType = PassSlotType::InputOutput;
+            colorSlot.attachmentUsage = ScopeAttachmentUsage::Color;
+            colorSlot.dimensions = { Dimension::Dim2D };
+            colorSlot.formats = {};
+            colorSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+            colorSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+            PassSlot resolveSlot{};
+            resolveSlot.name = "Resolve";
+            resolveSlot.slotType = PassSlotType::Output;
+            resolveSlot.attachmentUsage = ScopeAttachmentUsage::Resolve;
+            resolveSlot.dimensions = { Dimension::Dim2D };
+            resolveSlot.formats = {};
+            resolveSlot.loadStoreAction.loadAction = AttachmentLoadAction::DontCare;
+            resolveSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+            resolvePass->AddSlot(colorSlot);
+            resolvePass->AddSlot(resolveSlot);
         }
     }
 

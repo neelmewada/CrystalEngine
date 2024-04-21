@@ -29,8 +29,14 @@ namespace CE::RPI
 
 	using InstanceBase = CE::IntrusiveBase;
 
+	class View;
+	class Scene;
+
+	typedef Ptr<View> ViewPtr;
 
 }
+
+#include "RPILimits.h"
 
 // Passes
 #include "Pass/PassAttachmentDefines.h"
@@ -43,11 +49,15 @@ namespace CE::RPI
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
 
-#include "Feature/FeatureProcessor.h"
-#include "Feature/FeatureProcessorRegistry.h"
-
 #include "View.h"
 #include "RenderPipeline.h"
+
+#include "Feature/FeatureProcessor.h"
+#include "Feature/FeatureProcessorRegistry.h"
+#include "Feature/StaticMeshFeatureProcessor.h"
+#include "Feature/LightFeatureProcessor.h"
+#include "Feature/DirectionalLightFeatureProcessor.h"
+
 #include "Scene.h"
 
 #include "RPISystem.h"

@@ -63,6 +63,13 @@ namespace CE
 		if (assetManager)
 			assetManager->Tick(deltaTime);
 
+		engineSubsystems.Sort([](EngineSubsystem* a, EngineSubsystem* b) -> bool
+			{
+				if (a == nullptr || b == nullptr)
+					return false;
+				return a->GetTickPriority() < b->GetTickPriority();
+			});
+
 		for (auto subsystem : engineSubsystems)
 		{
 			subsystem->Tick(deltaTime);

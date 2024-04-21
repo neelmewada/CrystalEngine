@@ -19,11 +19,13 @@ namespace CE
 				continue;
 
 			IO::Path appDataPath{};
+#if PAL_TRAIT_BUILD_EDITOR
 			if (prefsName.GetString().StartsWith("Editor"))
 			{
 				appDataPath = PlatformDirectories::GetEditorAppDataDir();
 			}
 			else
+#endif
 			{
 				appDataPath = PlatformDirectories::GetAppDataDir();
 			}
@@ -53,11 +55,13 @@ namespace CE
 				continue;
 
 			IO::Path appDataPath{};
+#if PAL_TRAIT_BUILD_EDITOR
 			if (prefsName.GetString().StartsWith("Editor"))
 			{
 				appDataPath = PlatformDirectories::GetEditorAppDataDir();
 			}
 			else
+#endif
 			{
 				appDataPath = PlatformDirectories::GetAppDataDir();
 			}

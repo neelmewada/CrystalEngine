@@ -8,4 +8,10 @@ namespace CE
 		canTick = true;
     }
 
+    StaticMeshComponent::~StaticMeshComponent()
+    {
+	    
+    }
+
+
 } // namespace CE

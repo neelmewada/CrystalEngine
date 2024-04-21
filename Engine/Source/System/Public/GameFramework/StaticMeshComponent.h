@@ -10,6 +10,8 @@ namespace CE
 	public:
 
 		StaticMeshComponent();
+
+		~StaticMeshComponent();
         
 	protected:
         

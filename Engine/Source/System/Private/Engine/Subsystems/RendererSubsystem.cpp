@@ -9,6 +9,16 @@ namespace CE
 		
     }
 
+    void RendererSubsystem::RebuildFrameGraph()
+    {
+		rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
+    int RendererSubsystem::GetTickPriority() const
+    {
+		return 1;
+    }
+
     RPI::Texture* RendererSubsystem::LoadImage(const Name& assetPath)
     {
 		AssetManager* assetManager = gEngine->GetAssetManager();
@@ -62,6 +72,12 @@ namespace CE
 		sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
 		RPISystem::Get().Initialize();
+
+		// - Feature Processors -
+
+		RegisterFeatureProcessor<StaticMeshComponent, StaticMeshFeatureProcessor>();
+
+		// - Scheduler -
 
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
@@ -156,6 +172,9 @@ namespace CE
 			return;
 		}
 
+		RPISystem::Get().SimulationTick();
+		RPISystem::Get().RenderTick();
+
 		SubmitDrawPackets(imageIndex);
 
 		scheduler->EndExecution();
@@ -171,6 +190,8 @@ namespace CE
 			auto app = CApplication::TryGet();
 
 			// TODO: Build render pipeline passes
+			CE::Scene* scene = sceneSubsystem->GetActiveScene();
+
 
 			if (app)
 			{
@@ -221,6 +242,37 @@ namespace CE
 		{
 			app->SubmitDrawPackets(drawList);
 		}
+	}
+
+	void RendererSubsystem::RegisterFeatureProcessor(SubClass<ActorComponent> componentClass,
+		SubClass<FeatureProcessor> fpClass)
+	{
+		if (componentClass == nullptr || fpClass == nullptr)
+			return;
+
+		componentClassToFeatureProcessorClass[componentClass] = fpClass;
+	}
+
+	SubClass<FeatureProcessor> RendererSubsystem::GetFeatureProcessClass(SubClass<ActorComponent> componentClass)
+	{
+		if (componentClass == nullptr)
+			return nullptr;
+
+		Class* parentClass = componentClass;
+
+		while (parentClass != nullptr)
+		{
+			if (parentClass->GetSuperClassCount() == 0 || parentClass == GetStaticClass<Object>())
+				break;
+
+			if (componentClassToFeatureProcessorClass.KeyExists(parentClass))
+			{
+				return componentClassToFeatureProcessorClass[parentClass];
+			}
+			parentClass = parentClass->GetSuperClass(0);
+		}
+
+		return nullptr;
 	}
 
 } // namespace CE

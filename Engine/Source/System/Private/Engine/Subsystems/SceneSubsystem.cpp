@@ -8,15 +8,14 @@ namespace CE
 		
     }
 
-	void SceneSubsystem::OnBeginPlay()
-	{
-		if (scene != nullptr)
-			scene->OnBeginPlay();
-	}
-
 	void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
+	}
+
+	void SceneSubsystem::PostInitialize()
+	{
+		Super::PostInitialize();
 
 		// Create & set an empty scene by default
 		scene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
@@ -36,6 +35,14 @@ namespace CE
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
+
+		if (!isPlaying)
+		{
+			isPlaying = true;
+
+			if (scene != nullptr)
+				scene->OnBeginPlay();
+		}
 		
 		if (scene != nullptr)
 		{

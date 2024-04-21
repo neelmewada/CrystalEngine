@@ -21,6 +21,11 @@ namespace CE::RPI
 
 		void Shutdown();
 
+		void SimulationTick();
+		void RenderTick();
+
+		f32 GetCurrentTime() const;
+
 		inline RPI::Texture* GetDefaultAlbedoTex() const
 		{
 			return defaultAlbedoTex;
@@ -67,6 +72,10 @@ namespace CE::RPI
 
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
+
+		b8 isFirstTick = true;
+		clock_t startTime;
+		f32 currentTime = 0.0f;
 
 		friend class RPI::Scene;
 	};

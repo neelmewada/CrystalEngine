@@ -38,10 +38,9 @@ namespace CE
 
 		bool isInitailized = false;
 
-	system_internal:
-
 		static Array<ClassType*> subsystemClassesQueue;
 
+		friend class SystemModule;
 	};
     
 } // namespace CE

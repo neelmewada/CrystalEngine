@@ -10,6 +10,8 @@ namespace CE
 
 		Subsystem();
 
+		virtual int GetTickPriority() const { return 0; }
+
 		/// @brief Override and return false if you don't want to instantiate the subsystem, or vice versa.
 		virtual bool ShouldBeCreated(Object* outer) { return true; }
 
