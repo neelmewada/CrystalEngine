@@ -11,6 +11,7 @@ file(GLOB_RECURSE SRCS "*.cpp" "*.h")
 
 ce_add_test(${PROJECT_NAME}
     TARGET ${TEST_TARGET}
+    AUTORTTI
     FOLDER "Tests/Engine"
     SOURCES
         ${SRCS}

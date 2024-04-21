@@ -27,7 +27,7 @@ namespace CE
 
 		inline CameraComponent* GetMainCamera() const { return mainCamera; }
 
-	system_internal:
+	private:
 
 		// - Internal API -
 
@@ -56,6 +56,7 @@ namespace CE
 		friend class SceneComponent;
 		friend class CameraComponent;
 		friend class RendererSubsystem;
+		friend class SceneSubsystem;
 	};
     
 } // namespace CE

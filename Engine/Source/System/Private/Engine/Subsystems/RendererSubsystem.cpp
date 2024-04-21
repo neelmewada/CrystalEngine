@@ -172,6 +172,8 @@ namespace CE
 			return;
 		}
 
+		CE::Scene* scene = sceneSubsystem->GetActiveScene();
+
 		RPISystem::Get().SimulationTick();
 		RPISystem::Get().RenderTick();
 

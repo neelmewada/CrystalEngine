@@ -10,6 +10,12 @@ namespace CE
 	void RTTIGenerator::GenerateRTTI(String moduleName, IO::Path moduleHeaderRootPath, IO::Path outputPath, ModuleStamp& moduleStamp)
 	{
 		fs::path modulePath = moduleHeaderRootPath;
+		bool isUnitTest = false;
+
+		if (moduleHeaderRootPath.GetFilename() == "Tests")
+		{
+			isUnitTest = true;
+		}
 
 		ModuleAST moduleAST{ moduleName };
 
@@ -33,6 +39,11 @@ namespace CE
 
 			auto headerPath = entry.path();
 			auto headerRelPath = fs::relative(headerPath, modulePath);
+
+			if (!isUnitTest && IO::Path::IsSubDirectory(headerPath, moduleHeaderRootPath / "Tests"))
+			{
+				continue;
+			}
 
 			std::ifstream inputHeaderFile{ entry.path(), std::ios_base::in };
 			std::string inputHeaderFileContent((std::istreambuf_iterator<char>(inputHeaderFile)),

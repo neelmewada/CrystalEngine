@@ -26,6 +26,8 @@ namespace CE
         // Attachments
         // -------------------------------
 
+        PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
+
         PassAttachment* depthStencilAttachment;
 	    {
             PassImageAttachmentDesc depthStencilAttachmentDesc{};
@@ -97,6 +99,7 @@ namespace CE
             PassImageAttachmentDesc directionalShadowMapListDesc{};
             directionalShadowMapListDesc.name = "DirectionalShadowMapList";
             directionalShadowMapListDesc.lifetime = AttachmentLifetimeType::External;
+            directionalShadowMapListDesc.sizeSource.fixedSizes = Vec3i(1, 1, 1) * mainRenderPipelineAsset->directionalShadowResolution;
 
             directionalShadowMapListDesc.imageDescriptor.format = Format::D32_SFLOAT;
             directionalShadowMapListDesc.imageDescriptor.mipCount = 1;

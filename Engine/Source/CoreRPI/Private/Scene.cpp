@@ -26,6 +26,7 @@ namespace CE::RPI
 
 		FeatureProcessor* fp = CreateObject<FeatureProcessor>(GetTransientPackage(MODULE_NAME),
 			classType->GetName().GetLastComponent(), OF_Transient, classType);
+		featureProcessors.Add(fp);
 		return fp;
 	}
 

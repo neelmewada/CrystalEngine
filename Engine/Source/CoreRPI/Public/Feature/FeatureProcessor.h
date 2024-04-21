@@ -30,9 +30,9 @@ namespace CE::RPI
 		virtual void Simulate(const SimulatePacket& packet) {}
 
 		//! @brief The feature processor should enqueue draw packets to relevant draw lists.
-		virtual void Render(const RenderPacket& packet) = 0;
+		virtual void Render(const RenderPacket& packet) {}
 
-		virtual void OnFrameEnd() {}
+		virtual void OnRenderEnd() {}
 
 	private:
 
