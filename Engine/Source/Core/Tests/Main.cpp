@@ -849,14 +849,100 @@ TEST(Containers, FixedArray)
 
 struct PagedElement
 {
-	Name name = "";
+	String name = "";
+	int index = 0;
 };
 
 TEST(Containers, PagedDynamicArray)
 {
 	TEST_BEGIN;
 
-	PagedDynamicArray<PagedElement, 8> array{};
+	using PagedArrayType = PagedDynamicArray<PagedElement, 4>;
+	PagedArrayType array{};
+	using ArrayHandle = PagedArrayType::Handle;
+	struct HandleStruct
+	{
+		ArrayHandle handle;
+	};
+	Array<HandleStruct*> handles{};
+
+	constexpr int totalCount = 32;
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		HandleStruct* handleEntry = new HandleStruct();
+		PagedElement element = PagedElement{ .name = String::Format("Element {}", i), .index = i };
+		handleEntry->handle = array.Insert(element);
+		handles.Add(handleEntry);
+	}
+	
+	EXPECT_EQ(array.GetPageCount(), totalCount / 4);
+	EXPECT_EQ(array.GetCount(), totalCount);
+
+	HashSet<int> foundValues{};
+
+	delete handles[12]; handles[12] = nullptr;
+	delete handles[6]; handles[6] = nullptr;
+	delete handles[2]; handles[2] = nullptr;
+	delete handles[0]; handles[0] = nullptr;
+
+	for (auto it = array.begin(); it != array.end(); ++it)
+	{
+		foundValues.Add(it->index);
+	}
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		if (i == 0 || i == 2 || i == 6 || i == 12)
+		{
+			EXPECT_FALSE(foundValues.Exists(i));
+		}
+		else
+		{
+			EXPECT_TRUE(foundValues.Exists(i));
+		}
+	}
+
+	{
+		handles[0] = new HandleStruct();
+		PagedElement element = PagedElement{ .name = "Element 0", .index = 0 };
+		handles[0]->handle = array.Insert(element);
+
+		handles[2] = new HandleStruct();
+		PagedElement element2 = PagedElement{ .name = "Element 2", .index = 2 };
+		handles[2]->handle = array.Insert(element2);
+	}
+
+	foundValues.Clear();
+	for (auto it = array.begin(); it != array.end(); ++it)
+	{
+		foundValues.Add(it->index);
+	}
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		if (i == 6 || i == 12)
+		{
+			EXPECT_FALSE(foundValues.Exists(i));
+		}
+		else
+		{
+			EXPECT_TRUE(foundValues.Exists(i));
+		}
+	}
+
+	// - Cleanup -
+
+	for (int i = 0; i < handles.GetSize(); i++)
+	{
+		if (handles[i] != nullptr)
+		{
+			delete handles[i];
+		}
+	}
+	handles.Clear();
+
+	EXPECT_EQ(array.GetCount(), 0);
 
 	TEST_END;
 }
