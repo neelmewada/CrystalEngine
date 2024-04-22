@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
     void DrawListContext::Init(const DrawListMask& drawListMask)
@@ -19,7 +19,7 @@ namespace CE::RHI
     void DrawListContext::Shutdown()
     {
 		// Clear all lists
-		//threadDrawListsByTag.Clear();
+		
 		threadDrawListsByTag.ForEach([](DrawListsByTag& list)
 			{
 				for (int i = 0; i < list.GetSize(); i++)

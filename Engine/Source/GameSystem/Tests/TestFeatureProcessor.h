@@ -1,6 +1,14 @@
 #pragma once
 
-using namespace CE;
+CLASS()
+class TestActorComponent : public ActorComponent
+{
+	CE_CLASS(TestActorComponent, ActorComponent)
+public:
+
+
+
+};
 
 CLASS()
 class TestFeatureProcessor1 : public RPI::FeatureProcessor
@@ -9,8 +17,7 @@ class TestFeatureProcessor1 : public RPI::FeatureProcessor
 public:
 
 
-	
+
 };
 
 #include "TestFeatureProcessor.rtti.h"
-

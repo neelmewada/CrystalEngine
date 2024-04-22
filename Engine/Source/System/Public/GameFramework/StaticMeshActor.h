@@ -10,7 +10,7 @@ namespace CE
 
 		StaticMeshActor();
 
-		inline StaticMeshComponent* GetMeshComponent() const { return meshComponent; }
+		StaticMeshComponent* GetMeshComponent() const { return meshComponent; }
 
 	protected:
 

@@ -17,7 +17,18 @@ namespace CE
 
 		void RebuildFrameGraph();
 
-		int GetTickPriority() const override;
+		f32 GetTickPriority() const override;
+
+		void RegisterFeatureProcessor(SubClass<ActorComponent> componentClass, SubClass<FeatureProcessor> fpClass);
+
+		template<typename TActorComponent, typename TFeatureProcessor>
+			requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value and TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
+		void RegisterFeatureProcessor()
+		{
+			RegisterFeatureProcessor(TActorComponent::StaticType(), TFeatureProcessor::StaticType());
+		}
+
+		SubClass<FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
 
 	protected:
 
@@ -44,17 +55,6 @@ namespace CE
 		void CompileFrameGraph();
 
 		void SubmitDrawPackets(int imageIndex);
-
-		void RegisterFeatureProcessor(SubClass<ActorComponent> componentClass, SubClass<FeatureProcessor> fpClass);
-
-		template<typename TActorComponent, typename TFeatureProcessor>
-		requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value and TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
-		void RegisterFeatureProcessor()
-		{
-			RegisterFeatureProcessor(TActorComponent::StaticType(), TFeatureProcessor::StaticType());
-		}
-
-		SubClass<FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
 
 	protected:
 

@@ -105,6 +105,11 @@ namespace CE::RPI
         {
             scene->PrepareRender(currentTime);
         }
+
+        for (Scene* scene : scenes)
+        {
+            scene->OnRenderEnd();
+        }
     }
 
     f32 RPISystem::GetCurrentTime() const

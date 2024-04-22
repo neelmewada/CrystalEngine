@@ -9,6 +9,9 @@
 
 namespace CE
 {
+    template<SIZE_T Length, SIZE_T Alignment = alignof(max_align_t)>
+    using AlignedStorage = std::aligned_storage_t<Length, Alignment>;
+
     class CORE_API Memory
     {
     public:

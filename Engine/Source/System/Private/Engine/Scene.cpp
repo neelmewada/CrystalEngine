@@ -5,31 +5,59 @@ namespace CE
 
 	CE::Scene::Scene()
 	{
-		root = CreateDefaultSubobject<Actor>("SceneRoot");
-		root->scene = this;
+		if (!IsDefaultInstance())
+		{
+			rpiScene = new RPI::Scene();
+			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+		}
 	}
 
 	CE::Scene::~Scene()
 	{
-        
+		delete rpiScene; rpiScene = nullptr;
 	}
 
 	void CE::Scene::OnBeginPlay()
 	{
 		isPlaying = true;
 
-		if (root != nullptr)
+		for (Actor* actor : actors)
 		{
-			root->OnBeginPlay();
+			actor->OnBeginPlay();
 		}
 	}
 
 	void CE::Scene::Tick(f32 delta)
 	{
-		if (root != nullptr)
+		for (Actor* actor : actors)
 		{
-			root->Tick(delta);
+			actor->Tick(delta);
 		}
+	}
+
+	void CE::Scene::AddActor(Actor* actor)
+	{
+		if (actor == nullptr)
+			return;
+		if (actorsByUuid.KeyExists(actor->GetUuid()))
+			return;
+
+		actors.Add(actor);
+
+		OnActorChainAttached(actor);
+	}
+
+	void CE::Scene::RemoveActor(Actor* actor)
+	{
+		if (actor == nullptr)
+			return;
+		if (!actorsByUuid.KeyExists(actor->GetUuid()))
+			return;
+
+		actors.Remove(actor);
+
+		OnActorChainDetached(actor);
 	}
 
 	void CE::Scene::OnActorChainAttached(Actor* actor)

@@ -17,15 +17,25 @@ namespace CE::RPI
 
 		FeatureProcessor* AddFeatureProcessor(SubClass<FeatureProcessor> classType);
 
+		FeatureProcessor* GetFeatureProcessor(SubClass<FeatureProcessor> classType);
+
 		template<typename TFeatureProcessor> requires TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
 		TFeatureProcessor* AddFeatureProcessor()
 		{
 			return (TFeatureProcessor*)AddFeatureProcessor(TFeatureProcessor::Type());
 		}
 
+		template<typename TFeatureProcessor> requires TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
+		TFeatureProcessor* GetFeatureProcessor()
+		{
+			return (TFeatureProcessor*)GetFeatureProcessor(TFeatureProcessor::Type());
+		}
+
 		void Simulate(f32 currentTime);
 
 		void PrepareRender(f32 currentTime);
+
+		void OnRenderEnd();
 
 		void CollectDrawPackets();
 

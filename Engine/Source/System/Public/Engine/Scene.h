@@ -15,17 +15,33 @@ namespace CE
 
 		Scene();
 		virtual ~Scene();
-
-		inline Actor* GetRootActor() const
-		{
-			return root;
-		}
         
 		virtual void OnBeginPlay();
 
 		virtual void Tick(f32 delta);
 
-		inline CameraComponent* GetMainCamera() const { return mainCamera; }
+		CameraComponent* GetMainCamera() const { return mainCamera; }
+
+		RPI::Scene* GetRpiScene() const { return rpiScene; }
+
+		void AddActor(Actor* actor);
+		void RemoveActor(Actor* actor);
+
+		void IterateAllComponents(SubClass<ActorComponent> componentClass, auto callback)
+		{
+			if (componentClass == nullptr)
+				return;
+
+			TypeId componentTypeId = componentClass->GetTypeId();
+
+			if (!componentsByType.KeyExists(componentTypeId))
+				return;
+
+			for (auto [uuid, component] : componentsByType[componentTypeId])
+			{
+				callback(component);
+			}
+		}
 
 	private:
 
@@ -37,11 +53,15 @@ namespace CE
 	protected:
 
 		FIELD()
-		Actor* root = nullptr;
+		Array<Actor*> actors{};
 
 	private:
 
 		b8 isPlaying = false;
+
+		// - RPI -
+
+		RPI::Scene* rpiScene = nullptr;
 
 		// - Cache -
 

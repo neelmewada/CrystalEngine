@@ -11,29 +11,29 @@ namespace CE
 
         ~MaterialInstance();
 
-        virtual void SetProperty(const Name& name, u32 value) override;
+        void SetProperty(const Name& name, u32 value) override;
 
-        virtual void SetProperty(const Name& name, s32 value) override;
+        void SetProperty(const Name& name, s32 value) override;
 
-        virtual void SetProperty(const Name& name, f32 value) override;
+        void SetProperty(const Name& name, f32 value) override;
 
-        virtual void SetProperty(const Name& name, Vec4 value) override;
+        void SetProperty(const Name& name, Vec4 value) override;
 
-        virtual void SetProperty(const Name& name, Color value) override;
+        void SetProperty(const Name& name, Color value) override;
 
-        virtual void SetProperty(const Name& name, const Matrix4x4& value) override;
+        void SetProperty(const Name& name, const Matrix4x4& value) override;
 
-        virtual void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
+        void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
 
-        virtual RPI::Material* GetRpiMaterial() override;
+        RPI::Material* GetRpiMaterial() override;
 
-        virtual void OnAfterDeserialize() override;
+        void OnAfterDeserialize() override;
 
-        virtual void ApplyProperties() override;
+        void ApplyProperties() override;
 
     private:
 
-        virtual HashMap<Name, MaterialProperty> GetAllProperties() override;
+        HashMap<Name, MaterialProperty> GetAllProperties() override;
 
         FIELD()
         CE::MaterialInterface* baseMaterial = nullptr;

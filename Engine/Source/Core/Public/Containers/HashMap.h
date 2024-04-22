@@ -27,8 +27,14 @@ namespace CE
 
         KeyType first;
         ValueType second;
-    };
 
+        SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash<KeyType>(first);
+            CombineHash(hash, second);
+            return hash;
+        }
+    };
     
     template<typename KeyType = CE::Name, typename ValueType = CE::Variant>
     class HashMap

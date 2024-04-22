@@ -15,6 +15,7 @@ namespace CE
 
 	void SystemAllocator::Free(void* block, SizeType size)
 	{
+		std::aligned_storage_t<24, 8> storage{};
 		free(block);
 	}
 

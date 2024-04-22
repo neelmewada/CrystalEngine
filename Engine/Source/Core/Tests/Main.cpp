@@ -765,7 +765,7 @@ TEST(Containers, Defer)
 	TEST_END;
 }
 
-TEST(Container, ArrayView)
+TEST(Containers, ArrayView)
 {
 	TEST_BEGIN;
 
@@ -808,7 +808,7 @@ TEST(Container, ArrayView)
 	TEST_END;
 }
 
-TEST(Container, FixedArray)
+TEST(Containers, FixedArray)
 {
 	TEST_BEGIN;
 
@@ -843,6 +843,20 @@ TEST(Container, FixedArray)
 		EXPECT_EQ(item, String("str") + i);
 		i++;
 	}
+
+	TEST_END;
+}
+
+struct PagedElement
+{
+	Name name = "";
+};
+
+TEST(Containers, PagedDynamicArray)
+{
+	TEST_BEGIN;
+
+	PagedDynamicArray<PagedElement, 8> array{};
 
 	TEST_END;
 }

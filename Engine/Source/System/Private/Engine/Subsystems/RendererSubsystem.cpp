@@ -14,9 +14,9 @@ namespace CE
 		rebuildFrameGraph = recompileFrameGraph = true;
     }
 
-    int RendererSubsystem::GetTickPriority() const
+    f32 RendererSubsystem::GetTickPriority() const
     {
-		return 1;
+		return 2;
     }
 
     RPI::Texture* RendererSubsystem::LoadImage(const Name& assetPath)
@@ -173,6 +173,7 @@ namespace CE
 		}
 
 		CE::Scene* scene = sceneSubsystem->GetActiveScene();
+		RPI::Scene* rpiScene = scene->GetRpiScene();
 
 		RPISystem::Get().SimulationTick();
 		RPISystem::Get().RenderTick();
@@ -193,7 +194,6 @@ namespace CE
 
 			// TODO: Build render pipeline passes
 			CE::Scene* scene = sceneSubsystem->GetActiveScene();
-
 
 			if (app)
 			{

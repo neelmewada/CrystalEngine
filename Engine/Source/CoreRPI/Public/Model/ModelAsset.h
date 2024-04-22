@@ -10,13 +10,19 @@ namespace CE::RPI
         CE_CLASS(ModelAsset, Object)
     public:
 
-        inline u32 GetLodCount() const { return lods.GetSize(); }
+        u32 GetLodCount() const { return lods.GetSize(); }
 
-        inline ModelLodAsset* GetModelLod(u32 index) const { return lods[index]; }
+        ModelLodAsset* GetModelLod(u32 index) const { return lods[index]; }
 
         Model* CreateModel();
 
+        Model* GetModel();
+
+        void AddModelLod(ModelLodAsset* lod);
+
     private:
+
+        Model* model = nullptr;
 
         FIELD()
         Array<ModelLodAsset*> lods{};

@@ -256,4 +256,170 @@ namespace CE::RPI
         return model;
     }
 
+    ModelLodAsset* ModelLodAsset::CreateCubeAsset(Object* outer)
+    {
+        static const Vec3 vertices[] = {
+            Vec3(0.5, -0.5, 0.5),
+            Vec3(-0.5, -0.5, 0.5),
+            Vec3(0.5, 0.5, 0.5),
+            Vec3(-0.5, 0.5, 0.5),
+
+            Vec3(0.5, 0.5, -0.5),
+            Vec3(-0.5, 0.5, -0.5),
+            Vec3(0.5, -0.5, -0.5),
+            Vec3(-0.5, -0.5, -0.5),
+
+            Vec3(0.5, 0.5, 0.5),
+            Vec3(-0.5, 0.5, 0.5),
+            Vec3(0.5, 0.5, -0.5),
+            Vec3(-0.5, 0.5, -0.5),
+
+            Vec3(0.5, -0.5, -0.5),
+            Vec3(0.5, -0.5, 0.5),
+            Vec3(-0.5, -0.5, 0.5),
+            Vec3(-0.5, -0.5, -0.5),
+
+            Vec3(-0.5, -0.5, 0.5),
+            Vec3(-0.5, 0.5, 0.5),
+            Vec3(-0.5, 0.5, -0.5),
+            Vec3(-0.5, -0.5, -0.5),
+
+            Vec3(0.5, -0.5, -0.5),
+            Vec3(0.5, 0.5, -0.5),
+            Vec3(0.5, 0.5, 0.5),
+            Vec3(0.5, -0.5, 0.5)
+        };
+
+        static const Vec3 normals[] = {
+            Vec3(0, 0, 1),
+            Vec3(0, 0, 1),
+            Vec3(0, 0, 1),
+            Vec3(0, 0, 1),
+
+            Vec3(0, 1, 0),
+            Vec3(0, 1, 0),
+            Vec3(0, 0, -1),
+            Vec3(0, 0, -1),
+
+            Vec3(0, 1, 0),
+            Vec3(0, 1, 0),
+            Vec3(0, 0, -1),
+            Vec3(0, 0, -1),
+
+            Vec3(0, -1, 0),
+            Vec3(0, -1, 0),
+            Vec3(0, -1, 0),
+            Vec3(0, -1, 0),
+
+            Vec3(-1, 0, 0),
+            Vec3(-1, 0, 0),
+            Vec3(-1, 0, 0),
+            Vec3(-1, 0, 0),
+
+            Vec3(1, 0, 0),
+            Vec3(1, 0, 0),
+            Vec3(1, 0, 0),
+            Vec3(1, 0, 0)
+        };
+
+        static const Vec4 tangents[] = {
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+            Vec4(-1, 0, 0, -1),
+
+            Vec4(0, 0, -1, -1),
+            Vec4(0, 0, -1, -1),
+            Vec4(0, 0, -1, -1),
+            Vec4(0, 0, -1, -1),
+
+            Vec4(0, 0, 1, -1),
+            Vec4(0, 0, 1, -1),
+            Vec4(0, 0, 1, -1),
+            Vec4(0, 0, 1, -1),
+        };
+
+        static const Vec2 uvCoords[] = {
+            Vec2(0, 0),
+            Vec2(1, 0),
+            Vec2(0, 1),
+            Vec2(1, 1),
+
+            Vec2(0, 1),
+            Vec2(1, 1),
+            Vec2(0, 1),
+            Vec2(1, 1),
+
+            Vec2(0, 0),
+            Vec2(1, 0),
+            Vec2(0, 0),
+            Vec2(1, 0),
+
+            Vec2(0, 0),
+            Vec2(0, 1),
+            Vec2(1, 1),
+            Vec2(1, 0),
+
+            Vec2(0, 0),
+            Vec2(0, 1),
+            Vec2(1, 1),
+            Vec2(1, 0),
+
+            Vec2(0, 0),
+            Vec2(0, 1),
+            Vec2(1, 1),
+            Vec2(1, 0)
+        };
+
+        static const u16 indices[] = {
+            0, 2, 3,
+            0, 3, 1,
+            8, 4, 5,
+            8, 5, 9,
+            10, 6, 7,
+            10, 7, 11,
+            12, 13, 14,
+            12, 14, 15,
+            16, 17, 18,
+            16, 18, 19,
+            20, 21, 22,
+            20, 22, 23
+        };
+
+        if (outer == nullptr)
+        {
+            outer = GetTransientPackage(MODULE_NAME);
+        }
+
+        ModelLodAsset* modelLodAsset = CreateObject<ModelLodAsset>(outer, "CubeModelAsset");
+
+        modelLodAsset->numVertices = COUNTOF(vertices);
+        modelLodAsset->positionsData.LoadData(vertices, sizeof(vertices));
+        modelLodAsset->normalData.LoadData(normals, sizeof(normals));
+        modelLodAsset->tangentData.LoadData(tangents, sizeof(tangents));
+        modelLodAsset->uv0Data.LoadData(uvCoords, sizeof(uvCoords));
+
+        modelLodAsset->subMeshes.Resize(1);
+        modelLodAsset->subMeshes[0].indexFormat = IndexFormat::Uint16;
+        modelLodAsset->subMeshes[0].materialIndex = 0;
+        modelLodAsset->subMeshes[0].numIndices = COUNTOF(indices);
+        modelLodAsset->subMeshes[0].indicesData.LoadData(indices, sizeof(indices));
+
+        return modelLodAsset;
+    }
 } // namespace CE::RPI

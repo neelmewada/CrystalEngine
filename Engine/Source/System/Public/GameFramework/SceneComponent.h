@@ -19,17 +19,17 @@ namespace CE
 
 		bool ComponentExists(SceneComponent* component);
 
-		inline Vec3 GetLocalPosition() const { return localPosition; }
+		Vec3 GetLocalPosition() const { return localPosition; }
 
-		inline Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
+		Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
 
-		inline Vec3 GetLocalScale() const { return localScale; }
+		Vec3 GetLocalScale() const { return localScale; }
 
-		inline void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(true); }
+		void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(); }
 
-		inline void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(true); }
+		void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(); }
 
-		inline void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(true); }
+		void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(); }
 
 		void OnBeginPlay() override;
 
@@ -37,11 +37,17 @@ namespace CE
 
 		bool IsDirty();
 
-		inline Matrix4x4 GetTransform() const { return transform; }
+		const Matrix4x4& GetTransform() const { return transform; }
+
+		const Matrix4x4& GetLocalTransform() const { return localTransform; }
+
+    protected:
+
+		bool IsTransformUpdated() const { return transformUpdated; }
 
 	private:
 
-		void SetDirty(bool set = true);
+		void SetDirty();
 
 		FIELD()
 		Array<SceneComponent*> attachedComponents{};
@@ -61,6 +67,8 @@ namespace CE
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
 
 		b8 isDirty = true;
+
+		b8 transformUpdated = false;
         
         Matrix4x4 transform{};
 		Matrix4x4 localTransform{};

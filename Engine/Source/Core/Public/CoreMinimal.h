@@ -27,6 +27,9 @@
 #include "PAL/Common/PlatformProcess.h"
 #include "PAL/Common/PlatformTLS.h"
 
+// Special containers
+#include "Containers/PagedDynamicArray.h"
+
 // IO
 #include "IO/Path.h"
 #include "IO/Stream/GenericStream.h"

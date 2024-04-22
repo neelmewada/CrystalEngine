@@ -30,6 +30,20 @@ namespace CE::RPI
 		return fp;
 	}
 
+	FeatureProcessor* Scene::GetFeatureProcessor(SubClass<FeatureProcessor> classType)
+	{
+		if (classType == nullptr)
+			return nullptr;
+
+		for (FeatureProcessor* fp : featureProcessors)
+		{
+			if (fp && fp->IsOfType(classType))
+				return fp;
+		}
+
+		return nullptr;
+	}
+
 	void Scene::Simulate(f32 currentTime)
 	{
 		for (FeatureProcessor* fp : featureProcessors)
@@ -41,6 +55,14 @@ namespace CE::RPI
 	void Scene::PrepareRender(f32 currentTime)
 	{
 		CollectDrawPackets();
+	}
+
+	void Scene::OnRenderEnd()
+	{
+		for (FeatureProcessor* fp : featureProcessors)
+		{
+			fp->OnRenderEnd();
+		}
 	}
 
 	void Scene::CollectDrawPackets()

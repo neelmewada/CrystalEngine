@@ -21,15 +21,15 @@ namespace CE
 		component->parentComponent = this;
 		component->owner = this->owner;
 		attachedComponents.Add(component);
-
+		
 		if (HasBegunPlaying() && !component->HasBegunPlaying())
 		{
 			component->OnBeginPlay();
 		}
 
-		if (GetScene() != nullptr)
+		CE::Scene* scene = GetScene();
+		if (scene != nullptr)
 		{
-			CE::Scene* scene = GetScene();
 			scene->componentsByType[component->GetTypeId()][component->GetUuid()] = component;
 		}
 	}
@@ -54,6 +54,7 @@ namespace CE
 	void SceneComponent::Tick(f32 delta)
 	{
 		Super::Tick(delta);
+		transformUpdated = false;
         
 		if (IsDirty())
 		{
@@ -87,7 +88,7 @@ namespace CE
 						break;
 					parent = parent->GetParentActor();
 				}
-
+				
 				if (parent && parent->rootComponent != nullptr)
 					transform = parent->rootComponent->transform * localTransform;
 				else
@@ -99,6 +100,7 @@ namespace CE
 			}
 
 			isDirty = false;
+			transformUpdated = true;
 		}
 
 		for (auto component : attachedComponents)
@@ -131,9 +133,25 @@ namespace CE
 		return false;
 	}
 
-	void SceneComponent::SetDirty(bool set)
+	void SceneComponent::SetDirty()
 	{
-		isDirty = set;
+		isDirty = true;
+
+		for (SceneComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->SetDirty();
+		}
+
+		if (owner->rootComponent == this)
+		{
+			for (Actor* child : owner->children)
+			{
+				if (child->rootComponent != nullptr)
+				{
+					child->rootComponent->SetDirty();
+				}
+			}
+		}
 	}
 
 } // namespace CE

@@ -14,4 +14,16 @@ namespace CE::RPI
         return model;
     }
 
+    Model* ModelAsset::GetModel()
+    {
+        if (model == nullptr)
+            model = CreateModel();
+        return model;
+    }
+
+    void ModelAsset::AddModelLod(ModelLodAsset* lod)
+    {
+        lods.Add(lod);
+    }
+
 } // namespace CE

@@ -26,6 +26,7 @@ int main(int argc, char** argv)
         ("I,inc", "Include search directories", cxxopts::value<std::vector<std::string>>()->default_value(""))
         ("n,noapi", "Do not use X_API export macros")
         ("f,force", "Force update output headers")
+		("e,exclude", "Exclude files from directories", cxxopts::value<std::vector<std::string>>()->default_value(""))
         ;
 
     try

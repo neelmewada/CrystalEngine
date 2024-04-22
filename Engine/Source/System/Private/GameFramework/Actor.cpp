@@ -46,6 +46,8 @@ namespace CE
 		{
 			rootComponent->owner = this;
 		}
+
+
 	}
 
 	void Actor::AttachActor(Actor* actor)
