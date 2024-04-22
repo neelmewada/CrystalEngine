@@ -17,6 +17,8 @@ namespace CE::RPI
 		Matrix4x4 worldTransform{};
 	};
 
+	using ModelHandle = PagedDynamicArray<ModelDataInstance>::Handle;
+
 	CLASS()
 	class CORERPI_API StaticMeshFeatureProcessor : public FeatureProcessor
 	{
@@ -35,7 +37,7 @@ namespace CE::RPI
 
 	private:
 
-		Array<ModelDataInstance> models{};
+		PagedDynamicArray<ModelDataInstance> models{};
 
 	};
 
