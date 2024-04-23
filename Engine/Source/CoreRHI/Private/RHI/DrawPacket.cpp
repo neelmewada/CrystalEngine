@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
 	void DrawPacket::operator delete(void* p, size_t size)

@@ -19,7 +19,7 @@ namespace CE::RPI
 		handle->model = modelHandleDescriptor.model;
 		handle->originalModel = modelHandleDescriptor.originalModel;
 		handle->scene = this->scene;
-
+		
 		return handle;
 	}
 

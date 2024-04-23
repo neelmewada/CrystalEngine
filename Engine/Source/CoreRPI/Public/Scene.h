@@ -48,10 +48,15 @@ namespace CE::RPI
 		FeatureProcessor::SimulatePacket simulatePacket{};
 		FeatureProcessor::RenderPacket renderPacket{};
 
-		/// @brief A hash map of all views owned by this scene accessed by their respective tags
+		/// @brief A Scene shader resource group (SRG_PerScene).
+		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+
+		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
 		PipelineViewsByTag viewsByTag{};
 
+#if PAL_TRAIT_BUILD_TESTS
 		friend class ::RPI_Scene_Test;
+#endif
 	};
     
 } // namespace CE::RPI

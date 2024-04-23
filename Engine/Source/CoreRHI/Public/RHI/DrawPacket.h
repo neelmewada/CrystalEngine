@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
 	/// @brief DrawPacket is a collection of DrawItems that represent a single mesh. DrawPacket is allocated as a single contiguous memory and all the pointers

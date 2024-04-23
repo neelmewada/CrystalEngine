@@ -18,7 +18,7 @@ namespace CE::RPI
 
 		RPI::Scene* scene = nullptr;
 
-		
+		MeshDrawPacketsByLod drawPacketsListByLod{};
 	};
 
 	using ModelHandle = PagedDynamicArray<ModelDataInstance>::Handle;

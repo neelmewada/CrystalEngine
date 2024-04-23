@@ -10,7 +10,7 @@ namespace CE::RHI
 	class CORERHI_API DrawPacketBuilder final
 	{
 	public:
-		static constexpr u32 DrawItemCountMax = 16;
+		static constexpr u32 DrawItemCountMax = 32;
 
 		DrawPacketBuilder(IAllocator* allocator = nullptr);
 
