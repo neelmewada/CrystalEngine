@@ -6,6 +6,7 @@ PBR Demo            |  Widgets Demo
 :-------------------------:|:-------------------------:
 ![](./Screenshots/IBL%20Demo%20Night.png)  |  ![](./Screenshots/WidgetDemo.gif)
 
+Check more [screenshots below](#screenshots).
 
 ## Requirements
 
@@ -56,6 +57,13 @@ There's no actual GUI editor that exists yet. It's only CLI tools like AssetProc
 
 * **EditorCore**: Implements Asset processing and serves as the foundation of the editor & host tools.
 * **EditorSystem**: Host/editor implementation of the System module.
+
+## Screenshots
+
+Project browser window:
+
+![](./Screenshots/ProjectBrowser.png)
+
 
 
 
