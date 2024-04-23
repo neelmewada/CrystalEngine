@@ -13,6 +13,27 @@ namespace CE::RPI
 		
 	}
 
+	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor)
+	{
+		ModelHandle handle = modelInstances.Insert({});
+		handle->model = modelHandleDescriptor.model;
+		handle->originalModel = modelHandleDescriptor.originalModel;
+		handle->scene = this->scene;
+
+		return handle;
+	}
+
+	bool StaticMeshFeatureProcessor::ReleaseMesh(ModelHandle& handle)
+	{
+		if (handle.IsValid())
+		{
+			modelInstances.Remove(handle);
+			return true;
+		}
+
+		return false;
+	}
+
 
 	void StaticMeshFeatureProcessor::Simulate(const SimulatePacket& packet)
 	{
@@ -25,13 +46,14 @@ namespace CE::RPI
 	{
 		Super::Render(packet);
 
+		
 	}
 
 	void StaticMeshFeatureProcessor::OnRenderEnd()
 	{
 		Super::OnRenderEnd();
 
-		models.Clear();
+		
 	}
 
 } // namespace CE::RPI

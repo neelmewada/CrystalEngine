@@ -1,4 +1,5 @@
 #pragma once
+#include "GameFramework/ActorComponent.h"
 
 namespace CE
 {
@@ -40,6 +41,27 @@ namespace CE
 			for (auto [uuid, component] : componentsByType[componentTypeId])
 			{
 				callback(component);
+			}
+		}
+
+		template<typename TActorComponent> requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value
+		void IterateAllComponents(auto callback)
+		{
+			ClassType* clazz = TActorComponent::StaticType();
+			if (clazz == nullptr)
+				return;
+
+			TypeId componentTypeId = clazz->GetTypeId();
+
+			if (!componentsByType.KeyExists(componentTypeId))
+				return;
+
+			for (auto [uuid, component] : componentsByType[componentTypeId])
+			{
+				if (component->IsOfType(clazz))
+				{
+					callback((TActorComponent*)component);
+				}
 			}
 		}
 

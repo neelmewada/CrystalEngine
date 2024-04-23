@@ -21,13 +21,19 @@ namespace CE
 		scene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
-	void SceneSubsystem::Shutdown()
+	void SceneSubsystem::PreShutdown()
 	{
 		if (scene)
 		{
 			scene->Destroy();
 			scene = nullptr;
 		}
+
+		Super::PreShutdown();
+	}
+
+	void SceneSubsystem::Shutdown()
+	{
 
 		Super::Shutdown();
 	}

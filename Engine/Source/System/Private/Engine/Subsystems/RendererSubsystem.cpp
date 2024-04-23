@@ -116,6 +116,13 @@ namespace CE
 	{
 		Super::PreShutdown();
 
+		delete scheduler; scheduler = nullptr;
+	}
+
+	void RendererSubsystem::Shutdown()
+	{
+		Super::Shutdown();
+
 		CApplication* app = CApplication::TryGet();
 
 		RPISystem::Get().Shutdown();
@@ -127,15 +134,6 @@ namespace CE
 			app->Shutdown();
 			app->Destroy();
 		}
-
-		delete scheduler; scheduler = nullptr;
-	}
-
-	void RendererSubsystem::Shutdown()
-	{
-		Super::Shutdown();
-
-		
 	}
 
 	void RendererSubsystem::Tick(f32 delta)

@@ -10,7 +10,10 @@ namespace CE
 
     StaticMeshComponent::~StaticMeshComponent()
     {
-	    
+	    if (meshHandle.IsValid())
+	    {
+            meshHandle.Free();
+	    }
     }
 
     u32 StaticMeshComponent::GetLodCount() const
@@ -45,19 +48,23 @@ namespace CE
         if (!model)
             return;
 
-        ModelDataInstance modelDataInstance;
-        modelDataInstance.model = model;
-        modelDataInstance.originalModel = staticMesh->GetModelAsset();
-        modelDataInstance.worldTransform = GetTransform();
-
         if (meshChanged)
         {
-            if (meshHandle >= 0)
+            if (meshHandle.IsValid())
             {
                 fp->ReleaseMesh(meshHandle);
-                meshHandle = -1;
             }
 
+            RPI::ModelHandleDescriptor descriptor{};
+            descriptor.model = model;
+            descriptor.originalModel = staticMesh->GetModelAsset();
+
+            meshHandle = fp->AcquireMesh(descriptor);
+        }
+
+        if (meshHandle.IsValid())
+        {
+            meshHandle->worldTransform = GetTransform();
         }
 
         meshChanged = false;

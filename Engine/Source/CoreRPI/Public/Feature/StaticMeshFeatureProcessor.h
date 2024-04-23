@@ -15,9 +15,19 @@ namespace CE::RPI
 		ModelAsset* originalModel = nullptr;
 
 		Matrix4x4 worldTransform{};
+
+		RPI::Scene* scene = nullptr;
+
+		
 	};
 
 	using ModelHandle = PagedDynamicArray<ModelDataInstance>::Handle;
+
+	struct ModelHandleDescriptor
+	{
+		Model* model = nullptr;
+		ModelAsset* originalModel = nullptr;
+	};
 
 	CLASS()
 	class CORERPI_API StaticMeshFeatureProcessor : public FeatureProcessor
@@ -29,6 +39,10 @@ namespace CE::RPI
 
 		virtual ~StaticMeshFeatureProcessor();
 
+		ModelHandle AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor);
+
+		bool ReleaseMesh(ModelHandle& handle);
+
 		void Simulate(const SimulatePacket& packet) override;
 
 		void Render(const RenderPacket& packet) override;
@@ -37,7 +51,7 @@ namespace CE::RPI
 
 	private:
 
-		PagedDynamicArray<ModelDataInstance> models{};
+		PagedDynamicArray<ModelDataInstance> modelInstances{};
 
 	};
 

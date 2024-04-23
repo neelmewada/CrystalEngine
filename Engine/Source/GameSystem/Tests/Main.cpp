@@ -75,10 +75,15 @@ TEST(RPI, Scene)
 	TEST_BEGIN;
 	CERegisterModuleTypes();
 
-	CE::Scene* scene = CreateObject<CE::Scene>(nullptr, "Scene");
-	RPI::Scene* rpiScene = scene->GetRpiScene();
+	gEngine->PreInit();
+	gEngine->Initialize();
+	gEngine->PostInitialize();
 
 	RendererSubsystem* rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+
+	CE::Scene* scene = sceneSubsystem->GetActiveScene();
+	RPI::Scene* rpiScene = scene->GetRpiScene();
 
 	TestFeatureProcessor1* fp1 = rpiScene->AddFeatureProcessor<TestFeatureProcessor1>();
 	
@@ -103,14 +108,36 @@ TEST(RPI, Scene)
 		CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
 		meshComponent->SetMaterial(material, 0, 0);
 
+		SceneComponent* subComponent = CreateObject<SceneComponent>(meshComponent, "SubComponent");
+		meshComponent->SetupAttachment(subComponent);
+
 		constexpr f32 delta = 0.016f;
 
 		gEngine->Tick(delta);
 
+		HashSet<ActorComponent*> allComponents{};
 
+		scene->IterateAllComponents<ActorComponent>([&](ActorComponent* actorComponent)
+		{
+			allComponents.Add(actorComponent);
+		});
+		EXPECT_EQ(allComponents.GetSize(), 2);
+
+		allComponents.Clear();
+
+		meshComponent->DetachComponent(subComponent);
+
+		scene->IterateAllComponents<ActorComponent>([&](ActorComponent* actorComponent)
+			{
+				allComponents.Add(actorComponent);
+			});
+		EXPECT_EQ(allComponents.GetSize(), 1);
+
+		subComponent->Destroy();
 	}
 
-	scene->Destroy();
+	gEngine->PreShutdown();
+	gEngine->Shutdown();
 
 	CEDeregisterModuleTypes();
 	TEST_END;

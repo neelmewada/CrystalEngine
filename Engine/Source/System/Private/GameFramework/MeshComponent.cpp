@@ -49,7 +49,7 @@ namespace CE
 
         if (materialsPerLod[lodIndex].materials.GetSize() <= subMeshIndex)
         {
-            materialsPerLod[lodIndex].materials.Resize(subMeshIndex);
+            materialsPerLod[lodIndex].materials.Resize(subMeshIndex + 1);
         }
 
         materialsPerLod[lodIndex].materials[subMeshIndex] = material;

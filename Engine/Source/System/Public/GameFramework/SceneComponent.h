@@ -17,6 +17,9 @@ namespace CE
 		/// @param component: Component to add as child.
 		void SetupAttachment(SceneComponent* component);
 
+		void DetachComponent(SceneComponent* component);
+
+		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 
 		Vec3 GetLocalPosition() const { return localPosition; }

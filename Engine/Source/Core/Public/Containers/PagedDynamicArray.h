@@ -452,11 +452,14 @@ namespace CE
 
         ValueType* GetData() const { return data; }
 
+        ValueType& operator*() const;
+        ValueType* operator->() const;
+
         void Free();
 
-        void Invalidate();
-
     private:
+
+        void Invalidate();
 
         template<typename PageType>
         PagedDynamicArrayHandle(ValueType* data, PageType* page);
@@ -515,6 +518,18 @@ namespace CE
             other.Invalidate();
         }
         return *this;
+    }
+
+    template <typename ValueType>
+    ValueType& PagedDynamicArrayHandle<ValueType>::operator*() const
+    {
+        return *data;
+    }
+
+    template <typename ValueType>
+    ValueType* PagedDynamicArrayHandle<ValueType>::operator->() const
+    {
+        return data;
     }
 
     template <typename ValueType>

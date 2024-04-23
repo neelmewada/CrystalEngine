@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreRHI.h"
 #include "CoreShader.h"
 #include "CoreMesh.h"
@@ -52,6 +52,15 @@ namespace CE::RPI
 #include "View.h"
 #include "RenderPipeline.h"
 
+// Mesh
+#include "VertexBuffer.h"
+#include "Model/ModelLod.h"
+#include "Model/ModelLodAsset.h"
+#include "Model/ModelAsset.h"
+#include "Model/Model.h"
+#include "Model/MeshDrawPacket.h"
+
+// Feature processors
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
 #include "Feature/StaticMeshFeatureProcessor.h"
@@ -68,12 +77,6 @@ namespace CE::RPI
 #include "Material/MaterialProperty.h"
 #include "Material/Material.h"
 #include "TextureAsset.h"
-
-#include "VertexBuffer.h"
-#include "Model/ModelLod.h"
-#include "Model/ModelLodAsset.h"
-#include "Model/ModelAsset.h"
-#include "Model/Model.h"
 
 #include "Shader/ShaderResourceGroup.h"
 #include "Shader/ShaderVariant.h"

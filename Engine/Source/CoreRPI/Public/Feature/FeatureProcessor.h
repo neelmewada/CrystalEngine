@@ -34,8 +34,9 @@ namespace CE::RPI
 
 		virtual void OnRenderEnd() {}
 
-	private:
+	protected:
 
+		RPI::Scene* scene = nullptr;
 
 		friend class Scene;
 	};

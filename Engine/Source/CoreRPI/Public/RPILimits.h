@@ -5,6 +5,8 @@ namespace CE::RPI::Limits
 
 	constexpr u32 MaxShadowCascadeCount = 4;
 
-	constexpr u32 MaxSubMeshCount = 1024;
+	constexpr u32 MaxSubMeshCount = 4096;
+
+	constexpr u32 MaxLodCount = 10;
 
 } // namespace CE::RPI

@@ -12,7 +12,8 @@ namespace CE
 	{
 		if (!component || component == this)
 			return;
-		if (ComponentExists(component))
+
+		if (ComponentExistsRecursive(component))
 		{
 			CE_LOG(Error, All, "SceneComponent::SetupAttachment called with a scene component that already exists in it's hierarcy");
 			return;
@@ -30,15 +31,62 @@ namespace CE
 		CE::Scene* scene = GetScene();
 		if (scene != nullptr)
 		{
-			scene->componentsByType[component->GetTypeId()][component->GetUuid()] = component;
+			Class* componentClass = component->GetClass();
+
+			while (componentClass->GetTypeId() != TYPEID(Object))
+			{
+				scene->componentsByType[componentClass->GetTypeId()][component->GetUuid()] = component;
+
+				componentClass = componentClass->GetSuperClass(0);
+			}
 		}
+
+		SetDirty();
+	}
+
+	void SceneComponent::DetachComponent(SceneComponent* component)
+	{
+		if (!component || component == this)
+			return;
+
+		if (!ComponentExists(component))
+			return;
+
+		component->parentComponent = nullptr;
+		component->owner = nullptr;
+		attachedComponents.Remove(component);
+
+		CE::Scene* scene = GetScene();
+		if (scene != nullptr)
+		{
+			Class* componentClass = component->GetClass();
+
+			while (componentClass->GetTypeId() != TYPEID(Object))
+			{
+				scene->componentsByType[componentClass->GetTypeId()].Remove(component->GetUuid());
+
+				componentClass = componentClass->GetSuperClass(0);
+			}
+		}
+
+		SetDirty();
+	}
+
+	bool SceneComponent::ComponentExistsRecursive(SceneComponent* component)
+	{
+		for (auto comp : attachedComponents)
+		{
+			if (comp == component || comp->ComponentExistsRecursive(component))
+				return true;
+		}
+		return false;
 	}
 
 	bool SceneComponent::ComponentExists(SceneComponent* component)
 	{
 		for (auto comp : attachedComponents)
 		{
-			if (comp == component || comp->ComponentExists(component))
+			if (comp == component)
 				return true;
 		}
 		return false;

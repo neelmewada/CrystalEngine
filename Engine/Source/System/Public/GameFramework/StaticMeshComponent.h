@@ -24,7 +24,7 @@ namespace CE
 		FIELD()
 		StaticMesh* staticMesh = nullptr;
 
-		s64 meshHandle = -1;
+		RPI::ModelHandle meshHandle{};
 
 		b8 meshChanged = false;
 	};

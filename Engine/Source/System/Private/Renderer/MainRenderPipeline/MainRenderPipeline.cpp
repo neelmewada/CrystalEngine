@@ -252,7 +252,7 @@ namespace CE
                 resolveBinding.name = "Resolve";
                 resolveBinding.slotType = PassSlotType::Output;
                 resolveBinding.attachmentUsage = ScopeAttachmentUsage::Resolve;
-                resolveBinding.attachment = renderPipeline->FindAttachment("PipelineOutput");
+                resolveBinding.attachment = pipelineOutput;
                 resolveBinding.connectedBinding = resolveBinding.fallbackBinding = nullptr;
 
                 resolvePass->AddAttachmentBinding(resolveBinding);

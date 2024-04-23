@@ -10,6 +10,12 @@ namespace CE::RPI
 
 	Scene::~Scene()
 	{
+		for (FeatureProcessor* fp : featureProcessors)
+		{
+			fp->Destroy();
+		}
+		featureProcessors.Clear();
+
 		RPISystem::Get().scenes.Remove(this);
 	}
 
@@ -27,6 +33,7 @@ namespace CE::RPI
 		FeatureProcessor* fp = CreateObject<FeatureProcessor>(GetTransientPackage(MODULE_NAME),
 			classType->GetName().GetLastComponent(), OF_Transient, classType);
 		featureProcessors.Add(fp);
+		fp->scene = this;
 		return fp;
 	}
 

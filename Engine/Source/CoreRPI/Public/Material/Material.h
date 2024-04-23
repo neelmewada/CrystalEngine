@@ -48,24 +48,24 @@ namespace CE::RPI
 
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		void InsertPropertyValue(Name propertyName, const MaterialPropertyValue& value, int index = -1);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		void RemovePropertyValue(Name propertyName, int index);
 
 		void ClearPropertyValue(Name propertyName);
 
 		const MaterialPropertyValue& GetPropertyValue(Name propertyName);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		const MaterialPropertyValue& GetPropertyValue(Name propertyName, int index);
         
-        inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+        RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
 		void CopyPropertiesFrom(RPI::Material* other);
 
-		inline void SetBaseMaterial(RPI::Material* mat) { baseMaterial = mat; }
+		void SetBaseMaterial(RPI::Material* mat) { baseMaterial = mat; }
 
 	private:
 

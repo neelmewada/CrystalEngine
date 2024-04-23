@@ -17,6 +17,7 @@ namespace CE
 
 		void Initialize() override;
 		void PostInitialize() override;
+		void PreShutdown() override;
 		void Shutdown() override;
 
 		void Tick(f32 deltaTime) override;
