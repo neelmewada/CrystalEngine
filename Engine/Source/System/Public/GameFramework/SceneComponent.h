@@ -38,8 +38,6 @@ namespace CE
 
 		void Tick(f32 delta) override;
 
-		bool IsDirty();
-
 		const Matrix4x4& GetTransform() const { return transform; }
 
 		const Matrix4x4& GetLocalTransform() const { return localTransform; }
@@ -49,6 +47,8 @@ namespace CE
 		bool IsTransformUpdated() const { return transformUpdated; }
 
 	private:
+
+		bool IsDirty();
 
 		void SetDirty();
 

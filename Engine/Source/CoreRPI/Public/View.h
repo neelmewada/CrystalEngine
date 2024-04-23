@@ -16,9 +16,11 @@ namespace CE::RPI
     
 	class CORERPI_API View final : public InstanceBase
 	{
-	public:
-
+	private:
 		View();
+
+	public:
+		
 		~View();
 
 		enum UsageFlags
@@ -30,14 +32,21 @@ namespace CE::RPI
 			UsageCustom = BIT(3),
 		};
 
+		static ViewPtr CreateView(const Name& name, UsageFlags usageFlags);
+
 		void SetDrawListMask(const RHI::DrawListMask& mask);
 
-		inline RHI::DrawListMask GetDrawListMask() const
+		const RHI::DrawListMask& GetDrawListMask() const
 		{
 			return drawListMask;
 		}
 
-		inline RHI::DrawListContext* GetDrawListContext()
+		RHI::DrawListMask& GetDrawListMask()
+		{
+			return drawListMask;
+		}
+
+		RHI::DrawListContext* GetDrawListContext()
 		{
 			return &drawListContext;
 		}
@@ -45,6 +54,8 @@ namespace CE::RPI
 		UsageFlags GetUsageFlags() const { return usageFlags; }
 
 		void SetUsageFlags(UsageFlags usageFlags) { this->usageFlags = usageFlags; }
+
+		PerViewConstants& GetViewConstants() { return viewConstants; }
 
 	private:
 
@@ -54,8 +65,11 @@ namespace CE::RPI
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
+		PerViewConstants viewConstants{};
+
 		b8 enabled = true;
 
+		Name name = "";
 		UsageFlags usageFlags = UsageCamera;
 	};
 

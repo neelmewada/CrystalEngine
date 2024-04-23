@@ -46,7 +46,7 @@ namespace CE::RPI
 		builder.AddShaderResourceGroup(objectSrg);
 		builder.AddShaderResourceGroup(material->GetShaderResourceGroup());
 
-
+		
 	}
 
 } // namespace CE::RPI

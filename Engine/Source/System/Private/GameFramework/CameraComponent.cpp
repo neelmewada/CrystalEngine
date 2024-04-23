@@ -6,16 +6,21 @@ namespace CE
     CameraComponent::CameraComponent()
     {
 		canTick = true;
+
+        if (!IsDefaultInstance())
+        {
+            rpiView = RPI::View::CreateView("Camera", View::UsageCamera);
+        }
     }
 
-	void CameraComponent::SetMainCamera(bool set)
-	{
-		isMainCamera = set;
+    CameraComponent::~CameraComponent()
+    {
+        rpiView = nullptr;
+    }
 
-		if (isMainCamera && GetScene() != nullptr)
-		{
-			GetScene()->mainCamera = this;
-		}
-	}
+    void CameraComponent::Tick(f32 delta)
+    {
+	    Super::Tick(delta);
+    }
 
 } // namespace CE

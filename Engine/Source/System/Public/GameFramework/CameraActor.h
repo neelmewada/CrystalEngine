@@ -10,9 +10,9 @@ namespace CE
 
         CameraActor();
 
-		inline CameraComponent* GetCameraComponent() const { return cameraComponent; }
+		CameraComponent* GetCameraComponent() const { return cameraComponent; }
 
-		inline void SetCameraComponent(CameraComponent* cameraComponent) { this->cameraComponent = cameraComponent; }
+		void SetCameraComponent(CameraComponent* cameraComponent) { this->cameraComponent = cameraComponent; }
 
     protected:
 

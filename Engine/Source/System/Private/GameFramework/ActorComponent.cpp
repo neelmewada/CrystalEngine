@@ -15,7 +15,7 @@ namespace CE
 
 	void ActorComponent::Tick(f32 delta)
 	{
-
+		
 	}
 
 	CE::Scene* ActorComponent::GetScene() const

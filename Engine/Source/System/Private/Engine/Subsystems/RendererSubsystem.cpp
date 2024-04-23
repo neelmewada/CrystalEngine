@@ -173,8 +173,8 @@ namespace CE
 		CE::Scene* scene = sceneSubsystem->GetActiveScene();
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 
-		RPISystem::Get().SimulationTick();
-		RPISystem::Get().RenderTick();
+		RPISystem::Get().SimulationTick(imageIndex);
+		RPISystem::Get().RenderTick(imageIndex);
 
 		SubmitDrawPackets(imageIndex);
 

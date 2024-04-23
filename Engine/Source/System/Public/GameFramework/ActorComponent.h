@@ -42,16 +42,14 @@ namespace CE
 		bool canTick = true;
 
 		FIELD()
-		bool isEnabled = true;
-
-		FIELD()
 		Actor* owner = nullptr;
 
 	private:
 
-		b8 hasBegunPlaying = false;
+		FIELD()
+		bool isEnabled = true;
 
-		s64 featureProcessorHandle = 0;
+		b8 hasBegunPlaying = false;
 
 		friend class Actor;
 		friend class RendererSubsystem;

@@ -51,6 +51,25 @@ namespace CE::RPI
 		return nullptr;
 	}
 
+	void Scene::AddView(PipelineViewTag viewTag, ViewPtr view)
+	{
+		PipelineViews& pipelineViews = viewsByTag[viewTag];
+		pipelineViews.viewType = PipelineViewType::Persistent;
+		pipelineViews.viewTag = viewTag;
+		pipelineViews.views.Add(view);
+	}
+
+	void Scene::RemoveView(PipelineViewTag viewTag, ViewPtr view)
+	{
+		PipelineViews& pipelineViews = viewsByTag[viewTag];
+		pipelineViews.views.Remove(view);
+	}
+
+	RHI::DrawListMask& Scene::GetDrawListMask(PipelineViewTag viewTag)
+	{
+		return viewsByTag[viewTag].drawListMask;
+	}
+
 	void Scene::Simulate(f32 currentTime)
 	{
 		for (FeatureProcessor* fp : featureProcessors)

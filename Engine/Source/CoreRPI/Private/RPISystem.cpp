@@ -83,7 +83,7 @@ namespace CE::RPI
         }
     }
 
-    void RPISystem::SimulationTick()
+    void RPISystem::SimulationTick(u32 imageIndex)
     {
         if (isFirstTick)
         {
@@ -99,7 +99,7 @@ namespace CE::RPI
         }
     }
 
-    void RPISystem::RenderTick()
+    void RPISystem::RenderTick(u32 imageIndex)
     {
         for (Scene* scene : scenes)
         {

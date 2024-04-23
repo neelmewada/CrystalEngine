@@ -35,6 +35,10 @@ namespace CE
 	class BitSet
 	{
 	public:
+
+		BitSet(SIZE_T value = 0) : impl(value)
+		{}
+
 		inline void Set(SIZE_T pos, bool value = true)
 		{
 			impl.set(pos, value);

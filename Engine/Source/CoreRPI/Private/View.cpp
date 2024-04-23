@@ -16,6 +16,14 @@ namespace CE::RPI
 		}
 	}
 
+	ViewPtr View::CreateView(const Name& name, UsageFlags usageFlags)
+	{
+		ViewPtr view = new View();
+		view->name = name;
+		view->usageFlags = usageFlags;
+		return view;
+	}
+
 	void View::SetDrawListMask(const RHI::DrawListMask& mask)
 	{
 		if (drawListMask != mask)

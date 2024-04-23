@@ -18,21 +18,28 @@ namespace CE
 
 		CameraComponent();
 
-		inline const Color& GetClearColor() const { return clearColor; }
+		virtual ~CameraComponent();
 
-		inline void SetClearColor(const Color& clearColor) { this->clearColor = clearColor; }
+		const Color& GetClearColor() const { return clearColor; }
 
-		inline bool IsMainCamera() const { return isMainCamera; }
+		void SetClearColor(const Color& clearColor) { this->clearColor = clearColor; }
 
-		void SetMainCamera(bool set = true);
+		CameraProjection GetProjection() const { return projection; }
+		void SetProjection(CameraProjection projection) { this->projection = projection; }
 
-		inline CameraProjection GetProjection() const { return projection; }
-		inline void SetProjection(CameraProjection projection) { this->projection = projection; }
+		float GetFarPlane() const { return farPlane; }
+
+    	float GetNearPlane() const { return nearPlane; }
+
+		float GetFieldOfView() const { return fieldOfView; }
+
+		RPI::ViewPtr GetRpiView() const { return rpiView; }
+
+    protected:
+
+		void Tick(f32 delta) override;
 
 	private:
-
-		FIELD()
-		b8 isMainCamera = false;
 
 		FIELD()
 		Color clearColor = Color::RGBA(36, 85, 163);
@@ -52,6 +59,9 @@ namespace CE
 		FIELD(ReadOnly)
 		Matrix4x4 projectionMatrix{};
 
+		RPI::ViewPtr rpiView = nullptr;
+
+		friend class CE::Scene;
 		friend class RendererSubsystem;
 	};
 

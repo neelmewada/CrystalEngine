@@ -72,6 +72,8 @@ namespace CE
 		void OnActorChainAttached(Actor* actor);
 		void OnActorChainDetached(Actor* actor);
 
+		void OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor);
+
 	protected:
 
 		FIELD()

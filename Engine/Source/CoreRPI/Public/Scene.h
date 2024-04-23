@@ -31,6 +31,11 @@ namespace CE::RPI
 			return (TFeatureProcessor*)GetFeatureProcessor(TFeatureProcessor::Type());
 		}
 
+		void AddView(PipelineViewTag viewTag, ViewPtr view);
+		void RemoveView(PipelineViewTag viewTag, ViewPtr view);
+
+		RHI::DrawListMask& GetDrawListMask(PipelineViewTag viewTag);
+
 		void Simulate(f32 currentTime);
 
 		void PrepareRender(f32 currentTime);
@@ -53,6 +58,8 @@ namespace CE::RPI
 
 		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
 		PipelineViewsByTag viewsByTag{};
+
+		friend class MeshDrawPacket;
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class ::RPI_Scene_Test;

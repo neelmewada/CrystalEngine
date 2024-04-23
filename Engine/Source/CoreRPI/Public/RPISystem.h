@@ -21,8 +21,8 @@ namespace CE::RPI
 
 		void Shutdown();
 
-		void SimulationTick();
-		void RenderTick();
+		void SimulationTick(u32 imageIndex);
+		void RenderTick(u32 imageIndex);
 
 		f32 GetCurrentTime() const;
 

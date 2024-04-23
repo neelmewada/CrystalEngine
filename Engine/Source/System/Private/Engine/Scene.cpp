@@ -74,8 +74,15 @@ namespace CE
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
 				cameras.Add(camera);
-				if (camera->IsMainCamera())
+				if (mainCamera == nullptr)
+				{
 					mainCamera = camera;
+					rpiScene->AddView("MainCamera", mainCamera->rpiView);
+				}
+				else
+				{
+					
+				}
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -146,7 +153,13 @@ namespace CE
             
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
-				cameras.Remove((CameraComponent*)sceneComponent);
+				CameraComponent* camera = (CameraComponent*)sceneComponent;
+				cameras.Remove(camera);
+				if (mainCamera == camera)
+				{
+					rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
+					mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
+				}
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -199,6 +212,11 @@ namespace CE
         };
 
 		recursivelyRemove(actor);
+	}
+
+	void CE::Scene::OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor)
+	{
+
 	}
 
 } // namespace CE

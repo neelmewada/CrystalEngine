@@ -28,7 +28,6 @@ namespace CE::RPI
 	};
 
 	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
-
 	
 	class CORERPI_API RenderPipeline
 	{
@@ -55,7 +54,7 @@ namespace CE::RPI
 		Name rootPassDefinitionName{};
 
 		/// @brief Name tag of the main view.
-		Name mainViewTag = "MainCamera";
+		PipelineViewTag mainViewTag = "MainCamera";
 
 		/// @brief Scene this render pipeline belongs to.
 		Scene* scene = nullptr;
