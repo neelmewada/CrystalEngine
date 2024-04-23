@@ -35,6 +35,14 @@ namespace CE
 
     public:
 
+        class PageIterator;
+        struct IteratorRange
+        {
+            PageIterator begin;
+            PageIterator end;
+        };
+
+        using ParallelRanges = Array<IteratorRange>;
         using Handle = PagedDynamicArrayHandle<T>;
 
         ~PagedDynamicArray();
@@ -46,6 +54,8 @@ namespace CE
         SIZE_T GetCount() const { return itemCount; }
 
         SIZE_T GetPageCount() const { return pageCounter; }
+
+        ParallelRanges GetParallelRanges();
 
         iterator begin();
         iterator end();
@@ -152,6 +162,120 @@ namespace CE
     };
 
     template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    class PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator
+    {
+        using this_type = PageIterator;
+        using container_type = PagedDynamicArray;
+    public:
+
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = T;
+        using reference = T&;
+        using pointer = T*;
+
+        PageIterator() = default;
+        explicit PageIterator(Page* page);
+
+        reference operator*() const;
+        pointer operator->() const;
+
+        bool operator==(const this_type& rhs) const;
+        bool operator!=(const this_type& rhs) const;
+
+        this_type& operator++();
+        this_type operator++(int);
+
+        SIZE_T GetPageIndex() const;
+
+    private:
+
+        void SkipEmptyBits();
+        void SetItemAndAdvanceIterator();
+
+        Page* page = nullptr;
+        SIZE_T bitIndex = 0;
+        T* item = nullptr;
+    };
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::PageIterator(Page* page)
+	    : page(page)
+    {
+        if (page != nullptr)
+        {
+            SkipEmptyBits();
+        }
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    auto PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator*() const -> reference
+    {
+        return *item;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    auto PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator->() const -> pointer
+    {
+        return item;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    bool PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator==(const this_type& rhs) const
+    {
+        return rhs.item == item;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    bool PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator!=(const this_type& rhs) const
+    {
+        return !operator==(rhs);
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    auto PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator++() -> this_type&
+    {
+        SkipEmptyBits();
+
+        return *this;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    auto PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator++(int) -> this_type
+    {
+        this_type temp = *this;
+        ++this;
+        return temp;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    SIZE_T PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::GetPageIndex() const
+    {
+        return page->pageIndex;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    void PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::SkipEmptyBits()
+    {
+        for (; bitIndex < ElementsPerPage && !page->slots.Test(bitIndex); bitIndex++)
+        {}
+
+        if (bitIndex >= ElementsPerPage) // Done with this page, so it is end of page iterator.
+        {
+            item = nullptr;
+            return;
+        }
+
+        SetItemAndAdvanceIterator();
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    void PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::SetItemAndAdvanceIterator()
+    {
+        item = page->GetItem(bitIndex);
+        bitIndex++;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
     PagedDynamicArrayHandle<T> PagedDynamicArray<T, ElementsPerPage, Allocator>::Insert(const T& value)
     {
         while (firstAvailablePage)
@@ -207,6 +331,24 @@ namespace CE
 
         firstPage = firstAvailablePage = nullptr;
         pageCounter = itemCount = 0;
+    }
+
+    template <typename T, SIZE_T ElementsPerPage, class Allocator>
+    auto PagedDynamicArray<T, ElementsPerPage, Allocator>::GetParallelRanges() -> ParallelRanges
+    {
+        ParallelRanges ranges{};
+        Page* page = firstPage;
+
+        while (page)
+        {
+            if (!page->IsEmpty())
+            {
+                ranges.Add({ PageIterator(page), PageIterator(nullptr) });
+            }
+            page = page->nextPage;
+        }
+
+        return ranges;
     }
 
     template <typename T, SIZE_T ElementsPerPage, class Allocator>
@@ -475,6 +617,8 @@ namespace CE
         void* page = nullptr;
         ValueType* data = nullptr;
     };
+
+
 
     template <typename T, SIZE_T ElementsPerPage, class Allocator>
     void PagedDynamicArray<T, ElementsPerPage, Allocator>::Remove(Handle& handle)

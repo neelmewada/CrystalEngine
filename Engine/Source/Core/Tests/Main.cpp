@@ -868,6 +868,8 @@ TEST(Containers, PagedDynamicArray)
 
 	constexpr int totalCount = 32;
 
+	// Insert & Remove
+
 	for (int i = 0; i < totalCount; ++i)
 	{
 		HandleStruct* handleEntry = new HandleStruct();
@@ -902,6 +904,29 @@ TEST(Containers, PagedDynamicArray)
 			EXPECT_TRUE(foundValues.Exists(i));
 		}
 	}
+
+	// Page Iterator
+
+	auto parallelRanges = array.GetParallelRanges();
+
+	for (int i = 0; i < parallelRanges.GetSize(); ++i)
+	{
+		const auto& parallelRange = parallelRanges[i];
+
+		for (auto it = parallelRange.begin; it != parallelRange.end; ++it)
+		{
+			EXPECT_EQ(it.GetPageIndex(), i);
+
+			EXPECT_NE(it->index, 0);
+			EXPECT_NE(it->index, 2);
+			EXPECT_NE(it->index, 6);
+			EXPECT_NE(it->index, 12);
+
+			EXPECT_TRUE(foundValues.Exists(it->index));
+		}
+	}
+
+	// Reuse empty slots
 
 	{
 		handles[0] = new HandleStruct();
