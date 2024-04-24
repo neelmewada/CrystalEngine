@@ -26,10 +26,10 @@ namespace CE::RPI
 		defaultMaterial = new RPI::Material(drawShader);
 		defaultMaterial->SelectVariant(drawShader->GetDefaultVariantIndex());
 
-		RHI::ShaderResourceGroupLayout perViewSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
+		RHI::ShaderResourceGroupLayout perViewSrgLayout = defaultMaterial->GetCurrentOpaqueShader()->GetSrgLayout(RHI::SRGType::PerView);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 
-		RHI::ShaderResourceGroupLayout perDrawSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
+		RHI::ShaderResourceGroupLayout perDrawSrgLayout = defaultMaterial->GetCurrentOpaqueShader()->GetSrgLayout(RHI::SRGType::PerDraw);
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
 
 		for (int i = 0; i < numFramesInFlight; i++)
@@ -1073,7 +1073,7 @@ namespace CE::RPI
 
 					request.drawItemTag = drawListTag;
 					request.drawFilterMask = RHI::DrawFilterMask::ALL;
-					request.pipelineState = material->GetCurrentShader()->GetPipeline(multisampling);
+					request.pipelineState = material->GetCurrentOpaqueShader()->GetPipeline(multisampling);
 
 					builder.AddDrawItem(request);
 				}

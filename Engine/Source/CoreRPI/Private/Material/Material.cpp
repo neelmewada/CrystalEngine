@@ -2,18 +2,16 @@
 
 namespace CE::RPI
 {
-	Material::Material(Shader* shader)
+
+	Material::Material(ShaderCollection* shaderCollection)
+		: shaderCollection(shaderCollection)
 	{
-		SetShader(shader);
+
 	}
 
 	Material::~Material()
 	{
-		if (shaderResourceGroup)
-		{
-            delete shaderResourceGroup;
-		}
-        shaderResourceGroup = nullptr;
+		delete shaderResourceGroup; shaderResourceGroup = nullptr;
 
         for (int i = 0; i < buffersByVariableNamePerImage.GetSize(); i++)
         {
@@ -25,19 +23,22 @@ namespace CE::RPI
         }
 	}
 
-	void Material::SetShader(Shader* shader)
+	ShaderCollection* Material::GetShaderCollection() const
 	{
-		if (this->shader == shader)
-			return;
+        return shaderCollection;
+	}
 
-        if (shaderResourceGroup)
-        {
-            delete shaderResourceGroup;
-        }
-        shaderResourceGroup = nullptr;
+	void Material::SetShaderCollection(ShaderCollection* shaderCollection)
+	{
+        this->shaderCollection = shaderCollection;
 
-		this->shader = shader;
-		this->shaderVariantIndex = shader->defaultVariantIndex;
+        delete shaderResourceGroup; shaderResourceGroup = nullptr;
+
+        opaqueShader = GetOpaqueShader();
+        if (!opaqueShader)
+            return;
+
+        this->shaderVariantIndex = opaqueShader->defaultVariantIndex;
 
         for (int i = 0; i < buffersByVariableNamePerImage.GetSize(); i++)
         {
@@ -48,13 +49,35 @@ namespace CE::RPI
             buffersByVariableNamePerImage[i].Clear();
         }
 
-		RecreateShaderResourceGroup();
+        RecreateShaderResourceGroup();
         FlushProperties();
 	}
 
-	ShaderVariant* Material::GetCurrentShader() const
+	Shader* Material::GetOpaqueShader() const
 	{
-		return shader->GetVariant(shaderVariantIndex);
+        if (shaderCollection == nullptr)
+            return nullptr;
+
+        DrawListTag opaqueTag = RPISystem::Get().GetDrawListTagRegistry()->FindTag("opaque");
+        if (!opaqueTag.IsValid())
+            return nullptr;
+
+        for (const auto& item : *shaderCollection)
+        {
+            if (item.shader->drawListTag == opaqueTag || item.drawListOverride == opaqueTag)
+                return item.shader;
+        }
+
+        return nullptr;
+	}
+
+	ShaderVariant* Material::GetCurrentOpaqueShader()
+	{
+        if (!opaqueShader)
+            opaqueShader = GetOpaqueShader();
+        if (!opaqueShader)
+            return nullptr;
+		return opaqueShader->GetVariant(shaderVariantIndex);
 	}
 
 	void Material::SelectVariant(u32 variantIndex)
@@ -79,6 +102,21 @@ namespace CE::RPI
         }
 
         properties.Clear();
+    }
+
+    void Material::SetCustomShaderItem(int customItemIndex)
+    {
+        this->customShaderItem = customItemIndex;
+    }
+
+    RPI::Shader* Material::GetCustomShaderItem()
+    {
+        if (!shaderCollection)
+            return nullptr;
+		if (customShaderItem < 0 || customShaderItem >= shaderCollection->GetSize())
+            return nullptr;
+
+        return shaderCollection->At(customShaderItem).shader;
     }
 
     void Material::SetPropertyValue(Name propertyName, const MaterialPropertyValue& value)
@@ -468,7 +506,7 @@ namespace CE::RPI
 
 	void Material::RecreateShaderResourceGroup()
 	{
-        ShaderVariant* currentShader = GetCurrentShader();
+        ShaderVariant* currentShader = GetCurrentOpaqueShader();
         if (!currentShader || !currentShader->GetPipeline())
             return;
 

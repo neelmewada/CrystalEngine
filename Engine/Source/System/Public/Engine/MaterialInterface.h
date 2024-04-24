@@ -94,7 +94,7 @@ namespace CE
 
         virtual void ApplyProperties() = 0;
 
-        virtual void SetPass(u32 passIndex) = 0;
+        virtual void SetCustomPass(u32 passIndex) = 0;
 
         virtual RPI::Material* GetRpiMaterial() = 0;
 
@@ -104,7 +104,7 @@ namespace CE
 
         virtual HashMap<Name, MaterialProperty> GetAllProperties() = 0;
 
-        u32 passIndex = 0;
+        int passIndex = -1;
 
         friend class CE::Material;
         friend class CE::MaterialInstance;

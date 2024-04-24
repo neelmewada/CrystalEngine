@@ -73,16 +73,7 @@ namespace CE
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
-				cameras.Add(camera);
-				if (mainCamera == nullptr)
-				{
-					mainCamera = camera;
-					rpiScene->AddView("MainCamera", mainCamera->rpiView);
-				}
-				else
-				{
-					
-				}
+				OnCameraComponentAttached(camera);
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -154,12 +145,7 @@ namespace CE
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
-				cameras.Remove(camera);
-				if (mainCamera == camera)
-				{
-					rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
-					mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
-				}
+				OnCameraComponentDetached(camera);
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -212,6 +198,34 @@ namespace CE
         };
 
 		recursivelyRemove(actor);
+	}
+
+	void CE::Scene::OnCameraComponentAttached(CameraComponent* camera)
+	{
+		cameras.Add(camera);
+		if (mainCamera == nullptr)
+		{
+			mainCamera = camera;
+			rpiScene->AddView("MainCamera", mainCamera->rpiView);
+		}
+		else
+		{
+			rpiScene->AddView("Camera", camera->rpiView);
+		}
+	}
+
+	void CE::Scene::OnCameraComponentDetached(CameraComponent* camera)
+	{
+		cameras.Remove(camera);
+		if (mainCamera == camera)
+		{
+			rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
+			mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
+		}
+		else
+		{
+			rpiScene->RemoveView("Camera", camera->rpiView);
+		}
 	}
 
 	void CE::Scene::OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor)

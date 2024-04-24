@@ -284,15 +284,16 @@ namespace CE::RPI
 		return pipelineCollection->GetPipeline(variant);
 	}
 
-	RHI::ShaderResourceGroupLayout ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
+	const RHI::ShaderResourceGroupLayout& ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
 	{
 		for (const auto& srgLayout : pipelineDesc.srgLayouts)
 		{
 			if (srgLayout.srgType == srgType)
 				return srgLayout;
 		}
-
-		return RHI::ShaderResourceGroupLayout();
+		
+		thread_local RHI::ShaderResourceGroupLayout empty{};
+		return empty;
 	}
 
 } // namespace CE::RPI

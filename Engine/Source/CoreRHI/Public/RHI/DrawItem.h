@@ -2,6 +2,7 @@
 
 namespace CE::RHI
 {
+	class GraphicsPipelineCollection;
 
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
@@ -84,6 +85,9 @@ namespace CE::RHI
 
 		/// @brief The pipeline to use for this draw call.
 		RHI::PipelineState* pipelineState = nullptr;
+
+		/// @brief A collection of pipeline variants to use for draw call based on render pipeline.
+		RHI::GraphicsPipelineCollection* pipelineCollection = nullptr;
 
 		/// @brief Index buffer to bind for this draw call.
 		RHI::IndexBufferView* indexBufferView = nullptr;

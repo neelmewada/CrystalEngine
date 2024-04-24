@@ -111,6 +111,10 @@ TEST(RPI, Scene)
 		SceneComponent* subComponent = CreateObject<SceneComponent>(meshComponent, "SubComponent");
 		meshComponent->SetupAttachment(subComponent);
 
+		CameraComponent* cameraComponent = CreateObject<CameraComponent>(meshComponent, "Camera");
+		cameraComponent->SetLocalPosition(Vec3(0, 0, -10));
+		meshComponent->SetupAttachment(cameraComponent);
+
 		constexpr f32 delta = 0.016f;
 
 		gEngine->Tick(delta);

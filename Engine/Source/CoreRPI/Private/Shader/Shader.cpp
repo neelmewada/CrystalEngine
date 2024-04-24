@@ -2,14 +2,20 @@
 
 namespace CE::RPI
 {
-    
-	Shader::Shader()
+
+	Shader::Shader(RHI::DrawListTag drawListTag) : drawListTag(drawListTag)
 	{
 
 	}
 
 	Shader::~Shader()
 	{
+		if (drawListTag.IsValid())
+		{
+			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+			drawListTag = {};
+		}
+
 		for (RPI::ShaderVariant* variant : variants)
 		{
 			delete variant;

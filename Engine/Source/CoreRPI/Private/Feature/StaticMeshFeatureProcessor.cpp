@@ -34,12 +34,24 @@ namespace CE::RPI
 		return false;
 	}
 
-
 	void StaticMeshFeatureProcessor::Simulate(const SimulatePacket& packet)
 	{
 		Super::Simulate(packet);
 
-
+		auto parallelRanges = modelInstances.GetParallelRanges();
+		for (const auto& parallelRange : parallelRanges) // TODO: Implement multi-threaded processing
+		{
+			for (auto it = parallelRange.begin; it != parallelRange.end; ++it)
+			{
+				for (int i = 0; i < it->drawPacketsListByLod.GetSize(); ++i)
+				{
+					for (int j = 0; j < it->drawPacketsListByLod[i].GetSize(); ++j)
+					{
+						it->drawPacketsListByLod[i][j].Update(scene);
+					}
+				}
+			}
+		}
 	}
 
 	void StaticMeshFeatureProcessor::Render(const RenderPacket& packet)

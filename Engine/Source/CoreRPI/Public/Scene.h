@@ -12,6 +12,12 @@ namespace CE::RPI
 	{
 	public:
 
+		struct PipelineStateData
+		{
+			RHI::MultisampleState multisampleState{};
+			Array<RHI::Format> colorFormats{};
+		};
+
 		Scene();
 		~Scene();
 
@@ -55,6 +61,8 @@ namespace CE::RPI
 
 		/// @brief A Scene shader resource group (SRG_PerScene).
 		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+
+		PipelineViewTag mainViewTag = "MainCamera";
 
 		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
 		PipelineViewsByTag viewsByTag{};

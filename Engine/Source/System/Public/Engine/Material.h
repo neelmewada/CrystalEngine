@@ -9,40 +9,40 @@ namespace CE
     public:
 
         Material();
-        virtual ~Material();
+        ~Material();
 
         void SetShader(CE::Shader* shader);
 
-        virtual void SetProperty(const Name& name, u32 value) override;
+        void SetProperty(const Name& name, u32 value) override;
 
-        virtual void SetProperty(const Name& name, s32 value) override;
+        void SetProperty(const Name& name, s32 value) override;
 
-        virtual void SetProperty(const Name& name, f32 value) override;
+        void SetProperty(const Name& name, f32 value) override;
 
-        virtual void SetProperty(const Name& name, Vec4 value) override;
+        void SetProperty(const Name& name, Vec4 value) override;
 
-        virtual void SetProperty(const Name& name, Color value) override;
+        void SetProperty(const Name& name, Color value) override;
 
-        virtual void SetProperty(const Name& name, const Matrix4x4& value) override;
+        void SetProperty(const Name& name, const Matrix4x4& value) override;
 
-        virtual void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
+        void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
 
-        virtual void ApplyProperties() override;
+        void ApplyProperties() override;
 
-        virtual void SetPass(u32 passIndex) override;
+        void SetCustomPass(u32 passIndex) override;
 
-        virtual RPI::Material* GetRpiMaterial() override;
+        RPI::Material* GetRpiMaterial() override;
 
-        virtual void OnAfterDeserialize() override;
+        void OnAfterDeserialize() override;
 
-        virtual CE::Shader* GetShader() override
+        CE::Shader* GetShader() override
         {
             return shader;
         }
 
     private:
 
-        virtual HashMap<Name, MaterialProperty> GetAllProperties() override;
+        HashMap<Name, MaterialProperty> GetAllProperties() override;
 
         RPI::Material* material = nullptr;
 
@@ -53,6 +53,7 @@ namespace CE
         Array<MaterialProperty> properties{};
 
         bool valuesModified = true;
+        ShaderCollection* shaderCollection = nullptr;
 
         HashMap<Name, MaterialProperty> propertyMap{};
 

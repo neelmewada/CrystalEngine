@@ -804,7 +804,7 @@ namespace CE::RPI
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
 
-				RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentShader()->GetPipeline();
+				RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentOpaqueShader()->GetPipeline();
 				cmdList->BindPipelineState(pipeline);
 
 				cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
@@ -852,7 +852,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = grayscaleMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = grayscaleMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -932,7 +932,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = rowAverageMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = rowAverageMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -972,7 +972,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = columnAverageMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = columnAverageMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1004,7 +1004,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = pdfConditionalMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = pdfConditionalMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1050,7 +1050,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = pdfMarginalMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = pdfMarginalMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1082,7 +1082,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = cdfConditionalInverseMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = cdfConditionalInverseMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1114,7 +1114,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = pdfJointMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = pdfJointMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1167,7 +1167,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = cdfMarginalInverseMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = cdfMarginalInverseMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1214,7 +1214,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = diffuseConvolutionMaterial->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = diffuseConvolutionMaterial->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1263,7 +1263,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = equirectDiffuseIrradianceMaterials[i]->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = equirectDiffuseIrradianceMaterials[i]->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
@@ -1329,7 +1329,7 @@ namespace CE::RPI
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
 
-				RHI::PipelineState* pipeline = mipMapMaterials[i]->GetCurrentShader()->GetPipeline();
+				RHI::PipelineState* pipeline = mipMapMaterials[i]->GetCurrentOpaqueShader()->GetPipeline();
 				cmdList->BindPipelineState(pipeline);
 
 				cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1381,7 +1381,7 @@ namespace CE::RPI
 					scissorState.height = viewportState.height;
 					cmdList->SetScissors(1, &scissorState);
 
-					RHI::PipelineState* pipeline = specularConvolutionMaterials[mip]->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = specularConvolutionMaterials[mip]->GetCurrentOpaqueShader()->GetPipeline();
 					cmdList->BindPipelineState(pipeline);
 
 					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
@@ -1427,7 +1427,7 @@ namespace CE::RPI
 						scissorState.height = viewportState.height;
 						cmdList->SetScissors(1, &scissorState);
 
-						RHI::PipelineState* pipeline = equirectToSpecularConvolutionMaterials[face][mip]->GetCurrentShader()->GetPipeline();
+						RHI::PipelineState* pipeline = equirectToSpecularConvolutionMaterials[face][mip]->GetCurrentOpaqueShader()->GetPipeline();
 						cmdList->BindPipelineState(pipeline);
 
 						cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);

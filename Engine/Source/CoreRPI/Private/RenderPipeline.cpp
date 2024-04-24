@@ -10,7 +10,6 @@ namespace CE::RPI
 		PassImageAttachmentDesc pipelineOutputDesc{};
 		pipelineOutputDesc.name = "PipelineOutput";
 		pipelineOutputDesc.lifetime = AttachmentLifetimeType::External;
-		pipelineOutputDesc.fallbackFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 		pipelineOutputDesc.imageDescriptor.dimension = Dimension::Dim2D;
 		pipelineOutputDesc.imageDescriptor.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
 

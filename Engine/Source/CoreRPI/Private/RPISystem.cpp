@@ -91,7 +91,7 @@ namespace CE::RPI
             isFirstTick = false;
         }
 
-        currentTime = (f32)(clock() - startTime) / CLOCKS_PER_SEC;
+        currentTime = GetCurrentTime();
 
         for (Scene* scene : scenes)
         {

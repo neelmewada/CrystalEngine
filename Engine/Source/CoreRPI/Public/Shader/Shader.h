@@ -7,7 +7,7 @@ namespace CE::RPI
 	{
 	public:
 
-		Shader();
+		Shader(RHI::DrawListTag drawListTag = {});
 		~Shader();
 
 		inline u32 GetVariantCount() const { return variants.GetSize(); }
@@ -27,11 +27,17 @@ namespace CE::RPI
 
 		inline void SetDefaultVariantIndex(u32 index) { defaultVariantIndex = index; }
 
+		void SetDrawListTag(RHI::DrawListTag tag) { drawListTag = tag; }
+
+		RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
+
 	private:
 
 		u32 defaultVariantIndex = 0;
 
 		Array<RPI::ShaderVariant*> variants{};
+
+		RHI::DrawListTag drawListTag{};
 
 		friend class Material;
 	};

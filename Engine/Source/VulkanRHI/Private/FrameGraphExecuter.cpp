@@ -627,6 +627,8 @@ namespace CE::Vulkan
 
 								if (drawItem->enabled)
 								{
+									// TODO: Try using pipelineCollection instead of pipelineState
+
 									// Bind Pipeline
 									RHI::PipelineState* pipeline = drawItem->pipelineState;
 									if (pipeline)

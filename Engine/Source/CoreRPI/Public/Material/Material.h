@@ -10,6 +10,7 @@ namespace CE
 namespace CE::RPI
 {
 	class Shader;
+	class ShaderCollection;
 	class ShaderVariant;
 
 	typedef HashMap<Name, MaterialPropertyValueArray> MaterialPropertyValueMap;
@@ -18,14 +19,16 @@ namespace CE::RPI
 	{
 	public:
 
-		Material(Shader* shader);
+		Material(ShaderCollection* shaderCollection);
 		~Material();
 
-		void SetShader(Shader* shader);
+		ShaderCollection* GetShaderCollection() const;
 
-		inline Shader* GetShader() const { return shader; }
+		void SetShaderCollection(ShaderCollection* shaderCollection);
 
-		ShaderVariant* GetCurrentShader() const;
+		Shader* GetOpaqueShader() const;
+
+		ShaderVariant* GetCurrentOpaqueShader();
 
 		inline u32 GetCurrentVariantIndex() const { return shaderVariantIndex; }
 
@@ -45,6 +48,10 @@ namespace CE::RPI
 		bool PropertyExists(Name name) const;
         
 		void ClearAllValues();
+
+		void SetCustomShaderItem(int customItemIndex);
+
+		RPI::Shader* GetCustomShaderItem();
 
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
 
@@ -82,9 +89,13 @@ namespace CE::RPI
 
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
-		Shader* shader = nullptr;
+		ShaderCollection* shaderCollection = nullptr;
+
+		RPI::Shader* opaqueShader = nullptr;
 
 		u32 shaderVariantIndex = 0;
+
+		int customShaderItem = -1;
 
 		friend class MaterialInstance;
 		friend class MaterialInterface;

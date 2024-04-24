@@ -23,9 +23,11 @@ namespace CE
             return;
 
         valuesModified = true;
-        
+
+        shaderCollection = shader->GetShaderCollection();
+
         this->shader = shader;
-        auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
+        auto newMaterial = new RPI::Material(shader->GetShaderCollection());
 
         if (material)
         {
@@ -38,26 +40,16 @@ namespace CE
         this->material = newMaterial;
     }
 
-    void CE::Material::SetPass(u32 passIndex)
+    void CE::Material::SetCustomPass(u32 passIndex)
     {
-        if (this->passIndex == passIndex)
+        if (this->passIndex == passIndex || material == nullptr)
             return;
-
-        valuesModified = true;
-
-        this->passIndex = passIndex;
-
-        auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
 
         if (material)
         {
-            newMaterial->CopyPropertiesFrom(material);
-
-            delete material;
-            material = nullptr;
+            this->passIndex = passIndex;
+            material->SetCustomShaderItem(passIndex);
         }
-        
-        this->material = newMaterial;
     }
 
     RPI::Material* CE::Material::GetRpiMaterial()
@@ -73,19 +65,11 @@ namespace CE
 
         if (shader != nullptr)
         {
-            this->passIndex = 0;
+            CE::Shader* resetShader = shader;
+            shaderCollection = nullptr;
+            this->shader = nullptr;
 
-            auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
-
-            if (material)
-            {
-                newMaterial->CopyPropertiesFrom(material);
-
-                delete material;
-                material = nullptr;
-            }
-
-            this->material = newMaterial;
+            SetShader(resetShader);
         }
 
         propertyMap.Clear();

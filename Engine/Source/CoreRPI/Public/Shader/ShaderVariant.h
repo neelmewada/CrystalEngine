@@ -37,11 +37,6 @@ namespace CE::RPI
 		}
 	};
 
-	enum class ShaderVariantFlag
-	{
-		None = 0
-	};
-	ENUM_CLASS_FLAGS(ShaderVariantFlag);
 
 	class CORERPI_API ShaderVariant final
 	{
@@ -60,14 +55,12 @@ namespace CE::RPI
 
 		RHI::PipelineState* GetPipeline(const RHI::MultisampleState& multisampleState);
 
-		RHI::ShaderResourceGroupLayout GetSrgLayout(RHI::SRGType srgType);
+		const RHI::ShaderResourceGroupLayout& GetSrgLayout(RHI::SRGType srgType);
 
 	private:
 
 		SIZE_T variantId = 0;
 		Array<Name> defineFlags{};
-
-		ShaderVariantFlag flags{};
 
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
 

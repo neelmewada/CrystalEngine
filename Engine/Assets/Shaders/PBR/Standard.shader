@@ -22,6 +22,38 @@ Shader "PBR/Standard"
 
         Pass
         {
+            Name "Depth"
+            Tags {
+                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="depth"
+            }
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+
+            #include "Core/Depth.hlsli"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Shadow"
+            Tags {
+                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="shadow"
+            }
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+
+            #include "Core/Depth.hlsli"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
             Name "Opaque"
             Tags { 
                 "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque"

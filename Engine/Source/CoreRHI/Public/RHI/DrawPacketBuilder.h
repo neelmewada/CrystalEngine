@@ -28,6 +28,8 @@ namespace CE::RHI
 
 			PipelineState* pipelineState = nullptr;
 
+			GraphicsPipelineCollection* pipelineCollection = nullptr;
+
 			DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
 		};
 

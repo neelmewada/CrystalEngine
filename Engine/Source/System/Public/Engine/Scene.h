@@ -72,6 +72,9 @@ namespace CE
 		void OnActorChainAttached(Actor* actor);
 		void OnActorChainDetached(Actor* actor);
 
+		void OnCameraComponentAttached(CameraComponent* cameraComponent);
+		void OnCameraComponentDetached(CameraComponent* cameraComponent);
+
 		void OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor);
 
 	protected:

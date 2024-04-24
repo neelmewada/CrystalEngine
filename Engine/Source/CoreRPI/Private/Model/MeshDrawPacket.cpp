@@ -39,6 +39,10 @@ namespace CE::RPI
 			delete drawPacket; drawPacket = nullptr;
 		}
 
+		ShaderCollection* shaderCollection = material->GetShaderCollection();
+		if (shaderCollection == nullptr)
+			return;
+
 		RHI::DrawPacketBuilder builder{};
 
 		builder.SetDrawArguments(mesh->drawArguments);
@@ -46,7 +50,47 @@ namespace CE::RPI
 		builder.AddShaderResourceGroup(objectSrg);
 		builder.AddShaderResourceGroup(material->GetShaderResourceGroup());
 
-		
+		for (int i = 0; i < perDrawSrgs.GetSize(); ++i)
+		{
+			delete perDrawSrgs[i]; perDrawSrgs[i] = nullptr;
+		}
+		perDrawSrgs.Clear();
+
+		for (int i = 0; i < shaderCollection->GetSize(); i++)
+		{
+			const ShaderCollection::Item& shaderItem = shaderCollection->At(i);
+
+			DrawListTag drawListTag = shaderItem.drawListOverride;
+			if (!drawListTag.IsValid())
+			{
+				drawListTag = shaderItem.shader->GetDrawListTag();
+			}
+
+			if (!shaderItem.enabled || !drawListTag.IsValid())
+			{
+				continue;
+			}
+
+			RPI::Shader* shader = shaderItem.shader;
+
+			// TODO: Implement dynamic shader variant selection
+			RPI::ShaderVariant* variant = shader->GetVariant(shader->GetDefaultVariantIndex());
+
+			const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
+
+			RHI::ShaderResourceGroup* perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
+			perDrawSrgs.Add(perDrawSrg);
+
+			DrawPacketBuilder::DrawItemRequest drawItem{};
+			drawItem.drawFilterMask = DrawFilterMask::ALL;
+			drawItem.drawItemTag = drawListTag;
+			drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
+			drawItem.stencilRef = stencilRef;
+			// TODO: Get correct pipeline based on MSAA, color formats, etc
+			drawItem.pipelineState = variant->GetPipeline();
+
+			builder.AddDrawItem(drawItem);
+		}
 	}
 
 } // namespace CE::RPI

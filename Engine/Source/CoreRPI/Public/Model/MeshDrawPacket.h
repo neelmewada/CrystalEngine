@@ -18,6 +18,8 @@ namespace CE::RPI
 
         void Update(RPI::Scene* scene, bool forceUpdate = false);
 
+        void SetStencilRef(u8 stencilRef) { this->stencilRef = stencilRef; }
+
     private:
         void DoUpdate(RPI::Scene* scene);
 
@@ -29,10 +31,14 @@ namespace CE::RPI
         u32 modelLodMeshIndex = 0;
 
         RHI::ShaderResourceGroup* objectSrg = nullptr;
+
+        FixedArray<RHI::ShaderResourceGroup*, RHI::DrawPacketBuilder::DrawItemCountMax> perDrawSrgs{};
         
         RPI::Material* material = nullptr;
 
         RHI::DrawListMask drawListFilter{};
+
+        u8 stencilRef = 0;
 
         bool needsUpdate = true;
 
