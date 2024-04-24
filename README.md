@@ -43,11 +43,11 @@ All modules inside the core domain are at the low level of the engine.
 * **CoreRHI**: Rendering Hardware Interface. A graphics API abstraction layer that is used for low level GPU operations. Also implements frame graph rendering.
     * **VulkanRHI**: Vulkan implementation of the RHI layer.
 * **CoreRPI**: Render Pipeline Interface. Provides a render pipeline architecture layer on top of RHI, allowing engine to build complex render pipeline with many passes.
+* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 
 #### System domain
 System domain modules are at high level of the engine.
 
-* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 * **System module**: The main module that contains the high level game engine systems, game framework, etc.
 * **GameSystem**: Only for standalone builds. Runtime implementation of System module.
 
