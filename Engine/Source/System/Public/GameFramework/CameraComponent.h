@@ -36,10 +36,10 @@ namespace CE
 		float GetFieldOfView() const { return fieldOfView; }
 
 		RPI::ViewPtr GetRpiView() const { return rpiView; }
-
-    	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
-		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+    	void SetRenderPipelineOverride(CE::RenderPipeline* renderPipeline);
+    	
+		CE::RenderPipeline* GetRenderPipeline() const { return renderPipelineOverride; }
     	
     protected:
 
@@ -66,7 +66,7 @@ namespace CE
 		Matrix4x4 projectionMatrix{};
 
     	FIELD()
-    	CE::RenderPipeline* renderPipeline = nullptr;
+    	CE::RenderPipeline* renderPipelineOverride = nullptr;
 
 		RPI::ViewPtr rpiView = nullptr;
 

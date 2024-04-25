@@ -5,11 +5,15 @@ namespace CE
 
 	CE::Scene::Scene()
 	{
+		renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
+		
 		if (!IsDefaultInstance())
 		{
 			rpiScene = new RPI::Scene();
 			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+
+			rpiScene->AddRenderPipeline(renderPipeline->GetRpiRenderPipeline());
 		}
 	}
 

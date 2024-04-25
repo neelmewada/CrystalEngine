@@ -7,6 +7,7 @@ namespace CE
     class CameraComponent;
     class StaticMeshComponent;
 	class SceneComponent;
+	class RenderPipeline;
 
 	CLASS()
 	class SYSTEM_API Scene : public Asset
@@ -82,6 +83,9 @@ namespace CE
 		FIELD()
 		Array<Actor*> actors{};
 
+		FIELD()
+		CE::RenderPipeline* renderPipeline = nullptr;
+		
 	private:
 
 		b8 isPlaying = false;
