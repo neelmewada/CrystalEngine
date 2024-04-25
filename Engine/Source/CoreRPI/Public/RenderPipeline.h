@@ -50,9 +50,6 @@ namespace CE::RPI
 		/// @brief Name of the pipeline
 		Name name{};
 
-		/// @brief Name of the pass definition to instantiate as root pass
-		Name rootPassDefinitionName{};
-
 		/// @brief Name tag of the main view.
 		PipelineViewTag mainViewTag = "MainCamera";
 

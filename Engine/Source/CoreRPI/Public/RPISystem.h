@@ -4,7 +4,7 @@ namespace CE::RPI
 {
 	class Texture;
 
-	/// @brief RPISystem owns all scenes.
+	/// @brief RPISystem owns and manages all scenes.
 	class CORERPI_API RPISystem final
 	{
 		CE_NO_COPY(RPISystem)
@@ -12,7 +12,7 @@ namespace CE::RPI
 
 		static RPISystem& Get();
 
-		inline RHI::DrawListTagRegistry* GetDrawListTagRegistry()
+		RHI::DrawListTagRegistry* GetDrawListTagRegistry()
 		{
 			return rhiSystem.GetDrawListTagRegistry();
 		}
@@ -26,28 +26,28 @@ namespace CE::RPI
 
 		f32 GetCurrentTime() const;
 
-		inline RPI::Texture* GetDefaultAlbedoTex() const
+		RPI::Texture* GetDefaultAlbedoTex() const
 		{
 			return defaultAlbedoTex;
 		}
 
-		inline RPI::Texture* GetDefaultRoughnessTex() const
+		RPI::Texture* GetDefaultRoughnessTex() const
 		{
 			return defaultRoughnessTex;
 		}
 
-		inline RPI::Texture* GetDefaultNormalTex() const
+		RPI::Texture* GetDefaultNormalTex() const
 		{
 			return defaultNormalTex;
 		}
 
 		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
 
-		inline const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
-		inline RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
+		const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
+		RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
 
-		inline const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
-		inline RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
+		const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
+		RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
 
 	private:
 

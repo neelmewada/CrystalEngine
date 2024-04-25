@@ -14,12 +14,15 @@ namespace CE::RPI
 		
 	}
 
-	void MeshDrawPacket::Update(RPI::Scene* scene, bool forceUpdate)
+	bool MeshDrawPacket::Update(RPI::Scene* scene, bool forceUpdate)
 	{
 		if (needsUpdate || forceUpdate)
 		{
 			DoUpdate(scene);
+			return true;
 		}
+
+		return false;
 	}
 
 	void MeshDrawPacket::DoUpdate(RPI::Scene* scene)
@@ -86,7 +89,7 @@ namespace CE::RPI
 			drawItem.drawItemTag = drawListTag;
 			drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			drawItem.stencilRef = stencilRef;
-			// TODO: Get correct pipeline based on MSAA, color formats, etc
+			// TODO: Get correct pipeline based on MSAA, color formats, etc from the RPI::Scene's cache
 			drawItem.pipelineState = variant->GetPipeline();
 
 			builder.AddDrawItem(drawItem);

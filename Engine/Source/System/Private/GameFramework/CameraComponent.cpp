@@ -18,6 +18,11 @@ namespace CE
         rpiView = nullptr;
     }
 
+    void CameraComponent::SetRenderPipeline(CE::RenderPipeline* renderPipeline)
+    {
+        this->renderPipeline = renderPipeline;
+    }
+
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);

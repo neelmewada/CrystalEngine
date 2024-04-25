@@ -5,6 +5,7 @@ namespace CE::RPI
 	class Model;
 	class ModelAsset;
 	class ModelLod;
+	class StaticMeshFeatureProcessor;
 
 	class CORERPI_API ModelDataInstance
 	{
@@ -18,7 +19,21 @@ namespace CE::RPI
 
 		RPI::Scene* scene = nullptr;
 
+		RPI::Material* material = nullptr;
+
 		MeshDrawPacketsByLod drawPacketsListByLod{};
+
+		Array<RHI::ShaderResourceGroup*> objectSrgList{};
+
+		void Init(StaticMeshFeatureProcessor* fp);
+		void Deinit(StaticMeshFeatureProcessor* fp);
+		void BuildDrawPacketList(StaticMeshFeatureProcessor* fp, u32 modelLodIndex);
+		void UpdateDrawPackets(StaticMeshFeatureProcessor* fp);
+
+		struct Flags
+		{
+			bool isInitialized : 1 = false;
+		} flags{};
 	};
 
 	using ModelHandle = PagedDynamicArray<ModelDataInstance>::Handle;

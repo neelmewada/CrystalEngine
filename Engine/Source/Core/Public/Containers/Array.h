@@ -167,9 +167,9 @@ namespace CE
         }
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args&&... args)
+        CE_INLINE ElementType& EmplaceBack(Args&&... args)
         {
-            Impl.emplace_back(args...);
+            return Impl.emplace_back(args...);
         }
 
         CE_INLINE void AddRange(std::initializer_list<ElementType> elements)
@@ -667,9 +667,9 @@ namespace CE
 		}
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args&&... args)
+        CE_INLINE ElementType& EmplaceBack(Args&&... args)
         {
-            Super::Impl.emplace_back(args...);
+            return Super::Impl.emplace_back(args...);
         }
 
         CE_INLINE void AddRange(std::initializer_list<ElementType> elements)

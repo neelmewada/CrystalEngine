@@ -65,6 +65,13 @@ namespace CE::RPI
 		pipelineViews.views.Remove(view);
 	}
 
+	void Scene::AddRenderPipeline(RenderPipeline* renderPipeline)
+	{
+		if (!renderPipeline)
+			return;
+		renderPipelines.Add(renderPipeline);
+	}
+
 	RHI::DrawListMask& Scene::GetDrawListMask(PipelineViewTag viewTag)
 	{
 		return viewsByTag[viewTag].drawListMask;
@@ -78,7 +85,7 @@ namespace CE::RPI
 		}
 	}
 
-	void Scene::PrepareRender(f32 currentTime)
+	void Scene::PrepareRender(f32 currentTime, u32 imageIndex)
 	{
 		CollectDrawPackets();
 	}

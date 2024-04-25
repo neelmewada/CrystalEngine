@@ -63,7 +63,7 @@ namespace CE::RPI
 	{
 		CE_STRUCT(PassAttachmentSizeSource)
 	public:
-
+		
 		FIELD()
 		PassAttachmentRef source{};
 

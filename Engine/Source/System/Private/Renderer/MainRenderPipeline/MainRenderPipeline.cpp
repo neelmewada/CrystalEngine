@@ -19,6 +19,7 @@ namespace CE
 	    Super::Construct();
 
         PassTree* passTree = renderPipeline->passTree;
+    	renderPipeline->mainViewTag = "MainCamera";
 
         ParentPass* rootPass = passTree->GetRootPass();
 
@@ -28,12 +29,14 @@ namespace CE
 
         PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
 
+		// - Depth Stencil
+    	
         PassAttachment* depthStencilAttachment;
 	    {
             PassImageAttachmentDesc depthStencilAttachmentDesc{};
             depthStencilAttachmentDesc.name = "DepthStencil";
             depthStencilAttachmentDesc.lifetime = AttachmentLifetimeType::Transient;
-            depthStencilAttachmentDesc.sizeSource.source = "PipelineOutput";
+            depthStencilAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
             depthStencilAttachmentDesc.imageDescriptor.format = Format::D32_SFLOAT_S8_UINT;
             depthStencilAttachmentDesc.imageDescriptor.arrayLayers = 1;
@@ -61,12 +64,14 @@ namespace CE
             depthStencilAttachment = renderPipeline->AddAttachment(depthStencilAttachmentDesc);
 	    }
 
+    	// - Color MSAA
+    	
         PassAttachment* colorMsaa;
 	    {
             PassImageAttachmentDesc colorMsaaAttachmentDesc{};
             colorMsaaAttachmentDesc.name = "ColorMSAA";
             colorMsaaAttachmentDesc.lifetime = AttachmentLifetimeType::Transient;
-            colorMsaaAttachmentDesc.sizeSource.source = "PipelineOutput";
+            colorMsaaAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
             colorMsaaAttachmentDesc.imageDescriptor.format = Format::R8G8B8A8_UNORM;
             colorMsaaAttachmentDesc.imageDescriptor.mipCount = 1;
@@ -93,6 +98,8 @@ namespace CE
 
             colorMsaa = renderPipeline->AddAttachment(colorMsaaAttachmentDesc);
 	    }
+
+    	// - Directional Shadow Map
 
         PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
 	    {
@@ -186,9 +193,8 @@ namespace CE
 
         // - Opaque Pass
 
-        RasterPass* opaquePass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "OpaquePass");
+        auto opaquePass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "OpaquePass");
 	    {
-
             // DepthInput
             {
                 PassSlot depthSlot{};
@@ -234,7 +240,7 @@ namespace CE
 
         // - Resolve Pass
 
-        RasterPass* resolvePass = (RasterPass*)PassSystem::Get().CreatePass("ResolvePass");
+        auto resolvePass = (RasterPass*)PassSystem::Get().CreatePass("ResolvePass");
 	    {
 		    {
                 PassAttachmentBinding colorBinding{};
@@ -246,7 +252,7 @@ namespace CE
 
                 resolvePass->AddAttachmentBinding(colorBinding);
 		    }
-
+	    	
 		    {
                 PassAttachmentBinding resolveBinding{};
                 resolveBinding.name = "Resolve";

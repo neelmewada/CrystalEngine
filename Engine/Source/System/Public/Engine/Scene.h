@@ -1,5 +1,4 @@
 #pragma once
-#include "GameFramework/ActorComponent.h"
 
 namespace CE
 {
@@ -7,6 +6,7 @@ namespace CE
 	class ActorComponent;
     class CameraComponent;
     class StaticMeshComponent;
+	class SceneComponent;
 
 	CLASS()
 	class SYSTEM_API Scene : public Asset

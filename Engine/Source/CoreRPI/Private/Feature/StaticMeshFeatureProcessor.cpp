@@ -13,6 +13,71 @@ namespace CE::RPI
 		
 	}
 
+	void ModelDataInstance::Init(StaticMeshFeatureProcessor* fp)
+	{
+		if (flags.isInitialized)
+			return;
+		
+		flags.isInitialized = true;
+
+		for (int i = 0; i < model->GetModelLodCount(); ++i)
+		{
+			BuildDrawPacketList(fp, i);
+		}
+	}
+
+	void ModelDataInstance::Deinit(StaticMeshFeatureProcessor* fp)
+	{
+		
+
+		for (RHI::ShaderResourceGroup* srg : objectSrgList)
+		{
+			delete srg;
+		}
+
+		objectSrgList.Clear();
+
+		flags.isInitialized = false;
+	}
+
+	void ModelDataInstance::BuildDrawPacketList(StaticMeshFeatureProcessor* fp, u32 modelLodIndex)
+	{
+		ModelLod* lod = model->GetModelLod(modelLodIndex);
+		SIZE_T meshCount = lod->GetMeshCount();
+
+		if (drawPacketsListByLod.GetSize() != model->GetModelLodCount())
+		{
+			drawPacketsListByLod.Resize(model->GetModelLodCount());
+		}
+
+		MeshDrawPacketList& drawPacketList = drawPacketsListByLod[modelLodIndex];
+		drawPacketList.Clear();
+
+		for (RHI::ShaderResourceGroup* srg : objectSrgList)
+		{
+			delete srg;
+		}
+
+		objectSrgList.Clear();
+
+		for (int i = 0; i < meshCount; i++)
+		{
+			const auto& objectSrgLayout = material->GetCurrentOpaqueShader()->GetSrgLayout(SRGType::PerObject);
+
+			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
+			objectSrgList.Add(objectSrg);
+
+			RPI::MeshDrawPacket& packet = drawPacketList.EmplaceBack(lod, modelLodIndex, objectSrg, material);
+			
+			
+		}
+	}
+
+	void ModelDataInstance::UpdateDrawPackets(StaticMeshFeatureProcessor* fp)
+	{
+		
+	}
+
 	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor)
 	{
 		ModelHandle handle = modelInstances.Insert({});

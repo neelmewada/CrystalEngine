@@ -40,11 +40,17 @@ namespace CE::RPI
 		void AddView(PipelineViewTag viewTag, ViewPtr view);
 		void RemoveView(PipelineViewTag viewTag, ViewPtr view);
 
+		void AddRenderPipeline(RenderPipeline* renderPipeline);
+
+		u32 GetRenderPipelineCount() const { return renderPipelines.GetSize(); }
+
+		RenderPipeline* GetRenderPipeline(u32 index) const { return renderPipelines[index]; }
+
 		RHI::DrawListMask& GetDrawListMask(PipelineViewTag viewTag);
 
 		void Simulate(f32 currentTime);
 
-		void PrepareRender(f32 currentTime);
+		void PrepareRender(f32 currentTime, u32 imageIndex);
 
 		void OnRenderEnd();
 

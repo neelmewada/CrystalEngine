@@ -16,7 +16,7 @@ namespace CE::RPI
 
         MeshDrawPacket(ModelLod* modelLod, u32 modelLodMeshIndex, RHI::ShaderResourceGroup* objectSrg, RPI::Material* material);
 
-        void Update(RPI::Scene* scene, bool forceUpdate = false);
+        bool Update(RPI::Scene* scene, bool forceUpdate = false);
 
         void SetStencilRef(u8 stencilRef) { this->stencilRef = stencilRef; }
 

@@ -40,6 +40,10 @@ namespace CE::RPI
 
 		const Name& GetPassName() const { return GetName(); }
 
+		DrawListTag GetDrawListTag() const { return drawListTag; }
+
+		void SetDrawListTag(DrawListTag tag) { drawListTag = tag; }
+
 	protected:
 
 		Pass();

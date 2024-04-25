@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	class RenderPipeline;
+	
 	ENUM()
 	enum class CameraProjection
 	{
@@ -35,6 +37,10 @@ namespace CE
 
 		RPI::ViewPtr GetRpiView() const { return rpiView; }
 
+    	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
+    	
+		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+    	
     protected:
 
 		void Tick(f32 delta) override;
@@ -58,6 +64,9 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 projectionMatrix{};
+
+    	FIELD()
+    	CE::RenderPipeline* renderPipeline = nullptr;
 
 		RPI::ViewPtr rpiView = nullptr;
 

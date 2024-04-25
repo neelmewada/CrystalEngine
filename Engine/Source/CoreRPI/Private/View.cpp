@@ -34,4 +34,9 @@ namespace CE::RPI
 		}
 	}
 
+	void View::SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg)
+	{
+		shaderResourceGroup = viewSrg;
+	}
+	
 } // namespace CE::RPI

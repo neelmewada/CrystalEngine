@@ -103,7 +103,7 @@ namespace CE::RPI
     {
         for (Scene* scene : scenes)
         {
-            scene->PrepareRender(currentTime);
+            scene->PrepareRender(currentTime, imageIndex);
         }
 
         for (Scene* scene : scenes)

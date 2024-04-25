@@ -65,7 +65,7 @@ namespace CE
 		if (!actor)
 			return;
 		
-        std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
+        auto recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
@@ -93,7 +93,7 @@ namespace CE
             }
         };
 
-		std::function<void(Actor*)> recursivelyAdd = [&](Actor* add)
+		auto recursivelyAdd = [&](Actor* add)
         {
             if (!add)
                 return;
@@ -137,7 +137,7 @@ namespace CE
 		if (!actor)
 			return;
         
-        std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
+        auto recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
@@ -165,7 +165,7 @@ namespace CE
             }
         };
 
-		std::function<void(Actor*)> recursivelyRemove = [&](Actor* remove)
+		auto recursivelyRemove = [&](Actor* remove)
         {
             if (!remove)
                 return;

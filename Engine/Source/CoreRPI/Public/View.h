@@ -57,6 +57,8 @@ namespace CE::RPI
 
 		PerViewConstants& GetViewConstants() { return viewConstants; }
 
+		void SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg);
+
 	private:
 
 		RHI::DrawListContext drawListContext{};
