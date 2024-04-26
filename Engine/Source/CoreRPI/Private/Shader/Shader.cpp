@@ -23,6 +23,16 @@ namespace CE::RPI
 		variants.Clear();
 	}
 
+	Name Shader::GetName()
+	{
+		if (variants.NonEmpty())
+		{
+			return variants[0]->pipelineDesc.name;
+		}
+
+		return Name();
+	}
+
     RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
 	{
 		variants.Add(new ShaderVariant(variantDesc));

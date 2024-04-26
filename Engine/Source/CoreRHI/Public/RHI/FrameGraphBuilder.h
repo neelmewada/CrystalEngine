@@ -32,7 +32,7 @@ namespace CE::RHI
 		bool UsePipelines(const Array<RHI::PipelineState*>& pipelines);
 		bool UsePipeline(RHI::PipelineState* pipeline);
 
-		bool ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, const FrameGraphVariable& comparisonValue, bool shoudClear = false);
+		bool ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, const FrameGraphVariable& comparisonValue, bool shouldClear = false);
 		 
 		bool SetVariableAfterExecution(const Name& variableName, const FrameGraphVariable& value);
 

@@ -39,4 +39,9 @@ namespace CE::RPI
 		shaderResourceGroup = viewSrg;
 	}
 	
+	RHI::DrawList& View::GetDrawList(RHI::DrawListTag drawItemTag)
+	{
+		return drawListContext.GetDrawListForTag(drawItemTag);
+	}
+
 } // namespace CE::RPI

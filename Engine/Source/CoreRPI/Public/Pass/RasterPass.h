@@ -14,6 +14,10 @@ namespace CE::RPI
 
 	private:
 
+    	void ProduceScopes(FrameScheduler* scheduler) override;
+
+    	void EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase) override;
+
 	};
 
 } // namespace CE::RPI

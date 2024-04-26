@@ -59,6 +59,8 @@ namespace CE::RPI
 
 		void SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg);
 
+		RHI::DrawList& GetDrawList(RHI::DrawListTag drawItemTag);
+
 	private:
 
 		RHI::DrawListContext drawListContext{};

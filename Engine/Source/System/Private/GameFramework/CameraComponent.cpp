@@ -7,6 +7,12 @@ namespace CE
     {
 		canTick = true;
 
+#if PLATFORM_DESKTOP
+        renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
+#else
+		#error Unimplemented render pipeline
+#endif
+
         if (!IsDefaultInstance())
         {
             rpiView = RPI::View::CreateView("Camera", View::UsageCamera);
@@ -18,9 +24,20 @@ namespace CE
         rpiView = nullptr;
     }
 
-    void CameraComponent::SetRenderPipelineOverride(CE::RenderPipeline* renderPipeline)
+    void CameraComponent::SetRenderPipeline(CE::RenderPipeline* renderPipeline)
     {
-        this->renderPipelineOverride = renderPipeline;
+        CE::Scene* scene = GetScene();
+        if (scene)
+        {
+            scene->RemoveRenderPipeline(this->renderPipeline);
+        }
+        
+        this->renderPipeline = renderPipeline;
+        
+        if (scene)
+        {
+            scene->AddRenderPipeline(renderPipeline);
+        }
     }
 
     void CameraComponent::Tick(f32 delta)

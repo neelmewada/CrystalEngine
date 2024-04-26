@@ -10,6 +10,8 @@ namespace CE::RPI
 		Shader(RHI::DrawListTag drawListTag = {});
 		~Shader();
 
+		Name GetName();
+
 		inline u32 GetVariantCount() const { return variants.GetSize(); }
 
 		inline RPI::ShaderVariant* GetVariant(u32 index) const 

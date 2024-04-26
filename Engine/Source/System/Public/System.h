@@ -47,6 +47,7 @@
 #include "Renderer/RenderPipelineAsset.h"
 #include "Renderer/RenderPipeline.h"
 #include "Renderer/MainRenderPipeline/MainRenderPipelineAsset.h"
+#include "Renderer/MainRenderPipeline/DirectionalShadowPass.h"
 #include "Renderer/MainRenderPipeline/MainRenderPipeline.h"
 
 ///////////////////////////////////////////////////////

@@ -14,7 +14,7 @@ namespace CE::RHI
 		void Init(const DrawListMask& drawListMask);
 		void Shutdown();
 
-		DrawList& GetDrawListForTag(u8 tag);
+		DrawList& GetDrawListForTag(DrawListTag tag);
 
 		/// @brief Thread safe function to add a draw package to the DrawList.
 		/// @param drawPacket to add.

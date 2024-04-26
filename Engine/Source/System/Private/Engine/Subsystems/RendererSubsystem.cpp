@@ -99,8 +99,10 @@ namespace CE
 
 			auto atlasData = fontAsset->GetAtlasData();
 
+			RPI::ShaderCollection* draw2dShaderCollection = renderer2dShader->GetShaderCollection();
+			
 			CApplicationInitInfo appInitInfo{};
-			appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
+			appInitInfo.draw2dShader = draw2dShaderCollection->At(0).shader;
 			appInitInfo.defaultFont = atlasData;
 			appInitInfo.defaultFontName = "Roboto";
 			appInitInfo.scheduler = GetScheduler();

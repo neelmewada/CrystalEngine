@@ -48,6 +48,8 @@ namespace CE::RPI
 
 		RHI::DrawListMask& GetDrawListMask(PipelineViewTag viewTag);
 
+		ArrayView<ViewPtr> GetViews(const PipelineViewTag& viewTag);
+
 		void Simulate(f32 currentTime);
 
 		void PrepareRender(f32 currentTime, u32 imageIndex);

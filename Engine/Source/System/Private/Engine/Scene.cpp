@@ -5,15 +5,13 @@ namespace CE
 
 	CE::Scene::Scene()
 	{
-		renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
+		defaultRenderPipeline = GetStaticClass<MainRenderPipeline>();
 		
 		if (!IsDefaultInstance())
 		{
 			rpiScene = new RPI::Scene();
 			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
-
-			rpiScene->AddRenderPipeline(renderPipeline->GetRpiRenderPipeline());
 		}
 	}
 
@@ -46,7 +44,7 @@ namespace CE
 			return;
 		if (actorsByUuid.KeyExists(actor->GetUuid()))
 			return;
-
+		
 		actors.Add(actor);
 
 		OnActorChainAttached(actor);
@@ -64,12 +62,25 @@ namespace CE
 		OnActorChainDetached(actor);
 	}
 
+	void CE::Scene::AddRenderPipeline(CE::RenderPipeline* renderPipeline)
+	{
+		if (renderPipeline && !renderPipelines.Exists(renderPipeline))
+		{
+			renderPipelines.Add(renderPipeline);
+		}
+	}
+	
+	void CE::Scene::RemoveRenderPipeline(CE::RenderPipeline* renderPipeline)
+	{
+		renderPipelines.Remove(renderPipeline);
+	}
+
 	void CE::Scene::OnActorChainAttached(Actor* actor)
 	{
 		if (!actor)
 			return;
 		
-        auto recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
+		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
@@ -97,7 +108,7 @@ namespace CE
             }
         };
 
-		auto recursivelyAdd = [&](Actor* add)
+		std::function<void(Actor*)> recursivelyAdd = [&](Actor* add)
         {
             if (!add)
                 return;
@@ -141,7 +152,7 @@ namespace CE
 		if (!actor)
 			return;
         
-        auto recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
+		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
@@ -169,7 +180,7 @@ namespace CE
             }
         };
 
-		auto recursivelyRemove = [&](Actor* remove)
+		std::function<void(Actor*)> recursivelyRemove = [&](Actor* remove)
         {
             if (!remove)
                 return;
@@ -200,13 +211,14 @@ namespace CE
                     recursivelyRemove(child);
             }
         };
-
+		
 		recursivelyRemove(actor);
 	}
 
 	void CE::Scene::OnCameraComponentAttached(CameraComponent* camera)
 	{
 		cameras.Add(camera);
+		AddRenderPipeline(camera->GetRenderPipeline());
 		if (mainCamera == nullptr)
 		{
 			mainCamera = camera;
@@ -221,6 +233,7 @@ namespace CE
 	void CE::Scene::OnCameraComponentDetached(CameraComponent* camera)
 	{
 		cameras.Remove(camera);
+		RemoveRenderPipeline(camera->GetRenderPipeline());
 		if (mainCamera == camera)
 		{
 			rpiScene->RemoveView("MainCamera", mainCamera->rpiView);

@@ -12,5 +12,15 @@ namespace CE::RPI
     {
 	    
     }
-    
+	
+    void RasterPass::ProduceScopes(FrameScheduler* scheduler)
+    {
+    	
+    }
+	
+    void RasterPass::EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase)
+    {
+    	
+    }
+
 } // namespace CE::RPI

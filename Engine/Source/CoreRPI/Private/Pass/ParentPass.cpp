@@ -13,6 +13,7 @@ namespace CE::RPI
 		if (!passes.Exists(childPass))
 		{
 			passes.Add(childPass);
+			childPass->renderPipeline = renderPipeline;
 		}
 	}
 

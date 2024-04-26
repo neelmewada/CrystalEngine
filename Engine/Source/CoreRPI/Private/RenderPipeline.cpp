@@ -6,6 +6,7 @@ namespace CE::RPI
 	RenderPipeline::RenderPipeline()
 	{
 		passTree = CreateObject<PassTree>(GetTransientPackage(MODULE_NAME), "PassTree");
+		passTree->rootPass->renderPipeline = this;
 
 		PassImageAttachmentDesc pipelineOutputDesc{};
 		pipelineOutputDesc.name = "PipelineOutput";
@@ -13,7 +14,7 @@ namespace CE::RPI
 		pipelineOutputDesc.imageDescriptor.dimension = Dimension::Dim2D;
 		pipelineOutputDesc.imageDescriptor.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
 
-		PassAttachment* pipelineOutput = new PassAttachment(pipelineOutputDesc);
+		auto pipelineOutput = new PassAttachment(pipelineOutputDesc);
 		attachments.Add(pipelineOutput);
 	}
 
@@ -40,14 +41,14 @@ namespace CE::RPI
 
     PassAttachment* RenderPipeline::AddAttachment(const RPI::PassImageAttachmentDesc& imageDesc)
     {
-		PassAttachment* attachment = new PassAttachment(imageDesc);
+		auto attachment = new PassAttachment(imageDesc);
 		attachments.Add(attachment);
 		return attachment;
     }
 
     PassAttachment* RenderPipeline::AddAttachment(const RPI::PassBufferAttachmentDesc& bufferDesc)
     {
-		PassAttachment* attachment = new PassAttachment(bufferDesc);
+		auto attachment = new PassAttachment(bufferDesc);
 		attachments.Add(attachment);
 		return attachment;
     }

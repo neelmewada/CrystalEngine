@@ -16,10 +16,11 @@ class RenderPipeline_DefaultPipelineTree_Test;
 namespace CE::RPI
 {
 	class ParentPass;
-
+	class RenderPipeline;
+	
 	/// @brief The base Pass class. All passes should derive from this class.
 	CLASS(Abstract)
-	class CORERPI_API Pass : public Object
+	class CORERPI_API Pass : public Object, public RHI::IScopeProducer
 	{
 		CE_CLASS(Pass, Object)
 	public:
@@ -44,16 +45,26 @@ namespace CE::RPI
 
 		void SetDrawListTag(DrawListTag tag) { drawListTag = tag; }
 
+		PipelineViewTag GetPipelineViewTag() const { return pipelineViewTag; }
+
+		void SetPipelineViewTag(const PipelineViewTag& tag) { pipelineViewTag = tag; }
+
 	protected:
+
+		void ProduceScopes(FrameScheduler* scheduler) override {}
+
+		void EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase) override {}
 
 		Pass();
 
 		/// @brief Draw list tag this pass is associated to.
 		DrawListTag drawListTag{};
-
-		/// @brief The view tag associated with a pipeline view.
+		
+		/// @brief The view tag associated with a view.
 		/// The view that matches this tag will be queried by this pass.
 		PipelineViewTag pipelineViewTag{};
+
+		RPI::RenderPipeline* renderPipeline = nullptr;
 
 		FIELD()
 		ParentPass* parentPass = nullptr;

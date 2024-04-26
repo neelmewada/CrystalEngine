@@ -16,14 +16,7 @@ namespace CE
         delete renderPipeline; renderPipeline = nullptr;
     }
 
-    void CE::RenderPipeline::OnAfterConstruct()
-    {
-	    Super::OnAfterConstruct();
-
-        this->Construct();
-    }
-
-    void CE::RenderPipeline::Construct()
+    void CE::RenderPipeline::ConstructPipeline()
     {
         
     }

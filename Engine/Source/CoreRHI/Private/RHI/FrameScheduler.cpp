@@ -127,5 +127,10 @@ namespace CE::RHI
 	{
 		frameGraph->SetVariable(imageIndex, variableName, value);
 	}
+	
+	void FrameScheduler::AddScopeProducer(IScopeProducer* scopeProducer)
+	{
+		scopeProducers.Add(scopeProducer);
+	}
 
 } // namespace CE::RHI

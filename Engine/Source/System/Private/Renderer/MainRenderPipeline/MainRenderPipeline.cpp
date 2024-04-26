@@ -14,9 +14,9 @@ namespace CE
 	    
     }
 
-    void MainRenderPipeline::Construct()
+    void MainRenderPipeline::ConstructPipeline()
     {
-	    Super::Construct();
+	    Super::ConstructPipeline();
 
         PassTree* passTree = renderPipeline->passTree;
     	renderPipeline->mainViewTag = "MainCamera";
@@ -159,7 +159,6 @@ namespace CE
 
         RasterPass* shadowPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DirectionalShadowPass");
 	    {
-
             // Array of Texture2D<float> i.e. Shadow maps
             {
                 PassSlot outputSlot{};

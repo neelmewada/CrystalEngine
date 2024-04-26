@@ -14,11 +14,9 @@ namespace CE
 
         RPI::RenderPipeline* GetRpiRenderPipeline() const { return renderPipeline; }
 
+        virtual void ConstructPipeline();
+        
     protected:
-
-        void OnAfterConstruct() override final;
-
-        virtual void Construct();
 
         RPI::RenderPipeline* renderPipeline = nullptr;
 

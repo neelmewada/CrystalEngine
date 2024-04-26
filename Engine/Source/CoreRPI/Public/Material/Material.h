@@ -19,6 +19,8 @@ namespace CE::RPI
 	{
 	public:
 
+		Material(Shader* shader);
+
 		Material(ShaderCollection* shaderCollection);
 		~Material();
 
@@ -89,6 +91,7 @@ namespace CE::RPI
 
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
+		bool ownsShaderCollection = false;
 		ShaderCollection* shaderCollection = nullptr;
 
 		RPI::Shader* opaqueShader = nullptr;

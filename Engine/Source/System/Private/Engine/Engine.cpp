@@ -69,13 +69,13 @@ namespace CE
 					return false;
 				return a->GetTickPriority() < b->GetTickPriority();
 			});
-
+		
 		for (auto subsystem : engineSubsystems)
 		{
 			subsystem->Tick(deltaTime);
 		}
-
-		if (!mainThreadQueue.IsEmpty())
+		
+		while (!mainThreadQueue.IsEmpty())
 		{
 			mainThreadQueue.GetFront().InvokeIfValid();
 			mainThreadQueue.PopFront();

@@ -8,7 +8,7 @@ namespace CE
     class StaticMeshComponent;
 	class SceneComponent;
 	class RenderPipeline;
-
+	
 	CLASS()
 	class SYSTEM_API Scene : public Asset
 	{
@@ -66,6 +66,11 @@ namespace CE
 			}
 		}
 
+		// - Rendering -
+
+		void AddRenderPipeline(CE::RenderPipeline* renderPipeline);
+		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
+
 	private:
 
 		// - Internal API -
@@ -82,9 +87,12 @@ namespace CE
 
 		FIELD()
 		Array<Actor*> actors{};
+		
+		FIELD()
+		Array<CE::RenderPipeline*> renderPipelines{};
 
 		FIELD()
-		CE::RenderPipeline* renderPipeline = nullptr;
+		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
 		
 	private:
 

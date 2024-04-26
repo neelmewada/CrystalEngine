@@ -37,7 +37,7 @@ namespace CE::RHI
 		drawListMask.Reset();
     }
 
-    DrawList& DrawListContext::GetDrawListForTag(u8 tag)
+    DrawList& DrawListContext::GetDrawListForTag(DrawListTag tag)
 	{
 		static DrawList empty{};
 		if (tag >= mergedDrawListsByTag.GetSize())

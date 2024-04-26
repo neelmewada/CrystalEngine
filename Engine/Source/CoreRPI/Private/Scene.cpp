@@ -65,16 +65,25 @@ namespace CE::RPI
 		pipelineViews.views.Remove(view);
 	}
 
-	void Scene::AddRenderPipeline(RenderPipeline* renderPipeline)
+	void RPI::Scene::AddRenderPipeline(RenderPipeline* renderPipeline)
 	{
 		if (!renderPipeline)
 			return;
+		renderPipeline->scene = this;
 		renderPipelines.Add(renderPipeline);
 	}
 
 	RHI::DrawListMask& Scene::GetDrawListMask(PipelineViewTag viewTag)
 	{
 		return viewsByTag[viewTag].drawListMask;
+	}
+	
+	ArrayView<ViewPtr> Scene::GetViews(const PipelineViewTag& viewTag)
+	{
+		if (!viewsByTag.KeyExists(viewTag))
+			return {};
+
+		return viewsByTag[viewTag].views;
 	}
 
 	void Scene::Simulate(f32 currentTime)

@@ -2,9 +2,14 @@
 
 namespace CE::RPI
 {
+    Material::Material(Shader* shader) : ownsShaderCollection(true)
+    {
+        shaderCollection = new ShaderCollection();
+        shaderCollection->Add(ShaderCollection::Item{ .shaderTag = shader->GetName(), .shader = shader, .enabled = true, .drawListOverride = DrawListTag() });
+    }
 
-	Material::Material(ShaderCollection* shaderCollection)
-		: shaderCollection(shaderCollection)
+    Material::Material(ShaderCollection* shaderCollection)
+		: shaderCollection(shaderCollection), ownsShaderCollection(false)
 	{
 
 	}
@@ -20,6 +25,11 @@ namespace CE::RPI
                 delete buffer;
             }
             buffersByVariableNamePerImage[i].Clear();
+        }
+
+        if (ownsShaderCollection)
+        {
+            delete shaderCollection; shaderCollection = nullptr;
         }
 	}
 

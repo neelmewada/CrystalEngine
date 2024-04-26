@@ -6,6 +6,8 @@ class RenderPipeline_DefaultPipelineTree_Test;
 
 namespace CE::RPI
 {
+	class RenderPipeline;
+	
     CLASS()
 	class CORERPI_API PassTree final : public Object
 	{
