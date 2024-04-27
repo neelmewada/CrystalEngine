@@ -164,9 +164,9 @@ namespace CE
 			CompileFrameGraph();
 		}
 
-		u32 imageIndex = scheduler->BeginExecution();
+		curImageIndex = scheduler->BeginExecution();
 
-		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
+		if (curImageIndex >= RHI::Limits::MaxSwapChainImageCount)
 		{
 			rebuildFrameGraph = recompileFrameGraph = true;
 			return;
@@ -175,10 +175,10 @@ namespace CE
 		CE::Scene* scene = sceneSubsystem->GetActiveScene();
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 
-		RPISystem::Get().SimulationTick(imageIndex);
-		RPISystem::Get().RenderTick(imageIndex);
+		RPISystem::Get().SimulationTick(curImageIndex);
+		RPISystem::Get().RenderTick(curImageIndex);
 
-		SubmitDrawPackets(imageIndex);
+		SubmitDrawPackets(curImageIndex);
 
 		scheduler->EndExecution();
 	}
@@ -187,14 +187,26 @@ namespace CE
 	{
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
-
+    	
+    	CE::Scene* scene = sceneSubsystem->GetActiveScene();
+    	// TODO: Enqueue draw packets early! Scope producers need to have all draw packets available beforehand.
+    	if (scene)
+    	{
+    		
+    	}
+    	
 		scheduler->BeginFrameGraph();
 		{
 			auto app = CApplication::TryGet();
-
-			// TODO: Build render pipeline passes
-			CE::Scene* scene = sceneSubsystem->GetActiveScene();
-
+			
+			if (scene)
+			{
+				for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+				{
+					renderPipeline->GetRpiRenderPipeline()->ImportScopeProducers(scheduler);
+				}
+			}
+			
 			if (app)
 			{
 				app->BuildFrameGraph();

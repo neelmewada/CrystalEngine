@@ -45,9 +45,13 @@ namespace CE::RPI
 
 		void SetDrawListTag(DrawListTag tag) { drawListTag = tag; }
 
-		PipelineViewTag GetPipelineViewTag() const { return pipelineViewTag; }
+		SceneViewTag GetViewTag() const { return viewTag; }
 
-		void SetPipelineViewTag(const PipelineViewTag& tag) { pipelineViewTag = tag; }
+		void SetViewTag(const SceneViewTag& tag) { viewTag = tag; }
+
+		const Array<PassAttachmentBinding>& GetInputBindings() const { return inputBindings; }
+		const Array<PassAttachmentBinding>& GetInputOutputBindings() const { return inputOutputBindings; }
+		const Array<PassAttachmentBinding>& GetOutputBindings() const { return outputBindings; }
 
 	protected:
 
@@ -62,7 +66,7 @@ namespace CE::RPI
 		
 		/// @brief The view tag associated with a view.
 		/// The view that matches this tag will be queried by this pass.
-		PipelineViewTag pipelineViewTag{};
+		SceneViewTag viewTag{};
 
 		RPI::RenderPipeline* renderPipeline = nullptr;
 

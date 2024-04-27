@@ -2,8 +2,9 @@
 
 namespace CE
 {
-
-    CLASS()
+    class RenderPipeline;
+    
+    CLASS(Abstract)
     class SYSTEM_API RenderPipelineAsset : public Asset
     {
         CE_CLASS(RenderPipelineAsset, Asset)
@@ -12,8 +13,13 @@ namespace CE
         RenderPipelineAsset();
 
         virtual ~RenderPipelineAsset();
-
+        
+        void ApplyChanges();
+        
     protected:
+
+        FIELD()
+        Array<CE::RenderPipeline*> renderPipelines = {};
 
     public:
 
@@ -23,6 +29,7 @@ namespace CE
         FIELD()
         int directionalShadowResolution = 512;
 
+        friend class CE::RenderPipeline;
     };
     
 } // namespace CE

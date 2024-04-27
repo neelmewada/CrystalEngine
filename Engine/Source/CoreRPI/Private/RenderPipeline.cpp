@@ -52,5 +52,43 @@ namespace CE::RPI
 		attachments.Add(attachment);
 		return attachment;
     }
+	
+    void RenderPipeline::ImportScopeProducers(RHI::FrameScheduler* scheduler)
+    {
+		Array<IScopeProducer*> scopeProducers{};
+
+		std::function<void(Pass*)> addScopesRecursively = [&](Pass* currentPass)
+			{
+				if (currentPass == nullptr)
+					return;
+				
+				if (currentPass->IsParentPass())
+				{
+					auto parentPass = (ParentPass*)currentPass;
+
+					for (Pass* pass : parentPass->passes)
+					{
+						addScopesRecursively(pass);
+					}
+					return;
+				}
+
+				scopeProducers.Add(currentPass);
+			};
+
+		addScopesRecursively(passTree->rootPass);
+
+		for (int i = 0; i < scopeProducers.GetSize(); i++)
+		{
+			IScopeProducer* scopeProducer = scopeProducers[i];
+			scopeProducer->EmplaceAttachments(scheduler->GetAttachmentDatabase());
+		}
+
+		for (int i = 0; i < scopeProducers.GetSize(); i++)
+		{
+			IScopeProducer* scopeProducer = scopeProducers[i];
+			scopeProducer->ProduceScopes(scheduler);
+		}
+    }
 
 } // namespace CE::RPI

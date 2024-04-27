@@ -6,7 +6,7 @@ namespace CE
 	class ActorComponent;
 
 	CLASS()
-	class SYSTEM_API RendererSubsystem : public EngineSubsystem, ApplicationMessageHandler, CWidgetResourceLoader
+	class SYSTEM_API RendererSubsystem final : public EngineSubsystem, ApplicationMessageHandler, CWidgetResourceLoader
 	{
 		CE_CLASS(RendererSubsystem, EngineSubsystem)
 	public:
@@ -56,14 +56,16 @@ namespace CE
 
 		void SubmitDrawPackets(int imageIndex);
 
-	protected:
+	private:
 
 		// - Fields -
-
+		
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
 
 		HashMap<ClassType*, SubClass<FeatureProcessor>> componentClassToFeatureProcessorClass{};
+		
+		u32 curImageIndex = 0;
 
 		// - Frame Graph -
 

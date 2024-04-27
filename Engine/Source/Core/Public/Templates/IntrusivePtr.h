@@ -182,6 +182,16 @@ namespace CE
 			return ptr != rhs.ptr;
 		}
 
+		inline bool operator==(const T* rhs) const
+		{
+			return ptr == rhs;
+		}
+
+		inline bool operator!=(const T* rhs) const
+		{
+			return ptr != rhs;
+		}
+
 		inline void Swap(IntrusivePtr& rhs)
 		{
 			T* temp = ptr;

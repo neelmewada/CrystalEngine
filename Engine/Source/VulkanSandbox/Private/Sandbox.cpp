@@ -2023,13 +2023,13 @@ namespace CE
 		drawList.Init(drawListMask);
 		
 		// Add items
-		drawList.AddDrawPacket(sphereDrawPacket);
-		drawList.AddDrawPacket(cubeDrawPacket);
-		drawList.AddDrawPacket(skyboxDrawPacket);
-		drawList.AddDrawPacket(chairDrawPacket);
+		drawList.AddDrawPacket(sphereDrawPacket, TODO);
+		drawList.AddDrawPacket(cubeDrawPacket, TODO);
+		drawList.AddDrawPacket(skyboxDrawPacket, TODO);
+		drawList.AddDrawPacket(chairDrawPacket, TODO);
 		for (int i = 0; i < uiDrawPackets.GetSize(); i++)
 		{
-			drawList.AddDrawPacket(uiDrawPackets[i]);
+			drawList.AddDrawPacket(uiDrawPackets[i], TODO);
 		}
 
 		auto prevTime = clock();
@@ -2074,7 +2074,7 @@ namespace CE
 
 		for (auto drawPacket : renderer2dPackets)
 		{
-			drawList.AddDrawPacket(drawPacket);
+			drawList.AddDrawPacket(drawPacket, TODO);
 		}
 
 		// Finalize

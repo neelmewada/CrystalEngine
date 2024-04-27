@@ -15,8 +15,13 @@ namespace CE::RPI
 		struct PipelineStateData
 		{
 			RHI::MultisampleState multisampleState{};
-			Array<RHI::Format> colorFormats{};
+			Array<Format> colorFormats{};
+			Format depthFormat{};
+			
+			SceneViewTag viewTag{};
 		};
+
+		using PipelineStateList = Array<PipelineStateData>;
 
 		Scene();
 		~Scene();
@@ -37,18 +42,19 @@ namespace CE::RPI
 			return (TFeatureProcessor*)GetFeatureProcessor(TFeatureProcessor::Type());
 		}
 
-		void AddView(PipelineViewTag viewTag, ViewPtr view);
-		void RemoveView(PipelineViewTag viewTag, ViewPtr view);
+		void AddView(SceneViewTag viewTag, ViewPtr view);
+		void RemoveView(SceneViewTag viewTag, ViewPtr view);
 
 		void AddRenderPipeline(RenderPipeline* renderPipeline);
+		void RemoveRenderPipeline(RenderPipeline* renderPipeline);
 
 		u32 GetRenderPipelineCount() const { return renderPipelines.GetSize(); }
 
 		RenderPipeline* GetRenderPipeline(u32 index) const { return renderPipelines[index]; }
 
-		RHI::DrawListMask& GetDrawListMask(PipelineViewTag viewTag);
+		RHI::DrawListMask& GetDrawListMask(SceneViewTag viewTag);
 
-		ArrayView<ViewPtr> GetViews(const PipelineViewTag& viewTag);
+		ArrayView<ViewPtr> GetViews(const SceneViewTag& viewTag);
 
 		void Simulate(f32 currentTime);
 
@@ -58,7 +64,13 @@ namespace CE::RPI
 
 		void CollectDrawPackets();
 
+		void RebuildPipelineLookupTable();
+		
 	private:
+
+		bool needsLookupTableRebuild = true;
+
+		HashMap<DrawListTag, PipelineStateList> pipelineLookupMap{};
 
 		Array<RenderPipeline*> renderPipelines{};
 
@@ -70,10 +82,10 @@ namespace CE::RPI
 		/// @brief A Scene shader resource group (SRG_PerScene).
 		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
-		PipelineViewTag mainViewTag = "MainCamera";
+		SceneViewTag mainViewTag = "MainCamera";
 
 		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
-		PipelineViewsByTag viewsByTag{};
+		SceneViewsByTag viewsByTag{};
 
 		friend class MeshDrawPacket;
 

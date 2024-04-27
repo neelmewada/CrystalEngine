@@ -79,7 +79,6 @@ namespace CE::RPI
 		{
 			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
 		}
-
     }
 
 } // namespace CE::RPI

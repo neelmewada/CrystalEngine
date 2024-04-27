@@ -76,9 +76,9 @@ namespace CE::RPI
 
 			RPI::Shader* shader = shaderItem.shader;
 
-			// TODO: Implement dynamic shader variant selection
+			// TODO: Implement dynamic shader variant selection based on flags & shader options
 			RPI::ShaderVariant* variant = shader->GetVariant(shader->GetDefaultVariantIndex());
-
+			
 			const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
 
 			RHI::ShaderResourceGroup* perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
@@ -94,6 +94,8 @@ namespace CE::RPI
 
 			builder.AddDrawItem(drawItem);
 		}
+
+		drawPacket = builder.Build();
 	}
 
 } // namespace CE::RPI

@@ -32,6 +32,11 @@ namespace CE
 
 	void CE::Scene::Tick(f32 delta)
 	{
+		for (CE::RenderPipeline* renderPipeline : renderPipelines)
+		{
+			renderPipeline->Tick();
+		}
+		
 		for (Actor* actor : actors)
 		{
 			actor->Tick(delta);
@@ -62,16 +67,18 @@ namespace CE
 		OnActorChainDetached(actor);
 	}
 
-	void CE::Scene::AddRenderPipeline(CE::RenderPipeline* renderPipeline)
+	void CE::Scene::AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera)
 	{
 		if (renderPipeline && !renderPipelines.Exists(renderPipeline))
 		{
+			rpiScene->AddRenderPipeline(renderPipeline->GetRpiRenderPipeline());
 			renderPipelines.Add(renderPipeline);
 		}
 	}
 	
 	void CE::Scene::RemoveRenderPipeline(CE::RenderPipeline* renderPipeline)
 	{
+		rpiScene->RemoveRenderPipeline(renderPipeline->GetRpiRenderPipeline());
 		renderPipelines.Remove(renderPipeline);
 	}
 
@@ -218,7 +225,7 @@ namespace CE
 	void CE::Scene::OnCameraComponentAttached(CameraComponent* camera)
 	{
 		cameras.Add(camera);
-		AddRenderPipeline(camera->GetRenderPipeline());
+		AddRenderPipeline(camera->GetRenderPipeline(), camera);
 		if (mainCamera == nullptr)
 		{
 			mainCamera = camera;
@@ -247,7 +254,7 @@ namespace CE
 
 	void CE::Scene::OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor)
 	{
-
+		
 	}
 
 } // namespace CE

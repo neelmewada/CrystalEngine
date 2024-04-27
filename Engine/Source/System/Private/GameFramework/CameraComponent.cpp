@@ -33,10 +33,14 @@ namespace CE
         }
         
         this->renderPipeline = renderPipeline;
+        if (renderPipeline)
+        {
+            renderPipeline->SetMainViewTag(viewTag);
+        }
         
         if (scene)
         {
-            scene->AddRenderPipeline(renderPipeline);
+            scene->AddRenderPipeline(renderPipeline, this);
         }
     }
 

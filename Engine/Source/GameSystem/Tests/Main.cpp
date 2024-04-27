@@ -125,7 +125,7 @@ TEST(RPI, Scene)
 		{
 			allComponents.Add(actorComponent);
 		});
-		EXPECT_EQ(allComponents.GetSize(), 2);
+		EXPECT_EQ(allComponents.GetSize(), 3);
 
 		allComponents.Clear();
 
@@ -135,7 +135,7 @@ TEST(RPI, Scene)
 			{
 				allComponents.Add(actorComponent);
 			});
-		EXPECT_EQ(allComponents.GetSize(), 1);
+		EXPECT_EQ(allComponents.GetSize(), 2);
 
 		subComponent->Destroy();
 	}

@@ -52,6 +52,8 @@ namespace CE::RPI
 		Ptr<PassAttachment> attachment = nullptr;
         
 		Ptr<PassAttachment> originalAttachment = nullptr;
+
+		Ptr<PassAttachment> GetActualAttachment() const;
 	};
 
 } // namespace CE::RPI

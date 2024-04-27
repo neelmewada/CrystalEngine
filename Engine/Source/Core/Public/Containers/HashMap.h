@@ -109,17 +109,17 @@ namespace CE
 		}
 
         template<typename... Args>
-        inline void Emplace(Args... args)
+        auto Emplace(Args... args)
         {
-            Impl.emplace(args...);
+            return Impl.emplace(args...);
         }
 
-        inline void Remove(const KeyType& key)
+        void Remove(const KeyType& key)
         {
             Impl.erase(key);
         }
         
-        inline void Clear()
+        void Clear()
         {
             Impl.clear();
         }

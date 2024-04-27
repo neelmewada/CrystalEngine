@@ -10,26 +10,18 @@ namespace CE::RPI
 	class Scene;
 	class View;
 
-	enum class PipelineViewType
+	struct SceneViews
 	{
-		Undefined = 0,
-		Persistent,
-		Transient
-	};
-
-	struct PipelineViews
-	{
-		PipelineViewTag viewTag{};
-		PipelineViewType viewType{};
+		SceneViewTag viewTag{};
 
 		Array<ViewPtr> views{};
 
 		RHI::DrawListMask drawListMask{};
 	};
 
-	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
+	using SceneViewsByTag = HashMap<SceneViewTag, SceneViews>;
 	
-	class CORERPI_API RenderPipeline
+	class CORERPI_API RenderPipeline final
 	{
 	public:
 
@@ -47,11 +39,13 @@ namespace CE::RPI
 		PassAttachment* AddAttachment(const RPI::PassImageAttachmentDesc& imageDesc);
 		PassAttachment* AddAttachment(const RPI::PassBufferAttachmentDesc& bufferDesc);
 
+		void ImportScopeProducers(RHI::FrameScheduler* scheduler);
+
 		/// @brief Name of the pipeline
 		Name name{};
 
 		/// @brief Name tag of the main view.
-		PipelineViewTag mainViewTag = "MainCamera";
+		SceneViewTag mainViewTag = "MainCamera";
 
 		/// @brief Scene this render pipeline belongs to.
 		Scene* scene = nullptr;

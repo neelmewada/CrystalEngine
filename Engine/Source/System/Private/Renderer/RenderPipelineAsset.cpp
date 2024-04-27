@@ -12,5 +12,13 @@ namespace CE
 	{
 		
 	}
+	
+	void RenderPipelineAsset::ApplyChanges()
+	{
+		for (CE::RenderPipeline* renderPipeline : renderPipelines)
+		{
+			renderPipeline->MarkDirty();
+		}
+	}
 
 } // namespace CE

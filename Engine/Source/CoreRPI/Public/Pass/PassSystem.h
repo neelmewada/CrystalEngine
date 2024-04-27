@@ -20,6 +20,8 @@ namespace CE::RPI
 
 		Pass* CreatePass(Name templateName, Name newPassName = "");
 
+		Pass* CreatePass(Object* outer, Name templateName, Name newPassName = "");
+
 	private:
 
 		PassSystem() = default;

@@ -46,7 +46,7 @@ namespace CE::RHI
 		return mergedDrawListsByTag[tag];
 	}
 
-	void DrawListContext::AddDrawPacket(DrawPacket* drawPacket)
+	void DrawListContext::AddDrawPacket(DrawPacket* drawPacket, f32 depth)
 	{
 		if (!drawPacket)
 			return;
@@ -60,10 +60,12 @@ namespace CE::RHI
 			if (this->drawListMask.Test(drawListTag.Get()))
 			{
 				DrawItemProperties drawItemProperties = drawPacket->GetDrawItemProperties(i);
-
-				auto& drawList = threadDrawListsByTag[drawListTag];
-				threadDrawListsByTag[drawListTag].listTag = drawListTag;
+				drawItemProperties.depth = depth;
+				
+				auto& drawList = threadDrawListsByTag[drawListTag.Get()];
+				drawList.listTag = drawListTag;
 				drawList.AddDrawItem(drawItemProperties);
+				
 			}
 		}
 	}

@@ -126,8 +126,8 @@ namespace CE::RHI
 	{
 		DrawItemProperties() = default;
 
-		DrawItemProperties(const DrawItem* item, const DrawFilterMask filterMask = DrawFilterMask::ALL)
-			: item(item), drawFilterMask(filterMask)
+		DrawItemProperties(const DrawItem* item, f32 depth = 0.0f, const DrawFilterMask filterMask = DrawFilterMask::ALL)
+			: item(item), drawFilterMask(filterMask), depth(depth)
 		{}
 
 		const DrawItem* item = nullptr;
@@ -139,6 +139,8 @@ namespace CE::RHI
 
 		/// @brief A filter mask which helps decide if this item is supposed to be pushed to a CommandList for drawing.
 		DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
+
+		f32 depth = 0.0f;
 	};
 
 } // namespace CE::RPI

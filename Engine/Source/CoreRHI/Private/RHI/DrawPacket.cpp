@@ -16,7 +16,7 @@ namespace CE::RHI
 	{
 		CE_ASSERT(index < GetDrawItemCount(), "GetDrawItemProperties(): index {} out of bounds {}", index, GetDrawItemCount());
 
-		return DrawItemProperties(&drawItems[index], drawFilterMasks[index]);
+		return DrawItemProperties(&drawItems[index], 0.0f, drawFilterMasks[index]);
 	}
 
 } // namespace CE::RHI

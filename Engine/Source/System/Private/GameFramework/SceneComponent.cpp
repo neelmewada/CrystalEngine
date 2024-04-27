@@ -200,7 +200,7 @@ namespace CE
 			attachedComponent->SetDirty();
 		}
 
-		if (owner->rootComponent == this)
+		if (owner && owner->rootComponent == this)
 		{
 			for (Actor* child : owner->children)
 			{

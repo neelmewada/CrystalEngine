@@ -58,15 +58,11 @@ namespace CE::RHI
 		void SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value);
 		void SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value);
 
-		void AddScopeProducer(IScopeProducer* scopeProducer);
-
 	private:
 
 		u32 numFramesInFlight = 2;
 
 		RHI::Scope* drawListScope = nullptr;
-
-		Array<IScopeProducer*> scopeProducers{};
         
         TransientMemoryPool* transientMemoryPool = nullptr;
 

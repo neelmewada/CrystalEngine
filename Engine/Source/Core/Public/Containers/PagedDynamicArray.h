@@ -312,7 +312,8 @@ namespace CE
 
         SIZE_T indexInPage = page->Reserve();
         T* item = firstAvailablePage->GetItem(indexInPage);
-        *item = value;
+        new (item) T(value);
+        //*item = value;
         itemCount++;
         return Handle(item, firstAvailablePage);
     }

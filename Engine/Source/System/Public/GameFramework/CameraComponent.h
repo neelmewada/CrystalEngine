@@ -10,7 +10,15 @@ namespace CE
 		Perspective = 0,
 		Orthogonal = 1,
 	};
-	ENUM_CLASS_FLAGS(CameraProjection);
+	ENUM_CLASS(CameraProjection);
+
+	ENUM()
+	enum class CameraType
+	{
+		MainCamera = 0,
+		SecondaryCamera
+	};
+	ENUM_CLASS(CameraType);
 
     CLASS()
 	class SYSTEM_API CameraComponent : public SceneComponent
@@ -40,12 +48,22 @@ namespace CE
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
 		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+
+    	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
+
+    	void SetViewTag(const Name& tag) { viewTag = tag; }
     	
     protected:
 
 		void Tick(f32 delta) override;
 
 	private:
+
+    	FIELD()
+    	Name viewTag = "MainCamera";
+
+    	FIELD()
+    	CameraType cameraType = CameraType::MainCamera;
 
 		FIELD()
 		Color clearColor = Color::RGBA(36, 85, 163);

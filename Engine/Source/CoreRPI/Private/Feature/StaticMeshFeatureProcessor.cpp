@@ -68,8 +68,9 @@ namespace CE::RPI
 			objectSrgList.Add(objectSrg);
 
 			RPI::MeshDrawPacket& packet = drawPacketList.EmplaceBack(lod, modelLodIndex, objectSrg, material);
-
 			
+			packet.SetStencilRef(0);
+			packet.Update(scene, false);
 		}
 	}
 

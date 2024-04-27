@@ -125,7 +125,8 @@ namespace CE
 
         // - Depth Pass
 
-        RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass("DepthPass");
+        RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass(this, "DepthPass");
+    	depthPass->SetViewTag(mainViewTag);
 	    {
             PassAttachmentBinding outputBinding{};
             outputBinding.slotType = PassSlotType::Output;
@@ -141,7 +142,8 @@ namespace CE
 
         // - Skybox Pass
 
-        RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass("SkyboxPass");
+        RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass(this, "SkyboxPass");
+    	skyboxPass->SetViewTag(mainViewTag);
 	    {
             PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = PassSlotType::Output;
@@ -157,26 +159,11 @@ namespace CE
 
         // - Directional Shadow Pass
 
-        RasterPass* shadowPass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "DirectionalShadowPass");
+        DirectionalShadowPass* shadowPass = CreateObject<DirectionalShadowPass>(this, "DirectionalShadowPass");
+    	shadowPass->SetViewTag(mainViewTag);
 	    {
             // Array of Texture2D<float> i.e. Shadow maps
             {
-                PassSlot outputSlot{};
-                outputSlot.name = "DirectionalShadowListOutput";
-                outputSlot.slotType = PassSlotType::Output;
-                outputSlot.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-                outputSlot.dimensions = { Dimension::Dim2D };
-                outputSlot.formats = { Format::D32_SFLOAT, Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
-                outputSlot.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
-                outputSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
-                outputSlot.loadStoreAction.loadActionStencil = AttachmentLoadAction::DontCare;
-                outputSlot.loadStoreAction.storeActionStencil = AttachmentStoreAction::DontCare;
-                outputSlot.loadStoreAction.clearValueDepth = 1.0f;
-                outputSlot.isArray = true;
-                outputSlot.shaderInputName = "DirectionalShadowMapList";
-
-                shadowPass->AddSlot(outputSlot);
-
                 PassAttachmentBinding shadowMapListBinding{};
                 shadowMapListBinding.name = "DirectionalShadowListOutput";
                 shadowMapListBinding.slotType = PassSlotType::Output;
@@ -192,7 +179,8 @@ namespace CE
 
         // - Opaque Pass
 
-        auto opaquePass = CreateObject<RasterPass>(GetTransientPackage(MODULE_NAME), "OpaquePass");
+        auto opaquePass = CreateObject<RasterPass>(this, "OpaquePass");
+    	opaquePass->SetViewTag(mainViewTag);
 	    {
             // DepthInput
             {
@@ -239,7 +227,8 @@ namespace CE
 
         // - Resolve Pass
 
-        auto resolvePass = (RasterPass*)PassSystem::Get().CreatePass("ResolvePass");
+        auto resolvePass = (RasterPass*)PassSystem::Get().CreatePass(this, "ResolvePass");
+    	resolvePass->SetViewTag(mainViewTag);
 	    {
 		    {
                 PassAttachmentBinding colorBinding{};

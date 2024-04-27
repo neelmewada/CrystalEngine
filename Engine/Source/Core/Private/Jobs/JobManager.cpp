@@ -404,7 +404,7 @@ namespace CE
 		job->Finish();
 
 		{
-			LockGuard<SharedMutex> lock{ job->dependentJobsMutex };
+			LockGuard lock{ job->dependentJobsMutex };
 
 			for (auto dependent : job->dependentJobs)
 			{

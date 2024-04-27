@@ -23,9 +23,9 @@ namespace CE::RPI
     using Ptr = RHI::Ptr<T>;
 
 	/// @brief Name tag used to identify each View inside a Render Pipeline.
-	using PipelineViewTag = CE::Name;
+	using SceneViewTag = CE::Name;
 
-	using PipelineViewTagList = HashSet<PipelineViewTag>;
+	using PipelineViewTagList = HashSet<SceneViewTag>;
 
 	using InstanceBase = CE::IntrusiveBase;
 

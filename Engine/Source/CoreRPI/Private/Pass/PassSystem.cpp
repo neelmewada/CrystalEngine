@@ -125,6 +125,8 @@ namespace CE::RPI
 
             resolvePass->AddSlot(colorSlot);
             resolvePass->AddSlot(resolveSlot);
+
+            RegisterTemplate(resolvePass);
         }
     }
 
@@ -162,6 +164,11 @@ namespace CE::RPI
 
     Pass* PassSystem::CreatePass(Name templateName, Name newPassName)
     {
+        return CreatePass(GetTransientPackage(MODULE_NAME), templateName, newPassName);
+    }
+    
+    Pass* PassSystem::CreatePass(Object* outer, Name templateName, Name newPassName)
+    {
         if (passTemplates[templateName] == nullptr)
             return nullptr;
 
@@ -170,7 +177,7 @@ namespace CE::RPI
 
         Pass* templatePass = passTemplates[templateName];
 
-        Pass* newPass = CreateObject<Pass>(GetTransientPackage(MODULE_NAME), newPassName.GetString(), OF_NoFlags, templatePass->GetClass());
+        Pass* newPass = CreateObject<Pass>(outer, newPassName.GetString(), OF_NoFlags, templatePass->GetClass());
         newPass->slots = templatePass->slots;
 
         return newPass;

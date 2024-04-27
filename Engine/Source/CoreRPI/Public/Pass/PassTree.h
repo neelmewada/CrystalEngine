@@ -32,7 +32,11 @@ namespace CE::RPI
 			return rootPass;
 		}
 
+    	void IterateRecursively(const Delegate<void(Pass*)>& functor);
+
 	private:
+
+    	void IterateRecursively(Pass* currentPass, const Delegate<void(Pass*)>& functor);
 
 		Pass* FindPassInternal(const Name& passName, ParentPass* parentPass);
 

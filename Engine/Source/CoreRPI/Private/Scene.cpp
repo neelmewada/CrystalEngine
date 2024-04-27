@@ -51,17 +51,16 @@ namespace CE::RPI
 		return nullptr;
 	}
 
-	void Scene::AddView(PipelineViewTag viewTag, ViewPtr view)
+	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)
 	{
-		PipelineViews& pipelineViews = viewsByTag[viewTag];
-		pipelineViews.viewType = PipelineViewType::Persistent;
+		SceneViews& pipelineViews = viewsByTag[viewTag];
 		pipelineViews.viewTag = viewTag;
 		pipelineViews.views.Add(view);
 	}
 
-	void Scene::RemoveView(PipelineViewTag viewTag, ViewPtr view)
+	void Scene::RemoveView(SceneViewTag viewTag, ViewPtr view)
 	{
-		PipelineViews& pipelineViews = viewsByTag[viewTag];
+		SceneViews& pipelineViews = viewsByTag[viewTag];
 		pipelineViews.views.Remove(view);
 	}
 
@@ -73,12 +72,20 @@ namespace CE::RPI
 		renderPipelines.Add(renderPipeline);
 	}
 
-	RHI::DrawListMask& Scene::GetDrawListMask(PipelineViewTag viewTag)
+	void RPI::Scene::RemoveRenderPipeline(RenderPipeline* renderPipeline)
+	{
+		if (!renderPipeline)
+			return;
+		renderPipeline->scene = nullptr;
+		renderPipelines.Remove(renderPipeline);
+	}
+
+	RHI::DrawListMask& Scene::GetDrawListMask(SceneViewTag viewTag)
 	{
 		return viewsByTag[viewTag].drawListMask;
 	}
 	
-	ArrayView<ViewPtr> Scene::GetViews(const PipelineViewTag& viewTag)
+	ArrayView<ViewPtr> Scene::GetViews(const SceneViewTag& viewTag)
 	{
 		if (!viewsByTag.KeyExists(viewTag))
 			return {};
@@ -96,6 +103,11 @@ namespace CE::RPI
 
 	void Scene::PrepareRender(f32 currentTime, u32 imageIndex)
 	{
+		if (needsLookupTableRebuild)
+		{
+			RebuildPipelineLookupTable();
+		}
+		
 		CollectDrawPackets();
 	}
 
@@ -112,6 +124,79 @@ namespace CE::RPI
 		for (FeatureProcessor* fp : featureProcessors)
 		{
 			fp->Render(renderPacket);
+		}
+	}
+	
+	void Scene::RebuildPipelineLookupTable()
+	{
+		if (!needsLookupTableRebuild)
+			return;
+
+		needsLookupTableRebuild = false;
+
+		pipelineLookupMap.Clear();
+
+		for (RenderPipeline* renderPipeline : renderPipelines)
+		{
+			if (!renderPipeline)
+				continue;
+			
+			renderPipeline->passTree->IterateRecursively([&](Pass* pass)
+				{
+					const auto& inputBindings = pass->GetInputBindings();
+					const auto& inputOutputBindings = pass->GetInputOutputBindings();
+					const auto& outputBindings = pass->GetOutputBindings();
+
+					DrawListTag drawListTag = pass->GetDrawListTag();
+					SceneViewTag viewTag = pass->GetViewTag();
+					PipelineStateList& entry = pipelineLookupMap[drawListTag];
+					PipelineStateData* pipelineStateData = nullptr;
+
+					for (int i = 0; i < entry.GetSize(); i++)
+					{
+						if (entry[i].viewTag == viewTag)
+						{
+							pipelineStateData = &entry[i];
+							break;
+						}
+					}
+
+					if (pipelineStateData == nullptr)
+					{
+						entry.Add({});
+						pipelineStateData = &entry.Top();
+					}
+
+					pipelineStateData->viewTag = viewTag;
+
+					auto appendEntry = [&](const PassAttachmentBinding& binding)
+						{
+							Ptr<PassAttachment> attachment = binding.GetActualAttachment();
+							if (attachment == nullptr)
+								return;
+							if (attachment->attachmentDescriptor.type == AttachmentType::Image)
+							{
+								const RPI::ImageDescriptor& attachmentDesc = attachment->attachmentDescriptor.imageDesc;
+
+								pipelineStateData->multisampleState.sampleCount = attachmentDesc.sampleCount;
+							}
+						};
+					
+					for (const PassAttachmentBinding& inputBinding : inputBindings)
+					{
+						appendEntry(inputBinding);
+					}
+
+					for (const PassAttachmentBinding& inputOutputBinding : inputOutputBindings)
+					{
+						appendEntry(inputOutputBinding);
+					}
+
+					for (const PassAttachmentBinding& outputBinding : outputBindings)
+					{
+						appendEntry(outputBinding);
+					}
+				});
 		}
 	}
 

@@ -3372,6 +3372,44 @@ TEST(JobSystem, Basic)
 	TEST_END;
 }
 
+TEST(JobSystem, Jobs)
+{
+	TEST_BEGIN;
+
+	{
+		JobManagerDesc desc{};
+		desc.totalThreads = 0;
+
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		auto prev = clock();
+		int numThreads = 0;
+		numThreads = manager.GetNumThreads();
+		numThreads = Math::Max(2, numThreads); // Run only 2 threads
+
+		for (int i = 0; i < numThreads; i++)
+		{
+			Job* job = new JobFunction([&](Job* job)
+				{
+					Thread::SleepFor(500); // 500 milliseconds
+				});
+			job->Start();
+		}
+
+		manager.DeactivateWorkersAndWait();
+
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 0.8);
+
+		JobContext::PopGlobalContext();
+	}
+
+	TEST_END;
+}
+
 class JobDep : public Job
 {
 public:

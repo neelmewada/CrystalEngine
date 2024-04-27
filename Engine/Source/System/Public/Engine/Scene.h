@@ -68,7 +68,7 @@ namespace CE
 
 		// - Rendering -
 
-		void AddRenderPipeline(CE::RenderPipeline* renderPipeline);
+		void AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera);
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
 	private:

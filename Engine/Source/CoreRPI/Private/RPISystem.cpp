@@ -54,7 +54,7 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
-	    for (int i = scenes.GetSize() - 1; i >= 0; --i)
+	    for (int i = (int)scenes.GetSize() - 1; i >= 0; --i)
 	    {
 			delete scenes[i];
 	    }

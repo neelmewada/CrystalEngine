@@ -16,6 +16,7 @@ namespace CE
         void ProduceScopes(FrameScheduler* scheduler) override;
         
         void EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase) override;
+
         
     };
     
