@@ -21,6 +21,7 @@ namespace CE::RPI
         
         RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
 
+		Array<RHI::Format> fallbackFormats{};
 	};
 
 	/// @brief A Pass attachment binding either points to a pass attachment OR to another

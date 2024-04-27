@@ -37,6 +37,7 @@ namespace CE::RHI
 	void FrameScheduler::BeginFrameGraph()
 	{
 		GetAttachmentDatabase().Clear();
+		scopeProducers.Clear();
 
 		FrameGraphBuilder::BeginFrameGraph(frameGraph);
 	}
@@ -126,6 +127,24 @@ namespace CE::RHI
 	void FrameScheduler::SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value)
 	{
 		frameGraph->SetVariable(imageIndex, variableName, value);
+	}
+
+	void FrameScheduler::AddScopeProducer(IScopeProducer* scopeProducer)
+	{
+		scopeProducers.Add(scopeProducer);
+	}
+
+	IScopeProducer* FrameScheduler::FindScopeProducer(const Name& passName)
+	{
+		for (int i = 0; i < scopeProducers.GetSize(); i++)
+		{
+			if (scopeProducers[i]->GetPassName() == passName)
+			{
+				return scopeProducers[i];
+			}
+		}
+
+		return nullptr;
 	}
 
 } // namespace CE::RHI

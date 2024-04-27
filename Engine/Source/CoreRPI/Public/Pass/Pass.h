@@ -39,7 +39,7 @@ namespace CE::RPI
 
 		PassAttachmentBinding* FindBinding(const Name& name);
 
-		const Name& GetPassName() const { return GetName(); }
+		const Name& GetPassName() const override { return GetName(); }
 
 		DrawListTag GetDrawListTag() const { return drawListTag; }
 
@@ -57,7 +57,7 @@ namespace CE::RPI
 
 		void ProduceScopes(FrameScheduler* scheduler) override {}
 
-		void EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase) override {}
+		void EmplaceAttachments(FrameScheduler* scheduler) override {}
 
 		Pass();
 

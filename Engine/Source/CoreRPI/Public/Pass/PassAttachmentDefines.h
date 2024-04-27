@@ -73,7 +73,12 @@ namespace CE::RPI
 
 		/// @brief Fixed size values for (width, height, depth) dimensions.
 		FIELD()
-		Vec3i fixedSizes = Vec3i(0, 0, 0);
+		Vec3i fixedSizes = Vec3i(0, 0, 1);
+
+		bool IsFixedSize() const
+		{
+			return fixedSizes.x != 0 && fixedSizes.y != 0 && fixedSizes.z != 0;
+		}
 	};
 
 	STRUCT()

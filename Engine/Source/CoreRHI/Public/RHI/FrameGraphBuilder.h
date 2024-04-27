@@ -5,10 +5,12 @@ namespace CE::RHI
 
 	class CORERHI_API FrameGraphBuilder
 	{
-	public:
-		FrameGraphBuilder() = default;
+	protected:
 
 		void BeginFrameGraph(FrameGraph* frameGraph);
+
+	public:
+		FrameGraphBuilder() = default;
 
 		inline FrameAttachmentDatabase& GetFrameAttachmentDatabase()
 		{

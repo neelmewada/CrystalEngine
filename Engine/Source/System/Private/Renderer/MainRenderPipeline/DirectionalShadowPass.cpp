@@ -52,7 +52,7 @@ namespace CE
         }
     }
 
-    void DirectionalShadowPass::EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase)
+    void DirectionalShadowPass::EmplaceAttachments(FrameScheduler* scheduler)
     {
         
     }

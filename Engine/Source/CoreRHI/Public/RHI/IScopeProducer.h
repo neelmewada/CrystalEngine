@@ -11,10 +11,12 @@ namespace CE::RHI
         virtual ~IScopeProducer() = default;
         
     public:
+
+        virtual const Name& GetPassName() const = 0;
         
         virtual void ProduceScopes(FrameScheduler* scheduler) = 0;
 
-        virtual void EmplaceAttachments(FrameAttachmentDatabase& attachmentDatabase) = 0;
+        virtual void EmplaceAttachments(FrameScheduler* scheduler) = 0;
         
     };
     
