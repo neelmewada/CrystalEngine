@@ -57,7 +57,9 @@ namespace CE
 				}
 				else
 				{
-					gEngine->CreateSubsystem(type);
+					EngineSubsystem* engineSubsystem = gEngine->CreateSubsystem(type);
+					engineSubsystem->Initialize();
+					engineSubsystem->PostInitialize();
 				}
 			}
 

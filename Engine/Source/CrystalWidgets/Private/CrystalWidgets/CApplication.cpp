@@ -552,6 +552,23 @@ namespace CE::Widgets
 		globalStyleSheet = CSSStyleSheet::Load(path, this);
 	}
 
+	void CApplication::BuildFrameAttachments()
+	{
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
+		{
+			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
+
+			if (!platformWindow)
+				continue;
+
+			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
+
+			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
+		}
+	}
+
 	void CApplication::BuildFrameGraph()
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
@@ -563,7 +580,7 @@ namespace CE::Widgets
 
 			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-			Name id = String::Format("CWindow_{}", platformWindow->GetWindowId());
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
 
 			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
 
@@ -591,6 +608,14 @@ namespace CE::Widgets
 				scheduler->EndScope();
 			}
 		}
+	}
+
+	Name CApplication::GetNativeWindowSwapChainId(CPlatformWindow* platformWindow)
+	{
+		if (platformWindow == nullptr || platformWindow->platformWindow == nullptr)
+			return "";
+
+		return String::Format("Window_{}", platformWindow->platformWindow->GetWindowId());
 	}
 
 	void CApplication::SetDrawListMasks(RHI::DrawListMask& outMask)
@@ -626,7 +651,7 @@ namespace CE::Widgets
 			if (!platformWindow)
 				continue;
 
-			Name id = String::Format("CWindow_{}", platformWindow->GetWindowId());
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
 
 			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->GetDrawListTag()));
 		}

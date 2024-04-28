@@ -53,6 +53,7 @@ namespace CE::Widgets
         CApplicationStyleConstants styleConstants{};
     };
 
+    //! @brief CrystalWidgets application object. Responsible for managing the widgets framework.
     CLASS()
     class CRYSTALWIDGETS_API CApplication final : public Object, public ApplicationMessageHandler
     {
@@ -80,7 +81,10 @@ namespace CE::Widgets
 
         void LoadGlobalStyleSheet(const IO::Path& path);
 
+        void BuildFrameAttachments();
         void BuildFrameGraph();
+
+        Name GetNativeWindowSwapChainId(CPlatformWindow* platformWindow);
 
         void SetDrawListMasks(RHI::DrawListMask& outMask);
 

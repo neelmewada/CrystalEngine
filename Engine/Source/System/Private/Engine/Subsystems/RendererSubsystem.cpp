@@ -86,6 +86,9 @@ namespace CE
 
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
+		SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+		CE::Scene* activeScene = sceneSubsystem->GetActiveScene();
+
 		if (mainWindow)
 		{
 			PlatformApplication::Get()->AddMessageHandler(this);
@@ -114,6 +117,8 @@ namespace CE
 
 			// TODO: Implement editor window later
 			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
+
+			activeScene->renderWindow = gameWindow;
 		}
 	}
 
@@ -192,29 +197,47 @@ namespace CE
 		recompileFrameGraph = true;
     	
     	CE::Scene* scene = sceneSubsystem->GetActiveScene();
-    	// TODO: Enqueue draw packets early! Scope producers need to have all draw packets available beforehand.
+
     	if (scene)
     	{
-    		
+			// TODO: Enqueue draw packets early! Scope producers need to have all draw packets available beforehand.
     	}
     	
 		scheduler->BeginFrameGraph();
 		{
 			auto app = CApplication::TryGet();
 			
-			// TODO: Use the swapchain directly for now
-			scheduler->GetAttachmentDatabase().EmplaceFrameAttachment("PipelineOutput", gameWindow->GetNativeWindow()->GetSwapChain());
-			
-			if (scene)
-			{
-				for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
-				{
-					renderPipeline->GetRpiRenderPipeline()->ImportScopeProducers(scheduler);
-				}
-			}
-			
 			if (app)
 			{
+				app->BuildFrameAttachments();
+
+				if (scene && scene->renderWindow && scene->renderWindow->GetNativeWindow())
+				{
+					CWindow* renderWindow = scene->renderWindow;
+					CPlatformWindow* nativeWindow = renderWindow->GetNativeWindow();
+					PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
+
+					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+					{
+						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+						const auto& attachments = rpiPipeline->attachments;
+
+						for (PassAttachment* passAttachment : attachments)
+						{
+							if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+							{
+								passAttachment->attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
+							}
+							else
+							{
+								passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+							}
+						}
+
+						rpiPipeline->ImportScopeProducers(scheduler);
+					}
+				}
+
 				app->BuildFrameGraph();
 			}
 		}

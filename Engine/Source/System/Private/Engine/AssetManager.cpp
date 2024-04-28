@@ -127,11 +127,11 @@ namespace CE
 		if (package == nullptr)
 			return;
 
-		loadedAssetsMutex.Lock();
+		LockGuard lock{ loadedAssetsMutex };
+
 		loadedAssetsByPath.Remove(package->GetPackageName());
 		loadedAssetsByUuid.Remove(package->GetPackageUuid());
 		package->Destroy();
-		loadedAssetsMutex.Unlock();
 	}
 
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)

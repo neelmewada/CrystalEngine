@@ -11,7 +11,12 @@ namespace CE::RPI
 
 		virtual bool IsParentPass() const override final { return false; }
 
-	private:
+		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+
+	protected:
+
+		//! @brief Shader resource group for this pass (SRG_PerPass)
+		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
 		RPI_PASS(GpuPass)
 	};

@@ -5,7 +5,7 @@ namespace CE::RPI
 
     RasterPass::RasterPass()
     {
-	    
+
     }
 
     RasterPass::~RasterPass()
@@ -15,13 +15,96 @@ namespace CE::RPI
 	
     void RasterPass::ProduceScopes(FrameScheduler* scheduler)
     {
-    	// TODO: Build scopes
+        Name scopeId = String::Format("{}_{}", GetName(), GetUuid());
+        
+        scheduler->BeginScope(scopeId);
+        {
+            // - Use Attachments -
+            
+            auto useAttachment = [&](const PassAttachmentBinding& attachmentBinding)
+                {
+                    Ptr<PassAttachment> attachment = attachmentBinding.GetOriginalAttachment();
+                    if (attachment == nullptr)
+                        return;
+
+                    const PassSlot* slot = nullptr;
+
+					for (const PassSlot& passSlot : slots)
+					{
+						if (passSlot.slotType == attachmentBinding.slotType &&
+                            passSlot.name == attachmentBinding.name)
+						{
+                            slot = &passSlot;
+							break;
+						}
+					}
+
+					if (!slot)
+                        return;
+
+                    ScopeAttachmentAccess attachmentAccess = ScopeAttachmentAccess::Undefined;
+                    switch (slot->slotType)
+                    {
+                    case PassSlotType::Input:
+                        attachmentAccess = ScopeAttachmentAccess::Read;
+	                    break;
+                    case PassSlotType::Output:
+                        attachmentAccess = ScopeAttachmentAccess::Write;
+	                    break;
+                    case PassSlotType::InputOutput:
+                        attachmentAccess = ScopeAttachmentAccess::ReadWrite;
+	                    break;
+                    default:
+                        return;
+                    }
+
+                    if (attachment->attachmentDescriptor.type == AttachmentType::Image)
+                    {
+                        ImageScopeAttachmentDescriptor imageScopeAttachment{};
+                        imageScopeAttachment.attachmentId = attachment->attachmentId;
+                        imageScopeAttachment.loadStoreAction = slot->loadStoreAction;
+                        imageScopeAttachment.multisampleState.sampleCount = attachment->attachmentDescriptor.imageDesc.sampleCount;
+
+                        scheduler->UseAttachment(imageScopeAttachment, slot->attachmentUsage, attachmentAccess);
+                    }
+                    else if (attachment->attachmentDescriptor.type == AttachmentType::Buffer)
+                    {
+                        BufferScopeAttachmentDescriptor bufferScopeAttachment{};
+                        bufferScopeAttachment.attachmentId = attachment->attachmentId;
+                        bufferScopeAttachment.loadStoreAction = slot->loadStoreAction;
+
+                        scheduler->UseAttachment(bufferScopeAttachment, slot->attachmentUsage, attachmentAccess);
+                    }
+                };
+
+            for (const PassAttachmentBinding& attachmentBinding : inputBindings)
+            {
+                useAttachment(attachmentBinding);
+            }
+
+            for (const PassAttachmentBinding& attachmentBinding : inputOutputBindings)
+            {
+                useAttachment(attachmentBinding);
+            }
+
+            for (const PassAttachmentBinding& attachmentBinding : outputBindings)
+            {
+                useAttachment(attachmentBinding);
+            }
+
+            // - Use SRGs -
+
+            if (shaderResourceGroup)
+            {
+	            scheduler->UseShaderResourceGroup(shaderResourceGroup);
+            }
+            
+        }
+        scheduler->EndScope();
     }
 	
     void RasterPass::EmplaceAttachments(FrameScheduler* scheduler)
     {
-    	// TODO: Implement frame attachments
-    	
     	auto emplaceAttachment = [&](const PassAttachmentBinding& attachmentBinding)
     		{
                 FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
@@ -44,7 +127,7 @@ namespace CE::RPI
     					bufferDescriptor.bufferSize = attachmentDescriptor.bufferDesc.byteSize;
     					bufferDescriptor.defaultHeapType = MemoryHeapType::Default;
     					
-    					//attachmentDatabase.EmplaceFrameAttachment(attachment->name, bufferDescriptor);
+    					//attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
     				}
     					break;
     				case AttachmentType::Image:
@@ -56,6 +139,8 @@ namespace CE::RPI
                         imageDescriptor.arrayLayers = attachmentDescriptor.imageDesc.arrayLayers;
                         imageDescriptor.dimension = attachmentDescriptor.imageDesc.dimension;
                         imageDescriptor.format = attachmentDescriptor.imageDesc.format;
+                        imageDescriptor.sampleCount = attachmentDescriptor.imageDesc.sampleCount;
+                        imageDescriptor.mipLevels = attachmentDescriptor.imageDesc.mipCount;
 
                         if (attachment->sizeSource.IsFixedSize())
                         {
@@ -65,10 +150,25 @@ namespace CE::RPI
                         }
                         else if (attachment->sizeSource.source.IsValid())
                         {
-                            FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(attachment->sizeSource.source);
+                            Ptr<PassAttachment> sourcePassAttachment = renderPipeline->FindAttachment(attachment->sizeSource.source);
+                            if (!sourcePassAttachment)
+                                return;
+
+                            FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(sourcePassAttachment->attachmentId);
                             if (!sourceAttachment)
                                 return;
-                            if (sourceAttachment->IsImageAttachment())
+
+                            if (sourceAttachment->IsSwapChainAttachment())
+                            {
+                                auto srcSwapChainAttachment = (SwapChainFrameAttachment*)sourceAttachment;
+                                imageDescriptor.width = srcSwapChainAttachment->GetSwapChain()->GetWidth();
+                                imageDescriptor.height = srcSwapChainAttachment->GetSwapChain()->GetHeight();
+                                imageDescriptor.depth = 1;
+
+                                imageDescriptor.width *= attachment->sizeSource.sizeMultipliers.x;
+                                imageDescriptor.height *= attachment->sizeSource.sizeMultipliers.y;
+                            }
+                            else if (sourceAttachment->IsImageAttachment())
                             {
                                 auto srcImageAttachment = (ImageFrameAttachment*)sourceAttachment;
                                 imageDescriptor.width = srcImageAttachment->GetImageDescriptor().width;
@@ -78,16 +178,6 @@ namespace CE::RPI
                                 imageDescriptor.width *= attachment->sizeSource.sizeMultipliers.x;
                                 imageDescriptor.height *= attachment->sizeSource.sizeMultipliers.y;
                                 imageDescriptor.depth *= attachment->sizeSource.sizeMultipliers.z;
-                            }
-                            else if (sourceAttachment->IsSwapChainAttachment())
-                            {
-                                auto srcSwapChainAttachment = (SwapChainFrameAttachment*)sourceAttachment;
-                                imageDescriptor.width = srcSwapChainAttachment->GetSwapChain()->GetWidth();
-                                imageDescriptor.height = srcSwapChainAttachment->GetSwapChain()->GetHeight();
-                                imageDescriptor.depth = 1;
-
-                                imageDescriptor.width *= attachment->sizeSource.sizeMultipliers.x;
-                                imageDescriptor.height *= attachment->sizeSource.sizeMultipliers.y;
                             }
                             else
                             {
@@ -114,7 +204,7 @@ namespace CE::RPI
                             }
                         }
                         
-                        //attachmentDatabase.EmplaceFrameAttachment(attachment->name, imageDescriptor);
+                        attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, imageDescriptor);
     				}
     					break;
     				}

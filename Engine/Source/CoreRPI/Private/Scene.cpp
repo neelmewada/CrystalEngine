@@ -177,7 +177,7 @@ namespace CE::RPI
 
 					auto appendEntry = [&](const PassAttachmentBinding& binding)
 						{
-							Ptr<PassAttachment> attachment = binding.GetActualAttachment();
+							Ptr<PassAttachment> attachment = binding.GetOriginalAttachment();
 							if (attachment == nullptr)
 								return;
 							if (attachment->attachmentDescriptor.type == AttachmentType::Image)

@@ -9,10 +9,9 @@ namespace CE::RPI
 	public:
 
 		RasterPass();
-
 		virtual ~RasterPass();
 
-	private:
+	protected:
 
     	void ProduceScopes(FrameScheduler* scheduler) override;
 

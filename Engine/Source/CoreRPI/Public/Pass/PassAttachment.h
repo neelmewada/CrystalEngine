@@ -15,6 +15,9 @@ namespace CE::RPI
 		/// @brief Name of the attachment.
 		Name name{};
 
+		//! @brief Actual attachment id to use in Frame Scheduler.
+		AttachmentID attachmentId = "";
+
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
         PassAttachmentSizeSource sizeSource{};
@@ -32,7 +35,7 @@ namespace CE::RPI
         
 		/// @brief Name of the attachment binding. Either pass slot name, or attachment name.
 		Name name = "";
-        
+
 		/// @brief Name of shader input field.
 		Name shaderInputName = "";
         
@@ -51,10 +54,12 @@ namespace CE::RPI
         
 		/// @brief The pass attachment this binding points to. connectedBinding should be null if this is used.
 		Ptr<PassAttachment> attachment = nullptr;
-        
-		Ptr<PassAttachment> originalAttachment = nullptr;
 
-		Ptr<PassAttachment> GetActualAttachment() const;
+		Ptr<PassAttachment> GetOriginalAttachment() const;
+
+	private:
+
+		mutable Ptr<PassAttachment> originalAttachment = nullptr;
 	};
 
 } // namespace CE::RPI

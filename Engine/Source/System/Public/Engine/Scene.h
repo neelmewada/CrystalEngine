@@ -93,6 +93,10 @@ namespace CE
 
 		FIELD()
 		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
+
+		//! @brief The CWindow that this scene is rendered to.
+		FIELD()
+		CWindow* renderWindow = nullptr;
 		
 	private:
 

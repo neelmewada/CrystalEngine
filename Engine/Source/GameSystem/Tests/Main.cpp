@@ -23,7 +23,7 @@ static void TestBegin(bool gui)
 {
 	gProjectPath = PlatformDirectories::GetLaunchDir();
 	gProjectName = MODULE_NAME;
-
+	
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
 	ModuleManager::Get().LoadModule("CoreInput");
@@ -111,6 +111,8 @@ TEST(RPI, Scene)
 
 	TestFeatureProcessor1* fp1 = rpiScene->AddFeatureProcessor<TestFeatureProcessor1>();
 	StaticMeshFeatureProcessor* meshFp = rpiScene->GetFeatureProcessor<StaticMeshFeatureProcessor>();
+
+	CE::Shader* standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
 	
 	{
 		StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMesh");

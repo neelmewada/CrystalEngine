@@ -228,7 +228,7 @@ namespace CE::Vulkan
 
 		Array<Scope*> scopeChain{};
 		Scope* scopeInChain = scope;
-		Array<Vulkan::SwapChain*> swapChainsUsedAsAttachmentForFirstTime{};
+		HashSet<Vulkan::SwapChain*> swapChainsUsedAsAttachmentForFirstTime{};
 
 		while (scopeInChain != nullptr)
 		{
@@ -843,7 +843,7 @@ namespace CE::Vulkan
 
 		Vulkan::Scope* signallingScope = scopeChain.Top();
 		
-		if (swapChainsUsedAsAttachmentForFirstTime.NonEmpty()) // Frame graph uses a swapchain image
+		if (!swapChainsUsedAsAttachmentForFirstTime.IsEmpty()) // Frame graph uses a SwapChain image for first time
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + swapChainsUsedAsAttachmentForFirstTime.GetSize();
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
@@ -858,14 +858,17 @@ namespace CE::Vulkan
 				waitStages[i] = scope->waitSemaphoreStageFlags[i];
 			}
 
-			for (int i = 0; i < swapChainsUsedAsAttachmentForFirstTime.GetSize(); i++)
+			int idx = 0;
+			for (SwapChain* swapChain : swapChainsUsedAsAttachmentForFirstTime)
 			{
-				int swapChainIndex = frameGraph->presentSwapChains.IndexOf(swapChainsUsedAsAttachmentForFirstTime[i]);
+				int swapChainIndex = frameGraph->presentSwapChains.IndexOf(swapChain);
 				CE_ASSERT(swapChainIndex >= 0, "SwapChain not found in FrameGraph.");
 
 				// We need to wait on image-acquire semaphore too
-				waitSemaphores[scope->waitSemaphores[currentImageIndex].GetSize() + i] = compiler->imageAcquiredSemaphores[currentSubmissionIndex][swapChainIndex];
-				waitStages[scope->waitSemaphores[currentImageIndex].GetSize() + i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				waitSemaphores[scope->waitSemaphores[currentImageIndex].GetSize() + idx] = compiler->imageAcquiredSemaphores[currentSubmissionIndex][swapChainIndex];
+				waitStages[scope->waitSemaphores[currentImageIndex].GetSize() + idx] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+				idx++;
 			}
 
 			submitInfo.pWaitSemaphores = waitSemaphores.GetData();

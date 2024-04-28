@@ -12,6 +12,7 @@
 // ******************************************************
 // Basic headers
 #include "Misc/Exception.h"
+#include "Templates/IntrusivePtr.h"
 #include "Misc/Assert.h"
 #include "Misc/ByteUtils.h"
 #include "Misc/Defer.h"

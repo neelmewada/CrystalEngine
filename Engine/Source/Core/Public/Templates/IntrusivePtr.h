@@ -154,11 +154,19 @@ namespace CE
 
 		inline T& operator*() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException();
+			}
 			return *ptr;
 		}
 
 		inline T* operator->() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException();
+			}
 			return ptr;
 		}
 

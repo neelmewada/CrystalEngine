@@ -101,7 +101,7 @@ namespace CE
 
     	// - Directional Shadow Map
 
-        PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
+        /*PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
 	    {
             PassImageAttachmentDesc directionalShadowMapListDesc{};
             directionalShadowMapListDesc.name = "DirectionalShadowMapList";
@@ -117,7 +117,7 @@ namespace CE
             directionalShadowMapListDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
 
             directionalShadowMapList = renderPipeline->AddAttachment(directionalShadowMapListDesc);
-	    }
+	    }*/
 
         // -------------------------------
         // Passes
@@ -159,7 +159,7 @@ namespace CE
 
         // - Directional Shadow Pass
 
-        DirectionalShadowPass* shadowPass = CreateObject<DirectionalShadowPass>(this, "DirectionalShadowPass");
+        /*DirectionalShadowPass* shadowPass = CreateObject<DirectionalShadowPass>(this, "DirectionalShadowPass");
     	shadowPass->SetViewTag(mainViewTag);
 	    {
             // Array of Texture2D<float> i.e. Shadow maps
@@ -175,7 +175,7 @@ namespace CE
             }
 
             rootPass->AddChild(shadowPass);
-	    }
+	    }*/
 
         // - Opaque Pass
 

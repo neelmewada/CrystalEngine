@@ -48,10 +48,10 @@ namespace CE
 		// - Fields -
 
 		FIELD(Config)
-		SubClassType<AssetManager> runtimeAssetManagerClass = nullptr;
+		SubClass<AssetManager> runtimeAssetManagerClass = nullptr;
 
 		FIELD(Config)
-		SubClassType<GameInstance> gameInstanceClass = nullptr;
+		SubClass<GameInstance> gameInstanceClass = nullptr;
 
 		FIELD()
 		AssetManager* assetManager = nullptr;

@@ -21,12 +21,16 @@ namespace CE::RPI
         attachmentDescriptor = RPI::UnifiedAttachmentDescriptor(desc.bufferDescriptor);
     }
     
-    Ptr<PassAttachment> PassAttachmentBinding::GetActualAttachment() const
+    Ptr<PassAttachment> PassAttachmentBinding::GetOriginalAttachment() const
     {
         if (attachment)
             return attachment;
+
+        if (originalAttachment)
+            return originalAttachment;
+
         if (connectedBinding)
-            return connectedBinding->GetActualAttachment();
+            return originalAttachment = connectedBinding->GetOriginalAttachment();
         
         return nullptr;
     }

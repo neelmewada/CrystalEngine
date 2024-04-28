@@ -59,7 +59,7 @@ namespace CE::RHI
 
 	bool FrameGraphBuilder::UseShaderResourceGroup(RHI::ShaderResourceGroup* srg)
 	{
-		if (!currentScope || !frameGraph)
+		if (!currentScope || !frameGraph || !srg)
 			return false;
 
 		currentScope->AddShaderResourceGroups(srg);

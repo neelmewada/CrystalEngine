@@ -43,6 +43,17 @@ namespace CE
                 return list.GetLast().GetHandle();
             }
 
+            DelegateHandle operator+(const InternalDelegate& delegate)
+            {
+                return AddDelegateInstance(delegate);
+            }
+
+            MultiCastDelegateBase& operator-=(DelegateHandle handle)
+            {
+                RemoveDelegateInstance(handle);
+                return *this;
+            }
+
             void RemoveDelegateInstance(DelegateHandle handle)
             {
                 for (int i = 0; i < list.GetSize(); i++)
