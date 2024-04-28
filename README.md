@@ -27,7 +27,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Render graph based pipeline with automatic dependencies.
-- **CrystalWidgets** framework for GUI apps.
+- **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
 - **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
 ## Modules Overview
