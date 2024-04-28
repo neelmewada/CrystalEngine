@@ -262,6 +262,9 @@ namespace CE
 	{
 		drawList.Shutdown();
 
+		CE::Scene* scene = sceneSubsystem->GetActiveScene();
+		RPI::Scene* rpiScene = scene->GetRpiScene();
+
 		RHI::DrawListMask drawListMask{};
 
 		CApplication* app = CApplication::TryGet();
@@ -269,6 +272,26 @@ namespace CE
 		if (app)
 		{
 			CApplication::Get()->SetDrawListMasks(drawListMask);
+		}
+
+		// TODO: Set draw list masks
+
+		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+		{
+			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+			if (!renderPipeline)
+				continue;
+
+			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+				{
+					if (!pass)
+						return;
+
+					if (pass->GetDrawListTag().IsValid())
+					{
+						drawListMask.Set(pass->GetDrawListTag());
+					}
+				});
 		}
 
 		drawList.Init(drawListMask);
