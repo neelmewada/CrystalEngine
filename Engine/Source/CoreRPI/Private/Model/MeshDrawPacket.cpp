@@ -5,6 +5,12 @@ namespace CE::RPI
 
 	MeshDrawPacket::~MeshDrawPacket()
 	{
+		for (int i = 0; i < perDrawSrgs.GetSize(); ++i)
+		{
+			delete perDrawSrgs[i]; perDrawSrgs[i] = nullptr;
+		}
+		perDrawSrgs.Clear();
+
 		delete drawPacket; drawPacket = nullptr;
 	}
 

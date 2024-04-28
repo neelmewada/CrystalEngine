@@ -111,6 +111,9 @@ namespace CE
 			CApplication::Get()->Initialize(appInitInfo);
 
 			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
+
+			// TODO: Implement editor window later
+			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
 		}
 	}
 
@@ -118,16 +121,7 @@ namespace CE
 	{
 		Super::PreShutdown();
 
-		delete scheduler; scheduler = nullptr;
-	}
-
-	void RendererSubsystem::Shutdown()
-	{
-		Super::Shutdown();
-
 		CApplication* app = CApplication::TryGet();
-
-		RPISystem::Get().Shutdown();
 
 		if (app)
 		{
@@ -136,6 +130,15 @@ namespace CE
 			app->Shutdown();
 			app->Destroy();
 		}
+
+		delete scheduler; scheduler = nullptr;
+	}
+
+	void RendererSubsystem::Shutdown()
+	{
+		Super::Shutdown();
+
+		RPISystem::Get().Shutdown();
 	}
 
 	void RendererSubsystem::Tick(f32 delta)
@@ -198,6 +201,9 @@ namespace CE
 		scheduler->BeginFrameGraph();
 		{
 			auto app = CApplication::TryGet();
+			
+			// TODO: Use the swapchain directly for now
+			scheduler->GetAttachmentDatabase().EmplaceFrameAttachment("PipelineOutput", gameWindow->GetNativeWindow()->GetSwapChain());
 			
 			if (scene)
 			{

@@ -13,16 +13,20 @@ using namespace CE;
 
 using namespace CE;
 
-#define TEST_BEGIN TestBegin()
-#define TEST_END TestEnd()
+#define TEST_BEGIN TestBegin(false)
+#define TEST_END TestEnd(false)
 
-static void TestBegin()
+#define TEST_BEGIN_WINDOWED TestBegin(true)
+#define TEST_END_WINDOWED TestEnd(true)
+
+static void TestBegin(bool gui)
 {
 	gProjectPath = PlatformDirectories::GetLaunchDir();
 	gProjectName = MODULE_NAME;
 
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
+	ModuleManager::Get().LoadModule("CoreInput");
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreShader");
 	ModuleManager::Get().LoadModule("CoreRHI");
@@ -36,6 +40,17 @@ static void TestBegin()
 
 	app->Initialize();
 
+	if (gui)
+	{
+		PlatformWindowInfo windowInfo{};
+		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
+
+		app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+
+		InputManager::Get().Initialize(app);
+	}
+
 	gDynamicRHI = new Vulkan::VulkanRHI();
 
 	gDynamicRHI->Initialize();
@@ -44,7 +59,7 @@ static void TestBegin()
 	RPISystem::Get().Initialize();
 }
 
-static void TestEnd()
+static void TestEnd(bool gui)
 {
 	RPISystem::Get().Shutdown();
 
@@ -53,6 +68,12 @@ static void TestEnd()
 	delete gDynamicRHI; gDynamicRHI = nullptr;
 
 	PlatformApplication* app = PlatformApplication::Get();
+
+	if (gui)
+	{
+		InputManager::Get().Shutdown(app);
+	}
+
 	app->PreShutdown();
 	app->Shutdown();
 	delete app;
@@ -65,6 +86,7 @@ static void TestEnd()
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreShader");
 	ModuleManager::Get().UnloadModule("CoreMedia");
+	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 }
@@ -72,8 +94,10 @@ static void TestEnd()
 
 TEST(RPI, Scene)
 {
-	TEST_BEGIN;
+	TEST_BEGIN_WINDOWED;
 	CERegisterModuleTypes();
+
+	auto app = PlatformApplication::Get();
 
 	gEngine->PreInit();
 	gEngine->Initialize();
@@ -86,6 +110,7 @@ TEST(RPI, Scene)
 	RPI::Scene* rpiScene = scene->GetRpiScene();
 
 	TestFeatureProcessor1* fp1 = rpiScene->AddFeatureProcessor<TestFeatureProcessor1>();
+	StaticMeshFeatureProcessor* meshFp = rpiScene->GetFeatureProcessor<StaticMeshFeatureProcessor>();
 	
 	{
 		StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMesh");
@@ -115,9 +140,26 @@ TEST(RPI, Scene)
 		cameraComponent->SetLocalPosition(Vec3(0, 0, -10));
 		meshComponent->SetupAttachment(cameraComponent);
 
-		constexpr f32 delta = 0.016f;
+		clock_t lastTime = clock();
+		constexpr int LoopCount = 32;
 
-		gEngine->Tick(delta);
+		auto tick = [&]()
+			{
+				auto curTime = clock();
+				f32 deltaTime = ((f32)(curTime - lastTime)) / CLOCKS_PER_SEC;
+
+				app->Tick();
+				InputManager::Get().Tick();
+
+				gEngine->Tick(deltaTime);
+
+				lastTime = curTime;
+			};
+
+		for (int i = 0; i < LoopCount; i++)
+		{
+			tick();
+		}
 
 		HashSet<ActorComponent*> allComponents{};
 
@@ -144,6 +186,6 @@ TEST(RPI, Scene)
 	gEngine->Shutdown();
 
 	CEDeregisterModuleTypes();
-	TEST_END;
+	TEST_END_WINDOWED;
 }
 

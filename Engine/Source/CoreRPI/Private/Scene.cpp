@@ -143,12 +143,18 @@ namespace CE::RPI
 			
 			renderPipeline->passTree->IterateRecursively([&](Pass* pass)
 				{
+					if (pass->IsParentPass())
+						return;
+
 					const auto& inputBindings = pass->GetInputBindings();
 					const auto& inputOutputBindings = pass->GetInputOutputBindings();
 					const auto& outputBindings = pass->GetOutputBindings();
 
 					DrawListTag drawListTag = pass->GetDrawListTag();
 					SceneViewTag viewTag = pass->GetViewTag();
+					if (!drawListTag.IsValid())
+						return;
+
 					PipelineStateList& entry = pipelineLookupMap[drawListTag];
 					PipelineStateData* pipelineStateData = nullptr;
 

@@ -112,6 +112,11 @@ namespace CE
 					ShaderCollection::Item shaderItem{ .shaderTag = shaderPass->passName, .shader = rpiShader, .enabled = true, .drawListOverride = drawListTag };
 					shaderCollection.Add(shaderItem);
 				}
+				else
+				{
+					ShaderCollection::Item shaderItem{ .shaderTag = shaderPass->passName, .shader = rpiShader, .enabled = true, .drawListOverride = DrawListTag::NullValue };
+					shaderCollection.Add(shaderItem);
+				}
 			}
 		}
 

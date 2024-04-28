@@ -18,17 +18,26 @@ namespace CE
 
     void CE::RenderPipeline::ConstructPipeline()
     {
+        renderPipeline->name = GetName();
+        renderPipeline->uuid = GetUuid();
+
         // - Cleanup -
         
         for (int i = (int)renderPipeline->attachments.GetSize() - 1; i >= 0; --i)
         {
-            if (renderPipeline->attachments[i]->name != "PipelineOutput")
-            {
-                renderPipeline->attachments.RemoveAt(i);
-            }
+            renderPipeline->attachments.RemoveAt(i);
         }
 
         renderPipeline->passTree->Clear();
+
+        PassImageAttachmentDesc pipelineOutputDesc{};
+        pipelineOutputDesc.name = "PipelineOutput";
+        pipelineOutputDesc.lifetime = AttachmentLifetimeType::External;
+        pipelineOutputDesc.imageDescriptor.dimension = Dimension::Dim2D;
+        pipelineOutputDesc.imageDescriptor.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+
+        auto pipelineOutput = new PassAttachment(pipelineOutputDesc);
+        renderPipeline->attachments.Add(pipelineOutput);
     }
     
     void CE::RenderPipeline::SetRenderPipelineAsset(RenderPipelineAsset* renderPipelineAsset)

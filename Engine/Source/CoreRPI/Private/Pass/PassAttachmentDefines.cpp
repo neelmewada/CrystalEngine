@@ -7,7 +7,7 @@ namespace CE::RPI
     {
         if (copy.type == AttachmentType::Image)
         {
-            if (copy.type == type) // Both are image types
+            if (copy.type == type || type == AttachmentType::None) // Both are image types
             {
                 imageDesc = copy.imageDesc;
             }
@@ -22,7 +22,7 @@ namespace CE::RPI
         }
         else if (copy.type == AttachmentType::Buffer)
         {
-            if (copy.type == type) // Both are buffer types
+            if (copy.type == type || type == AttachmentType::None) // Both are buffer types
             {
                 bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
             }
@@ -41,7 +41,7 @@ namespace CE::RPI
     {
         if (copy.type == AttachmentType::Image)
         {
-            if (copy.type == type)
+            if (copy.type == type || type == AttachmentType::None)
             {
                 imageDesc = RPI::ImageDescriptor(copy.imageDesc);
             }
@@ -56,7 +56,7 @@ namespace CE::RPI
         }
         else if (copy.type == AttachmentType::Buffer)
         {
-            if (copy.type == type)
+            if (copy.type == type || type == AttachmentType::None)
             {
                 bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
             }

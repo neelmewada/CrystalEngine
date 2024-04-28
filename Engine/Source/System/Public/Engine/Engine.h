@@ -13,6 +13,8 @@ namespace CE
 	public:
 		// - Functions -
 
+		Engine();
+
 		virtual void PreInit();
 		virtual void Initialize();
 		virtual void PostInitialize();

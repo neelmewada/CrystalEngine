@@ -4,6 +4,11 @@ namespace CE
 {
 	Array<ClassType*> Engine::subsystemClassQueue{};
 
+	Engine::Engine()
+	{
+
+	}
+
 	void Engine::PreInit()
 	{
 		

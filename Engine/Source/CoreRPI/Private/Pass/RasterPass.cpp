@@ -39,12 +39,12 @@ namespace CE::RPI
     				case AttachmentType::Buffer:
     				{
     					RHI::BufferDescriptor bufferDescriptor{};
-    					bufferDescriptor.name = attachmentBinding.attachment->name;
+    					bufferDescriptor.name = attachment->name;
     					bufferDescriptor.bindFlags = attachmentDescriptor.bufferDesc.bindFlags;
     					bufferDescriptor.bufferSize = attachmentDescriptor.bufferDesc.byteSize;
     					bufferDescriptor.defaultHeapType = MemoryHeapType::Default;
     					
-    					//attachmentDatabase.EmplaceFrameAttachment(bufferDescriptor.name, bufferDescriptor);
+    					//attachmentDatabase.EmplaceFrameAttachment(attachment->name, bufferDescriptor);
     				}
     					break;
     				case AttachmentType::Image:
@@ -59,13 +59,40 @@ namespace CE::RPI
 
                         if (attachment->sizeSource.IsFixedSize())
                         {
-                            imageDescriptor.width = attachmentBinding.attachment->sizeSource.fixedSizes.x;
-                            imageDescriptor.height = attachmentBinding.attachment->sizeSource.fixedSizes.y;
-                            imageDescriptor.depth = attachmentBinding.attachment->sizeSource.fixedSizes.z;
+                            imageDescriptor.width = attachment->sizeSource.fixedSizes.x;
+                            imageDescriptor.height = attachment->sizeSource.fixedSizes.y;
+                            imageDescriptor.depth = attachment->sizeSource.fixedSizes.z;
                         }
                         else if (attachment->sizeSource.source.IsValid())
                         {
-                            
+                            FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(attachment->sizeSource.source);
+                            if (!sourceAttachment)
+                                return;
+                            if (sourceAttachment->IsImageAttachment())
+                            {
+                                auto srcImageAttachment = (ImageFrameAttachment*)sourceAttachment;
+                                imageDescriptor.width = srcImageAttachment->GetImageDescriptor().width;
+                                imageDescriptor.height = srcImageAttachment->GetImageDescriptor().height;
+                                imageDescriptor.depth = srcImageAttachment->GetImageDescriptor().depth;
+
+                                imageDescriptor.width *= attachment->sizeSource.sizeMultipliers.x;
+                                imageDescriptor.height *= attachment->sizeSource.sizeMultipliers.y;
+                                imageDescriptor.depth *= attachment->sizeSource.sizeMultipliers.z;
+                            }
+                            else if (sourceAttachment->IsSwapChainAttachment())
+                            {
+                                auto srcSwapChainAttachment = (SwapChainFrameAttachment*)sourceAttachment;
+                                imageDescriptor.width = srcSwapChainAttachment->GetSwapChain()->GetWidth();
+                                imageDescriptor.height = srcSwapChainAttachment->GetSwapChain()->GetHeight();
+                                imageDescriptor.depth = 1;
+
+                                imageDescriptor.width *= attachment->sizeSource.sizeMultipliers.x;
+                                imageDescriptor.height *= attachment->sizeSource.sizeMultipliers.y;
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
                         else
                         {
@@ -87,6 +114,7 @@ namespace CE::RPI
                             }
                         }
                         
+                        //attachmentDatabase.EmplaceFrameAttachment(attachment->name, imageDescriptor);
     				}
     					break;
     				}

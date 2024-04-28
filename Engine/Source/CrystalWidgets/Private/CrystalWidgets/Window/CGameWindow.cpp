@@ -23,11 +23,13 @@ namespace CE::Widgets
     void CGameWindow::OnPaint(CPaintEvent* paintEvent)
     {
 	    // Do not paint anything
+        CPainter* painter = paintEvent->painter;
     }
 
     void CGameWindow::OnPaintOverlay(CPaintEvent* paintEvent)
     {
         // Do not paint anything
+        CPainter* painter = paintEvent->painter;
     }
 
 } // namespace CE::Widgets

@@ -563,7 +563,7 @@ namespace CE::Widgets
 
 			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-			Name id = String::Format("{}", platformWindow->GetWindowId());
+			Name id = String::Format("CWindow_{}", platformWindow->GetWindowId());
 
 			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
 
@@ -626,7 +626,7 @@ namespace CE::Widgets
 			if (!platformWindow)
 				continue;
 
-			Name id = String::Format("{}", platformWindow->GetWindowId());
+			Name id = String::Format("CWindow_{}", platformWindow->GetWindowId());
 
 			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->GetDrawListTag()));
 		}

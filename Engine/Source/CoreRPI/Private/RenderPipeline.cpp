@@ -7,15 +7,6 @@ namespace CE::RPI
 	{
 		passTree = CreateObject<PassTree>(GetTransientPackage(MODULE_NAME), "PassTree");
 		passTree->rootPass->renderPipeline = this;
-
-		PassImageAttachmentDesc pipelineOutputDesc{};
-		pipelineOutputDesc.name = "PipelineOutput";
-		pipelineOutputDesc.lifetime = AttachmentLifetimeType::External;
-		pipelineOutputDesc.imageDescriptor.dimension = Dimension::Dim2D;
-		pipelineOutputDesc.imageDescriptor.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
-
-		auto pipelineOutput = new PassAttachment(pipelineOutputDesc);
-		attachments.Add(pipelineOutput);
 	}
 
     RenderPipeline::~RenderPipeline()
