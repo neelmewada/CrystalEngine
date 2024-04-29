@@ -55,11 +55,13 @@ namespace CE
                 fp->ReleaseMesh(meshHandle);
             }
 
+            auto materialMap = GetRpiMaterialMap();
+
             RPI::ModelHandleDescriptor descriptor{};
             descriptor.model = model;
             descriptor.originalModel = staticMesh->GetModelAsset();
 
-            meshHandle = fp->AcquireMesh(descriptor);
+            meshHandle = fp->AcquireMesh(descriptor, materialMap);
         }
 
         if (meshHandle.IsValid())

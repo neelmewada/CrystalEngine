@@ -25,10 +25,8 @@ namespace CE::RPI
     {
         if (attachment)
             return attachment;
-
         if (originalAttachment)
             return originalAttachment;
-
         if (connectedBinding)
             return originalAttachment = connectedBinding->GetOriginalAttachment();
         

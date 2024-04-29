@@ -15,10 +15,10 @@ namespace CE::RPI
 
 	void ModelDataInstance::Init(StaticMeshFeatureProcessor* fp)
 	{
-		if (flags.isInitialized)
+		if (flags.initialized)
 			return;
 		
-		flags.isInitialized = true;
+		flags.initialized = true;
 
 		for (int i = 0; i < model->GetModelLodCount(); ++i)
 		{
@@ -28,8 +28,6 @@ namespace CE::RPI
 
 	void ModelDataInstance::Deinit(StaticMeshFeatureProcessor* fp)
 	{
-		
-
 		for (RHI::ShaderResourceGroup* srg : objectSrgList)
 		{
 			delete srg;
@@ -37,7 +35,7 @@ namespace CE::RPI
 
 		objectSrgList.Clear();
 
-		flags.isInitialized = false;
+		flags.initialized = false;
 	}
 
 	void ModelDataInstance::BuildDrawPacketList(StaticMeshFeatureProcessor* fp, u32 modelLodIndex)
@@ -62,6 +60,17 @@ namespace CE::RPI
 
 		for (int i = 0; i < meshCount; i++)
 		{
+			CustomMaterialId materialId = CustomMaterialId(modelLodIndex, i);
+			RPI::Material* material = materialMap[materialId];
+			if (material == nullptr)
+			{
+				material = materialMap[DefaultCustomMaterialId];
+				if (material == nullptr)
+				{
+					continue;
+				}
+			}
+
 			const auto& objectSrgLayout = material->GetCurrentOpaqueShader()->GetSrgLayout(SRGType::PerObject);
 
 			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
@@ -74,25 +83,47 @@ namespace CE::RPI
 		}
 	}
 
-	void ModelDataInstance::UpdateDrawPackets(StaticMeshFeatureProcessor* fp)
+	void ModelDataInstance::UpdateDrawPackets(StaticMeshFeatureProcessor* fp, bool forceUpdate)
 	{
-		
+		for (int i = 0; i < drawPacketsListByLod.GetSize(); ++i)
+		{
+			for (int j = 0; j < drawPacketsListByLod[i].GetSize(); ++j)
+			{
+				drawPacketsListByLod[i][j].Update(scene, forceUpdate);
+			}
+		}
 	}
 
-	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor)
+	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor, const CustomMaterialMap& materialMap)
 	{
 		ModelHandle handle = modelInstances.Insert({});
 		handle->model = modelHandleDescriptor.model;
 		handle->originalModel = modelHandleDescriptor.originalModel;
 		handle->scene = this->scene;
+		handle->materialMap = materialMap;
 		
 		return handle;
+	}
+
+	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor,
+		RPI::Material* defaultMaterial)
+	{
+		if (defaultMaterial == nullptr)
+		{
+			return ModelHandle();
+		}
+
+		CustomMaterialMap materialMap{};
+		materialMap[DefaultCustomMaterialId] = defaultMaterial;
+
+		return AcquireMesh(modelHandleDescriptor, materialMap);
 	}
 
 	bool StaticMeshFeatureProcessor::ReleaseMesh(ModelHandle& handle)
 	{
 		if (handle.IsValid())
 		{
+			handle->Deinit(this);
 			modelInstances.Remove(handle);
 			return true;
 		}
@@ -104,20 +135,29 @@ namespace CE::RPI
 	{
 		Super::Simulate(packet);
 
-		auto parallelRanges = modelInstances.GetParallelRanges();
-		for (const auto& parallelRange : parallelRanges) // TODO: Implement multi-threaded processing
+		JobCompletion jobCompletion = JobCompletion();
+
+		Array<Job*> initJobs = CreateInitJobs();
+
+		if (initJobs.GetSize() == 1)
 		{
-			for (auto it = parallelRange.begin; it != parallelRange.end; ++it)
+			initJobs[0]->Process();
+			initJobs[0]->Finish();
+			delete initJobs[0];
+			initJobs.Clear();
+		}
+		else if (initJobs.GetSize() > 1)
+		{
+			for (Job* initJob : initJobs)
 			{
-				for (int i = 0; i < it->drawPacketsListByLod.GetSize(); ++i)
-				{
-					for (int j = 0; j < it->drawPacketsListByLod[i].GetSize(); ++j)
-					{
-						it->drawPacketsListByLod[i][j].Update(scene);
-					}
-				}
+				initJob->SetDependent(&jobCompletion);
+				initJob->Start();
 			}
 		}
+
+		jobCompletion.StartAndWaitForCompletion();
+
+		forceRebuildDrawPackets = false;
 	}
 
 	void StaticMeshFeatureProcessor::Render(const RenderPacket& packet)
@@ -132,6 +172,38 @@ namespace CE::RPI
 		Super::OnRenderEnd();
 
 		
+	}
+
+	Array<Job*> StaticMeshFeatureProcessor::CreateInitJobs()
+	{
+		Array<Job*> jobs{};
+
+		auto ranges = modelInstances.GetParallelRanges();
+
+		for (const auto& range : ranges)
+		{
+			const auto initJobLambda = [this, range](Job* job)
+				{
+					for (auto it = range.begin; it != range.end; ++it)
+					{
+						if (!it->flags.visible)
+						{
+							continue;
+						}
+
+						if (!it->flags.initialized)
+						{
+							it->Init(this);
+						}
+
+						it->UpdateDrawPackets(this, forceRebuildDrawPackets);
+					}
+				};
+
+			jobs.Add(new JobFunction(initJobLambda, true));
+		}
+
+		return jobs;
 	}
 
 } // namespace CE::RPI

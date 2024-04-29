@@ -23,6 +23,8 @@ namespace CE
         void MarkDirty() { isDirty = true; }
 
         void SetMainViewTag(const Name& viewTag) { mainViewTag = viewTag; }
+
+        RHI::DrawListTag GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag buitinDrawItemTag);
         
     protected:
 

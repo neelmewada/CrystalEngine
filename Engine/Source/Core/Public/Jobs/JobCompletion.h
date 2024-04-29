@@ -14,7 +14,7 @@ namespace CE
 	class CORE_API JobCompletion : public Job
 	{
 	public:
-		JobCompletion(JobContext* context = nullptr) : Job(false, context)
+		JobCompletion(JobContext* context = nullptr) : Job(context)
 		{
 
 		}

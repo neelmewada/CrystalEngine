@@ -91,6 +91,16 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
+class SampleClass
+{
+public:
+
+	Name MyFunc(const String& stringA, const String& stringB)
+	{
+		return stringA + stringB;
+	}
+
+};
 
 TEST(RPI, Scene)
 {
@@ -133,6 +143,7 @@ TEST(RPI, Scene)
 		meshComponent->SetLocalPosition(Vec3(0, 0, 10));
 
 		CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
+		material->SetShader(standardShader);
 		meshComponent->SetMaterial(material, 0, 0);
 
 		SceneComponent* subComponent = CreateObject<SceneComponent>(meshComponent, "SubComponent");

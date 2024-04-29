@@ -15,12 +15,12 @@ namespace CE
     {
     public:
 
-        Pair() : first({}), second({})
+        constexpr Pair() : first({}), second({})
         {
 
         }
 
-        Pair(KeyType key, ValueType value) : first(key), second(value)
+        constexpr Pair(KeyType key, ValueType value) : first(key), second(value)
         {
 
         }
@@ -33,6 +33,16 @@ namespace CE
             SIZE_T hash = CE::GetHash<KeyType>(first);
             CombineHash(hash, second);
             return hash;
+        }
+
+        bool operator==(const Pair& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const Pair& rhs) const
+        {
+            return !operator==(rhs);
         }
     };
     

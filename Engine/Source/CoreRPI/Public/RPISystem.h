@@ -4,6 +4,19 @@ namespace CE::RPI
 {
 	class Texture;
 
+	enum class BuiltinDrawItemTag
+	{
+		None = 0,
+		Depth,
+		Opaque,
+		Shadow,
+		Skybox,
+		UI,
+		Transparent,
+		COUNT
+	};
+	ENUM_CLASS(BuiltinDrawItemTag);
+
 	/// @brief RPISystem owns and manages all scenes.
 	class CORERPI_API RPISystem final
 	{
@@ -49,6 +62,8 @@ namespace CE::RPI
 		const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
 		RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
 
+		DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
+
 	private:
 
 		RPISystem() = default;
@@ -72,6 +87,8 @@ namespace CE::RPI
 
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
+
+		HashMap<BuiltinDrawItemTag, RHI::DrawListTag> builtinDrawTags{};
 
 		b8 isFirstTick = true;
 		clock_t startTime;

@@ -47,6 +47,8 @@ namespace CE::RHI
 
 	void DrawPacketBuilder::AddShaderResourceGroup(ShaderResourceGroup* srg)
 	{
+		if (srg == nullptr)
+			return;
 		if (shaderResourceGroupCount >= shaderResourceGroups.GetSize())
 			return;
 

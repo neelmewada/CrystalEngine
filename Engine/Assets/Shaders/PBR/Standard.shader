@@ -31,7 +31,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
 
-            #include "Core/Depth.hlsli"
+            #include "Depth.hlsli"
 
             ENDHLSL
         }
@@ -47,7 +47,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
 
-            #include "Core/Depth.hlsli"
+            #include "Depth.hlsli"
 
             ENDHLSL
         }
@@ -155,7 +155,8 @@ Shader "PBR/Standard"
                     light.halfway = normalize(viewDir + light.lightDir);
 
                     float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
-                    float shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+                    // Disable shadows temporarily
+                    float shadow = 0.0;//CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
                     shadow = clamp(shadow, 0, 1);
 
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);

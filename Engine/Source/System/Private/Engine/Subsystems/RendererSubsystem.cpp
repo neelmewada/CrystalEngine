@@ -274,8 +274,6 @@ namespace CE
 			CApplication::Get()->SetDrawListMasks(drawListMask);
 		}
 
-		// TODO: Set draw list masks
-
 		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
 			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);

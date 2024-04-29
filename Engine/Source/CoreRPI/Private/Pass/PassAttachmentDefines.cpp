@@ -16,7 +16,7 @@ namespace CE::RPI
                 if (type == AttachmentType::Image)
                     imageDesc.~ImageDescriptor();
                 memset(&bufferDesc, 0, sizeof(bufferDesc));
-                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
             }
             type = copy.type;
         }
@@ -31,7 +31,7 @@ namespace CE::RPI
                 if (type == AttachmentType::Buffer)
                     bufferDesc.~BufferDescriptor();
                 memset(&imageDesc, 0, sizeof(imageDesc));
-                imageDesc = RPI::ImageDescriptor(copy.imageDesc);
+                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
             }
             type = copy.type;
         }
@@ -50,7 +50,7 @@ namespace CE::RPI
                 if (type == AttachmentType::Image)
                     imageDesc.~ImageDescriptor();
                 memset(&bufferDesc, 0, sizeof(bufferDesc));
-                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
             }
             type = copy.type;
         }
@@ -65,7 +65,7 @@ namespace CE::RPI
                 if (type == AttachmentType::Buffer)
                     bufferDesc.~BufferDescriptor();
                 memset(&imageDesc, 0, sizeof(imageDesc));
-                imageDesc = RPI::ImageDescriptor(copy.imageDesc);
+                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
             }
             type = copy.type;
         }

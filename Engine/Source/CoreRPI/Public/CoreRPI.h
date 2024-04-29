@@ -37,6 +37,7 @@ namespace CE::RPI
 }
 
 #include "RPILimits.h"
+#include "Shader/ShaderCollection.h"
 
 // Passes
 #include "Pass/PassAttachmentDefines.h"
@@ -54,11 +55,11 @@ namespace CE::RPI
 
 // Mesh
 #include "VertexBuffer.h"
+#include "Model/MeshDrawPacket.h"
 #include "Model/ModelLod.h"
 #include "Model/ModelLodAsset.h"
 #include "Model/ModelAsset.h"
 #include "Model/Model.h"
-#include "Model/MeshDrawPacket.h"
 
 // Feature processors
 #include "Feature/FeatureProcessor.h"
@@ -81,7 +82,6 @@ namespace CE::RPI
 #include "Shader/ShaderResourceGroup.h"
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"
-#include "Shader/ShaderCollection.h"
 
 #include "Text/FontAtlasLayout.h"
 #include "Text/FontAtlas.h"

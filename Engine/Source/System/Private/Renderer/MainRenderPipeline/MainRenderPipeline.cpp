@@ -127,6 +127,7 @@ namespace CE
 
         RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass(this, "DepthPass");
     	depthPass->SetViewTag(mainViewTag);
+        depthPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Depth));
 	    {
             PassAttachmentBinding outputBinding{};
             outputBinding.slotType = PassSlotType::Output;
@@ -144,6 +145,7 @@ namespace CE
 
         RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass(this, "SkyboxPass");
     	skyboxPass->SetViewTag(mainViewTag);
+        skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Skybox));
 	    {
             PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = PassSlotType::Output;
@@ -161,6 +163,7 @@ namespace CE
 
         /*DirectionalShadowPass* shadowPass = CreateObject<DirectionalShadowPass>(this, "DirectionalShadowPass");
     	shadowPass->SetViewTag(mainViewTag);
+        shadowPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow));
 	    {
             // Array of Texture2D<float> i.e. Shadow maps
             {
@@ -181,6 +184,7 @@ namespace CE
 
         auto opaquePass = CreateObject<RasterPass>(this, "OpaquePass");
     	opaquePass->SetViewTag(mainViewTag);
+        opaquePass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque));
 	    {
             // DepthInput
             {

@@ -16,5 +16,5 @@ ce_add_test(${PROJECT_NAME}
     SOURCES
         ${SRCS}
     BUILD_DEPENDENCIES
-        TARGETS Config
+        TARGETS Config EngineAssets
 )

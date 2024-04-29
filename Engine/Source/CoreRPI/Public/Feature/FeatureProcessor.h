@@ -16,7 +16,7 @@ namespace CE::RPI
 
 		struct SimulatePacket
 		{
-			
+			Job* parentJob = nullptr;
 		};
 
 		struct RenderPacket

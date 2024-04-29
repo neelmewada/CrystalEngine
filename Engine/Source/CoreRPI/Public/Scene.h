@@ -64,6 +64,8 @@ namespace CE::RPI
 
 		void CollectDrawPackets();
 
+		void GetPipelineMultiSampleState(RHI::DrawListTag drawListTag, RHI::MultisampleState& multisampleState);
+
 		void RebuildPipelineLookupTable();
 		
 	private:

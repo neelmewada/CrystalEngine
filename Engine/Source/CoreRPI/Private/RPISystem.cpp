@@ -50,10 +50,52 @@ namespace CE::RPI
         CreateFullScreenQuad();
 
         PassSystem::Get().Initialize();
+
+        builtinDrawTags.Clear();
+
+        for (int i = 1; i < (int)BuiltinDrawItemTag::COUNT; ++i)
+        {
+            RHI::DrawListTag tag{};
+            DrawListTagRegistry* registry = GetDrawListTagRegistry();
+
+            switch ((BuiltinDrawItemTag)i)
+            {
+            case BuiltinDrawItemTag::Depth:
+                tag = registry->AcquireTag("depth");
+	            break;
+            case BuiltinDrawItemTag::Opaque:
+                tag = registry->AcquireTag("opaque");
+	            break;
+            case BuiltinDrawItemTag::Shadow:
+                tag = registry->AcquireTag("shadow");
+	            break;
+            case BuiltinDrawItemTag::UI:
+                tag = registry->AcquireTag("ui");
+	            break;
+            case BuiltinDrawItemTag::Transparent:
+                tag = registry->AcquireTag("transparent");
+                break;
+            case BuiltinDrawItemTag::Skybox:
+                tag = registry->AcquireTag("skybox");
+                break;
+            case BuiltinDrawItemTag::None:
+            case BuiltinDrawItemTag::COUNT:
+                continue;
+            }
+            builtinDrawTags[(BuiltinDrawItemTag)i] = tag;
+        }
     }
 
     void RPISystem::Shutdown()
     {
+        for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
+        {
+            if (!drawListTag.IsValid())
+                continue;
+            GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+        }
+        builtinDrawTags.Clear();
+
 	    for (int i = (int)scenes.GetSize() - 1; i >= 0; --i)
 	    {
 			delete scenes[i];

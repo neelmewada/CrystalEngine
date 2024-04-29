@@ -6,6 +6,7 @@ namespace CE::RPI
 	class ModelAsset;
 	class ModelLod;
 	class StaticMeshFeatureProcessor;
+	class Material;
 
 	class CORERPI_API ModelDataInstance
 	{
@@ -19,7 +20,7 @@ namespace CE::RPI
 
 		RPI::Scene* scene = nullptr;
 
-		RPI::Material* material = nullptr;
+		CustomMaterialMap materialMap{};
 
 		MeshDrawPacketsByLod drawPacketsListByLod{};
 
@@ -28,11 +29,12 @@ namespace CE::RPI
 		void Init(StaticMeshFeatureProcessor* fp);
 		void Deinit(StaticMeshFeatureProcessor* fp);
 		void BuildDrawPacketList(StaticMeshFeatureProcessor* fp, u32 modelLodIndex);
-		void UpdateDrawPackets(StaticMeshFeatureProcessor* fp);
+		void UpdateDrawPackets(StaticMeshFeatureProcessor* fp, bool forceUpdate = false);
 
 		struct Flags
 		{
-			bool isInitialized : 1 = false;
+			bool visible : 1 = true;
+			bool initialized : 1 = false;
 		} flags{};
 	};
 
@@ -54,8 +56,8 @@ namespace CE::RPI
 
 		virtual ~StaticMeshFeatureProcessor();
 
-		ModelHandle AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor);
-
+		ModelHandle AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor, const CustomMaterialMap& materialMap);
+		ModelHandle AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor, RPI::Material* defaultMaterial);
 		bool ReleaseMesh(ModelHandle& handle);
 
 		void Simulate(const SimulatePacket& packet) override;
@@ -66,8 +68,11 @@ namespace CE::RPI
 
 	private:
 
+		Array<Job*> CreateInitJobs();
+
 		PagedDynamicArray<ModelDataInstance> modelInstances{};
 
+		bool forceRebuildDrawPackets = false;
 	};
 
 } // namespace CE::RPI

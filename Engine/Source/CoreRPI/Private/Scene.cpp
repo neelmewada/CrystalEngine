@@ -53,15 +53,15 @@ namespace CE::RPI
 
 	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)
 	{
-		SceneViews& pipelineViews = viewsByTag[viewTag];
-		pipelineViews.viewTag = viewTag;
-		pipelineViews.views.Add(view);
+		SceneViews& sceneViews = viewsByTag[viewTag];
+		sceneViews.viewTag = viewTag;
+		sceneViews.views.Add(view);
 	}
 
 	void Scene::RemoveView(SceneViewTag viewTag, ViewPtr view)
 	{
-		SceneViews& pipelineViews = viewsByTag[viewTag];
-		pipelineViews.views.Remove(view);
+		SceneViews& sceneViews = viewsByTag[viewTag];
+		sceneViews.views.Remove(view);
 	}
 
 	void RPI::Scene::AddRenderPipeline(RenderPipeline* renderPipeline)
@@ -70,6 +70,8 @@ namespace CE::RPI
 			return;
 		renderPipeline->scene = this;
 		renderPipelines.Add(renderPipeline);
+
+		needsLookupTableRebuild = true;
 	}
 
 	void RPI::Scene::RemoveRenderPipeline(RenderPipeline* renderPipeline)
@@ -78,6 +80,8 @@ namespace CE::RPI
 			return;
 		renderPipeline->scene = nullptr;
 		renderPipelines.Remove(renderPipeline);
+
+		needsLookupTableRebuild = false;
 	}
 
 	RHI::DrawListMask& Scene::GetDrawListMask(SceneViewTag viewTag)
@@ -95,6 +99,11 @@ namespace CE::RPI
 
 	void Scene::Simulate(f32 currentTime)
 	{
+		if (needsLookupTableRebuild)
+		{
+			RebuildPipelineLookupTable();
+		}
+
 		for (FeatureProcessor* fp : featureProcessors)
 		{
 			fp->Simulate({});
@@ -103,10 +112,6 @@ namespace CE::RPI
 
 	void Scene::PrepareRender(f32 currentTime, u32 imageIndex)
 	{
-		if (needsLookupTableRebuild)
-		{
-			RebuildPipelineLookupTable();
-		}
 		
 		CollectDrawPackets();
 	}
@@ -126,7 +131,17 @@ namespace CE::RPI
 			fp->Render(renderPacket);
 		}
 	}
-	
+
+	void Scene::GetPipelineMultiSampleState(RHI::DrawListTag drawListTag, RHI::MultisampleState& multisampleState)
+	{
+		if (!pipelineLookupMap.KeyExists(drawListTag))
+			return;
+		if (pipelineLookupMap[drawListTag].IsEmpty())
+			return;
+
+		multisampleState = pipelineLookupMap[drawListTag][0].multisampleState;
+	}
+
 	void Scene::RebuildPipelineLookupTable()
 	{
 		if (!needsLookupTableRebuild)
@@ -180,7 +195,8 @@ namespace CE::RPI
 							Ptr<PassAttachment> attachment = binding.GetOriginalAttachment();
 							if (attachment == nullptr)
 								return;
-							if (attachment->attachmentDescriptor.type == AttachmentType::Image)
+							if (attachment->attachmentDescriptor.type == AttachmentType::Image &&
+								(binding.attachmentUsage == ScopeAttachmentUsage::Color || binding.attachmentUsage == ScopeAttachmentUsage::DepthStencil))
 							{
 								const RPI::ImageDescriptor& attachmentDesc = attachment->attachmentDescriptor.imageDesc;
 

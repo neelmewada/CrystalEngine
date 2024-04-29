@@ -56,6 +56,8 @@ namespace CE::RPI
 
 		builder.SetDrawArguments(mesh->drawArguments);
 
+		material->FlushProperties();
+
 		builder.AddShaderResourceGroup(objectSrg);
 		builder.AddShaderResourceGroup(material->GetShaderResourceGroup());
 
@@ -95,9 +97,13 @@ namespace CE::RPI
 			drawItem.drawItemTag = drawListTag;
 			drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			drawItem.stencilRef = stencilRef;
-			// TODO: Get correct pipeline based on MSAA, color formats, etc from the RPI::Scene's cache
-			drawItem.pipelineState = variant->GetPipeline();
 
+			RHI::MultisampleState multisampleState{};
+			scene->GetPipelineMultiSampleState(drawListTag, multisampleState);
+
+			// TODO: Get correct pipeline based on MSAA, color formats, etc. from the RPI::Scene's cache
+			drawItem.pipelineState = variant->GetPipeline(multisampleState);
+			
 			builder.AddDrawItem(drawItem);
 		}
 

@@ -4,6 +4,7 @@ namespace CE::RPI
 {
     class Material;
     class Scene;
+    class ModelLod;
 
     //! @brief Maintains the draw packet for a particular mesh and other related data.
     class CORERPI_API MeshDrawPacket
@@ -46,5 +47,16 @@ namespace CE::RPI
 
     using MeshDrawPacketList = Array<MeshDrawPacket>;
     using MeshDrawPacketsByLod = FixedArray<MeshDrawPacketList, RPI::Limits::MaxLodCount>;
+
+    using MaterialLodIndex = u32;
+    static constexpr MaterialLodIndex MaxMaterialLodIndex = NumericLimits<MaterialLodIndex>::Max();
+
+    using MaterialMeshIndex = u32;
+    static constexpr MaterialMeshIndex MaxMaterialSubMeshIndex = NumericLimits<MaterialMeshIndex>::Max();
+
+    using CustomMaterialId = Pair<MaterialLodIndex, MaterialMeshIndex>;
+    using CustomMaterialMap = HashMap<CustomMaterialId, RPI::Material*>;
+
+    static constexpr CustomMaterialId DefaultCustomMaterialId = CustomMaterialId(MaxMaterialLodIndex, MaxMaterialSubMeshIndex);
     
 } // namespace CE::RPI

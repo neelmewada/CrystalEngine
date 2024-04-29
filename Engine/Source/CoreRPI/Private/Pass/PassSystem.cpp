@@ -178,6 +178,8 @@ namespace CE::RPI
         Pass* templatePass = passTemplates[templateName];
 
         Pass* newPass = CreateObject<Pass>(outer, newPassName.GetString(), OF_NoFlags, templatePass->GetClass());
+        newPass->drawListTag = templatePass->drawListTag;
+        newPass->viewTag = templatePass->viewTag;
         newPass->slots = templatePass->slots;
 
         return newPass;

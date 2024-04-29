@@ -31,6 +31,14 @@ namespace CE
 
 	CE::Shader::~Shader()
 	{
+		for (const ShaderCollection::Item& item : shaderCollection)
+		{
+			if (item.shader)
+			{
+				delete item.shader;
+			}
+		}
+
 		shaderCollection.Clear();
 	}
 
@@ -58,7 +66,7 @@ namespace CE
 				{
 					if (tagEntry.key == "DrawListTag")
 					{
-						drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(tagEntry.key);
+						drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(tagEntry.value);
 						break;
 					}
 				}

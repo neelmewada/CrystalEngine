@@ -2,6 +2,7 @@
 
 namespace CE::RPI
 {
+	class Shader;
 
 	class CORERPI_API ShaderCollection final
 	{
