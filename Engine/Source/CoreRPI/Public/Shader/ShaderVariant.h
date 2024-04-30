@@ -2,11 +2,6 @@
 
 namespace CE::RPI
 {
-	struct ShaderVariantDescriptor
-	{
-		RHI::GraphicsPipelineDescriptor pipelineDesc{};
-		Array<Name> defineFlags{};
-	};
 
 	struct ShaderVariantDescriptor2
 	{
@@ -42,7 +37,6 @@ namespace CE::RPI
 	{
 	public:
 
-		ShaderVariant(const ShaderVariantDescriptor& desc);
 		ShaderVariant(const ShaderVariantDescriptor2& desc);
 
 		~ShaderVariant();
@@ -57,6 +51,8 @@ namespace CE::RPI
 
 		const RHI::ShaderResourceGroupLayout& GetSrgLayout(RHI::SRGType srgType);
 
+		const ShaderReflection& GetShaderReflection() const { return reflectionInfo; }
+
 	private:
 
 		SIZE_T variantId = 0;
@@ -69,6 +65,7 @@ namespace CE::RPI
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 
 		//RHI::PipelineState* pipeline = nullptr;
+		ShaderReflection reflectionInfo;
 
 		friend class Shader;
 	};

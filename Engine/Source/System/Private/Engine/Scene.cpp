@@ -230,10 +230,12 @@ namespace CE
 		{
 			mainCamera = camera;
 			rpiScene->AddView("MainCamera", mainCamera->rpiView);
+			camera->cameraType = CameraType::MainCamera;
 		}
 		else
 		{
 			rpiScene->AddView("Camera", camera->rpiView);
+			camera->cameraType = CameraType::SecondaryCamera;
 		}
 	}
 

@@ -147,6 +147,8 @@ namespace CE
     	skyboxPass->SetViewTag(mainViewTag);
         skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Skybox));
 	    {
+            PassSlot* colorOutputSlot = skyboxPass->FindSlot("ColorOutput");
+
             PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = PassSlotType::Output;
             colorOutputBinding.attachment = colorMsaa;

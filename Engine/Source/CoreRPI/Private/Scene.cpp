@@ -55,13 +55,18 @@ namespace CE::RPI
 	{
 		SceneViews& sceneViews = viewsByTag[viewTag];
 		sceneViews.viewTag = viewTag;
+		sceneViews.drawListMask = view->GetDrawListMask();
 		sceneViews.views.Add(view);
+
+		needsLookupTableRebuild = true;
 	}
 
 	void Scene::RemoveView(SceneViewTag viewTag, ViewPtr view)
 	{
 		SceneViews& sceneViews = viewsByTag[viewTag];
 		sceneViews.views.Remove(view);
+
+		needsLookupTableRebuild = true;
 	}
 
 	void RPI::Scene::AddRenderPipeline(RenderPipeline* renderPipeline)
@@ -81,7 +86,7 @@ namespace CE::RPI
 		renderPipeline->scene = nullptr;
 		renderPipelines.Remove(renderPipeline);
 
-		needsLookupTableRebuild = false;
+		needsLookupTableRebuild = true;
 	}
 
 	RHI::DrawListMask& Scene::GetDrawListMask(SceneViewTag viewTag)
@@ -112,7 +117,28 @@ namespace CE::RPI
 
 	void Scene::PrepareRender(f32 currentTime, u32 imageIndex)
 	{
-		
+		// - Rebuild render packet -
+		renderPacket.drawListMask.Reset();
+		renderPacket.views.Clear();
+
+		HashMap<View*, DrawListMask> uniqueViews{};
+		for (const auto& [name, sceneViews] : viewsByTag)
+		{
+			for (View* view : sceneViews.views)
+			{
+				uniqueViews[view] |= sceneViews.drawListMask;
+			}
+		}
+
+		for (const auto& [view, drawListMask] : uniqueViews)
+		{
+			renderPacket.drawListMask |= drawListMask;
+			renderPacket.views.Add(view);
+
+			view->Reset();
+			view->Init(drawListMask);
+		}
+
 		CollectDrawPackets();
 	}
 
@@ -150,6 +176,11 @@ namespace CE::RPI
 		needsLookupTableRebuild = false;
 
 		pipelineLookupMap.Clear();
+
+		for (auto& [name, sceneViews] : viewsByTag)
+		{
+			sceneViews.drawListMask.Reset();
+		}
 
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
@@ -189,6 +220,8 @@ namespace CE::RPI
 					}
 
 					pipelineStateData->viewTag = viewTag;
+
+					viewsByTag[viewTag].drawListMask.Set(drawListTag);
 
 					auto appendEntry = [&](const PassAttachmentBinding& binding)
 						{

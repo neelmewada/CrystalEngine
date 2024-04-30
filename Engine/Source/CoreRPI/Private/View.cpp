@@ -16,9 +16,9 @@ namespace CE::RPI
 		}
 	}
 
-	ViewPtr View::CreateView(const Name& name, UsageFlags usageFlags)
+	View* View::CreateView(const Name& name, UsageFlags usageFlags)
 	{
-		ViewPtr view = new View();
+		View* view = new View();
 		view->name = name;
 		view->usageFlags = usageFlags;
 		return view;
@@ -42,6 +42,23 @@ namespace CE::RPI
 	RHI::DrawList& View::GetDrawList(RHI::DrawListTag drawItemTag)
 	{
 		return drawListContext.GetDrawListForTag(drawItemTag);
+	}
+
+	void View::Reset()
+	{
+		drawListMask.Reset();
+		drawListContext.Shutdown();
+	}
+
+	void View::Init(RHI::DrawListMask drawListMask)
+	{
+		this->drawListMask = drawListMask;
+		drawListContext.Init(drawListMask);
+	}
+
+	void View::AddDrawPacket(DrawPacket* drawPacket, f32 depth)
+	{
+		drawListContext.AddDrawPacket(drawPacket, depth);
 	}
 
 } // namespace CE::RPI

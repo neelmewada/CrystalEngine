@@ -33,6 +33,8 @@ namespace CE::RPI
 
 		void AddSlot(const PassSlot& slot);
 
+		PassSlot* FindSlot(const Name& name);
+
 		PassAttachmentBinding* FindInputBinding(const Name& name);
 		PassAttachmentBinding* FindInputOutputBinding(const Name& name);
 		PassAttachmentBinding* FindOutputBinding(const Name& name);

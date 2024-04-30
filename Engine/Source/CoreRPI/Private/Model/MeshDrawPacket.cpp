@@ -84,8 +84,15 @@ namespace CE::RPI
 
 			RPI::Shader* shader = shaderItem.shader;
 
+			if (shader == nullptr)
+			{
+				continue;
+			}
+
 			// TODO: Implement dynamic shader variant selection based on flags & shader options
 			RPI::ShaderVariant* variant = shader->GetVariant(shader->GetDefaultVariantIndex());
+
+			const auto& shaderReflection = variant->GetShaderReflection();
 			
 			const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
 
@@ -103,6 +110,26 @@ namespace CE::RPI
 
 			// TODO: Get correct pipeline based on MSAA, color formats, etc. from the RPI::Scene's cache
 			drawItem.pipelineState = variant->GetPipeline(multisampleState);
+
+			for (const Name& vertexInputName : shaderReflection.vertexInputs)
+			{
+				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(vertexInputName.GetString());
+
+				if (semantic.attribute != VertexInputAttribute::None)
+				{
+					for (const auto& vertInfo : mesh->vertexBufferInfos)
+					{
+						if (vertInfo.semantic.attribute != semantic.attribute)
+							continue;
+
+						auto vertBufferView = RHI::VertexBufferView(modelLod->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+						drawItem.vertexBufferViews.Add(vertBufferView);
+						break;
+					}
+				}
+			}
+
+			drawItem.indexBufferView = mesh->indexBufferView;
 			
 			builder.AddDrawItem(drawItem);
 		}

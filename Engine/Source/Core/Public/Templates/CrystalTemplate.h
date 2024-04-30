@@ -13,8 +13,10 @@ namespace CE
 	class String;
 
 	template<typename T>
-	struct NumericLimits
+	struct NumericLimits final
 	{
+		NumericLimits() = delete;
+
 		constexpr static T Min() noexcept
 		{
 			return std::numeric_limits<T>::min();
@@ -92,6 +94,8 @@ namespace CE
 
 		String ToString() const;
 
+		constexpr SIZE_T GetSize() const { return impl.size(); }
+
 		inline bool operator==(const BitSet& rhs) const
 		{
 			return impl == rhs.impl;
@@ -100,6 +104,36 @@ namespace CE
 		inline bool operator!=(const BitSet& rhs) const
 		{
 			return impl != rhs.impl;
+		}
+
+		BitSet& operator|=(const BitSet& rhs)
+		{
+			impl |= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator&=(const BitSet& rhs)
+		{
+			impl &= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator^=(const BitSet& rhs)
+		{
+			impl ^= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator<<=(const BitSet& rhs)
+		{
+			impl <<= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator>>=(const BitSet& rhs)
+		{
+			impl >>= rhs.impl;
+			return *this;
 		}
 
 	private:

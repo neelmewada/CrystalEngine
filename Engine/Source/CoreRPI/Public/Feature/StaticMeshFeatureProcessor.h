@@ -16,7 +16,7 @@ namespace CE::RPI
 
 		ModelAsset* originalModel = nullptr;
 
-		Matrix4x4 worldTransform{};
+		Matrix4x4 localToWorldTransform{};
 
 		RPI::Scene* scene = nullptr;
 

@@ -115,7 +115,7 @@ namespace CE
 
 			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
 
-			// TODO: Implement editor window later
+			// TODO: Implement editor window support later
 			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
 
 			activeScene->renderWindow = gameWindow;

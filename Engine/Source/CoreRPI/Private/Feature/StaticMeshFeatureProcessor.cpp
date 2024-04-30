@@ -164,7 +164,33 @@ namespace CE::RPI
 	{
 		Super::Render(packet);
 
-		
+		auto parallelRanges = modelInstances.GetParallelRanges();
+
+		JobCompletion jobCompletion{};
+
+		for (View* view : packet.views)
+		{
+			for (const auto& range : parallelRanges)
+			{
+				Job* jobFunction = new JobFunction([range, view](Job* job)
+					{
+						for (auto it = range.begin; it != range.end; ++it)
+						{
+							if (it->drawPacketsListByLod.IsEmpty())
+								continue;
+
+							const auto& meshDrawPacketList = it->drawPacketsListByLod[0];
+							RHI::DrawPacket* drawPacket = meshDrawPacketList[0].GetDrawPacket();
+							view->AddDrawPacket(drawPacket, 0);
+						}
+					}, true);
+
+				jobFunction->SetDependent(&jobCompletion);
+				jobFunction->Start();
+			}
+		}
+
+		jobCompletion.StartAndWaitForCompletion();
 	}
 
 	void StaticMeshFeatureProcessor::OnRenderEnd()
@@ -195,7 +221,7 @@ namespace CE::RPI
 						{
 							it->Init(this);
 						}
-
+						
 						it->UpdateDrawPackets(this, forceRebuildDrawPackets);
 					}
 				};

@@ -32,6 +32,17 @@ namespace CE::RPI
 		slots.Add(slot);
 	}
 
+	PassSlot* Pass::FindSlot(const Name& name)
+	{
+		for (PassSlot& slot : slots)
+		{
+			if (slot.name == name)
+				return &slot;
+		}
+
+		return nullptr;
+	}
+
 	PassAttachmentBinding* Pass::FindInputBinding(const Name& name)
 	{
 		for (int i = 0; i < inputBindings.GetSize(); i++)

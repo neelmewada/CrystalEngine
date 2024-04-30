@@ -32,7 +32,7 @@ namespace CE::RPI
 			UsageCustom = BIT(3),
 		};
 
-		static ViewPtr CreateView(const Name& name, UsageFlags usageFlags);
+		static View* CreateView(const Name& name, UsageFlags usageFlags);
 
 		void SetDrawListMask(const RHI::DrawListMask& mask);
 
@@ -60,6 +60,13 @@ namespace CE::RPI
 		void SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg);
 
 		RHI::DrawList& GetDrawList(RHI::DrawListTag drawItemTag);
+
+		void Reset();
+		void Init(RHI::DrawListMask drawListMask);
+
+		//! @brief Enqueues draw packets to this view.
+		//! The function is thread safe and is supposed to be called every frame!
+		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);
 
 	private:
 

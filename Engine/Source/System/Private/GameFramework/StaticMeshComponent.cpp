@@ -66,7 +66,7 @@ namespace CE
 
         if (meshHandle.IsValid())
         {
-            meshHandle->worldTransform = GetTransform();
+            meshHandle->localToWorldTransform = GetTransform();
         }
 
         meshChanged = false;

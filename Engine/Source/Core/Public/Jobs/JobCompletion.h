@@ -30,6 +30,11 @@ namespace CE
 
 		void Process() override
 		{
+			
+		}
+
+		void Finish() override
+		{
 			waitSemaphore.release();
 		}
 

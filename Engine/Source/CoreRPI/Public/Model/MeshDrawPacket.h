@@ -21,6 +21,10 @@ namespace CE::RPI
 
         void SetStencilRef(u8 stencilRef) { this->stencilRef = stencilRef; }
 
+        RHI::DrawPacket* GetDrawPacket() const { return drawPacket; }
+
+        RPI::ModelLod* GetLodModel() const { return modelLod; }
+
     private:
         void DoUpdate(RPI::Scene* scene);
 

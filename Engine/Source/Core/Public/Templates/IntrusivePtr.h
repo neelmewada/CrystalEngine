@@ -8,7 +8,7 @@ namespace CE
 {
 
 	//
-	//  intrusive_ptr.hpp
+	//  IntrusivePtr.hpp
 	//
 	//  Copyright (c) 2001, 2002 Peter Dimov
 	//
@@ -16,7 +16,7 @@ namespace CE
 	// accompanying file LICENSE_1_0.txt or copy at
 	// http://www.boost.org/LICENSE_1_0.txt)
 	//
-	//  See http://www.boost.org/libs/smart_ptr/intrusive_ptr.html for documentation.
+	//  See http://www.boost.org/libs/smart_ptr/IntrusivePtr.html for documentation.
 	//
     
 	struct IntrusiveDefaultDeleter
@@ -130,6 +130,29 @@ namespace CE
 			{
 				CountPolicy::ReleaseRef(ptr);
 			}
+		}
+
+		IntrusivePtr(IntrusivePtr&& rhs) : ptr(rhs.ptr)
+		{
+			rhs.ptr = 0;
+		}
+
+		IntrusivePtr& operator=(IntrusivePtr&& rhs)
+		{
+			ThisType(static_cast<IntrusivePtr&&>(rhs)).Swap(*this);
+			return *this;
+		}
+
+		IntrusivePtr& operator=(IntrusivePtr const& rhs)
+		{
+			ThisType(rhs).Swap(*this);
+			return *this;
+		}
+
+		IntrusivePtr& operator=(T* rhs)
+		{
+			ThisType(rhs).Swap(*this);
+			return *this;
 		}
 
 		inline void Reset()
