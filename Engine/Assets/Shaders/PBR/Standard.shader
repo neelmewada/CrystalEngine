@@ -24,7 +24,7 @@ Shader "PBR/Standard"
         {
             Name "Depth"
             Tags {
-                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="depth"
+                "Vertex"="VertMain", "DrawListTag"="depth"
             }
             ZWrite On
             ZTest LEqual
@@ -40,7 +40,7 @@ Shader "PBR/Standard"
         {
             Name "Shadow"
             Tags {
-                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="shadow"
+                "Vertex"="VertMain", "DrawListTag"="shadow"
             }
             ZWrite On
             ZTest LEqual

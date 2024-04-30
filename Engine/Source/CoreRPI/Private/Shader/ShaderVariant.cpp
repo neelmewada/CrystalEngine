@@ -20,7 +20,8 @@ namespace CE::RPI
 		RHI::ColorBlendState colorBlend = {};
 
 		bool depthOnly = false;
-		if (desc.TagExists("DrawListTag") && desc.GetTagValue("DrawListTag") == "depth")
+		if (desc.TagExists("DrawListTag") && 
+			(desc.GetTagValue("DrawListTag") == "depth" || desc.GetTagValue("DrawListTag") == "shadow"))
 		{
 			depthOnly = true;
 		}
