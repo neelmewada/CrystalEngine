@@ -35,7 +35,7 @@ cmake --build Build/Windows --config Debug --target HostTools -Wno-dev
 The standalone build has the VulkanSandbox application, which is what you should use to play-test the engine. Run the following command to make standalone build.
 
 ```sh
-cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -CE_HOST_BUILD_DIR="<Path To host tools binary dir>" -DCMAKE_SYSTEM_NAME=Windows -Wno-Dev
+cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="<Path To host tools binary dir>" -DCMAKE_SYSTEM_NAME=Windows -Wno-Dev
 ```
 
 The path to host tools binary directory in our situation is:
