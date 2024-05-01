@@ -56,9 +56,13 @@ namespace CE::RPI
 
 		ArrayView<ViewPtr> GetViews(const SceneViewTag& viewTag);
 
+		const SceneViewsByTag& GetViews() const { return viewsByTag; }
+
 		void Simulate(f32 currentTime);
 
 		void PrepareRender(f32 currentTime, u32 imageIndex);
+
+		void SubmitDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
 		void OnRenderEnd();
 

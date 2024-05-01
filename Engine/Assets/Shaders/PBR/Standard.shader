@@ -162,8 +162,9 @@ Shader "PBR/Standard"
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }
 
-                float3 color = ComputeSkyboxIBL(material, normal, viewDir);
-                
+                //float3 color = ComputeSkyboxIBL(material, normal, viewDir);
+                float3 color = float3(0, 0, 0);
+
                 color += Lo;
 
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)

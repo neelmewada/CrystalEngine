@@ -157,12 +157,15 @@ namespace CE
 			app->Tick();
 		}
 
+		int submittedImageIndex = -1;
+
 		if (rebuildFrameGraph)
 		{
 			rebuildFrameGraph = false;
 			recompileFrameGraph = true;
 
 			BuildFrameGraph();
+			submittedImageIndex = curImageIndex;
 		}
 
 		if (recompileFrameGraph)
@@ -183,10 +186,112 @@ namespace CE
 		CE::Scene* scene = sceneSubsystem->GetActiveScene();
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 
-		RPISystem::Get().SimulationTick(curImageIndex);
-		RPISystem::Get().RenderTick(curImageIndex);
+		// ---------------------------------------------------------
+		// - Enqueue draw packets to views
 
-		SubmitDrawPackets(curImageIndex);
+		if (submittedImageIndex != curImageIndex)
+		{
+			RPISystem::Get().SimulationTick(curImageIndex);
+			RPISystem::Get().RenderTick(curImageIndex);
+		}
+
+		// ---------------------------------------------------------
+		// - Submit draw lists to scopes for execution
+
+		drawList.Shutdown();
+
+		RHI::DrawListMask drawListMask{};
+		HashSet<RHI::DrawListTag> drawListTags{};
+
+		// - Setup draw list mask
+
+		if (app)
+		{
+			CApplication::Get()->SetDrawListMasks(drawListMask);
+		}
+
+		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+		{
+			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+			if (!renderPipeline)
+				continue;
+
+			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+				{
+					if (!pass)
+						return;
+
+					if (pass->GetDrawListTag().IsValid())
+					{
+						drawListMask.Set(pass->GetDrawListTag());
+					}
+				});
+		}
+
+		// - Enqueue additional draw packets
+
+		for (int i = 0; i < drawListMask.GetSize(); ++i)
+		{
+			if (drawListMask.Test(i))
+			{
+				drawListTags.Add((u8)i);
+			}
+		}
+
+		drawList.Init(drawListMask);
+
+		if (app)
+		{
+			app->FlushDrawPackets(drawList, curImageIndex);
+		}
+
+		for (const auto& [viewTag, views] : rpiScene->GetViews())
+		{
+			for (View* view : views.views)
+			{
+				view->GetDrawListContext()->Finalize();
+
+				for (const auto& drawListTag : drawListTags)
+				{
+					DrawList& viewDrawList = view->GetDrawList(drawListTag);
+					for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
+					{
+						drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
+					}
+				}
+			}
+		}
+
+		drawList.Finalize();
+
+		// - Set scope draw lists
+
+		if (app) // CWidget Scopes & DrawLists
+		{
+			app->SubmitDrawPackets(drawList);
+		}
+
+		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+		{
+			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+			if (!renderPipeline)
+				continue;
+
+			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+				{
+					if (!pass)
+						return;
+
+					SceneViewTag viewTag = pass->GetViewTag();
+					DrawListTag passDrawTag = pass->GetDrawListTag();
+					ScopeID scopeId = pass->GetScopeId();
+
+					if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
+					{
+						scheduler->SetScopeDrawList(scopeId, &drawList.GetDrawListForTag(passDrawTag));
+					}
+				});
+		}
 
 		scheduler->EndExecution();
 	}
@@ -201,6 +306,8 @@ namespace CE
     	if (scene)
     	{
 			// TODO: Enqueue draw packets early! Scope producers need to have all draw packets available beforehand.
+			RPISystem::Get().SimulationTick(curImageIndex);
+			RPISystem::Get().RenderTick(curImageIndex);
     	}
     	
 		scheduler->BeginFrameGraph();
@@ -260,52 +367,8 @@ namespace CE
 
 	void RendererSubsystem::SubmitDrawPackets(int imageIndex)
 	{
-		drawList.Shutdown();
+		
 
-		CE::Scene* scene = sceneSubsystem->GetActiveScene();
-		RPI::Scene* rpiScene = scene->GetRpiScene();
-
-		RHI::DrawListMask drawListMask{};
-
-		CApplication* app = CApplication::TryGet();
-
-		if (app)
-		{
-			CApplication::Get()->SetDrawListMasks(drawListMask);
-		}
-
-		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
-		{
-			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
-			if (!renderPipeline)
-				continue;
-
-			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
-				{
-					if (!pass)
-						return;
-
-					if (pass->GetDrawListTag().IsValid())
-					{
-						drawListMask.Set(pass->GetDrawListTag());
-					}
-				});
-		}
-
-		drawList.Init(drawListMask);
-
-		if (app)
-		{
-			app->FlushDrawPackets(drawList, imageIndex);
-		}
-
-		// Finalize
-		drawList.Finalize();
-
-		if (app)
-		{
-			app->SubmitDrawPackets(drawList);
-		}
 	}
 
 	void RendererSubsystem::RegisterFeatureProcessor(SubClass<ActorComponent> componentClass,

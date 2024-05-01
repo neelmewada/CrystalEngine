@@ -57,10 +57,14 @@ static void TestBegin(bool gui)
 	gDynamicRHI->PostInitialize();
 
 	RPISystem::Get().Initialize();
+
+	Logger::Initialize();
 }
 
 static void TestEnd(bool gui)
 {
+	Logger::Shutdown();
+
 	RPISystem::Get().Shutdown();
 
 	gDynamicRHI->PreShutdown();

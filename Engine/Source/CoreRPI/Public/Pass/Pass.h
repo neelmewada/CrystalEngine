@@ -51,6 +51,8 @@ namespace CE::RPI
 
 		void SetViewTag(const SceneViewTag& tag) { viewTag = tag; }
 
+		Name GetScopeId() const;
+
 		const Array<PassAttachmentBinding>& GetInputBindings() const { return inputBindings; }
 		const Array<PassAttachmentBinding>& GetInputOutputBindings() const { return inputOutputBindings; }
 		const Array<PassAttachmentBinding>& GetOutputBindings() const { return outputBindings; }

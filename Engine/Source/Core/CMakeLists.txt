@@ -28,6 +28,7 @@ ce_add_target(Core SHARED
             ThirdParty::mINI
             ThirdParty::zip
             ThirdParty::crcpp
+            ThirdParty::mono
         PUBLIC
             ThirdParty::spdlog
             ThirdParty::yaml
@@ -38,5 +39,4 @@ ce_add_target(Core SHARED
 )
 
 add_subdirectory(Tests)
-
 

@@ -86,6 +86,92 @@ static void CEDeregisterModuleTypes()
 using namespace CE;
 
 /**********************************************
+*   Scripting
+*/
+
+#pragma region Scripting
+
+class SampleMonoClass
+{
+public:
+
+	static MonoString* GetCppString()
+	{
+		return Mono::NewString("String from C++");
+	}
+
+	static Object* CreateObjectImpl(MonoString* className, MonoString* objectName)
+	{
+		Name fullClassName = Mono::StringToUTF8(className);
+		String name = Mono::StringToUTF8(objectName);
+		if (!fullClassName.IsValid())
+			return nullptr;
+
+		ClassType* classType = ClassType::FindClass(fullClassName);
+		if (classType == nullptr)
+			return nullptr;
+
+		return CreateObject<Object>(nullptr, name, OF_NoFlags, classType);
+	}
+
+	static void DestroyObjectImpl(Object* object)
+	{
+		String::IsAlphabet('a');
+		if (object != nullptr)
+		{
+			object->Destroy();
+		}
+	}
+};
+
+TEST(Scripting, Mono)
+{
+	using namespace CE::Mono;
+
+	TEST_BEGIN;
+	ScriptRuntime::Initialize();
+
+	Mono::Assembly* assembly = Mono::ScriptRuntime::GetScriptCoreAssembly();
+	assembly->AddInternalCall("CE.SampleClass::GetCppString", SampleMonoClass::GetCppString);
+	assembly->AddInternalCall("CE.Object::CreateObjectImpl", SampleMonoClass::CreateObjectImpl);
+	assembly->AddInternalCall("CE.Object::DestroyObjectImpl", SampleMonoClass::DestroyObjectImpl);
+
+	ScriptClass scriptClass = assembly->FindClass("CE", "SampleClass");
+
+	if (scriptClass.IsValid())
+	{
+		scriptClass.IterateAllMethods([&](ScriptMethod method)
+			{
+				if (!method.IsValid())
+					return;
+
+				Name methodName = method.GetMethodName();
+
+				if (methodName == "TestMethod")
+				{
+					MonoString* string = Mono::NewString("Extra");
+					void* args[1] = { string };
+					MonoObject* result = method.Invoke(nullptr, args);
+					MonoString* monoString = Mono::ObjectToString(result);
+					String str = Mono::StringToUTF8(monoString);
+					EXPECT_EQ(str, "From C#: String from C++ | Extra");
+				}
+
+				if (methodName == "ObjectTest")
+				{
+					method.Invoke(nullptr, nullptr);
+				}
+			});
+	}
+
+	ScriptRuntime::Shutdown();
+	TEST_END;
+}
+
+#pragma endregion
+
+
+/**********************************************
 *   Performance
 */
 

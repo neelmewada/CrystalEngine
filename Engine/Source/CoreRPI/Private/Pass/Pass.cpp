@@ -84,7 +84,12 @@ namespace CE::RPI
 		return nullptr;
 	}
 
-    Pass::Pass()
+	Name Pass::GetScopeId() const
+	{
+		return String::Format("{}_{}", GetName(), GetUuid());
+	}
+
+	Pass::Pass()
     {
 		
     }

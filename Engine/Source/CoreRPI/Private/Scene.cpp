@@ -139,7 +139,14 @@ namespace CE::RPI
 			view->Init(drawListMask);
 		}
 
+		// Enqueue draw packets to views
+
 		CollectDrawPackets();
+	}
+
+	void Scene::SubmitDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
+	{
+
 	}
 
 	void Scene::OnRenderEnd()
