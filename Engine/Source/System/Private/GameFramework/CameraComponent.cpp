@@ -47,6 +47,11 @@ namespace CE
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);
+
+        if (projection == CameraProjection::Perspective)
+        {
+	        
+        }
     }
 
 } // namespace CE

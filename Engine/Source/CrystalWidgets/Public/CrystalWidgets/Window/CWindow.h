@@ -29,11 +29,15 @@ namespace CE::Widgets
 
         CPlatformWindow* GetRootNativeWindow();
 
+        CPlatformWindow* GetCurrentNativeWindow() const { return nativeWindow; }
+
         virtual void Show();
 
         virtual void Hide();
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
+        Vec2 GetWindowSize() const { return windowSize; }
 
     protected:
 

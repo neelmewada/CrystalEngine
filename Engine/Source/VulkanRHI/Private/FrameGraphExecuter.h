@@ -22,7 +22,7 @@ namespace CE::Vulkan
 
 	private:
 
-		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeID>& executedScopes, 
+		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
 		VulkanDevice* device = nullptr;

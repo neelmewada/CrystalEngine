@@ -34,7 +34,7 @@ namespace CE
     void StaticMeshComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);
-
+        
         CE::Scene* scene = GetScene();
         if (!scene || !staticMesh)
             return;

@@ -71,6 +71,8 @@ namespace CE
 		void AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera);
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
+		CWindow* GetRenderWindow() const { return renderWindow; }
+
 	private:
 
 		// - Internal API -

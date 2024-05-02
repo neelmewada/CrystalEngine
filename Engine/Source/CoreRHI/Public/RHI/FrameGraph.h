@@ -77,7 +77,7 @@ namespace CE::RHI
 		HashMap<AttachmentID, Scope*> lastWrittenAttachmentToScope{};
 		HashMap<AttachmentID, HashSet<Scope*>> attachmentReadSchedule{};
 		HashMap<Scope*, HashSet<Scope*>> nodeDependencies{};
-		HashMap<ScopeID, GraphNode> nodes{};
+		HashMap<ScopeId, GraphNode> nodes{};
 
 		HashMap<Name, StaticArray<FrameGraphVariable, RHI::Limits::MaxSwapChainImageCount>> frameGraphVariables{};
 
@@ -85,7 +85,7 @@ namespace CE::RHI
         FrameAttachmentDatabase attachmentDatabase{};
 
         Array<Scope*> scopes{};
-		HashMap<ScopeID, Scope*> scopesById{};
+		HashMap<ScopeId, Scope*> scopesById{};
 
 		//! Multiple scopes can be grouped together as subpasses in a single render pass.
 		Array<ScopeGroup> scopeGroups{};

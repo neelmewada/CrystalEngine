@@ -53,6 +53,8 @@ namespace CE::RPI
 		/// @brief Scene this render pipeline belongs to.
 		Scene* scene = nullptr;
 
+		ViewPtr view = nullptr;
+
 		/// @brief The pass tree hierarchy. Pipeline owns & manages the passes.
 		PassTree* passTree = nullptr;
 

@@ -17,9 +17,9 @@ namespace CE::RHI
 			return frameGraph->attachmentDatabase;
 		}
 
-		void BeginScopeGroup(const ScopeID& groupId);
+		void BeginScopeGroup(const ScopeId& groupId);
 
-		void BeginScope(const ScopeID& id);
+		void BeginScope(const ScopeId& id);
 
 		bool ScopeQueueClass(HardwareQueueClass queueClass);
 

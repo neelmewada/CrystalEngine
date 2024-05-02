@@ -80,7 +80,7 @@ namespace CE::Vulkan
 
 		bool success = true;
 
-		HashSet<ScopeID> executedScopes{};
+		HashSet<ScopeId> executedScopes{};
 		HashSet<Vulkan::SwapChain*> usedSwapChains{};
 
 		for (auto rhiScope : frameGraph->endScopes)
@@ -171,7 +171,7 @@ namespace CE::Vulkan
 	{
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 
-		HashSet<ScopeID> executedScopes{};
+		HashSet<ScopeId> executedScopes{};
 		HashSet<Vulkan::SwapChain*> usedSwapChains{};
 
 		for (auto rhiScope : frameGraph->endScopes)
@@ -184,7 +184,7 @@ namespace CE::Vulkan
 	}
 
 	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, 
-		HashSet<ScopeID>& executedScopes,
+		HashSet<ScopeId>& executedScopes,
 		HashSet<Vulkan::SwapChain*>& usedSwapChains)
 	{
 		if (!scope)

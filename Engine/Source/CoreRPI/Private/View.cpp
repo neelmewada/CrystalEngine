@@ -9,6 +9,11 @@ namespace CE::RPI
 
 	View::~View()
 	{
+		for (int i = 0; i < viewConstantBuffers.GetSize(); ++i)
+		{
+			delete viewConstantBuffers[i]; viewConstantBuffers[i] = nullptr;
+		}
+
 		if (shaderResourceGroup != nullptr)
 		{
 			delete shaderResourceGroup;
@@ -21,6 +26,10 @@ namespace CE::RPI
 		View* view = new View();
 		view->name = name;
 		view->usageFlags = usageFlags;
+		if (gDynamicRHI != nullptr)
+		{
+			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().GetViewSrgLayout());
+		}
 		return view;
 	}
 

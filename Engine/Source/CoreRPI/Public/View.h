@@ -59,6 +59,8 @@ namespace CE::RPI
 
 		void SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg);
 
+		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+
 		RHI::DrawList& GetDrawList(RHI::DrawListTag drawItemTag);
 
 		void Reset();
@@ -75,6 +77,8 @@ namespace CE::RPI
 
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
 
 		PerViewConstants viewConstants{};
 

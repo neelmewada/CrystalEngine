@@ -15,13 +15,13 @@ namespace CE::RHI
 
 	struct ScopeDescriptor
 	{
-		ScopeID id{};
+		ScopeId id{};
 		RHI::HardwareQueueClass queueClass{};
 	};
 
 	struct ScopeGroup
 	{
-		ScopeID groupId{};
+		ScopeId groupId{};
 		Array<Scope*> scopes{};
 	};
 
@@ -45,7 +45,7 @@ namespace CE::RHI
 
 	public:
 
-		inline ScopeID GetId() const { return id; }
+		inline ScopeId GetId() const { return id; }
 
 		void AddScopeAttachment(ScopeAttachment* attachment);
 
@@ -93,7 +93,7 @@ namespace CE::RHI
 		u32 groupCountY = 1;
 		u32 groupCountZ = 1;
 
-		ScopeID id{};
+		ScopeId id{};
 		int scopeGroupIndex = -1;
 		//bool usesSwapChainAttachment = false;
 		Array<SwapChain*> swapChainsUsedByAttachments{};

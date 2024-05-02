@@ -12,13 +12,13 @@ namespace CE::RHI
 		success = true;
     }
 
-	void FrameGraphBuilder::BeginScopeGroup(const ScopeID& groupId)
+	void FrameGraphBuilder::BeginScopeGroup(const ScopeId& groupId)
 	{
 		curScopeGroup = {};
 		curScopeGroup.groupId = groupId;
 	}
 
-	void FrameGraphBuilder::BeginScope(const ScopeID& id)
+	void FrameGraphBuilder::BeginScope(const ScopeId& id)
 	{
 		RHI::ScopeDescriptor desc{};
 		desc.id = id;

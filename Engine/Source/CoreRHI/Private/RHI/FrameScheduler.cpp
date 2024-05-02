@@ -87,7 +87,7 @@ namespace CE::RHI
 		executer->EndExecution(executeRequest);
 	}
 
-	void FrameScheduler::SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList)
+	void FrameScheduler::SetScopeDrawList(const ScopeId& scopeId, DrawList* drawList)
 	{
 		if (!frameGraph->scopesById.KeyExists(scopeId))
 			return;
@@ -99,7 +99,7 @@ namespace CE::RHI
 		scope->drawList = drawList;
 	}
 
-	RHI::Scope* FrameScheduler::FindScope(const ScopeID& scopeId)
+	RHI::Scope* FrameScheduler::FindScope(const ScopeId& scopeId)
 	{
 		return frameGraph->scopesById[scopeId];
 	}

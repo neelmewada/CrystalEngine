@@ -274,7 +274,7 @@ namespace CE::Vulkan
 	//! need to use a wait semaphore for it.
     void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest)
 	{
-		HashSet<ScopeID> visitedScopes{};
+		HashSet<ScopeId> visitedScopes{};
 		for (auto scope : compileRequest.frameGraph->producers)
 		{
 			CompileCrossQueueDependenciesInternal(compileRequest, (Vulkan::Scope*)scope, visitedScopes);
@@ -283,7 +283,7 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest, 
 		Vulkan::Scope* current, 
-		HashSet<ScopeID>& visitedScopes)
+		HashSet<ScopeId>& visitedScopes)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		if (visitedScopes.Exists(current->GetId()))

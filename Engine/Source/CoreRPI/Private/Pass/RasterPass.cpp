@@ -98,6 +98,16 @@ namespace CE::RPI
             {
 	            scheduler->UseShaderResourceGroup(shaderResourceGroup);
             }
+
+            if (viewSrg)
+            {
+                scheduler->UseShaderResourceGroup(viewSrg);
+            }
+
+            if (sceneSrg)
+            {
+                scheduler->UseShaderResourceGroup(sceneSrg);
+            }
             
         }
         scheduler->EndScope();

@@ -1,70 +1,25 @@
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace CE
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class NativeClassAttribute : System.Attribute
+
+    // Native ClassPath: /Code/ScriptCore.CE::CustomObject
+    public class CustomObject : Object
     {
-        public NativeClassAttribute(string fullClassName)
+        [Export]
+        public string textValue = "";
+
+        public CustomObject() 
         {
-            FullClassName = fullClassName;
+            
         }
-
-        public string FullClassName { get; private set; }
-    }
-
-    [NativeClass("/Code/Core.CE::Object")]
-    public class Object
-    {
-        [NonSerialized]
-        private IntPtr _impl = IntPtr.Zero;
-        [NonSerialized]
-        private string fullClassName = "";
-
-        public IntPtr NativePtr => _impl;
-
-        public Object(string name = "Object", Object outer = null)
-        {
-            NativeClassAttribute nativeClassAttribute = GetType().GetCustomAttribute<NativeClassAttribute>();
-            if (nativeClassAttribute != null)
-            {
-                fullClassName = nativeClassAttribute.FullClassName;
-                _impl = CreateObjectImpl(fullClassName, name, outer);
-            }
-        }
-
-        ~Object()
-        {
-            Destroy();
-        }
-
-        public void Destroy()
-        {
-            DestroyObjectImpl(_impl);
-            _impl = IntPtr.Zero;
-        }
-
-        public bool IsValid()
-        {
-            return _impl != IntPtr.Zero;
-        }
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern IntPtr CreateObjectImpl(string fullClassTypeName, string objectName, Object outer = null);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void DestroyObjectImpl(IntPtr impl);
-
-    }
-
-    [NativeClass("/Code/Core.CE::Package")]
-    public class Package : Object
-    {
-
     }
 
     public class SampleClass

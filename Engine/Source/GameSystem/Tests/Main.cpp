@@ -117,6 +117,10 @@ TEST(RPI, Scene)
 	gEngine->Initialize();
 	gEngine->PostInitialize();
 
+	CE::Shader* standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+
+	RPISystem::Get().PostInitialize(standardShader->GetShaderCollection());
+
 	RendererSubsystem* rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
@@ -125,8 +129,6 @@ TEST(RPI, Scene)
 
 	TestFeatureProcessor1* fp1 = rpiScene->AddFeatureProcessor<TestFeatureProcessor1>();
 	StaticMeshFeatureProcessor* meshFp = rpiScene->GetFeatureProcessor<StaticMeshFeatureProcessor>();
-
-	CE::Shader* standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
 	
 	{
 		StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMesh");

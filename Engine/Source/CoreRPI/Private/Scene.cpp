@@ -139,6 +139,22 @@ namespace CE::RPI
 			view->Init(drawListMask);
 		}
 
+		for (RenderPipeline* renderPipeline : renderPipelines)
+		{
+			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+				{
+					if (!pass || pass->IsParentPass())
+						return;
+
+					if (pass->IsOfType<GpuPass>())
+					{
+						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
+						gpuPass->GetViewTag();
+						gpuPass->SetViewSrg(viewSrg);
+					}
+				});
+		}
+
 		// Enqueue draw packets to views
 
 		CollectDrawPackets();

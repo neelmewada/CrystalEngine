@@ -12,6 +12,8 @@ namespace CE
 			rpiScene = new RPI::Scene();
 			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+
+			
 		}
 	}
 
@@ -32,14 +34,27 @@ namespace CE
 
 	void CE::Scene::Tick(f32 delta)
 	{
-		for (CE::RenderPipeline* renderPipeline : renderPipelines)
-		{
-			renderPipeline->Tick();
-		}
-		
 		for (Actor* actor : actors)
 		{
 			actor->Tick(delta);
+		}
+
+		for (CameraComponent* camera : cameras)
+		{
+			RPI::View* view = camera->GetRpiView();
+			if (!view || !renderWindow)
+				continue;
+
+			Vec2 windowSize = renderWindow->GetWindowSize();
+			PerViewConstants& viewConstants = view->GetViewConstants();
+			viewConstants.pixelResolution = windowSize;
+			viewConstants.projectionMatrix = camera->projectionMatrix;
+			viewConstants.viewMatrix = 
+		}
+
+		for (CE::RenderPipeline* renderPipeline : renderPipelines)
+		{
+			renderPipeline->Tick();
 		}
 	}
 

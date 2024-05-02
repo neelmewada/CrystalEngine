@@ -86,8 +86,31 @@ namespace CE::RPI
         }
     }
 
+    void RPISystem::PostInitialize(RPI::ShaderCollection* defaultShader)
+    {
+        this->defaultShader = defaultShader;
+
+        if (!defaultShader)
+            return;
+
+        for (const ShaderCollection::Item& shaderItem : *defaultShader)
+        {
+	        if (!shaderItem.shader)
+                continue;
+
+            RPI::ShaderVariant* variant = shaderItem.shader->GetVariant(shaderItem.shader->GetDefaultVariantIndex());
+            if (!variant)
+                continue;
+
+            viewSrgLayout = variant->GetSrgLayout(SRGType::PerView);
+            sceneSrgLayout = variant->GetSrgLayout(SRGType::PerScene);
+        }
+    }
+
     void RPISystem::Shutdown()
     {
+        defaultShader = nullptr;
+
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
         {
             if (!drawListTag.IsValid())

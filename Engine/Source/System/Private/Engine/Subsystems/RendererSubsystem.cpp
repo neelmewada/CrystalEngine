@@ -284,7 +284,7 @@ namespace CE
 
 					SceneViewTag viewTag = pass->GetViewTag();
 					DrawListTag passDrawTag = pass->GetDrawListTag();
-					ScopeID scopeId = pass->GetScopeId();
+					ScopeId scopeId = pass->GetScopeId();
 
 					if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 					{
@@ -303,12 +303,9 @@ namespace CE
     	
     	CE::Scene* scene = sceneSubsystem->GetActiveScene();
 
-    	if (scene)
-    	{
-			// TODO: Enqueue draw packets early! Scope producers need to have all draw packets available beforehand.
-			RPISystem::Get().SimulationTick(curImageIndex);
-			RPISystem::Get().RenderTick(curImageIndex);
-    	}
+		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
+		RPISystem::Get().SimulationTick(curImageIndex);
+		RPISystem::Get().RenderTick(curImageIndex);
     	
 		scheduler->BeginFrameGraph();
 		{
@@ -318,10 +315,11 @@ namespace CE
 			{
 				app->BuildFrameAttachments();
 
-				if (scene && scene->renderWindow && scene->renderWindow->GetNativeWindow())
+				// Scene is rendered into a native window (directly into SwapChain)
+				if (scene && scene->renderWindow && scene->renderWindow->GetCurrentNativeWindow())
 				{
 					CWindow* renderWindow = scene->renderWindow;
-					CPlatformWindow* nativeWindow = renderWindow->GetNativeWindow();
+					CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
 					PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
 
 					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
@@ -343,6 +341,10 @@ namespace CE
 
 						rpiPipeline->ImportScopeProducers(scheduler);
 					}
+				}
+				else
+				{
+					// TODO: Scene is rendered into a viewport (NOT a SwapChain)
 				}
 
 				app->BuildFrameGraph();

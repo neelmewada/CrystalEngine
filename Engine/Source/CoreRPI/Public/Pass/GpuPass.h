@@ -13,10 +13,18 @@ namespace CE::RPI
 
 		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
+		void SetViewSrg(RHI::ShaderResourceGroup* srg) { viewSrg = srg; }
+
+		void SetSceneSrg(RHI::ShaderResourceGroup* srg) { sceneSrg = srg; }
+
 	protected:
 
 		//! @brief Shader resource group for this pass (SRG_PerPass)
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+
+		RHI::ShaderResourceGroup* viewSrg = nullptr;
+
+		RHI::ShaderResourceGroup* sceneSrg = nullptr;
 
 		RPI_PASS(GpuPass)
 	};

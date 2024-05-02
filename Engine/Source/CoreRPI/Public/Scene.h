@@ -15,8 +15,8 @@ namespace CE::RPI
 		struct PipelineStateData
 		{
 			RHI::MultisampleState multisampleState{};
-			Array<Format> colorFormats{};
-			Format depthFormat{};
+			Array<RHI::Format> colorFormats{};
+			RHI::Format depthFormat{};
 			
 			SceneViewTag viewTag{};
 		};

@@ -3,6 +3,7 @@
 namespace CE::RPI
 {
 	class Texture;
+	class ShaderCollection;
 
 	enum class BuiltinDrawItemTag
 	{
@@ -31,6 +32,7 @@ namespace CE::RPI
 		}
 
 		void Initialize();
+		void PostInitialize(RPI::ShaderCollection* defaultShader);
 
 		void Shutdown();
 
@@ -64,6 +66,9 @@ namespace CE::RPI
 
 		DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
 
+		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
+		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
+
 	private:
 
 		RPISystem() = default;
@@ -81,6 +86,10 @@ namespace CE::RPI
 
 		Array<Scene*> scenes{};
 
+		RHI::ShaderResourceGroupLayout sceneSrgLayout{};
+		RHI::ShaderResourceGroupLayout viewSrgLayout{};
+
+		RPI::ShaderCollection* defaultShader = nullptr;
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;
 		RPI::Texture* defaultRoughnessTex = nullptr;

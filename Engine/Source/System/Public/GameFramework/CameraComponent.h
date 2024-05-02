@@ -43,7 +43,7 @@ namespace CE
 
 		float GetFieldOfView() const { return fieldOfView; }
 
-		RPI::ViewPtr GetRpiView() const { return rpiView; }
+		RPI::View* GetRpiView() const { return rpiView; }
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
@@ -82,6 +82,9 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 projectionMatrix{};
+
+		FIELD(ReadOnly)
+		Matrix4x4 viewMatrix{};
 
     	FIELD()
     	CE::RenderPipeline* renderPipeline = nullptr;
