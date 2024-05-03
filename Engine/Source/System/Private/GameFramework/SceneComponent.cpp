@@ -157,6 +157,11 @@ namespace CE
 				transform = localTransform;
 			}
 
+			globalPosition = transform * Vec4(localPosition, 1.0f);
+
+			forwardVector = transform * Vec4(0, 0, 1, 0);
+			upwardVector = transform * Vec4(0, 1, 0, 0);
+
 			isDirty = false;
 			transformUpdated = true;
 		}

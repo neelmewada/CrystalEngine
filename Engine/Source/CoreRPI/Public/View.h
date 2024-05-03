@@ -66,6 +66,8 @@ namespace CE::RPI
 		void Reset();
 		void Init(RHI::DrawListMask drawListMask);
 
+		void UpdateSrg(int imageIndex);
+
 		//! @brief Enqueues draw packets to this view.
 		//! The function is thread safe and is supposed to be called every frame!
 		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);

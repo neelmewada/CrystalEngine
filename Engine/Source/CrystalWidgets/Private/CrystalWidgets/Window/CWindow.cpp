@@ -409,6 +409,15 @@ namespace CE::Widgets
         return subWidgetClass->IsSubclassOf<CWidget>() && !subWidgetClass->IsSubclassOf<CMenuItem>();
     }
 
+    Vec2 CWindow::GetWindowSize() const
+    {
+        if (nativeWindow)
+        {
+            return nativeWindow->GetPlatformWindow()->GetWindowSize().ToVec2();
+        }
+        return windowSize;
+    }
+
     void CWindow::OnPlatformWindowSet()
     {
 

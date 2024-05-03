@@ -5,11 +5,21 @@ namespace CE::RPI
     
 	Scene::Scene()
 	{
-		RPISystem::Get().scenes.Add(this);
+		if (RPISystem::Get().isInitialized && gDynamicRHI != nullptr)
+		{
+			RPISystem::Get().scenes.Add(this);
+
+			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().sceneSrgLayout);
+		}
 	}
 
 	Scene::~Scene()
 	{
+		if (shaderResourceGroup)
+		{
+			delete shaderResourceGroup; shaderResourceGroup = nullptr;
+		}
+
 		for (FeatureProcessor* fp : featureProcessors)
 		{
 			fp->Destroy();
@@ -137,10 +147,14 @@ namespace CE::RPI
 
 			view->Reset();
 			view->Init(drawListMask);
+
+			view->UpdateSrg(imageIndex);
 		}
 
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
+			View* targetView = renderPipeline->view;
+
 			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
 				{
 					if (!pass || pass->IsParentPass())
@@ -149,8 +163,10 @@ namespace CE::RPI
 					if (pass->IsOfType<GpuPass>())
 					{
 						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
-						gpuPass->GetViewTag();
-						gpuPass->SetViewSrg(viewSrg);
+						if (targetView != nullptr)
+						{
+							gpuPass->SetViewSrg(targetView->GetShaderResourceGroup());
+						}
 					}
 				});
 		}

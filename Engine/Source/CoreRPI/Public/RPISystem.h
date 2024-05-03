@@ -76,6 +76,8 @@ namespace CE::RPI
 		void CreateDefaultTextures();
 		void CreateFullScreenQuad();
 
+		bool isInitialized = false;
+		
 		RHI::RHISystem rhiSystem{};
 		Array<RHI::Buffer*> vertexBuffers{};
 		Array<RHI::VertexBufferView> quadVertexBufferViews{};

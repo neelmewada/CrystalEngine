@@ -86,7 +86,7 @@ namespace CE::RPI
 		FeatureProcessor::RenderPacket renderPacket{};
 
 		/// @brief A Scene shader resource group (SRG_PerScene).
-		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
 		SceneViewTag mainViewTag = "MainCamera";
 

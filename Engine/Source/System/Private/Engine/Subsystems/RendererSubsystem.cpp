@@ -118,7 +118,7 @@ namespace CE
 			// TODO: Implement editor window support later
 			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
 
-			activeScene->renderWindow = gameWindow;
+			activeScene->mainRenderWindow = gameWindow;
 		}
 	}
 
@@ -315,36 +315,38 @@ namespace CE
 			{
 				app->BuildFrameAttachments();
 
-				// Scene is rendered into a native window (directly into SwapChain)
-				if (scene && scene->renderWindow && scene->renderWindow->GetCurrentNativeWindow())
+				for (CameraComponent* camera : scene->cameras)
 				{
-					CWindow* renderWindow = scene->renderWindow;
-					CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
-					PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
-
-					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+					CWindow* renderWindow = camera->renderWindow;
+					if (renderWindow && renderWindow->GetCurrentNativeWindow())
 					{
-						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
-						const auto& attachments = rpiPipeline->attachments;
+						CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
+						PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
 
-						for (PassAttachment* passAttachment : attachments)
+						for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
 						{
-							if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
-							{
-								passAttachment->attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
-							}
-							else
-							{
-								passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
-							}
-						}
+							RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+							const auto& attachments = rpiPipeline->attachments;
 
-						rpiPipeline->ImportScopeProducers(scheduler);
+							for (PassAttachment* passAttachment : attachments)
+							{
+								if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+								{
+									passAttachment->attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
+								}
+								else
+								{
+									passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+								}
+							}
+
+							rpiPipeline->ImportScopeProducers(scheduler);
+						}
 					}
-				}
-				else
-				{
-					// TODO: Scene is rendered into a viewport (NOT a SwapChain)
+					else if (renderWindow)
+					{
+						// TODO: Scene is rendered into a viewport (NOT a SwapChain)
+					}
 				}
 
 				app->BuildFrameGraph();

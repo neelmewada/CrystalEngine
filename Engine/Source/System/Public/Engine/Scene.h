@@ -71,8 +71,6 @@ namespace CE
 		void AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera);
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
-		CWindow* GetRenderWindow() const { return renderWindow; }
-
 	private:
 
 		// - Internal API -
@@ -96,9 +94,8 @@ namespace CE
 		FIELD()
 		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
 
-		//! @brief The CWindow that this scene is rendered to.
 		FIELD()
-		CWindow* renderWindow = nullptr;
+		CWindow* mainRenderWindow = nullptr;
 		
 	private:
 

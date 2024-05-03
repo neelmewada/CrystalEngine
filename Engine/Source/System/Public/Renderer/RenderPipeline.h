@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class CameraComponent;
+
     CLASS(Abstract)
     class SYSTEM_API RenderPipeline : public Object
     {
@@ -25,6 +27,10 @@ namespace CE
         void SetMainViewTag(const Name& viewTag) { mainViewTag = viewTag; }
 
         RHI::DrawListTag GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag buitinDrawItemTag);
+
+        void SetOwnerCamera(CameraComponent* owner) { targetCamera = owner; }
+
+        CameraComponent* GetOwnerCamera() const { return targetCamera; }
         
     protected:
 
@@ -35,6 +41,9 @@ namespace CE
 
         FIELD()
         RenderPipelineAsset* renderPipelineAsset = nullptr;
+
+        FIELD()
+        CameraComponent* targetCamera = nullptr;
 
     private:
 

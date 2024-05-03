@@ -45,6 +45,7 @@ namespace CE::RPI
     void RPISystem::Initialize()
     {
         isFirstTick = true;
+        isInitialized = true;
 
         CreateDefaultTextures();
         CreateFullScreenQuad();
@@ -110,6 +111,7 @@ namespace CE::RPI
     void RPISystem::Shutdown()
     {
         defaultShader = nullptr;
+        isInitialized = false;
 
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
         {

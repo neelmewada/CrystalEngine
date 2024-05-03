@@ -29,6 +29,18 @@ namespace CE::RPI
 		if (gDynamicRHI != nullptr)
 		{
 			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().GetViewSrgLayout());
+
+			RHI::BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.name = "ViewConstants";
+			bufferDescriptor.bindFlags = BufferBindFlags::ConstantBuffer;
+			bufferDescriptor.defaultHeapType = MemoryHeapType::Upload;
+			bufferDescriptor.bufferSize = sizeof(viewConstants);
+			bufferDescriptor.structureByteStride = sizeof(viewConstants);
+
+			for (int i = 0; i < view->viewConstantBuffers.GetSize(); ++i)
+			{
+				view->viewConstantBuffers[i] = gDynamicRHI->CreateBuffer(bufferDescriptor);
+			}
 		}
 		return view;
 	}
@@ -63,6 +75,16 @@ namespace CE::RPI
 	{
 		this->drawListMask = drawListMask;
 		drawListContext.Init(drawListMask);
+	}
+
+	void View::UpdateSrg(int imageIndex)
+	{
+		void* data;
+		viewConstantBuffers[imageIndex]->Map(0, viewConstantBuffers[imageIndex]->GetBufferSize(), &data);
+		{
+			memcpy(data, &viewConstants, sizeof(viewConstants));
+		}
+		viewConstantBuffers[imageIndex]->Unmap();
 	}
 
 	void View::AddDrawPacket(DrawPacket* drawPacket, f32 depth)

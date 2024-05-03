@@ -21,6 +21,11 @@ namespace CE
         renderPipeline->name = GetName();
         renderPipeline->uuid = GetUuid();
 
+        if (targetCamera != nullptr)
+        {
+            renderPipeline->view = targetCamera->GetRpiView();
+        }
+
         // - Cleanup -
         
         for (int i = (int)renderPipeline->attachments.GetSize() - 1; i >= 0; --i)

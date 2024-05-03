@@ -16,6 +16,8 @@ namespace CE
         if (!IsDefaultInstance())
         {
             rpiView = RPI::View::CreateView("Camera", View::UsageCamera);
+
+            renderPipeline->SetOwnerCamera(this);
         }
     }
 
@@ -48,9 +50,21 @@ namespace CE
     {
 	    Super::Tick(delta);
 
-        if (projection == CameraProjection::Perspective)
+        if (renderWindow != nullptr)
         {
-	        
+            Vec2 windowSize = renderWindow->GetWindowSize();
+	        if (projection == CameraProjection::Perspective && windowSize.height > 0)
+	        {
+                projectionMatrix = Matrix4x4::PerspectiveProjection(windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);
+	        }
+            else if (projection == CameraProjection::Orthogonal && windowSize.height > 0)
+            {
+                projectionMatrix = Matrix4x4::OrthographicProjection(windowSize.width / windowSize.height, nearPlane, farPlane);
+            }
+
+            Vec3 lookDir = GetForwardVector();
+
+            viewMatrix = Quat::LookRotation(lookDir).ToMatrix() * Matrix4x4::Translation(-GetPosition());
         }
     }
 

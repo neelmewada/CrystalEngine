@@ -37,7 +37,7 @@ namespace CE::Widgets
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
-        Vec2 GetWindowSize() const { return windowSize; }
+        Vec2 GetWindowSize() const;
 
     protected:
 

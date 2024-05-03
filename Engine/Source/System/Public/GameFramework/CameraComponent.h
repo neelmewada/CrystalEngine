@@ -52,6 +52,8 @@ namespace CE
     	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
 
     	void SetViewTag(const Name& tag) { viewTag = tag; }
+
+		CWindow* GetRenderWindow() const { return renderWindow; }
     	
     protected:
 
@@ -85,6 +87,10 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 viewMatrix{};
+
+		//! @brief The CWindow that this scene is rendered to.
+		FIELD()
+		CWindow* renderWindow = nullptr;
 
     	FIELD()
     	CE::RenderPipeline* renderPipeline = nullptr;

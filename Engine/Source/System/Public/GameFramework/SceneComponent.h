@@ -22,6 +22,8 @@ namespace CE
 		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 
+		Vec3 GetPosition() const { return globalPosition; }
+
 		Vec3 GetLocalPosition() const { return localPosition; }
 
 		Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
@@ -41,6 +43,10 @@ namespace CE
 		const Matrix4x4& GetTransform() const { return transform; }
 
 		const Matrix4x4& GetLocalTransform() const { return localTransform; }
+
+		Vec3 GetForwardVector() const { return forwardVector; }
+
+		Vec3 GetUpwardVector() const { return upwardVector; }
 
     protected:
 
@@ -68,6 +74,15 @@ namespace CE
 		Vec3 localScale = Vec3(1, 1, 1);
 
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
+
+		FIELD(ReadOnly)
+		Vec3 globalPosition{};
+
+		FIELD(ReadOnly)
+		Vec3 forwardVector{};
+
+		FIELD(ReadOnly)
+		Vec3 upwardVector{};
 
 		b8 isDirty = true;
 
