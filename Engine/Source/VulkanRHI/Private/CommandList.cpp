@@ -117,10 +117,10 @@ namespace CE::Vulkan
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
 					{
-						commitedSRGsBySetNumber[setNumber]->usageCount--;
+						--commitedSRGsBySetNumber[setNumber]->usageCount;
 					}
 					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0]->GetDescriptorSet();
-					commitedSRGsBySetNumber[setNumber]->usageCount++;
+					++commitedSRGsBySetNumber[setNumber]->usageCount;
 
 					VkDescriptorSet descriptorSetHandle = commitedSRGsBySetNumber[setNumber]->GetHandle();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
@@ -140,10 +140,10 @@ namespace CE::Vulkan
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
 					{
-						commitedSRGsBySetNumber[setNumber]->usageCount--;
+						--commitedSRGsBySetNumber[setNumber]->usageCount;
 					}
 					commitedSRGsBySetNumber[setNumber] = mergedSrg->GetDescriptorSet();
-					commitedSRGsBySetNumber[setNumber]->usageCount++;
+					++commitedSRGsBySetNumber[setNumber]->usageCount;
 
 					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetHandle();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
