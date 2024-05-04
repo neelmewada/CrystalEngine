@@ -273,4 +273,15 @@ namespace CE::RPI
 		return empty;
 	}
 
+	bool ShaderVariant::HasSrgLayout(RHI::SRGType srgType)
+	{
+		for (const auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType == srgType)
+				return true;
+		}
+
+		return false;
+	}
+
 } // namespace CE::RPI

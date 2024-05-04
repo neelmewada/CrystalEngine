@@ -1371,7 +1371,7 @@ namespace CE
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-			bufferDesc.bufferSize = sizeof(LightData);
+			bufferDesc.bufferSize = sizeof(LightConstants);
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Light Data Buffer";
 

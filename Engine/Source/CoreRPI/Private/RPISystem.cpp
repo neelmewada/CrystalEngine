@@ -87,30 +87,150 @@ namespace CE::RPI
         }
     }
 
-    void RPISystem::PostInitialize(RPI::ShaderCollection* defaultShader)
+    void RPISystem::PostInitialize(const RPISystemInitInfo& initInfo)
     {
-        this->defaultShader = defaultShader;
+        this->standardShader = initInfo.standardShader;
+        this->iblConvolutionShader = initInfo.iblConvolutionShader;
 
-        if (!defaultShader)
+        if (standardShader != nullptr)
+	    {
+		    for (const ShaderCollection::Item& shaderItem : *standardShader)
+		    {
+		    	if (!shaderItem.shader)
+		    		continue;
+
+		    	RPI::ShaderVariant* variant = shaderItem.shader->GetVariant(shaderItem.shader->GetDefaultVariantIndex());
+		    	if (!variant)
+		    		continue;
+
+		    	viewSrgLayout = variant->GetSrgLayout(SRGType::PerView);
+		    	sceneSrgLayout = variant->GetSrgLayout(SRGType::PerScene);
+		    }
+	    }
+
+        if (iblConvolutionShader != nullptr)
+        {
+            CreateBrdfLutTexture();
+        }
+    }
+
+    void RPISystem::CreateBrdfLutTexture()
+    {
+        if (!iblConvolutionShader)
             return;
 
-        for (const ShaderCollection::Item& shaderItem : *defaultShader)
+        // - Create BRDF Lut Texture by rendering a full screen quad
+
+        RPI::ShaderVariant* shaderVariant = nullptr;
+        const Name lookupName = "BRDF Generator";
+
+        for (const auto& item : *iblConvolutionShader)
         {
-	        if (!shaderItem.shader)
+            RPI::Shader* rpiShader = item.shader;
+            if (!rpiShader)
+                continue;
+            if (rpiShader->GetName() != lookupName)
                 continue;
 
-            RPI::ShaderVariant* variant = shaderItem.shader->GetVariant(shaderItem.shader->GetDefaultVariantIndex());
-            if (!variant)
-                continue;
-
-            viewSrgLayout = variant->GetSrgLayout(SRGType::PerView);
-            sceneSrgLayout = variant->GetSrgLayout(SRGType::PerScene);
+            shaderVariant = rpiShader->GetVariant(rpiShader->GetDefaultVariantIndex());
         }
+
+        if (!shaderVariant)
+            return;
+
+        RPI::TextureDescriptor rpiDesc{};
+
+        RHI::TextureDescriptor& brdfLutDesc = rpiDesc.texture;
+        brdfLutDesc.name = "BRDF LUT Texture";
+        brdfLutDesc.sampleCount = 1;
+        brdfLutDesc.arrayLayers = 1;
+        brdfLutDesc.mipLevels = 1;
+        brdfLutDesc.defaultHeapType = MemoryHeapType::Default;
+        brdfLutDesc.width = brdfLutDesc.height = 512;
+        brdfLutDesc.depth = 1;
+        brdfLutDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+        brdfLutDesc.format = Format::R8G8_UNORM;
+        brdfLutDesc.dimension = Dimension::Dim2D;
+
+        brdfLutTexture = new RPI::Texture(rpiDesc);
+        RHI::Texture* brdfLut = brdfLutTexture->GetRhiTexture();
+
+        RHI::RenderTarget* brdfLutRT = nullptr;
+        RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+        {
+            RHI::RenderTargetLayout rtLayout{};
+            RHI::RenderAttachmentLayout colorAttachment{};
+            colorAttachment.attachmentId = "BRDF LUT";
+            colorAttachment.format = RHI::Format::R8G8_UNORM;
+            colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+            colorAttachment.loadAction = AttachmentLoadAction::Clear;
+            colorAttachment.storeAction = AttachmentStoreAction::Store;
+            colorAttachment.multisampleState.sampleCount = 1;
+            rtLayout.attachmentLayouts.Add(colorAttachment);
+
+            brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+            brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+        }
+
+        defer(
+            delete brdfLutRT;
+			delete brdfLutRTB;
+        );
+
+        auto gfxQueue = gDynamicRHI->GetPrimaryGraphicsQueue();
+        auto cmdList = gDynamicRHI->AllocateCommandList(gfxQueue);
+
+        AttachmentClearValue clearValue{ .clearValue = Vec4(0, 0, 0, 0) };
+
+        cmdList->Begin();
+        {
+            RHI::ResourceBarrierDescriptor barrier{};
+            barrier.resource = brdfLut;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::ColorOutput;
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+            cmdList->ResourceBarrier(1, &barrier);
+
+            cmdList->ClearShaderResourceGroups();
+
+            cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clearValue);
+            {
+                RHI::ViewportState viewportState{};
+                viewportState.x = viewportState.y = 0;
+                viewportState.width = brdfLut->GetWidth();
+                viewportState.height = brdfLut->GetHeight();
+                viewportState.minDepth = 0;
+                viewportState.maxDepth = 1;
+                cmdList->SetViewports(1, &viewportState);
+
+                RHI::ScissorState scissorState{};
+                scissorState.x = scissorState.y = 0;
+                scissorState.width = viewportState.width;
+                scissorState.height = viewportState.height;
+                cmdList->SetScissors(1, &scissorState);
+
+                cmdList->BindPipelineState(brdfGenMaterial->GetCurrentOpaqueShader()->GetPipeline());
+
+                cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+                cmdList->DrawLinear(fullscreenQuadArgs);
+            }
+            cmdList->EndRenderTarget();
+
+            barrier.resource = brdfLut;
+            barrier.fromState = RHI::ResourceState::ColorOutput;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+            cmdList->ResourceBarrier(1, &barrier);
+        }
+        cmdList->End();
+
+        gDynamicRHI->FreeCommandLists(1, &cmdList);
     }
 
     void RPISystem::Shutdown()
     {
-        defaultShader = nullptr;
+        standardShader = nullptr;
         isInitialized = false;
 
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)

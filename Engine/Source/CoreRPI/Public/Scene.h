@@ -85,6 +85,14 @@ namespace CE::RPI
 		FeatureProcessor::SimulatePacket simulatePacket{};
 		FeatureProcessor::RenderPacket renderPacket{};
 
+		// - Temporary Lighting data -
+
+		LightConstants lightConstants{};
+		RPI::Buffer* lightConstantsBuffer = nullptr;
+
+		StaticArray<DirectionalLightConstants, RPI::Limits::MaxDirectionalLightsCount> directionalLightConstants = {};
+		RPI::Buffer* directionalLightBuffer = nullptr;
+
 		/// @brief A Scene shader resource group (SRG_PerScene).
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 

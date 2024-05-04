@@ -51,6 +51,8 @@ namespace CE::RPI
 
 		const RHI::ShaderResourceGroupLayout& GetSrgLayout(RHI::SRGType srgType);
 
+		bool HasSrgLayout(RHI::SRGType srgType);
+
 		const ShaderReflection& GetShaderReflection() const { return reflectionInfo; }
 
 	private:

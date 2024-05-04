@@ -2,7 +2,8 @@
 
 namespace CE::RPI
 {
-    struct alignas(16) DirectionalLightData
+
+    struct alignas(16) DirectionalLightConstants
     {
         Matrix4x4 lightSpaceMatrix;
         Vec4 direction;

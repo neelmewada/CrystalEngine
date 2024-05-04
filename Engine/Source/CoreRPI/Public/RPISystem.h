@@ -18,6 +18,13 @@ namespace CE::RPI
 	};
 	ENUM_CLASS(BuiltinDrawItemTag);
 
+	struct RPISystemInitInfo
+	{
+		RPI::ShaderCollection* standardShader = nullptr;
+		RPI::ShaderCollection* iblConvolutionShader = nullptr;
+		
+	};
+
 	/// @brief RPISystem owns and manages all scenes.
 	class CORERPI_API RPISystem final
 	{
@@ -32,7 +39,7 @@ namespace CE::RPI
 		}
 
 		void Initialize();
-		void PostInitialize(RPI::ShaderCollection* defaultShader);
+		void PostInitialize(const RPISystemInitInfo& initInfo);
 
 		void Shutdown();
 
@@ -56,6 +63,11 @@ namespace CE::RPI
 			return defaultNormalTex;
 		}
 
+		RPI::Texture* GetBrdfLutTexture() const
+		{
+			return brdfLutTexture;
+		}
+
 		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
 
 		const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
@@ -76,6 +88,8 @@ namespace CE::RPI
 		void CreateDefaultTextures();
 		void CreateFullScreenQuad();
 
+		void CreateBrdfLutTexture();
+
 		bool isInitialized = false;
 		
 		RHI::RHISystem rhiSystem{};
@@ -91,10 +105,14 @@ namespace CE::RPI
 		RHI::ShaderResourceGroupLayout sceneSrgLayout{};
 		RHI::ShaderResourceGroupLayout viewSrgLayout{};
 
-		RPI::ShaderCollection* defaultShader = nullptr;
+		RPI::ShaderCollection* standardShader = nullptr;
+		RPI::ShaderCollection* iblConvolutionShader = nullptr;
+
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;
 		RPI::Texture* defaultRoughnessTex = nullptr;
+
+		RPI::Texture* brdfLutTexture = nullptr;
 
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};

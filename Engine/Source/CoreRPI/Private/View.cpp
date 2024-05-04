@@ -40,7 +40,11 @@ namespace CE::RPI
 			for (int i = 0; i < view->viewConstantBuffers.GetSize(); ++i)
 			{
 				view->viewConstantBuffers[i] = gDynamicRHI->CreateBuffer(bufferDescriptor);
+
+				view->shaderResourceGroup->Bind("_PerViewData", view->viewConstantBuffers[i]);
 			}
+
+			view->shaderResourceGroup->FlushBindings();
 		}
 		return view;
 	}

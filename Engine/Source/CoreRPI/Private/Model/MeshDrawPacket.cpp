@@ -59,7 +59,6 @@ namespace CE::RPI
 		material->FlushProperties();
 
 		builder.AddShaderResourceGroup(objectSrg);
-		builder.AddShaderResourceGroup(material->GetShaderResourceGroup());
 
 		for (int i = 0; i < perDrawSrgs.GetSize(); ++i)
 		{
@@ -93,17 +92,27 @@ namespace CE::RPI
 			RPI::ShaderVariant* variant = shader->GetVariant(shader->GetDefaultVariantIndex());
 
 			const auto& shaderReflection = variant->GetShaderReflection();
-			
-			const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
 
-			RHI::ShaderResourceGroup* perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
-			perDrawSrgs.Add(perDrawSrg);
+			RHI::ShaderResourceGroup* perDrawSrg = nullptr;
 
 			DrawPacketBuilder::DrawItemRequest drawItem{};
 			drawItem.drawFilterMask = DrawFilterMask::ALL;
 			drawItem.drawItemTag = drawListTag;
-			drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			drawItem.stencilRef = stencilRef;
+
+			if (variant->HasSrgLayout(SRGType::PerDraw))
+			{
+				const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
+				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
+				perDrawSrgs.Add(perDrawSrg);
+				drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
+			}
+
+			if (drawListTag == RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque) ||
+				drawListTag == RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Transparent))
+			{
+				drawItem.uniqueShaderResourceGroups.Add(material->GetShaderResourceGroup());
+			}
 
 			RHI::MultisampleState multisampleState{};
 			scene->GetPipelineMultiSampleState(drawListTag, multisampleState);

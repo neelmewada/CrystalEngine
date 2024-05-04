@@ -279,7 +279,7 @@ namespace CE
 		RHI::Buffer* lightDataBuffer = nullptr;
 		FixedArray<DirectionalLight, MaxDirectionalLightCount> directionalLights{};
 		Array<PointLight> pointLights{};
-		LightData lightData{};
+		LightConstants lightData{};
 
 		u32 width = 0;
 		u32 height = 0;

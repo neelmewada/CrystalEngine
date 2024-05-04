@@ -26,10 +26,14 @@ namespace CE::RPI
 
 		Array<RHI::ShaderResourceGroup*> objectSrgList{};
 
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> objectBuffers{};
+
 		void Init(StaticMeshFeatureProcessor* fp);
 		void Deinit(StaticMeshFeatureProcessor* fp);
 		void BuildDrawPacketList(StaticMeshFeatureProcessor* fp, u32 modelLodIndex);
 		void UpdateDrawPackets(StaticMeshFeatureProcessor* fp, bool forceUpdate = false);
+
+		void UpdateSrgs(int imageIndex);
 
 		struct Flags
 		{

@@ -632,7 +632,9 @@ namespace CE::Vulkan
 									// Bind Pipeline
 									RHI::PipelineState* pipeline = drawItem->pipelineState;
 									if (pipeline)
+									{
 										commandList->BindPipelineState(pipeline);
+									}
 
 									// Bind SRGs
 									for (int j = 0; j < drawItem->shaderResourceGroupCount; j++)

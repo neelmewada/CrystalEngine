@@ -25,6 +25,7 @@ namespace CE::RPI
 
 			RHI::DrawListMask drawListMask{};
 
+			u32 imageIndex = 0;
 		};
 
 		virtual void Simulate(const SimulatePacket& packet) {}

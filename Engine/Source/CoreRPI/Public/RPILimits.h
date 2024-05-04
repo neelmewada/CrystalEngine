@@ -2,6 +2,7 @@
 
 namespace CE::RPI::Limits
 {
+	constexpr u32 MaxDirectionalLightsCount = 8;
 
 	constexpr u32 MaxShadowCascadeCount = 4;
 

@@ -39,6 +39,8 @@ namespace CE::RPI
 #include "RPILimits.h"
 #include "Shader/ShaderCollection.h"
 
+#include "Buffer.h"
+
 // Passes
 #include "Pass/PassAttachmentDefines.h"
 #include "Pass/PassAttachment.h"
@@ -64,9 +66,9 @@ namespace CE::RPI
 // Feature processors
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
-#include "Feature/StaticMeshFeatureProcessor.h"
 #include "Feature/LightFeatureProcessor.h"
 #include "Feature/DirectionalLightFeatureProcessor.h"
+#include "Feature/StaticMeshFeatureProcessor.h"
 
 #include "Scene.h"
 

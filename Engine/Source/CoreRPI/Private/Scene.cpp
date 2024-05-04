@@ -8,8 +8,6 @@ namespace CE::RPI
 		if (RPISystem::Get().isInitialized && gDynamicRHI != nullptr)
 		{
 			RPISystem::Get().scenes.Add(this);
-
-			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().sceneSrgLayout);
 		}
 	}
 
@@ -19,6 +17,9 @@ namespace CE::RPI
 		{
 			delete shaderResourceGroup; shaderResourceGroup = nullptr;
 		}
+
+		delete directionalLightBuffer; directionalLightBuffer = nullptr;
+		delete lightConstantsBuffer; lightConstantsBuffer = nullptr;
 
 		for (FeatureProcessor* fp : featureProcessors)
 		{
@@ -114,6 +115,51 @@ namespace CE::RPI
 
 	void Scene::Simulate(f32 currentTime)
 	{
+		if (shaderResourceGroup == nullptr)
+		{
+			const auto& srgLayout = RPISystem::Get().sceneSrgLayout;
+			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+			RHI::BufferDescriptor lightConstantsDesc{};
+			lightConstantsDesc.name = "LightConstants";
+			lightConstantsDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			lightConstantsDesc.defaultHeapType = MemoryHeapType::Upload;
+			lightConstantsDesc.bufferSize = sizeof(lightConstants);
+
+			lightConstantsBuffer = new RPI::Buffer(lightConstantsDesc);
+
+			lightConstantsBuffer->UploadData(sizeof(lightConstants), 0, &lightConstants);
+
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; ++i)
+			{
+				shaderResourceGroup->Bind(i, "_LightData", lightConstantsBuffer->GetBuffer(i));
+			}
+
+			RHI::BufferDescriptor directionalLightDesc{};
+			directionalLightDesc.name = "DirectionalLightConstants";
+			directionalLightDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			directionalLightDesc.defaultHeapType = MemoryHeapType::Upload;
+			directionalLightDesc.bufferSize = sizeof(directionalLightConstants) * RPI::Limits::MaxDirectionalLightsCount;
+			directionalLightDesc.structureByteStride = sizeof(directionalLightConstants);
+
+			directionalLightBuffer = new RPI::Buffer(directionalLightDesc);
+
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; ++i)
+			{
+				shaderResourceGroup->Bind(i, "_DirectionalLightsArray", directionalLightBuffer->GetBuffer(i));
+			}
+
+			RHI::SamplerDescriptor samplerDesc{};
+			samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
+			samplerDesc.enableAnisotropy = true;
+			samplerDesc.maxAnisotropy = 8;
+			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+
+			shaderResourceGroup->Bind("_DefaultSampler", RPISystem::Get().FindOrCreateSampler(samplerDesc));
+		}
+
+		shaderResourceGroup->FlushBindings();
+
 		if (needsLookupTableRebuild)
 		{
 			RebuildPipelineLookupTable();
@@ -130,6 +176,7 @@ namespace CE::RPI
 		// - Rebuild render packet -
 		renderPacket.drawListMask.Reset();
 		renderPacket.views.Clear();
+		renderPacket.imageIndex = imageIndex;
 
 		HashMap<View*, DrawListMask> uniqueViews{};
 		for (const auto& [name, sceneViews] : viewsByTag)
@@ -151,6 +198,8 @@ namespace CE::RPI
 			view->UpdateSrg(imageIndex);
 		}
 
+		shaderResourceGroup->FlushBindings();
+
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
 			View* targetView = renderPipeline->view;
@@ -166,6 +215,7 @@ namespace CE::RPI
 						if (targetView != nullptr)
 						{
 							gpuPass->SetViewSrg(targetView->GetShaderResourceGroup());
+							gpuPass->SetSceneSrg(shaderResourceGroup);
 						}
 					}
 				});

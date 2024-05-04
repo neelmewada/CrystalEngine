@@ -20,6 +20,22 @@ namespace CE::RPI
 		
 		flags.initialized = true;
 
+		for (int i = 0; i < objectBuffers.GetSize(); ++i)
+		{
+			RHI::BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.name = "ObjectBuffer";
+			bufferDescriptor.bindFlags = BufferBindFlags::ConstantBuffer;
+			bufferDescriptor.bufferSize = sizeof(Matrix4x4);
+			bufferDescriptor.defaultHeapType = MemoryHeapType::Upload;
+			bufferDescriptor.structureByteStride = sizeof(Matrix4x4);
+
+			objectBuffers[i] = gDynamicRHI->CreateBuffer(bufferDescriptor);
+
+			Matrix4x4 defaultValue = Matrix4x4::Identity();
+
+			objectBuffers[i]->UploadData(&defaultValue, sizeof(defaultValue));
+		}
+
 		for (int i = 0; i < model->GetModelLodCount(); ++i)
 		{
 			BuildDrawPacketList(fp, i);
@@ -28,9 +44,14 @@ namespace CE::RPI
 
 	void ModelDataInstance::Deinit(StaticMeshFeatureProcessor* fp)
 	{
-		for (RHI::ShaderResourceGroup* srg : objectSrgList)
+		for (auto& objectBuffer : objectBuffers)
 		{
-			delete srg;
+			delete objectBuffer; objectBuffer = nullptr;
+		}
+
+		for (auto& srg : objectSrgList)
+		{
+			delete srg; srg = nullptr;
 		}
 
 		objectSrgList.Clear();
@@ -74,6 +95,14 @@ namespace CE::RPI
 			const auto& objectSrgLayout = material->GetCurrentOpaqueShader()->GetSrgLayout(SRGType::PerObject);
 
 			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
+
+			for (int j = 0; j < objectBuffers.GetSize(); ++j)
+			{
+				objectSrg->Bind(j, "_ObjectData", objectBuffers[j]);
+			}
+
+			objectSrg->FlushBindings();
+
 			objectSrgList.Add(objectSrg);
 
 			RPI::MeshDrawPacket& packet = drawPacketList.EmplaceBack(lod, modelLodIndex, objectSrg, material);
@@ -92,6 +121,11 @@ namespace CE::RPI
 				drawPacketsListByLod[i][j].Update(scene, forceUpdate);
 			}
 		}
+	}
+
+	void ModelDataInstance::UpdateSrgs(int imageIndex)
+	{
+		objectBuffers[imageIndex]->UploadData(&localToWorldTransform, sizeof(Matrix4x4));
 	}
 
 	ModelHandle StaticMeshFeatureProcessor::AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor, const CustomMaterialMap& materialMap)
@@ -167,17 +201,27 @@ namespace CE::RPI
 		auto parallelRanges = modelInstances.GetParallelRanges();
 
 		JobCompletion jobCompletion{};
+		int imageIndex = packet.imageIndex;
+
+		// - Enqueue Draw Packets to relevant views -
 
 		for (View* view : packet.views)
 		{
 			for (const auto& range : parallelRanges)
 			{
-				Job* jobFunction = new JobFunction([range, view](Job* job)
+				Job* jobFunction = new JobFunction([range, view, imageIndex](Job* job)
 					{
 						for (auto it = range.begin; it != range.end; ++it)
 						{
 							if (it->drawPacketsListByLod.IsEmpty())
 								continue;
+
+							it->UpdateSrgs(imageIndex);
+
+							for (RHI::ShaderResourceGroup* objectSrg : it->objectSrgList)
+							{
+								objectSrg->FlushBindings();
+							}
 
 							const auto& meshDrawPacketList = it->drawPacketsListByLod[0];
 							RHI::DrawPacket* drawPacket = meshDrawPacketList[0].GetDrawPacket();

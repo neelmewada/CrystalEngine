@@ -117,9 +117,16 @@ TEST(RPI, Scene)
 	gEngine->Initialize();
 	gEngine->PostInitialize();
 
-	CE::Shader* standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	AssetManager* assetManager = AssetManager::Get();
 
-	RPISystem::Get().PostInitialize(standardShader->GetShaderCollection());
+	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+
+	RPI::RPISystemInitInfo rpiInitInfo{};
+	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
+	rpiInitInfo.iblConvolutionShader = iblConvolutionShader->GetShaderCollection();
+
+	RPISystem::Get().PostInitialize(rpiInitInfo);
 
 	RendererSubsystem* rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
