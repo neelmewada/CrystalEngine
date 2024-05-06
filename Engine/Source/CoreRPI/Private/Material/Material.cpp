@@ -423,7 +423,8 @@ namespace CE::RPI
                             }
                             RHI::Sampler* sampler = texture->GetSamplerState();
                             Name samplerPropertyName = variable.name.GetString() + "Sampler";
-                            if (sampler != nullptr && (!properties.KeyExists(samplerPropertyName) || !properties[samplerPropertyName].IsOfType<RHI::Sampler*>()))
+                            if (sampler != nullptr && (!properties.KeyExists(samplerPropertyName) || !properties[samplerPropertyName].IsOfType<RHI::Sampler*>()) &&
+                                shaderResourceGroup->HasVariable(samplerPropertyName))
                             {
                                 shaderResourceGroup->Bind(imageIndex, samplerPropertyName, sampler);
                             }
@@ -455,7 +456,9 @@ namespace CE::RPI
                                 shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
                             }
                             RHI::Sampler* sampler = texture->GetSamplerState();
-                            if (sampler != nullptr)
+                            Name samplerPropertyName = variable.name.GetString() + "Sampler";
+                            if (sampler != nullptr && (!properties.KeyExists(samplerPropertyName) || !properties[samplerPropertyName].IsOfType<RHI::Sampler*>()) &&
+                                shaderResourceGroup->HasVariable(samplerPropertyName))
                             {
                                 shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "Sampler", sampler);
                             }

@@ -284,7 +284,8 @@ namespace CE
             if (indexInPage != Page::InvalidPage)
             {
                 T* item = firstAvailablePage->GetItem(indexInPage);
-                *item = value;
+                new (item) T(value);
+                //*item = value;
                 itemCount++;
                 return Handle(item, firstAvailablePage);
             }

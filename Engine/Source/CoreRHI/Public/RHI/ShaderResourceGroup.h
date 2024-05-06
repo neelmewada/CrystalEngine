@@ -12,6 +12,8 @@ namespace CE::RHI
 
 	public:
 
+		virtual bool HasVariable(const Name& variableName) = 0;
+
 		virtual bool Bind(Name name, RHI::BufferView bufferView) = 0;
 		virtual bool Bind(Name name, RHI::Texture* texture) = 0;
 		virtual bool Bind(Name name, RHI::TextureView* textureViews) = 0;

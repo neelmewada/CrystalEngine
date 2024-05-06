@@ -39,7 +39,11 @@ namespace CE
 
 		float GetFarPlane() const { return farPlane; }
 
+		void SetFarPlane(f32 value) { farPlane = value; }
+
     	float GetNearPlane() const { return nearPlane; }
+
+		void SetNearPlane(f32 value) { nearPlane = value; }
 
 		float GetFieldOfView() const { return fieldOfView; }
 

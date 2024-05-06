@@ -44,6 +44,8 @@ namespace CE::RPI
 
 	void ModelDataInstance::Deinit(StaticMeshFeatureProcessor* fp)
 	{
+		// TODO: Set objectBuffer destruction to queue instead of deleting it immediately
+
 		for (auto& objectBuffer : objectBuffers)
 		{
 			delete objectBuffer; objectBuffer = nullptr;

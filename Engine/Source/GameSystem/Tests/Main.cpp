@@ -148,7 +148,7 @@ TEST(RPI, Scene)
 	StaticMeshFeatureProcessor* meshFp = rpiScene->GetFeatureProcessor<StaticMeshFeatureProcessor>();
 	
 	{
-		StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMesh");
+		StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMeshActor");
 		scene->AddActor(meshActor);
 
 		StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
@@ -163,6 +163,9 @@ TEST(RPI, Scene)
 		}
 		meshComponent->SetStaticMesh(cubeMesh);
 
+		meshComponent->SetLocalPosition(Vec3(0, 0, 10));
+		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+
 		StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
 		{
 			RPI::ModelAsset* sphereModel = CreateObject<ModelAsset>(sphereMesh, "SphereModel");
@@ -171,23 +174,41 @@ TEST(RPI, Scene)
 
 			sphereMesh->SetModelAsset(sphereModel);
 		}
-		//meshComponent->SetStaticMesh(sphereMesh);
+		meshComponent->SetStaticMesh(sphereMesh);
 
-		meshComponent->SetLocalPosition(Vec3(0, 0, 10));
-		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
+		scene->AddActor(skyboxActor);
+
+		StaticMeshComponent* skyboxMeshComponent = skyboxActor->GetMeshComponent();
+		skyboxMeshComponent->SetStaticMesh(sphereMesh);
+
+		skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
+		skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 800);
 		
-		CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
-		material->SetShader(standardShader);
-		meshComponent->SetMaterial(material, 0, 0);
+		{
+			CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
+			material->SetShader(standardShader);
+			meshComponent->SetMaterial(material, 0, 0);
 
-		material->SetProperty("_AlbedoTex", albedoTex);
-		material->SetProperty("_NormalTex", normalTex);
-		material->SetProperty("_MetallicTex", metallicTex);
-		material->SetProperty("_RoughnessTex", roughnessTex);
-		material->ApplyProperties();
+			material->SetProperty("_AlbedoTex", albedoTex);
+			material->SetProperty("_NormalTex", normalTex);
+			material->SetProperty("_MetallicTex", metallicTex);
+			material->SetProperty("_RoughnessTex", roughnessTex);
+			material->ApplyProperties();
+		}
+
+		{
+			CE::Material* skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Material");
+			skyboxMaterial->SetShader(skyboxShader);
+			skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
+
+			skyboxMaterial->SetProperty("_CubeMap", skybox);
+			skyboxMaterial->ApplyProperties();
+		}
 
 		CameraComponent* cameraComponent = CreateObject<CameraComponent>(meshComponent, "Camera");
 		cameraComponent->SetLocalPosition(Vec3(0, 0, -10));
+		cameraComponent->SetFarPlane(500);
 		meshComponent->SetupAttachment(cameraComponent);
 
 		clock_t lastTime = clock();
@@ -205,6 +226,15 @@ TEST(RPI, Scene)
 			if (InputManager::IsKeyDown(KeyCode::Escape))
 			{
 				RequestEngineExit("USER_EXIT");
+			}
+
+			if (InputManager::IsKeyDown(KeyCode::A))
+			{
+				meshComponent->SetStaticMesh(cubeMesh);
+			}
+			else if (InputManager::IsKeyDown(KeyCode::S))
+			{
+				meshComponent->SetStaticMesh(sphereMesh);
 			}
 
 			app->Tick();

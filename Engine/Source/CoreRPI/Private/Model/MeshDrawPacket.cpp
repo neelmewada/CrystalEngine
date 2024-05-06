@@ -66,6 +66,9 @@ namespace CE::RPI
 		}
 		perDrawSrgs.Clear();
 
+		auto opaqueTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque);
+		auto transparentTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Transparent);
+
 		for (int i = 0; i < shaderCollection->GetSize(); i++)
 		{
 			const ShaderCollection::Item& shaderItem = shaderCollection->At(i);
@@ -108,8 +111,9 @@ namespace CE::RPI
 				drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			}
 
-			if (drawListTag == RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque) ||
-				drawListTag == RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Transparent))
+			if (drawListTag == opaqueTag ||
+				drawListTag == transparentTag ||
+				material->GetCurrentShader() == shader)
 			{
 				drawItem.uniqueShaderResourceGroups.Add(material->GetShaderResourceGroup());
 			}

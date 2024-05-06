@@ -361,6 +361,11 @@ namespace CE::Vulkan
 		pool = device->GetDescriptorPool();
 	}
 
+	bool ShaderResourceGroup::HasVariable(const Name& variableName)
+	{
+		return bindingSlotsByVariableName.KeyExists(variableName);
+	}
+
 	bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
 	{
 		if (!bufferView.GetBuffer())
