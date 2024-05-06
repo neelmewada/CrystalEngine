@@ -23,5 +23,12 @@ namespace CE
 		return owner != nullptr ? owner->GetScene() : nullptr;
 	}
 
+	bool ActorComponent::IsEnabled() const
+	{
+		if (!owner)
+			return isEnabled;
+
+		return isEnabled && owner->IsEnabled();
+	}
 } // namespace CE
 

@@ -79,6 +79,7 @@ namespace CE::RPI
 #include "CubeMap/CubeMapProcessor.h"
 #include "Material/MaterialProperty.h"
 #include "Material/Material.h"
+#include "Material/MaterialSystem.h"
 #include "TextureAsset.h"
 
 #include "Shader/ShaderResourceGroup.h"

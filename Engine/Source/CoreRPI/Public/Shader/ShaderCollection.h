@@ -36,6 +36,10 @@ namespace CE::RPI
 
 		void Clear() { items.Clear(); }
 
+		bool HasItem(RHI::DrawListTag drawListTag);
+
+		RPI::Shader* GetShader(RHI::DrawListTag drawListTag);
+
 		const Item& At(SIZE_T index) const
 		{
 			return items[index];

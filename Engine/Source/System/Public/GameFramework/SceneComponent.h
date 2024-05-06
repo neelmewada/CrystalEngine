@@ -11,7 +11,9 @@ namespace CE
 
 		// - Public API -
 
-		bool IsSceneComponent() const override final { return true; }
+		bool IsSceneComponent() const final { return true; }
+
+		bool IsEnabled() const final;
 
 		/// @brief Add the passed scene component as a child of receiving scene component.
 		/// @param component: Component to add as child.
@@ -44,9 +46,11 @@ namespace CE
 
 		const Matrix4x4& GetLocalTransform() const { return localTransform; }
 
-		Vec3 GetForwardVector() const { return forwardVector; }
+		const Vec3& GetForwardVector() const { return forwardVector; }
 
-		Vec3 GetUpwardVector() const { return upwardVector; }
+		const Vec3& GetUpwardVector() const { return upwardVector; }
+
+		const Vec3& GetRightwardVector() const { return rightwardVector; }
 
     protected:
 
@@ -83,6 +87,9 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Vec3 upwardVector{};
+
+		FIELD(ReadOnly)
+		Vec3 rightwardVector{};
 
 		b8 isDirty = true;
 

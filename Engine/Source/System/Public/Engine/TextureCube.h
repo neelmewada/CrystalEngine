@@ -16,17 +16,11 @@ namespace CE
 
         RPI::Texture* CloneRpiTexture() override;
 
-        TextureDimension GetDimension() override
-        {
-            return TextureDimension::TexCube;
-        }
+        TextureDimension GetDimension() override { return TextureDimension::TexCube; }
 
-        inline TextureCube* GetDiffuseConvolution() const { return diffuseConvolution; }
+        TextureCube* GetDiffuseConvolution() const { return diffuseConvolution; }
 
-        u32 GetArrayLayers() const override
-        {
-            return 6;
-        }
+        u32 GetArrayLayers() const override { return 6; }
 
     private:
 

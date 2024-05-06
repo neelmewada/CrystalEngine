@@ -92,7 +92,7 @@ namespace CE::RPI
 				}
 			}
 
-			const auto& objectSrgLayout = material->GetCurrentOpaqueShader()->GetSrgLayout(SRGType::PerObject);
+			const auto& objectSrgLayout = material->GetCurrentShader()->GetDefaultVariant()->GetSrgLayout(SRGType::PerObject);
 
 			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
 

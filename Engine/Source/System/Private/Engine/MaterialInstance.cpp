@@ -160,7 +160,6 @@ namespace CE
         if (materialOverride == nullptr && baseMaterial != nullptr)
         {
             materialOverride = new RPI::Material(baseMaterial->GetRpiMaterial()->GetShaderCollection());
-            materialOverride->SelectVariant(baseMaterial->GetRpiMaterial()->GetCurrentVariantIndex());
         }
     }
 
@@ -169,7 +168,6 @@ namespace CE
         if (materialOverride == nullptr && baseMaterial != nullptr)
         {
             materialOverride = new RPI::Material(baseMaterial->GetRpiMaterial()->GetShaderCollection());
-            materialOverride->SelectVariant(baseMaterial->GetRpiMaterial()->GetCurrentVariantIndex());
         }
 
         if (materialOverride == nullptr)

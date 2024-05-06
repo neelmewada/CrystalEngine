@@ -26,7 +26,9 @@ namespace CE
 
 		CE::Scene* GetScene() const;
 
-		bool IsEnabled() const { return isEnabled; }
+		virtual bool IsEnabled() const;
+
+		bool IsSelfEnabled() const { return isEnabled; }
 
 		void SetEnabled(bool enabled) { isEnabled = enabled; }
 

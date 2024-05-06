@@ -44,6 +44,7 @@ static void TestBegin(bool gui)
 	{
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+		windowInfo.resizable = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
 		app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
@@ -120,7 +121,14 @@ TEST(RPI, Scene)
 	AssetManager* assetManager = AssetManager::Get();
 
 	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+	CE::TextureCube* skybox = assetManager->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
+
+	CE::Texture* albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
+	CE::Texture* normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
+	CE::Texture* metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
+	CE::Texture* roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
 
 	RPI::RPISystemInitInfo rpiInitInfo{};
 	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
@@ -134,6 +142,8 @@ TEST(RPI, Scene)
 	CE::Scene* scene = sceneSubsystem->GetActiveScene();
 	RPI::Scene* rpiScene = scene->GetRpiScene();
 
+	scene->SetSkyboxCubeMap(skybox);
+
 	TestFeatureProcessor1* fp1 = rpiScene->AddFeatureProcessor<TestFeatureProcessor1>();
 	StaticMeshFeatureProcessor* meshFp = rpiScene->GetFeatureProcessor<StaticMeshFeatureProcessor>();
 	
@@ -143,7 +153,7 @@ TEST(RPI, Scene)
 
 		StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
 
-		StaticMesh* cubeMesh = CreateObject<StaticMesh>(meshComponent, "StaticMesh");
+		StaticMesh* cubeMesh = CreateObject<StaticMesh>(scene, "StaticMesh");
 		{
 			RPI::ModelAsset* cubeModel = CreateObject<ModelAsset>(cubeMesh, "CubeModel");
 			RPI::ModelLodAsset* cubeLodAsset = RPI::ModelLodAsset::CreateCubeAsset(cubeModel);
@@ -153,59 +163,71 @@ TEST(RPI, Scene)
 		}
 		meshComponent->SetStaticMesh(cubeMesh);
 
-		meshComponent->SetLocalPosition(Vec3(0, 0, 10));
+		StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
+		{
+			RPI::ModelAsset* sphereModel = CreateObject<ModelAsset>(sphereMesh, "SphereModel");
+			RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
+			sphereModel->AddModelLod(sphereLodAsset);
 
+			sphereMesh->SetModelAsset(sphereModel);
+		}
+		//meshComponent->SetStaticMesh(sphereMesh);
+
+		meshComponent->SetLocalPosition(Vec3(0, 0, 10));
+		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		
 		CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
 		material->SetShader(standardShader);
 		meshComponent->SetMaterial(material, 0, 0);
 
-		SceneComponent* subComponent = CreateObject<SceneComponent>(meshComponent, "SubComponent");
-		meshComponent->SetupAttachment(subComponent);
+		material->SetProperty("_AlbedoTex", albedoTex);
+		material->SetProperty("_NormalTex", normalTex);
+		material->SetProperty("_MetallicTex", metallicTex);
+		material->SetProperty("_RoughnessTex", roughnessTex);
+		material->ApplyProperties();
 
 		CameraComponent* cameraComponent = CreateObject<CameraComponent>(meshComponent, "Camera");
 		cameraComponent->SetLocalPosition(Vec3(0, 0, -10));
 		meshComponent->SetupAttachment(cameraComponent);
 
 		clock_t lastTime = clock();
-		constexpr int LoopCount = 32;
+		constexpr u32 LoopCount = 256;
+		u32 frameCounter = 0;
 
-		auto tick = [&]()
-			{
-				auto curTime = clock();
-				f32 deltaTime = ((f32)(curTime - lastTime)) / CLOCKS_PER_SEC;
+		f32 rotation = 0.0f;
+		f32 camPos = cameraComponent->GetLocalPosition().z;
 
-				app->Tick();
-				InputManager::Get().Tick();
-
-				gEngine->Tick(deltaTime);
-
-				lastTime = curTime;
-			};
-
-		for (int i = 0; i < LoopCount; i++)
+		while (!IsEngineRequestingExit())
 		{
-			tick();
+			auto curTime = clock();
+			f32 deltaTime = ((f32)(curTime - lastTime)) / CLOCKS_PER_SEC;
+
+			if (InputManager::IsKeyDown(KeyCode::Escape))
+			{
+				RequestEngineExit("USER_EXIT");
+			}
+
+			app->Tick();
+			InputManager::Get().Tick();
+
+			rotation += deltaTime * 30;
+			if (rotation > 360)
+				rotation -= 360;
+			camPos += deltaTime * 2;
+			if (camPos > 0)
+				camPos = -10;
+
+			meshComponent->SetLocalEulerAngles(Vec3(0, 0, rotation));
+			cameraComponent->SetLocalPosition(Vec3(0, 0, -2));
+			//cameraComponent->SetLocalEulerAngles(Vec3(0, 0, rotation));
+			
+			gEngine->Tick(deltaTime);
+
+			lastTime = curTime;
+
+			frameCounter++;
 		}
 
-		HashSet<ActorComponent*> allComponents{};
-
-		scene->IterateAllComponents<ActorComponent>([&](ActorComponent* actorComponent)
-		{
-			allComponents.Add(actorComponent);
-		});
-		EXPECT_EQ(allComponents.GetSize(), 3);
-
-		allComponents.Clear();
-
-		meshComponent->DetachComponent(subComponent);
-
-		scene->IterateAllComponents<ActorComponent>([&](ActorComponent* actorComponent)
-			{
-				allComponents.Add(actorComponent);
-			});
-		EXPECT_EQ(allComponents.GetSize(), 2);
-
-		subComponent->Destroy();
 	}
 
 	gEngine->PreShutdown();

@@ -22,7 +22,6 @@ namespace CE::RPI
 	{
 		RPI::ShaderCollection* standardShader = nullptr;
 		RPI::ShaderCollection* iblConvolutionShader = nullptr;
-		
 	};
 
 	/// @brief RPISystem owns and manages all scenes.

@@ -51,11 +51,11 @@ namespace CE
 
 	void Engine::PreShutdown()
 	{
-		if (assetManager)
-			assetManager->Shutdown();
-		
 		for (auto subsystem : engineSubsystems) // PreShutdown
 			subsystem->PreShutdown();
+
+		if (assetManager)
+			assetManager->Shutdown();
 	}
 
 	void Engine::Shutdown()
@@ -72,6 +72,11 @@ namespace CE
 
 	void Engine::Tick(f32 deltaTime)
 	{
+		if (IsEngineRequestingExit())
+		{
+			return;
+		}
+
 		if (assetManager)
 			assetManager->Tick(deltaTime);
 

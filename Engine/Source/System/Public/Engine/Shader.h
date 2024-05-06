@@ -161,6 +161,8 @@ namespace CE
 
 		RPI::ShaderCollection* GetShaderCollection();
 
+		const Array<ShaderPropertyEntry>& GetProperties() const { return properties; }
+
 	protected:
 
 		SubShader* GetSubshader();

@@ -175,6 +175,19 @@ namespace CE
 			CompileFrameGraph();
 		}
 
+		CE::Scene* scene = sceneSubsystem->GetActiveScene();
+		RPI::Scene* rpiScene = scene->GetRpiScene();
+		bool isSceneWindowActive = true;
+
+		if (scene->mainRenderWindow != nullptr)
+		{
+			CPlatformWindow* nativeWindow = scene->mainRenderWindow->GetNativeWindow();
+			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
+			{
+				isSceneWindowActive = false;
+			}
+		}
+
 		curImageIndex = scheduler->BeginExecution();
 
 		if (curImageIndex >= RHI::Limits::MaxSwapChainImageCount)
@@ -182,9 +195,6 @@ namespace CE
 			rebuildFrameGraph = recompileFrameGraph = true;
 			return;
 		}
-
-		CE::Scene* scene = sceneSubsystem->GetActiveScene();
-		RPI::Scene* rpiScene = scene->GetRpiScene();
 
 		// ---------------------------------------------------------
 		// - Enqueue draw packets to views
@@ -245,22 +255,25 @@ namespace CE
 			app->FlushDrawPackets(drawList, curImageIndex);
 		}
 
-		for (const auto& [viewTag, views] : rpiScene->GetViews())
-		{
-			for (View* view : views.views)
-			{
-				view->GetDrawListContext()->Finalize();
+		if (isSceneWindowActive)
+	    {
+		    for (const auto& [viewTag, views] : rpiScene->GetViews())
+		    {
+		    	for (View* view : views.views)
+		    	{
+		    		view->GetDrawListContext()->Finalize();
 
-				for (const auto& drawListTag : drawListTags)
-				{
-					DrawList& viewDrawList = view->GetDrawList(drawListTag);
-					for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
-					{
-						drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
-					}
-				}
-			}
-		}
+		    		for (const auto& drawListTag : drawListTags)
+		    		{
+		    			DrawList& viewDrawList = view->GetDrawList(drawListTag);
+		    			for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
+		    			{
+		    				drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
+		    			}
+		    		}
+		    	}
+		    }
+	    }
 
 		drawList.Finalize();
 
@@ -271,7 +284,7 @@ namespace CE
 			app->SubmitDrawPackets(drawList);
 		}
 
-		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+		for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
 			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
 			if (!renderPipeline)
@@ -303,6 +316,17 @@ namespace CE
     	
     	CE::Scene* scene = sceneSubsystem->GetActiveScene();
 
+		bool isSceneWindowActive = true;
+
+		if (scene->mainRenderWindow != nullptr)
+		{
+			CPlatformWindow* nativeWindow = scene->mainRenderWindow->GetNativeWindow();
+			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
+			{
+				isSceneWindowActive = false;
+			}
+		}
+
 		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
 		RPISystem::Get().SimulationTick(curImageIndex);
 		RPISystem::Get().RenderTick(curImageIndex);
@@ -315,37 +339,40 @@ namespace CE
 			{
 				app->BuildFrameAttachments();
 
-				for (CameraComponent* camera : scene->cameras)
+				if (isSceneWindowActive)
 				{
-					CWindow* renderWindow = camera->renderWindow;
-					if (renderWindow && renderWindow->GetCurrentNativeWindow())
+					for (CameraComponent* camera : scene->cameras)
 					{
-						CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
-						PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
-
-						for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+						CWindow* renderWindow = camera->renderWindow;
+						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
-							RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
-							const auto& attachments = rpiPipeline->attachments;
+							CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
+							PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
 
-							for (PassAttachment* passAttachment : attachments)
+							for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
 							{
-								if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
-								{
-									passAttachment->attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
-								}
-								else
-								{
-									passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
-								}
-							}
+								RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+								const auto& attachments = rpiPipeline->attachments;
 
-							rpiPipeline->ImportScopeProducers(scheduler);
+								for (PassAttachment* passAttachment : attachments)
+								{
+									if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+									{
+										passAttachment->attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
+									}
+									else
+									{
+										passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+									}
+								}
+
+								rpiPipeline->ImportScopeProducers(scheduler);
+							}
 						}
-					}
-					else if (renderWindow)
-					{
-						// TODO: Scene is rendered into a viewport (NOT a SwapChain)
+						else if (renderWindow)
+						{
+							// TODO: Scene is rendered into a viewport (NOT a SwapChain)
+						}
 					}
 				}
 

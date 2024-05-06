@@ -99,6 +99,20 @@ namespace CE
 		renderPipelines.Remove(renderPipeline);
 	}
 
+	void CE::Scene::SetSkyboxCubeMap(TextureCube* cubeMap)
+	{
+		skyboxCubeMap = cubeMap;
+		if (rpiScene && skyboxCubeMap)
+		{
+			TextureCube* diffuseIrradiance = skyboxCubeMap->GetDiffuseConvolution();
+			RPI::Texture* diffuseIrradianceRpi = nullptr;
+			if (diffuseIrradiance)
+				diffuseIrradianceRpi = diffuseIrradiance->GetRpiTexture();
+
+			rpiScene->SetSkyboxCubeMap(skyboxCubeMap->GetRpiTexture(), diffuseIrradianceRpi);
+		}
+	}
+
 	void CE::Scene::OnActorChainAttached(Actor* actor)
 	{
 		if (!actor)

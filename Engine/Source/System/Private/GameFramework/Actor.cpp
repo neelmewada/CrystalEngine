@@ -155,4 +155,12 @@ namespace CE
 		}
     }
 
+	bool Actor::IsEnabled() const
+	{
+		if (!parent)
+			return isEnabled;
+
+		return isEnabled && parent->IsEnabled();
+	}
+
 } // namespace CE

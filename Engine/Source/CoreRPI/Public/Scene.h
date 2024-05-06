@@ -7,6 +7,7 @@ class RPI_Scene_Test;
 namespace CE::RPI
 {
 	class FeatureProcessor;
+	class Texture;
 
 	class CORERPI_API Scene final
 	{
@@ -71,6 +72,8 @@ namespace CE::RPI
 		void GetPipelineMultiSampleState(RHI::DrawListTag drawListTag, RHI::MultisampleState& multisampleState);
 
 		void RebuildPipelineLookupTable();
+
+		void SetSkyboxCubeMap(RPI::Texture* skyboxCubeMap, RPI::Texture* skyboxIrradiance);
 		
 	private:
 
@@ -84,6 +87,9 @@ namespace CE::RPI
 
 		FeatureProcessor::SimulatePacket simulatePacket{};
 		FeatureProcessor::RenderPacket renderPacket{};
+
+		RPI::Texture* skyboxCubeMap = nullptr;
+		RPI::Texture* skyboxIrradiance = nullptr;
 
 		// - Temporary Lighting data -
 

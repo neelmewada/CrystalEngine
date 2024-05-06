@@ -21,6 +21,15 @@ namespace CE::RPI
 			return variants[index]; 
 		}
 
+		RPI::ShaderVariant* GetDefaultVariant() const { return GetVariant(GetDefaultVariantIndex()); }
+
+		RHI::PipelineState* GetDefaultPipeline() const
+		{
+			RPI::ShaderVariant* variant = GetDefaultVariant();
+
+			return variant->GetPipeline();
+		}
+
 		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor2& variantDesc);
 
 		inline u32 GetDefaultVariantIndex() const { return defaultVariantIndex; }

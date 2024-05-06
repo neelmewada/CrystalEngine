@@ -40,7 +40,13 @@ namespace CE
 		static Quat FromToRotation(const Vec3& from, const Vec3& to);
 
 		static Quat LookRotation(const Vec3& lookAt);
+
+		// Use LookRotation2 instead.
 		static Quat LookRotation(const Vec3& lookAt, const Vec3& upDirection);
+
+		// New LookRotation function. Do not use old one.
+		static Quat LookRotation2(const Vec3& forward, const Vec3& up);
+
 		static Quat Slerp(const Quat& from, const Quat& to, float t);
 		static Quat Lerp(const Quat& from, const Quat& to, float t);
 		static float Angle(const Quat& a, const Quat& b);
@@ -50,6 +56,9 @@ namespace CE
 		static Quat EulerDegrees(float x, float y, float z);
 		static Quat EulerRadians(float x, float y, float z);
 		static Matrix4x4 ToMatrix(const Quat& q);
+
+		Vec3 ToEulerRadians() const;
+		Vec3 ToEulerDegrees() const;
 
 		inline f32 GetSqrMagnitude() const
 		{

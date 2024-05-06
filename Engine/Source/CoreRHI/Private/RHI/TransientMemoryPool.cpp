@@ -23,8 +23,10 @@ namespace CE::RHI
 
 		if (bufferPool)
 			delete bufferPool;
+		bufferPool = nullptr;
 		if (imagePool)
 			delete imagePool;
+		imagePool = nullptr;
 	}
 
     void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, 
@@ -73,6 +75,7 @@ namespace CE::RHI
 			if (imagePool)
 			{
 				RHI::gDynamicRHI->FreeMemoryHeap(imagePool);
+				imagePool = nullptr;
 			}
 
 			*imagePoolRecreated = true;

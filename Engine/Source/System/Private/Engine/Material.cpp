@@ -27,7 +27,7 @@ namespace CE
         shaderCollection = shader->GetShaderCollection();
 
         this->shader = shader;
-        auto newMaterial = new RPI::Material(shader->GetShaderCollection());
+        auto newMaterial = new RPI::Material(shaderCollection);
 
         if (material)
         {
@@ -38,6 +38,66 @@ namespace CE
         }
 
         this->material = newMaterial;
+
+        propertyMap.Clear();
+
+        for (const auto& prop : properties)
+        {
+            propertyMap[prop.name] = prop;
+        }
+
+        const auto& shaderDefaults = shader->GetProperties();
+
+        for (const auto& defaultProp : shaderDefaults)
+        {
+	        if (!propertyMap.KeyExists(defaultProp.name))
+	        {
+                MaterialProperty property{};
+
+		        switch (defaultProp.propertyType)
+		        {
+		        case ShaderPropertyType::UInt:
+                    property.propertyType = MaterialPropertyType::UInt;
+                    property.u32Value = (u32)defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Int:
+                    property.propertyType = MaterialPropertyType::Int;
+                    property.s32Value = (s32)defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Float:
+                    property.propertyType = MaterialPropertyType::Float;
+                    property.floatValue = defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Color:
+                    property.propertyType = MaterialPropertyType::Color;
+                    property.colorValue = defaultProp.defaultVectorValue;
+			        break;
+		        case ShaderPropertyType::Vector:
+                    property.propertyType = MaterialPropertyType::Vector;
+                    property.vectorValue = defaultProp.defaultVectorValue;
+			        break;
+		        case ShaderPropertyType::Tex2D:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::Tex3D:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::TexCube:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::None:
+                    continue;
+		        }
+
+                property.name = defaultProp.name;
+
+                properties.Add(property);
+                propertyMap[property.name] = property;
+	        }
+        }
     }
 
     void CE::Material::SetCustomPass(u32 passIndex)
@@ -48,7 +108,7 @@ namespace CE
         if (material)
         {
             this->passIndex = passIndex;
-            material->SetCustomShaderItem(passIndex);
+            material->SetCurrentShaderItem(passIndex);
         }
     }
 
@@ -71,12 +131,14 @@ namespace CE
 
             SetShader(resetShader);
         }
-
-        propertyMap.Clear();
-
-        for (const auto& prop : properties)
+        else
         {
-            propertyMap[prop.name] = prop;
+            propertyMap.Clear();
+
+            for (const auto& prop : properties)
+            {
+                propertyMap[prop.name] = prop;
+            }
         }
     }
 

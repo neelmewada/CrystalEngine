@@ -25,6 +25,18 @@ namespace CE
         CE_STRUCT(MaterialTextureValue)
     public:
 
+        MaterialTextureValue() = default;
+
+        MaterialTextureValue(const Name& textureName) : textureName(textureName)
+        {}
+
+        MaterialTextureValue(CE::Texture* texture, Vec2 offset = Vec2(0, 0), Vec2 scaling = Vec2(1, 1))
+	        : texture(texture), offset(offset), scaling(scaling)
+        {}
+
+        FIELD()
+        Name textureName = "";
+
         FIELD()
         CE::Texture* texture = nullptr;
 

@@ -28,13 +28,13 @@ namespace CE::RPI
 
 		void SetShaderCollection(ShaderCollection* shaderCollection);
 
+		void SetDefaultShaderItem(int shaderItem);
+
 		Shader* GetOpaqueShader() const;
 
-		ShaderVariant* GetCurrentOpaqueShader();
+		Shader* GetCurrentShader();
 
-		inline u32 GetCurrentVariantIndex() const { return shaderVariantIndex; }
-
-		void SelectVariant(u32 variantIndex);
+		//ShaderVariant* GetCurrentOpaqueShader();
         
         void FlushProperties(u32 imageIndex);
 
@@ -51,9 +51,9 @@ namespace CE::RPI
         
 		void ClearAllValues();
 
-		void SetCustomShaderItem(int customItemIndex);
+		void SetCurrentShaderItem(int itemIndex);
 
-		RPI::Shader* GetCustomShaderItem();
+		RPI::Shader* GetCurrentShaderItem();
 
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
 
@@ -91,14 +91,14 @@ namespace CE::RPI
 
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
-		bool ownsShaderCollection = false;
-		ShaderCollection* shaderCollection = nullptr;
+		bool ownsShaderCollection;
+		ShaderCollection* shaderCollection;
 
-		RPI::Shader* opaqueShader = nullptr;
+		RPI::Shader* currentShader = nullptr;
 
-		u32 shaderVariantIndex = 0;
+		//u32 shaderVariantIndex = 0;
 
-		int customShaderItem = -1;
+		int currentShaderItem = -1;
 
 		friend class MaterialInstance;
 		friend class MaterialInterface;

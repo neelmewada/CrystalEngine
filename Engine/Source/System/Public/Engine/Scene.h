@@ -71,6 +71,8 @@ namespace CE
 		void AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera);
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
+		void SetSkyboxCubeMap(TextureCube* cubeMap);
+
 	private:
 
 		// - Internal API -
@@ -96,6 +98,9 @@ namespace CE
 
 		FIELD()
 		CWindow* mainRenderWindow = nullptr;
+
+		FIELD()
+		TextureCube* skyboxCubeMap = nullptr;
 		
 	private:
 

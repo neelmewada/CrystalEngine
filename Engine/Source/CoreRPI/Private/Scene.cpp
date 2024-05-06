@@ -13,6 +13,8 @@ namespace CE::RPI
 
 	Scene::~Scene()
 	{
+		RHI::FrameScheduler::Get()->WaitUntilIdle();
+
 		if (shaderResourceGroup)
 		{
 			delete shaderResourceGroup; shaderResourceGroup = nullptr;
@@ -156,6 +158,27 @@ namespace CE::RPI
 			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 
 			shaderResourceGroup->Bind("_DefaultSampler", RPISystem::Get().FindOrCreateSampler(samplerDesc));
+
+			shaderResourceGroup->Bind("_BrdfLut", RPISystem::Get().GetBrdfLutTexture()->GetRhiTexture());
+
+			RHI::SamplerDescriptor skyboxSamplerDesc{};
+			skyboxSamplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueWhite;
+			skyboxSamplerDesc.addressModeU = skyboxSamplerDesc.addressModeV = skyboxSamplerDesc.addressModeW = RHI::SamplerAddressMode::Repeat;
+			skyboxSamplerDesc.enableAnisotropy = false;
+			skyboxSamplerDesc.maxAnisotropy = 0;
+			skyboxSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+			RHI::Sampler* skyboxSampler = RPISystem::Get().FindOrCreateSampler(skyboxSamplerDesc);
+
+			if (skyboxCubeMap)
+			{
+				shaderResourceGroup->Bind("_Skybox", skyboxCubeMap->GetRhiTexture());
+				shaderResourceGroup->Bind("_SkyboxSampler", skyboxSampler);
+			}
+
+			if (skyboxIrradiance)
+			{
+				shaderResourceGroup->Bind("_SkyboxIrradiance", skyboxIrradiance->GetRhiTexture());
+			}
 		}
 
 		shaderResourceGroup->FlushBindings();
@@ -342,6 +365,12 @@ namespace CE::RPI
 					}
 				});
 		}
+	}
+
+	void Scene::SetSkyboxCubeMap(RPI::Texture* skyboxCubeMap, RPI::Texture* skyboxIrradiance)
+	{
+		this->skyboxCubeMap = skyboxCubeMap;
+		this->skyboxIrradiance = skyboxIrradiance;
 	}
 
 } // namespace CE::RPI

@@ -46,6 +46,7 @@ namespace CE
         }
     }
 
+
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);
@@ -63,8 +64,9 @@ namespace CE
             }
 
             Vec3 lookDir = GetForwardVector();
-
-            viewMatrix = Quat::LookRotation(lookDir).ToMatrix() * Matrix4x4::Translation(-GetPosition());
+            Vec3 upDir = GetUpwardVector();
+            
+            viewMatrix = Quat::LookRotation2(lookDir, upDir).ToMatrix() * Matrix4x4::Translation(-GetPosition());
         }
     }
 

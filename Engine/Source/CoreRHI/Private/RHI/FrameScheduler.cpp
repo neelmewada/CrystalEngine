@@ -28,10 +28,10 @@ namespace CE::RHI
 			frameSchedulerInstance = nullptr;
 		}
 
-		delete executer;
-		delete compiler;
-        delete transientMemoryPool;
-		delete frameGraph;
+		delete executer; executer = nullptr;
+		delete compiler; compiler = nullptr;
+		delete transientMemoryPool; transientMemoryPool = nullptr;
+		delete frameGraph; frameGraph = nullptr;
 	}
 
 	void FrameScheduler::BeginFrameGraph()

@@ -177,8 +177,12 @@ namespace CE::RPI
 			delete brdfLutRTB;
         );
 
-        auto gfxQueue = gDynamicRHI->GetPrimaryGraphicsQueue();
-        auto cmdList = gDynamicRHI->AllocateCommandList(gfxQueue);
+        auto queue = gDynamicRHI->GetPrimaryGraphicsQueue();
+        auto cmdList = gDynamicRHI->AllocateCommandList(queue);
+        auto fence = gDynamicRHI->CreateFence(false);
+
+        const auto& fullscreenQuad = GetFullScreenQuad();
+        const auto& fullscreenQuadArgs = GetFullScreenQuadDrawArgs();
 
         AttachmentClearValue clearValue{ .clearValue = Vec4(0, 0, 0, 0) };
 
@@ -209,7 +213,7 @@ namespace CE::RPI
                 scissorState.height = viewportState.height;
                 cmdList->SetScissors(1, &scissorState);
 
-                cmdList->BindPipelineState(brdfGenMaterial->GetCurrentOpaqueShader()->GetPipeline());
+                cmdList->BindPipelineState(shaderVariant->GetPipeline());
 
                 cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
 
@@ -220,11 +224,14 @@ namespace CE::RPI
             barrier.resource = brdfLut;
             barrier.fromState = RHI::ResourceState::ColorOutput;
             barrier.toState = RHI::ResourceState::FragmentShaderResource;
-            barrier.subresourceRange = RHI::SubresourceRange::All();
             cmdList->ResourceBarrier(1, &barrier);
         }
         cmdList->End();
 
+        queue->Execute(1, &cmdList, fence);
+        fence->WaitForFence();
+
+        gDynamicRHI->DestroyFence(fence); fence = nullptr;
         gDynamicRHI->FreeCommandLists(1, &cmdList);
     }
 
@@ -288,6 +295,8 @@ namespace CE::RPI
 
     void RPISystem::RenderTick(u32 imageIndex)
     {
+        MaterialSystem::Get().Update(imageIndex);
+
         for (Scene* scene : scenes)
         {
             scene->PrepareRender(currentTime, imageIndex);

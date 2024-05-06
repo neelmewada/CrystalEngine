@@ -24,7 +24,6 @@ namespace CE::RPI
 		textQuadDrawArgs = RPISystem::Get().GetTextQuadDrawArgs();
 
 		defaultMaterial = new RPI::Material(drawShader);
-		defaultMaterial->SelectVariant(drawShader->GetDefaultVariantIndex());
 
 		ShaderVariant* drawShaderVariant = drawShader->GetVariant(drawShader->GetDefaultVariantIndex());
 
