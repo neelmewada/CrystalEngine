@@ -87,7 +87,7 @@ namespace CE
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 		SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
-		CE::Scene* activeScene = sceneSubsystem->GetActiveScene();
+		CE::Scene* activeScene = sceneSubsystem->GetMainScene();
 
 		if (mainWindow)
 		{
@@ -175,7 +175,7 @@ namespace CE
 			CompileFrameGraph();
 		}
 
-		CE::Scene* scene = sceneSubsystem->GetActiveScene();
+		CE::Scene* scene = sceneSubsystem->GetMainScene();
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 		bool isSceneWindowActive = true;
 
@@ -314,7 +314,7 @@ namespace CE
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
     	
-    	CE::Scene* scene = sceneSubsystem->GetActiveScene();
+    	CE::Scene* scene = sceneSubsystem->GetMainScene();
 
 		bool isSceneWindowActive = true;
 

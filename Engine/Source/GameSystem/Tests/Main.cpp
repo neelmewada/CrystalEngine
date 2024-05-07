@@ -139,7 +139,7 @@ TEST(RPI, Scene)
 	RendererSubsystem* rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-	CE::Scene* scene = sceneSubsystem->GetActiveScene();
+	CE::Scene* scene = sceneSubsystem->GetMainScene();
 	RPI::Scene* rpiScene = scene->GetRpiScene();
 
 	scene->SetSkyboxCubeMap(skybox);

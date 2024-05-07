@@ -11,7 +11,7 @@ namespace CE
 	public:
 		SceneSubsystem();
 
-		CE::Scene* GetActiveScene() { return scene; }
+		CE::Scene* GetMainScene() { return mainScene; }
 
 	protected:
 
@@ -23,7 +23,7 @@ namespace CE
 		void Tick(f32 deltaTime) override;
 
 		FIELD()
-		CE::Scene* scene = nullptr;
+		CE::Scene* mainScene = nullptr;
 
     private:
 

@@ -192,9 +192,9 @@ void GameLoop::RunLoop()
 
 		// - Render -
 		viewport->SetClearColor(Color::Black());
-		if (sceneSubsystem && sceneSubsystem->GetActiveScene() != nullptr)
+		if (sceneSubsystem && sceneSubsystem->GetMainScene() != nullptr)
 		{
-			CameraComponent* mainCamera = sceneSubsystem->GetActiveScene()->GetMainCamera();
+			CameraComponent* mainCamera = sceneSubsystem->GetMainScene()->GetMainCamera();
 			if (mainCamera != nullptr)
 			{
 				viewport->SetClearColor(mainCamera->GetClearColor());

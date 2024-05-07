@@ -18,15 +18,15 @@ namespace CE
 		Super::PostInitialize();
 
 		// Create & set an empty scene by default
-		scene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
+		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
 	{
-		if (scene)
+		if (mainScene)
 		{
-			scene->Destroy();
-			scene = nullptr;
+			mainScene->Destroy();
+			mainScene = nullptr;
 		}
 
 		Super::PreShutdown();
@@ -46,13 +46,13 @@ namespace CE
 		{
 			isPlaying = true;
 
-			if (scene != nullptr)
-				scene->OnBeginPlay();
+			if (mainScene != nullptr)
+				mainScene->OnBeginPlay();
 		}
 		
-		if (scene != nullptr)
+		if (mainScene != nullptr)
 		{
-			scene->Tick(deltaTime);
+			mainScene->Tick(deltaTime);
 		}
 	}
 

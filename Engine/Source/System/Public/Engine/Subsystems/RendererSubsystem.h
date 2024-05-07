@@ -67,7 +67,7 @@ namespace CE
 		
 		u32 curImageIndex = 0;
 
-		CGameWindow* gameWindow = nullptr;
+		CWindow* gameWindow = nullptr;
 
 		// - Frame Graph -
 
