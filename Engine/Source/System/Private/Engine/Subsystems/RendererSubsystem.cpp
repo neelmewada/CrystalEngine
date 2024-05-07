@@ -86,6 +86,7 @@ namespace CE
 
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
+		// TODO: Implement multi scene support
 		SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 		CE::Scene* activeScene = sceneSubsystem->GetMainScene();
 

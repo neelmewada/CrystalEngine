@@ -64,6 +64,7 @@
 #include "CrystalWidgets/Widget/CWidget.h"
 #include "CrystalWidgets/Window/CWindow.h"
 #include "CrystalWidgets/Window/CGameWindow.h"
+#include "CrystalWidgets/Widget/CViewport.h"
 
 #include "CrystalWidgets/Item/CItemSelectionModel.h"
 #include "CrystalWidgets/Item/CBaseItemDelegate.h"

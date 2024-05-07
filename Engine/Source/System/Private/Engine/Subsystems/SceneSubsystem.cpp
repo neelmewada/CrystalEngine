@@ -2,7 +2,6 @@
 
 namespace CE
 {
-
     SceneSubsystem::SceneSubsystem()
     {
 		
@@ -16,6 +15,8 @@ namespace CE
 	void SceneSubsystem::PostInitialize()
 	{
 		Super::PostInitialize();
+
+		// TODO: Implement multi scene support
 
 		// Create & set an empty scene by default
 		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
