@@ -102,12 +102,51 @@ namespace CE
 
 	bool SceneComponent::ComponentExists(SceneComponent* component)
 	{
-		for (auto comp : attachedComponents)
+		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
+	}
+
+	void SceneComponent::UpdateTransformInternal()
+	{
+		auto actor = GetActor();
+
+		localTranslationMat[0][3] = localPosition.x;
+		localTranslationMat[1][3] = localPosition.y;
+		localTranslationMat[2][3] = localPosition.z;
+
+		localRotation = Quat::EulerDegrees(localEulerAngles);
+		localRotationMat = localRotation.ToMatrix();
+
+		localScaleMat[0][0] = localScale.x;
+		localScaleMat[1][1] = localScale.y;
+		localScaleMat[2][2] = localScale.z;
+
+		localTransform = localTranslationMat * localRotationMat * localScaleMat;
+
+		if (parentComponent != nullptr)
 		{
-			if (comp == component)
-				return true;
+			transform = parentComponent->transform * localTransform;
 		}
-		return false;
+		else if (actor != nullptr && actor->parent != nullptr)
+		{
+			auto parent = actor->parent;
+			while (parent != nullptr)
+			{
+				if (parent->rootComponent != nullptr)
+					break;
+				if (parent->GetParentActor() == nullptr)
+					break;
+				parent = parent->GetParentActor();
+			}
+
+			if (parent && parent->rootComponent != nullptr)
+				transform = parent->rootComponent->transform * localTransform;
+			else
+				transform = localTransform;
+		}
+		else
+		{
+			transform = localTransform;
+		}
 	}
 
 	void SceneComponent::OnBeginPlay()
@@ -124,46 +163,7 @@ namespace CE
         
 		if (IsDirty())
 		{
-			auto actor = GetActor();
-
-			localTranslationMat[0][3] = localPosition.x;
-			localTranslationMat[1][3] = localPosition.y;
-			localTranslationMat[2][3] = localPosition.z;
-
-			localRotation = Quat::EulerDegrees(localEulerAngles);
-			localRotationMat = localRotation.ToMatrix();
-			
-			localScaleMat[0][0] = localScale.x;
-			localScaleMat[1][1] = localScale.y;
-			localScaleMat[2][2] = localScale.z;
-
-			localTransform = localTranslationMat * localRotationMat * localScaleMat;
-
-			if (parentComponent != nullptr)
-			{
-				transform = parentComponent->transform * localTransform;
-			}
-			else if (actor != nullptr && actor->parent != nullptr)
-			{
-				auto parent = actor->parent;
-				while (parent != nullptr)
-				{
-					if (parent->rootComponent != nullptr)
-						break;
-					if (parent->GetParentActor() == nullptr)
-						break;
-					parent = parent->GetParentActor();
-				}
-				
-				if (parent && parent->rootComponent != nullptr)
-					transform = parent->rootComponent->transform * localTransform;
-				else
-					transform = localTransform;
-			}
-			else
-			{
-				transform = localTransform;
-			}
+			UpdateTransformInternal();
 
 			globalPosition = transform * Vec4(0, 0, 0, 1);
 

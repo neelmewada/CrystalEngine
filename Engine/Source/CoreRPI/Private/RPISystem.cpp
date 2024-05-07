@@ -240,6 +240,18 @@ namespace CE::RPI
         standardShader = nullptr;
         isInitialized = false;
 
+        {
+            LockGuard lock{ rhiDestructionQueueMutex };
+
+            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
+            {
+                auto& entry = rhiDestructionQueue[i];
+                delete entry.resource; entry.resource = nullptr;
+            }
+
+            rhiDestructionQueue.Clear();
+        }
+
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
         {
             if (!drawListTag.IsValid())
@@ -279,6 +291,23 @@ namespace CE::RPI
 
     void RPISystem::SimulationTick(u32 imageIndex)
     {
+        {
+            LockGuard lock{ rhiDestructionQueueMutex };
+
+            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
+            {
+                auto& entry = rhiDestructionQueue[i];
+	            if (entry.frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+	            {
+                    delete entry.resource; entry.resource = nullptr;
+                    rhiDestructionQueue.RemoveAt(i);
+                    continue;
+	            }
+
+                entry.frameCounter++;
+            }
+        }
+
         if (isFirstTick)
         {
             startTime = clock();
@@ -358,6 +387,13 @@ namespace CE::RPI
         sampler = RHI::gDynamicRHI->CreateSampler(desc);
         samplerCache[hash] = sampler;
         return sampler;
+    }
+
+    void RPISystem::EnqueueDestroy(RHI::RHIResource* rhiResource)
+    {
+        LockGuard lock{ rhiDestructionQueueMutex };
+
+        rhiDestructionQueue.Add({ .resource = rhiResource, .frameCounter = 0 });
     }
 
     void RPISystem::CreateDefaultTextures()

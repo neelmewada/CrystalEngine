@@ -51,6 +51,8 @@ namespace CE
 
 	void Engine::PreShutdown()
 	{
+		FrameScheduler::Get()->WaitUntilIdle();
+
 		for (auto subsystem : engineSubsystems) // PreShutdown
 			subsystem->PreShutdown();
 

@@ -183,7 +183,7 @@ TEST(RPI, Scene)
 		skyboxMeshComponent->SetStaticMesh(sphereMesh);
 
 		skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
-		skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 800);
+		skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
 		
 		{
 			CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");

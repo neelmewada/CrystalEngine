@@ -48,7 +48,8 @@ namespace CE::RPI
 
 		for (auto& objectBuffer : objectBuffers)
 		{
-			delete objectBuffer; objectBuffer = nullptr;
+			RPISystem::Get().EnqueueDestroy(objectBuffer);
+			objectBuffer = nullptr;
 		}
 
 		for (auto& srg : objectSrgList)

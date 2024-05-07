@@ -80,6 +80,8 @@ namespace CE::RPI
 		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
 		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
 
+		void EnqueueDestroy(RHI::RHIResource* rhiResource);
+
 	private:
 
 		RPISystem() = default;
@@ -90,6 +92,15 @@ namespace CE::RPI
 		void CreateBrdfLutTexture();
 
 		bool isInitialized = false;
+
+		struct RHIDestructionEntry
+		{
+			RHI::RHIResource* resource = nullptr;
+			int frameCounter = 0;
+		};
+
+		Array<RHIDestructionEntry> rhiDestructionQueue{};
+		SharedMutex rhiDestructionQueueMutex{};
 		
 		RHI::RHISystem rhiSystem{};
 		Array<RHI::Buffer*> vertexBuffers{};

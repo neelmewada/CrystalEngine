@@ -58,6 +58,8 @@ namespace CE
 
 	private:
 
+		void UpdateTransformInternal();
+
 		bool IsDirty();
 
 		void SetDirty();

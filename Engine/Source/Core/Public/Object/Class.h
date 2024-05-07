@@ -341,7 +341,7 @@ namespace CE
 
 			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
 
-			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, const Array<Variant>& params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
@@ -370,7 +370,7 @@ namespace CE
 
 			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
 
-			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, const Array<Variant>& params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
