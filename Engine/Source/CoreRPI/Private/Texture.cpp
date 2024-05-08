@@ -98,10 +98,17 @@ namespace CE::RPI
 
     Texture::~Texture()
     {
-        delete texture;
-        texture = nullptr;
-        delete textureView;
-        textureView = nullptr;
+        if (texture)
+        {
+            RPISystem::Get().EnqueueDestroy(texture);
+            texture = nullptr;
+        }
+
+        if (textureView)
+        {
+            RPISystem::Get().EnqueueDestroy(textureView);
+            textureView = nullptr;
+        }
     }
 
     RHI::TextureView* Texture::GetOrCreateTextureView()

@@ -16,7 +16,9 @@ namespace CE::Editor
         void Construct() override;
 
 
-        
+        FIELD()
+        CViewport* viewport = nullptr;
+
     };
     
 } // namespace CE::Editor

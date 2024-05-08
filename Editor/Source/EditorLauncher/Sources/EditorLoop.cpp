@@ -225,7 +225,7 @@ void EditorLoop::RunLoop()
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
-		deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
 		// App & Input Tick
 		app->Tick();

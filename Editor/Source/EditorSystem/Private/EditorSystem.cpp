@@ -8,12 +8,15 @@ namespace CE::Editor
 {
 	EDITORSYSTEM_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
 
+    EDITORSYSTEM_API EditorEngine* gEditor = nullptr;
+
     class EditorSystemModule : public CE::Module
     {
     public:
         virtual void StartupModule() override
         {
-			gEngine = CreateObject<EditorEngine>(nullptr, "EditorEngine", OF_Transient);
+            gEditor = CreateObject<EditorEngine>(nullptr, "EditorEngine", OF_Transient);
+            gEngine = gEditor;
         }
 
         virtual void ShutdownModule() override
@@ -23,6 +26,7 @@ namespace CE::Editor
 
 			gEngine->Destroy();
 			gEngine = nullptr;
+            gEditor = nullptr;
         }
 
         virtual void RegisterTypes() override

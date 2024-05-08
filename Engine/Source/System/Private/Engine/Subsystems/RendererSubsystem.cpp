@@ -189,13 +189,15 @@ namespace CE
 			}
 		}
 
-		curImageIndex = scheduler->BeginExecution();
+		int imageIndex = scheduler->BeginExecution();
 
-		if (curImageIndex >= RHI::Limits::MaxSwapChainImageCount)
+		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
 		{
 			rebuildFrameGraph = recompileFrameGraph = true;
 			return;
 		}
+
+		curImageIndex = imageIndex;
 
 		// ---------------------------------------------------------
 		// - Enqueue draw packets to views
@@ -314,7 +316,8 @@ namespace CE
 	{
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
-    	
+
+		// TODO: Implement multi scene support
     	CE::Scene* scene = sceneSubsystem->GetMainScene();
 
 		bool isSceneWindowActive = true;
@@ -340,10 +343,13 @@ namespace CE
 			{
 				app->BuildFrameAttachments();
 
-				if (isSceneWindowActive)
+				if (isSceneWindowActive && scene->IsEnabled())
 				{
 					for (CameraComponent* camera : scene->cameras)
 					{
+						if (!camera->IsEnabled())
+							continue;
+
 						CWindow* renderWindow = camera->renderViewport;
 						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
@@ -402,7 +408,6 @@ namespace CE
 
 	void RendererSubsystem::SubmitDrawPackets(int imageIndex)
 	{
-		
 
 	}
 

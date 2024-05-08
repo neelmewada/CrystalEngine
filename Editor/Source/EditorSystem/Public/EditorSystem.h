@@ -16,5 +16,7 @@
 
 namespace CE::Editor
 {
+	extern EDITORSYSTEM_API EditorEngine* gEditor;
+
 	EDITORSYSTEM_API AssetDefinitionRegistry* GetAssetDefinitionRegistry();
 }

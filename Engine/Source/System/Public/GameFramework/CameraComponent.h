@@ -48,6 +48,10 @@ namespace CE
 		float GetFieldOfView() const { return fieldOfView; }
 
 		RPI::View* GetRpiView() const { return rpiView; }
+
+		Vec2 GetViewport() const { return viewport; }
+
+		void SetViewport(const Vec2& value) { viewport = value; }
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
@@ -91,6 +95,9 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 viewMatrix{};
+
+		FIELD()
+		Vec2 viewport = Vec2(1, 1);
 
 		//! @brief The CWindow that this scene is rendered to.
 		FIELD()

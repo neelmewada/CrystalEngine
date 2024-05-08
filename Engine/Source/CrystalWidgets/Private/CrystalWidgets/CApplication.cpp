@@ -542,9 +542,9 @@ namespace CE::Widgets
 		}
 	}
 
-	void CApplication::SetGlobalStyleSheet(CStyleSheet* globalStyleSheet)
+	void CApplication::SetGlobalStyleSheet(CStyleSheet* styleSheet)
 	{
-		this->globalStyleSheet = globalStyleSheet;
+		this->globalStyleSheet = styleSheet;
 	}
 
 	void CApplication::LoadGlobalStyleSheet(const IO::Path& path)
@@ -601,7 +601,7 @@ namespace CE::Widgets
 					}
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 					swapChainAttachment.multisampleState.sampleCount = 1;
-					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
 					scheduler->PresentSwapChain(platformWindows[i]->GetSwapChain());
 				}

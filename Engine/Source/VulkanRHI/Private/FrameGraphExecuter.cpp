@@ -141,9 +141,8 @@ namespace CE::Vulkan
 				{
 					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
 					{
-						//((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
+						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
 					}
-					return RHI::Limits::MaxSwapChainImageCount;
 				}
 
 				if (result != VK_SUCCESS)

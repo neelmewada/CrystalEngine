@@ -219,6 +219,7 @@ namespace CE::Widgets
             owner->SetNeedsPaintRecursively(false);
 
             painter->renderer = renderer;
+            static int paintCounter = 0;
 
             renderer->Begin();
             {

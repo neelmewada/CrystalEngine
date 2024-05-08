@@ -268,3 +268,9 @@ CListWidgetItem:active {
 ViewportWindow {
     background-color: black;
 }
+
+ViewportWindow CViewport {
+    background-color: black;
+    width: 100%;
+    height: 100%;
+}

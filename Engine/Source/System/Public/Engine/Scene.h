@@ -29,6 +29,10 @@ namespace CE
 		void AddActor(Actor* actor);
 		void RemoveActor(Actor* actor);
 
+		bool IsEnabled() const { return isEnabled; }
+
+		void SetEnabled(bool set) { isEnabled = set; }
+
 		void IterateAllComponents(SubClass<ActorComponent> componentClass, auto callback)
 		{
 			if (componentClass == nullptr)
@@ -103,6 +107,9 @@ namespace CE
 		TextureCube* skyboxCubeMap = nullptr;
 		
 	private:
+
+		FIELD()
+		bool isEnabled = true;
 
 		b8 isPlaying = false;
 
