@@ -26,7 +26,13 @@ namespace CE::RPI
         u32 drawItemStorageIncrement = 10'000;
 #endif
     };
-    
+
+    /**
+     * \brief A utility class used for 2D rendering.
+     * \details This class serves as the Rendering API for drawing 2d text and geometry.
+     * The CrystalWidgets library uses this class for rendering it's 2d GUI widgets.
+     * Converts 2d draw commands like DrawRect, etc into Draw Items that can be submitted to Draw Lists for execution.
+     */
     class CORERPI_API Renderer2D
     {
     public:
