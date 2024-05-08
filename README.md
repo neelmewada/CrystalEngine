@@ -10,7 +10,7 @@ Check more [screenshots below](#screenshots).
 
 ## Requirements
 
-Only Windows and macOS are supported. However, macOS builds are experimental and may fail.
+Only Windows is supported for now. Although, the Core libraries compile on macOS too.
 
 ## Building
 
