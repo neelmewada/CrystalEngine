@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 #include "PAL/Common/PlatformApplication.h"
 #include "PAL/Common/PlatformWindow.h"

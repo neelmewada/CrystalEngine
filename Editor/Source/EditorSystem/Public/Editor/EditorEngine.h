@@ -12,9 +12,11 @@ namespace CE::Editor
 		EditorEngine();
 		virtual ~EditorEngine();
 
+		void PostInitialize() override;
+
+		void PreShutdown() override;
+
 	public:
-
-
 
 	protected:
 

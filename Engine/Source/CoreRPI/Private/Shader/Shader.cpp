@@ -2,14 +2,20 @@
 
 namespace CE::RPI
 {
-    
-	Shader::Shader()
+
+	Shader::Shader(RHI::DrawListTag drawListTag) : drawListTag(drawListTag)
 	{
 
 	}
 
 	Shader::~Shader()
 	{
+		if (drawListTag.IsValid())
+		{
+			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+			drawListTag = {};
+		}
+
 		for (RPI::ShaderVariant* variant : variants)
 		{
 			delete variant;
@@ -17,10 +23,14 @@ namespace CE::RPI
 		variants.Clear();
 	}
 
-    RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
+	Name Shader::GetName()
 	{
-		variants.Add(new ShaderVariant(variantDesc));
-        return variants.Top();
+		if (variants.NonEmpty())
+		{
+			return variants[0]->pipelineDesc.name;
+		}
+
+		return Name();
 	}
 
 	RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor2& variantDesc)

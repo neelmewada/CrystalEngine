@@ -16,14 +16,14 @@ namespace CE
 	struct alignas(16) DirectionalLight
 	{
 		Matrix4x4 lightSpaceMatrix;
-		Vec3 direction;
+		Vec4 direction;
 		Vec4 colorAndIntensity;
 		float temperature;
 	};
 
 	struct alignas(16) PointLight
 	{
-		Vec3 position;
+		Vec4 position;
 		Vec4 colorAndIntensity;
 		float radius;
 		float attenuation;
@@ -229,10 +229,11 @@ namespace CE
 		PlatformWindow* secondWindow = nullptr;
 		bool secondWindowHidden = false;
 
-		RHI::FrameScheduler* scheduler = nullptr;
+		//RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;
-		RHI::SwapChain* swapChain2 = nullptr;
+		//RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
+		CGameWindow* gameWindow = nullptr;
 
 		RPI::Model* chairModel = nullptr;
 
@@ -278,7 +279,7 @@ namespace CE
 		RHI::Buffer* lightDataBuffer = nullptr;
 		FixedArray<DirectionalLight, MaxDirectionalLightCount> directionalLights{};
 		Array<PointLight> pointLights{};
-		LightData lightData{};
+		LightConstants lightData{};
 
 		u32 width = 0;
 		u32 height = 0;

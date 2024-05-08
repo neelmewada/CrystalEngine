@@ -11,37 +11,58 @@ namespace CE
 
 		// - Public API -
 
-		bool IsSceneComponent() const override final { return true; }
+		bool IsSceneComponent() const final { return true; }
+
+		bool IsEnabled() const final;
 
 		/// @brief Add the passed scene component as a child of receiving scene component.
 		/// @param component: Component to add as child.
 		void SetupAttachment(SceneComponent* component);
 
+		void DetachComponent(SceneComponent* component);
+
+		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 
-		inline Vec3 GetLocalPosition() const { return localPosition; }
+		Vec3 GetPosition() const { return globalPosition; }
 
-		inline Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
+		Vec3 GetLocalPosition() const { return localPosition; }
 
-		inline Vec3 GetLocalScale() const { return localScale; }
+		Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
 
-		inline void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(true); }
+		Vec3 GetLocalScale() const { return localScale; }
 
-		inline void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(true); }
+		void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(); }
 
-		inline void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(true); }
+		void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(); }
+
+		void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(); }
 
 		void OnBeginPlay() override;
 
 		void Tick(f32 delta) override;
 
-		bool IsDirty();
+		const Matrix4x4& GetTransform() const { return transform; }
 
-		inline Matrix4x4 GetTransform() const { return transform; }
+		const Matrix4x4& GetLocalTransform() const { return localTransform; }
+
+		const Vec3& GetForwardVector() const { return forwardVector; }
+
+		const Vec3& GetUpwardVector() const { return upwardVector; }
+
+		const Vec3& GetRightwardVector() const { return rightwardVector; }
+
+    protected:
+
+		bool IsTransformUpdated() const { return transformUpdated; }
 
 	private:
 
-		void SetDirty(bool set = true);
+		void UpdateTransformInternal();
+
+		bool IsDirty();
+
+		void SetDirty();
 
 		FIELD()
 		Array<SceneComponent*> attachedComponents{};
@@ -60,7 +81,21 @@ namespace CE
 
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
 
+		FIELD(ReadOnly)
+		Vec3 globalPosition{};
+
+		FIELD(ReadOnly)
+		Vec3 forwardVector{};
+
+		FIELD(ReadOnly)
+		Vec3 upwardVector{};
+
+		FIELD(ReadOnly)
+		Vec3 rightwardVector{};
+
 		b8 isDirty = true;
+
+		b8 transformUpdated = false;
         
         Matrix4x4 transform{};
 		Matrix4x4 localTransform{};

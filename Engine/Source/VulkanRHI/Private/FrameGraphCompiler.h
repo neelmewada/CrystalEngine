@@ -23,7 +23,7 @@ namespace CE::Vulkan
 		void CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest);
 
 		void CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest,
-			Vulkan::Scope* current, HashSet<ScopeID>& visitedScopes);
+			Vulkan::Scope* current, HashSet<ScopeId>& visitedScopes);
 
 		void CompileBarriers(const FrameGraphCompileRequest& compileRequest);
 
@@ -36,7 +36,7 @@ namespace CE::Vulkan
 
 		StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> graphExecutionFences{};
 
-		StaticArray<HashSet<ScopeID>, RHI::Limits::MaxSwapChainImageCount> visitedScopes{};
+		StaticArray<HashSet<ScopeId>, RHI::Limits::MaxSwapChainImageCount> visitedScopes{};
 		StaticArray<HashSet<AttachmentID>, RHI::Limits::MaxSwapChainImageCount> usedAttachments{};
 
 		// Keep track of current family index of each attachment

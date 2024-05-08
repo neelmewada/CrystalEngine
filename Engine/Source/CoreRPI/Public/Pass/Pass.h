@@ -16,20 +16,24 @@ class RenderPipeline_DefaultPipelineTree_Test;
 namespace CE::RPI
 {
 	class ParentPass;
-
+	class RenderPipeline;
+	
 	/// @brief The base Pass class. All passes should derive from this class.
 	CLASS(Abstract)
-	class CORERPI_API Pass : public Object
+	class CORERPI_API Pass : public Object, public RHI::IScopeProducer
 	{
 		CE_CLASS(Pass, Object)
 	public:
-		friend class ParentPass;
-		friend class PassTree;
-		friend class PassRegistry;
 
 		virtual ~Pass();
 
 		virtual bool IsParentPass() const { return false; }
+
+		void AddAttachmentBinding(const PassAttachmentBinding& attachmentBinding);
+
+		void AddSlot(const PassSlot& slot);
+
+		PassSlot* FindSlot(const Name& name);
 
 		PassAttachmentBinding* FindInputBinding(const Name& name);
 		PassAttachmentBinding* FindInputOutputBinding(const Name& name);
@@ -37,28 +41,52 @@ namespace CE::RPI
 
 		PassAttachmentBinding* FindBinding(const Name& name);
 
-		inline const Name& GetPassName() const { return GetName(); }
+		const Name& GetPassName() const override { return GetName(); }
 
-	corerpi_protected_internal:
+		DrawListTag GetDrawListTag() const { return drawListTag; }
+
+		void SetDrawListTag(DrawListTag tag) { drawListTag = tag; }
+
+		SceneViewTag GetViewTag() const { return viewTag; }
+
+		void SetViewTag(const SceneViewTag& tag) { viewTag = tag; }
+
+		Name GetScopeId() const;
+
+		const Array<PassAttachmentBinding>& GetInputBindings() const { return inputBindings; }
+		const Array<PassAttachmentBinding>& GetInputOutputBindings() const { return inputOutputBindings; }
+		const Array<PassAttachmentBinding>& GetOutputBindings() const { return outputBindings; }
+
+	protected:
+
+		void ProduceScopes(FrameScheduler* scheduler) override {}
+
+		void EmplaceAttachments(FrameScheduler* scheduler) override {}
 
 		Pass();
 
 		/// @brief Draw list tag this pass is associated to.
 		DrawListTag drawListTag{};
-
-		/// @brief The view tag associated with a pipeline view.
+		
+		/// @brief The view tag associated with a view.
 		/// The view that matches this tag will be queried by this pass.
-		PipelineViewTag pipelineViewTag{};
+		SceneViewTag viewTag{};
 
+		RPI::RenderPipeline* renderPipeline = nullptr;
+
+		FIELD()
 		ParentPass* parentPass = nullptr;
+
+		FIELD()
+		Array<PassSlot> slots{};
 
 		Array<PassAttachmentBinding> inputBindings{};
 		Array<PassAttachmentBinding> inputOutputBindings{};
 		Array<PassAttachmentBinding> outputBindings{};
 
-		Array<Ptr<PassAttachment>> passAttachments{};
-
 		friend class RenderPipeline;
+
+		RPI_PASS(Pass);
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RenderPipeline_DefaultPipelineTree_Test;

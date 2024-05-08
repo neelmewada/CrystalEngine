@@ -43,14 +43,14 @@ namespace CE::Widgets
 
 		nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo, parentWindow);
 
-		nativeWindow->platformWindow->SetWindowPosition(showPosition);
-		nativeWindow->platformWindow->SetBorderless(true);
-		nativeWindow->platformWindow->SetAlwaysOnTop(true);
+		nativeWindow->GetPlatformWindow()->SetWindowPosition(showPosition);
+		nativeWindow->GetPlatformWindow()->SetBorderless(true);
+		nativeWindow->GetPlatformWindow()->SetAlwaysOnTop(true);
 		nativeWindow->Show();
 
-		nativeWindow->platformWindow->SetInputFocus();
+		nativeWindow->GetPlatformWindow()->SetInputFocus();
 
-		nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+		nativeWindow->GetPlatformWindow()->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
 
 		SetNeedsLayout();
 		SetNeedsStyle();
@@ -62,7 +62,7 @@ namespace CE::Widgets
 		if (!nativeWindow)
 			return;
 
-		nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
+		nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
 
 		delete nativeWindow;
 		nativeWindow = nullptr;

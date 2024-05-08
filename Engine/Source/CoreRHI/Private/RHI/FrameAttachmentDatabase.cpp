@@ -14,6 +14,8 @@ namespace CE::RHI
 
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, const ImageDescriptor& descriptor)
 	{
+		if (attachmentsById.KeyExists(id))
+			return;
 		auto attachment = new ImageFrameAttachment(id, descriptor);
 		attachments.Add(attachment);
 		attachmentsById[id] = attachment;
@@ -21,6 +23,8 @@ namespace CE::RHI
 
     void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain)
     {
+		if (attachmentsById.KeyExists(id))
+			return;
         auto attachment = new SwapChainFrameAttachment(id, swapChain);
         attachments.Add(attachment);
         attachmentsById[id] = attachment;
@@ -28,6 +32,8 @@ namespace CE::RHI
 
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, Texture* image)
 	{
+		if (attachmentsById.KeyExists(id))
+			return;
 		auto attachment = new ImageFrameAttachment(id, image);
 		attachments.Add(attachment);
 		attachmentsById[id] = attachment;
@@ -35,6 +41,8 @@ namespace CE::RHI
 
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, const BufferDescriptor& descriptor)
 	{
+		if (attachmentsById.KeyExists(id))
+			return;
 		auto attachment = new BufferFrameAttachment(id, descriptor);
 		attachments.Add(attachment);
 		attachmentsById[id] = attachment;
@@ -42,6 +50,8 @@ namespace CE::RHI
 
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, Buffer* buffer)
 	{
+		if (attachmentsById.KeyExists(id))
+			return;
 		auto attachment = new BufferFrameAttachment(id, buffer);
 		attachments.Add(attachment);
 		attachmentsById[id] = attachment;

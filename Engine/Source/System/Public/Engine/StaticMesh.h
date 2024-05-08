@@ -12,7 +12,22 @@ namespace CE
         StaticMesh();
         ~StaticMesh();
 
-        inline RPI::ModelAsset* GetModelAsset() const { return modelAsset; }
+        RPI::ModelAsset* GetModelAsset() const
+        {
+	        return modelAsset;
+        }
+
+        void SetModelAsset(RPI::ModelAsset* modelAsset)
+        {
+            this->modelAsset = modelAsset;
+        }
+
+        u32 GetLodCount() const
+        {
+            if (!modelAsset)
+                return 0;
+	        return modelAsset->GetLodCount();
+        }
 
     private:
 

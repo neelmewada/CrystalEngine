@@ -72,6 +72,8 @@ namespace CE
 		bool IsEnumField();
 		bool IsEnumFlagsField();
 
+        bool IsNumberField() const { return IsIntegerField() || IsDecimalField(); }
+
         bool IsObjectField() const;
 		bool IsStructField();
 
@@ -105,6 +107,8 @@ namespace CE
         INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
 		String GetFieldValueAsString(void* instance);
+
+        f64 GetNumericFieldValue(void* instance);
 
 		// Returns pointer to the field's location in memory itself
 		void* GetFieldInstance(void* instance)

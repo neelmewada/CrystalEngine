@@ -10,6 +10,7 @@ namespace CE
 namespace CE::RPI
 {
 	class Shader;
+	class ShaderCollection;
 	class ShaderVariant;
 
 	typedef HashMap<Name, MaterialPropertyValueArray> MaterialPropertyValueMap;
@@ -19,17 +20,21 @@ namespace CE::RPI
 	public:
 
 		Material(Shader* shader);
+
+		Material(ShaderCollection* shaderCollection);
 		~Material();
 
-		void SetShader(Shader* shader);
+		ShaderCollection* GetShaderCollection() const;
 
-		inline Shader* GetShader() const { return shader; }
+		void SetShaderCollection(ShaderCollection* shaderCollection);
 
-		ShaderVariant* GetCurrentShader() const;
+		void SetDefaultShaderItem(int shaderItem);
 
-		inline u32 GetCurrentVariantIndex() const { return shaderVariantIndex; }
+		Shader* GetOpaqueShader() const;
 
-		void SelectVariant(u32 variantIndex);
+		Shader* GetCurrentShader();
+
+		//ShaderVariant* GetCurrentOpaqueShader();
         
         void FlushProperties(u32 imageIndex);
 
@@ -46,26 +51,30 @@ namespace CE::RPI
         
 		void ClearAllValues();
 
+		void SetCurrentShaderItem(int itemIndex);
+
+		RPI::Shader* GetCurrentShaderItem();
+
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		void InsertPropertyValue(Name propertyName, const MaterialPropertyValue& value, int index = -1);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		void RemovePropertyValue(Name propertyName, int index);
 
 		void ClearPropertyValue(Name propertyName);
 
 		const MaterialPropertyValue& GetPropertyValue(Name propertyName);
 
-		// Used for shader resource arrays
+		//! Used for shader resource arrays
 		const MaterialPropertyValue& GetPropertyValue(Name propertyName, int index);
         
-        inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+        RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
 		void CopyPropertiesFrom(RPI::Material* other);
 
-		inline void SetBaseMaterial(RPI::Material* mat) { baseMaterial = mat; }
+		void SetBaseMaterial(RPI::Material* mat) { baseMaterial = mat; }
 
 	private:
 
@@ -82,9 +91,14 @@ namespace CE::RPI
 
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
-		Shader* shader = nullptr;
+		bool ownsShaderCollection;
+		ShaderCollection* shaderCollection;
 
-		u32 shaderVariantIndex = 0;
+		RPI::Shader* currentShader = nullptr;
+
+		//u32 shaderVariantIndex = 0;
+
+		int currentShaderItem = -1;
 
 		friend class MaterialInstance;
 		friend class MaterialInterface;

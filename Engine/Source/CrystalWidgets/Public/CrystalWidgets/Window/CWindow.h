@@ -29,13 +29,19 @@ namespace CE::Widgets
 
         CPlatformWindow* GetRootNativeWindow();
 
+        CPlatformWindow* GetCurrentNativeWindow() const { return nativeWindow; }
+
         virtual void Show();
 
         virtual void Hide();
 
         bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
-    crystalwidgets_protected_internal:
+        Vec2 GetWindowSize() const;
+
+        bool IsViewportWindow() const;
+
+    protected:
 
         virtual void OnPlatformWindowSet();
 
@@ -76,6 +82,9 @@ namespace CE::Widgets
         b8 canBeMaximized = true;
 
         FIELD()
+        b8 clearScreen = true;
+
+        FIELD()
         Array<CMenuItem*> menuItems{};
 
         Array<Rect> controlRects{};
@@ -89,6 +98,8 @@ namespace CE::Widgets
         friend class CApplication;
         friend class CWidget;
         friend class CDockSpace;
+
+        CE_WIDGET_FRIENDS()
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
@@ -100,7 +111,6 @@ namespace CE::Widgets
         Object* outer = CApplication::Get();
 
         TWindow* window = CreateObject<TWindow>(outer, name, OF_NoFlags, windowClass);
-        window->SetTitle(name);
         window->SetPlatformWindow(nativeWindow);
         return window;
     }

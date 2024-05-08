@@ -5,19 +5,21 @@ namespace CE::RHI
 
 	class CORERHI_API FrameGraphBuilder
 	{
-	public:
-		FrameGraphBuilder() = default;
+	protected:
 
 		void BeginFrameGraph(FrameGraph* frameGraph);
+
+	public:
+		FrameGraphBuilder() = default;
 
 		inline FrameAttachmentDatabase& GetFrameAttachmentDatabase()
 		{
 			return frameGraph->attachmentDatabase;
 		}
 
-		void BeginScopeGroup(const ScopeID& groupId);
+		void BeginScopeGroup(const ScopeId& groupId);
 
-		void BeginScope(const ScopeID& id);
+		void BeginScope(const ScopeId& id);
 
 		bool ScopeQueueClass(HardwareQueueClass queueClass);
 
@@ -32,7 +34,7 @@ namespace CE::RHI
 		bool UsePipelines(const Array<RHI::PipelineState*>& pipelines);
 		bool UsePipeline(RHI::PipelineState* pipeline);
 
-		bool ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, const FrameGraphVariable& comparisonValue, bool shoudClear = false);
+		bool ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, const FrameGraphVariable& comparisonValue, bool shouldClear = false);
 		 
 		bool SetVariableAfterExecution(const Name& variableName, const FrameGraphVariable& value);
 

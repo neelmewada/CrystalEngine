@@ -13,6 +13,8 @@ namespace CE::Widgets
 		CListWidgetItem();
 		virtual ~CListWidgetItem();
 
+		int GetIndex() const { return index; }
+
 	protected:
 
 		void HandleEvent(CEvent* event) override;

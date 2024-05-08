@@ -38,20 +38,11 @@ namespace CE
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
 		
-		scheduler = RHI::FrameScheduler::Create(desc);
+		//scheduler = RHI::FrameScheduler::Create(desc);
 
 		mainWindow = window;
 
-		RHI::SwapChainDescriptor swapChainDesc{};
-		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
-#if FORCE_SRGB
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
-#endif
-
-		swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
-
-		swapChain2 = RHI::gDynamicRHI->CreateSwapChain(secondWindow, swapChainDesc);
+		CApplication* app = CApplication::Get();
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
@@ -66,6 +57,8 @@ namespace CE
 		depthTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("depth");
 		opaqueTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("opaque");
 		shadowTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("shadow");
+
+		gameWindow = CreateWindow<CGameWindow>(MODULE_NAME, mainWindow);
 		
 		InitModels();
 		InitCubeMaps();
@@ -332,7 +325,7 @@ namespace CE
 			scissorState.height = viewportState.height;
 			cmdList->SetScissors(1, &scissorState);
 
-			cmdList->BindPipelineState(brdfGenMaterial->GetCurrentShader()->GetPipeline());
+			cmdList->BindPipelineState(brdfGenMaterial->GetCurrentOpaqueShader()->GetPipeline());
 
 			cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
 
@@ -612,7 +605,7 @@ namespace CE
 					scissor.height = viewport.height;
 					hdrCmdList->SetScissors(1, &scissor);
 
-					RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentShader()->GetPipeline();
+					RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentOpaqueShader()->GetPipeline();
 					hdrCmdList->BindPipelineState(pipeline);
 
 					hdrCmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
@@ -883,7 +876,7 @@ namespace CE
 			skyboxShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
 			skyboxMaterial = new RPI::Material(skyboxShader->GetOrCreateRPIShader(0));
-			RHI::ShaderResourceGroupLayout perObjectSRGLayout = skyboxMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout = skyboxMaterial->GetCurrentOpaqueShader()->GetSrgLayout(RHI::SRGType::PerObject);
 
 			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
 			if (cubeMapTex != nullptr)
@@ -1031,7 +1024,7 @@ namespace CE
 
 		renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
 
-		auto perViewLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
+		auto perViewLayout = textMaterial->GetCurrentOpaqueShader()->GetSrgLayout(RHI::SRGType::PerView);
 		perView2DSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewLayout);
 
 		PerViewData viewData{};
@@ -1057,7 +1050,7 @@ namespace CE
 
 		sdfGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFTextGen");
 
-		RHI::ShaderResourceGroupLayout perDrawLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
+		RHI::ShaderResourceGroupLayout perDrawLayout = textMaterial->GetCurrentOpaqueShader()->GetSrgLayout(RHI::SRGType::PerDraw);
 		textPerDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawLayout);
 
 		fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
@@ -1258,7 +1251,7 @@ namespace CE
 
 			request.drawItemTag = uiTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = textMaterial->GetCurrentShader()->GetPipeline(multisampling);
+			request.pipelineState = textMaterial->GetCurrentOpaqueShader()->GetPipeline(multisampling);
 			
 			builder.AddDrawItem(request);
 		}
@@ -1378,7 +1371,7 @@ namespace CE
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-			bufferDesc.bufferSize = sizeof(LightData);
+			bufferDesc.bufferSize = sizeof(LightConstants);
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Light Data Buffer";
 
@@ -1421,7 +1414,7 @@ namespace CE
 
 			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -1437,7 +1430,7 @@ namespace CE
 
 			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1468,7 +1461,7 @@ namespace CE
 			request.indexBufferView = mesh->indexBufferView;
 			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = sphereMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1502,7 +1495,7 @@ namespace CE
 
 			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -1517,7 +1510,7 @@ namespace CE
 
 			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1548,7 +1541,7 @@ namespace CE
 
 			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = sphereMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1582,7 +1575,7 @@ namespace CE
 
 			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -1597,7 +1590,7 @@ namespace CE
 
 			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = depthMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 			
 			builder.AddDrawItem(request);
 		}
@@ -1628,7 +1621,7 @@ namespace CE
 
 			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = sphereMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(sphereMaterial->GetShaderResourceGroup());
 
@@ -1677,7 +1670,7 @@ namespace CE
 
 			request.drawItemTag = skyboxTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline(msaa);
+			request.pipelineState = skyboxMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1801,6 +1794,7 @@ namespace CE
 	{
 		rebuild = false;
 		recompile = true;
+		return;
 
 		RHI::MultisampleState msaa{};
 		msaa.sampleCount = SampleCount;
@@ -1875,7 +1869,7 @@ namespace CE
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
 
-				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline(msaa));
+				scheduler->UsePipeline(skyboxMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 			
@@ -1893,7 +1887,7 @@ namespace CE
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
 
-				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
+				scheduler->UsePipeline(depthMaterial->GetCurrentOpaqueShader()->GetPipeline());
 
 				//scheduler->SetVariableAfterExecution("DrawSunShadows", false);
 			}
@@ -1912,7 +1906,7 @@ namespace CE
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
 
-				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline(msaa));
+				scheduler->UsePipeline(depthMaterial->GetCurrentOpaqueShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 
@@ -2029,13 +2023,13 @@ namespace CE
 		drawList.Init(drawListMask);
 		
 		// Add items
-		drawList.AddDrawPacket(sphereDrawPacket);
-		drawList.AddDrawPacket(cubeDrawPacket);
-		drawList.AddDrawPacket(skyboxDrawPacket);
-		drawList.AddDrawPacket(chairDrawPacket);
+		drawList.AddDrawPacket(sphereDrawPacket, TODO);
+		drawList.AddDrawPacket(cubeDrawPacket, TODO);
+		drawList.AddDrawPacket(skyboxDrawPacket, TODO);
+		drawList.AddDrawPacket(chairDrawPacket, TODO);
 		for (int i = 0; i < uiDrawPackets.GetSize(); i++)
 		{
-			drawList.AddDrawPacket(uiDrawPackets[i]);
+			drawList.AddDrawPacket(uiDrawPackets[i], TODO);
 		}
 
 		auto prevTime = clock();
@@ -2080,7 +2074,7 @@ namespace CE
 
 		for (auto drawPacket : renderer2dPackets)
 		{
-			drawList.AddDrawPacket(drawPacket);
+			drawList.AddDrawPacket(drawPacket, TODO);
 		}
 
 		// Finalize

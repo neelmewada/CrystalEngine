@@ -374,6 +374,8 @@ namespace CE
 
 		stream->SetBinaryMode(true);
 
+		bool isShader = targetType->GetName() == "CE::Shader";
+
 		auto type = targetType;
 
 		if (type->IsClass())

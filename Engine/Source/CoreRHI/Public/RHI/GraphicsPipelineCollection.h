@@ -8,7 +8,7 @@ namespace CE::RHI
         Array<RHI::Format> colorFormats{};
         RHI::Format depthStencilFormat = RHI::Format::Undefined;
 
-        inline SIZE_T GetHash() const
+        SIZE_T GetHash() const
         {
             SIZE_T hash = sampleState.GetHash();
             for (int i = 0; i < colorFormats.GetSize(); i++)
@@ -19,9 +19,14 @@ namespace CE::RHI
             return hash;
         }
 
-        inline bool operator==(const GraphicsPipelineVariant& rhs) const
+        bool operator==(const GraphicsPipelineVariant& rhs) const
         {
             return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const GraphicsPipelineVariant& rhs) const
+        {
+            return !operator==(rhs);
         }
     };
 

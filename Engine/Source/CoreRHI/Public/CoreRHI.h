@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreApplication.h"
 #include "CoreMedia.h"
 
@@ -44,7 +44,7 @@
 // Draw Data dependents
 #include "RHI/CommandList.h"
 
-// Frame
+// Frame Graph
 #include "RHI/FrameAttachment.h"
 #include "RHI/BufferFrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"
@@ -61,6 +61,7 @@
 #include "RHI/FrameGraphCompiler.h"
 #include "RHI/FrameGraphExecuter.h"
 #include "RHI/FrameScheduler.h"
+#include "RHI/IScopeProducer.h"
 
 #include "RHI/DeviceLimits.h"
 #include "RHI/RHI.h"

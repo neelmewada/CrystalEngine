@@ -4,7 +4,8 @@ namespace CE::RHI
 {
 	class FrameGraphCompiler;
 	class FrameGraphExecuter;
-
+	interface IScopeProducer;
+	
 	struct FrameSchedulerDescriptor
 	{
 		//! @brief Number of frames being rendered simultaneously (ex: triple buffering = 3).
@@ -42,9 +43,9 @@ namespace CE::RHI
 
 		void EndExecution();
 
-		void SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList);
+		void SetScopeDrawList(const ScopeId& scopeId, DrawList* drawList);
 
-		RHI::Scope* FindScope(const ScopeID& scopeId);
+		RHI::Scope* FindScope(const ScopeId& scopeId);
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 
@@ -57,11 +58,19 @@ namespace CE::RHI
 		void SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value);
 		void SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value);
 
+		void AddScopeProducer(IScopeProducer* scopeProducer);
+
+		const auto& GetScopeProducers() const { return scopeProducers; }
+
+		IScopeProducer* FindScopeProducer(const Name& passName);
+
 	private:
 
 		u32 numFramesInFlight = 2;
 
 		RHI::Scope* drawListScope = nullptr;
+
+		Array<IScopeProducer*> scopeProducers{};
         
         TransientMemoryPool* transientMemoryPool = nullptr;
 

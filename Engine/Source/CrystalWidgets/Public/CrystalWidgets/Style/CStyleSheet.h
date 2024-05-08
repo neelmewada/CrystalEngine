@@ -8,6 +8,9 @@ namespace CE::Widgets
         CE_CLASS(CStyleSheet, Object)
     public:
 
+        CStyleSheet();
+        virtual ~CStyleSheet();
+
         static CStyleSheet* Load(const IO::Path& path, Object* parent = nullptr);
 
         void OnSubobjectAttached(Object* subObject) override;
@@ -17,6 +20,8 @@ namespace CE::Widgets
 
         virtual void Clear() = 0;
 
+        static void MarkAllDirty();
+
         void MarkDirty()
         {
             isDirty = true;
@@ -24,15 +29,14 @@ namespace CE::Widgets
 
         bool IsDirty() const { return isDirty; }
 
-    crystalwidgets_internal:
-
         FIELD()
 		CStyleSheet* parent = nullptr;
 
-    protected:
-
         b8 isDirty = true;
 
+    protected:
+
+        static Array<CStyleSheet*> styleSheets;
     };
     
 } // namespace CE::Widgets

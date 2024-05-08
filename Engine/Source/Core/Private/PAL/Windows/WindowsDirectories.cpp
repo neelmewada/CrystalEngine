@@ -16,6 +16,13 @@ namespace CE
         return IO::Path(String(buffer)).GetParentPath();
     }
 
+    IO::Path WindowsDirectories::GetExecutablePath()
+    {
+        static char buffer[MAX_PATH_SIZE];
+        GetModuleFileNameA(NULL, buffer, MAX_PATH_SIZE);
+        return IO::Path(String(buffer));
+    }
+
     IO::Path WindowsDirectories::GetAppRootDir()
     {
         return GetLaunchDir();

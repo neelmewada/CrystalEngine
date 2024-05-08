@@ -25,6 +25,18 @@ namespace CE
         CE_STRUCT(MaterialTextureValue)
     public:
 
+        MaterialTextureValue() = default;
+
+        MaterialTextureValue(const Name& textureName) : textureName(textureName)
+        {}
+
+        MaterialTextureValue(CE::Texture* texture, Vec2 offset = Vec2(0, 0), Vec2 scaling = Vec2(1, 1))
+	        : texture(texture), offset(offset), scaling(scaling)
+        {}
+
+        FIELD()
+        Name textureName = "";
+
         FIELD()
         CE::Texture* texture = nullptr;
 
@@ -94,7 +106,7 @@ namespace CE
 
         virtual void ApplyProperties() = 0;
 
-        virtual void SetPass(u32 passIndex) = 0;
+        virtual void SetCustomPass(u32 passIndex) = 0;
 
         virtual RPI::Material* GetRpiMaterial() = 0;
 
@@ -104,7 +116,7 @@ namespace CE
 
         virtual HashMap<Name, MaterialProperty> GetAllProperties() = 0;
 
-        u32 passIndex = 0;
+        int passIndex = -1;
 
         friend class CE::Material;
         friend class CE::MaterialInstance;

@@ -86,6 +86,93 @@ static void CEDeregisterModuleTypes()
 using namespace CE;
 
 /**********************************************
+*   Scripting
+*/
+
+#pragma region Scripting
+
+class SampleMonoClass
+{
+public:
+
+	static MonoString* GetCppString()
+	{
+		return Mono::NewString("String from C++");
+	}
+
+	static Object* CreateObjectImpl(MonoString* className, MonoString* objectName)
+	{
+		Name fullClassName = Mono::StringToUTF8(className);
+		String name = Mono::StringToUTF8(objectName);
+		if (!fullClassName.IsValid())
+			return nullptr;
+
+		ClassType* classType = ClassType::FindClass(fullClassName);
+		if (classType == nullptr)
+			return nullptr;
+
+		return CreateObject<Object>(nullptr, name, OF_NoFlags, classType);
+	}
+
+	static void DestroyObjectImpl(Object* object)
+	{
+		String::IsAlphabet('a');
+		if (object != nullptr)
+		{
+			object->Destroy();
+		}
+	}
+};
+
+TEST(Scripting, Mono)
+{
+	using namespace CE::Mono;
+	return; // Skip mono C# testing for now
+
+	TEST_BEGIN;
+	ScriptRuntime::Initialize();
+
+	Mono::Assembly* assembly = Mono::ScriptRuntime::GetScriptCoreAssembly();
+	assembly->AddInternalCall("CE.SampleClass::GetCppString", SampleMonoClass::GetCppString);
+	assembly->AddInternalCall("CE.Object::CreateObjectImpl", SampleMonoClass::CreateObjectImpl);
+	assembly->AddInternalCall("CE.Object::DestroyObjectImpl", SampleMonoClass::DestroyObjectImpl);
+
+	ScriptClass scriptClass = assembly->FindClass("CE", "SampleClass");
+
+	if (scriptClass.IsValid())
+	{
+		scriptClass.IterateAllMethods([&](ScriptMethod method)
+			{
+				if (!method.IsValid())
+					return;
+
+				Name methodName = method.GetMethodName();
+
+				if (methodName == "TestMethod")
+				{
+					MonoString* string = Mono::NewString("Extra");
+					void* args[1] = { string };
+					MonoObject* result = method.Invoke(nullptr, args);
+					MonoString* monoString = Mono::ObjectToString(result);
+					String str = Mono::StringToUTF8(monoString);
+					EXPECT_EQ(str, "From C#: String from C++ | Extra");
+				}
+
+				if (methodName == "ObjectTest")
+				{
+					method.Invoke(nullptr, nullptr);
+				}
+			});
+	}
+
+	ScriptRuntime::Shutdown();
+	TEST_END;
+}
+
+#pragma endregion
+
+
+/**********************************************
 *   Performance
 */
 
@@ -612,10 +699,10 @@ TEST(Containers, Matrix)
 		out = rotator * vec;
 		EXPECT_EQ(out, Vec4(0, -1, 0, 1));
 
-		Quat lookRotation = Quat::LookRotation(Vec3(1, 0, 0));
-		vec = Vec4(0, 0, 1, 0);
-		out = lookRotation * vec;
-		//EXPECT_EQ(out, Vec4(1, 0, 0, 0));
+		Quat lookRotation = Quat::LookRotation2(Vec3(1, 0, 0), Vec3(0, 1, 0));
+		Vec3 degrees = lookRotation.ToEulerDegrees();
+
+		degrees.GetNormalized();
 	}
 
     // Multiplication
@@ -765,7 +852,7 @@ TEST(Containers, Defer)
 	TEST_END;
 }
 
-TEST(Container, ArrayView)
+TEST(Containers, ArrayView)
 {
 	TEST_BEGIN;
 
@@ -808,7 +895,7 @@ TEST(Container, ArrayView)
 	TEST_END;
 }
 
-TEST(Container, FixedArray)
+TEST(Containers, FixedArray)
 {
 	TEST_BEGIN;
 
@@ -843,6 +930,131 @@ TEST(Container, FixedArray)
 		EXPECT_EQ(item, String("str") + i);
 		i++;
 	}
+
+	TEST_END;
+}
+
+struct PagedElement
+{
+	String name = "";
+	int index = 0;
+};
+
+TEST(Containers, PagedDynamicArray)
+{
+	TEST_BEGIN;
+
+	using PagedArrayType = PagedDynamicArray<PagedElement, 4>;
+	PagedArrayType array{};
+	using ArrayHandle = PagedArrayType::Handle;
+	struct HandleStruct
+	{
+		ArrayHandle handle;
+	};
+	Array<HandleStruct*> handles{};
+
+	constexpr int totalCount = 32;
+
+	// Insert & Remove
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		HandleStruct* handleEntry = new HandleStruct();
+		PagedElement element = PagedElement{ .name = String::Format("Element {}", i), .index = i };
+		handleEntry->handle = array.Insert(element);
+		handles.Add(handleEntry);
+	}
+	
+	EXPECT_EQ(array.GetPageCount(), totalCount / 4);
+	EXPECT_EQ(array.GetCount(), totalCount);
+
+	HashSet<int> foundValues{};
+
+	delete handles[12]; handles[12] = nullptr;
+	delete handles[6]; handles[6] = nullptr;
+	delete handles[2]; handles[2] = nullptr;
+	delete handles[0]; handles[0] = nullptr;
+
+	for (auto it = array.begin(); it != array.end(); ++it)
+	{
+		foundValues.Add(it->index);
+	}
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		if (i == 0 || i == 2 || i == 6 || i == 12)
+		{
+			EXPECT_FALSE(foundValues.Exists(i));
+		}
+		else
+		{
+			EXPECT_TRUE(foundValues.Exists(i));
+		}
+	}
+
+	// Page Iterator
+
+	auto parallelRanges = array.GetParallelRanges();
+
+	for (int i = 0; i < parallelRanges.GetSize(); ++i)
+	{
+		const auto& parallelRange = parallelRanges[i];
+
+		for (auto it = parallelRange.begin; it != parallelRange.end; ++it)
+		{
+			EXPECT_EQ(it.GetPageIndex(), i);
+
+			EXPECT_NE(it->index, 0);
+			EXPECT_NE(it->index, 2);
+			EXPECT_NE(it->index, 6);
+			EXPECT_NE(it->index, 12);
+
+			EXPECT_TRUE(foundValues.Exists(it->index));
+		}
+	}
+
+	// Reuse empty slots
+
+	{
+		handles[0] = new HandleStruct();
+		PagedElement element = PagedElement{ .name = "Element 0", .index = 0 };
+		handles[0]->handle = array.Insert(element);
+
+		handles[2] = new HandleStruct();
+		PagedElement element2 = PagedElement{ .name = "Element 2", .index = 2 };
+		handles[2]->handle = array.Insert(element2);
+	}
+
+	foundValues.Clear();
+	for (auto it = array.begin(); it != array.end(); ++it)
+	{
+		foundValues.Add(it->index);
+	}
+
+	for (int i = 0; i < totalCount; ++i)
+	{
+		if (i == 6 || i == 12)
+		{
+			EXPECT_FALSE(foundValues.Exists(i));
+		}
+		else
+		{
+			EXPECT_TRUE(foundValues.Exists(i));
+		}
+	}
+
+	// - Cleanup -
+
+	for (int i = 0; i < handles.GetSize(); i++)
+	{
+		if (handles[i] != nullptr)
+		{
+			delete handles[i];
+		}
+	}
+	handles.Clear();
+
+	EXPECT_EQ(array.GetCount(), 0);
 
 	TEST_END;
 }
@@ -2737,6 +2949,91 @@ TEST(Serialization, BasicBinarySerialization)
 	TEST_END;
 }
 
+struct TestPrefsStruct
+{
+	CE_STRUCT(TestPrefsStruct)
+public:
+
+	Array<Name> nameList{};
+
+	Color colorValue{};
+};
+
+CE_RTTI_STRUCT(,,TestPrefsStruct,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(nameList)
+		CE_FIELD(colorValue)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,,TestPrefsStruct)
+
+class TestPrefsClass : public Object
+{
+	CE_CLASS(TestPrefsClass, Object)
+public:
+
+	Array<String> stringList{};
+
+	TestPrefsStruct prefsStruct{};
+};
+
+CE_RTTI_CLASS(,,TestPrefsClass,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(Prefs = Test),
+	CE_FIELD_LIST(
+		CE_FIELD(stringList, Prefs)
+		CE_FIELD(prefsStruct, Prefs)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(,,TestPrefsClass)
+
+TEST(Serialization, Prefs)	
+{
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(TestPrefsStruct);
+	CE_REGISTER_TYPES(TestPrefsClass);
+	Prefs::Get().LoadPrefsJson();
+	{
+		TestPrefsClass* prefsObject = CreateObject<TestPrefsClass>(nullptr, "TestObject");
+		prefsObject->stringList.Clear();
+		prefsObject->stringList.AddRange({ "item0", "item1", "item2", "item3" });
+
+		prefsObject->prefsStruct.nameList.Clear();
+		prefsObject->prefsStruct.nameList.AddRange({ "name0", "name1" });
+		prefsObject->prefsStruct.colorValue = Color::RGBA(128, 64, 32);
+
+		prefsObject->Destroy();
+	}
+	Prefs::Get().SavePrefsJson();
+
+	Prefs::Get().LoadPrefsJson();
+	{
+		TestPrefsClass* prefsObject = CreateObject<TestPrefsClass>(nullptr, "TestObject");
+		EXPECT_EQ(prefsObject->stringList.GetSize(), 4);
+		for (int i = 0; i < 4; ++i)
+		{
+			EXPECT_EQ(prefsObject->stringList[i], String::Format("item{}", i));
+		}
+
+		EXPECT_EQ(prefsObject->prefsStruct.nameList.GetSize(), 2);
+		for (int i = 0; i < 2; ++i)
+		{
+			EXPECT_EQ(prefsObject->prefsStruct.nameList[i], String::Format("name{}", i));
+		}
+
+		EXPECT_EQ(prefsObject->prefsStruct.colorValue.ToU32(), Color::RGBA(128, 64, 32).ToU32());
+
+		prefsObject->Destroy();
+	}
+	CE_DEREGISTER_TYPES(TestPrefsClass, TestPrefsStruct);
+	TEST_END;
+}
+
 #pragma endregion
 
 
@@ -3147,6 +3444,44 @@ TEST(JobSystem, Basic)
 		for (int i = 0; i < numThreads; i++)
 		{
 			JobSleep* job = new JobSleep(500);
+			job->Start();
+		}
+
+		manager.DeactivateWorkersAndWait();
+
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 0.8);
+
+		JobContext::PopGlobalContext();
+	}
+
+	TEST_END;
+}
+
+TEST(JobSystem, Jobs)
+{
+	TEST_BEGIN;
+
+	{
+		JobManagerDesc desc{};
+		desc.totalThreads = 0;
+
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		auto prev = clock();
+		int numThreads = 0;
+		numThreads = manager.GetNumThreads();
+		numThreads = Math::Max(2, numThreads); // Run only 2 threads
+
+		for (int i = 0; i < numThreads; i++)
+		{
+			Job* job = new JobFunction([&](Job* job)
+				{
+					Thread::SleepFor(500); // 500 milliseconds
+				});
 			job->Start();
 		}
 

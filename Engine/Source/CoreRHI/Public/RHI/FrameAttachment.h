@@ -34,9 +34,9 @@ namespace CE::RHI
         
         AttachmentID attachmentId{};
         AttachmentLifetimeType lifetime{};
+
 		//! Either a buffer or texture
 		StaticArray<RHIResource*, RHI::Limits::MaxSwapChainImageCount> resources{};
-		//RHIResource* resource = nullptr;
 	};
     
 } // namespace CE::RHI

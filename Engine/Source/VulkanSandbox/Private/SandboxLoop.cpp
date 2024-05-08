@@ -104,9 +104,9 @@ namespace CE
 
 		gEngine->Initialize();
 
-		main->Init(mainWindow);
-
 		gEngine->PostInitialize();
+		
+		main->Init(mainWindow);
 
 		auto tickDelegate = MemberDelegate(&SandboxLoop::AlternativeTick, this);
 		this->tickDelegateHandle = tickDelegate.GetHandle();

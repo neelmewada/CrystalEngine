@@ -7,7 +7,7 @@ namespace CE::Widgets
 	{
         allowVerticalScroll = allowHorizontalScroll = false;
         receiveMouseEvents = true;
-        rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
+        rootPadding = Vec4(1, 1, 1, 1) * 1.5f;
 
         CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("DockSplitView");
         full->dockSpace = this;
@@ -20,8 +20,15 @@ namespace CE::Widgets
 	{
         if (nativeWindow)
         {
-            nativeWindow->platformWindow->SetHitTestDelegate(nullptr);
+            nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
         }
+	}
+
+	CDockSplitView* CDockSpace::GetRootDockSplit() const
+	{
+        if (dockSplits.IsEmpty())
+            return nullptr;
+        return dockSplits[0];
 	}
 
     bool CDockSpace::Split(CDockSplitView* originalSplit, f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1, Name splitName2)
@@ -169,7 +176,7 @@ namespace CE::Widgets
 
         if (nativeWindow)
         {
-	        nativeWindow->platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+	        nativeWindow->GetPlatformWindow()->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
         }
     }
 
@@ -232,7 +239,7 @@ namespace CE::Widgets
 
         if (GetDockType() == CDockType::Major) // Major dock space
         {
-        	PlatformWindow* nativeWindow = GetRootNativeWindow()->platformWindow;
+        	PlatformWindow* nativeWindow = GetRootNativeWindow()->GetPlatformWindow();
 
             u32 w = 0, h = 0;
             nativeWindow->GetDrawableWindowSize(&w, &h);
@@ -241,25 +248,25 @@ namespace CE::Widgets
 
             painter->SetBrush(brush);
 
-            if (nativeWindow != nullptr && nativeWindow->IsBorderless() && !nativeWindow->IsMaximized() && !nativeWindow->IsFullscreen())
-            {
-                f32 windowEdgeSize = 2.0f;
-                pen.SetWidth(windowEdgeSize);
-                painter->SetPen(pen);
-            }
-
             painter->DrawRect(Rect::FromSize(0, 0, w, h));
 
             if (nativeWindow != nullptr && nativeWindow->IsBorderless() && !nativeWindow->IsMaximized() && !nativeWindow->IsFullscreen())
             {
-                f32 windowEdgeSize = 1.25f;
-                pen.SetWidth(windowEdgeSize);
-                pen.SetColor(Color::RGBA(15, 15, 15));
-                painter->SetPen(pen);
+                pen = CPen(Color::RGBA(15, 15, 15));
+                pen.SetWidth(2.0f);
 
                 painter->SetBrush(CBrush());
+                painter->SetPen(pen);
 
-                painter->DrawRect(Rect::FromSize(0, 0, w, h));
+                nativeWindow->GetWindowSize(&w, &h);
+
+                painter->DrawRect(Rect::FromSize(Vec2(), Vec2(w, h)));
+
+                pen.SetColor(Color::RGBA(50, 50, 50));
+                pen.SetWidth(1.0f);
+                painter->SetPen(pen);
+
+                painter->DrawRect(Rect::FromSize(Vec2(2, 2), Vec2(w - 4, h - 4)));
             }
 
             // Draw menu items

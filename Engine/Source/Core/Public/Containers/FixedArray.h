@@ -126,7 +126,7 @@ namespace CE
 		inline void Resize(u32 newSize)
 		{
 			u32 oldCount = count;
-			count = std::min(newSize, impl.size());
+			count = newSize < impl.size() ? newSize : impl.size();
 			
 			for (int i = oldCount; i < count; i++)
 			{

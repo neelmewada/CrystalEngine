@@ -22,19 +22,21 @@ namespace CE
 
 		virtual void Tick(f32 delta);
 
-		inline Actor* GetActor() const { return owner; }
+		Actor* GetActor() const { return owner; }
 
 		CE::Scene* GetScene() const;
 
-		inline bool IsEnabled() const { return isEnabled; }
+		virtual bool IsEnabled() const;
 
-		inline void SetEnabled(bool enabled) { isEnabled = enabled; }
+		bool IsSelfEnabled() const { return isEnabled; }
 
-		inline bool CanTick() const { return canTick; }
+		void SetEnabled(bool enabled) { isEnabled = enabled; }
 
-		inline void SetCanTick(bool canTick) { this->canTick = canTick; }
+		bool CanTick() const { return canTick; }
 
-		inline bool HasBegunPlaying() const { return hasBegunPlaying; }
+		void SetCanTick(bool canTick) { this->canTick = canTick; }
+
+		bool HasBegunPlaying() const { return hasBegunPlaying; }
 
 	protected:
 
@@ -42,16 +44,17 @@ namespace CE
 		bool canTick = true;
 
 		FIELD()
-		bool isEnabled = true;
-
-		FIELD()
 		Actor* owner = nullptr;
 
 	private:
 
+		FIELD()
+		bool isEnabled = true;
+
 		b8 hasBegunPlaying = false;
 
 		friend class Actor;
+		friend class RendererSubsystem;
 	};
 
 } // namespace CE

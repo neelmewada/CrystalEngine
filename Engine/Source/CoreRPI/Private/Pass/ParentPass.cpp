@@ -13,6 +13,7 @@ namespace CE::RPI
 		if (!passes.Exists(childPass))
 		{
 			passes.Add(childPass);
+			childPass->renderPipeline = renderPipeline;
 		}
 	}
 
@@ -31,6 +32,10 @@ namespace CE::RPI
 
     void ParentPass::Clear()
     {
+		for (Pass* pass : passes)
+		{
+			pass->Destroy();
+		}
 		passes.Clear();
     }
 

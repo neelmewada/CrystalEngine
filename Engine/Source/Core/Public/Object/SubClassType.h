@@ -63,6 +63,11 @@ namespace CE
 			return baseClassType;
 		}
 
+		ClassType* GetClassType() const
+		{
+			return type;
+		}
+
 		inline bool operator==(ClassType* other) const
 		{
 			return type == other;

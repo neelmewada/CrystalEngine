@@ -1,13 +1,12 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreApplication.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
 #include "CrystalWidgets.h"
 
 #include "EditorCore.h"
-#include "EditorWidgets.h"
 #include "CrystalEditor.h"
 
 #include <cxxopts.hpp>

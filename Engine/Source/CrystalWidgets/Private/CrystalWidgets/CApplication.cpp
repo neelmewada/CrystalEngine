@@ -41,7 +41,7 @@ namespace CE::Widgets
 		defaultFontName = initInfo.defaultFontName;
 		defaultFont = initInfo.defaultFont;
 		scheduler = initInfo.scheduler;
-		numFramesInFlight = initInfo.numFramesInFlight;
+		numFramesInFlight = scheduler->GetFramesInFlight();
 		resourceLoader = initInfo.resourceLoader;
 
 		CE_ASSERT(resourceLoader != nullptr, "CApplication passed with null resource loader!");
@@ -70,7 +70,7 @@ namespace CE::Widgets
 
 	void CApplication::Tick()
 	{
-		constexpr u32 destroyAfterFrames = Limits::MaxSwapChainImageCount;
+		constexpr u32 destroyAfterFrames = RHI::Limits::MaxSwapChainImageCount;
 
 		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
 		{
@@ -166,7 +166,7 @@ namespace CE::Widgets
 
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			CWidget* curHoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->owner);
+			CWidget* curHoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->GetOwner());
 			if (curHoveredWidget != nullptr)
 			{
 				hoveredWidget = curHoveredWidget;
@@ -180,7 +180,7 @@ namespace CE::Widgets
 
 		if (hoveredWidget && hoveredWidget->GetNativeWindow())
 		{
-			PlatformWindow* platformWindow = hoveredWidget->GetNativeWindow()->platformWindow;
+			PlatformWindow* platformWindow = hoveredWidget->GetNativeWindow()->GetPlatformWindow();
 			if (platformWindow && !platformWindow->IsFocused())
 			{
 				hoveredWidget = nullptr;
@@ -535,9 +535,9 @@ namespace CE::Widgets
 		
 		for (auto window : platformWindows)
 		{
-			if (window->renderer != nullptr)
+			if (window->GetRenderer() != nullptr)
 			{
-				window->renderer->RegisterFont(fontName, fontAtlas);
+				window->GetRenderer()->RegisterFont(fontName, fontAtlas);
 			}
 		}
 	}
@@ -552,20 +552,37 @@ namespace CE::Widgets
 		globalStyleSheet = CSSStyleSheet::Load(path, this);
 	}
 
-	void CApplication::BuildFrameGraph()
+	void CApplication::BuildFrameAttachments()
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			PlatformWindow* platformWindow = platformWindows[i]->platformWindow;
+			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
 
 			if (!platformWindow)
 				continue;
 
 			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-			Name id = String::Format("{}", platformWindow->GetWindowId());
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
 
-			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->swapChain);
+			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
+		}
+	}
+
+	void CApplication::BuildFrameGraph()
+	{
+		for (int i = 0; i < platformWindows.GetSize(); ++i)
+		{
+			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
+
+			if (!platformWindow)
+				continue;
+
+			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
+
+			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
 
 			if (!platformWindow->IsMinimized() && platformWindow->IsShown())
 			{
@@ -573,24 +590,39 @@ namespace CE::Widgets
 				{
 					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 					swapChainAttachment.attachmentId = id;
-					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
-					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					if (platformWindows[i]->owner->clearScreen)
+					{
+						swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+						swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					}
+					else
+					{
+						swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+					}
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 					swapChainAttachment.multisampleState.sampleCount = 1;
 					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-					scheduler->PresentSwapChain(platformWindows[i]->swapChain);
+					scheduler->PresentSwapChain(platformWindows[i]->GetSwapChain());
 				}
 				scheduler->EndScope();
 			}
 		}
 	}
 
+	Name CApplication::GetNativeWindowSwapChainId(CPlatformWindow* platformWindow)
+	{
+		if (platformWindow == nullptr || platformWindow->platformWindow == nullptr)
+			return "";
+
+		return String::Format("Window_{}", platformWindow->platformWindow->GetWindowId());
+	}
+
 	void CApplication::SetDrawListMasks(RHI::DrawListMask& outMask)
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			outMask.Set(platformWindows[i]->drawListTag);
+			outMask.Set(platformWindows[i]->GetDrawListTag());
 		}
 	}
 
@@ -598,7 +630,7 @@ namespace CE::Widgets
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			if (!platformWindows[i]->owner->IsVisible() || !platformWindows[i]->owner->IsEnabled())
+			if (!platformWindows[i]->GetOwner()->IsVisible() || !platformWindows[i]->GetOwner()->IsEnabled())
 				continue;
 
 			const auto& packets = platformWindows[i]->FlushDrawPackets(imageIndex);
@@ -614,14 +646,14 @@ namespace CE::Widgets
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			PlatformWindow* platformWindow = platformWindows[i]->platformWindow;
+			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
 
 			if (!platformWindow)
 				continue;
 
-			Name id = String::Format("{}", platformWindow->GetWindowId());
+			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
 
-			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->drawListTag));
+			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(platformWindows[i]->GetDrawListTag()));
 		}
 	}
 
@@ -629,11 +661,11 @@ namespace CE::Widgets
 	{
 		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
-			if (platformWindows[i]->platformWindow == nativeWindow)
+			if (platformWindows[i]->GetPlatformWindow() == nativeWindow)
 			{
-				platformWindows[i]->owner->nativeWindow = nullptr; // Clear the nativeWindow pointer
-				platformWindows[i]->owner->Destroy();
-				if (!platformWindows[i]->isDeleted)
+				platformWindows[i]->GetOwner()->nativeWindow = nullptr; // Clear the nativeWindow pointer
+				platformWindows[i]->GetOwner()->Destroy();
+				if (!platformWindows[i]->IsDeleted())
 				{
 					platformWindows[i]->platformWindow = nullptr;
 					delete platformWindows[i];
@@ -651,7 +683,7 @@ namespace CE::Widgets
 	{
 		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
-			if (platformWindows[i]->platformWindow == nativeWindow)
+			if (platformWindows[i]->GetPlatformWindow() == nativeWindow)
 			{
 				platformWindows.RemoveAt(i);
 				break;
@@ -708,6 +740,16 @@ namespace CE::Widgets
 		return PlatformApplication::Get()->GetScreenBounds(displayIndex);
 	}
 
+	void CApplication::OnStyleSheetsReloaded()
+	{
+		for (auto platformWindow : platformWindows)
+		{
+			platformWindow->owner->SetNeedsStyle();
+			platformWindow->owner->SetNeedsLayout();
+			platformWindow->owner->SetNeedsPaint();
+		}
+	}
+
 	void CApplication::OnWidgetDestroyed(CWidget* widget)
 	{
 		for (int i = 0; i < widgetsPressedPerMouseButton.GetSize(); i++)
@@ -723,7 +765,7 @@ namespace CE::Widgets
 	{
 		for (CPlatformWindow* window : platformWindows)
 		{
-			if (window->platformWindow == nativeWindow)
+			if (window->GetPlatformWindow() == nativeWindow)
 			{
 				window->owner->SetNeedsStyle();
 				window->owner->SetNeedsLayout();
@@ -736,7 +778,7 @@ namespace CE::Widgets
 	{
 		for (CPlatformWindow* window : platformWindows)
 		{
-			if (window->platformWindow == nativeWindow)
+			if (window->GetPlatformWindow() == nativeWindow)
 			{
 				window->owner->SetNeedsStyle();
 				window->owner->SetNeedsLayout();

@@ -8,6 +8,41 @@ namespace CE::RPI
 		
 	}
 
+	void Pass::AddAttachmentBinding(const PassAttachmentBinding& attachmentBinding)
+	{
+		if (attachmentBinding.slotType == PassSlotType::Input)
+		{
+			inputBindings.Add(attachmentBinding);
+			inputBindings.Top().ownerPass = this;
+		}
+		else if (attachmentBinding.slotType == PassSlotType::Output)
+		{
+			outputBindings.Add(attachmentBinding);
+			outputBindings.Top().ownerPass = this;
+		}
+		else if (attachmentBinding.slotType == PassSlotType::InputOutput)
+		{
+			inputOutputBindings.Add(attachmentBinding);
+			inputOutputBindings.Top().ownerPass = this;
+		}
+	}
+
+	void Pass::AddSlot(const PassSlot& slot)
+	{
+		slots.Add(slot);
+	}
+
+	PassSlot* Pass::FindSlot(const Name& name)
+	{
+		for (PassSlot& slot : slots)
+		{
+			if (slot.name == name)
+				return &slot;
+		}
+
+		return nullptr;
+	}
+
 	PassAttachmentBinding* Pass::FindInputBinding(const Name& name)
 	{
 		for (int i = 0; i < inputBindings.GetSize(); i++)
@@ -49,13 +84,14 @@ namespace CE::RPI
 		return nullptr;
 	}
 
-    Pass::Pass()
-    {
-		if (drawListTag.IsValid())
-		{
-			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
-		}
+	Name Pass::GetScopeId() const
+	{
+		return String::Format("{}_{}", GetName(), GetUuid());
+	}
 
+	Pass::Pass()
+    {
+		
     }
 
 } // namespace CE::RPI

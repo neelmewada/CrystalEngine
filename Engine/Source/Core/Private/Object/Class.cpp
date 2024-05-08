@@ -57,17 +57,17 @@ namespace CE
         return cachedAttributes;
     }
 
-    bool StructType::HasAttribute(const String& key)
+    bool StructType::HasAttribute(const Name& key)
     {
         if (!attributesCached)
         {
             CacheAllAttributes();
         }
 
-        return cachedAttributes.IsMap() && cachedAttributes.HasKey(Name(key));
+        return cachedAttributes.IsMap() && cachedAttributes.HasKey(key);
     }
 
-    Attribute StructType::GetAttribute(const CE::String& key)
+    Attribute StructType::GetAttribute(const CE::Name& key)
     {
         if (!attributesCached)
         {
@@ -234,7 +234,7 @@ namespace CE
         if (!attribs.IsMap())
             return;
 
-		static HashSet<Name> disallowInheritance = { "Abstract", "abstract" };
+		static const HashSet<Name> disallowInheritance = { "Abstract", "abstract" };
 
         auto& table = attribs.GetTableValue();
 
@@ -468,6 +468,12 @@ namespace CE
     {
         if (superTypesCached)
             return;
+
+        bool isModuleLoaded = ModuleManager::Get().IsModuleLoaded(GetClassModule());
+        if (!isModuleLoaded)
+        {
+            CE_LOG(Warn, All, "ClassType accessed without loading the module the class belongs to!");
+        }
 
 		superTypesCached = true;
 

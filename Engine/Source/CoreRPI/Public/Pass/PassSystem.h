@@ -2,6 +2,7 @@
 
 namespace CE::RPI
 {
+	class RasterPass;
 
 	class CORERPI_API PassSystem
 	{
@@ -11,9 +12,21 @@ namespace CE::RPI
 
 		void Shutdown();
 
+		static PassSystem& Get();
+
+		void RegisterTemplate(Name templateName, Pass* pass);
+
+		void RegisterTemplate(Pass* pass);
+
+		Pass* CreatePass(Name templateName, Name newPassName = "");
+
+		Pass* CreatePass(Object* outer, Name templateName, Name newPassName = "");
+
 	private:
 
+		PassSystem() = default;
 
+		HashMap<Name, Pass*> passTemplates{};
 	};
     
 } // namespace CE::RPI

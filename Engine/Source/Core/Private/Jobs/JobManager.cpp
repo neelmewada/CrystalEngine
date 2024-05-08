@@ -401,10 +401,8 @@ namespace CE
 		auto oldFlags = job->GetDependentCountAndFlags();
 		job->SetDependentCountAndFlags(oldFlags | Job::FLAGS_FINISHED);
 
-		job->Finish();
-
 		{
-			LockGuard<SharedMutex> lock{ job->dependentJobsMutex };
+			LockGuard lock{ job->dependentJobsMutex };
 
 			for (auto dependent : job->dependentJobs)
 			{
@@ -414,6 +412,8 @@ namespace CE
 				}
 			}
 		}
+
+		job->Finish();
 
 		if (isAutoDelete)
 		{

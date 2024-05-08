@@ -14,10 +14,16 @@ namespace CE
 			return nullptr;
 		if (rootComponent)
 			rootComponent->Destroy();
+		rootComponent = nullptr;
 		
 		if (name.IsEmpty())
 			name = componentType->GetName().GetLastComponent();
 		rootComponent = CreateObject<SceneComponent>(this, name, OF_NoFlags, componentType);
+
+		if (scene)
+		{
+			scene->OnRootComponentSet(rootComponent, this);
+		}
 
 		return rootComponent;
 	}
@@ -45,6 +51,11 @@ namespace CE
 		if (rootComponent) // component can be set to nullptr
 		{
 			rootComponent->owner = this;
+
+			if (scene)
+			{
+				scene->OnRootComponentSet(rootComponent, this);
+			}
 		}
 	}
 
@@ -143,5 +154,13 @@ namespace CE
 			child->Tick(delta);
 		}
     }
+
+	bool Actor::IsEnabled() const
+	{
+		if (!parent)
+			return isEnabled;
+
+		return isEnabled && parent->IsEnabled();
+	}
 
 } // namespace CE

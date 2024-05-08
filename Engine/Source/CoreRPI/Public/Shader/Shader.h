@@ -7,8 +7,10 @@ namespace CE::RPI
 	{
 	public:
 
-		Shader();
+		Shader(RHI::DrawListTag drawListTag = {});
 		~Shader();
+
+		Name GetName();
 
 		inline u32 GetVariantCount() const { return variants.GetSize(); }
 
@@ -19,7 +21,14 @@ namespace CE::RPI
 			return variants[index]; 
 		}
 
-		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor& variantDesc);
+		RPI::ShaderVariant* GetDefaultVariant() const { return GetVariant(GetDefaultVariantIndex()); }
+
+		RHI::PipelineState* GetDefaultPipeline() const
+		{
+			RPI::ShaderVariant* variant = GetDefaultVariant();
+
+			return variant->GetPipeline();
+		}
 
 		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor2& variantDesc);
 
@@ -27,11 +36,17 @@ namespace CE::RPI
 
 		inline void SetDefaultVariantIndex(u32 index) { defaultVariantIndex = index; }
 
+		void SetDrawListTag(RHI::DrawListTag tag) { drawListTag = tag; }
+
+		RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
+
 	private:
 
 		u32 defaultVariantIndex = 0;
 
 		Array<RPI::ShaderVariant*> variants{};
+
+		RHI::DrawListTag drawListTag{};
 
 		friend class Material;
 	};

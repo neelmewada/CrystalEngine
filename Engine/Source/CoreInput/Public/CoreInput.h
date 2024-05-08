@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreApplication.h"
 
 #include "Input/CoreInputTypes.h"

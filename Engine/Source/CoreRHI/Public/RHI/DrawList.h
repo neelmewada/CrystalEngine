@@ -10,6 +10,8 @@ namespace CE::RHI
 
 	using DrawListTagRegistry = TagRegistry<DrawListTag::IndexType, Limits::Pipeline::DrawListTagCount>;
 
+	using DrawListView = ArrayView<DrawItemProperties>;
+
 	class CORERHI_API DrawList final
 	{
 	public:
@@ -20,9 +22,9 @@ namespace CE::RHI
 
 		void Merge(const DrawList& other);
 
-		inline u32 GetDrawItemCount() const { return drawItems.GetSize(); }
-
-		inline const DrawItemProperties& GetDrawItem(u32 index) const { return drawItems[index]; }
+		u32 GetDrawItemCount() const { return drawItems.GetSize(); }
+		
+		const DrawItemProperties& GetDrawItem(u32 index) const { return drawItems[index]; }
 
 	private:
 

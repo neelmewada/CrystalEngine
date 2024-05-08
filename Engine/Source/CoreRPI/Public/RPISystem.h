@@ -3,8 +3,28 @@
 namespace CE::RPI
 {
 	class Texture;
+	class ShaderCollection;
 
-	/// @brief RPISystem owns all scenes.
+	enum class BuiltinDrawItemTag
+	{
+		None = 0,
+		Depth,
+		Opaque,
+		Shadow,
+		Skybox,
+		UI,
+		Transparent,
+		COUNT
+	};
+	ENUM_CLASS(BuiltinDrawItemTag);
+
+	struct RPISystemInitInfo
+	{
+		RPI::ShaderCollection* standardShader = nullptr;
+		RPI::ShaderCollection* iblConvolutionShader = nullptr;
+	};
+
+	/// @brief RPISystem owns and manages all scenes.
 	class CORERPI_API RPISystem final
 	{
 		CE_NO_COPY(RPISystem)
@@ -12,37 +32,55 @@ namespace CE::RPI
 
 		static RPISystem& Get();
 
-		inline RHI::DrawListTagRegistry* GetDrawListTagRegistry()
+		RHI::DrawListTagRegistry* GetDrawListTagRegistry()
 		{
 			return rhiSystem.GetDrawListTagRegistry();
 		}
 
 		void Initialize();
+		void PostInitialize(const RPISystemInitInfo& initInfo);
 
 		void Shutdown();
 
-		inline RPI::Texture* GetDefaultAlbedoTex() const
+		void SimulationTick(u32 imageIndex);
+		void RenderTick(u32 imageIndex);
+
+		f32 GetCurrentTime() const;
+
+		RPI::Texture* GetDefaultAlbedoTex() const
 		{
 			return defaultAlbedoTex;
 		}
 
-		inline RPI::Texture* GetDefaultRoughnessTex() const
+		RPI::Texture* GetDefaultRoughnessTex() const
 		{
 			return defaultRoughnessTex;
 		}
 
-		inline RPI::Texture* GetDefaultNormalTex() const
+		RPI::Texture* GetDefaultNormalTex() const
 		{
 			return defaultNormalTex;
 		}
 
+		RPI::Texture* GetBrdfLutTexture() const
+		{
+			return brdfLutTexture;
+		}
+
 		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
 
-		inline const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
-		inline RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
+		const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
+		RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
 
-		inline const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
-		inline RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
+		const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
+		RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
+
+		DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
+
+		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
+		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
+
+		void EnqueueDestroy(RHI::RHIResource* rhiResource);
 
 	private:
 
@@ -51,6 +89,19 @@ namespace CE::RPI
 		void CreateDefaultTextures();
 		void CreateFullScreenQuad();
 
+		void CreateBrdfLutTexture();
+
+		bool isInitialized = false;
+
+		struct RHIDestructionEntry
+		{
+			RHI::RHIResource* resource = nullptr;
+			int frameCounter = 0;
+		};
+
+		Array<RHIDestructionEntry> rhiDestructionQueue{};
+		SharedMutex rhiDestructionQueueMutex{};
+		
 		RHI::RHISystem rhiSystem{};
 		Array<RHI::Buffer*> vertexBuffers{};
 		Array<RHI::VertexBufferView> quadVertexBufferViews{};
@@ -59,14 +110,30 @@ namespace CE::RPI
 		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
 		RHI::DrawLinearArguments textQuadDrawArgs{};
 
-		Array<ScenePtr> scenes{};
+		Array<Scene*> scenes{};
+
+		RHI::ShaderResourceGroupLayout sceneSrgLayout{};
+		RHI::ShaderResourceGroupLayout viewSrgLayout{};
+
+		RPI::ShaderCollection* standardShader = nullptr;
+		RPI::ShaderCollection* iblConvolutionShader = nullptr;
 
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;
 		RPI::Texture* defaultRoughnessTex = nullptr;
 
+		RPI::Texture* brdfLutTexture = nullptr;
+
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
+
+		HashMap<BuiltinDrawItemTag, RHI::DrawListTag> builtinDrawTags{};
+
+		b8 isFirstTick = true;
+		clock_t startTime;
+		f32 currentTime = 0.0f;
+
+		friend class RPI::Scene;
 	};
     
 } // namespace CE::RPI

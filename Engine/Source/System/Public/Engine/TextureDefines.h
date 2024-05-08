@@ -135,6 +135,19 @@ namespace CE
 	};
 	ENUM_CLASS(TextureDimension);
 
+	ENUM()
+	enum MSAA
+	{
+		ECONST(Display = "x1")
+		MSAA1,
+		ECONST(Display = "x2")
+		MSAA2,
+		ECONST(Display = "x4")
+		MSAA4,
+		ECONST(Display = "x8")
+		MSAA8
+	};
+
 } // namespace CE
 
 #include "TextureDefines.rtti.h"

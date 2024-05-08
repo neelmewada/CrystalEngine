@@ -74,9 +74,9 @@ namespace CE::Editor
 		IFileDialog* pfd = nullptr;
 		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
 		{
-			Array<COMDLG_FILTERSPEC> fileTypes{};
-			Array<std::wstring> descStore{};
-			Array<std::wstring> extStore{};
+			List<COMDLG_FILTERSPEC> fileTypes{};
+			List<std::wstring> descStore{};
+			List<std::wstring> extStore{};
 
 			for (const auto& inFileType : inFileTypes)
 			{

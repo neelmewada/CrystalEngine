@@ -7,6 +7,7 @@
 
 // GameSystem includes
 #include "Engine/GameEngine.h"
+#include "Engine/Subsystems/GameViewportSubsystem.h"
 
 namespace CE
 {

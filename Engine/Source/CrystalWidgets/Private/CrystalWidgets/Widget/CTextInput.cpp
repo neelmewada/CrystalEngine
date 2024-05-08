@@ -30,8 +30,6 @@ namespace CE::Widgets
         if (display.IsEmpty())
             display = " ";
 
-        Vec2 base = Super::CalculateIntrinsicSize(width, height);
-
         Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
 
         f32 fontSize = 14;
@@ -43,14 +41,23 @@ namespace CE::Widgets
         return CalculateTextSize(display, fontSize, fontName, 0);
     }
 
-    void CTextInput::SetText(const String& value)
+    bool CTextInput::SetText(const String& value)
     {
+        if (inputValidator.IsValid() && !inputValidator.Invoke(value))
+        {
+            return false;
+        }
+
         this->text = value;
 
         RecalculateOffsets();
 
+        emit OnTextChanged(this);
+
         SetNeedsLayout();
         SetNeedsPaint();
+
+        return true;
     }
 
     void CTextInput::SetHint(const String& hint)
@@ -69,6 +76,17 @@ namespace CE::Widgets
 
         SetNeedsLayout();
         SetNeedsPaint();
+    }
+
+    void CTextInput::StopEditing(bool restoreOriginal)
+    {
+        if (restoreOriginal)
+        {
+            text = originalText;
+            isEditing = false;
+        }
+
+        Unfocus();
     }
 
     bool CTextInput::IsTextSelected()
@@ -114,6 +132,11 @@ namespace CE::Widgets
         Super::OnFocusLost();
 
         DeselectAll();
+
+        if (isEditing)
+        {
+            emit OnEditingFinished(this);
+        }
 
         textScrollOffset = 0;
         timer->Stop();
@@ -236,7 +259,10 @@ namespace CE::Widgets
             newText.InsertAt(string[i], insertPos + i);
         }
 
-        SetText(newText);
+        bool success = SetText(newText);
+        if (!success)
+            return;
+
         SetCursorPos(insertPos + string.GetLength());
     }
 
@@ -248,7 +274,10 @@ namespace CE::Widgets
         String newText = text;
         newText.Remove(startIndex, count);
 
-        SetText(newText);
+        bool success = SetText(newText);
+        if (!success)
+            return;
+
         SetCursorPos(startIndex);
     }
 
@@ -350,6 +379,10 @@ namespace CE::Widgets
                     {
                         selectedIdx = characterOffsets.GetSize();
                     }
+                }
+                else if (selectedIdx == -1)
+                {
+                    selectedIdx = 0;
                 }
 
                 if (selectedIdx != -1)
@@ -471,7 +504,7 @@ namespace CE::Widgets
                     c += ('A' - 'a');
                 }
 
-                if (shiftPressed && (int)keyEvent->key >= (int)KeyCode::N0 && (int)keyEvent->key <= (int)KeyCode::N9)
+                if (shiftPressed)
                 {
 	                switch (keyEvent->key)
 	                {
@@ -504,6 +537,36 @@ namespace CE::Widgets
                         break;
                     case KeyCode::N9:
                         c = '(';
+                        break;
+	                case KeyCode::Semicolon:
+                        c = ':';
+                        break;
+	                case KeyCode::LeftBracket:
+                        c = '{';
+                        break;
+	                case KeyCode::RightBracket:
+                        c = '}';
+                        break;
+	                case KeyCode::Equals:
+                        c = '+';
+                        break;
+	                case KeyCode::Minus:
+                        c = '_';
+                        break;
+	                case KeyCode::Backquote:
+                        c = '~';
+                        break;
+	                case KeyCode::Comma:
+                        c = '<';
+                        break;
+	                case KeyCode::Period:
+                        c = '>';
+                        break;
+	                case KeyCode::Slash:
+                        c = '?';
+                        break;
+	                case KeyCode::Quote:
+                        c = '\"';
                         break;
 	                }
                 }
@@ -637,6 +700,7 @@ namespace CE::Widgets
             else if (keyEvent->key == KeyCode::Escape)
             {
                 text = originalText;
+                isEditing = false;
                 Unfocus();
             }
         }
@@ -684,6 +748,11 @@ namespace CE::Widgets
         contentRect.min += padding.min;
         contentRect.max -= padding.max;
 
+        if (characterOffsets.IsEmpty())
+        {
+            textSize = painter->CalculateTextSize(" ");
+        }
+
         Rect textRect = rect.Translate(Vec2(padding.left - textScrollOffset, rect.GetSize().height / 2 - textSize.height / 2));
         textRect.max -= Vec2(padding.left + padding.right, rect.GetSize().height / 2 - textSize.height / 2);
 
@@ -692,10 +761,21 @@ namespace CE::Widgets
         selectionRange.min = Math::Max(0, selectionRange.min);
         selectionRange.max = Math::Min(selectionRange.max, (int)characterOffsets.GetSize() - 1);
 
+        //bool pushClipRect = characterOffsets.NonEmpty();
+
         // Add text scroll offset to negate its effect from Clip Rect
-        painter->PushClipRect(textRect.Translate(Vec2(textScrollOffset, 0)));
+        
+		painter->PushClipRect(textRect.Translate(Vec2(textScrollOffset, 0)));
         painter->PushChildCoordinateSpace(rect.min);
         {
+            if (characterOffsets.IsEmpty() && hint.NonEmpty())
+            {
+                painter->SetPen(CPen(Color::RGBA(255, 255, 255, 60)));
+                painter->DrawText(hint, textRect.min - rect.min);
+            }
+
+            painter->SetPen(pen);
+
             if (isEditing) // Edit mode
             {
                 // Draw text selection background
@@ -728,8 +808,18 @@ namespace CE::Widgets
 	                cursorRect = characterOffsets.Top().Translate(padding.min - Vec2(textScrollOffset, 0) - Vec2(cursorWidth / 2.0f, 0) +
 					   Vec2(characterOffsets.Top().GetSize().width, 0));
                 }
+                else if (characterOffsets.IsEmpty())
+                {
+                    cursorPos = 0;
+                    cursorRect.min = (padding.min - Vec2(textScrollOffset, 0) - Vec2(cursorWidth / 2.0f, 0));
+                }
                 cursorRect.max.x = cursorRect.min.x + cursorWidth;
                 cursorRect.max.y = cursorRect.min.y + textSize.height;
+                if (characterOffsets.IsEmpty())
+                {
+                    Vec2 size = painter->CalculateTextSize(" ");
+                    cursorRect.max.y = cursorRect.min.y + size.height;
+                }
                 
                 if (cursorState)
                 {
@@ -745,7 +835,7 @@ namespace CE::Widgets
             }
         }
         painter->PopChildCoordinateSpace();
-        painter->PopClipRect();
+		painter->PopClipRect();
     }
 
 } // namespace CE::Widgets

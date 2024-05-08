@@ -9,6 +9,10 @@ namespace CE::RHI
         Array<RHI::Texture*> attachments{};
     };
 
+
+    /**
+     * \brief A FrameBuffer in case of Vulkan.
+     */
     class CORERHI_API RenderTargetBuffer : public RHI::RHIResource
     {
     public:

@@ -21,7 +21,7 @@ namespace CE
 		void SetRootComponent(SceneComponent* rootComponent);
 
 		template<typename TSceneComponent> requires TIsBaseClassOf<SceneComponent, TSceneComponent>::Value
-		FORCE_INLINE TSceneComponent* SetRootComponent(const String& name = "")
+		TSceneComponent* SetRootComponent(const String& name = "")
 		{
 			return (TSceneComponent*)SetRootComponent(TSceneComponent::StaticType(), name);
 		}
@@ -29,27 +29,32 @@ namespace CE
 		void AttachActor(Actor* actor);
 		void DetachActor(Actor* actor);
 
-		inline Actor* GetParentActor() const { return parent; }
+		Actor* GetParentActor() const { return parent; }
 
-		inline CE::Scene* GetScene() const { return scene; }
+		CE::Scene* GetScene() const { return scene; }
 
 		virtual void OnBeginPlay();
 
 		virtual void Tick(f32 delta);
 
-		inline SceneComponent* GetRootComponent() const { return rootComponent; }
+		SceneComponent* GetRootComponent() const { return rootComponent; }
 
-		inline void SetLocalPosition(const Vec3& localPos)
+		void SetLocalPosition(const Vec3& localPos)
 		{
 			if (rootComponent)
 				rootComponent->SetLocalPosition(localPos);
 		}
 
+		bool IsEnabled() const;
+
+		void SetEnabled(bool enabled) { isEnabled = enabled; }
+
+		bool IsSelfEnabled() const { return isEnabled; }
+
 	protected:
 
 
 	private:
-        
 
 		FIELD()
 		SceneComponent* rootComponent = nullptr;
@@ -65,6 +70,9 @@ namespace CE
 
 		FIELD()
 		CE::Scene* scene = nullptr;
+
+		FIELD()
+		bool isEnabled = true;
 
 		b8 hasBegunPlaying = false;
 

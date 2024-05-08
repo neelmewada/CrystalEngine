@@ -2,10 +2,11 @@
 
 namespace CE::RHI
 {
+	class GraphicsPipelineCollection;
 
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
 	enum DrawArgumentsType
@@ -85,6 +86,9 @@ namespace CE::RHI
 		/// @brief The pipeline to use for this draw call.
 		RHI::PipelineState* pipelineState = nullptr;
 
+		/// @brief A collection of pipeline variants to use for draw call based on render pipeline.
+		RHI::GraphicsPipelineCollection* pipelineCollection = nullptr;
+
 		/// @brief Index buffer to bind for this draw call.
 		RHI::IndexBufferView* indexBufferView = nullptr;
 
@@ -122,8 +126,8 @@ namespace CE::RHI
 	{
 		DrawItemProperties() = default;
 
-		DrawItemProperties(const DrawItem* item, const DrawFilterMask filterMask = DrawFilterMask::ALL)
-			: item(item), drawFilterMask(filterMask)
+		DrawItemProperties(const DrawItem* item, f32 depth = 0.0f, const DrawFilterMask filterMask = DrawFilterMask::ALL)
+			: item(item), drawFilterMask(filterMask), depth(depth)
 		{}
 
 		const DrawItem* item = nullptr;
@@ -135,6 +139,8 @@ namespace CE::RHI
 
 		/// @brief A filter mask which helps decide if this item is supposed to be pushed to a CommandList for drawing.
 		DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
+
+		f32 depth = 0.0f;
 	};
 
 } // namespace CE::RPI

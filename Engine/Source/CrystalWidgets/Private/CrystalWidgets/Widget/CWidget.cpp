@@ -370,7 +370,7 @@ namespace CE::Widgets
 	{
 		if (NeedsLayout())
 		{
-			auto rootPadding = GetFinalRootPadding();
+			Vec4 rootPadding = GetFinalRootPadding();
 
 			Vec2 availableSize = Vec2(YGUndefined, YGUndefined);
 
@@ -390,7 +390,7 @@ namespace CE::Widgets
 					u32 w, h;
 					nativeWindow->GetWindowSize(&w, &h);
 					window->windowSize = Vec2(w, h);
-					availableSize = window->windowSize;
+					availableSize = window->windowSize - Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
 					rootOrigin = Vec2(0, 0);
 				}
 				else if (parentWindow)
@@ -874,7 +874,7 @@ namespace CE::Widgets
 			CWindow* window = (CWindow*)this;
 			if (window->nativeWindow != nullptr)
 			{
-				Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
+				Vec2i posInt = window->nativeWindow->GetPlatformWindow()->GetWindowPosition();
 				Vec2 pos = Vec2(posInt.x, posInt.y);
 				u32 w, h;
 				window->nativeWindow->GetWindowSize(&w, &h);
@@ -883,7 +883,7 @@ namespace CE::Widgets
 			}
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
 		if (nativeWindow == nullptr)
 			return {};
 
@@ -908,7 +908,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
+					Vec2i posInt = window->nativeWindow->GetPlatformWindow()->GetWindowPosition();
 					Vec2 pos = Vec2(posInt.x, posInt.y);
 					u32 w, h;
 					window->nativeWindow->GetWindowSize(&w, &h);
@@ -920,7 +920,7 @@ namespace CE::Widgets
 			return point;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
 		if (nativeWindow == nullptr)
 			return point;
 
@@ -947,7 +947,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2i posInt = window->nativeWindow->platformWindow->GetWindowPosition();
+					Vec2i posInt = window->nativeWindow->GetPlatformWindow()->GetWindowPosition();
 					Vec2 pos = Vec2(posInt.x, posInt.y);
 					u32 w, h;
 					window->nativeWindow->GetWindowSize(&w, &h);
@@ -959,7 +959,7 @@ namespace CE::Widgets
 			return rect;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
 		if (nativeWindow == nullptr)
 			return rect;
 
@@ -984,7 +984,7 @@ namespace CE::Widgets
 				CWindow* window = (CWindow*)this;
 				if (window->nativeWindow != nullptr)
 				{
-					Vec2 pos = window->nativeWindow->platformWindow->GetWindowPosition().ToVec2();
+					Vec2 pos = window->nativeWindow->GetPlatformWindow()->GetWindowPosition().ToVec2();
 
 					return point - (pos + rootOrigin);
 				}
@@ -993,7 +993,7 @@ namespace CE::Widgets
 			return point;
 		}
 
-		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->platformWindow;
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
 		if (nativeWindow == nullptr)
 			return point; // Should never happen
 
@@ -1044,7 +1044,8 @@ namespace CE::Widgets
 		{
 			if (owner->ownerWindow == nullptr)
 			{
-				renderer = owner->nativeWindow->renderer;
+				if (owner->nativeWindow)
+					renderer = owner->nativeWindow->renderer;
 				break;
 			}
 			owner = owner->ownerWindow;
@@ -1172,12 +1173,20 @@ namespace CE::Widgets
 			borderRadius = computedStyle.properties[CStylePropertyType::BorderRadius].vector;
 		}
 
+		Color foreground = computedStyle.GetForegroundColor();
+
 		CPen pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
 		CBrush brush = CBrush(); brush.SetColor(bgColor);
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
-		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+		Vec2 extraSize = Vec2();
+		if (IsWindow() && parent == nullptr)
+		{
+			extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
+		}
+
+		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
 
 		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
 		{
@@ -1193,7 +1202,7 @@ namespace CE::Widgets
 			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
 			if (texture)
 			{
-				brush.SetColor(Color::White());
+				brush.SetColor(foreground);
 				painter->SetBrush(brush);
 
 				painter->DrawTexture(rect, texture);
@@ -1314,7 +1323,12 @@ namespace CE::Widgets
 
 				if (clipChildren)
 				{
-					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+					Vec2 extraSize = Vec2();
+					if (IsWindow() && parent == nullptr)
+					{
+						extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
+					}
+					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
 					paintEvent->painter->PushClipRect(contentRect);
 				}
 

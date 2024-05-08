@@ -48,12 +48,12 @@ namespace CE::Widgets
         RPI::Shader* draw2dShader = nullptr;
         Name defaultFontName = "";
         RPI::FontAtlasAsset* defaultFont = nullptr;
-        u32 numFramesInFlight = 2;
         RHI::FrameScheduler* scheduler = nullptr;
         CWidgetResourceLoader* resourceLoader = nullptr;
         CApplicationStyleConstants styleConstants{};
     };
 
+    //! @brief CrystalWidgets application object. Responsible for managing the widgets framework.
     CLASS()
     class CRYSTALWIDGETS_API CApplication final : public Object, public ApplicationMessageHandler
     {
@@ -81,7 +81,10 @@ namespace CE::Widgets
 
         void LoadGlobalStyleSheet(const IO::Path& path);
 
+        void BuildFrameAttachments();
         void BuildFrameGraph();
+
+        Name GetNativeWindowSwapChainId(CPlatformWindow* platformWindow);
 
         void SetDrawListMasks(RHI::DrawListMask& outMask);
 
@@ -99,7 +102,9 @@ namespace CE::Widgets
 
         Rect GetScreenBounds(int displayIndex);
 
-    crystalwidgets_internal:
+        void OnStyleSheetsReloaded();
+
+    private:
 
         void OnWidgetDestroyed(CWidget* widget);
 
@@ -126,7 +131,7 @@ namespace CE::Widgets
 
         void SetFocus(CWidget* widget);
 
-    crystalwidgets_internal:
+    private:
 
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
@@ -162,6 +167,11 @@ namespace CE::Widgets
 
         friend class CWidget;
         friend class CTimer;
+        friend class CScrollBehavior;
+        friend class CDockWindow;
+        friend class CDockSpace;
+        friend class CPlatformWindow;
+        CE_WIDGET_FRIENDS();
     };
 
 } // namespace CE::Widgets

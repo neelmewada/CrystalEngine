@@ -12,6 +12,7 @@
 // ******************************************************
 // Basic headers
 #include "Misc/Exception.h"
+#include "Templates/IntrusivePtr.h"
 #include "Misc/Assert.h"
 #include "Misc/ByteUtils.h"
 #include "Misc/Defer.h"
@@ -26,6 +27,9 @@
 #include "PAL/Common/PlatformDirectories.h"
 #include "PAL/Common/PlatformProcess.h"
 #include "PAL/Common/PlatformTLS.h"
+
+// Special containers
+#include "Containers/PagedDynamicArray.h"
 
 // IO
 #include "IO/Path.h"
@@ -65,6 +69,7 @@
 // Jobs
 #include "Jobs/JobContext.h"
 #include "Jobs/Job.h"
+#include "Jobs/JobFunction.h"
 #include "Jobs/JobCompletion.h"
 #include "Jobs/WorkQueue.h"
 #include "Jobs/WorkThread.h"
@@ -78,6 +83,19 @@
 // ******************************************************
 // RTTI, Object & Serialization
 
+// Mono
+struct _MonoString;
+typedef _MonoString MonoString;
+struct _MonoObject;
+typedef _MonoObject MonoObject;
+struct _MonoType;
+typedef _MonoType MonoType;
+
+#include "Mono/MonoObject.h"
+#include "Mono/MonoMethod.h"
+#include "Mono/MonoClass.h"
+#include "Mono/MonoRuntime.h"
+
 // Serialization
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"
@@ -89,6 +107,7 @@
 
 // RTTI & Object
 #include "RTTI/RTTI.h"
+#include "Object/Interface.h"
 #include "Object/Object.h"
 #include "Object/Serialization.h"
 #include "Object/FieldSerializer.h"
@@ -98,6 +117,7 @@
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
 #include "Object/BasePrefs.h"
+#include "Object/Prefs.h"
 #include "Component/Component.h"
 #include "Object/Package.h"
 

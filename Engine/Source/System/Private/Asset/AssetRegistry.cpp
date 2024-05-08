@@ -217,7 +217,7 @@ namespace CE
 		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
 		{
 			auto projectAssetsPath = gProjectPath / "Game/Assets";
-
+			
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
 					auto relativePath = IO::Path::GetRelative(item, gProjectPath);
@@ -274,14 +274,21 @@ namespace CE
 #endif
 		}
 
-		// Engine assets
-		if (gProjectPath.Exists() && (gProjectPath / "Engine/Assets").Exists())
+		auto engineDir = gProjectPath;
+
+		if (!gProjectPath.Exists() || !(gProjectPath / "Engine/Assets").Exists())
 		{
-			auto projectAssetsPath = gProjectPath / "Engine/Assets";
+			engineDir = PlatformDirectories::GetEngineRootDir();
+		}
+
+		// Engine assets
+		if (engineDir.Exists() && (engineDir / "Engine/Assets").Exists())
+		{
+			auto projectAssetsPath = engineDir / "Engine/Assets";
 
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
-					auto relativePath = IO::Path::GetRelative(item, gProjectPath);
+					auto relativePath = IO::Path::GetRelative(item, engineDir);
 					auto relativePathStr = relativePath.RemoveExtension().GetString().Replace({ '\\' }, '/');
 					if (!relativePathStr.StartsWith("/"))
 						relativePathStr = "/" + relativePathStr;

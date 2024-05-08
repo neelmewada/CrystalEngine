@@ -26,6 +26,10 @@ namespace CE
 			return;
 		
 		OnBeforeDestroy();
+		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
+		{
+			Prefs::Get().SavePrefs(this);
+		}
 
 		// Unbind signals
 		UnbindAllSignals(this);
@@ -60,7 +64,7 @@ namespace CE
 		delete this;
 	}
 
-	bool Object::IsOfType(ClassType* classType)
+	bool Object::IsOfType(ClassType* classType) const
 	{
 		if (classType == nullptr)
 			return false;
@@ -177,7 +181,7 @@ namespace CE
 		return false;
 	}
 
-	bool Object::IsTransient()
+	bool Object::IsTransient() const
 	{
 		//Package* package = GetPackage();
 		//if (package != nullptr && package != this && package->IsTransient())
@@ -1094,7 +1098,6 @@ namespace CE
 
 	// - Bindings API -
 
-	// TODO: Change it to a SharedMutex & run tests.
 	static SharedRecursiveMutex bindingsMutex{};
 
 	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
@@ -1132,6 +1135,8 @@ namespace CE
 
 		if (!IsDefaultInstance())
 		{
+			Prefs::Get().LoadPrefs(this);
+
 			OnAfterConstruct();
 		}
 	}

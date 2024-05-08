@@ -10,7 +10,7 @@ namespace CE::RHI
 	class CORERHI_API DrawPacketBuilder final
 	{
 	public:
-		static constexpr u32 DrawItemCountMax = 16;
+		static constexpr u32 DrawItemCountMax = 32;
 
 		DrawPacketBuilder(IAllocator* allocator = nullptr);
 
@@ -27,6 +27,8 @@ namespace CE::RHI
 			Array<ShaderResourceGroup*> uniqueShaderResourceGroups{};
 
 			PipelineState* pipelineState = nullptr;
+
+			GraphicsPipelineCollection* pipelineCollection = nullptr;
 
 			DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
 		};

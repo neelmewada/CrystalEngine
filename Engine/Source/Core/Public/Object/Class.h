@@ -103,9 +103,9 @@ namespace CE
 
         const Attribute& GetAttributes() override;
 
-        bool HasAttribute(const CE::String& key) override;
+        bool HasAttribute(const CE::Name& key) override;
 
-        Attribute GetAttribute(const CE::String& key) override;
+        Attribute GetAttribute(const CE::Name& key) override;
 
 		IntPtr TryCast(IntPtr ptr, TypeId castToType) const
 		{
@@ -341,7 +341,7 @@ namespace CE
 
 			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
 
-			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, const Array<Variant>& params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
@@ -370,7 +370,7 @@ namespace CE
 
 			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
 
-			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, const Array<Variant>& params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{

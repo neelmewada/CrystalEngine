@@ -14,11 +14,13 @@ namespace CE::RPI
 		Vec2 pixelResolution = Vec2();
 	};
     
-	class CORERPI_API View final : public IntrusiveBase
+	class CORERPI_API View final : public InstanceBase
 	{
-	public:
-
+	private:
 		View();
+
+	public:
+		
 		~View();
 
 		enum UsageFlags
@@ -30,17 +32,45 @@ namespace CE::RPI
 			UsageCustom = BIT(3),
 		};
 
+		static View* CreateView(const Name& name, UsageFlags usageFlags);
+
 		void SetDrawListMask(const RHI::DrawListMask& mask);
 
-		inline RHI::DrawListMask GetDrawListMask() const
+		const RHI::DrawListMask& GetDrawListMask() const
 		{
 			return drawListMask;
 		}
 
-		inline RHI::DrawListContext* GetDrawListContext()
+		RHI::DrawListMask& GetDrawListMask()
+		{
+			return drawListMask;
+		}
+
+		RHI::DrawListContext* GetDrawListContext()
 		{
 			return &drawListContext;
 		}
+
+		UsageFlags GetUsageFlags() const { return usageFlags; }
+
+		void SetUsageFlags(UsageFlags usageFlags) { this->usageFlags = usageFlags; }
+
+		PerViewConstants& GetViewConstants() { return viewConstants; }
+
+		void SetShaderResourceGroup(RHI::ShaderResourceGroup* viewSrg);
+
+		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+
+		RHI::DrawList& GetDrawList(RHI::DrawListTag drawItemTag);
+
+		void Reset();
+		void Init(RHI::DrawListMask drawListMask);
+
+		void UpdateSrg(int imageIndex);
+
+		//! @brief Enqueues draw packets to this view.
+		//! The function is thread safe and is supposed to be called every frame!
+		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);
 
 	private:
 
@@ -50,12 +80,15 @@ namespace CE::RPI
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
+
+		PerViewConstants viewConstants{};
+
 		b8 enabled = true;
 
+		Name name = "";
 		UsageFlags usageFlags = UsageCamera;
 	};
-
-	typedef Ptr<View> ViewPtr;
 
 	ENUM_CLASS_FLAGS(View::UsageFlags);
 

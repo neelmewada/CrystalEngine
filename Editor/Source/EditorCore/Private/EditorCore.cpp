@@ -10,12 +10,15 @@ namespace CE::Editor
 
         void StartupModule() override
         {
-			EditorPrefs::Get().LoadPrefs();
+			
         }
 
         void ShutdownModule() override
         {
-			EditorPrefs::Get().SavePrefs();
+			if (ProjectManager::TryGet())
+			{
+                ProjectManager::TryGet()->Destroy();
+			}
         }
 
         void RegisterTypes() override

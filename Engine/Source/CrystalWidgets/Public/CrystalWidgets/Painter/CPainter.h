@@ -46,7 +46,7 @@ namespace CE::Widgets
         bool ClipRectExists();
         Rect GetLastClipRect();
 
-    crystalwidgets_internal:
+    private:
 
         Array<Vec2> coordinateSpaceStack{};
 
@@ -62,6 +62,7 @@ namespace CE::Widgets
 
         friend class CWidget;
         friend class CWindow;
+        CE_WIDGET_FRIENDS();
     };
     
 } // namespace CE::Widgets

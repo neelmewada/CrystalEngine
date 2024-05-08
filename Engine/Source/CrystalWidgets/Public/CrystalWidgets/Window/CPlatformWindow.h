@@ -8,10 +8,9 @@ namespace CE::Widgets
 
     class CRYSTALWIDGETS_API CPlatformWindow
     {
-    crystalwidgets_protected_internal:
-        virtual ~CPlatformWindow();
-
 	public:
+
+        virtual ~CPlatformWindow();
 
         CPlatformWindow(CWindow* owner, u32 width, u32 height, const PlatformWindowInfo& info, CPlatformWindow* parentWindow = nullptr);
         CPlatformWindow(CWindow* owner, PlatformWindow* nativeWindow, CPlatformWindow* parentWindow = nullptr);
@@ -33,15 +32,21 @@ namespace CE::Widgets
 
         PlatformWindow* GetPlatformWindow() const { return platformWindow; }
 
-    private:
+        void Tick();
+
+        CWindow* GetOwner() const { return owner; }
+
+        RPI::Renderer2D* GetRenderer() const { return renderer; }
+
+        RHI::SwapChain* GetSwapChain() const { return swapChain; }
+
+        RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
+
+        bool IsDeleted() const { return isDeleted; }
 
         void Init();
 
         void OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight);
-
-    crystalwidgets_internal:
-
-        void Tick();
 
         CWindow* owner = nullptr;
         b8 isDeleted = false;

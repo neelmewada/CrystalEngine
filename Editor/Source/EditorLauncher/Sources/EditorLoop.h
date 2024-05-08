@@ -21,6 +21,7 @@ private:
 	void LoadProject();
 
 	void InitStyles();
+	void AlternateTick();
 
 	void AppPreInit();
 	void AppInit();
@@ -39,10 +40,14 @@ private:
 
 	// Application
 	CE::PlatformApplication* app = nullptr;
+	PlatformWindow* mainWindow = nullptr;
 
 	IO::Path projectPath{};
 
 	clock_t previousTime{};
+	f32 deltaTime = 0.0f;
+
+	DelegateHandle tickDelegateHandle = 0;
 };
 
 extern EditorLoop gEditorLoop;

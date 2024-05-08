@@ -82,6 +82,22 @@ namespace CE::RHI
 			return {};
 		}
 
+		TagType FindOrAcquireTag(const Name& tagName) const
+		{
+			{
+				LockGuard<SharedMutex> lock{ mutex };
+				for (int i = 0; i < entriesByTag.GetSize(); i++)
+				{
+					if (entriesByTag[i].name == tagName)
+					{
+						return TagType(i);
+					}
+				}
+			}
+
+			return AcquireTag(tagName);
+		}
+
 		Name GetName(TagType tag) const
 		{
 			if (tag.Get() < entriesByTag.GetSize())

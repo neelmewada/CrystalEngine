@@ -40,6 +40,7 @@ Shader "2D/SDF Geometry"
                 float2 uv : TEXCOORD0;
                 nointerpolation uint instanceId : TEXCOORD1;
                 float2 screenPosition : TEXCOORD2;
+                float4 uvBounds : TEXCOORD3;
             };
 
             struct DrawItem
@@ -95,6 +96,7 @@ Shader "2D/SDF Geometry"
                 if (_DrawList[input.instanceId].drawType == DRAW_Text) // Text
                 {
                     float4 uvBounds = _CharacterData[_DrawList[input.instanceId].charIndex].atlasUV;
+                    o.uvBounds = uvBounds;
                     o.uv = float2(lerp(uvBounds.x, uvBounds.z, input.uv.x), lerp(uvBounds.y, uvBounds.w, input.uv.y));
                 }
 
@@ -167,11 +169,18 @@ Shader "2D/SDF Geometry"
                 float borderThickness;
             };
 
-            float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold)
+            float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
             {
-                const float screenPxRange = itemSize.x / 7.5; // 7.5
+                uint w; uint h;
+                _FontAtlas.GetDimensions(w, h);
+                float2 origSize = float2(uvBounds.zw - uvBounds.xy) * float2(w, h);
+
+                float numerator = max(itemSize.x, itemSize.y) * 0.5;
+                float denominator = max(origSize.x, origSize.y) * 0.5;
+
+                const float screenPxRange = numerator / denominator * 3.0; // / 10.0
                 float sdf = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
-                float screenPxDistance = screenPxRange * (sdf - 0.45);
+                float screenPxDistance = screenPxRange * (sdf - 0.5);
                 float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
                 return lerp(float4(color.rgb, 0), color, opacity);
             }
@@ -277,7 +286,7 @@ Shader "2D/SDF Geometry"
                 switch (_DrawList[idx].drawType)
                 {
                 case DRAW_Text:
-                    return RenderText(_DrawList[idx].fillColor, input.uv, info.itemSize, _DrawList[idx].bold);
+                    return RenderText(_DrawList[idx].fillColor, input.uv, info.itemSize, _DrawList[idx].bold, input.uvBounds);
                 case DRAW_Circle:
                     return RenderCircle(info, p);
                 case DRAW_Rect:

@@ -20,7 +20,7 @@ namespace CE::Widgets
 
 		void SetAsMainWindow(bool set) { isMainWindow = set; canBeClosed = !isMainWindow; }
 		
-	crystalwidgets_internal:
+	private:
 
 		FIELD()
 		CDockSpace* dockSpace = nullptr;
@@ -28,6 +28,8 @@ namespace CE::Widgets
 		FIELD()
 		b8 isMainWindow = false;
 
+		friend class CDockSplitView;
+		friend class CDockSpace;
 	};
 
 } // namespace CE::Widgets

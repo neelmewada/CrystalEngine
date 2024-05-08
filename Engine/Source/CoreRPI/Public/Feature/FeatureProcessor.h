@@ -2,6 +2,9 @@
 
 namespace CE::RPI
 {
+	class View;
+	class Scene;
+
 	CLASS(Abstract)
 	class CORERPI_API FeatureProcessor : public Object
 	{
@@ -11,9 +14,30 @@ namespace CE::RPI
 		FeatureProcessor() = default;
 		virtual ~FeatureProcessor() = default;
 
+		struct SimulatePacket
+		{
+			Job* parentJob = nullptr;
+		};
 
-	private:
+		struct RenderPacket
+		{
+			Array<ViewPtr> views{};
 
+			RHI::DrawListMask drawListMask{};
+
+			u32 imageIndex = 0;
+		};
+
+		virtual void Simulate(const SimulatePacket& packet) {}
+
+		//! @brief The feature processor should enqueue draw packets to relevant draw lists.
+		virtual void Render(const RenderPacket& packet) {}
+
+		virtual void OnRenderEnd() {}
+
+	protected:
+
+		RPI::Scene* scene = nullptr;
 
 		friend class Scene;
 	};

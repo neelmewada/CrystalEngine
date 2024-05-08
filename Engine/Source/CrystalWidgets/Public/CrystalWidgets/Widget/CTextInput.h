@@ -13,7 +13,7 @@ namespace CE::Widgets
 
 		Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
 
-		void SetText(const String& value);
+		bool SetText(const String& value);
 
 		const String& GetText() const { return text; }
 
@@ -27,6 +27,8 @@ namespace CE::Widgets
 
 		b8 IsEditing() const { return isEditing; }
 
+		void StopEditing(bool restoreOriginalText = false);
+
 		b8 IsEditable() const { return isEditable; }
 
 		void SetEditable(bool editable) { isEditable = editable; }
@@ -37,6 +39,12 @@ namespace CE::Widgets
 		}
 
 		bool IsTextSelected();
+
+		// - Signals -
+
+		CE_SIGNAL(OnEditingFinished, CTextInput*);
+
+		CE_SIGNAL(OnTextChanged, CTextInput*);
 
 	protected:
 
@@ -55,8 +63,6 @@ namespace CE::Widgets
 		void OnFocusGained() override;
 
 		void OnFocusLost() override;
-
-	crystalwidgets_protected_internal:
 
 		FIELD()
 		String text{};

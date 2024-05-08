@@ -33,5 +33,27 @@ namespace CE
         ParseFailedException(const String& message) : Exception(message)
         {}
     };
+
+    class CORE_API NullPointerException : public Exception
+    {
+    public:
+        NullPointerException() : Exception("NullPointerException")
+        {}
+
+        NullPointerException(const String& message) : Exception("NullPointerException: " + message)
+        {}
+
+    };
+
+    class CORE_API IndexOutOfRangeException : public Exception
+    {
+    public:
+
+        IndexOutOfRangeException() : Exception("IndexOutOfRangeException")
+        {}
+
+        IndexOutOfRangeException(const String& message) : Exception("IndexOutOfRangeException: " + message)
+        {}
+    };
     
 } // namespace CE

@@ -29,7 +29,25 @@ namespace CE::Widgets
 		activeTab = containers[tabIndex];
 		activeTab->SetEnabled(true);
 
+		emit OnTabSelectionChanged(tabIndex);
+
 		SetNeedsPaint();
+	}
+
+	int CTabWidget::GetActiveTabIndex() const
+	{
+		for (int i = 0; i < containers.GetSize(); ++i)
+		{
+			if (activeTab == containers[i])
+				return i;
+		}
+		return -1;
+	}
+
+	void CTabWidget::OnAfterComputeStyle()
+	{
+		Super::OnAfterComputeStyle();
+
 	}
 
 	void CTabWidget::OnPaint(CPaintEvent* paintEvent)
@@ -98,6 +116,15 @@ namespace CE::Widgets
 			painter->DrawText(containers[i]->GetTitle(), tabRects[i].min + tabPadding.min);
 
 			painter->PopChildCoordinateSpace();
+		}
+
+		Vec4 newRootPadding = Vec4(0, maxY - minY - 1, 0, 0);
+		
+		if (rootPadding != newRootPadding)
+		{
+			rootPadding = newRootPadding;
+			SetNeedsStyle();
+			SetNeedsLayout();
 		}
 	}
 

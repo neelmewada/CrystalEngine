@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreMedia.h"
 #include "CoreShader.h"
 #include "CoreRHI.h"

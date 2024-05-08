@@ -15,20 +15,36 @@ namespace CE
     {
     public:
 
-        Pair() : first({}), second({})
+        constexpr Pair() : first({}), second({})
         {
 
         }
 
-        Pair(KeyType key, ValueType value) : first(key), second(value)
+        constexpr Pair(KeyType key, ValueType value) : first(key), second(value)
         {
 
         }
 
         KeyType first;
         ValueType second;
-    };
 
+        SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash<KeyType>(first);
+            CombineHash(hash, second);
+            return hash;
+        }
+
+        bool operator==(const Pair& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const Pair& rhs) const
+        {
+            return !operator==(rhs);
+        }
+    };
     
     template<typename KeyType = CE::Name, typename ValueType = CE::Variant>
     class HashMap
@@ -103,17 +119,17 @@ namespace CE
 		}
 
         template<typename... Args>
-        inline void Emplace(Args... args)
+        auto Emplace(Args... args)
         {
-            Impl.emplace(args...);
+            return Impl.emplace(args...);
         }
 
-        inline void Remove(const KeyType& key)
+        void Remove(const KeyType& key)
         {
             Impl.erase(key);
         }
         
-        inline void Clear()
+        void Clear()
         {
             Impl.clear();
         }

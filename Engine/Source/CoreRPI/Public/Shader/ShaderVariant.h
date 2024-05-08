@@ -2,11 +2,6 @@
 
 namespace CE::RPI
 {
-	struct ShaderVariantDescriptor
-	{
-		RHI::GraphicsPipelineDescriptor pipelineDesc{};
-		Array<Name> defineFlags{};
-	};
 
 	struct ShaderVariantDescriptor2
 	{
@@ -37,17 +32,11 @@ namespace CE::RPI
 		}
 	};
 
-	enum class ShaderVariantFlag
-	{
-		None = 0
-	};
-	ENUM_CLASS_FLAGS(ShaderVariantFlag);
 
 	class CORERPI_API ShaderVariant final
 	{
 	public:
 
-		ShaderVariant(const ShaderVariantDescriptor& desc);
 		ShaderVariant(const ShaderVariantDescriptor2& desc);
 
 		~ShaderVariant();
@@ -60,14 +49,16 @@ namespace CE::RPI
 
 		RHI::PipelineState* GetPipeline(const RHI::MultisampleState& multisampleState);
 
-		RHI::ShaderResourceGroupLayout GetSrgLayout(RHI::SRGType srgType);
+		const RHI::ShaderResourceGroupLayout& GetSrgLayout(RHI::SRGType srgType);
+
+		bool HasSrgLayout(RHI::SRGType srgType);
+
+		const ShaderReflection& GetShaderReflection() const { return reflectionInfo; }
 
 	private:
 
 		SIZE_T variantId = 0;
 		Array<Name> defineFlags{};
-
-		ShaderVariantFlag flags{};
 
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
 
@@ -76,6 +67,7 @@ namespace CE::RPI
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 
 		//RHI::PipelineState* pipeline = nullptr;
+		ShaderReflection reflectionInfo;
 
 		friend class Shader;
 	};

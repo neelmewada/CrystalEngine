@@ -220,9 +220,15 @@ namespace CE
         }
 	    
         template<typename... Args>
-        static String Format(String str, Args... args)
+        static String Format(const String& str, Args... args)
         {
             return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
+        }
+
+		template<typename... Args>
+		static String Format(const char* cStr, Args... args)
+        {
+        	return String(fmt::vformat(cStr, fmt::make_format_args(args...)));
         }
 
 	    static bool RegexMatch(const String& sourceString, const String& regex);

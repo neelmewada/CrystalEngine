@@ -9,17 +9,17 @@ namespace CE::Widgets
     class CrystalWidgetsModule : public CE::Module
     {
     public:
-        virtual void StartupModule() override
+        void StartupModule() override
         {
 
         }
 
-        virtual void ShutdownModule() override
+        void ShutdownModule() override
         {
 
         }
 
-        virtual void RegisterTypes() override
+        void RegisterTypes() override
         {
             
         }

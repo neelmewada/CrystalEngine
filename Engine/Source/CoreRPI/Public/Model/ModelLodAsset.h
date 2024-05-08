@@ -35,6 +35,10 @@ namespace CE::RPI
 
         ModelLod* CreateModelLod();
 
+        static ModelLodAsset* CreateCubeAsset(Object* outer = nullptr);
+
+        static ModelLodAsset* CreateSphereAsset(Object* outer = nullptr);
+
         inline u32 GetNumVertices() const { return numVertices; }
 
     private:

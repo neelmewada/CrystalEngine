@@ -15,7 +15,7 @@ namespace CE::Widgets
 
 		bool IsLayoutCalculationRoot() override { return dockType == CDockType::Major; }
 
-		CDockSplitView* GetRootDockSplit() const { return dockSplits.Top(); }
+		CDockSplitView* GetRootDockSplit() const;
 
 		bool Split(CDockSplitView* originalSplitView, f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1 = "", Name splitName2 = "");
 
@@ -25,7 +25,7 @@ namespace CE::Widgets
 
 		void SetDockType(CDockType dockType) { this->dockType = dockType; }
 
-	crystalwidgets_protected_internal:
+	protected:
 
 		void HandleEvent(CEvent* event) override;
 

@@ -11,7 +11,7 @@ namespace CE
 	class ClassType;
 	class Object;
 
-	using FunctionDelegate = Delegate<void(void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
+	using FunctionDelegate = Delegate<void(void* instance, const CE::Array<CE::Variant>& params, CE::Variant& returnValue)>;
 
     class CORE_API FunctionType : public TypeInfo
     {

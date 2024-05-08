@@ -79,9 +79,8 @@ namespace CE
 		}
 
 		this->hashValue = GetHash(hashString);
-		//this->value = hashString;
 
-		LockGuard<SharedMutex> lock{ nameMutex };
+		LockGuard lock{ nameMutex };
 
 		nameHashMap[this->hashValue] = hashString;
 #if CE_NAME_DEBUG
@@ -98,7 +97,7 @@ namespace CE
 	{
 		this->hashValue = copy.hashValue;
 #if CE_NAME_DEBUG
-		LockGuard<SharedMutex> lock{ nameMutex };
+		LockGuard lock{ nameMutex };
 		debugString = nameHashMap[this->hashValue].GetCString();
 #endif
 	}
@@ -107,7 +106,7 @@ namespace CE
 	{
 		this->hashValue = copy.hashValue;
 #if CE_NAME_DEBUG
-		LockGuard<SharedMutex> lock{ nameMutex };
+		LockGuard lock{ nameMutex };
 		debugString = nameHashMap[this->hashValue].GetCString();
 #endif
 		return *this;
@@ -126,7 +125,7 @@ namespace CE
 
 	const String& Name::GetString() const
 	{
-		LockGuard<SharedMutex> lock{ nameMutex };
+		LockGuard lock{ nameMutex };
 		return nameHashMap[hashValue];
 	}
 

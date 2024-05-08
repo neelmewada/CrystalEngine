@@ -6,7 +6,9 @@ namespace CE
 	class ActorComponent;
     class CameraComponent;
     class StaticMeshComponent;
-
+	class SceneComponent;
+	class RenderPipeline;
+	
 	CLASS()
 	class SYSTEM_API Scene : public Asset
 	{
@@ -15,33 +17,98 @@ namespace CE
 
 		Scene();
 		virtual ~Scene();
-
-		inline Actor* GetRootActor() const
-		{
-			return root;
-		}
         
 		virtual void OnBeginPlay();
 
 		virtual void Tick(f32 delta);
 
-		inline CameraComponent* GetMainCamera() const { return mainCamera; }
+		CameraComponent* GetMainCamera() const { return mainCamera; }
 
-	system_internal:
+		RPI::Scene* GetRpiScene() const { return rpiScene; }
+
+		void AddActor(Actor* actor);
+		void RemoveActor(Actor* actor);
+
+		void IterateAllComponents(SubClass<ActorComponent> componentClass, auto callback)
+		{
+			if (componentClass == nullptr)
+				return;
+
+			TypeId componentTypeId = componentClass->GetTypeId();
+
+			if (!componentsByType.KeyExists(componentTypeId))
+				return;
+
+			for (auto [uuid, component] : componentsByType[componentTypeId])
+			{
+				callback(component);
+			}
+		}
+
+		template<typename TActorComponent> requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value
+		void IterateAllComponents(auto callback)
+		{
+			ClassType* clazz = TActorComponent::StaticType();
+			if (clazz == nullptr)
+				return;
+
+			TypeId componentTypeId = clazz->GetTypeId();
+
+			if (!componentsByType.KeyExists(componentTypeId))
+				return;
+
+			for (auto [uuid, component] : componentsByType[componentTypeId])
+			{
+				if (component->IsOfType(clazz))
+				{
+					callback((TActorComponent*)component);
+				}
+			}
+		}
+
+		// - Rendering -
+
+		void AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera);
+		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
+
+		void SetSkyboxCubeMap(TextureCube* cubeMap);
+
+	private:
 
 		// - Internal API -
 
 		void OnActorChainAttached(Actor* actor);
 		void OnActorChainDetached(Actor* actor);
 
+		void OnCameraComponentAttached(CameraComponent* cameraComponent);
+		void OnCameraComponentDetached(CameraComponent* cameraComponent);
+
+		void OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor);
+
 	protected:
 
 		FIELD()
-		Actor* root = nullptr;
+		Array<Actor*> actors{};
+		
+		FIELD()
+		Array<CE::RenderPipeline*> renderPipelines{};
 
+		FIELD()
+		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
+
+		FIELD()
+		CWindow* mainRenderViewport = nullptr;
+
+		FIELD()
+		TextureCube* skyboxCubeMap = nullptr;
+		
 	private:
 
 		b8 isPlaying = false;
+
+		// - RPI -
+
+		RPI::Scene* rpiScene = nullptr;
 
 		// - Cache -
 
@@ -56,6 +123,8 @@ namespace CE
 		friend class SceneComponent;
 		friend class CameraComponent;
 		friend class RendererSubsystem;
+		friend class GameViewportSubsystem;
+		friend class SceneSubsystem;
 	};
     
 } // namespace CE

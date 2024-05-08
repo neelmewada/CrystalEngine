@@ -4,6 +4,11 @@ namespace CE
 {
 	Array<ClassType*> Engine::subsystemClassQueue{};
 
+	Engine::Engine()
+	{
+
+	}
+
 	void Engine::PreInit()
 	{
 		
@@ -17,6 +22,13 @@ namespace CE
 		}
 
 		subsystemClassQueue.Clear();
+
+		engineSubsystems.Sort([](EngineSubsystem* a, EngineSubsystem* b) -> bool
+			{
+				if (a == nullptr || b == nullptr)
+					return false;
+				return a->GetTickPriority() < b->GetTickPriority();
+			});
 
 		for (auto subsystem : engineSubsystems)
 		{
@@ -39,11 +51,13 @@ namespace CE
 
 	void Engine::PreShutdown()
 	{
-		if (assetManager)
-			assetManager->Shutdown();
-		
+		FrameScheduler::Get()->WaitUntilIdle();
+
 		for (auto subsystem : engineSubsystems) // PreShutdown
 			subsystem->PreShutdown();
+
+		if (assetManager)
+			assetManager->Shutdown();
 	}
 
 	void Engine::Shutdown()
@@ -60,15 +74,27 @@ namespace CE
 
 	void Engine::Tick(f32 deltaTime)
 	{
+		if (IsEngineRequestingExit())
+		{
+			return;
+		}
+
 		if (assetManager)
 			assetManager->Tick(deltaTime);
 
+		engineSubsystems.Sort([](EngineSubsystem* a, EngineSubsystem* b) -> bool
+			{
+				if (a == nullptr || b == nullptr)
+					return false;
+				return a->GetTickPriority() < b->GetTickPriority();
+			});
+		
 		for (auto subsystem : engineSubsystems)
 		{
 			subsystem->Tick(deltaTime);
 		}
-
-		if (!mainThreadQueue.IsEmpty())
+		
+		while (!mainThreadQueue.IsEmpty())
 		{
 			mainThreadQueue.GetFront().InvokeIfValid();
 			mainThreadQueue.PopFront();
@@ -78,14 +104,6 @@ namespace CE
 		{
 			if (gameInstance->IsInitialized())
 				gameInstance->Tick(deltaTime);
-		}
-	}
-
-	void Engine::Render()
-	{
-		for (auto subsystem : engineSubsystems)
-		{
-			subsystem->Render();
 		}
 	}
 
@@ -119,6 +137,8 @@ namespace CE
 	EngineSubsystem* Engine::CreateSubsystem(ClassType* type)
 	{
 		if (type == nullptr || type->GetTypeId() == TYPEID(EngineSubsystem) || !type->IsSubclassOf<EngineSubsystem>())
+			return nullptr;
+		if (!type->CanBeInstantiated())
 			return nullptr;
 
 		auto cdi = (EngineSubsystem*)type->GetDefaultInstance();

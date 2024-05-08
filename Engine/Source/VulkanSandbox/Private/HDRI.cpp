@@ -1539,7 +1539,7 @@ namespace CE
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
 
-				cmdList->BindPipelineState(brdfGenMaterial->GetCurrentShader()->GetPipeline());
+				cmdList->BindPipelineState(brdfGenMaterial->GetCurrentOpaqueShader()->GetPipeline());
 
 				cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
 

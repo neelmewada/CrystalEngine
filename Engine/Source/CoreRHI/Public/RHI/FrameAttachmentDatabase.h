@@ -25,7 +25,7 @@ namespace CE::RHI
 
 		FrameAttachment* FindFrameAttachment(AttachmentID id);
 
-		inline const Array<FrameAttachment*>& GetAttachments() const
+		const Array<FrameAttachment*>& GetAttachments() const
 		{
 			return attachments;
 		}

@@ -113,7 +113,7 @@ namespace CE
 		{
 			individualAssetPaths.Add(input);
 		}
-	
+
 		gProjectPath = PlatformDirectories::GetLaunchDir();
 		if (projectPath.NonEmpty())
 			gProjectPath = projectPath;

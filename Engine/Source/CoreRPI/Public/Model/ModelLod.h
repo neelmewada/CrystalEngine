@@ -9,6 +9,7 @@ namespace CE::Editor
 
 namespace CE::RPI
 {
+	using MaterialSlotId = u32;
 
 	class Material;
 
@@ -36,6 +37,7 @@ namespace CE::RPI
 
 		VertexBufferList vertexBufferInfos{};
 
+		//! @brief Index of the material to use for this sub-mesh
 		MaterialSlotId materialSlotId = 0;
 	};
 
@@ -44,7 +46,7 @@ namespace CE::RPI
 	public:
 
 		ModelLod();
-		virtual ~ModelLod();
+		~ModelLod();
 
 		static ModelLod* CreateCubeModel();
 
@@ -52,22 +54,25 @@ namespace CE::RPI
 
 		void AddMesh(const Mesh& mesh);
 
-		inline u32 GetMeshCount() const { return meshes.GetSize(); }
+		//! @brief Returns the number of sub meshes 
+		u32 GetMeshCount() const { return meshes.GetSize(); }
 
-		inline Mesh* GetMesh(u32 index)
+		Mesh* GetMesh(u32 index)
 		{
 			if (index >= meshes.GetSize())
 				return nullptr;
 			return &meshes[index]; 
 		}
 
-		inline RHI::Buffer* GetBuffer(u32 index) const { return trackedBuffers[index]; }
+		RHI::Buffer* GetBuffer(u32 index) const { return trackedBuffers[index]; }
 
 		//! @brief Always add index buffers at the very end!
 		void TrackBuffer(RHI::Buffer* buffer);
 
-		// Temporary functions!
+		//! Temporary function
 		void BuildVertexInputSlotDescriptorList(u32 meshIndex, Array<RHI::VertexInputSlotDescriptor>& outInputSlots);
+
+		//! Temporary function
 		void BuildVertexInputAttributeList(u32 meshIndex, Array<RHI::VertexAttributeDescriptor>& outVertexAttribs);
 
 	private:

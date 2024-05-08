@@ -361,6 +361,11 @@ namespace CE::Vulkan
 		pool = device->GetDescriptorPool();
 	}
 
+	bool ShaderResourceGroup::HasVariable(const Name& variableName)
+	{
+		return bindingSlotsByVariableName.KeyExists(variableName);
+	}
+
 	bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
 	{
 		if (!bufferView.GetBuffer())
@@ -544,6 +549,14 @@ namespace CE::Vulkan
 		if (!variableBindingsBySlot.KeyExists(bindingSlot))
 			return false;
 
+		// Do not make changes if the same image is already bound!
+
+		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
+			imageInfosBoundBySlot[i][bindingSlot][0].imageView == texture->GetImageView())
+		{
+			return true;
+		}
+
 		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
 
 		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -588,6 +601,14 @@ namespace CE::Vulkan
 		if (!variableBindingsBySlot.KeyExists(bindingSlot))
 			return false;
 
+		// Do not make changes if the same image is already bound!
+
+		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
+			imageInfosBoundBySlot[i][bindingSlot][0].imageView == textureView->GetImageView())
+		{
+			return true;
+		}
+
 		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
 
 		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -631,6 +652,12 @@ namespace CE::Vulkan
 		int i = imageIndex;
 		int bindingSlot = bindingSlotsByVariableName[name];
 		Vulkan::Sampler* sampler = (Vulkan::Sampler*)rhiSampler;
+
+		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
+			imageInfosBoundBySlot[i][bindingSlot][0].sampler == sampler->GetVkHandle())
+		{
+			return true;
+		}
 
 		VkDescriptorImageInfo imageWrite{};
 		imageWrite.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -777,6 +804,8 @@ namespace CE::Vulkan
 				}
 			}
 		}
+
+		// Do not make changes if the array elements and their order are same as before!
 
 		if (!needsRecompile)
 			return true;

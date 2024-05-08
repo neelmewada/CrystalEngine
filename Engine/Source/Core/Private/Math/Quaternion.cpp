@@ -126,25 +126,25 @@ namespace CE
 
 	void Quat::SetEulerDegrees(float x, float y, float z)
 	{
-		this->x *= 0.0174532925f; // To radians!
-		this->y *= 0.0174532925f; // To radians!
-		this->z *= 0.0174532925f; // To radians!
+		x *= 0.0174532925f; // To radians!
+		y *= 0.0174532925f; // To radians!
+		z *= 0.0174532925f; // To radians!
 
-		this->x *= 0.5f;
-		this->y *= 0.5f;
-		this->z *= 0.5f;
+		x *= 0.5f;
+		y *= 0.5f;
+		z *= 0.5f;
 		
-		float sinx = sinf(this->x);
-		float siny = sinf(this->y);
-		float sinz = sinf(this->z);
-		float cosx = cosf(this->x);
-		float cosy = cosf(this->y);
-		float cosz = cosf(this->z);
+		float sinx = sinf(x);
+		float siny = sinf(y);
+		float sinz = sinf(z);
+		float cosx = cosf(x);
+		float cosy = cosf(y);
+		float cosz = cosf(z);
 
 		w = cosx * cosy * cosz + sinx * siny * sinz;
-		x = sinx * cosy * cosz + cosx * siny * sinz;
-		y = cosx * siny * cosz - sinx * cosy * sinz;
-		z = cosx * cosy * sinz - sinx * siny * cosz;
+		this->x = sinx * cosy * cosz + cosx * siny * sinz;
+		this->y = cosx * siny * cosz - sinx * cosy * sinz;
+		this->z = cosx * cosy * sinz - sinx * siny * cosz;
 	}
 
 	float Quat::Dot(const Quat& b) const
@@ -167,8 +167,6 @@ namespace CE
 		float w = sqrt((1 + dot) * 0.5);
 		float k = sqrt((1 - dot) * 0.5);
 		float scale = (w > 0) ? (1.0 / w) : 0;
-
-		//return Quat(w, cross.x * scale, cross.y * scale, cross.z * scale);
 
 		if (dot >= 1.0f)
 		{
@@ -208,8 +206,6 @@ namespace CE
 			// Return the normalized quaternion rotation.
 			return Quat(Vec4(v, s)).GetNormalized();
 		}
-
-		return Quat();
 	}
 
 	Quat Quat::LookRotation(const Vec3& lookAt)
@@ -217,6 +213,7 @@ namespace CE
 		return Quat::FromToRotation(Vec3(0, 0, 1), lookAt);
 	}
 
+	// TODO: Modify LookRotation entries after modifying the original function
 	Quat Quat::LookRotation(const Vec3& lookAt, const Vec3& upDirection)
 	{
 		// Calculate the unit quaternion that rotates Vector3::FORWARD to face
@@ -242,6 +239,18 @@ namespace CE
 		// specified upward direction. There is no need to normalize the result
 		// as both q1 and q2 are unit quaternions.
 		return q2 * q1;
+	}
+
+	Quat Quat::LookRotation2(const Vec3& forward, const Vec3& up)
+	{
+		Vec3 right = Vec3::Cross(up, forward);
+		Quat result;
+		result.w = sqrtf(1.0f + right.x + up.y + forward.z) * 0.5f;
+		float w4_recip = 1.0f / (4.0f * result.w);
+		result.x = (forward.y - up.z) * w4_recip;
+		result.y = (right.z - forward.x) * w4_recip;
+		result.z = (up.x - right.y) * w4_recip;
+		return result;
 	}
 
 	Quat Quat::Slerp(const Quat& from, const Quat& to, float t)
@@ -317,17 +326,17 @@ namespace CE
 	Quat Quat::EulerRadians(float X, float Y, float Z)
 	{
 		// NEW
-		double cy = cos(Z * 0.5);
-		double sy = sin(Z * 0.5);
-		double cp = cos(Y * 0.5);
-		double sp = sin(Y * 0.5);
-		double cr = cos(X * 0.5);
-		double sr = sin(X * 0.5);
+		f32 cy = cos(Z * 0.5);
+		f32 sy = sin(Z * 0.5);
+		f32 cp = cos(Y * 0.5);
+		f32 sp = sin(Y * 0.5);
+		f32 cr = cos(X * 0.5);
+		f32 sr = sin(X * 0.5);
 
-		double qw = cr * cp * cy + sr * sp * sy;
-		double qx = -sr * cp * cy + cr * sp * sy;
-		double qy = cr * sp * cy + sr * cp * sy;
-		double qz = cr * cp * sy - sr * sp * cy;
+		f32 qw = cr * cp * cy + sr * sp * sy;
+		f32 qx = -sr * cp * cy + cr * sp * sy;
+		f32 qy = cr * sp * cy + sr * cp * sy;
+		f32 qz = cr * cp * sy - sr * sp * cy;
 
 		//return Quat(qw, qx, qy, qz);
 
@@ -385,6 +394,42 @@ namespace CE
 		mat[6] = 2.0 * (tmp1 - tmp2) * invs;
 
 		return matrix;
+	}
+
+	Vec3 Quat::ToEulerRadians() const
+	{
+		const Quat& q = *this;
+
+		double sqw = q.w * q.w;
+		double sqx = q.x * q.x;
+		double sqy = q.y * q.y;
+		double sqz = q.z * q.z;
+		double unit = sqx + sqy + sqz + sqw;
+		double test = q.x * q.y + q.z * q.w;
+		Vec3 euler;
+
+		if (test > 0.499 * unit) { // Singularity at north pole
+			euler.y = 2 * atan2(q.x, q.w);
+			euler.x = M_PI / 2;
+			euler.z = 0;
+			return euler;
+		}
+		if (test < -0.499 * unit) { // Singularity at south pole
+			euler.y = -2 * atan2(q.x, q.w);
+			euler.x = -M_PI / 2;
+			euler.z = 0;
+			return euler;
+		}
+		euler.y = atan2(2 * q.y * q.w + 2 * q.x * q.z, sqw - sqx - sqy + sqz); // Yaw
+		euler.x = asin(-2 * (q.x * q.z - q.y * q.w) / unit); // Pitch
+		euler.z = atan2(2 * q.x * q.w + 2 * q.y * q.z, sqw + sqx - sqy - sqz); // Roll
+
+		return euler;
+	}
+
+	Vec3 Quat::ToEulerDegrees() const
+	{
+		return ToEulerRadians() * RAD_TO_DEG;
 	}
 
 	Vec4 operator*(const Vec4& v, const Quat& m)

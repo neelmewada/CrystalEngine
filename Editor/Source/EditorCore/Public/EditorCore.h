@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreRHI.h"
 #include "System.h"
 
@@ -8,7 +8,7 @@
 #include "PAL/Common/EditorPlatform.h"
 
 // Editor Prefs
-#include "Editor/EditorPrefs.h"
+#include "Editor/EditorGlobals.h"
 
 // Project
 #include "Project/CrystalProject.h"

@@ -6,12 +6,16 @@
 #include "CoreShader.h"
 #include "CoreSettings.h"
 #include "CoreInput.h"
-//#include "CrystalWidgets.h"
+#include "CrystalWidgets.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"
 #include "Asset/AssetRegistry.h"
 #include "Engine/AssetManager.h"
+
+///////////////////////////////////////////////////////
+// Engine
+///////////////////////////////////////////////////////
 
 // Asset Types
 #include "Engine/TextureDefines.h"
@@ -36,6 +40,15 @@
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 
+///////////////////////////////////////////////////////
+// Renderer
+///////////////////////////////////////////////////////
+
+#include "Renderer/RenderPipelineAsset.h"
+#include "Renderer/RenderPipeline.h"
+#include "Renderer/MainRenderPipeline/MainRenderPipelineAsset.h"
+#include "Renderer/MainRenderPipeline/DirectionalShadowPass.h"
+#include "Renderer/MainRenderPipeline/MainRenderPipeline.h"
 
 ///////////////////////////////////////////////////////
 // GameFramework
@@ -66,4 +79,5 @@ namespace CE
 	extern SYSTEM_API Engine* gEngine;
 
 	SYSTEM_API JobManager* GetJobManager();
+
 }

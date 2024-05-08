@@ -29,7 +29,7 @@ namespace CE::Widgets
 
         void HandleEvent(CEvent* event) override;
 
-    crystalwidgets_internal:
+    private:
 
         FIELD()
         CLabel* label = nullptr;

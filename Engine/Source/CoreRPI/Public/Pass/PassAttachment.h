@@ -5,7 +5,7 @@ namespace CE::RPI
 	class Pass;
 
 	/// @brief Describes the attachment used by a pass
-	struct CORERPI_API PassAttachment final : public IntrusiveBase
+	struct CORERPI_API PassAttachment final : IntrusiveBase
 	{
 	public:
 
@@ -14,9 +14,9 @@ namespace CE::RPI
 
 		/// @brief Name of the attachment.
 		Name name{};
-        
-		/// @brief Path to this attachment. Path of owning pass and the attachment name.
-		AttachmentID path{};
+
+		//! @brief Actual attachment id to use in Frame Scheduler.
+		AttachmentID attachmentId = "";
 
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
@@ -24,6 +24,7 @@ namespace CE::RPI
         
         RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
 
+		Array<RHI::Format> fallbackFormats{};
 	};
 
 	/// @brief A Pass attachment binding either points to a pass attachment OR to another
@@ -34,7 +35,7 @@ namespace CE::RPI
         
 		/// @brief Name of the attachment binding. Either pass slot name, or attachment name.
 		Name name = "";
-        
+
 		/// @brief Name of shader input field.
 		Name shaderInputName = "";
         
@@ -51,10 +52,14 @@ namespace CE::RPI
 		/// @brief The pass that owns this binding.
 		Pass* ownerPass = nullptr;
         
-		/// @brief The pass attachment this binding points to. Connected binding should be null if this is used.
+		/// @brief The pass attachment this binding points to. connectedBinding should be null if this is used.
 		Ptr<PassAttachment> attachment = nullptr;
-        
-		Ptr<PassAttachment> originalAttachment = nullptr;
+
+		Ptr<PassAttachment> GetOriginalAttachment() const;
+
+	private:
+
+		mutable Ptr<PassAttachment> originalAttachment = nullptr;
 	};
 
 } // namespace CE::RPI

@@ -2,13 +2,23 @@
 
 namespace CE
 {
+	class RenderPipeline;
+	
 	ENUM()
 	enum class CameraProjection
 	{
 		Perspective = 0,
 		Orthogonal = 1,
 	};
-	ENUM_CLASS_FLAGS(CameraProjection);
+	ENUM_CLASS(CameraProjection);
+
+	ENUM()
+	enum class CameraType
+	{
+		MainCamera = 0,
+		SecondaryCamera
+	};
+	ENUM_CLASS(CameraType);
 
     CLASS()
 	class SYSTEM_API CameraComponent : public SceneComponent
@@ -18,21 +28,48 @@ namespace CE
 
 		CameraComponent();
 
-		inline const Color& GetClearColor() const { return clearColor; }
+		virtual ~CameraComponent();
 
-		inline void SetClearColor(const Color& clearColor) { this->clearColor = clearColor; }
+		const Color& GetClearColor() const { return clearColor; }
 
-		inline bool IsMainCamera() const { return isMainCamera; }
+		void SetClearColor(const Color& clearColor) { this->clearColor = clearColor; }
 
-		void SetMainCamera(bool set = true);
+		CameraProjection GetProjection() const { return projection; }
+		void SetProjection(CameraProjection projection) { this->projection = projection; }
 
-		inline CameraProjection GetProjection() const { return projection; }
-		inline void SetProjection(CameraProjection projection) { this->projection = projection; }
+		float GetFarPlane() const { return farPlane; }
+
+		void SetFarPlane(f32 value) { farPlane = value; }
+
+    	float GetNearPlane() const { return nearPlane; }
+
+		void SetNearPlane(f32 value) { nearPlane = value; }
+
+		float GetFieldOfView() const { return fieldOfView; }
+
+		RPI::View* GetRpiView() const { return rpiView; }
+    	
+    	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
+    	
+		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+
+    	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
+
+    	void SetViewTag(const Name& tag) { viewTag = tag; }
+
+		CWindow* GetRenderWindow() const { return renderViewport; }
+    	
+    protected:
+
+		void Tick(f32 delta) override;
 
 	private:
 
-		FIELD()
-		b8 isMainCamera = false;
+    	FIELD()
+    	Name viewTag = "MainCamera";
+
+    	FIELD()
+    	CameraType cameraType = CameraType::MainCamera;
 
 		FIELD()
 		Color clearColor = Color::RGBA(36, 85, 163);
@@ -52,6 +89,19 @@ namespace CE
 		FIELD(ReadOnly)
 		Matrix4x4 projectionMatrix{};
 
+		FIELD(ReadOnly)
+		Matrix4x4 viewMatrix{};
+
+		//! @brief The CWindow that this scene is rendered to.
+		FIELD()
+		CWindow* renderViewport = nullptr;
+
+    	FIELD()
+    	CE::RenderPipeline* renderPipeline = nullptr;
+
+		RPI::ViewPtr rpiView = nullptr;
+
+		friend class CE::Scene;
 		friend class RendererSubsystem;
 	};
 

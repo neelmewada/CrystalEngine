@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 #include "CoreMesh/Scene.h"
 #include "CoreMesh/FBXImporter.h"

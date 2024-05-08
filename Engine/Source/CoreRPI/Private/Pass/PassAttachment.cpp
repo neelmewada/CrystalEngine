@@ -7,6 +7,7 @@ namespace CE::RPI
         name = desc.name;
         lifetime = desc.lifetime;
         sizeSource = desc.sizeSource;
+        fallbackFormats = desc.fallbackFormats;
         
         attachmentDescriptor = RPI::UnifiedAttachmentDescriptor(desc.imageDescriptor);
     }
@@ -16,8 +17,20 @@ namespace CE::RPI
         name = desc.name;
         lifetime = desc.lifetime;
         sizeSource = desc.sizeSource;
-        
+
         attachmentDescriptor = RPI::UnifiedAttachmentDescriptor(desc.bufferDescriptor);
+    }
+    
+    Ptr<PassAttachment> PassAttachmentBinding::GetOriginalAttachment() const
+    {
+        if (attachment)
+            return attachment;
+        if (originalAttachment)
+            return originalAttachment;
+        if (connectedBinding)
+            return originalAttachment = connectedBinding->GetOriginalAttachment();
+        
+        return nullptr;
     }
 
 } // namespace CE::RPI

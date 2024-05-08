@@ -22,6 +22,38 @@ Shader "PBR/Standard"
 
         Pass
         {
+            Name "Depth"
+            Tags {
+                "Vertex"="VertMain", "DrawListTag"="depth"
+            }
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+
+            #include "Depth.hlsli"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Shadow"
+            Tags {
+                "Vertex"="VertMain", "DrawListTag"="shadow"
+            }
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+
+            #include "Depth.hlsli"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
             Name "Opaque"
             Tags { 
                 "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque"
@@ -123,14 +155,16 @@ Shader "PBR/Standard"
                     light.halfway = normalize(viewDir + light.lightDir);
 
                     float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
-                    float shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+                    // Disable shadows temporarily
+                    float shadow = 0.0;//CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
                     shadow = clamp(shadow, 0, 1);
 
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }
 
                 float3 color = ComputeSkyboxIBL(material, normal, viewDir);
-                
+                //float3 color = float3(0, 0, 0);
+
                 color += Lo;
 
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)

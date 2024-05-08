@@ -8,86 +8,63 @@ namespace CE::RPI
 {
 	class PassTree;
 	class Scene;
+	class View;
 
-	enum class PipelineViewType
+	struct SceneViews
 	{
-		Undefined = 0,
-		Persistent,
-		Transient
-	};
-
-	struct PipelineViews
-	{
-		PipelineViewTag viewTag{};
-		PipelineViewType viewType{};
+		SceneViewTag viewTag{};
 
 		Array<ViewPtr> views{};
+
+		RHI::DrawListMask drawListMask{};
 	};
 
-	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
-
+	using SceneViewsByTag = HashMap<SceneViewTag, SceneViews>;
+	
 	class CORERPI_API RenderPipeline final
 	{
-		friend class RenderPipelineBuilder;
 	public:
 
+		RenderPipeline();
+
 		virtual ~RenderPipeline();
-
-		static RenderPipeline* Create(const RenderPipelineDescriptor& descriptor, Scene* ownerScene);
-
-		static RenderPipeline* CreateFromJson(const String& jsonString, Scene* ownerScene);
-
-		static RenderPipeline* CreateFromJson(Stream* jsonStream, Scene* ownerScene);
         
-        inline PassTree* GetPassTree() const
+        PassTree* GetPassTree() const
         {
             return passTree;
         }
 
-	private:
-        
-        bool CompilePipeline();
+		Ptr<PassAttachment> FindAttachment(Name name);
 
-		void SetupRootPass(ParentPass* rootPass);
+		PassAttachment* AddAttachment(const RPI::PassImageAttachmentDesc& imageDesc);
+		PassAttachment* AddAttachment(const RPI::PassBufferAttachmentDesc& bufferDesc);
 
-		Pass* InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass);
-
-		void BuildPassConnectionsRecursively(const PassRequest& passRequest);
-
-		void InitializeInternal();
-
-		bool IsRootPass(const Name& passName);
-
-	protected:
-
-		RenderPipeline();
-
-		RenderPipelineDescriptor descriptor{};
-
-		/// @brief The output render target of this render pipeline.
-		RHI::RenderTarget* renderTarget = nullptr;
+		void ImportScopeProducers(RHI::FrameScheduler* scheduler);
 
 		/// @brief Name of the pipeline
 		Name name{};
 
-		/// @brief Name of the pass definition to instantiate as root pass
-		Name rootPassDefinitionName{};
+		/// @brief Unique id of the pipeline
+		Uuid uuid{};
 
 		/// @brief Name tag of the main view.
-		Name mainViewTag = "MainCamera";
+		SceneViewTag mainViewTag = "MainCamera";
 
 		/// @brief Scene this render pipeline belongs to.
 		Scene* scene = nullptr;
 
+		ViewPtr view = nullptr;
+
 		/// @brief The pass tree hierarchy. Pipeline owns & manages the passes.
 		PassTree* passTree = nullptr;
 
-		/// @brief A hash map of all views owned by this pipeline accessed by their respective tags
-		PipelineViewsByTag pipelineViewsByTag{};
+		Array<Ptr<PassAttachment>> attachments{};
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RenderPipeline_DefaultPipelineTree_Test;
 #endif
+
+		friend class RenderPipelineBuilder;
 	};
     
 } // namespace CE::RPI

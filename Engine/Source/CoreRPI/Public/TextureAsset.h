@@ -29,6 +29,7 @@ namespace CE::RPI
 
 		FIELD()
 		RHI::SamplerAddressMode addressModeV = RHI::SamplerAddressMode::Repeat;
+
         FIELD()
 		RHI::SamplerAddressMode addressModeW = RHI::SamplerAddressMode::Repeat;
 

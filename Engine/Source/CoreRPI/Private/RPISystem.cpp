@@ -2,7 +2,7 @@
 
 namespace CE::RPI
 {
-    static f32 quadVertexData[] = {
+    static constexpr f32 quadVertexData[] = {
         // Positions
         -1.0f, -1.0f, 0, 0,
         1.0f, -1.0f, 0, 0,
@@ -19,7 +19,7 @@ namespace CE::RPI
         1.0f, 1.0f,
     };
 
-    static f32 textQuadVertexData[] = {
+    static constexpr f32 textQuadVertexData[] = {
         // Positions
         0.0f, 0.0f, 0, 0,
         1.0f, 0.0f, 0, 0,
@@ -44,12 +44,230 @@ namespace CE::RPI
 
     void RPISystem::Initialize()
     {
+        isFirstTick = true;
+        isInitialized = true;
+
         CreateDefaultTextures();
         CreateFullScreenQuad();
+
+        PassSystem::Get().Initialize();
+
+        builtinDrawTags.Clear();
+
+        for (int i = 1; i < (int)BuiltinDrawItemTag::COUNT; ++i)
+        {
+            RHI::DrawListTag tag{};
+            DrawListTagRegistry* registry = GetDrawListTagRegistry();
+
+            switch ((BuiltinDrawItemTag)i)
+            {
+            case BuiltinDrawItemTag::Depth:
+                tag = registry->AcquireTag("depth");
+	            break;
+            case BuiltinDrawItemTag::Opaque:
+                tag = registry->AcquireTag("opaque");
+	            break;
+            case BuiltinDrawItemTag::Shadow:
+                tag = registry->AcquireTag("shadow");
+	            break;
+            case BuiltinDrawItemTag::UI:
+                tag = registry->AcquireTag("ui");
+	            break;
+            case BuiltinDrawItemTag::Transparent:
+                tag = registry->AcquireTag("transparent");
+                break;
+            case BuiltinDrawItemTag::Skybox:
+                tag = registry->AcquireTag("skybox");
+                break;
+            case BuiltinDrawItemTag::None:
+            case BuiltinDrawItemTag::COUNT:
+                continue;
+            }
+            builtinDrawTags[(BuiltinDrawItemTag)i] = tag;
+        }
+    }
+
+    void RPISystem::PostInitialize(const RPISystemInitInfo& initInfo)
+    {
+        this->standardShader = initInfo.standardShader;
+        this->iblConvolutionShader = initInfo.iblConvolutionShader;
+
+        if (standardShader != nullptr)
+	    {
+		    for (const ShaderCollection::Item& shaderItem : *standardShader)
+		    {
+		    	if (!shaderItem.shader)
+		    		continue;
+
+		    	RPI::ShaderVariant* variant = shaderItem.shader->GetVariant(shaderItem.shader->GetDefaultVariantIndex());
+		    	if (!variant)
+		    		continue;
+
+		    	viewSrgLayout = variant->GetSrgLayout(SRGType::PerView);
+		    	sceneSrgLayout = variant->GetSrgLayout(SRGType::PerScene);
+		    }
+	    }
+
+        if (iblConvolutionShader != nullptr)
+        {
+            CreateBrdfLutTexture();
+        }
+    }
+
+    void RPISystem::CreateBrdfLutTexture()
+    {
+        if (!iblConvolutionShader)
+            return;
+
+        // - Create BRDF Lut Texture by rendering a full screen quad
+
+        RPI::ShaderVariant* shaderVariant = nullptr;
+        const Name lookupName = "BRDF Generator";
+
+        for (const auto& item : *iblConvolutionShader)
+        {
+            RPI::Shader* rpiShader = item.shader;
+            if (!rpiShader)
+                continue;
+            if (rpiShader->GetName() != lookupName)
+                continue;
+
+            shaderVariant = rpiShader->GetVariant(rpiShader->GetDefaultVariantIndex());
+        }
+
+        if (!shaderVariant)
+            return;
+
+        RPI::TextureDescriptor rpiDesc{};
+
+        RHI::TextureDescriptor& brdfLutDesc = rpiDesc.texture;
+        brdfLutDesc.name = "BRDF LUT Texture";
+        brdfLutDesc.sampleCount = 1;
+        brdfLutDesc.arrayLayers = 1;
+        brdfLutDesc.mipLevels = 1;
+        brdfLutDesc.defaultHeapType = MemoryHeapType::Default;
+        brdfLutDesc.width = brdfLutDesc.height = 512;
+        brdfLutDesc.depth = 1;
+        brdfLutDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+        brdfLutDesc.format = Format::R8G8_UNORM;
+        brdfLutDesc.dimension = Dimension::Dim2D;
+
+        brdfLutTexture = new RPI::Texture(rpiDesc);
+        RHI::Texture* brdfLut = brdfLutTexture->GetRhiTexture();
+
+        RHI::RenderTarget* brdfLutRT = nullptr;
+        RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+        {
+            RHI::RenderTargetLayout rtLayout{};
+            RHI::RenderAttachmentLayout colorAttachment{};
+            colorAttachment.attachmentId = "BRDF LUT";
+            colorAttachment.format = RHI::Format::R8G8_UNORM;
+            colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+            colorAttachment.loadAction = AttachmentLoadAction::Clear;
+            colorAttachment.storeAction = AttachmentStoreAction::Store;
+            colorAttachment.multisampleState.sampleCount = 1;
+            rtLayout.attachmentLayouts.Add(colorAttachment);
+
+            brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+            brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+        }
+
+        defer(
+            delete brdfLutRT;
+			delete brdfLutRTB;
+        );
+
+        auto queue = gDynamicRHI->GetPrimaryGraphicsQueue();
+        auto cmdList = gDynamicRHI->AllocateCommandList(queue);
+        auto fence = gDynamicRHI->CreateFence(false);
+
+        const auto& fullscreenQuad = GetFullScreenQuad();
+        const auto& fullscreenQuadArgs = GetFullScreenQuadDrawArgs();
+
+        AttachmentClearValue clearValue{ .clearValue = Vec4(0, 0, 0, 0) };
+
+        cmdList->Begin();
+        {
+            RHI::ResourceBarrierDescriptor barrier{};
+            barrier.resource = brdfLut;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::ColorOutput;
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+            cmdList->ResourceBarrier(1, &barrier);
+
+            cmdList->ClearShaderResourceGroups();
+
+            cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clearValue);
+            {
+                RHI::ViewportState viewportState{};
+                viewportState.x = viewportState.y = 0;
+                viewportState.width = brdfLut->GetWidth();
+                viewportState.height = brdfLut->GetHeight();
+                viewportState.minDepth = 0;
+                viewportState.maxDepth = 1;
+                cmdList->SetViewports(1, &viewportState);
+
+                RHI::ScissorState scissorState{};
+                scissorState.x = scissorState.y = 0;
+                scissorState.width = viewportState.width;
+                scissorState.height = viewportState.height;
+                cmdList->SetScissors(1, &scissorState);
+
+                cmdList->BindPipelineState(shaderVariant->GetPipeline());
+
+                cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+                cmdList->DrawLinear(fullscreenQuadArgs);
+            }
+            cmdList->EndRenderTarget();
+
+            barrier.resource = brdfLut;
+            barrier.fromState = RHI::ResourceState::ColorOutput;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
+            cmdList->ResourceBarrier(1, &barrier);
+        }
+        cmdList->End();
+
+        queue->Execute(1, &cmdList, fence);
+        fence->WaitForFence();
+
+        gDynamicRHI->DestroyFence(fence); fence = nullptr;
+        gDynamicRHI->FreeCommandLists(1, &cmdList);
     }
 
     void RPISystem::Shutdown()
     {
+        standardShader = nullptr;
+        isInitialized = false;
+
+        {
+            LockGuard lock{ rhiDestructionQueueMutex };
+
+            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
+            {
+                auto& entry = rhiDestructionQueue[i];
+                delete entry.resource; entry.resource = nullptr;
+            }
+
+            rhiDestructionQueue.Clear();
+        }
+
+        for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
+        {
+            if (!drawListTag.IsValid())
+                continue;
+            GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+        }
+        builtinDrawTags.Clear();
+
+	    for (int i = (int)scenes.GetSize() - 1; i >= 0; --i)
+	    {
+			delete scenes[i];
+	    }
+        scenes.Clear();
+
+        PassSystem::Get().Shutdown();
+
         for (auto buffer : vertexBuffers)
         {
             RHI::gDynamicRHI->DestroyBuffer(buffer);
@@ -61,7 +279,7 @@ namespace CE::RPI
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
 
         {
-            LockGuard<SharedMutex> lock{ samplerCacheMutex };
+            LockGuard lock{ samplerCacheMutex };
 
             for (auto [_, sampler] : samplerCache)
             {
@@ -69,6 +287,59 @@ namespace CE::RPI
             }
             samplerCache.Clear();
         }
+    }
+
+    void RPISystem::SimulationTick(u32 imageIndex)
+    {
+        {
+            LockGuard lock{ rhiDestructionQueueMutex };
+
+            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
+            {
+                auto& entry = rhiDestructionQueue[i];
+	            if (entry.frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+	            {
+                    delete entry.resource; entry.resource = nullptr;
+                    rhiDestructionQueue.RemoveAt(i);
+                    continue;
+	            }
+
+                entry.frameCounter++;
+            }
+        }
+
+        if (isFirstTick)
+        {
+            startTime = clock();
+            isFirstTick = false;
+        }
+
+        currentTime = GetCurrentTime();
+
+        for (Scene* scene : scenes)
+        {
+            scene->Simulate(currentTime);
+        }
+    }
+
+    void RPISystem::RenderTick(u32 imageIndex)
+    {
+        MaterialSystem::Get().Update(imageIndex);
+
+        for (Scene* scene : scenes)
+        {
+            scene->PrepareRender(currentTime, imageIndex);
+        }
+
+        for (Scene* scene : scenes)
+        {
+            scene->OnRenderEnd();
+        }
+    }
+
+    f32 RPISystem::GetCurrentTime() const
+    {
+        return (f32)(clock() - startTime) / CLOCKS_PER_SEC;
     }
 
     void RPISystem::CreateFullScreenQuad()
@@ -116,6 +387,13 @@ namespace CE::RPI
         sampler = RHI::gDynamicRHI->CreateSampler(desc);
         samplerCache[hash] = sampler;
         return sampler;
+    }
+
+    void RPISystem::EnqueueDestroy(RHI::RHIResource* rhiResource)
+    {
+        LockGuard lock{ rhiDestructionQueueMutex };
+
+        rhiDestructionQueue.Add({ .resource = rhiResource, .frameCounter = 0 });
     }
 
     void RPISystem::CreateDefaultTextures()

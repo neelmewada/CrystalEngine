@@ -8,7 +8,14 @@ namespace CE::RPI
 		CE_CLASS(RasterPass, GpuPass)
 	public:
 
-	private:
+		RasterPass();
+		virtual ~RasterPass();
+
+	protected:
+
+    	void ProduceScopes(FrameScheduler* scheduler) override;
+
+    	void EmplaceAttachments(FrameScheduler* scheduler) override;
 
 	};
 

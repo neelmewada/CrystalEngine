@@ -84,12 +84,12 @@ namespace CE
 		FIELD()
 		Array<String> features{};
 
-		inline bool TagExists(const Name& key) const
+		bool TagExists(const Name& key) const
 		{
 			return tags.Exists([&](const ShaderTagEntry& entry) { return entry.key == key; });
 		}
 
-		inline String GetTagValue(const Name& key) const
+		String GetTagValue(const Name& key) const
 		{
 			int index = tags.IndexOf([&](const ShaderTagEntry& entry) { return entry.key == key; });
 			if (index >= 0 && index < tags.GetSize())
@@ -159,14 +159,16 @@ namespace CE
 			return GetSubshader()->passes[index].passName;
 		}
 
-		RPI::Shader* GetOrCreateRPIShader(int passIndex);
+		RPI::ShaderCollection* GetShaderCollection();
+
+		const Array<ShaderPropertyEntry>& GetProperties() const { return properties; }
 
 	protected:
 
 		SubShader* GetSubshader();
 
 		SharedMutex rpiShaderMutex{};
-		Array<RPI::Shader*> rpiShaderPerPass{};
+		RPI::ShaderCollection shaderCollection{};
 
 		FIELD()
 		Name shaderName{};

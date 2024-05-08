@@ -28,14 +28,17 @@ namespace CE::RHI
 			frameSchedulerInstance = nullptr;
 		}
 
-		delete executer;
-		delete compiler;
-        delete transientMemoryPool;
-		delete frameGraph;
+		delete executer; executer = nullptr;
+		delete compiler; compiler = nullptr;
+		delete transientMemoryPool; transientMemoryPool = nullptr;
+		delete frameGraph; frameGraph = nullptr;
 	}
 
 	void FrameScheduler::BeginFrameGraph()
 	{
+		GetAttachmentDatabase().Clear();
+		scopeProducers.Clear();
+
 		FrameGraphBuilder::BeginFrameGraph(frameGraph);
 	}
 
@@ -84,7 +87,7 @@ namespace CE::RHI
 		executer->EndExecution(executeRequest);
 	}
 
-	void FrameScheduler::SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList)
+	void FrameScheduler::SetScopeDrawList(const ScopeId& scopeId, DrawList* drawList)
 	{
 		if (!frameGraph->scopesById.KeyExists(scopeId))
 			return;
@@ -96,7 +99,7 @@ namespace CE::RHI
 		scope->drawList = drawList;
 	}
 
-	RHI::Scope* FrameScheduler::FindScope(const ScopeID& scopeId)
+	RHI::Scope* FrameScheduler::FindScope(const ScopeId& scopeId)
 	{
 		return frameGraph->scopesById[scopeId];
 	}
@@ -124,6 +127,24 @@ namespace CE::RHI
 	void FrameScheduler::SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value)
 	{
 		frameGraph->SetVariable(imageIndex, variableName, value);
+	}
+
+	void FrameScheduler::AddScopeProducer(IScopeProducer* scopeProducer)
+	{
+		scopeProducers.Add(scopeProducer);
+	}
+
+	IScopeProducer* FrameScheduler::FindScopeProducer(const Name& passName)
+	{
+		for (int i = 0; i < scopeProducers.GetSize(); i++)
+		{
+			if (scopeProducers[i]->GetPassName() == passName)
+			{
+				return scopeProducers[i];
+			}
+		}
+
+		return nullptr;
 	}
 
 } // namespace CE::RHI

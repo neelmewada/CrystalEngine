@@ -6,12 +6,14 @@ namespace CE
 	class GameInstance;
 	class EngineSubsystem;
 
-	CLASS(Abstract, NonSerialized, Config = Engine)
+	CLASS(Abstract, Config = Engine)
 	class SYSTEM_API Engine : public Object
 	{
 		CE_CLASS(Engine, Object)
 	public:
 		// - Functions -
+
+		Engine();
 
 		virtual void PreInit();
 		virtual void Initialize();
@@ -22,15 +24,13 @@ namespace CE
 
 		virtual void Tick(f32 deltaTime);
 
-		virtual void Render();
-
 		void DispatchOnMainThread(const Delegate<void(void)>& action);
 
 		virtual GameInstance* GetGameInstance();
 
-		inline bool IsInitialized() const { return isInitialized; }
+		bool IsInitialized() const { return isInitialized; }
 
-		inline AssetManager* GetAssetManager() const { return assetManager; }
+		AssetManager* GetAssetManager() const { return assetManager; }
 
 		EngineSubsystem* GetSubsystem(ClassType* subsystemClass);
 
@@ -40,8 +40,6 @@ namespace CE
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
 
-	system_internal:
-
 		// - Internal API -
 
 		EngineSubsystem* CreateSubsystem(ClassType* subsystemClass);
@@ -50,10 +48,10 @@ namespace CE
 		// - Fields -
 
 		FIELD(Config)
-		SubClassType<AssetManager> runtimeAssetManagerClass = nullptr;
+		SubClass<AssetManager> runtimeAssetManagerClass = nullptr;
 
 		FIELD(Config)
-		SubClassType<GameInstance> gameInstanceClass = nullptr;
+		SubClass<GameInstance> gameInstanceClass = nullptr;
 
 		FIELD()
 		AssetManager* assetManager = nullptr;
@@ -69,9 +67,10 @@ namespace CE
 
 		b8 isInitialized = false;
 
-	system_internal:
+
 		static Array<ClassType*> subsystemClassQueue;
 
+		friend class SystemModule;
 	};
     
 } // namespace CE

@@ -27,13 +27,8 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
         PUBLIC
-            CE::Core
-            CE::CoreRHI
-            CE::CoreShader
-            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
-            CE::System
+            CE::CrystalWidgets
             CE::EditorCore
-            CE::EditorWidgets
     RUNTIME_DEPENDENCIES
         
 )

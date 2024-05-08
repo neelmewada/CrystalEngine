@@ -104,7 +104,6 @@ namespace CE::Widgets
     {
         Super::Construct();
 
-        this->title = GetName().GetString();
     }
 
     Vec2 CWindow::CalculateIntrinsicSize(f32 width, f32 height)
@@ -174,7 +173,8 @@ namespace CE::Widgets
         CPen pen = CPen(); pen.SetColor(Color(1, 1, 1, 1)); pen.SetWidth(2.0f);
         CBrush brush = CBrush();
 
-        if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac) // The CWindow is a native window
+        if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac &&
+            nativeWindow->GetPlatformWindow()->IsBorderless()) // The CWindow is a native window
         {
             painter->SetPen(pen);
             painter->SetBrush(brush);
@@ -227,7 +227,7 @@ namespace CE::Widgets
                     painter->SetPen(pen);
                 }
 
-                if (!nativeWindow->platformWindow->IsMaximized())
+                if (!nativeWindow->GetPlatformWindow()->IsMaximized())
                 {
                     painter->DrawRect(ScaleRect(controlRects[1], 0.98f));
                 }
@@ -359,11 +359,11 @@ namespace CE::Widgets
                             if (i == clickedControlIdx)
                             {
                                 if (clickedControlIdx == 0)
-                                    nativeWindow->platformWindow->Minimize();
-                                else if (clickedControlIdx == 1 && nativeWindow->platformWindow->IsMaximized())
-                                    nativeWindow->platformWindow->Restore();
+                                    nativeWindow->GetPlatformWindow()->Minimize();
+                                else if (clickedControlIdx == 1 && nativeWindow->GetPlatformWindow()->IsMaximized())
+                                    nativeWindow->GetPlatformWindow()->Restore();
                                 else if (clickedControlIdx == 1)
-                                    nativeWindow->platformWindow->Maximize();
+                                    nativeWindow->GetPlatformWindow()->Maximize();
                                 else if (clickedControlIdx == 2)
                                     QueueDestroy();
                             }
@@ -407,6 +407,20 @@ namespace CE::Widgets
     bool CWindow::IsSubWidgetAllowed(Class* subWidgetClass)
     {
         return subWidgetClass->IsSubclassOf<CWidget>() && !subWidgetClass->IsSubclassOf<CMenuItem>();
+    }
+
+    Vec2 CWindow::GetWindowSize() const
+    {
+        if (nativeWindow)
+        {
+            return nativeWindow->GetPlatformWindow()->GetWindowSize().ToVec2();
+        }
+        return windowSize;
+    }
+
+    bool CWindow::IsViewportWindow() const
+    {
+        return IsOfType<CViewport>();
     }
 
     void CWindow::OnPlatformWindowSet()

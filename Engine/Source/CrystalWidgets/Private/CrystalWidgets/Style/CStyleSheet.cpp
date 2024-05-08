@@ -2,6 +2,17 @@
 
 namespace CE::Widgets
 {
+	Array<CStyleSheet*> CStyleSheet::styleSheets{};
+
+	CStyleSheet::CStyleSheet()
+	{
+		styleSheets.Add(this);
+	}
+
+	CStyleSheet::~CStyleSheet()
+	{
+		styleSheets.Remove(this);
+	}
 
 	CStyleSheet* CStyleSheet::Load(const IO::Path& path, Object* parent)
 	{
@@ -39,6 +50,16 @@ namespace CE::Widgets
 		{
 			subStylesheet->parent = nullptr;
 		}
+	}
+
+	void CStyleSheet::MarkAllDirty()
+	{
+		for (auto styleSheet : styleSheets)
+		{
+			styleSheet->MarkDirty();
+		}
+
+		CApplication::Get()->OnStyleSheetsReloaded();
 	}
 
 } // namespace CE::Widgets

@@ -5,30 +5,111 @@ namespace CE
 
 	CE::Scene::Scene()
 	{
-		root = CreateDefaultSubobject<Actor>("SceneRoot");
-		root->scene = this;
+		defaultRenderPipeline = GetStaticClass<MainRenderPipeline>();
+		
+		if (!IsDefaultInstance())
+		{
+			rpiScene = new RPI::Scene();
+			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+
+			
+		}
 	}
 
 	CE::Scene::~Scene()
 	{
-        
+		delete rpiScene; rpiScene = nullptr;
 	}
 
 	void CE::Scene::OnBeginPlay()
 	{
 		isPlaying = true;
 
-		if (root != nullptr)
+		for (Actor* actor : actors)
 		{
-			root->OnBeginPlay();
+			actor->OnBeginPlay();
 		}
 	}
 
 	void CE::Scene::Tick(f32 delta)
 	{
-		if (root != nullptr)
+		for (Actor* actor : actors)
 		{
-			root->Tick(delta);
+			actor->Tick(delta);
+		}
+
+		for (CameraComponent* camera : cameras)
+		{
+			RPI::View* view = camera->GetRpiView();
+			if (!view || camera->renderViewport == nullptr)
+				continue;
+
+			Vec2 windowSize = camera->renderViewport->GetWindowSize();
+			PerViewConstants& viewConstants = view->GetViewConstants();
+			viewConstants.pixelResolution = windowSize;
+			viewConstants.projectionMatrix = camera->projectionMatrix;
+			viewConstants.viewMatrix = camera->viewMatrix;
+			viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
+			viewConstants.viewPosition = camera->GetPosition();
+		}
+
+		for (CE::RenderPipeline* renderPipeline : renderPipelines)
+		{
+			renderPipeline->Tick();
+		}
+	}
+
+	void CE::Scene::AddActor(Actor* actor)
+	{
+		if (actor == nullptr)
+			return;
+		if (actorsByUuid.KeyExists(actor->GetUuid()))
+			return;
+		
+		actors.Add(actor);
+
+		OnActorChainAttached(actor);
+	}
+
+	void CE::Scene::RemoveActor(Actor* actor)
+	{
+		if (actor == nullptr)
+			return;
+		if (!actorsByUuid.KeyExists(actor->GetUuid()))
+			return;
+
+		actors.Remove(actor);
+
+		OnActorChainDetached(actor);
+	}
+
+	void CE::Scene::AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera)
+	{
+		if (renderPipeline && !renderPipelines.Exists(renderPipeline))
+		{
+			rpiScene->AddRenderPipeline(renderPipeline->GetRpiRenderPipeline());
+			renderPipelines.Add(renderPipeline);
+		}
+	}
+	
+	void CE::Scene::RemoveRenderPipeline(CE::RenderPipeline* renderPipeline)
+	{
+		rpiScene->RemoveRenderPipeline(renderPipeline->GetRpiRenderPipeline());
+		renderPipelines.Remove(renderPipeline);
+	}
+
+	void CE::Scene::SetSkyboxCubeMap(TextureCube* cubeMap)
+	{
+		skyboxCubeMap = cubeMap;
+		if (rpiScene && skyboxCubeMap)
+		{
+			TextureCube* diffuseIrradiance = skyboxCubeMap->GetDiffuseConvolution();
+			RPI::Texture* diffuseIrradianceRpi = nullptr;
+			if (diffuseIrradiance)
+				diffuseIrradianceRpi = diffuseIrradiance->GetRpiTexture();
+
+			rpiScene->SetSkyboxCubeMap(skyboxCubeMap->GetRpiTexture(), diffuseIrradianceRpi);
 		}
 	}
 
@@ -37,7 +118,7 @@ namespace CE
 		if (!actor)
 			return;
 		
-        std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
+		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
@@ -45,9 +126,7 @@ namespace CE
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
-				cameras.Add(camera);
-				if (camera->IsMainCamera())
-					mainCamera = camera;
+				OnCameraComponentAttached(camera);
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -111,14 +190,15 @@ namespace CE
 		if (!actor)
 			return;
         
-        std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
+		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
             
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
-				cameras.Remove((CameraComponent*)sceneComponent);
+				CameraComponent* camera = (CameraComponent*)sceneComponent;
+				OnCameraComponentDetached(camera);
 			}
 
 			auto componentClass = sceneComponent->GetClass();
@@ -169,8 +249,47 @@ namespace CE
                     recursivelyRemove(child);
             }
         };
-
+		
 		recursivelyRemove(actor);
+	}
+
+	void CE::Scene::OnCameraComponentAttached(CameraComponent* camera)
+	{
+		cameras.Add(camera);
+		AddRenderPipeline(camera->GetRenderPipeline(), camera);
+		if (mainCamera == nullptr)
+		{
+			mainCamera = camera;
+			rpiScene->AddView("MainCamera", mainCamera->rpiView);
+			camera->cameraType = CameraType::MainCamera;
+			camera->renderViewport = mainRenderViewport;
+		}
+		else
+		{
+			rpiScene->AddView("Camera", camera->rpiView);
+			camera->cameraType = CameraType::SecondaryCamera;
+		}
+	}
+
+	void CE::Scene::OnCameraComponentDetached(CameraComponent* camera)
+	{
+		cameras.Remove(camera);
+		RemoveRenderPipeline(camera->GetRenderPipeline());
+		if (mainCamera == camera)
+		{
+			rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
+			mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
+			camera->renderViewport = nullptr;
+		}
+		else
+		{
+			rpiScene->RemoveView("Camera", camera->rpiView);
+		}
+	}
+
+	void CE::Scene::OnRootComponentSet(SceneComponent* rootComponent, Actor* ownerActor)
+	{
+		
 	}
 
 } // namespace CE

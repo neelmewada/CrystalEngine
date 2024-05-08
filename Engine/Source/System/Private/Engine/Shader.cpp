@@ -31,11 +31,15 @@ namespace CE
 
 	CE::Shader::~Shader()
 	{
-		for (auto rpiShader : rpiShaderPerPass)
+		for (const ShaderCollection::Item& item : shaderCollection)
 		{
-			delete rpiShader;
+			if (item.shader)
+			{
+				delete item.shader;
+			}
 		}
-		rpiShaderPerPass.Clear();
+
+		shaderCollection.Clear();
 	}
 
 	void CE::Shader::OnAfterConstruct()
@@ -43,23 +47,36 @@ namespace CE
 		Super::OnAfterConstruct();
 	}
 
-	RPI::Shader* CE::Shader::GetOrCreateRPIShader(int passIndex)
+	RPI::ShaderCollection* CE::Shader::GetShaderCollection()
 	{
 		LockGuard<SharedMutex> lock{ rpiShaderMutex };
 
-		if (rpiShaderPerPass.GetSize() == 0)
+		if (shaderCollection.IsEmpty())
 		{
+			shaderCollection = RPI::ShaderCollection();
+
 			SubShader* subShader = GetSubshader();
 
 			for (int i = 0; i < GetShaderPassCount(); i++)
 			{
-				RPI::Shader* rpiShader = new RPI::Shader();
 				CE::ShaderPass* shaderPass = GetShaderPass(i);
+				RHI::DrawListTag drawListTag = {};
+
+				for (const auto& tagEntry : shaderPass->tags)
+				{
+					if (tagEntry.key == "DrawListTag")
+					{
+						drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(tagEntry.value);
+						break;
+					}
+				}
+
+				RPI::Shader* rpiShader = new RPI::Shader(drawListTag);
 
 				for (int j = 0; j < shaderPass->variants.GetSize(); j++)
 				{
 					const CE::ShaderVariant& variant = shaderPass->variants[j];
-					
+
 					RPI::ShaderVariantDescriptor2 variantDesc{};
 					variantDesc.shaderName = shaderPass->passName;
 					variantDesc.reflectionInfo = variant.reflectionInfo;
@@ -85,7 +102,7 @@ namespace CE
 						{
 							EnumType* shaderStageEnum = GetStaticEnum<RHI::ShaderStage>();
 							EnumConstant* constant = shaderStageEnum->FindConstantWithValue((s64)curShaderBlob->shaderStage);
-							
+
 							if (constant != nullptr && shaderPass->TagExists(constant->GetName()))
 							{
 								entryPoint = shaderPass->GetTagValue(constant->GetName());
@@ -94,18 +111,24 @@ namespace CE
 
 						variantDesc.entryPoints.Add(entryPoint);
 					}
-					
+
 					rpiShader->AddVariant(variantDesc);
 				}
 
-				rpiShaderPerPass.Add(rpiShader);
+				if (drawListTag.IsValid())
+				{
+					ShaderCollection::Item shaderItem{ .shaderTag = shaderPass->passName, .shader = rpiShader, .enabled = true, .drawListOverride = drawListTag };
+					shaderCollection.Add(shaderItem);
+				}
+				else
+				{
+					ShaderCollection::Item shaderItem{ .shaderTag = shaderPass->passName, .shader = rpiShader, .enabled = true, .drawListOverride = DrawListTag::NullValue };
+					shaderCollection.Add(shaderItem);
+				}
 			}
 		}
 
-		if (passIndex < 0 || passIndex >= rpiShaderPerPass.GetSize())
-			return nullptr;
-
-		return rpiShaderPerPass[passIndex];
+		return &shaderCollection;
 	}
 
 	SubShader* CE::Shader::GetSubshader()

@@ -16,6 +16,7 @@ add_subdirectory(Styles)
 # Core Modules
 
 add_subdirectory(Source/Core)
+add_subdirectory(Source/ScriptCore)
 add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreInput)
 add_subdirectory(Source/CoreMedia)

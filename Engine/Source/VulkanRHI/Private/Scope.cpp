@@ -129,7 +129,7 @@ namespace CE::Vulkan
 
 		if (prevSubPass == nullptr && nextSubPass != nullptr)
 		{
-			// TODO: RenderPass with multiple subpasses
+			// TODO: Fix RenderPass with multiple subpasses
 			Vulkan::Scope* next = this;
 			this->subpassIndex = 0;
 			int i = 0;
@@ -204,6 +204,7 @@ namespace CE::Vulkan
 				Pipeline* pipeline = pipelineState->GetPipeline();
 				if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
 					continue;
+
 				GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
 				graphicsPipeline->Compile(renderPass, subpassIndex);
 

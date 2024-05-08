@@ -12,5 +12,10 @@ namespace CE::Widgets
     {
 	    
     }
-    
+
+    bool CTabWidgetContainer::IsLayoutCalculationRoot()
+    {
+        return true;
+    }
+
 } // namespace CE::Widgets

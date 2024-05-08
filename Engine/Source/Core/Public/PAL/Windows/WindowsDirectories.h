@@ -14,6 +14,9 @@ namespace CE
     public:
         static IO::Path GetLaunchDir();
 
+        // Absolute path to the current executable
+        static IO::Path GetExecutablePath();
+
         static IO::Path GetAppRootDir();
 
         // Returns the root directory of the engine installation

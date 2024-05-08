@@ -4,7 +4,7 @@ namespace CE::RPI
 {
 	PassTree::PassTree()
 	{
-
+		rootPass = CreateDefaultSubobject<ParentPass>("RootPass");
 	}
 
 	PassTree::~PassTree()
@@ -14,11 +14,12 @@ namespace CE::RPI
 
     void PassTree::Clear()
     {
-        if (rootPass != nullptr)
-        {
-            rootPass->Destroy();
-            rootPass = nullptr;
-        }
+		for (Pass* pass : rootPass->passes)
+		{
+			pass->Destroy();
+		}
+		
+        rootPass->passes.Clear();
     }
 
     Pass* PassTree::FindPass(const Name& passName)
@@ -79,6 +80,32 @@ namespace CE::RPI
 		}
 
 		return curSearchPass;
+	}
+
+	void PassTree::IterateRecursively(const Delegate<void(Pass*)>& functor)
+	{
+		if (rootPass == nullptr)
+			return;
+
+		IterateRecursively(rootPass, functor);
+	}
+	
+	void PassTree::IterateRecursively(Pass* currentPass, const Delegate<void(Pass*)>& functor)
+	{
+		if (currentPass == nullptr)
+			return;
+
+		functor.InvokeIfValid(currentPass);
+
+		if (currentPass->IsParentPass())
+		{
+			auto parentPass = (ParentPass*)currentPass;
+
+			for (Pass* pass : parentPass->passes)
+			{
+				IterateRecursively(pass, functor);
+			}
+		}
 	}
 
 	Pass* PassTree::FindPassInternal(const Name& passName, ParentPass* parentPass)

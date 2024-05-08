@@ -24,12 +24,13 @@ namespace CE::RPI
 		textQuadDrawArgs = RPISystem::Get().GetTextQuadDrawArgs();
 
 		defaultMaterial = new RPI::Material(drawShader);
-		defaultMaterial->SelectVariant(drawShader->GetDefaultVariantIndex());
 
-		RHI::ShaderResourceGroupLayout perViewSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
+		ShaderVariant* drawShaderVariant = drawShader->GetVariant(drawShader->GetDefaultVariantIndex());
+
+		RHI::ShaderResourceGroupLayout perViewSrgLayout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerView);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 
-		RHI::ShaderResourceGroupLayout perDrawSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
+		RHI::ShaderResourceGroupLayout perDrawSrgLayout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerDraw);
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
 
 		for (int i = 0; i < numFramesInFlight; i++)
@@ -519,8 +520,6 @@ namespace CE::RPI
 
 				outRects[i].max = outRects[i].min + Vec2((f32)glyphLayout.advance * fontSize / atlasFontSize, hLayout.GetHeight() * fontSize / atlasFontSize);
 			}
-			//outRects[i].max.x = outRects[i].min.x + (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
-			//outRects[i].max.y = outRects[i].min.y + glyphHeight * fontSize / atlasFontSize;
 
 			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > startX + width)
 			{
@@ -1075,7 +1074,9 @@ namespace CE::RPI
 
 					request.drawItemTag = drawListTag;
 					request.drawFilterMask = RHI::DrawFilterMask::ALL;
-					request.pipelineState = material->GetCurrentShader()->GetPipeline(multisampling);
+					RPI::Shader* shader = material->GetShaderCollection()->At(0).shader;
+					
+					request.pipelineState = shader->GetVariant(0)->GetPipeline(multisampling);
 
 					builder.AddDrawItem(request);
 				}

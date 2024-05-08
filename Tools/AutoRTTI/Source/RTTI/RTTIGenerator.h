@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 #include "Language/HeaderTokenizer.h"
 #include "Language/HeaderAST.h"

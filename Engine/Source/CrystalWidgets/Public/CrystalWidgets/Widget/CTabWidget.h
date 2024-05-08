@@ -17,7 +17,18 @@ namespace CE::Widgets
 
         void SetActiveTab(int tabIndex);
 
+        int GetActiveTabIndex() const;
+
+        CTabWidgetContainer* GetActiveTab() const { return activeTab; }
+
+        // - Signals -
+
+        // Params: int newTabIndex
+        CE_SIGNAL(OnTabSelectionChanged, int);
+
     protected:
+
+        void OnAfterComputeStyle() override;
 
         void OnPaint(CPaintEvent* paintEvent) override;
 
@@ -26,7 +37,7 @@ namespace CE::Widgets
 
         void HandleEvent(CEvent* event) override;
 
-    crystalwidgets_internal:
+    private:
 
         FIELD()
         Array<CTabWidgetContainer*> containers{};

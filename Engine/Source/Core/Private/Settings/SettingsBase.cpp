@@ -47,6 +47,21 @@ namespace CE
 		Package::SavePackage(settingsPackage, nullptr);
 	}
 
+#if PAL_TRAIT_BUILD_EDITOR
+	void SettingsBase::SaveSettings(const IO::Path& customPath)
+	{
+		Package* settingsPackage = GetSettingsPackage();
+		if (settingsPackage == nullptr)
+			return;
+
+		if (!settingsPackage->IsFullyLoaded())
+			settingsPackage->LoadFully();
+
+		Package::SavePackage(settingsPackage, nullptr, customPath);
+	}
+#endif
+
+
 	Array<ClassType*> SettingsBase::GetSettingsClassesWithCategory(const String& settingsCategory)
     {
 		Array<ClassType*> result{};

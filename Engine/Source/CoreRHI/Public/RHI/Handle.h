@@ -13,7 +13,7 @@ namespace CE::RHI
 	public:
 		using IndexType = T;
 
-		static const constexpr T NullValue = T(-1);
+		static constexpr T NullValue = T(-1);
 
 		Handle() : value(NullValue)
 		{
@@ -48,6 +48,11 @@ namespace CE::RHI
 		inline void Reset()
 		{
 			value = NullValue;
+		}
+
+		SIZE_T GetHash() const
+		{
+			return CE::GetHash<T>(value);
 		}
 
 	private:

@@ -10,6 +10,8 @@ namespace CE
 
 		Subsystem();
 
+		virtual f32 GetTickPriority() const { return 0; }
+
 		/// @brief Override and return false if you don't want to instantiate the subsystem, or vice versa.
 		virtual bool ShouldBeCreated(Object* outer) { return true; }
 
@@ -20,8 +22,6 @@ namespace CE
 		virtual void Shutdown();
 
 		virtual void Tick(float deltaTime);
-
-		virtual void Render() {}
 
 	protected:
 

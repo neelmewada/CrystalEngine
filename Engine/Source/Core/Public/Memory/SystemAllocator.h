@@ -5,10 +5,9 @@ namespace CE
     
 	class CORE_API SystemAllocator : public IAllocator
 	{
-	private:
-		SystemAllocator() = default;
-
 	public:
+
+		SystemAllocator() = default;
 
 		static SystemAllocator* Get();
 

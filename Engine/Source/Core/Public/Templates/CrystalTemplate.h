@@ -13,8 +13,10 @@ namespace CE
 	class String;
 
 	template<typename T>
-	struct NumericLimits
+	struct NumericLimits final
 	{
+		NumericLimits() = delete;
+
 		constexpr static T Min() noexcept
 		{
 			return std::numeric_limits<T>::min();
@@ -35,6 +37,10 @@ namespace CE
 	class BitSet
 	{
 	public:
+
+		BitSet(SIZE_T value = 0) : impl(value)
+		{}
+
 		inline void Set(SIZE_T pos, bool value = true)
 		{
 			impl.set(pos, value);
@@ -88,6 +94,8 @@ namespace CE
 
 		String ToString() const;
 
+		constexpr SIZE_T GetSize() const { return impl.size(); }
+
 		inline bool operator==(const BitSet& rhs) const
 		{
 			return impl == rhs.impl;
@@ -96,6 +104,36 @@ namespace CE
 		inline bool operator!=(const BitSet& rhs) const
 		{
 			return impl != rhs.impl;
+		}
+
+		BitSet& operator|=(const BitSet& rhs)
+		{
+			impl |= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator&=(const BitSet& rhs)
+		{
+			impl &= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator^=(const BitSet& rhs)
+		{
+			impl ^= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator<<=(const BitSet& rhs)
+		{
+			impl <<= rhs.impl;
+			return *this;
+		}
+
+		BitSet& operator>>=(const BitSet& rhs)
+		{
+			impl >>= rhs.impl;
+			return *this;
 		}
 
 	private:
@@ -114,7 +152,7 @@ namespace CE
     struct TTrueType : TBoolConst<true> {};
 
     template<typename T>
-    FORCE_INLINE typename RemoveReference<T>::Type&& MoveTemp(T&& value)
+    typename RemoveReference<T>::Type&& MoveTemp(T&& value)
     {
         return static_cast<typename RemoveReference<T>::Type&&>(value);
     }

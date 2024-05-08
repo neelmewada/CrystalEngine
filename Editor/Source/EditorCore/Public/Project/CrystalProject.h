@@ -8,9 +8,6 @@ namespace CE::Editor
 	{
 		CE_STRUCT(CrystalProject)
 	public:
-
-		FIELD()
-		Name projectName = "Untitled";
         
         FIELD()
         String engineVersion = CE_ENGINE_VERSION_STRING;

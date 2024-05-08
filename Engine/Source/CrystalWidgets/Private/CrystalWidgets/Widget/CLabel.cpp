@@ -28,7 +28,7 @@ namespace CE::Widgets
         {
             if (owner->ownerWindow == nullptr)
             {
-                renderer = owner->nativeWindow->renderer;
+                renderer = owner->GetNativeWindow()->renderer;
 	            break;
             }
             owner = owner->ownerWindow;
@@ -52,6 +52,9 @@ namespace CE::Widgets
     void CLabel::SetText(const String& text)
     {
         this->text = text;
+
+        SetNeedsLayout();
+        SetNeedsPaint();
     }
 
     const String& CLabel::GetText() const

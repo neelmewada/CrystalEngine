@@ -23,9 +23,11 @@ namespace CE
             return;
 
         valuesModified = true;
-        
+
+        shaderCollection = shader->GetShaderCollection();
+
         this->shader = shader;
-        auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
+        auto newMaterial = new RPI::Material(shaderCollection);
 
         if (material)
         {
@@ -36,28 +38,78 @@ namespace CE
         }
 
         this->material = newMaterial;
+
+        propertyMap.Clear();
+
+        for (const auto& prop : properties)
+        {
+            propertyMap[prop.name] = prop;
+        }
+
+        const auto& shaderDefaults = shader->GetProperties();
+
+        for (const auto& defaultProp : shaderDefaults)
+        {
+	        if (!propertyMap.KeyExists(defaultProp.name))
+	        {
+                MaterialProperty property{};
+
+		        switch (defaultProp.propertyType)
+		        {
+		        case ShaderPropertyType::UInt:
+                    property.propertyType = MaterialPropertyType::UInt;
+                    property.u32Value = (u32)defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Int:
+                    property.propertyType = MaterialPropertyType::Int;
+                    property.s32Value = (s32)defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Float:
+                    property.propertyType = MaterialPropertyType::Float;
+                    property.floatValue = defaultProp.defaultFloatValue;
+			        break;
+		        case ShaderPropertyType::Color:
+                    property.propertyType = MaterialPropertyType::Color;
+                    property.colorValue = defaultProp.defaultVectorValue;
+			        break;
+		        case ShaderPropertyType::Vector:
+                    property.propertyType = MaterialPropertyType::Vector;
+                    property.vectorValue = defaultProp.defaultVectorValue;
+			        break;
+		        case ShaderPropertyType::Tex2D:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::Tex3D:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::TexCube:
+                    property.propertyType = MaterialPropertyType::Texture;
+                    property.textureValue.textureName = defaultProp.defaultStringValue;
+			        break;
+		        case ShaderPropertyType::None:
+                    continue;
+		        }
+
+                property.name = defaultProp.name;
+
+                properties.Add(property);
+                propertyMap[property.name] = property;
+	        }
+        }
     }
 
-    void CE::Material::SetPass(u32 passIndex)
+    void CE::Material::SetCustomPass(u32 passIndex)
     {
-        if (this->passIndex == passIndex)
+        if (this->passIndex == passIndex || material == nullptr)
             return;
-
-        valuesModified = true;
-
-        this->passIndex = passIndex;
-
-        auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
 
         if (material)
         {
-            newMaterial->CopyPropertiesFrom(material);
-
-            delete material;
-            material = nullptr;
+            this->passIndex = passIndex;
+            material->SetCurrentShaderItem(passIndex);
         }
-        
-        this->material = newMaterial;
     }
 
     RPI::Material* CE::Material::GetRpiMaterial()
@@ -73,26 +125,20 @@ namespace CE
 
         if (shader != nullptr)
         {
-            this->passIndex = 0;
+            CE::Shader* resetShader = shader;
+            shaderCollection = nullptr;
+            this->shader = nullptr;
 
-            auto newMaterial = new RPI::Material(shader->GetOrCreateRPIShader(passIndex));
-
-            if (material)
-            {
-                newMaterial->CopyPropertiesFrom(material);
-
-                delete material;
-                material = nullptr;
-            }
-
-            this->material = newMaterial;
+            SetShader(resetShader);
         }
-
-        propertyMap.Clear();
-
-        for (const auto& prop : properties)
+        else
         {
-            propertyMap[prop.name] = prop;
+            propertyMap.Clear();
+
+            for (const auto& prop : properties)
+            {
+                propertyMap[prop.name] = prop;
+            }
         }
     }
 

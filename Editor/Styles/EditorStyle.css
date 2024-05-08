@@ -17,18 +17,6 @@ CDockSplitView::splitter {
     flex-shrink: 2;
 }
 
-#SplitLeft {
-    background: rgb(21, 21, 21);
-}
-
-#SplitRightBottom {
-    background: rgb(21, 21, 21);
-}
-
-#SplitRightTop {
-    background: rgb(21, 21, 21);
-}
-
 CDockWindow {
     background: rgb(36, 36, 36);
 }
@@ -42,32 +30,12 @@ CDockWindow {
     column-gap: 10px;
 }
 
-#Third, #Fourth {
-    row-gap: 10px;
-    font-size: 13px;
-    align-items: flex-start;
-}
-
-#TestButton {
-    background: rgb(128, 128, 0);
-    width: 30px;
-    height: 30px;
-}
-
-#TestButton:hovered {
-    background: rgb(128, 0, 0);
-}
-
-#TestButton:pressed {
-    background: rgb(0, 128, 0);
-}
-
 CButton {
     background: rgb(56, 56, 56);
     flex-direction: row;
     min-width: 40px;
     min-height: 20px;
-    padding: 10px 5px;
+    padding: 15px 5px;
     border-radius: 5px 5px;
     border-color: rgb(24, 24, 24);
     border-width: 1px;
@@ -79,7 +47,7 @@ CButton:hovered {
 
 CButton:pressed {
     background: rgb(50, 50, 50);
-    padding: 10px 6px 10px 4px;
+    padding: 15px 6px 15px 4px;
 }
 
 CButton:disabled {
@@ -92,7 +60,7 @@ CButton::alternate {
     flex-direction: row;
     min-width: 40px;
     min-height: 20px;
-    padding: 10px 5px;
+    padding: 15px 5px;
     border-radius: 5px 5px;
     border-color: rgb(24, 24, 24);
     border-width: 1px;
@@ -104,7 +72,7 @@ CButton::alternate:hovered {
 
 CButton::alternate:pressed {
     background: rgb(0, 100, 200);
-    padding: 10px 6px 10px 4px;
+    padding: 15px 6px 15px 4px;
 }
 
 CButton::alternate:disabled {
@@ -117,7 +85,7 @@ CTextInput {
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 2px;
+    border-width: 1.5px;
     border-color: rgb(50, 50, 50);
     border-radius: 5px 5px;
     min-height: 22.5px;
@@ -136,26 +104,6 @@ CTextInput:disabled {
     border-color: rgb(50, 50, 50);
     background-color: rgb(26, 26, 26);
     color: rgb(140, 140, 140);
-}
-
-#TextInputDemo {
-    max-width: 100px;
-}
-
-#TestLabel {
-    font-size: 48px;
-}
-
-#ImageWidget {
-    width: 80px;
-    height: 80px;
-    background-image: "/Engine/Assets/Sandbox/TopView";
-}
-
-#ImageWidget2 {
-    width: 28px;
-    height: 28px;
-    background-image: "/Engine/Assets/Sandbox/Object";
 }
 
 #Fourth {
@@ -262,23 +210,10 @@ CScrollArea::scroll-bar:active {
 CListWidget {
     flex-direction: column;
     align-items: stretch;
-}
-
-#ListWidget {
-    background-color: black;
     border-width: 1.5px;
     border-color: rgb(64, 64, 64);
     height: 250px;
     padding: 0px 0px 10px 0px;
-}
-
-#TestPopup {
-    background-color: rgb(47, 47, 47);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-width: 2px;
-    border-color: rgb(21, 21, 21);
 }
 
 CToolWindow::title-bar {
@@ -291,12 +226,11 @@ CToolWindow {
     background-color: rgb(36, 36, 36);
 }
 
-#TitleLabel {
+#TitleLabel, .Title {
     font-size: 18px;
 }
 
 CListWidgetItem {
-    background-color: rgba(0, 0, 0, 0);
     padding: 10px 10px;
 }
 
@@ -306,4 +240,31 @@ CListWidgetItem:hovered {
 
 CListWidgetItem:active {
     background-color: rgb(0, 112, 224);
+}
+
+#HStack, .HStack {
+    flex-direction: row;
+    align-items: center;
+}
+
+#VStack, .VStack {
+    flex-direction: column;
+}
+
+.IconButton {
+    border-width: 0.0px;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.IconButton:hovered {
+    background-color: rgb(56, 56, 56);
+}
+
+.IconButton:pressed {
+    background-color: rgb(40, 40, 40);
+}
+
+ViewportWindow {
+    background-color: black;
 }

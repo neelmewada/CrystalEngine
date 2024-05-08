@@ -3,32 +3,8 @@
 namespace CE::RPI
 {
 
-	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor& desc)
-		: defineFlags(desc.defineFlags)
-		, pipelineDesc(desc.pipelineDesc)
-	{
-		variantId = 0;
-
-		for (int i = 0; i < defineFlags.GetSize(); i++)
-		{
-			if (i == 0)
-				variantId = defineFlags[i].GetHashValue();
-			else
-				variantId = GetCombinedHash(variantId, defineFlags[i].GetHashValue());
-		}
-
-		for (const auto& shaderStage : pipelineDesc.shaderStages)
-		{
-			if (shaderStage.shaderModule)
-			{
-				modulesByStage[shaderStage.shaderModule->GetShaderStage()] = shaderStage.shaderModule;
-			}
-		}
-		
-		pipelineCollection = new GraphicsPipelineCollection(pipelineDesc);
-	}
-
 	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor2& desc)
+		: reflectionInfo(desc.reflectionInfo)
 	{
 		variantId = 0;
 
@@ -44,7 +20,8 @@ namespace CE::RPI
 		RHI::ColorBlendState colorBlend = {};
 
 		bool depthOnly = false;
-		if (desc.TagExists("DrawListTag") && desc.GetTagValue("DrawListTag") == "depth")
+		if (desc.TagExists("DrawListTag") && 
+			(desc.GetTagValue("DrawListTag") == "depth" || desc.GetTagValue("DrawListTag") == "shadow"))
 		{
 			depthOnly = true;
 		}
@@ -133,6 +110,9 @@ namespace CE::RPI
 		{
 			pipelineDesc.depthStencilState.depthState.enable = false;
 		}
+
+		// TODO: Add support for stencil state
+		pipelineDesc.depthStencilState.stencilState.enable = false;
 
 		if (desc.TagExists("Cull"))
 		{
@@ -281,15 +261,27 @@ namespace CE::RPI
 		return pipelineCollection->GetPipeline(variant);
 	}
 
-	RHI::ShaderResourceGroupLayout ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
+	const RHI::ShaderResourceGroupLayout& ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
 	{
 		for (const auto& srgLayout : pipelineDesc.srgLayouts)
 		{
 			if (srgLayout.srgType == srgType)
 				return srgLayout;
 		}
+		
+		thread_local RHI::ShaderResourceGroupLayout empty{};
+		return empty;
+	}
 
-		return RHI::ShaderResourceGroupLayout();
+	bool ShaderVariant::HasSrgLayout(RHI::SRGType srgType)
+	{
+		for (const auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType == srgType)
+				return true;
+		}
+
+		return false;
 	}
 
 } // namespace CE::RPI

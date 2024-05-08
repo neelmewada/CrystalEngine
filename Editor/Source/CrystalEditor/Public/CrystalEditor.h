@@ -2,35 +2,31 @@
 
 #include "Core.h"
 #include "CoreRHI.h"
-#include "CoreWidgets.h"
+#include "CoreRPI.h"
 #include "CoreApplication.h"
 #include "EditorCore.h"
-#include "EditorWidgets.h"
+#include "CrystalWidgets.h"
 #include "EditorSystem.h"
 
-// Panels
-#include "Editor/Panels/EditorPanel.h"
+// Project Browser
+#include "ProjectBrowser/ProjectBrowser.h"
 
-#include "Editor/Panels/AssetBrowser/AssetBrowserModel.h"
-#include "Editor/Panels/AssetBrowser/AssetBrowserPanel.h"
-#include "Editor/Panels/AssetBrowser/AssetItemWidget.h"
+// ----------------------------------------
+// Crystal Editor
 
-#include "Editor/Panels/RenderViewport/RenderViewportPanel.h"
-#include "Editor/Panels/Details/DetailsPanel.h"
-#include "Editor/Panels/SceneOutliner/SceneOutlinerPanel.h"
+// Widgets
+#include "CrystalEditor/Widgets/EditorToolBar.h"
 
-#include "Editor/Panels/ImageTestPanel.h"
+// Windows
+#include "CrystalEditor/EditorWindow.h"
+#include "CrystalEditor/MinorEditorWindow.h"
 
-#include "Editor/CrystalEditorWindow.h"
+#include "CrystalEditor/Windows/AssetBrowser/AssetBrowserWindow.h"
+#include "CrystalEditor/Windows/Viewport/ViewportWindow.h"
+#include "CrystalEditor/Windows/Details/DetailsWindow.h"
 
-// Menus
-#include "Editor/Menus/AssetItemContextMenu.h"
+#include "CrystalEditor/Editors/SceneEditor/SceneEditorWindow.h"
 
-// Editor Windows
-#include "Editor/Windows/EditorWindow.h"
-#include "Editor/Windows/ProjectSettingsWindow.h"
-
-#include "Editor/Windows/SceneEditor/SceneEditorWindow.h"
-#include "Editor/Windows/TextureEditor/TextureEditorWindow.h"
-
+// Main window
+#include "CrystalEditor/CrystalEditorWindow.h"
 

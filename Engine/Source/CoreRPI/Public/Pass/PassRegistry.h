@@ -12,8 +12,6 @@ namespace CE::RPI
 
 		SubClass<Pass> GetPassClass(const Name& shortName);
 
-	corerpi_internal:
-
 		void OnClassRegistered(ClassType* classType);
 		void OnClassDeregistered(ClassType* classType);
 

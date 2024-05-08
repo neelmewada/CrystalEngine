@@ -76,6 +76,8 @@ namespace CE::Vulkan
 
 		virtual bool IsMerged() const { return false; }
 
+		virtual bool HasVariable(const Name& variableName) override;
+
 		virtual bool Bind(Name name, RHI::BufferView bufferView) override;
 		virtual bool Bind(Name name, RHI::Texture* texture) override;
 		virtual bool Bind(Name name, RHI::TextureView* textureView) override;

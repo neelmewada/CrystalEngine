@@ -8,7 +8,7 @@ namespace CE
 {
 
 	//
-	//  intrusive_ptr.hpp
+	//  IntrusivePtr.hpp
 	//
 	//  Copyright (c) 2001, 2002 Peter Dimov
 	//
@@ -16,7 +16,7 @@ namespace CE
 	// accompanying file LICENSE_1_0.txt or copy at
 	// http://www.boost.org/LICENSE_1_0.txt)
 	//
-	//  See http://www.boost.org/libs/smart_ptr/intrusive_ptr.html for documentation.
+	//  See http://www.boost.org/libs/smart_ptr/IntrusivePtr.html for documentation.
 	//
     
 	struct IntrusiveDefaultDeleter
@@ -132,6 +132,29 @@ namespace CE
 			}
 		}
 
+		IntrusivePtr(IntrusivePtr&& rhs) : ptr(rhs.ptr)
+		{
+			rhs.ptr = 0;
+		}
+
+		IntrusivePtr& operator=(IntrusivePtr&& rhs)
+		{
+			ThisType(static_cast<IntrusivePtr&&>(rhs)).Swap(*this);
+			return *this;
+		}
+
+		IntrusivePtr& operator=(IntrusivePtr const& rhs)
+		{
+			ThisType(rhs).Swap(*this);
+			return *this;
+		}
+
+		IntrusivePtr& operator=(T* rhs)
+		{
+			ThisType(rhs).Swap(*this);
+			return *this;
+		}
+
 		inline void Reset()
 		{
 			ThisType().Swap(*this);
@@ -154,11 +177,19 @@ namespace CE
 
 		inline T& operator*() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException();
+			}
 			return *ptr;
 		}
 
 		inline T* operator->() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException();
+			}
 			return ptr;
 		}
 
@@ -180,6 +211,16 @@ namespace CE
 		inline bool operator!=(const IntrusivePtr& rhs) const
 		{
 			return ptr != rhs.ptr;
+		}
+
+		inline bool operator==(const T* rhs) const
+		{
+			return ptr == rhs;
+		}
+
+		inline bool operator!=(const T* rhs) const
+		{
+			return ptr != rhs;
 		}
 
 		inline void Swap(IntrusivePtr& rhs)

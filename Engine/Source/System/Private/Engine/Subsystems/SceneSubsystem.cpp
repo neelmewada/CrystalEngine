@@ -2,33 +2,39 @@
 
 namespace CE
 {
-
     SceneSubsystem::SceneSubsystem()
     {
 		
     }
 
-	void SceneSubsystem::OnBeginPlay()
-	{
-		if (scene != nullptr)
-			scene->OnBeginPlay();
-	}
-
 	void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
+	}
+
+	void SceneSubsystem::PostInitialize()
+	{
+		Super::PostInitialize();
+
+		// TODO: Implement multi scene support
 
 		// Create & set an empty scene by default
-		scene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
+		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
+	}
+
+	void SceneSubsystem::PreShutdown()
+	{
+		if (mainScene)
+		{
+			mainScene->Destroy();
+			mainScene = nullptr;
+		}
+
+		Super::PreShutdown();
 	}
 
 	void SceneSubsystem::Shutdown()
 	{
-		if (scene)
-		{
-			scene->Destroy();
-			scene = nullptr;
-		}
 
 		Super::Shutdown();
 	}
@@ -36,10 +42,18 @@ namespace CE
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
-		
-		if (scene != nullptr)
+
+		if (!isPlaying)
 		{
-			scene->Tick(deltaTime);
+			isPlaying = true;
+
+			if (mainScene != nullptr)
+				mainScene->OnBeginPlay();
+		}
+		
+		if (mainScene != nullptr)
+		{
+			mainScene->Tick(deltaTime);
 		}
 	}
 

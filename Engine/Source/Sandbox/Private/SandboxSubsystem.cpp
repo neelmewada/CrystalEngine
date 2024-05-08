@@ -38,7 +38,7 @@ namespace CE
 		auto sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 		if (sceneSubsystem != nullptr)
 		{
-			Scene* scene = sceneSubsystem->GetActiveScene();
+			Scene* scene = sceneSubsystem->GetMainScene();
 			SetupScene(scene);
 		}
 	}

@@ -49,7 +49,9 @@ namespace CE::Widgets
 		virtual Vec2 GetComputedLayoutTopLeft() override;
 		virtual Vec2 GetComputedLayoutSize() override;
 
-	crystalwidgets_internal:
+		void SetAutoHideTabs(bool set);
+
+	private:
 
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;
@@ -75,6 +77,9 @@ namespace CE::Widgets
 
 		FIELD()
 		CDockSpace* dockSpace = nullptr;
+
+		FIELD()
+		b8 autoHideTabs = false;
 
 		int draggedSplitIdx = -1;
 		int hoveredSplitIdx = -1;

@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
 	void DrawPacket::operator delete(void* p, size_t size)
@@ -16,7 +16,7 @@ namespace CE::RHI
 	{
 		CE_ASSERT(index < GetDrawItemCount(), "GetDrawItemProperties(): index {} out of bounds {}", index, GetDrawItemCount());
 
-		return DrawItemProperties(&drawItems[index], drawFilterMasks[index]);
+		return DrawItemProperties(&drawItems[index], 0.0f, drawFilterMasks[index]);
 	}
 
 } // namespace CE::RHI

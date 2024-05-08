@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 * Used under Apache 2.0 license. https://github.com/o3de/o3de/blob/development/LICENSE.TXT
 	 */
 
     void DrawListContext::Init(const DrawListMask& drawListMask)
@@ -19,7 +19,7 @@ namespace CE::RHI
     void DrawListContext::Shutdown()
     {
 		// Clear all lists
-		//threadDrawListsByTag.Clear();
+		
 		threadDrawListsByTag.ForEach([](DrawListsByTag& list)
 			{
 				for (int i = 0; i < list.GetSize(); i++)
@@ -37,7 +37,7 @@ namespace CE::RHI
 		drawListMask.Reset();
     }
 
-    DrawList& DrawListContext::GetDrawListForTag(u8 tag)
+    DrawList& DrawListContext::GetDrawListForTag(DrawListTag tag)
 	{
 		static DrawList empty{};
 		if (tag >= mergedDrawListsByTag.GetSize())
@@ -46,7 +46,7 @@ namespace CE::RHI
 		return mergedDrawListsByTag[tag];
 	}
 
-	void DrawListContext::AddDrawPacket(DrawPacket* drawPacket)
+	void DrawListContext::AddDrawPacket(DrawPacket* drawPacket, f32 depth)
 	{
 		if (!drawPacket)
 			return;
@@ -60,10 +60,12 @@ namespace CE::RHI
 			if (this->drawListMask.Test(drawListTag.Get()))
 			{
 				DrawItemProperties drawItemProperties = drawPacket->GetDrawItemProperties(i);
-
-				auto& drawList = threadDrawListsByTag[drawListTag];
-				threadDrawListsByTag[drawListTag].listTag = drawListTag;
+				drawItemProperties.depth = depth;
+				
+				auto& drawList = threadDrawListsByTag[drawListTag.Get()];
+				drawList.listTag = drawListTag;
 				drawList.AddDrawItem(drawItemProperties);
+				
 			}
 		}
 	}

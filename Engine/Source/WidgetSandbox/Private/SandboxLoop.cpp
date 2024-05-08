@@ -105,9 +105,9 @@ namespace CE
 
 		gEngine->Initialize();
 
-		main->Init(mainWindow);
-
 		gEngine->PostInitialize();
+
+		main->Init(mainWindow);
 
 		auto tickDelegate = MemberDelegate(&SandboxLoop::AlternativeTick, this);
 		this->tickDelegateHandle = tickDelegate.GetHandle();
@@ -127,11 +127,8 @@ namespace CE
 			app->Tick();
 			InputManager::Get().Tick();
 
-			// Tick Widgets app
-			CApplication::Get()->Tick();
-
 			// Engine tick
-			//gEngine->Tick(deltaTime);
+			gEngine->Tick(deltaTime);
 
 			// Game tick
 			main->Tick(deltaTime);

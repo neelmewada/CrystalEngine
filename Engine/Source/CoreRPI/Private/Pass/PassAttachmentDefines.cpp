@@ -3,26 +3,78 @@
 namespace CE::RPI
 {
 
-	void PassDefinition::OnAfterDeserialize()
-	{
-		slotNamesToIndex.Clear();
-		imageAttachmentNameToIndex.Clear();
-		bufferAttachmentNameToIndex.Clear();
+    UnifiedAttachmentDescriptor::UnifiedAttachmentDescriptor(const UnifiedAttachmentDescriptor& copy)
+    {
+        if (copy.type == AttachmentType::Image)
+        {
+            if (copy.type == type || type == AttachmentType::None) // Both are image types
+            {
+                imageDesc = copy.imageDesc;
+            }
+            else if (copy.type == AttachmentType::Buffer) // Copy is a buffer
+            {
+                if (type == AttachmentType::Image)
+                    imageDesc.~ImageDescriptor();
+                memset(&bufferDesc, 0, sizeof(bufferDesc));
+                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
+            }
+            type = copy.type;
+        }
+        else if (copy.type == AttachmentType::Buffer)
+        {
+            if (copy.type == type || type == AttachmentType::None) // Both are buffer types
+            {
+                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+            }
+            else if (copy.type == AttachmentType::Image) // Copy is an image
+            {
+                if (type == AttachmentType::Buffer)
+                    bufferDesc.~BufferDescriptor();
+                memset(&imageDesc, 0, sizeof(imageDesc));
+                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
+            }
+            type = copy.type;
+        }
+    }
+    
+    UnifiedAttachmentDescriptor& UnifiedAttachmentDescriptor::operator=(const UnifiedAttachmentDescriptor& copy)
+    {
+        if (copy.type == AttachmentType::Image)
+        {
+            if (copy.type == type || type == AttachmentType::None)
+            {
+                imageDesc = RPI::ImageDescriptor(copy.imageDesc);
+            }
+            else if (copy.type == AttachmentType::Buffer) // Copy is a buffer
+            {
+                if (type == AttachmentType::Image)
+                    imageDesc.~ImageDescriptor();
+                memset(&bufferDesc, 0, sizeof(bufferDesc));
+                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
+            }
+            type = copy.type;
+        }
+        else if (copy.type == AttachmentType::Buffer)
+        {
+            if (copy.type == type || type == AttachmentType::None)
+            {
+                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+            }
+            else if (copy.type == AttachmentType::Image) // Copy is an image
+            {
+                if (type == AttachmentType::Buffer)
+                    bufferDesc.~BufferDescriptor();
+                memset(&imageDesc, 0, sizeof(imageDesc));
+                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
+            }
+            type = copy.type;
+        }
+        return *this;
+    }
 
-		for (int i = 0; i < slots.GetSize(); i++)
-		{
-			slotNamesToIndex[slots[i].name] = i;
-		}
-
-		for (int i = 0; i < imageAttachments.GetSize(); i++)
-		{
-			imageAttachmentNameToIndex[slots[i].name] = i;
-		}
-
-		for (int i = 0; i < bufferAttachments.GetSize(); i++)
-		{
-			bufferAttachmentNameToIndex[slots[i].name] = i;
-		}
-	}
+    UnifiedAttachmentDescriptor::~UnifiedAttachmentDescriptor()
+    {
+        memset(this, 0, sizeof(UnifiedAttachmentDescriptor));
+    }
 
 } // namespace CE::RPI
