@@ -19,7 +19,7 @@ namespace CE::Editor
 
         SetTitle("Viewport");
 
-        viewport = CreateObject<CViewport>(this, "ContentViewport");
+        viewport = CreateObject<EditorViewport>(this, "ContentViewport");
 
     }
     

@@ -17,7 +17,7 @@ namespace CE::Editor
 
 
         FIELD()
-        CViewport* viewport = nullptr;
+        EditorViewport* viewport = nullptr;
 
     };
     

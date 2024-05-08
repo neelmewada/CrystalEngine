@@ -559,11 +559,6 @@ namespace CE::Vulkan
 
     Texture::~Texture()
     {
-		if (name == "DepthStencil")
-		{
-			name.GetHashValue();
-		}
-
         if (imageView != nullptr)
         {
             vkDestroyImageView(device->GetHandle(), imageView, nullptr);

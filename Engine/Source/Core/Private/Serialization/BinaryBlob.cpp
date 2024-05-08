@@ -38,12 +38,10 @@ namespace CE
 
 	BinaryBlob::BinaryBlob(BinaryBlob&& move) noexcept
 	{
-		isAllocated = move.isAllocated;
 		flags = move.flags;
 		data = move.data;
 		dataSize = move.dataSize;
 
-		move.isAllocated = false;
 		move.flags = BLOB_None;
 		move.data = nullptr;
 		move.dataSize = 0;
@@ -51,7 +49,7 @@ namespace CE
 
 	void BinaryBlob::Free()
 	{
-		if (isAllocated && data != nullptr)
+		if (data != nullptr)
 		{
 			Memory::Free(data);
 		}

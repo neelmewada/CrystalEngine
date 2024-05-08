@@ -84,6 +84,13 @@ namespace CE::Widgets
         renderer->DrawTexture(texture, rect.GetSize());
     }
 
+    void CPainter::DrawFrameBuffer(const Rect& rect,
+	    const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
+    {
+        renderer->SetCursor(GetOrigin() + rect.min);
+        renderer->DrawFrameBuffer(frames, rect.GetSize());
+    }
+
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
         renderer->SetCursor(GetOrigin() + position);

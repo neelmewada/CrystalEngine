@@ -134,6 +134,14 @@ namespace CE::RPI
             return DrawTexture(texture, rect.GetSize());
         }
 
+        Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, Vec2 size);
+
+        Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawFrameBuffer(frames, rect);
+        }
+
         void End();
 
         const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
@@ -166,6 +174,12 @@ namespace CE::RPI
             DRAW_RoundedRect,
             DRAW_RoundedX,
             DRAW_Texture,
+            DRAW_FrameBuffer,
+        };
+
+        struct alignas(4) DrawDataConstants
+        {
+            u32 frameIndex = 0;
         };
 
         struct alignas(16) DrawItem2D
@@ -247,6 +261,7 @@ namespace CE::RPI
         Matrix4x4 rootTransform = Matrix4x4::Identity();
         PerViewConstants viewConstants{};
         StaticArray<RHI::Buffer*, MaxImageCount> viewConstantsBuffer{};
+        StaticArray<RHI::Buffer*, MaxImageCount> drawDataConstantsBuffer{};
         RHI::ShaderResourceGroup* perViewSrg = nullptr;
         StaticArray<bool, MaxImageCount> viewConstantsUpdateRequired{};
 

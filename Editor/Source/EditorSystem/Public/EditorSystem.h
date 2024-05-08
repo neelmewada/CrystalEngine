@@ -11,6 +11,8 @@
 
 /////////////////////////////////////////////
 
+#include "Editor/Widgets/EditorViewport.h"
+
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 

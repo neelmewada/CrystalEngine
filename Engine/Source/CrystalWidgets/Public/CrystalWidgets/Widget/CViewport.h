@@ -42,6 +42,10 @@ namespace CE::Widgets
 			}
 		}
 
+		u32 GetFrameCount() const { return frames.GetSize(); }
+
+		RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
+
 	protected:
 
 		void OnPaint(CPaintEvent* paintEvent) override;

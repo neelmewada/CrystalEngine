@@ -28,6 +28,8 @@ namespace CE::Widgets
 
         void DrawTexture(const Rect& rect, RPI::Texture* texture);
 
+        void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
+
         void SetFont(const CFont& font);
 
         Vec2 CalculateTextSize(const String& text, f32 width = 0);

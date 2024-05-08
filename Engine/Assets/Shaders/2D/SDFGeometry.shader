@@ -64,9 +64,14 @@ Shader "2D/SDF Geometry"
 
             SamplerState _TextureSampler : SRG_PerDraw(s2);
 
-            #define MAX_TEXTURES 10000
+            #define MAX_TEXTURES 10000 // 10,000
 
             Texture2D<float4> _Textures[MAX_TEXTURES] : SRG_PerDraw(t3);
+
+            cbuffer _DrawDataConstants : SRG_PerDraw(b4)
+            {
+                uint _FrameIndex;
+            };
 
             struct CharacterItem
             {
@@ -84,6 +89,7 @@ Shader "2D/SDF Geometry"
                 DRAW_RoundedRect,
                 DRAW_RoundedX,
                 DRAW_Texture,
+                DRAW_FrameBuffer,
             };
 
             #if VERTEX
@@ -297,6 +303,8 @@ Shader "2D/SDF Geometry"
                     return RenderRoundedX(info, p);
                 case DRAW_Texture:
                     return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                case DRAW_FrameBuffer:
+                    return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
                 }
 
                 return float4(0, 0, 0, 0);
