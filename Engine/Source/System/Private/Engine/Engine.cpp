@@ -138,6 +138,8 @@ namespace CE
 	{
 		if (type == nullptr || type->GetTypeId() == TYPEID(EngineSubsystem) || !type->IsSubclassOf<EngineSubsystem>())
 			return nullptr;
+		if (!type->CanBeInstantiated())
+			return nullptr;
 
 		auto cdi = (EngineSubsystem*)type->GetDefaultInstance();
 		if (cdi == nullptr || !cdi->ShouldBeCreated(this))

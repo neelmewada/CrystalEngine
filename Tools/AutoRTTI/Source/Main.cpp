@@ -1,7 +1,7 @@
 
 #include "cxxopts.hpp"
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 #include "RTTI/RTTIGenerator.h"
 

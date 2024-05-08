@@ -193,24 +193,29 @@ namespace CE::Editor
 		CE::Shader* iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/CubeMap/IBLConvolution");
 		CE::Shader* mipmapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 
+		ShaderCollection* equirectShaderCollection = equirectShader->GetShaderCollection();
+		ShaderCollection* iblShaderCollection = iblShader->GetShaderCollection();
+		ShaderCollection* iblConvolutionShaderCollection = iblConvolutionShader->GetShaderCollection();
+		ShaderCollection* mipMapShaderCollection = mipmapShader->GetShaderCollection();
+
 		RPI::CubeMapOfflineProcessInfo processInfo{};
 		processInfo.name = name;
 		processInfo.sourceImage = sourceImage;
-		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
-		processInfo.grayscaleShader = iblShader->GetOrCreateRPIShader(0);
-		processInfo.rowAverageShader = iblShader->GetOrCreateRPIShader(1);
-		processInfo.columnAverageShader = iblShader->GetOrCreateRPIShader(2);
-		processInfo.divisionShader = iblShader->GetOrCreateRPIShader(3);
-		processInfo.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
-		processInfo.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
-		processInfo.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
+		processInfo.equirectangularShader = equirectShaderCollection->At(0).shader;
+		processInfo.grayscaleShader = iblShaderCollection->At(0).shader;
+		processInfo.rowAverageShader = iblShaderCollection->At(1).shader;
+		processInfo.columnAverageShader = iblShaderCollection->At(2).shader;
+		processInfo.divisionShader = iblShaderCollection->At(3).shader;
+		processInfo.cdfMarginalInverseShader = iblShaderCollection->At(4).shader;
+		processInfo.cdfConditionalInverseShader = iblShaderCollection->At(5).shader;
+		processInfo.diffuseConvolutionShader = iblConvolutionShaderCollection->At(0).shader;
 		processInfo.useCompression = (compressionFormat == TextureSourceCompressionFormat::BC6H);
 		processInfo.diffuseIrradianceResolution = convoluteCubemap ? diffuseConvolutionResolution : 0;
 		processInfo.diffuseIrradianceOutput = nullptr;
 		processInfo.compressDiffuseIrradiance = compressConvolution;
 		processInfo.specularConvolution = specularConvolution;
-		processInfo.specularConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(1);
-		processInfo.mipMapShader = mipmapShader->GetOrCreateRPIShader(0);
+		processInfo.specularConvolutionShader = iblConvolutionShaderCollection->At(1).shader;
+		processInfo.mipMapShader = mipMapShaderCollection->At(0).shader;
 
 		if (convoluteCubemap && diffuseConvolutionResolution > 0)
 		{

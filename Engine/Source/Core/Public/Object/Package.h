@@ -80,7 +80,7 @@ namespace CE
 
 		// - Public API -
 
-		bool IsPackage() override { return true; }
+		bool IsPackage() const override { return true; }
 
 		virtual void SetName(const Name& newName) override
 		{

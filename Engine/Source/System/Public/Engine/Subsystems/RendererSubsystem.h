@@ -67,7 +67,10 @@ namespace CE
 		
 		u32 curImageIndex = 0;
 
-		CWindow* gameWindow = nullptr;
+		//CWindow* gameWindow = nullptr;
+
+		//! @brief The viewport used to render the main scene to
+		CWindow* primaryViewport = nullptr;
 
 		// - Frame Graph -
 

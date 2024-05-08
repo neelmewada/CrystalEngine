@@ -253,7 +253,7 @@ namespace CE::Editor
 		// - Setup shaders & materials -
 
 		CE::Shader* sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/UI/SDFTextGen");
-		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetOrCreateRPIShader(0));
+		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetShaderCollection()->At(0).shader);
 		sdfGenMaterial->SetPropertyValue("_FontAtlas", rasterizedAtlasRpi);
 		sdfGenMaterial->SetPropertyValue("_Spread", spread);
 		sdfGenMaterial->FlushProperties();
@@ -267,7 +267,7 @@ namespace CE::Editor
 
 		for (int i = 1; i < mipLevels; i++)
 		{
-			RPI::Material* mipMapMaterial = new RPI::Material(mipMapShader->GetOrCreateRPIShader(0));
+			RPI::Material* mipMapMaterial = new RPI::Material(mipMapShader->GetShaderCollection()->At(0).shader);
 			mipMapMaterial->SetPropertyValue("_InputTexture", sdfFontAtlasMipViews[i - 1]);
 			mipMapMaterial->SetPropertyValue("_InputSampler", sampler);
 			mipMapMaterial->FlushProperties();
@@ -390,7 +390,7 @@ namespace CE::Editor
 				scissor.height = viewport.height;
 				cmdList->SetScissors(1, &scissor);
 
-				RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetPipeline();
+				RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetDefaultPipeline();
 				cmdList->BindPipelineState(pipeline);
 
 				cmdList->SetShaderResourceGroup(sdfGenMaterial->GetShaderResourceGroup());
@@ -432,7 +432,7 @@ namespace CE::Editor
 				scissor.height = viewport.height;
 				cmdList->SetScissors(1, &scissor);
 
-				RHI::PipelineState* pipeline = mipMapMaterials[i - 1]->GetCurrentShader()->GetPipeline();
+				RHI::PipelineState* pipeline = mipMapMaterials[i - 1]->GetCurrentShader()->GetDefaultPipeline();
 				cmdList->BindPipelineState(pipeline);
 
 				cmdList->SetShaderResourceGroup(mipMapMaterials[i - 1]->GetShaderResourceGroup());

@@ -51,9 +51,9 @@ namespace CE
     {
 	    Super::Tick(delta);
 
-        if (renderWindow != nullptr)
+        if (renderViewport != nullptr)
         {
-            Vec2 windowSize = renderWindow->GetWindowSize();
+            Vec2 windowSize = renderViewport->GetWindowSize();
 	        if (projection == CameraProjection::Perspective && windowSize.height > 0)
 	        {
                 projectionMatrix = Matrix4x4::PerspectiveProjection(windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);

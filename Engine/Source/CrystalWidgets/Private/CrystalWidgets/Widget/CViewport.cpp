@@ -13,5 +13,13 @@ namespace CE::Widgets
 	    
     }
 
-    
+    void CViewport::OnPaint(CPaintEvent* paintEvent)
+    {
+        CPainter* painter = paintEvent->painter;
+
+        
+
+	    Super::OnPaint(paintEvent);
+    }
+
 } // namespace CE::Widgets

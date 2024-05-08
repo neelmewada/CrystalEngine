@@ -42,10 +42,10 @@ namespace CE
 		for (CameraComponent* camera : cameras)
 		{
 			RPI::View* view = camera->GetRpiView();
-			if (!view || camera->renderWindow == nullptr)
+			if (!view || camera->renderViewport == nullptr)
 				continue;
 
-			Vec2 windowSize = camera->renderWindow->GetWindowSize();
+			Vec2 windowSize = camera->renderViewport->GetWindowSize();
 			PerViewConstants& viewConstants = view->GetViewConstants();
 			viewConstants.pixelResolution = windowSize;
 			viewConstants.projectionMatrix = camera->projectionMatrix;
@@ -262,7 +262,7 @@ namespace CE
 			mainCamera = camera;
 			rpiScene->AddView("MainCamera", mainCamera->rpiView);
 			camera->cameraType = CameraType::MainCamera;
-			camera->renderWindow = mainRenderWindow;
+			camera->renderViewport = mainRenderViewport;
 		}
 		else
 		{
@@ -279,7 +279,7 @@ namespace CE
 		{
 			rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
 			mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
-			camera->renderWindow = nullptr;
+			camera->renderViewport = nullptr;
 		}
 		else
 		{

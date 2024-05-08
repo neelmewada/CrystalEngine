@@ -126,7 +126,7 @@ namespace CE
             return HasAnyObjectFlags(OF_TemplateInstance);
         }
 
-		bool IsTransient();
+		bool IsTransient() const;
 
 		inline u32 GetSubObjectCount() const { return attachedObjects.GetObjectCount(); }
         inline Object* GetSubobject(int index) const { return attachedObjects.GetObjectAt(index); }
@@ -151,14 +151,14 @@ namespace CE
 
         // - Public API -
 
-        virtual bool IsAsset() { return false; }
+        virtual bool IsAsset() const { return false; }
 
-        virtual bool IsPackage() { return false; }
+        virtual bool IsPackage() const { return false; }
 
-		bool IsOfType(ClassType* classType);
+		bool IsOfType(ClassType* classType) const;
 
 		template<typename T>
-		FORCE_INLINE bool IsOfType()
+		FORCE_INLINE bool IsOfType() const
 		{
 			return IsOfType(T::StaticType());
 		}

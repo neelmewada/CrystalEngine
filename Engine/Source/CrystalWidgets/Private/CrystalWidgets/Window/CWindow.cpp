@@ -418,6 +418,11 @@ namespace CE::Widgets
         return windowSize;
     }
 
+    bool CWindow::IsViewportWindow() const
+    {
+        return IsOfType<CViewport>();
+    }
+
     void CWindow::OnPlatformWindowSet()
     {
 

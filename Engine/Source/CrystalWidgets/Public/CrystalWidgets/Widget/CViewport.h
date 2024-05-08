@@ -13,6 +13,8 @@ namespace CE::Widgets
 
 	protected:
 
+		void OnPaint(CPaintEvent* paintEvent) override;
+
 		StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> frameBuffers{};
 	};
 

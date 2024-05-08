@@ -171,6 +171,17 @@ void EditorLoop::PostInit()
 
 	gEngine->PostInitialize();
 
+	AssetManager* assetManager = AssetManager::Get();
+
+	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+
+	RPI::RPISystemInitInfo rpiInitInfo{};
+	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
+	rpiInitInfo.iblConvolutionShader = iblConvolutionShader->GetShaderCollection();
+
+	RPISystem::Get().PostInitialize(rpiInitInfo);
+
 	CApplication::Get()->LoadGlobalStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/EditorStyle.css");
 
 	auto tickDelegate = MemberDelegate(&EditorLoop::AlternateTick, this);

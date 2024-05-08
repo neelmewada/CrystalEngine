@@ -57,7 +57,7 @@ namespace CE
 
     	void SetViewTag(const Name& tag) { viewTag = tag; }
 
-		CWindow* GetRenderWindow() const { return renderWindow; }
+		CWindow* GetRenderWindow() const { return renderViewport; }
     	
     protected:
 
@@ -94,7 +94,7 @@ namespace CE
 
 		//! @brief The CWindow that this scene is rendered to.
 		FIELD()
-		CWindow* renderWindow = nullptr;
+		CWindow* renderViewport = nullptr;
 
     	FIELD()
     	CE::RenderPipeline* renderPipeline = nullptr;

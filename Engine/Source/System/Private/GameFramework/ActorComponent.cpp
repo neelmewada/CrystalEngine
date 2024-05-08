@@ -30,5 +30,6 @@ namespace CE
 
 		return isEnabled && owner->IsEnabled();
 	}
+
 } // namespace CE
 

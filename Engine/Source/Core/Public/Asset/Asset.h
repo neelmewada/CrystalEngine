@@ -8,7 +8,7 @@ namespace CE
 		CE_CLASS(Asset, CE::Object)
 	public:
 
-		bool IsAsset() override final { return true; }
+		bool IsAsset() const override final { return true; }
 
 		inline const String& GetSourceAssetRelativePath() const { return sourceAssetRelativePath; }
 

@@ -117,9 +117,9 @@ namespace CE
 			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
 
 			// TODO: Implement editor window support later
-			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
+			//gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
 
-			activeScene->mainRenderWindow = gameWindow;
+			//activeScene->mainRenderViewport = primaryViewport;
 		}
 	}
 
@@ -180,9 +180,9 @@ namespace CE
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 		bool isSceneWindowActive = true;
 
-		if (scene->mainRenderWindow != nullptr)
+		if (scene->mainRenderViewport != nullptr)
 		{
-			CPlatformWindow* nativeWindow = scene->mainRenderWindow->GetNativeWindow();
+			CPlatformWindow* nativeWindow = scene->mainRenderViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
@@ -319,9 +319,9 @@ namespace CE
 
 		bool isSceneWindowActive = true;
 
-		if (scene->mainRenderWindow != nullptr)
+		if (scene->mainRenderViewport != nullptr)
 		{
-			CPlatformWindow* nativeWindow = scene->mainRenderWindow->GetNativeWindow();
+			CPlatformWindow* nativeWindow = scene->mainRenderViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
@@ -344,7 +344,7 @@ namespace CE
 				{
 					for (CameraComponent* camera : scene->cameras)
 					{
-						CWindow* renderWindow = camera->renderWindow;
+						CWindow* renderWindow = camera->renderViewport;
 						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
 							CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();
@@ -370,9 +370,12 @@ namespace CE
 								rpiPipeline->ImportScopeProducers(scheduler);
 							}
 						}
-						else if (renderWindow)
+						else if (renderWindow && renderWindow->IsViewportWindow())
 						{
 							// TODO: Scene is rendered into a viewport (NOT a SwapChain)
+
+							CViewport* viewport = static_cast<CViewport*>(renderWindow);
+							
 						}
 					}
 				}

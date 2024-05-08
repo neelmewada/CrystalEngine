@@ -39,6 +39,8 @@ namespace CE::Widgets
 
         Vec2 GetWindowSize() const;
 
+        bool IsViewportWindow() const;
+
     protected:
 
         virtual void OnPlatformWindowSet();

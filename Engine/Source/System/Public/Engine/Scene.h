@@ -97,7 +97,7 @@ namespace CE
 		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
 
 		FIELD()
-		CWindow* mainRenderWindow = nullptr;
+		CWindow* mainRenderViewport = nullptr;
 
 		FIELD()
 		TextureCube* skyboxCubeMap = nullptr;
@@ -123,6 +123,7 @@ namespace CE
 		friend class SceneComponent;
 		friend class CameraComponent;
 		friend class RendererSubsystem;
+		friend class GameViewportSubsystem;
 		friend class SceneSubsystem;
 	};
     
