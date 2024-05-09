@@ -27,6 +27,9 @@ namespace CE::Editor
 		FIELD()
 		DetailsWindow* detailsWindow = nullptr;
 
+		FIELD()
+		RendererSubsystem* rendererSubsystem = nullptr;
+
 	};
 
 } // namespace CE::Editor

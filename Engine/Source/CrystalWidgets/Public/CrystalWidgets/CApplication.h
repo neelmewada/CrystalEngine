@@ -81,8 +81,11 @@ namespace CE::Widgets
 
         void LoadGlobalStyleSheet(const IO::Path& path);
 
-        void BuildFrameAttachments();
-        void BuildFrameGraph();
+        // - Frame Graph -
+
+        void FrameGraphBegin();
+        void FrameGraphShaderDependency(CPlatformWindow* nativeWindow, AttachmentID attachmentId, RHI::ScopeAttachmentAccess access = ScopeAttachmentAccess::Read);
+        void FrameGraphEnd();
 
         Name GetNativeWindowSwapChainId(CPlatformWindow* platformWindow);
 
@@ -140,6 +143,9 @@ namespace CE::Widgets
         CStyleSheet* globalStyleSheet = nullptr;
 
         CApplicationStyleConstants styleConstants{};
+
+        HashMap<CPlatformWindow*, Array<ImageScopeAttachmentDescriptor>> shaderReadOnlyAttachmentDependencies{};
+        HashMap<CPlatformWindow*, Array<ImageScopeAttachmentDescriptor>> shaderWriteAttachmentDependencies{};
 
         Array<CPlatformWindow*> platformWindows{};
 

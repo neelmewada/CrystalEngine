@@ -552,8 +552,11 @@ namespace CE::Widgets
 		globalStyleSheet = CSSStyleSheet::Load(path, this);
 	}
 
-	void CApplication::BuildFrameAttachments()
+	void CApplication::FrameGraphBegin()
 	{
+		shaderReadOnlyAttachmentDependencies.Clear();
+		shaderWriteAttachmentDependencies.Clear();
+
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
 			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
@@ -569,7 +572,29 @@ namespace CE::Widgets
 		}
 	}
 
-	void CApplication::BuildFrameGraph()
+	void CApplication::FrameGraphShaderDependency(CPlatformWindow* nativeWindow, AttachmentID attachmentId,
+		RHI::ScopeAttachmentAccess access)
+	{
+		if (!nativeWindow)
+			return;
+		PlatformWindow* platformWindow = nativeWindow->GetPlatformWindow();
+
+		ImageScopeAttachmentDescriptor descriptor{};
+		descriptor.attachmentId = attachmentId;
+		descriptor.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+		descriptor.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+		if (access == ScopeAttachmentAccess::Read)
+		{
+			shaderReadOnlyAttachmentDependencies[nativeWindow].Add(descriptor);
+		}
+		else if (access == ScopeAttachmentAccess::ReadWrite || access == ScopeAttachmentAccess::Write)
+		{
+			shaderWriteAttachmentDependencies[nativeWindow].Add(descriptor);
+		}
+	}
+
+	void CApplication::FrameGraphEnd()
 	{
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
@@ -602,6 +627,18 @@ namespace CE::Widgets
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 					swapChainAttachment.multisampleState.sampleCount = 1;
 					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+
+					// TODO: Add Shader Attachment dependencies to Viewports
+
+					for (const auto& scopeAttachment : shaderReadOnlyAttachmentDependencies[platformWindows[i]])
+					{
+						scheduler->UseAttachment(scopeAttachment, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Read);
+					}
+
+					for (const auto& scopeAttachment : shaderWriteAttachmentDependencies[platformWindows[i]])
+					{
+						scheduler->UseAttachment(scopeAttachment, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Write);
+					}
 
 					scheduler->PresentSwapChain(platformWindows[i]->GetSwapChain());
 				}

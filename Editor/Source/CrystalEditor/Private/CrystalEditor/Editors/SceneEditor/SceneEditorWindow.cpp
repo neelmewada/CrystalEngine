@@ -20,6 +20,8 @@ namespace CE::Editor
         SetTitle("DefaultScene");
         SetAsMainWindow(true);
 
+        rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+
         // - Menu -
 
         CMenuItem* fileMenuItem = CreateObject<CMenuItem>(this, "FileMenuItem");
@@ -74,6 +76,8 @@ namespace CE::Editor
         centerTop->SetAutoHideTabs(true);
         EditorViewport* editorViewport = viewportWindow->GetViewport();
 
+        Bind(editorViewport, MEMBER_FUNCTION(EditorViewport, OnFrameBufferRecreated),
+            rendererSubsystem, MEMBER_FUNCTION(RendererSubsystem, RebuildFrameGraph));
 
         assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
 

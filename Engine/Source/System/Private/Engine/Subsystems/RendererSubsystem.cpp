@@ -221,7 +221,7 @@ namespace CE
 
 		if (app)
 		{
-			CApplication::Get()->SetDrawListMasks(drawListMask);
+			app->SetDrawListMasks(drawListMask);
 		}
 
 		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
@@ -335,14 +335,16 @@ namespace CE
 		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
 		RPISystem::Get().SimulationTick(curImageIndex);
 		RPISystem::Get().RenderTick(curImageIndex);
+
+		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
     	
 		scheduler->BeginFrameGraph();
 		{
-			auto app = CApplication::TryGet();
+			auto cApp = CApplication::TryGet();
 			
-			if (app)
+			if (cApp)
 			{
-				app->BuildFrameAttachments();
+				cApp->FrameGraphBegin();
 
 				if (isSceneWindowActive && scene->IsEnabled())
 				{
@@ -383,15 +385,44 @@ namespace CE
 						}
 						else if (renderWindow && renderWindow->IsViewportWindow())
 						{
-							// TODO: Scene is rendered into a viewport (NOT a SwapChain)
-
 							CViewport* viewport = static_cast<CViewport*>(renderWindow);
-							
+
+							for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+							{
+								RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+								const auto& attachments = rpiPipeline->attachments;
+
+								for (PassAttachment* passAttachment : attachments)
+								{
+									if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+									{
+										passAttachment->attachmentId = String::Format("Viewport_{}", viewport->GetUuid());
+
+										StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> frameBuffer{};
+										CPlatformWindow* nativeWindow = viewport->GetNativeWindow();
+
+										cApp->FrameGraphShaderDependency(nativeWindow, passAttachment->attachmentId);
+
+										for (int i = 0; i < frameBuffer.GetSize(); ++i)
+										{
+											frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
+										}
+
+										attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, frameBuffer);
+									}
+									else
+									{
+										passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+									}
+								}
+
+								rpiPipeline->ImportScopeProducers(scheduler);
+							}
 						}
 					}
 				}
 
-				app->BuildFrameGraph();
+				cApp->FrameGraphEnd();
 			}
 		}
 		scheduler->EndFrameGraph();
@@ -407,7 +438,7 @@ namespace CE
 		RHI::MemoryHeap* imageHeap = pool->GetImagePool();
 		if (imageHeap != nullptr)
 		{
-			CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
+			//CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
 		}
 	}
 

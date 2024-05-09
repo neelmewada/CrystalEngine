@@ -14,6 +14,9 @@ namespace CE::RHI
 
 		//! Add an external image attachment
 		void EmplaceFrameAttachment(AttachmentID id, Texture* image);
+
+		//! Add an external FrameBuffer image attachment that uses different image per image index.
+		void EmplaceFrameAttachment(AttachmentID id, const StaticArray<Texture*, Limits::MaxSwapChainImageCount>& frames);
         
         void EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain);
 

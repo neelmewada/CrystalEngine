@@ -82,6 +82,8 @@ namespace CE::Widgets
 
         blob.Free();
 
+        emit OnFrameBufferRecreated();
+
         CE_LOG(Info, All, "Viewport Size: {}", currentSize);
     }
 
