@@ -61,10 +61,16 @@ There's no actual GUI editor that exists yet. It's only CLI tools like AssetProc
 
 ## Screenshots
 
+
+### Editor tools using CrystalWidgets
+
 Project browser window:
 
 ![](./Screenshots/ProjectBrowser.png)
 
+Crystal Editor window:
+
+![](./Screenshots/EditorWindow.png)
 
 
 
