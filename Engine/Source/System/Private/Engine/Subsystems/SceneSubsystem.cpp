@@ -6,10 +6,29 @@ namespace CE
     {
 		
     }
+  
+    void SceneSubsystem::RegisterViewport(CWindow* viewport, CE::Scene* scene)
+    {
+		if (!viewport || !scene)
+			return;
 
-	void SceneSubsystem::Initialize()
+		scenesByViewport[viewport] = scene;
+
+		renderer->RebuildFrameGraph();
+    }
+
+    void SceneSubsystem::SetMainViewport(CWindow* viewport)
+    {
+		mainViewport = viewport;
+
+		renderer->RebuildFrameGraph();
+    }
+
+    void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
+
+		renderer = gEngine->GetSubsystem<RendererSubsystem>();
 	}
 
 	void SceneSubsystem::PostInitialize()
@@ -17,13 +36,15 @@ namespace CE
 		Super::PostInitialize();
 
 		// TODO: Implement multi scene support
-
+		
 		// Create & set an empty scene by default
 		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
 	{
+		mainViewport = nullptr;
+    
 		if (mainScene)
 		{
 			mainScene->Destroy();
@@ -54,6 +75,16 @@ namespace CE
 		if (mainScene != nullptr)
 		{
 			mainScene->Tick(deltaTime);
+		}
+	}
+
+	void SceneSubsystem::OnSceneDestroyed(CE::Scene* scene)
+	{
+		otherScenes.Remove(scene);
+
+		if (scene == mainScene)
+		{
+			mainScene = nullptr;
 		}
 	}
 

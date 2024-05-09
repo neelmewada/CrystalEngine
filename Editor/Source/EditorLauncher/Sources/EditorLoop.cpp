@@ -166,6 +166,8 @@ void EditorLoop::PostInit()
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
+  
+	RPISystem::Get().Initialize();
 
 	gEngine->Initialize();
 
@@ -225,7 +227,7 @@ void EditorLoop::RunLoop()
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
-		deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
 		// App & Input Tick
 		app->Tick();
@@ -258,6 +260,8 @@ void EditorLoop::PreShutdown()
 	}
 
 	gEngine->PreShutdown();
+  
+	RPISystem::Get().Shutdown();
 
 	gDynamicRHI->PreShutdown();
 

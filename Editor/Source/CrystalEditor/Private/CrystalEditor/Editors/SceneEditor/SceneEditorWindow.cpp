@@ -20,6 +20,8 @@ namespace CE::Editor
         SetTitle("DefaultScene");
         SetAsMainWindow(true);
 
+        rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+
         // - Menu -
 
         CMenuItem* fileMenuItem = CreateObject<CMenuItem>(this, "FileMenuItem");
@@ -63,17 +65,20 @@ namespace CE::Editor
         auto parentSplit = minorDockSpace->GetRootDockSplit();
         auto center = parentSplit->GetSplit(0);
         auto right = parentSplit->GetSplit(1);
-
-        DetailsWindow* detailsWindow = CreateObject<DetailsWindow>(right, "Details");
+      
+        detailsWindow = CreateObject<DetailsWindow>(right, "Details");
 
         minorDockSpace->Split(center, 0.4f, CDockSplitDirection::Vertical, "SplitTop", "SplitBottom");
         auto centerTop = center->GetSplit(0);
         auto centerBottom = center->GetSplit(1);
-
-        ViewportWindow* viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
+        viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
         centerTop->SetAutoHideTabs(true);
+        EditorViewport* editorViewport = viewportWindow->GetViewport();
 
-        AssetBrowserWindow* assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
+        Bind(editorViewport, MEMBER_FUNCTION(EditorViewport, OnFrameBufferRecreated),
+            rendererSubsystem, MEMBER_FUNCTION(RendererSubsystem, RebuildFrameGraph));
+
+        assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
 
     }
 

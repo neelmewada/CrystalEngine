@@ -1,3 +1,6 @@
+#include "Renderer2D.h"
+#include "Renderer2D.h"
+
 #include "CoreRPI.h"
 
 namespace CE::RPI
@@ -65,6 +68,20 @@ namespace CE::RPI
 			viewConstantsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(viewConstantsBufferDesc);
 			viewConstantsBuffer[i]->UploadData(&viewConstants, sizeof(viewConstants));
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
+
+			DrawDataConstants drawDataConstants{};
+			drawDataConstants.frameIndex = i;
+
+			RHI::BufferDescriptor drawDataConstantsBufferDesc{};
+			drawDataConstantsBufferDesc.name = "DrawDataConstants";
+			drawDataConstantsBufferDesc.bufferSize = sizeof(DrawDataConstants);
+			drawDataConstantsBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			drawDataConstantsBufferDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			drawDataConstantsBufferDesc.structureByteStride = sizeof(DrawDataConstants);
+
+			drawDataConstantsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(drawDataConstantsBufferDesc);
+			drawDataConstantsBuffer[i]->UploadData(&drawDataConstants, sizeof(drawDataConstants));
+			drawItemSrg->Bind(i, "_DrawDataConstants", drawDataConstantsBuffer[i]);
 		}
 
 		RHI::SamplerDescriptor textureSampler{};
@@ -90,6 +107,9 @@ namespace CE::RPI
 
 			delete viewConstantsBuffer[i];
 			viewConstantsBuffer[i] = nullptr;
+
+			delete drawDataConstantsBuffer[i];
+			drawDataConstantsBuffer[i] = nullptr;
 		}
 
 		for (const auto& [variant, material] : materials)
@@ -1015,6 +1035,83 @@ namespace CE::RPI
 		curDrawBatch.drawItemCount++;
 
 		drawItemCount++;
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, Vec2 size)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		StaticArray<int, RHI::Limits::MaxSwapChainImageCount> textureIndexPerImage{};
+
+		for (int imageIdx = 0; imageIdx < frames.GetSize(); ++imageIdx)
+		{
+			RPI::Texture* frame = frames[imageIdx];
+
+			if (textureIndices.KeyExists(frame))
+			{
+				textureIndexPerImage[imageIdx] = textureIndices[frame];
+			}
+			else
+			{
+				textureIndexPerImage[imageIdx] = textureCount;
+				if (textures.GetSize() < textureCount + 1)
+					textures.Resize(textureCount + 1);
+
+				textureIndices[frame] = textureIndexPerImage[imageIdx];
+
+				textureCount++;
+			}
+
+			textures[textureIndexPerImage[imageIdx]] = frame;
+		}
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_FrameBuffer;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
+		drawItem.textureIndex = textureIndexPerImage[0]; // Add index only to first image in frame buffer
+
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+
 		return size;
 	}
 

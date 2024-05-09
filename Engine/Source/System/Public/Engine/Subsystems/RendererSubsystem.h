@@ -14,7 +14,8 @@ namespace CE
 		RendererSubsystem();
 
 		FrameScheduler* GetScheduler() const { return scheduler; }
-
+    
+		FUNCTION()
 		void RebuildFrameGraph();
 
 		f32 GetTickPriority() const override;

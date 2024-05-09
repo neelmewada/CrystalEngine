@@ -373,6 +373,7 @@ namespace CE
 #endif
 		ModuleManager::Get().LoadModule("CoreRPI");
 		ModuleManager::Get().LoadModule("CoreShader");
+		ModuleManager::Get().LoadModule("CrystalWidgets");
 
 		ModuleManager::Get().LoadModule("System");
 		ModuleManager::Get().LoadModule("EditorCore");
@@ -432,6 +433,7 @@ namespace CE
 		ModuleManager::Get().UnloadModule("EditorCore");
 		ModuleManager::Get().UnloadModule("System");
 
+		ModuleManager::Get().UnloadModule("CrystalWidgets");
 		ModuleManager::Get().UnloadModule("CoreShader");
 		ModuleManager::Get().UnloadModule("CoreRPI");
 #if PAL_TRAIT_VULKAN_SUPPORTED

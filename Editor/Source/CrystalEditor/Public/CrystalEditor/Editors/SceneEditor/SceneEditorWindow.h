@@ -11,10 +11,23 @@ namespace CE::Editor
 		SceneEditorWindow();
 
 		virtual ~SceneEditorWindow();
+		ViewportWindow* GetViewportWindow() const { return viewportWindow; }
 
 	private:
 
 		void Construct() override;
+
+		FIELD()
+		ViewportWindow* viewportWindow = nullptr;
+
+		FIELD()
+		AssetBrowserWindow* assetBrowserWindow = nullptr;
+
+		FIELD()
+		DetailsWindow* detailsWindow = nullptr;
+
+		FIELD()
+		RendererSubsystem* rendererSubsystem = nullptr;
 
 	};
 

@@ -11,10 +11,14 @@
 
 /////////////////////////////////////////////
 
+#include "Editor/Widgets/EditorViewport.h"
+
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 
 namespace CE::Editor
 {
+	extern EDITORSYSTEM_API EditorEngine* gEditor;
+
 	EDITORSYSTEM_API AssetDefinitionRegistry* GetAssetDefinitionRegistry();
 }

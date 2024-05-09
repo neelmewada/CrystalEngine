@@ -48,6 +48,10 @@ namespace CE
 		float GetFieldOfView() const { return fieldOfView; }
 
 		RPI::View* GetRpiView() const { return rpiView; }
+
+		Vec2 GetViewport() const { return viewport; }
+
+		void SetViewport(const Vec2& value) { viewport = value; }
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
@@ -56,8 +60,6 @@ namespace CE
     	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
 
     	void SetViewTag(const Name& tag) { viewTag = tag; }
-
-		CWindow* GetRenderWindow() const { return renderViewport; }
     	
     protected:
 
@@ -91,10 +93,12 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 viewMatrix{};
-
-		//! @brief The CWindow that this scene is rendered to.
+    
 		FIELD()
-		CWindow* renderViewport = nullptr;
+		Vec2 viewport = Vec2(1, 1);
+
+		FIELD()
+		Vec2i windowSize = Vec2i(0, 0);
 
     	FIELD()
     	CE::RenderPipeline* renderPipeline = nullptr;

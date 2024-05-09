@@ -8,6 +8,7 @@ namespace CE
     class StaticMeshComponent;
 	class SceneComponent;
 	class RenderPipeline;
+	class SceneSubsystem;
 	
 	CLASS()
 	class SYSTEM_API Scene : public Asset
@@ -28,7 +29,11 @@ namespace CE
 
 		void AddActor(Actor* actor);
 		void RemoveActor(Actor* actor);
+    
+		bool IsEnabled() const { return isEnabled; }
 
+		void SetEnabled(bool set) { isEnabled = set; }
+    
 		void IterateAllComponents(SubClass<ActorComponent> componentClass, auto callback)
 		{
 			if (componentClass == nullptr)
@@ -72,7 +77,6 @@ namespace CE
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
 		void SetSkyboxCubeMap(TextureCube* cubeMap);
-
 	private:
 
 		// - Internal API -
@@ -97,12 +101,12 @@ namespace CE
 		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
 
 		FIELD()
-		CWindow* mainRenderViewport = nullptr;
-
-		FIELD()
 		TextureCube* skyboxCubeMap = nullptr;
 		
 	private:
+
+		FIELD()
+		bool isEnabled = true;
 
 		b8 isPlaying = false;
 
@@ -117,6 +121,8 @@ namespace CE
 		Array<CameraComponent*> cameras{};
 
 		CameraComponent* mainCamera = nullptr;
+
+		SceneSubsystem* sceneSubsystem = nullptr;
 
 		friend class Actor;
 		friend class ActorComponent;

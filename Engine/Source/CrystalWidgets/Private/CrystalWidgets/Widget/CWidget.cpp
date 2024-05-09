@@ -1303,8 +1303,6 @@ namespace CE::Widgets
 			paintEvent->direction = CEventDirection::TopToBottom;
 			CPainter* painter = paintEvent->painter;
 
-			b8 isMenu = IsOfType<CMenu>();
-
 			Vec2 scrollOffset = Vec2();
 
 			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
