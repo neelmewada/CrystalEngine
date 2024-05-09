@@ -27,7 +27,6 @@ namespace CE
 				sceneSubsystem->OnSceneDestroyed(this);
 			}
 		}
-
 		delete rpiScene; rpiScene = nullptr;
 	}
 
@@ -47,7 +46,7 @@ namespace CE
 		{
 			actor->Tick(delta);
 		}
-
+    
 		CWindow* mainViewport = sceneSubsystem->GetMainViewport();
 		Vec2i windowSize = mainViewport->GetWindowSize().ToVec2i();
 

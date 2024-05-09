@@ -6,7 +6,7 @@ namespace CE
     {
 		
     }
-
+  
     void SceneSubsystem::RegisterViewport(CWindow* viewport, CE::Scene* scene)
     {
 		if (!viewport || !scene)
@@ -44,7 +44,7 @@ namespace CE
 	void SceneSubsystem::PreShutdown()
 	{
 		mainViewport = nullptr;
-
+    
 		if (mainScene)
 		{
 			mainScene->Destroy();

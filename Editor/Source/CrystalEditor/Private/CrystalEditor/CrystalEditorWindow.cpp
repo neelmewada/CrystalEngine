@@ -20,7 +20,7 @@ namespace CE::Editor
         SetTitle("Crystal Editor");
 
         CDockSplitView* root = GetRootDockSplit();
-
+      
         sceneEditor = CreateObject<SceneEditorWindow>(root, "SceneEditor");
         viewportWindow = sceneEditor->GetViewportWindow();
 

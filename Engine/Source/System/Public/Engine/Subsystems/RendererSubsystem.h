@@ -14,7 +14,7 @@ namespace CE
 		RendererSubsystem();
 
 		FrameScheduler* GetScheduler() const { return scheduler; }
-
+    
 		FUNCTION()
 		void RebuildFrameGraph();
 

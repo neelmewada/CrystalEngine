@@ -6,10 +6,11 @@ PBR Demo            |  Widgets Demo
 :-------------------------:|:-------------------------:
 ![](./Screenshots/IBL%20Demo%20Night.png)  |  ![](./Screenshots/WidgetDemo.gif)
 
+Check more [screenshots below](#screenshots).
 
 ## Requirements
 
-Only Windows and macOS are supported. However, macOS builds are experimental and may fail.
+Only Windows is supported for now. Although, the Core libraries compile on macOS too.
 
 ## Building
 
@@ -26,7 +27,8 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Render graph based pipeline with automatic dependencies.
-- **CrystalWidgets** framework for GUI apps.
+- **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
+- **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
 ## Modules Overview
 
@@ -42,11 +44,11 @@ All modules inside the core domain are at the low level of the engine.
 * **CoreRHI**: Rendering Hardware Interface. A graphics API abstraction layer that is used for low level GPU operations. Also implements frame graph rendering.
     * **VulkanRHI**: Vulkan implementation of the RHI layer.
 * **CoreRPI**: Render Pipeline Interface. Provides a render pipeline architecture layer on top of RHI, allowing engine to build complex render pipeline with many passes.
+* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 
 #### System domain
 System domain modules are at high level of the engine.
 
-* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 * **System module**: The main module that contains the high level game engine systems, game framework, etc.
 * **GameSystem**: Only for standalone builds. Runtime implementation of System module.
 
@@ -56,6 +58,13 @@ There's no actual GUI editor that exists yet. It's only CLI tools like AssetProc
 
 * **EditorCore**: Implements Asset processing and serves as the foundation of the editor & host tools.
 * **EditorSystem**: Host/editor implementation of the System module.
+
+## Screenshots
+
+Project browser window:
+
+![](./Screenshots/ProjectBrowser.png)
+
 
 
 

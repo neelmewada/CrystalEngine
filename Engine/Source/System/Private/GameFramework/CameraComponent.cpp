@@ -50,7 +50,7 @@ namespace CE
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);
-
+      
         if (windowSize.x > 0 && windowSize.y > 0)
         {
 	        if (projection == CameraProjection::Perspective && windowSize.height > 0)

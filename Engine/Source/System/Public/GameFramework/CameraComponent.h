@@ -93,7 +93,7 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Matrix4x4 viewMatrix{};
-
+    
 		FIELD()
 		Vec2 viewport = Vec2(1, 1);
 

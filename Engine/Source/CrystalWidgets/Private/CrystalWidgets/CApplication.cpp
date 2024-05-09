@@ -606,7 +606,7 @@ namespace CE::Widgets
 			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
 			Name id = String::Format("Window_{}", platformWindow->GetWindowId());
-
+      
 			attachmentDatabase.EmplaceFrameAttachment(id, platformWindows[i]->GetSwapChain());
 
 			if (!platformWindow->IsMinimized() && platformWindow->IsShown())

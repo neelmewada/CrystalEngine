@@ -24,18 +24,24 @@ Run the following cmake command to make host build from the project's root direc
 cmake -B Build/Windows -S . -G "Visual Studio 17 2022" -Wno-dev
 ```
 
-Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to only stick with **debug** builds for now as that's what is primary used for development.
+Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to use **debug** builds in case there are issues with Development or Release builds.
 
 ```sh
 cmake --build Build/Windows --config Debug --target HostTools -Wno-dev
 ```
 
-## Building standalone
-
-The standalone build has the VulkanSandbox application, which is what you should use to play-test the engine. Run the following command to make standalone build.
+If you want to build the editor too, you can either build and run the EditorLauncher target from Visual studio, or via command line:
 
 ```sh
-cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -CE_HOST_BUILD_DIR="<Path To host tools binary dir>" -DCMAKE_SYSTEM_NAME=Windows -Wno-Dev
+cmake --build Build/Windows --config Debug --target EditorLauncher -Wno-dev
+```
+
+## Building standalone
+
+The standalone build has the GameSystem_Test application, which you can run to play-test the engine in standalone mode.
+
+```sh
+cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="<Path To host tools binary dir>" -DCMAKE_SYSTEM_NAME=Windows -Wno-Dev
 ```
 
 The path to host tools binary directory in our situation is:

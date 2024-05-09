@@ -11,7 +11,6 @@ namespace CE::Editor
 		SceneEditorWindow();
 
 		virtual ~SceneEditorWindow();
-
 		ViewportWindow* GetViewportWindow() const { return viewportWindow; }
 
 	private:

@@ -10,7 +10,7 @@ namespace CE::Widgets
 
 		CViewport();
 		virtual ~CViewport();
-
+    
 		void RecreateFrameBuffer();
 
 		RHI::Format GetImageFormat() const { return format; }
@@ -49,7 +49,7 @@ namespace CE::Widgets
 		// - Signals -
 
 		CE_SIGNAL(OnFrameBufferRecreated);
-
+    
 	protected:
 
 		void OnPaint(CPaintEvent* paintEvent) override;
@@ -65,7 +65,7 @@ namespace CE::Widgets
 		Vec2i currentSize = Vec2i(0, 0);
 
 		StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> frames{};
-
+    
 	};
 
 } // namespace CE::Widgets

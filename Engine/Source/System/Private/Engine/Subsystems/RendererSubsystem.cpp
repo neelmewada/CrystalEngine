@@ -149,11 +149,9 @@ namespace CE
 	void RendererSubsystem::Tick(f32 delta)
 	{
 		Super::Tick(delta);
-
 		bool isExiting = IsEngineRequestingExit();
 
 		CApplication* app = CApplication::TryGet();
-
 		if (app)
 		{
 			app->Tick();
@@ -282,7 +280,7 @@ namespace CE
 		drawList.Finalize();
 
 		// - Set scope draw lists
-
+    
 		if (app) // CWidget Scopes & DrawLists
 		{
 			app->SubmitDrawPackets(drawList);
@@ -322,7 +320,7 @@ namespace CE
     	CE::Scene* scene = sceneSubsystem->GetMainScene();
 
 		bool isSceneWindowActive = true;
-
+    
 		if (sceneSubsystem->mainViewport != nullptr)
 		{
 			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
@@ -357,7 +355,7 @@ namespace CE
 						// TODO: Add support for multiple cameras in scene
 						if (camera != scene->mainCamera)
 							continue;
-
+            
 						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
 							CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();

@@ -166,7 +166,7 @@ void EditorLoop::PostInit()
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
-
+  
 	RPISystem::Get().Initialize();
 
 	gEngine->Initialize();
@@ -260,7 +260,7 @@ void EditorLoop::PreShutdown()
 	}
 
 	gEngine->PreShutdown();
-
+  
 	RPISystem::Get().Shutdown();
 
 	gDynamicRHI->PreShutdown();
