@@ -89,8 +89,6 @@ namespace CE::Widgets
 
         Name GetNativeWindowSwapChainId(CPlatformWindow* platformWindow);
 
-        Name GetNativeWindowSwapChainId(CPlatformWindow* platformWindow);
-
         void SetDrawListMasks(RHI::DrawListMask& outMask);
 
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
