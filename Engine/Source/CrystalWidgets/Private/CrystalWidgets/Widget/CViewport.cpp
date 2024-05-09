@@ -83,8 +83,6 @@ namespace CE::Widgets
         blob.Free();
 
         emit OnFrameBufferRecreated();
-
-        CE_LOG(Info, All, "Viewport Size: {}", currentSize);
     }
 
     void CViewport::OnPaint(CPaintEvent* paintEvent)
@@ -110,7 +108,6 @@ namespace CE::Widgets
         painter->SetBrush(CBrush(Color::White()));
 
         painter->DrawFrameBuffer(Rect::FromSize(position, size.ToVec2() + extraSize), frames);
-        //painter->DrawTexture(Rect::FromSize(position, size.ToVec2()), frames[0]);
 
 	    Super::OnPaint(paintEvent);
     }
