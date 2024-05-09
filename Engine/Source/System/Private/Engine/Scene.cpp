@@ -13,12 +13,21 @@ namespace CE
 			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
 
-			
+			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 		}
 	}
 
 	CE::Scene::~Scene()
 	{
+		if (gEngine && !IsDefaultInstance())
+		{
+			SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+			if (sceneSubsystem)
+			{
+				sceneSubsystem->OnSceneDestroyed(this);
+			}
+		}
+
 		delete rpiScene; rpiScene = nullptr;
 	}
 
@@ -39,15 +48,19 @@ namespace CE
 			actor->Tick(delta);
 		}
 
+		CWindow* mainViewport = sceneSubsystem->GetMainViewport();
+		Vec2i windowSize = mainViewport->GetWindowSize().ToVec2i();
+
 		for (CameraComponent* camera : cameras)
 		{
+			camera->windowSize = windowSize;
+
 			RPI::View* view = camera->GetRpiView();
-			if (!view || camera->renderViewport == nullptr)
+			if (!view)
 				continue;
 
-			Vec2 windowSize = camera->renderViewport->GetWindowSize();
 			PerViewConstants& viewConstants = view->GetViewConstants();
-			viewConstants.pixelResolution = windowSize;
+			viewConstants.pixelResolution = windowSize.ToVec2();
 			viewConstants.projectionMatrix = camera->projectionMatrix;
 			viewConstants.viewMatrix = camera->viewMatrix;
 			viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
@@ -262,7 +275,6 @@ namespace CE
 			mainCamera = camera;
 			rpiScene->AddView("MainCamera", mainCamera->rpiView);
 			camera->cameraType = CameraType::MainCamera;
-			camera->renderViewport = mainRenderViewport;
 		}
 		else
 		{
@@ -279,7 +291,6 @@ namespace CE
 		{
 			rpiScene->RemoveView("MainCamera", mainCamera->rpiView);
 			mainCamera = cameras.IsEmpty() ? nullptr : cameras.Top();
-			camera->renderViewport = nullptr;
 		}
 		else
 		{

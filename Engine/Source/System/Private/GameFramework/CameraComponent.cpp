@@ -51,16 +51,15 @@ namespace CE
     {
 	    Super::Tick(delta);
 
-        if (renderViewport != nullptr)
+        if (windowSize.x > 0 && windowSize.y > 0)
         {
-            Vec2 windowSize = renderViewport->GetWindowSize();
 	        if (projection == CameraProjection::Perspective && windowSize.height > 0)
 	        {
-                projectionMatrix = Matrix4x4::PerspectiveProjection(windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);
+                projectionMatrix = Matrix4x4::PerspectiveProjection((f32)windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);
 	        }
             else if (projection == CameraProjection::Orthogonal && windowSize.height > 0)
             {
-                projectionMatrix = Matrix4x4::OrthographicProjection(windowSize.width / windowSize.height, nearPlane, farPlane);
+                projectionMatrix = Matrix4x4::OrthographicProjection((f32)windowSize.width / windowSize.height, nearPlane, farPlane);
             }
 
             Vec3 lookDir = GetForwardVector();

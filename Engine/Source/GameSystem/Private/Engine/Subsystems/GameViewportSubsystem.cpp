@@ -32,7 +32,7 @@ namespace CE
 		{
 			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
 
-			activeScene->mainRenderViewport = gameWindow;
+			sceneSubsystem->SetMainViewport(gameWindow);
 		}
 	}
 

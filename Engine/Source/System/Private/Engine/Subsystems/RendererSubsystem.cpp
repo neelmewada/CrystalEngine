@@ -87,7 +87,6 @@ namespace CE
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 		// TODO: Implement multi scene support
-		SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 		CE::Scene* activeScene = sceneSubsystem->GetMainScene();
 
 		if (mainWindow)
@@ -180,9 +179,9 @@ namespace CE
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 		bool isSceneWindowActive = true;
 
-		if (scene->mainRenderViewport != nullptr)
+		if (sceneSubsystem->mainViewport != nullptr)
 		{
-			CPlatformWindow* nativeWindow = scene->mainRenderViewport->GetNativeWindow();
+			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
@@ -322,9 +321,9 @@ namespace CE
 
 		bool isSceneWindowActive = true;
 
-		if (scene->mainRenderViewport != nullptr)
+		if (sceneSubsystem->mainViewport != nullptr)
 		{
-			CPlatformWindow* nativeWindow = scene->mainRenderViewport->GetNativeWindow();
+			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
@@ -345,12 +344,16 @@ namespace CE
 
 				if (isSceneWindowActive && scene->IsEnabled())
 				{
+					CWindow* renderWindow = sceneSubsystem->mainViewport;
+
 					for (CameraComponent* camera : scene->cameras)
 					{
 						if (!camera->IsEnabled())
 							continue;
+						// TODO: Add support for multiple cameras in scene
+						if (camera != scene->mainCamera)
+							continue;
 
-						CWindow* renderWindow = camera->renderViewport;
 						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
 							CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();

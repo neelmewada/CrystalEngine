@@ -60,8 +60,6 @@ namespace CE
     	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
 
     	void SetViewTag(const Name& tag) { viewTag = tag; }
-
-		CWindow* GetRenderWindow() const { return renderViewport; }
     	
     protected:
 
@@ -99,9 +97,8 @@ namespace CE
 		FIELD()
 		Vec2 viewport = Vec2(1, 1);
 
-		//! @brief The CWindow that this scene is rendered to.
 		FIELD()
-		CWindow* renderViewport = nullptr;
+		Vec2i windowSize = Vec2i(0, 0);
 
     	FIELD()
     	CE::RenderPipeline* renderPipeline = nullptr;

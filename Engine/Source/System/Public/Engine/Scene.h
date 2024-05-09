@@ -8,6 +8,7 @@ namespace CE
     class StaticMeshComponent;
 	class SceneComponent;
 	class RenderPipeline;
+	class SceneSubsystem;
 	
 	CLASS()
 	class SYSTEM_API Scene : public Asset
@@ -101,9 +102,6 @@ namespace CE
 		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
 
 		FIELD()
-		CWindow* mainRenderViewport = nullptr;
-
-		FIELD()
 		TextureCube* skyboxCubeMap = nullptr;
 		
 	private:
@@ -124,6 +122,8 @@ namespace CE
 		Array<CameraComponent*> cameras{};
 
 		CameraComponent* mainCamera = nullptr;
+
+		SceneSubsystem* sceneSubsystem = nullptr;
 
 		friend class Actor;
 		friend class ActorComponent;

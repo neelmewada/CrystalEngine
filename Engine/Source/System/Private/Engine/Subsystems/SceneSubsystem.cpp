@@ -7,9 +7,28 @@ namespace CE
 		
     }
 
-	void SceneSubsystem::Initialize()
+    void SceneSubsystem::RegisterViewport(CWindow* viewport, CE::Scene* scene)
+    {
+		if (!viewport || !scene)
+			return;
+
+		scenesByViewport[viewport] = scene;
+
+		renderer->RebuildFrameGraph();
+    }
+
+    void SceneSubsystem::SetMainViewport(CWindow* viewport)
+    {
+		mainViewport = viewport;
+
+		renderer->RebuildFrameGraph();
+    }
+
+    void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
+
+		renderer = gEngine->GetSubsystem<RendererSubsystem>();
 	}
 
 	void SceneSubsystem::PostInitialize()
@@ -54,6 +73,16 @@ namespace CE
 		if (mainScene != nullptr)
 		{
 			mainScene->Tick(deltaTime);
+		}
+	}
+
+	void SceneSubsystem::OnSceneDestroyed(CE::Scene* scene)
+	{
+		otherScenes.Remove(scene);
+
+		if (scene == mainScene)
+		{
+			mainScene = nullptr;
 		}
 	}
 
