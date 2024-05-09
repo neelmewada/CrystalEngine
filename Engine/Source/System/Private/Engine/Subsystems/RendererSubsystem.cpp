@@ -150,6 +150,8 @@ namespace CE
 	{
 		Super::Tick(delta);
 
+		bool isExiting = IsEngineRequestingExit();
+
 		CApplication* app = CApplication::TryGet();
 
 		if (app)

@@ -21,8 +21,22 @@ namespace CE::Editor
 
         CDockSplitView* root = GetRootDockSplit();
 
-        SceneEditorWindow* sceneEditor = CreateObject<SceneEditorWindow>(root, "SceneEditor");
-        
+        sceneEditor = CreateObject<SceneEditorWindow>(root, "SceneEditor");
+        viewportWindow = sceneEditor->GetViewportWindow();
+
+        sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+        sceneSubsystem->SetMainViewport(viewportWindow->GetViewport());
+
+    }
+
+    void CrystalEditorWindow::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (sceneSubsystem && sceneSubsystem->GetMainViewport() == viewportWindow->GetViewport())
+        {
+            sceneSubsystem->SetMainViewport(nullptr);
+        }
     }
 
 } // namespace CE::Editor

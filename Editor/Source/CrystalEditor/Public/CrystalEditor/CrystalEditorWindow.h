@@ -15,7 +15,16 @@ namespace CE::Editor
     private:
 
         void Construct() override;
-        
+
+        void OnBeforeDestroy() override;
+
+        FIELD()
+        SceneEditorWindow* sceneEditor = nullptr;
+
+        FIELD()
+        ViewportWindow* viewportWindow = nullptr;
+
+        SceneSubsystem* sceneSubsystem = nullptr;
     };
     
 } // namespace CE::Editor

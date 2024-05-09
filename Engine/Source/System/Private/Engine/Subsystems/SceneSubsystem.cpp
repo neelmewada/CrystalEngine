@@ -36,13 +36,15 @@ namespace CE
 		Super::PostInitialize();
 
 		// TODO: Implement multi scene support
-
+		
 		// Create & set an empty scene by default
 		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
 	{
+		mainViewport = nullptr;
+
 		if (mainScene)
 		{
 			mainScene->Destroy();

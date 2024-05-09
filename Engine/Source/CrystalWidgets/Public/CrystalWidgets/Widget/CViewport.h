@@ -46,6 +46,10 @@ namespace CE::Widgets
 
 		RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
 
+		// - Signals -
+
+		CE_SIGNAL(OnFrameBufferRecreated);
+
 	protected:
 
 		void OnPaint(CPaintEvent* paintEvent) override;

@@ -11,6 +11,8 @@ namespace CE::Editor
         ViewportWindow();
         virtual ~ViewportWindow();
 
+        EditorViewport* GetViewport() const { return viewport; }
+
     private:
 
         void Construct() override;
