@@ -24,19 +24,20 @@ Run the following cmake command to make host build from the project's root direc
 cmake -B Build/Windows -S . -G "Visual Studio 17 2022" -Wno-dev
 ```
 
-Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to use **debug** builds in case there are issues with Development or Release builds.
+Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to use **debug** builds in case you experience issues with Development or Release builds.
+Host tools are command line tools used by standalone platform build. Hence they must be built before doing standalone build.
 
 ```sh
 cmake --build Build/Windows --config Debug --target HostTools -Wno-dev
 ```
 
-If you want to build the editor too, you can either build and run the EditorLauncher target from Visual studio, or via command line:
+**Recommended**: However, if you want to build the editor GUI tolls, you can either build and run the `EditorLauncher` target from Visual studio, or via command line:
 
 ```sh
 cmake --build Build/Windows --config Debug --target EditorLauncher -Wno-dev
 ```
 
-## Building standalone
+## Building standalone (optional)
 
 The standalone build has the GameSystem_Test application, which you can run to play-test the engine in standalone mode.
 
@@ -47,5 +48,5 @@ cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="<
 The path to host tools binary directory in our situation is:
 `C:/CrystalEngine/Build/Windows/Debug`. `Build/Windows` is the host tools solution directory, and the binary files will be produced in the Debug folder, if you have chosen to build Debug target for host tools.
 
-You can now open standalone solution in visual studio and run the VulkanSandbox application inside the Engine folder.
+Note: For now, there is no real use of standalone builds, and they are incomplete yet. You can run the `GameSystem_Test` target in standalone build to do a basic play test of the standalone engine.
 
