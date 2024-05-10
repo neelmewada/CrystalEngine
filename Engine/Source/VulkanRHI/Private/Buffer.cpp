@@ -85,6 +85,10 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
 		}
+
+#if PLATFORM_DESKTOP && !CE_BUILD_RELEASE
+		device->SetObjectDebugName((uint64_t)buffer, VK_OBJECT_TYPE_BUFFER, name.GetCString());
+#endif
 		
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);

@@ -26,7 +26,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Asset processing to generate binary assets for use by engine.
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
-- Render graph based pipeline with automatic dependencies.
+- Frame graph based GPU scheduling with automatic resource dependencies.
 - **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
 - **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
@@ -34,32 +34,36 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 
 The engine is divided into different domains, and each domain can have multiple modules.
 
-#### Core domain
+### Core domain
 All modules inside the core domain are at the low level of the engine.
 
-* **Core module**: The foundation of the engine. Provides runtime type reflection system, Binary & JSON serialization, containers, Object system, Job System, etc.
-* **CoreApplication**: Low level application layer to handle OS application specific things. Uses SDL2 underneath the abstractions.
+* **Core**: The foundation of the engine. Provides runtime type reflection system, Binary & JSON serialization, containers, Object system, Job System, etc.
+* **CoreApplication**: Low level application layer to handle OS specific application & windowing. Uses SDL2 underneath the abstractions.
+* **CoreInput**: Low level input handling.
 * **CoreMedia**: Low level image handling and BC1-7 compression.
+* **CoreMesh**: Low level mesh loading.
 * **CoreShader**: Low level shader compilation and reflection. Uses DxCompiler & spirv reflect.
 * **CoreRHI**: Rendering Hardware Interface. A graphics API abstraction layer that is used for low level GPU operations. Also implements frame graph rendering.
     * **VulkanRHI**: Vulkan implementation of the RHI layer.
 * **CoreRPI**: Render Pipeline Interface. Provides a render pipeline architecture layer on top of RHI, allowing engine to build complex render pipeline with many passes.
 * **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 
-#### System domain
+### System domain
+
 System domain modules are at high level of the engine.
 
-* **System module**: The main module that contains the high level game engine systems, game framework, etc.
+* **System**: The main module that contains the high level game engine systems, game framework, etc.
 * **GameSystem**: Only for standalone builds. Runtime implementation of System module.
 
-#### Editor domain
+### Editor domain
 
-There's no actual GUI editor that exists yet. It's only CLI tools like AssetProcessor, AutoRTTI, ResourceCompiler, etc.
+Contains all the editor modules.
 
 * **EditorCore**: Implements Asset processing and serves as the foundation of the editor & host tools.
-* **EditorSystem**: Host/editor implementation of the System module.
+* **EditorSystem**: Host/editor implementation of the System module i.e. Engine.
+* **CrystalEditor**: Contains all the editor related GUI and features.
 
-## Screenshots
+# Screenshots
 
 
 ### Editor tools using CrystalWidgets

@@ -34,6 +34,8 @@ namespace CE::Vulkan
 		else
 			surfaceSupported = false; // Initialize vulkan in offscreen mode
 
+		setDebugUtilsObjectName = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectNameEXT");
+
 		SelectGpu();
 		InitGpu();
 
@@ -153,6 +155,20 @@ namespace CE::Vulkan
 		}
 
 		return availableDepthOnlyFormats;
+	}
+
+	void VulkanDevice::SetObjectDebugName(uint64_t objectHandle, VkObjectType objectType, const char* objectName)
+	{
+		if (setDebugUtilsObjectName)
+		{
+			VkDebugUtilsObjectNameInfoEXT info{};
+			info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+			info.objectType = objectType;
+			info.objectHandle = objectHandle;
+			info.pObjectName = objectName;
+			setDebugUtilsObjectName(device, &info);
+		}
+
 	}
 
 	void VulkanDevice::SelectGpu()

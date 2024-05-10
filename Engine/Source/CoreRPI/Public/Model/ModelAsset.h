@@ -10,6 +10,8 @@ namespace CE::RPI
         CE_CLASS(ModelAsset, Object)
     public:
 
+        virtual ~ModelAsset();
+
         u32 GetLodCount() const { return lods.GetSize(); }
 
         ModelLodAsset* GetModelLod(u32 index) const { return lods[index]; }

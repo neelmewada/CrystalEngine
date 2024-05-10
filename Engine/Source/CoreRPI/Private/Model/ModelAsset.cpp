@@ -2,6 +2,10 @@
 
 namespace CE::RPI
 {
+	ModelAsset::~ModelAsset()
+	{
+        delete model; model = nullptr;
+	}
 
     Model* ModelAsset::CreateModel()
     {

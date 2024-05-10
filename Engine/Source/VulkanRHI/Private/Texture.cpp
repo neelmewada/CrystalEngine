@@ -379,6 +379,8 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create Vulkan Image");
 			return;
 		}
+
+		device->SetObjectDebugName((uint64_t)image, VK_OBJECT_TYPE_IMAGE, name.GetCString());
 	}
 
 	void Texture::AllocateInternal()
