@@ -427,6 +427,8 @@ namespace CE
 		if (object == nullptr)
 			return;
 
+		loadedObjectsMutex.Lock();
+
 		Uuid oldUuid = object->GetUuid();
 
 		if (GetPrimaryObjectUuid() == oldUuid)
@@ -446,9 +448,30 @@ namespace CE
 		{
 			loadedObjects[newUuid] = loadedObjects[oldUuid];
 			loadedObjects.Remove(oldUuid);
-
-			// TODO: 
 		}
+
+		loadedObjectsMutex.Unlock();
+
+		packageRegistryMutex.Lock();
+
+		if (object->IsPackage())
+		{
+			Package* package = (Package*)object;
+
+			if (loadedPackagesByUuid.KeyExists(oldUuid))
+			{
+				loadedPackagesByUuid[newUuid] = loadedPackagesByUuid[oldUuid];
+				loadedPackagesByUuid.Remove(oldUuid);
+			}
+
+			if (loadedPackageUuidToPath.KeyExists(oldUuid))
+			{
+				loadedPackageUuidToPath[newUuid] = loadedPackageUuidToPath[oldUuid];
+				loadedPackageUuidToPath.Remove(oldUuid);
+			}
+		}
+
+		packageRegistryMutex.Unlock();
 
 		object->uuid = newUuid;
 	}
