@@ -12,7 +12,12 @@ namespace CE
     {
 	    if (meshHandle.IsValid())
 	    {
-            meshHandle.Free();
+            CE::Scene* scene = GetScene();
+            RPI::Scene* rpiScene = scene->GetRpiScene();
+            StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+
+            fp->ReleaseMesh(meshHandle);
+            //meshHandle.Free();
 	    }
     }
 

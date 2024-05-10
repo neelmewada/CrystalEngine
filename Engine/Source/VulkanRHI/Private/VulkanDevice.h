@@ -112,6 +112,8 @@ namespace CE::Vulkan
         const Array<RHI::Format>& GetAvailableDepthStencilFormats();
         const Array<RHI::Format>& GetAvailableDepthOnlyFormats();
 
+        void SetObjectDebugName(uint64_t objectHandle, VkObjectType objectType, const char* objectName);
+
     protected:
 
     private:
@@ -177,6 +179,9 @@ namespace CE::Vulkan
 
 		//DescriptorPool* descriptorPool = nullptr;
         ThreadLocalContext<DescriptorPool> threadedDescriptorPool;
+
+        // Debug functions
+        PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectName = nullptr;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

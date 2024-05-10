@@ -37,7 +37,7 @@ namespace CE::Vulkan
         static Array<const char*> GetRequiredInstanceExtensions()
         {
             auto extensions = VulkanOSPlatform::GetRequiredInstanceExtensions();
-#if CE_BUILD_DEBUG
+#if PLATFORM_DESKTOP && !CE_BUILD_RELEASE
             extensions.AddRange({
                 VK_EXT_DEBUG_UTILS_EXTENSION_NAME
             });

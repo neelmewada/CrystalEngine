@@ -44,6 +44,9 @@ namespace CE::RPI
 
     void RPISystem::Initialize()
     {
+        if (isInitialized)
+            return;
+
         isFirstTick = true;
         isInitialized = true;
 
@@ -237,20 +240,11 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
+        if (!isInitialized)
+            return;
+
         standardShader = nullptr;
         isInitialized = false;
-
-        {
-            LockGuard lock{ rhiDestructionQueueMutex };
-
-            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
-            {
-                auto& entry = rhiDestructionQueue[i];
-                delete entry.resource; entry.resource = nullptr;
-            }
-
-            rhiDestructionQueue.Clear();
-        }
 
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
         {
@@ -277,6 +271,7 @@ namespace CE::RPI
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
+        delete brdfLutTexture; brdfLutTexture = nullptr;
 
         {
             LockGuard lock{ samplerCacheMutex };
@@ -286,6 +281,18 @@ namespace CE::RPI
                 RHI::gDynamicRHI->DestroySampler(sampler);
             }
             samplerCache.Clear();
+        }
+
+        {
+            LockGuard lock{ rhiDestructionQueueMutex };
+
+            for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
+            {
+                auto& entry = rhiDestructionQueue[i];
+                delete entry.resource; entry.resource = nullptr;
+            }
+
+            rhiDestructionQueue.Clear();
         }
     }
 

@@ -65,12 +65,19 @@ namespace CE::Editor
         auto parentSplit = minorDockSpace->GetRootDockSplit();
         auto center = parentSplit->GetSplit(0);
         auto right = parentSplit->GetSplit(1);
-      
-        detailsWindow = CreateObject<DetailsWindow>(right, "Details");
+
+    	minorDockSpace->Split(right, 0.5f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
+        auto rightTop = right->GetSplit(0);
+        auto rightBottom = right->GetSplit(1);
+
+        sceneHierarchyWindow = CreateObject<SceneHierarchyWindow>(rightTop, "SceneHierarchy");
+
+        detailsWindow = CreateObject<DetailsWindow>(rightBottom, "Details");
 
         minorDockSpace->Split(center, 0.4f, CDockSplitDirection::Vertical, "SplitTop", "SplitBottom");
         auto centerTop = center->GetSplit(0);
         auto centerBottom = center->GetSplit(1);
+
         viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
         centerTop->SetAutoHideTabs(true);
         EditorViewport* editorViewport = viewportWindow->GetViewport();

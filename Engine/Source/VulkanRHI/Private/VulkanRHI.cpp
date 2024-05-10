@@ -110,7 +110,7 @@ namespace CE::Vulkan
         Array<const char*> validationLayers = VulkanPlatform::GetValidationLayers();
         bool enableValidation = VulkanPlatform::IsValidationEnabled();
         Array<const char*> instanceExtensions = VulkanPlatform::GetRequiredInstanceExtensions();
-
+        
         u32 extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
         Array<VkExtensionProperties> extensionProps{}; extensionProps.Resize(extensionCount);
@@ -123,7 +123,9 @@ namespace CE::Vulkan
                     if (strcmp(extensionProps[i].extensionName, extName) == 0)
                     {
                         instanceExtensions.Add(extensionProps[i].extensionName);
+                        return true;
                     }
+                    return false;
                 };
 
             tryAddExtension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);

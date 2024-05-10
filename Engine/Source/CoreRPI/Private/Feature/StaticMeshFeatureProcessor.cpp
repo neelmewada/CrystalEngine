@@ -10,7 +10,15 @@ namespace CE::RPI
 
 	StaticMeshFeatureProcessor::~StaticMeshFeatureProcessor()
 	{
-		
+		auto parallelRanges = modelInstances.GetParallelRanges();
+
+		for (const auto& range : parallelRanges)
+		{
+			for (auto it = range.begin; it != range.end; ++it)
+			{
+				it->Deinit(this);
+			}
+		}
 	}
 
 	void ModelDataInstance::Init(StaticMeshFeatureProcessor* fp)

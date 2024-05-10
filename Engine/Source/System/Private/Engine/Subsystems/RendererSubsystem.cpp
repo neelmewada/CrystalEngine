@@ -71,8 +71,6 @@ namespace CE
 
 		sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-		RPISystem::Get().Initialize();
-
 		// - Feature Processors -
 
 		RegisterFeatureProcessor<StaticMeshComponent, StaticMeshFeatureProcessor>();
@@ -143,7 +141,6 @@ namespace CE
 	{
 		Super::Shutdown();
 
-		RPISystem::Get().Shutdown();
 	}
 
 	void RendererSubsystem::Tick(f32 delta)

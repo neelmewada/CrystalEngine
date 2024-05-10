@@ -24,6 +24,9 @@ namespace CE::Editor
 		AssetBrowserWindow* assetBrowserWindow = nullptr;
 
 		FIELD()
+		SceneHierarchyWindow* sceneHierarchyWindow = nullptr;
+
+		FIELD()
 		DetailsWindow* detailsWindow = nullptr;
 
 		FIELD()
