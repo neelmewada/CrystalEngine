@@ -213,6 +213,14 @@ namespace CE::Editor
 			return;
 		}
 
+		if (!isGameAsset)
+		{
+			// TODO: Non-game assets must have a fixed UUID based on their path.
+			// Because They are generated locally when the engine is built.
+
+			
+		}
+
 		auto saveResult = Package::SavePackage(package, nullptr, productPath);
 		package->Destroy();
 

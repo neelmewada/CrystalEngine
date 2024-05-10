@@ -422,6 +422,37 @@ namespace CE
 		return String();
 	}
 
+	void Package::SetObjectUuid(Object* object, Uuid newUuid)
+	{
+		if (object == nullptr)
+			return;
+
+		Uuid oldUuid = object->GetUuid();
+
+		if (GetPrimaryObjectUuid() == oldUuid)
+		{
+			primaryObjectUuid = 0;
+		}
+
+		if (objectUuidToEntryMap.KeyExists(oldUuid))
+		{
+			objectUuidToEntryMap[newUuid] = objectUuidToEntryMap[oldUuid];
+			objectUuidToEntryMap.Remove(oldUuid);
+
+			objectUuidToEntryMap[newUuid].instanceUuid = newUuid;
+		}
+
+		if (loadedObjects.KeyExists(oldUuid))
+		{
+			loadedObjects[newUuid] = loadedObjects[oldUuid];
+			loadedObjects.Remove(oldUuid);
+
+			// TODO: 
+		}
+
+		object->uuid = newUuid;
+	}
+
 	void Package::OnObjectUnloaded(Object* object)
 	{
 		if (object == nullptr)

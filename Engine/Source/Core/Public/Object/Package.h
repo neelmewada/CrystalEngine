@@ -122,6 +122,8 @@ namespace CE
 		const Name& GetPrimaryObjectTypeName();
 		Uuid GetPrimaryObjectUuid();
 		String GetPrimarySourceAssetRelativePath();
+
+		void SetObjectUuid(Object* object, Uuid newUuid);
         
     private:
 

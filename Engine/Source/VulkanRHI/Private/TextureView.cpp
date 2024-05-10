@@ -7,7 +7,7 @@ namespace CE::Vulkan
     {
         VkImageViewCreateInfo imageViewCI{};
         imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
+        
         Vulkan::Texture* texture = (Vulkan::Texture*)desc.texture;
         
         imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;

@@ -81,7 +81,7 @@ namespace CE::Editor
         viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
         centerTop->SetAutoHideTabs(true);
         EditorViewport* editorViewport = viewportWindow->GetViewport();
-
+        
         Bind(editorViewport, MEMBER_FUNCTION(EditorViewport, OnFrameBufferRecreated),
             rendererSubsystem, MEMBER_FUNCTION(RendererSubsystem, RebuildFrameGraph));
 

@@ -23,9 +23,10 @@ namespace CE::Editor
       
         sceneEditor = CreateObject<SceneEditorWindow>(root, "SceneEditor");
         viewportWindow = sceneEditor->GetViewportWindow();
+        EditorViewport* editorViewport = viewportWindow->GetViewport();
 
         sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
-        sceneSubsystem->SetMainViewport(viewportWindow->GetViewport());
+        sceneSubsystem->SetMainViewport(editorViewport);
 
         rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 

@@ -54,6 +54,11 @@ namespace CE::Widgets
 
 	void CBaseItemView::SetModel(CBaseItemModel* model)
 	{
+		if (this->model != nullptr)
+		{
+			UnbindSignals(this, this->model);
+		}
+
 		this->model = model;
 
 		if (selectionModel)
@@ -72,6 +77,11 @@ namespace CE::Widgets
 					columnWidthRatios[i] = 0.0f;
 				}
 			}
+
+			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
+				this, MEMBER_FUNCTION(Self, SetNeedsLayout));
+			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
+				this, MEMBER_FUNCTION(Self, SetNeedsPaint));
 		}
 	}
 

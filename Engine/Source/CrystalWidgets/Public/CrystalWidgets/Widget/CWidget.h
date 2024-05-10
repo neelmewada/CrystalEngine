@@ -40,11 +40,15 @@ namespace CE::Widgets
         void SetEnabled(bool enabled);
         void SetInteractable(bool interactable);
 
+        FUNCTION()
         void SetNeedsPaint();
 
+        FUNCTION()
         void SetNeedsLayout();
+
         void ClearNeedsLayout();
 
+        FUNCTION()
         void SetNeedsStyle();
 
         bool NeedsLayout();
