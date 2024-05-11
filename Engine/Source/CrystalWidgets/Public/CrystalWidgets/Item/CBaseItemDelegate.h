@@ -22,6 +22,7 @@ namespace CE::Widgets
         Vec4 padding{};
         Color bgColor{};
         Color textColor{};
+        Vec2 cellSize{};
         b8 isExpanded = false;
         int expandableColumn = -1;
     };

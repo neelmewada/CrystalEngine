@@ -96,6 +96,9 @@ namespace CE::Widgets
         FIELD()
         b8 canDrawRowHeader = true;
 
+        FIELD()
+        b8 canExpandRows = true;
+
     private:
 
         Vec2 scrollOffset = Vec2(0, 0);

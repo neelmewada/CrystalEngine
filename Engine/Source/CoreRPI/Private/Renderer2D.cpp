@@ -892,12 +892,32 @@ namespace CE::RPI
 		return size;
 	}
 
-	Vec2 Renderer2D::DrawArrow(Vec2 size, f32 thickness)
+	Vec2 Renderer2D::DrawTriangle(Vec2 size)
 	{
 		if (size.x <= 0 || size.y <= 0)
 			return Vec2(0, 0);
 
-		size = Vec2(1, 1) * Math::Min(size.x, size.y);
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -908,10 +928,19 @@ namespace CE::RPI
 		Vec2 quadPos = cursorPosition;
 		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 
-		Matrix4x4 mainTransform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		//drawItem.transform = Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Triangle;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
 
+		curDrawBatch.drawItemCount++;
 
-
+		drawItemCount++;
 		return size;
 	}
 
@@ -988,7 +1017,6 @@ namespace CE::RPI
 
 		if (drawItems.GetSize() < drawItemCount + 1)
 			drawItems.Resize(drawItemCount + 1);
-
 
 		int textureIndex = 0;
 
@@ -1106,7 +1134,7 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
-		drawItem.textureIndex = textureIndexPerImage[0]; // Add index only to first image in frame buffer
+		drawItem.textureIndex = textureIndexPerImage[0]; // Add only the index to first image in frame buffer
 
 		curDrawBatch.drawItemCount++;
 

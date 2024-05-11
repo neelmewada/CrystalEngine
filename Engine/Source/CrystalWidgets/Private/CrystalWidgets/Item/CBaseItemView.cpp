@@ -390,8 +390,10 @@ namespace CE::Widgets
 
 	void CBaseItemView::PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parentIndex)
 	{
-		int numRows = model->GetRowCount(parentIndex);
-		int numColumns = model->GetColumnCount(parentIndex);
+		u32 numRows = model->GetRowCount(parentIndex);
+		u32 numColumns = model->GetColumnCount(parentIndex);
+		if (numColumns == 0)
+			return;
 
 		f32 rowPosY = 0.0f;
 		CFont font{};
@@ -446,7 +448,7 @@ namespace CE::Widgets
 				}
 			}
 
-			f32 posX = 0.0f;
+			f32 posX = indentLevel * cellHeight; // Add indentation level
 
 			for (int col = 0; !isClipped && col < numColumns; ++col)
 			{
@@ -478,6 +480,8 @@ namespace CE::Widgets
 
 				Rect cellRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
 
+				itemStyle.cellSize = cellRect.GetSize();
+
 				painter->PushChildCoordinateSpace(cellRect.min);
 				painter->PushClipRect(Rect::FromSize(Vec2(0, 0), cellRect.GetSize()));
 
@@ -493,8 +497,32 @@ namespace CE::Widgets
 							selectionModel->Clear();
 
 						selectionModel->Select(index);
-
+						
 						mouseClickedInsideCell = true;
+					}
+				}
+
+				if (col == expandableColumn && model->GetRowCount(index) > 0) // Draw expand arrow icon
+				{
+					if (!expandedRows.Exists(index))
+					{
+						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
+						Vec2 trianglePos = Vec2(20.0f, triangleSize.height * 0.5f);
+
+						painter->SetBrush(CBrush(Color::RGBA(160, 160, 160)));
+						painter->SetRotation(90);
+						painter->DrawTriangle(Rect::FromSize(trianglePos, triangleSize));
+						painter->SetRotation(0);
+					}
+					else
+					{
+						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
+						Vec2 trianglePos = Vec2(17.0f, triangleSize.height * 1.8f);
+
+						painter->SetBrush(CBrush(Color::RGBA(160, 160, 160)));
+						painter->SetRotation(180);
+						painter->DrawTriangle(Rect::FromSize(trianglePos, triangleSize));
+						painter->SetRotation(0);
 					}
 				}
 

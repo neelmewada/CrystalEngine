@@ -17,8 +17,14 @@ namespace CE::Editor
     {
         if (scene == nullptr)
             return 0;
+        if (!parent.IsValid())
+			return scene->GetRootActorCount();
 
-        return scene->GetRootActorCount();
+        Actor* actor = (Actor*)parent.GetInternalData();
+        if (!actor)
+            return 0;
+
+        return actor->GetChildCount();
     }
 
     u32 SceneDataModel::GetColumnCount(const CModelIndex& parent)

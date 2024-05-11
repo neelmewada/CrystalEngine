@@ -91,6 +91,12 @@ namespace CE::Widgets
         renderer->DrawFrameBuffer(frames, rect.GetSize());
     }
 
+    void CPainter::DrawTriangle(const Rect& rect)
+    {
+        renderer->SetCursor(GetOrigin() + rect.min);
+        renderer->DrawTriangle(rect.GetSize());
+    }
+
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
         renderer->SetCursor(GetOrigin() + position);

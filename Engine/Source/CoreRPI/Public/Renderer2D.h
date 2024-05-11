@@ -116,7 +116,14 @@ namespace CE::RPI
             return DrawRoundedRect(rect.GetSize(), cornerRadius);
         }
 
-        Vec2 DrawArrow(Vec2 size, f32 thickness);
+        //! @brief Draws a simple isosceles triangle in the given rect
+        Vec2 DrawTriangle(Vec2 size);
+
+        Vec2 DrawTriangle(const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawTriangle(rect.GetSize());
+        }
 
         Vec2 DrawRoundedX(Vec2 size);
 
@@ -175,6 +182,7 @@ namespace CE::RPI
             DRAW_RoundedX,
             DRAW_Texture,
             DRAW_FrameBuffer,
+            DRAW_Triangle,
         };
 
         struct alignas(4) DrawDataConstants
