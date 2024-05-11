@@ -344,9 +344,17 @@ void EditorLoop::AppPreInit()
 void EditorLoop::AppInit()
 {
 	gEngine->PreInit();
+	bool isProjectBrowsingMode = false;
 
-	gDefaultWindowWidth = 1280;
-	gDefaultWindowHeight = 720;
+	gDefaultWindowWidth = 1366;
+	gDefaultWindowHeight = 768;
+
+	Vec2i screenSize = app->GetMainScreenSize();
+	if (screenSize.x >= 2560 && screenSize.y >= 1440)
+	{
+		gDefaultWindowWidth = 1920;
+		gDefaultWindowHeight = 1080;
+	}
 
 	PlatformWindowInfo windowInfo{};
 	windowInfo.maximised = windowInfo.fullscreen = windowInfo.hidden = false;
@@ -354,6 +362,7 @@ void EditorLoop::AppInit()
 	windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 	if (projectPath.IsEmpty())
 	{
+		isProjectBrowsingMode = true;
 		windowInfo.windowFlags |= PlatformWindowFlags::Utility;
 		gDefaultWindowWidth = 1024;
 		gDefaultWindowHeight = 640;
@@ -361,7 +370,7 @@ void EditorLoop::AppInit()
 
 	mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);
 
-	mainWindow->SetMinimumSize(Vec2i(gDefaultWindowWidth, gDefaultWindowHeight));
+	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
 }
 

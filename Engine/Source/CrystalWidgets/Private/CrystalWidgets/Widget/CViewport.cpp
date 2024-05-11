@@ -74,6 +74,9 @@ namespace CE::Widgets
         {
 	        if (frames[i] != nullptr)
 	        {
+                if (i == 0)
+                    RHI::FrameScheduler::Get()->WaitUntilIdle();
+
                 delete frames[i]; frames[i] = nullptr;
 	        }
 

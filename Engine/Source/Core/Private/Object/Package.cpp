@@ -422,6 +422,60 @@ namespace CE
 		return String();
 	}
 
+	void Package::SetObjectUuid(Object* object, Uuid newUuid)
+	{
+		if (object == nullptr)
+			return;
+
+		loadedObjectsMutex.Lock();
+
+		Uuid oldUuid = object->GetUuid();
+
+		if (GetPrimaryObjectUuid() == oldUuid)
+		{
+			primaryObjectUuid = 0;
+		}
+
+		if (objectUuidToEntryMap.KeyExists(oldUuid))
+		{
+			objectUuidToEntryMap[newUuid] = objectUuidToEntryMap[oldUuid];
+			objectUuidToEntryMap.Remove(oldUuid);
+
+			objectUuidToEntryMap[newUuid].instanceUuid = newUuid;
+		}
+
+		if (loadedObjects.KeyExists(oldUuid))
+		{
+			loadedObjects[newUuid] = loadedObjects[oldUuid];
+			loadedObjects.Remove(oldUuid);
+		}
+
+		loadedObjectsMutex.Unlock();
+
+		packageRegistryMutex.Lock();
+
+		if (object->IsPackage())
+		{
+			Package* package = (Package*)object;
+
+			if (loadedPackagesByUuid.KeyExists(oldUuid))
+			{
+				loadedPackagesByUuid[newUuid] = loadedPackagesByUuid[oldUuid];
+				loadedPackagesByUuid.Remove(oldUuid);
+			}
+
+			if (loadedPackageUuidToPath.KeyExists(oldUuid))
+			{
+				loadedPackageUuidToPath[newUuid] = loadedPackageUuidToPath[oldUuid];
+				loadedPackageUuidToPath.Remove(oldUuid);
+			}
+		}
+
+		packageRegistryMutex.Unlock();
+
+		object->uuid = newUuid;
+	}
+
 	void Package::OnObjectUnloaded(Object* object)
 	{
 		if (object == nullptr)

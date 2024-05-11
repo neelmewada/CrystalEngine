@@ -22,7 +22,7 @@ namespace CE::Widgets
             selectionRanges.Add({ start, end });
         }
 
-        bool IsSelected(const CModelIndex& index)
+        bool IsSelected(const CModelIndex& index) const
         {
 	        if (!index.IsValid())
                 return false;
@@ -54,7 +54,7 @@ namespace CE::Widgets
 
         b8 HasSelection() const { return hasSelection; }
 
-        bool IsSelected(const CModelIndex& index)
+        bool IsSelected(const CModelIndex& index) const
         {
             return selection.IsSelected(index);
         }

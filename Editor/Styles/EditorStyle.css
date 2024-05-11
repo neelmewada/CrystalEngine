@@ -275,3 +275,7 @@ ViewportWindow CViewport {
     height: 100%;
 }
 
+#HierarchyTreeView {
+    flex-grow: 4;
+    flex-shrink: 2;
+}

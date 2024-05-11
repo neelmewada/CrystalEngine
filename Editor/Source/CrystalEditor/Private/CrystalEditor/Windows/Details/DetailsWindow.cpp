@@ -19,6 +19,5 @@ namespace CE::Editor
 
         SetTitle("Details");
     }
-
     
 } // namespace CE::Editor

@@ -76,7 +76,7 @@ namespace CE
             this->dragHitTest = delegate;
         }
 
-    coreapplication_protected_internal:
+    coreapplication_internal:
 
         WindowDragHitTestDelegate dragHitTest{};
 

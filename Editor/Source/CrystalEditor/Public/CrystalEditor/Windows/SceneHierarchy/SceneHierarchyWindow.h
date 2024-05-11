@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SceneDataModel.h"
+
 namespace CE::Editor
 {
 	CLASS()
@@ -11,9 +13,20 @@ namespace CE::Editor
 		SceneHierarchyWindow();
 		virtual ~SceneHierarchyWindow();
 
+		void SetScene(CE::Scene* scene);
+
 	private:
 
 		void Construct() override;
+
+		FIELD(ReadOnly)
+		CTreeView* hierarchyTreeView = nullptr;
+
+		FIELD()
+		CE::Scene* openScene = nullptr;
+
+		FIELD()
+		SceneDataModel* dataModel = nullptr;
 
 	};
 

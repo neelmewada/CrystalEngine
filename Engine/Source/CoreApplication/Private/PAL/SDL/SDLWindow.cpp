@@ -96,7 +96,7 @@ namespace CE
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (fullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		
+
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 	}
 

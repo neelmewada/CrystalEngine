@@ -1417,18 +1417,16 @@ namespace CE::Widgets
 		
 		if (event->direction == CEventDirection::TopToBottom && IsEnabled()) // Pass event down the chain
 		{
-			if (!shouldPropagateDownwards)
+			if (shouldPropagateDownwards)
 			{
-				return;
-			}
-
-			for (CWidget* widget : attachedWidgets)
-			{
-				if (event->stopPropagation)
+				for (CWidget* widget : attachedWidgets)
 				{
-					return;
+					if (event->stopPropagation)
+					{
+						return;
+					}
+					widget->HandleEvent(event);
 				}
-				widget->HandleEvent(event);
 			}
 		}
 		else if (event->direction == CEventDirection::BottomToTop) // Pass event up the chain

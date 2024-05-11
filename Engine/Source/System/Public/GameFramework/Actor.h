@@ -51,6 +51,10 @@ namespace CE
 
 		bool IsSelfEnabled() const { return isEnabled; }
 
+		u32 GetChildCount() const { return children.GetSize(); }
+
+		Actor* GetChild(u32 index) const { return children[index]; }
+
 	protected:
 
 

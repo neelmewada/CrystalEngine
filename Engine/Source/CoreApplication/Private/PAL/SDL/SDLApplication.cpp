@@ -36,7 +36,15 @@ namespace CE
 			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
 		}
 
+		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
+
 		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "1");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+
+		// Hints for editor window
+		SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
+		SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
 
 		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);

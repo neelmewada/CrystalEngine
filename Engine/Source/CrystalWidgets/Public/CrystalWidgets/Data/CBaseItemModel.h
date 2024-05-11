@@ -42,6 +42,8 @@ namespace CE::Widgets
 
 		virtual Variant GetHeaderData(int position, COrientation orientation, CItemDataUsage usage = CItemDataUsage::Display) = 0;
 
+		CE_SIGNAL(OnModelDataUpdated);
+
 	private:
 
 

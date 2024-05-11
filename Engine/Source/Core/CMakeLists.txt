@@ -8,7 +8,6 @@ ce_add_target(Core SHARED
     PCHHEADER 
         PRIVATE 
             Public/Core.h
-            Public/CoreMinimal.h
     FILES_CMAKE
         PRIVATE
             core_private_files.cmake
@@ -28,7 +27,6 @@ ce_add_target(Core SHARED
             ThirdParty::mINI
             ThirdParty::zip
             ThirdParty::crcpp
-            ThirdParty::mono
         PUBLIC
             ThirdParty::spdlog
             ThirdParty::yaml

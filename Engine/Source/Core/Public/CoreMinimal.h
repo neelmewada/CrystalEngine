@@ -83,19 +83,6 @@
 // ******************************************************
 // RTTI, Object & Serialization
 
-// Mono
-struct _MonoString;
-typedef _MonoString MonoString;
-struct _MonoObject;
-typedef _MonoObject MonoObject;
-struct _MonoType;
-typedef _MonoType MonoType;
-
-#include "Mono/MonoObject.h"
-#include "Mono/MonoMethod.h"
-#include "Mono/MonoClass.h"
-#include "Mono/MonoRuntime.h"
-
 // Serialization
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"

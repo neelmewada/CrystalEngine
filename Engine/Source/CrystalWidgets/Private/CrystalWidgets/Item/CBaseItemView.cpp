@@ -54,6 +54,11 @@ namespace CE::Widgets
 
 	void CBaseItemView::SetModel(CBaseItemModel* model)
 	{
+		if (this->model != nullptr)
+		{
+			UnbindSignals(this, this->model);
+		}
+
 		this->model = model;
 
 		if (selectionModel)
@@ -72,6 +77,11 @@ namespace CE::Widgets
 					columnWidthRatios[i] = 0.0f;
 				}
 			}
+
+			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
+				this, MEMBER_FUNCTION(Self, SetNeedsLayout));
+			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
+				this, MEMBER_FUNCTION(Self, SetNeedsPaint));
 		}
 	}
 
@@ -257,7 +267,7 @@ namespace CE::Widgets
 		}
 
 		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight - scrollOffset.y));
-		painter->PushClipRect(Rect::FromSize(0, 0, regionSize.width, contentSize.height - columnHeaderHeight));
+		painter->PushClipRect(Rect::FromSize(0, 0, regionSize.width, contentSize.height));
 
 		PaintRows(painter, Rect::FromSize(0, 0, regionSize.width, regionSize.height - columnHeaderHeight), 0, CModelIndex());
 
@@ -394,6 +404,8 @@ namespace CE::Widgets
 
 		font.SetSize(cellStyle.GetFontSize());
 
+		bool mouseClickedInsideCell = false;
+
 		for (int row = 0; row < numRows; ++row)
 		{
 			if (rowPosY - scrollOffset.y > regionRect.GetSize().height)
@@ -422,6 +434,8 @@ namespace CE::Widgets
 					if (selectionModel->IsSelected(index))
 					{
 						CBrush brush = CBrush(Color::RGBA(0, 112, 224));
+						if (!IsFocussed())
+							brush.SetColor(Color::RGBA(64, 87, 111));
 						painter->SetBrush(brush);
 						painter->SetPen(CPen());
 
@@ -479,6 +493,8 @@ namespace CE::Widgets
 							selectionModel->Clear();
 
 						selectionModel->Select(index);
+
+						mouseClickedInsideCell = true;
 					}
 				}
 
@@ -496,6 +512,11 @@ namespace CE::Widgets
 			}
 
 			rowPosY += rowHeightsByParent[parentIndex][row];
+		}
+
+		if (isMouseLeftClick && !mouseClickedInsideCell)
+		{
+			selectionModel->Clear();
 		}
 	}
 

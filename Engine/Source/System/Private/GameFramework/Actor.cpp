@@ -67,8 +67,16 @@ namespace CE
 		children.Add(actor);
 		actor->parent = this;
 		actor->scene = scene;
-        
-		AttachSubobject(actor);
+
+		if (actor->parent != nullptr && actor->parent != this)
+		{
+			actor->parent->DetachActor(actor);
+		}
+
+		if (actor->parent != this)
+		{
+			AttachSubobject(actor);
+		}
         
         if (scene != nullptr)
         {
