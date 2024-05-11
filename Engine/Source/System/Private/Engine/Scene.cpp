@@ -48,6 +48,9 @@ namespace CE
 		}
     
 		CWindow* mainViewport = sceneSubsystem->GetMainViewport();
+		if (mainViewport == nullptr)
+			return;
+
 		Vec2i windowSize = mainViewport->GetWindowSize().ToVec2i();
 
 		for (CameraComponent* camera : cameras)

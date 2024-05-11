@@ -30,6 +30,10 @@ namespace CE::Editor
 
         rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 
+        CE::Scene* scene = sceneSubsystem->GetMainScene();
+
+        sceneEditor->GetSceneHierarchyWindow()->SetScene(scene);
+
         // -------------------------------------
         // TODO: Sample scene & test code here
 
@@ -50,12 +54,10 @@ namespace CE::Editor
         CE::Texture* metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
         CE::Texture* roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
 
-        CE::Scene* scene = sceneSubsystem->GetMainScene();
-
         scene->SetSkyboxCubeMap(skybox);
 
 	    {
-            StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "StaticMeshActor");
+            StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "Sphere_0");
             scene->AddActor(meshActor);
 
             meshComponent = meshActor->GetMeshComponent();
@@ -83,6 +85,33 @@ namespace CE::Editor
             }
             meshComponent->SetStaticMesh(sphereMesh);
 
+            CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
+            material->SetShader(standardShader);
+            meshComponent->SetMaterial(material, 0, 0);
+
+            material->SetProperty("_AlbedoTex", albedoTex);
+            material->SetProperty("_NormalTex", normalTex);
+            material->SetProperty("_MetallicTex", metallicTex);
+            material->SetProperty("_RoughnessTex", roughnessTex);
+            material->ApplyProperties();
+
+            {
+                Vec3 cubePositions[4] = { Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(0, -1, 0) };
+
+	            for (int i = 0; i < 4; ++i)
+	            {
+                    StaticMeshActor* cubeActor = CreateObject<StaticMeshActor>(meshActor, String::Format("Cube_{}", i));
+                    meshActor->AttachActor(cubeActor);
+
+                    StaticMeshComponent* cubeMeshComponent = cubeActor->GetMeshComponent();
+                    cubeMeshComponent->SetStaticMesh(cubeMesh);
+
+                    cubeMeshComponent->SetLocalPosition(cubePositions[i] * 1.5f);
+
+                    cubeMeshComponent->SetMaterial(material, 0);
+	            }
+            }
+
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
             scene->AddActor(skyboxActor);
 
@@ -91,18 +120,6 @@ namespace CE::Editor
 
             skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
             skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
-
-            {
-                CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
-                material->SetShader(standardShader);
-                meshComponent->SetMaterial(material, 0, 0);
-
-                material->SetProperty("_AlbedoTex", albedoTex);
-                material->SetProperty("_NormalTex", normalTex);
-                material->SetProperty("_MetallicTex", metallicTex);
-                material->SetProperty("_RoughnessTex", roughnessTex);
-                material->ApplyProperties();
-            }
 
             {
                 CE::Material* skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Material");

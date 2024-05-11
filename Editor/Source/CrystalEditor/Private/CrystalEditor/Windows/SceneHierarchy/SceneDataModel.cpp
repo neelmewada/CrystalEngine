@@ -84,6 +84,21 @@ namespace CE::Editor
 
     Variant SceneDataModel::GetData(const CModelIndex& index, CItemDataUsage usage)
     {
+        if (!index.IsValid())
+			return {};
+
+    	Actor* actor = (Actor*)index.GetInternalData();
+        if (!actor)
+            return  {};
+
+        if (usage == CItemDataUsage::Display)
+        {
+            if (index.GetColumn() == 0)
+                return actor->GetName().GetString();
+            if (index.GetColumn() == 1)
+                return actor->GetClass()->GetName().GetLastComponent();
+        }
+
         return {};
     }
 

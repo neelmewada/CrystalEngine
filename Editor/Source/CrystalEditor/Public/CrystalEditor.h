@@ -21,6 +21,8 @@
 #include "CrystalEditor/EditorWindow.h"
 #include "CrystalEditor/MinorEditorWindow.h"
 
+#include "CrystalEditor/Windows/Misc/AboutWindow.h"
+
 #include "CrystalEditor/Windows/AssetBrowser/AssetBrowserWindow.h"
 #include "CrystalEditor/Windows/Viewport/ViewportWindow.h"
 #include "CrystalEditor/Windows/Details/DetailsWindow.h"

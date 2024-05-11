@@ -698,9 +698,9 @@ namespace CE::Widgets
 	{
 		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
-			if (platformWindows[i]->GetPlatformWindow() == nativeWindow)
+			if (platformWindows[i]->GetPlatformWindow() == nativeWindow || nativeWindow->IsMainWindow())
 			{
-				platformWindows[i]->GetOwner()->nativeWindow = nullptr; // Clear the nativeWindow pointer
+				platformWindows[i]->GetOwner()->nativeWindow = nullptr; // Clear the nativeWindow pointer first
 				platformWindows[i]->GetOwner()->Destroy();
 				if (!platformWindows[i]->IsDeleted())
 				{

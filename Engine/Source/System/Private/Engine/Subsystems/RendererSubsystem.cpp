@@ -317,7 +317,7 @@ namespace CE
     	CE::Scene* scene = sceneSubsystem->GetMainScene();
 
 		bool isSceneWindowActive = true;
-    
+		
 		if (sceneSubsystem->mainViewport != nullptr)
 		{
 			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();

@@ -55,6 +55,30 @@ namespace CE::Editor
             editorSettingsItem->SetText("Editor Settings...");
         }
 
+
+        CMenuItem* helpMenuItem = CreateObject<CMenuItem>(this, "HelpMenuItem");
+        helpMenuItem->SetText("Help");
+	    {
+            CMenu* helpMenu = CreateObject<CMenu>(helpMenuItem, "HelpMenu");
+
+            CMenuItem* aboutItem = CreateObject<CMenuItem>(helpMenu, "AboutItem");
+            aboutItem->SetText("About Crystal Editor");
+
+            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [&]
+                {
+                    PlatformWindowInfo windowInfo{};
+                    windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+                    windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::Utility;
+                    PlatformWindow* platformWindow = PlatformApplication::Get()->CreatePlatformWindow("About Crystal Editor", 640, 480, windowInfo);
+
+                    platformWindow->SetBorderless(true);
+
+                    AboutWindow* aboutWindow = CreateWindow<AboutWindow>("AboutWindow", platformWindow);
+                    aboutWindow->Show();
+                });
+
+	    }
+
         // - Child Windows -
 
         auto minorDockSpace = CreateObject<CDockSpace>(nullptr, "MinorDockSpace");
@@ -66,7 +90,7 @@ namespace CE::Editor
         auto center = parentSplit->GetSplit(0);
         auto right = parentSplit->GetSplit(1);
 
-    	minorDockSpace->Split(right, 0.5f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
+    	minorDockSpace->Split(right, 0.7f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
         auto rightTop = right->GetSplit(0);
         auto rightBottom = right->GetSplit(1);
 
