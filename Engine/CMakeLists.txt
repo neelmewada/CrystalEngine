@@ -46,8 +46,5 @@ if(${CE_STANDALONE})
     add_subdirectory(Source/WidgetSandbox)
     
     add_subdirectory(Source/GameSystem)
-    if(${CE_BUILD_TESTS})
-        add_subdirectory(Source/Sandbox)
-    endif()
     add_subdirectory(Source/GameLauncher)
 endif()

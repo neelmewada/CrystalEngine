@@ -18,6 +18,13 @@ namespace CE
             return "Windows";
         }
 
+
+        /**
+         * \brief Get the full OS version display string.
+         * On windows: Windows 11 [10.0.22631] (x86_64)
+         */
+        static String GetOSVersionString();
+
         inline static PlatformName GetCurrentPlatform()
         {
             return PlatformName::Windows;

@@ -28,13 +28,10 @@ namespace CE::Editor
 		titleLabel->SetText("CrystalEditor");
 
 		CLabel* desc1 = CreateObject<CLabel>(this, "Desc1");
-		desc1->SetText("Crystal Engine Version: " CE_ENGINE_VERSION_STRING);
+		desc1->SetText("Version: " CE_ENGINE_VERSION_STRING " pre-alpha");
 
 		CLabel* desc2 = CreateObject<CLabel>(this, "Desc2");
-		desc2->SetText("Platform: " + PlatformMisc::GetPlatformName());
-
-		CLabel* attribution = CreateObject<CLabel>(this, "AttributionLinks");
-		attribution->SetText("Images by freepik.com");
+		desc2->SetText("Platform: " + PlatformMisc::GetOSVersionString());
 	}
 
 } // namespace CE::Editor

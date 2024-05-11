@@ -98,6 +98,17 @@ namespace CE::Editor
             if (index.GetColumn() == 1)
                 return actor->GetClass()->GetName().GetLastComponent();
         }
+        else if (usage == CItemDataUsage::Decoration && index.GetColumn() == 0)
+        {
+            if (actor->GetChildCount() == 0)
+            {
+                return "/Editor/Assets/Icons/File";
+            }
+            else
+            {
+                return "/Editor/Assets/Icons/Folder";
+            }
+        }
 
         return {};
     }
