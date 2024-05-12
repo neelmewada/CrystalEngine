@@ -28,7 +28,7 @@ namespace CE::Editor
 		titleLabel->SetText("CrystalEditor");
 
 		CLabel* desc1 = CreateObject<CLabel>(this, "Desc1");
-		desc1->SetText("Version: " CE_ENGINE_VERSION_STRING " pre-alpha");
+		desc1->SetText("Version: " CE_ENGINE_VERSION_STRING_SHORT " pre-alpha [Build " CE_TOSTRING(CE_VERSION_BUILD) "]");
 
 		CLabel* desc2 = CreateObject<CLabel>(this, "Desc2");
 		desc2->SetText("Platform: " + PlatformMisc::GetOSVersionString());

@@ -88,7 +88,7 @@ namespace CE::Editor
 		//gProjectName = projectName;
         
         CrystalProject project{};
-        project.engineVersion = CE_ENGINE_VERSION_STRING;
+        project.engineVersion = CE_ENGINE_VERSION_STRING_SHORT;
         
         FileStream stream = FileStream(projectFolder / projectFile, Stream::Permissions::WriteOnly);
         stream.SetAsciiMode(true);
@@ -109,7 +109,7 @@ namespace CE::Editor
 		
 		ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 		projectSettings->projectName = projectName;
-		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING;
+		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING_SHORT;
 
 		SaveSettings(projectFolder / "Game/Settings.casset"); // Saves the settings package in the global project path gProjectPath
 

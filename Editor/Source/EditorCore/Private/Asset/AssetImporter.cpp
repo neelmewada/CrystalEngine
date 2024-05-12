@@ -218,7 +218,26 @@ namespace CE::Editor
 			// TODO: Non-game assets must have a fixed UUID based on their path.
 			// Because They are generated locally when the engine is built.
 
-			
+			std::function<void(Object*)> visitorFunc = [&](Object* object)
+				{
+					if (!object)
+						return;
+
+					String pathInPackage = object->GetPathInPackage().GetString();
+					if (pathInPackage.NonEmpty())
+						pathInPackage = "." + pathInPackage;
+					String fullObjectPath = package->GetPackageName().GetString() + pathInPackage;
+					SIZE_T hash = GetHash(fullObjectPath);
+					package->SetObjectUuid(object, Uuid(hash));
+
+					for (int i = 0; i < object->GetSubObjectCount(); ++i)
+					{
+						Object* subObject = object->GetSubobject(i);
+						visitorFunc(subObject);
+					}
+				};
+
+			visitorFunc(package);
 		}
 
 		auto saveResult = Package::SavePackage(package, nullptr, productPath);

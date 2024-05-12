@@ -158,12 +158,18 @@ namespace CE::Widgets
         }
 
         Rect GetScreenSpaceRect();
+
+        // - Transformation Utils -
+
         Vec2 LocalToScreenSpacePos(const Vec2& point);
         Rect LocalToScreenSpaceRect(const Rect& localRect);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
         Vec2 ScreenToLocalSpacePoint(const Vec2& point);
         Vec2 ScreenToWindowSpacePoint(const Vec2& point);
 
+        //! @brief Returns the underlying Renderer2D that is used for rendering all widgets.
+        //! @details Do NOT use this directly to draw 2d graphics, use CPainter instead from OnPaint and OnPaintOverlay methods.
+        //! This is useful in cases where you only need to calculate the bounds of a text and need Renderer2D for it.
         Renderer2D* GetRenderer();
 
         CPlatformWindow* GetNativeWindow();

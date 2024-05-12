@@ -450,6 +450,8 @@ namespace CE::Widgets
 
 			// - Draw selection background -
 
+			bool isRowSelected = false;
+
 			if (!isClipped && selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow)
 			{
 				for (int col = 0; col < numColumns; ++col)
@@ -464,10 +466,18 @@ namespace CE::Widgets
 						painter->SetPen(CPen());
 
 						painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, cellHeight));
+						isRowSelected = true;
 
 						break;
 					}
 				}
+			}
+
+			// - Draw hover background -
+
+			if (!isRowSelected)
+			{
+				
 			}
 
 			f32 posX = 0.0f; // Add indentation level

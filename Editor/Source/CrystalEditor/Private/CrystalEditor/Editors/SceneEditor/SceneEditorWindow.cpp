@@ -90,7 +90,7 @@ namespace CE::Editor
         auto center = parentSplit->GetSplit(0);
         auto right = parentSplit->GetSplit(1);
 
-    	minorDockSpace->Split(right, 0.7f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
+    	minorDockSpace->Split(right, 0.6f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
         auto rightTop = right->GetSplit(0);
         auto rightBottom = right->GetSplit(1);
 
