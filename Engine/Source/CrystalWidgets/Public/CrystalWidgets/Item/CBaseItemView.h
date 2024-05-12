@@ -134,6 +134,7 @@ namespace CE::Widgets
         CStyle cellStyle{};
         CStyle cellHoveredStyle{};
         CStyle cellSelectedStyle{};
+        CStyle cellSelectedUnfocusedStyle{};
 
         CModelIndex hoveredCell{};
         KeyModifier keyModifier{};
@@ -150,6 +151,7 @@ namespace CE::Widgets
 
         b8 isMouseHovering = false;
         b8 isMouseLeftClick = false;
+        b8 isMouseLeftHeld = false;
     };
     
 } // namespace CE::Widgets

@@ -138,6 +138,18 @@ CTreeView::cell {
     font-size: 14px;
 }
 
+CTreeView::cell:hovered {
+    background-color: rgb(40, 40, 40);
+}
+
+CTreeView::cell:active {
+    background-color: rgb(64, 87, 111);
+}
+
+CTreeView::cell:active:focused {
+    background-color: rgb(0, 112, 224);
+}
+
 CMenuItem {
     font-size: 13px;
     flex-direction: row;
