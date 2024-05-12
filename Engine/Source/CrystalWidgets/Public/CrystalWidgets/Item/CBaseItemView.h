@@ -72,7 +72,8 @@ namespace CE::Widgets
 
         void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel);
 
-        void PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, f32& rowPosY, bool& mouseClickedInsideCell, const CModelIndex& parent = {});
+        void PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, f32& rowPosY, bool& mouseClickedInsideCell, int
+                               & curRowNumber, const CModelIndex& parent = {});
 
         void HandleEvent(CEvent* event) override;
 
@@ -145,6 +146,8 @@ namespace CE::Widgets
         f32 totalContentHeight = 0;
 
         Vec2 localMousePos = Vec2(-1, -1);
+        Vec2 windowSpaceMousePos = Vec2(-1, -1);
+
         b8 isMouseHovering = false;
         b8 isMouseLeftClick = false;
     };

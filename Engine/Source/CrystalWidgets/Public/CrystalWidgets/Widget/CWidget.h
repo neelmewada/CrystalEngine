@@ -161,7 +161,8 @@ namespace CE::Widgets
         Vec2 LocalToScreenSpacePos(const Vec2& point);
         Rect LocalToScreenSpaceRect(const Rect& localRect);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
-        Vec2 ScreenSpaceToLocalPoint(const Vec2& point);
+        Vec2 ScreenToLocalSpacePoint(const Vec2& point);
+        Vec2 ScreenToWindowSpacePoint(const Vec2& point);
 
         Renderer2D* GetRenderer();
 

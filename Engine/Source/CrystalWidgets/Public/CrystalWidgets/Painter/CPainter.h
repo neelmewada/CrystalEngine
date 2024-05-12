@@ -50,6 +50,8 @@ namespace CE::Widgets
         bool ClipRectExists();
         Rect GetLastClipRect();
 
+        Vec2 GetCurrentOrigin() const { return GetOrigin(); }
+
     private:
 
         Array<Vec2> coordinateSpaceStack{};

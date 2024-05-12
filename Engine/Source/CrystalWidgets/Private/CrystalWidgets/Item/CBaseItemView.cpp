@@ -395,8 +395,9 @@ namespace CE::Widgets
 
 		f32 rowPosY = 0;
 		bool mouseClickedInsideCell = false;
+		int rowNumber = 0;
 
-		PaintRowsInternal(painter, regionRect, indentLevel, rowPosY, mouseClickedInsideCell);
+		PaintRowsInternal(painter, regionRect, indentLevel, rowPosY, mouseClickedInsideCell, rowNumber);
 
 		if (isMouseLeftClick && !mouseClickedInsideCell)
 		{
@@ -406,9 +407,9 @@ namespace CE::Widgets
 		isMouseLeftClick = false;
 	}
 
-	void CBaseItemView::PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, 
-		f32& rowPosY, bool& mouseClickedInsideCell, 
-		const CModelIndex& parentIndex)
+	void CBaseItemView::PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel,
+	                                      f32& rowPosY, bool& mouseClickedInsideCell,
+	                                      int& curRowNumber, const CModelIndex& parentIndex)
 	{
 		u32 numRows = model->GetRowCount(parentIndex);
 		u32 numColumns = model->GetColumnCount(parentIndex);
@@ -436,7 +437,9 @@ namespace CE::Widgets
 
 			bool isClipped = (rowPosY + cellHeight - scrollOffset.y) < 0;
 
-			if (row % 2 != 0 && alternateBgColor.a > 0 && !isClipped)
+			// - Draw alternate background -
+
+			if (curRowNumber % 2 != 0 && alternateBgColor.a > 0 && !isClipped)
 			{
 				CBrush brush = CBrush(alternateBgColor);
 				painter->SetBrush(brush);
@@ -526,32 +529,28 @@ namespace CE::Widgets
 						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
 						Vec2 trianglePos = Vec2(20.0f + cellRect.min.x, triangleSize.height * 0.5f);
 						Rect triangleRect = Rect::FromSize(trianglePos, triangleSize);
-
-						if (isMouseHovering)
+						Vec2 curOrigin = painter->GetCurrentOrigin();
+						Rect windowTriangleRect = Rect::FromSize(trianglePos + curOrigin - Vec2(15, 0), triangleSize);
+						
+						if (isMouseHovering && windowTriangleRect.Contains(windowSpaceMousePos))
 						{
-							Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
-							rowMousePos.x += trianglePos.x * 0.9f;
-
-							if (triangleRect.Contains(rowMousePos))
+							mouseHoverOnArrow = true;
+							if (!isMouseLeftClick)
 							{
-								mouseHoverOnArrow = true;
-								if (!isMouseLeftClick)
-								{
-									triangleColor = Color::RGBA(220, 220, 220);
-								}
-								else
-								{
-									expandedRows.Add(index);
+								triangleColor = Color::RGBA(220, 220, 220);
+							}
+							else
+							{
+								expandedRows.Add(index);
 
-									recalculateRows = true;
-									SetNeedsLayout();
-									SetNeedsPaint();
+								recalculateRows = true;
+								SetNeedsLayout();
+								SetNeedsPaint();
 
-									painter->PopClipRect();
-									painter->PopChildCoordinateSpace();
+								painter->PopClipRect();
+								painter->PopChildCoordinateSpace();
 
-									return;
-								}
+								return;
 							}
 						}
 
@@ -563,35 +562,30 @@ namespace CE::Widgets
 					else // Row is expanded
 					{
 						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
-						Vec2 trianglePos = Vec2(17.0f + cellRect.min.x, triangleSize.height * 1.8f);
+						Vec2 trianglePos = Vec2(17.0f + cellRect.min.x, triangleSize.height * 0.7f + cellRect.GetSize().height * 0.5f);
 						Rect triangleRect = Rect::FromSize(trianglePos, triangleSize);
+						Vec2 curOrigin = painter->GetCurrentOrigin();
+						Rect windowTriangleRect = Rect::FromSize(trianglePos + curOrigin - Vec2(15, cellRect.GetSize().height * 0.5f), triangleSize);
 
-						if (isMouseHovering)
+						if (isMouseHovering && windowTriangleRect.Contains(windowSpaceMousePos))
 						{
-							Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
-							rowMousePos.x += trianglePos.x * 0.9f;
-							rowMousePos.y += trianglePos.y * 0.7f;
-
-							if (triangleRect.Contains(rowMousePos))
+							mouseHoverOnArrow = true;
+							if (!isMouseLeftClick)
 							{
-								mouseHoverOnArrow = true;
-								if (!isMouseLeftClick)
-								{
-									triangleColor = Color::RGBA(220, 220, 220);
-								}
-								else
-								{
-									expandedRows.Remove(index);
+								triangleColor = Color::RGBA(220, 220, 220);
+							}
+							else
+							{
+								expandedRows.Remove(index);
 
-									recalculateRows = true;
-									SetNeedsLayout();
-									SetNeedsPaint();
+								recalculateRows = true;
+								SetNeedsLayout();
+								SetNeedsPaint();
 
-									painter->PopClipRect();
-									painter->PopChildCoordinateSpace();
+								painter->PopClipRect();
+								painter->PopChildCoordinateSpace();
 
-									return;
-								}
+								return;
 							}
 						}
 
@@ -638,10 +632,11 @@ namespace CE::Widgets
 			}
 
 			rowPosY += rowHeightsByParent[parentIndex][row];
+			curRowNumber++;
 
 			if (expandedIndex.IsValid())
 			{
-				PaintRowsInternal(painter, regionRect, indentLevel + 1, rowPosY, mouseClickedInsideCell, expandedIndex);
+				PaintRowsInternal(painter, regionRect, indentLevel + 1, rowPosY, mouseClickedInsideCell, curRowNumber, expandedIndex);
 			}
 		}
 	}
@@ -807,14 +802,15 @@ namespace CE::Widgets
 				{
 					isVerticalScrollHovered = true;
 
-					localMousePos = Vec2(-1, -1);
+					localMousePos = windowSpaceMousePos = Vec2(-1, -1);
 					isMouseHovering = false;
 				}
 				else
 				{
 					isVerticalScrollHovered = false;
-
-					localMousePos = ScreenSpaceToLocalPoint(globalMousePos);
+					
+					localMousePos = ScreenToLocalSpacePoint(globalMousePos);
+					windowSpaceMousePos = ScreenToWindowSpacePoint(globalMousePos);
 					isMouseHovering = true;
 				}
 			}

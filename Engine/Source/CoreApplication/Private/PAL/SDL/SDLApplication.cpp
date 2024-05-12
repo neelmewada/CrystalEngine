@@ -433,7 +433,7 @@ namespace CE
 	{
 #if PLATFORM_WINDOWS
 		if (event->type == SDL_WINDOWEVENT &&
-			event->window.event == SDL_WINDOWEVENT_MOVED) 
+			event->window.event == SDL_WINDOWEVENT_EXPOSED) //SDL_WINDOWEVENT_MOVED 
 		{
 			auto app = SDLApplication::Get();
 			for (const auto& tickHandler : app->tickHanders)

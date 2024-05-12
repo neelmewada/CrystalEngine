@@ -333,7 +333,7 @@ namespace CE::Widgets
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
             Vec2 screenMousePos = mouseEvent->mousePos;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
-            Vec2 localMousePos = ScreenSpaceToLocalPoint(screenMousePos);
+            Vec2 localMousePos = ScreenToLocalSpacePoint(screenMousePos);
             Vec4 padding = GetComputedLayoutPadding();
 
             Renderer2D* renderer = GetRenderer();

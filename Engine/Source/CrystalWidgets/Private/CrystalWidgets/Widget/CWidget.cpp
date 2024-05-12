@@ -975,7 +975,7 @@ namespace CE::Widgets
 		}
 	}
 
-	Vec2 CWidget::ScreenSpaceToLocalPoint(const Vec2& point)
+	Vec2 CWidget::ScreenToLocalSpacePoint(const Vec2& point)
 	{
 		if (ownerWindow == nullptr)
 		{
@@ -1005,6 +1005,39 @@ namespace CE::Widgets
 			Vec2 pos = nativeWindow->GetWindowPosition().ToVec2();
 
 			return point - (pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset);
+		}
+	}
+
+	Vec2 CWidget::ScreenToWindowSpacePoint(const Vec2& point)
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					Vec2 pos = window->nativeWindow->GetPlatformWindow()->GetWindowPosition().ToVec2();
+
+					return point - (pos);
+				}
+			}
+
+			return point;
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
+		if (nativeWindow == nullptr)
+			return point; // Should never happen
+
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		{
+			Vec2 pos = nativeWindow->GetWindowPosition().ToVec2();
+
+			return point - (pos - scrollOffset);
 		}
 	}
 
