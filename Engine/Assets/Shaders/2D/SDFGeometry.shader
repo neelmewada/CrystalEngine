@@ -64,7 +64,7 @@ Shader "2D/SDF Geometry"
 
             SamplerState _TextureSampler : SRG_PerDraw(s2);
 
-            #define MAX_TEXTURES 10000 // 10,000
+            #define MAX_TEXTURES 100000 // 100,000
 
             Texture2D<float4> _Textures[MAX_TEXTURES] : SRG_PerDraw(t3);
 

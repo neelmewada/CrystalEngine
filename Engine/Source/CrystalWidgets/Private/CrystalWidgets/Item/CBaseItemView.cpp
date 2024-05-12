@@ -155,7 +155,7 @@ namespace CE::Widgets
 
 		columnWidths.Resize(numColumns);
 		columnWidthRatios.Reserve(numColumns);
-		rowHeightsByParent[{}].Resize(numRows);
+		rowHeightsByParent[{}].Reserve(numRows);
 		columnHeaderHeight = 0;
 
 		f32 remainingColumnWidth = regionSize.width;
@@ -239,10 +239,12 @@ namespace CE::Widgets
 			totalContentHeight = 0.0f;
 			expandableColumn = -1;
 
-			CalculateRowHeights(rowHeightsByParent[CModelIndex()], CModelIndex());
+			CalculateRowHeights(CModelIndex());
 
 			contentSize.height = totalContentHeight;
 			contentSize.width = regionSize.width;
+
+			recalculateRows = false;
 		}
 		else
 		{
@@ -269,7 +271,7 @@ namespace CE::Widgets
 		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight - scrollOffset.y));
 		painter->PushClipRect(Rect::FromSize(0, 0, regionSize.width, contentSize.height));
 
-		PaintRows(painter, Rect::FromSize(0, 0, regionSize.width, regionSize.height - columnHeaderHeight), 0, CModelIndex());
+		PaintRows(painter, Rect::FromSize(0, 0, regionSize.width, regionSize.height - columnHeaderHeight), 0);
 
 		painter->PopClipRect();
 		painter->PopChildCoordinateSpace();
@@ -384,18 +386,35 @@ namespace CE::Widgets
 
 		painter->PopClipRect();
 		painter->PopChildCoordinateSpace();
-
-		recalculateRows = false;
 	}
 
-	void CBaseItemView::PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parentIndex)
+	void CBaseItemView::PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel)
+	{
+		if (model == nullptr)
+			return;
+
+		f32 rowPosY = 0;
+		bool mouseClickedInsideCell = false;
+
+		PaintRowsInternal(painter, regionRect, indentLevel, rowPosY, mouseClickedInsideCell);
+
+		if (isMouseLeftClick && !mouseClickedInsideCell)
+		{
+			selectionModel->Clear();
+		}
+
+		isMouseLeftClick = false;
+	}
+
+	void CBaseItemView::PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, 
+		f32& rowPosY, bool& mouseClickedInsideCell, 
+		const CModelIndex& parentIndex)
 	{
 		u32 numRows = model->GetRowCount(parentIndex);
 		u32 numColumns = model->GetColumnCount(parentIndex);
 		if (numColumns == 0)
 			return;
 
-		f32 rowPosY = 0.0f;
 		CFont font{};
 
 		font.SetFamily(cellStyle.GetFontName());
@@ -405,8 +424,6 @@ namespace CE::Widgets
 		}
 
 		font.SetSize(cellStyle.GetFontSize());
-
-		bool mouseClickedInsideCell = false;
 
 		for (int row = 0; row < numRows; ++row)
 		{
@@ -428,7 +445,9 @@ namespace CE::Widgets
 				painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, cellHeight));
 			}
 
-			if (!isClipped && selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow) // Draw row selection
+			// - Draw selection background -
+
+			if (!isClipped && selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow)
 			{
 				for (int col = 0; col < numColumns; ++col)
 				{
@@ -448,14 +467,16 @@ namespace CE::Widgets
 				}
 			}
 
-			f32 posX = indentLevel * cellHeight; // Add indentation level
+			f32 posX = 0.0f; // Add indentation level
+
+			CModelIndex expandedIndex{};
 
 			for (int col = 0; !isClipped && col < numColumns; ++col)
 			{
 				CModelIndex index = model->GetIndex(row, col, parentIndex);
 				CViewItemStyle itemStyle{};
 				itemStyle.font = font;
-				
+
 				Variant display = model->GetData(index, CItemDataUsage::Display);
 				if (display.HasValue() && display.IsTextType())
 				{
@@ -475,21 +496,119 @@ namespace CE::Widgets
 				itemStyle.padding = cellStyle.GetPadding();
 				itemStyle.textColor = computedStyle.GetForegroundColor();
 				itemStyle.bgColor = Color::Clear();
-				itemStyle.isExpanded = expandedRows.Exists(index);
 				itemStyle.expandableColumn = expandableColumn;
 
-				Rect cellRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
+				f32 indentationX = 0.0f;
+				
+				if (parentIndex.IsValid() && expandedRows.Exists(parentIndex) && col == expandableColumn)
+				{
+					indentationX = indentLevel * 10.0f;
+				}
+
+				const Rect cellRect = Rect::FromSize(posX + indentationX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
+				const Rect cellSelectionRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
 
 				itemStyle.cellSize = cellRect.GetSize();
 
 				painter->PushChildCoordinateSpace(cellRect.min);
 				painter->PushClipRect(Rect::FromSize(Vec2(0, 0), cellRect.GetSize()));
 
+				bool mouseHoverOnArrow = false;
+
+				// - Draw clickable expansion arrow icon
+
+				if (col == expandableColumn && model->GetRowCount(index) > 0)
+				{
+					Color triangleColor = Color::RGBA(160, 160, 160);
+
+					if (!expandedRows.Exists(index))
+					{
+						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
+						Vec2 trianglePos = Vec2(20.0f + cellRect.min.x, triangleSize.height * 0.5f);
+						Rect triangleRect = Rect::FromSize(trianglePos, triangleSize);
+
+						if (isMouseHovering)
+						{
+							Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
+							rowMousePos.x += trianglePos.x * 0.9f;
+
+							if (triangleRect.Contains(rowMousePos))
+							{
+								mouseHoverOnArrow = true;
+								if (!isMouseLeftClick)
+								{
+									triangleColor = Color::RGBA(220, 220, 220);
+								}
+								else
+								{
+									expandedRows.Add(index);
+
+									recalculateRows = true;
+									SetNeedsLayout();
+									SetNeedsPaint();
+
+									painter->PopClipRect();
+									painter->PopChildCoordinateSpace();
+
+									return;
+								}
+							}
+						}
+
+						painter->SetBrush(CBrush(triangleColor));
+						painter->SetRotation(90);
+						painter->DrawTriangle(triangleRect);
+						painter->SetRotation(0);
+					}
+					else // Row is expanded
+					{
+						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
+						Vec2 trianglePos = Vec2(17.0f + cellRect.min.x, triangleSize.height * 1.8f);
+						Rect triangleRect = Rect::FromSize(trianglePos, triangleSize);
+
+						if (isMouseHovering)
+						{
+							Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
+							rowMousePos.x += trianglePos.x * 0.9f;
+							rowMousePos.y += trianglePos.y * 0.7f;
+
+							if (triangleRect.Contains(rowMousePos))
+							{
+								mouseHoverOnArrow = true;
+								if (!isMouseLeftClick)
+								{
+									triangleColor = Color::RGBA(220, 220, 220);
+								}
+								else
+								{
+									expandedRows.Remove(index);
+
+									recalculateRows = true;
+									SetNeedsLayout();
+									SetNeedsPaint();
+
+									painter->PopClipRect();
+									painter->PopChildCoordinateSpace();
+
+									return;
+								}
+							}
+						}
+
+						painter->SetBrush(CBrush(triangleColor));
+						painter->SetRotation(180);
+						painter->DrawTriangle(triangleRect);
+						painter->SetRotation(0);
+					}
+				}
+				
+				// - Select clicked row
+
 				if (isMouseHovering)
 				{
 					Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
 
-					if (cellRect.Contains(rowMousePos) && isMouseLeftClick && selectionMode != CItemSelectionMode::NoSelection)
+					if (cellSelectionRect.Contains(rowMousePos) && isMouseLeftClick && selectionMode != CItemSelectionMode::NoSelection)
 					{
 						if (selectionMode == CItemSelectionMode::SingleSelection)
 							selectionModel->Clear();
@@ -497,33 +616,17 @@ namespace CE::Widgets
 							selectionModel->Clear();
 
 						selectionModel->Select(index);
-						
+
 						mouseClickedInsideCell = true;
 					}
 				}
 
-				if (col == expandableColumn && model->GetRowCount(index) > 0) // Draw expand arrow icon
+				itemStyle.isExpanded = expandedRows.Exists(index);
+				itemStyle.padding.left += indentationX;
+
+				if (itemStyle.isExpanded)
 				{
-					if (!expandedRows.Exists(index))
-					{
-						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
-						Vec2 trianglePos = Vec2(20.0f, triangleSize.height * 0.5f);
-
-						painter->SetBrush(CBrush(Color::RGBA(160, 160, 160)));
-						painter->SetRotation(90);
-						painter->DrawTriangle(Rect::FromSize(trianglePos, triangleSize));
-						painter->SetRotation(0);
-					}
-					else
-					{
-						Vec2 triangleSize = Vec2(1, 0.9f) * cellHeight * 0.5f;
-						Vec2 trianglePos = Vec2(17.0f, triangleSize.height * 1.8f);
-
-						painter->SetBrush(CBrush(Color::RGBA(160, 160, 160)));
-						painter->SetRotation(180);
-						painter->DrawTriangle(Rect::FromSize(trianglePos, triangleSize));
-						painter->SetRotation(0);
-					}
+					expandedIndex = index;
 				}
 
 				delegate->Paint(painter, itemStyle, index); // Paint cell
@@ -531,34 +634,27 @@ namespace CE::Widgets
 				painter->PopClipRect();
 				painter->PopChildCoordinateSpace();
 
-				if (itemStyle.isExpanded)
-				{
-					PaintRows(painter, regionRect, indentLevel + 1, index);
-				}
-
 				posX += columnWidths[col];
 			}
 
 			rowPosY += rowHeightsByParent[parentIndex][row];
-		}
 
-		if (isMouseLeftClick && !mouseClickedInsideCell)
-		{
-			selectionModel->Clear();
+			if (expandedIndex.IsValid())
+			{
+				PaintRowsInternal(painter, regionRect, indentLevel + 1, rowPosY, mouseClickedInsideCell, expandedIndex);
+			}
 		}
 	}
 
-	void CBaseItemView::CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parentIndex)
+	void CBaseItemView::CalculateRowHeights(const CModelIndex& parentIndex)
 	{
-		outHeights.Clear();
-
 		int numRows = model->GetRowCount(parentIndex);
 		int numColumns = model->GetColumnCount(parentIndex);
 
 		if (numColumns == 0 || numRows == 0)
 			return;
 
-		outHeights.Reserve(numRows);
+		rowHeightsByParent[parentIndex].Reserve(numRows);
 		CFont font{};
 
 		font.SetFamily(cellStyle.GetFontName());
@@ -586,7 +682,7 @@ namespace CE::Widgets
 
 					if (expandedRows.Exists(index))
 					{
-						CalculateRowHeights(rowHeightsByParent[index], index);
+						CalculateRowHeights(index);
 					}
 				}
 
@@ -619,7 +715,7 @@ namespace CE::Widgets
 			}
 
 			totalContentHeight += height;
-			outHeights.Add(height);
+			rowHeightsByParent[parentIndex].Add(height);
 		}
 	}
 

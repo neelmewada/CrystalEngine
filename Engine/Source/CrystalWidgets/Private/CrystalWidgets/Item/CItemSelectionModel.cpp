@@ -3,6 +3,29 @@
 namespace CE::Widgets
 {
 
+	bool CItemSelection::IsSelected(const CModelIndex& index) const
+	{
+        if (!index.IsValid())
+            return false;
+
+        CModelIndex indexParent = index.GetParent();
+
+        for (int i = 0; i < selectionRanges.GetSize(); ++i)
+        {
+            const CModelIndex& start = selectionRanges[i].start;
+            const CModelIndex& end = selectionRanges[i].end;
+
+            if (index.GetRow() >= start.GetRow() && index.GetRow() <= end.GetRow() &&
+                index.GetColumn() >= start.GetColumn() && index.GetColumn() <= end.GetColumn() &&
+                indexParent == start.GetParent() && indexParent == end.GetParent())
+            {
+                return true;
+            }
+        }
+
+        return false;
+	}
+
     CItemSelectionModel::CItemSelectionModel()
     {
 	    

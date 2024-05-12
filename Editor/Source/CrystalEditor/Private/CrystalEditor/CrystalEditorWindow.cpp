@@ -120,9 +120,23 @@ namespace CE::Editor
                     StaticMeshComponent* cubeMeshComponent = cubeActor->GetMeshComponent();
                     cubeMeshComponent->SetStaticMesh(cubeMesh);
 
-                    cubeMeshComponent->SetLocalPosition(cubePositions[i] * 1.5f);
+                    cubeMeshComponent->SetLocalPosition(cubePositions[i] * 1);
 
-                    cubeMeshComponent->SetMaterial(plasticMaterial, 0);
+                    cubeMeshComponent->SetMaterial(plasticMaterial);
+
+                    for (int j = 0; i == 2 && j < 4; ++j)
+                    {
+                        StaticMeshActor* subActor = CreateObject<StaticMeshActor>(meshActor, String::Format("SubActor_{}", j));
+                        cubeActor->AttachActor(subActor);
+
+                        StaticMeshComponent* subActorMeshComponent = subActor->GetMeshComponent();
+                        subActorMeshComponent->SetStaticMesh(sphereMesh);
+
+                        subActorMeshComponent->SetLocalPosition(cubePositions[i] * 2);
+                        subActorMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 0.5f);
+
+                        subActorMeshComponent->SetMaterial(material);
+                    }
 	            }
             }
 

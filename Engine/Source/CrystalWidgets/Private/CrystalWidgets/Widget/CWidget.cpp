@@ -1423,6 +1423,8 @@ namespace CE::Widgets
 				{
 					if (event->stopPropagation)
 					{
+						// Only stop propagation to the children, but continue propagation to widgets outside this hierarchy
+						event->stopPropagation = false;
 						return;
 					}
 					widget->HandleEvent(event);

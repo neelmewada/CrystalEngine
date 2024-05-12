@@ -68,9 +68,11 @@ namespace CE::Widgets
 
         Rect GetVerticalScrollBarRect();
 
-        void CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parent = {});
+        void CalculateRowHeights(const CModelIndex& parent = {});
 
-        void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parent = {});
+        void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel);
+
+        void PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, f32& rowPosY, bool& mouseClickedInsideCell, const CModelIndex& parent = {});
 
         void HandleEvent(CEvent* event) override;
 

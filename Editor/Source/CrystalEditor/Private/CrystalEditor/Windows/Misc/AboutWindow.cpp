@@ -32,6 +32,9 @@ namespace CE::Editor
 
 		CLabel* desc2 = CreateObject<CLabel>(this, "Desc2");
 		desc2->SetText("Platform: " + PlatformMisc::GetOSVersionString());
+
+		CLabel* attributionLabel = CreateObject<CLabel>(this, "AttributionLabel");
+		attributionLabel->SetText("Icons by flaticon.com");
 	}
 
 } // namespace CE::Editor

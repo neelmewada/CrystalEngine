@@ -94,6 +94,8 @@ namespace CE::Widgets
 
         CBaseItemModel* model = index.GetModel();
 
+        CModelIndex parent = index.GetParent();
+
         if (!EnumHasAnyFlags(itemStyle.features, CViewItemFeature::HasDecoration | CViewItemFeature::HasDisplay))
             return Vec2();
 
