@@ -235,7 +235,8 @@ namespace CE::Widgets
 		{
 			cellStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Cell);
 			cellHoveredStyle = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Cell);
-			cellSelectedStyle = styleSheet->SelectStyle(this, CStateFlag::Active, CSubControl::Cell);
+			cellSelectedStyle = styleSheet->SelectStyle(this, CStateFlag::Active | CStateFlag::Focused, CSubControl::Cell);
+			cellSelectedUnfocusedStyle = styleSheet->SelectStyle(this, CStateFlag::Active, CSubControl::Cell);
 			totalContentHeight = 0.0f;
 			expandableColumn = -1;
 
@@ -459,9 +460,9 @@ namespace CE::Widgets
 					CModelIndex index = model->GetIndex(row, col, parentIndex);
 					if (selectionModel->IsSelected(index))
 					{
-						CBrush brush = CBrush(Color::RGBA(0, 112, 224));
+						CBrush brush = CBrush(cellSelectedStyle.GetBackgroundColor());
 						if (!IsFocussed())
-							brush.SetColor(Color::RGBA(64, 87, 111));
+							brush.SetColor(cellSelectedUnfocusedStyle.GetBackgroundColor());
 						painter->SetBrush(brush);
 						painter->SetPen(CPen());
 
@@ -475,9 +476,27 @@ namespace CE::Widgets
 
 			// - Draw hover background -
 
-			if (!isRowSelected)
+			if (!isRowSelected && isMouseHovering && !isMouseLeftHeld && selectionMode != CItemSelectionMode::NoSelection)
 			{
-				
+				f32 localPosX = 0;
+				const Rect fullWidthRect = Rect::FromSize(0, rowPosY, regionRect.GetSize().width, rowHeightsByParent[parentIndex][row]);
+
+				for (int col = 0; !isClipped && col < numColumns; ++col)
+				{
+					const Rect cellSelectionRect = Rect::FromSize(localPosX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
+
+					Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
+
+					if (cellSelectionRect.Contains(rowMousePos))
+					{
+						painter->SetBrush(CBrush(cellHoveredStyle.GetBackgroundColor()));
+						painter->SetPen(CPen());
+						painter->DrawRect(fullWidthRect);
+						break;
+					}
+
+					localPosX += columnWidths[col];
+				}
 			}
 
 			f32 posX = 0.0f; // Add indentation level
@@ -807,6 +826,7 @@ namespace CE::Widgets
 				mouseEvent->Consume(this);
 
 				isMouseLeftClick = mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left;
+				isMouseLeftHeld = mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left;
 
 				if (contentMaxY > originalHeight + ScrollSizeBuffer && scrollBarRect.Contains(globalMousePos))
 				{
