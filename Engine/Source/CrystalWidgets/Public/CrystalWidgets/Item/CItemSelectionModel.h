@@ -22,25 +22,7 @@ namespace CE::Widgets
             selectionRanges.Add({ start, end });
         }
 
-        bool IsSelected(const CModelIndex& index) const
-        {
-	        if (!index.IsValid())
-                return false;
-
-	        for (int i = 0; i < selectionRanges.GetSize(); ++i)
-	        {
-                const CModelIndex& start = selectionRanges[i].start;
-                const CModelIndex& end = selectionRanges[i].end;
-
-                if (index.GetRow() >= start.GetRow() && index.GetRow() <= end.GetRow() &&
-                    index.GetColumn() >= start.GetColumn() && index.GetColumn() <= end.GetColumn())
-                {
-	                return true;
-                }
-	        }
-
-            return false;
-        }
+        bool IsSelected(const CModelIndex& index) const;
     };
 
     CLASS()

@@ -64,7 +64,7 @@ Shader "2D/SDF Geometry"
 
             SamplerState _TextureSampler : SRG_PerDraw(s2);
 
-            #define MAX_TEXTURES 10000 // 10,000
+            #define MAX_TEXTURES 100000 // 100,000
 
             Texture2D<float4> _Textures[MAX_TEXTURES] : SRG_PerDraw(t3);
 
@@ -90,6 +90,7 @@ Shader "2D/SDF Geometry"
                 DRAW_RoundedX,
                 DRAW_Texture,
                 DRAW_FrameBuffer,
+                DRAW_Triangle
             };
 
             #if VERTEX
@@ -165,6 +166,18 @@ Shader "2D/SDF Geometry"
                 return length(p-min(p.x+p.y,w)*0.5) - r;
             }
 
+            // Credit: https://iquilezles.org/articles/distfunctions2d/
+            float SDFIsoscelesTriangle(in float2 p, in float2 q)
+            {
+                p.x = abs(p.x);
+	            float2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
+                float2 b = p - q*float2( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
+                float k = sign( q.y );
+                float d = min(dot( a, a ),dot(b, b));
+                float s = max( k*(p.x*q.y-p.y*q.x),k*(p.y-q.y)  );
+	            return sqrt(d)*sign(s);
+            }
+
             struct GeometryInfo
             {
                 float4 fillColor;
@@ -230,7 +243,8 @@ Shader "2D/SDF Geometry"
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                return lerp(float4(color.rgb, 0), color, clamp(-sdf * 5.0, 0, 1)); // 1.5 = sharpness
+                const float sharpness = 5.0;
+                return lerp(float4(color.rgb, 0), color, clamp(-sdf * sharpness, 0, 1));
             }
 
             float4 RenderRoundedRect(in GeometryInfo info, float2 p)
@@ -269,6 +283,15 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, clamp(invSdf * 5.0, 0, 1));
             }
 
+            float4 RenderTriangle(in GeometryInfo info, float2 p)
+            {
+                const float sdf = SDFIsoscelesTriangle(p, min(info.itemSize.x, info.itemSize.y));
+                const float invSdf = -sdf;
+                const float4 color = info.fillColor;
+
+                return lerp(float4(color.rgb, 0), color, invSdf);
+            }
+
             #define idx input.instanceId
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -305,6 +328,8 @@ Shader "2D/SDF Geometry"
                     return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
                 case DRAW_FrameBuffer:
                     return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                case DRAW_Triangle:
+                    return RenderTriangle(info, p);
                 }
 
                 return float4(0, 0, 0, 0);

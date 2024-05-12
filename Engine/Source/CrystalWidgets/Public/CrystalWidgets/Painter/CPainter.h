@@ -30,6 +30,8 @@ namespace CE::Widgets
 
         void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
 
+        void DrawTriangle(const Rect& rect);
+
         void SetFont(const CFont& font);
 
         Vec2 CalculateTextSize(const String& text, f32 width = 0);
@@ -47,6 +49,8 @@ namespace CE::Widgets
 
         bool ClipRectExists();
         Rect GetLastClipRect();
+
+        Vec2 GetCurrentOrigin() const { return GetOrigin(); }
 
     private:
 

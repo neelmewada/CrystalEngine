@@ -17,8 +17,14 @@ namespace CE::Editor
     {
         if (scene == nullptr)
             return 0;
+        if (!parent.IsValid())
+			return scene->GetRootActorCount();
 
-        return scene->GetRootActorCount();
+        Actor* actor = (Actor*)parent.GetInternalData();
+        if (!actor)
+            return 0;
+
+        return actor->GetChildCount();
     }
 
     u32 SceneDataModel::GetColumnCount(const CModelIndex& parent)
@@ -97,6 +103,17 @@ namespace CE::Editor
                 return actor->GetName().GetString();
             if (index.GetColumn() == 1)
                 return actor->GetClass()->GetName().GetLastComponent();
+        }
+        else if (usage == CItemDataUsage::Decoration && index.GetColumn() == 0)
+        {
+            if (actor->GetChildCount() == 0)
+            {
+                return "/Editor/Assets/Icons/File";
+            }
+            else
+            {
+                return "/Editor/Assets/Icons/Folder";
+            }
         }
 
         return {};

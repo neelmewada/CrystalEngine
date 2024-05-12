@@ -54,6 +54,11 @@ namespace CE::Editor
         CE::Texture* metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
         CE::Texture* roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
 
+        CE::Texture* plasticAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/albedo");
+        CE::Texture* plasticNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/normal");
+        CE::Texture* plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
+        CE::Texture* plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
+
         scene->SetSkyboxCubeMap(skybox);
 
 	    {
@@ -85,7 +90,7 @@ namespace CE::Editor
             }
             meshComponent->SetStaticMesh(sphereMesh);
 
-            CE::Material* material = CreateObject<CE::Material>(meshComponent, "Material");
+            CE::Material* material = CreateObject<CE::Material>(scene, "Material");
             material->SetShader(standardShader);
             meshComponent->SetMaterial(material, 0, 0);
 
@@ -95,8 +100,17 @@ namespace CE::Editor
             material->SetProperty("_RoughnessTex", roughnessTex);
             material->ApplyProperties();
 
+            CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
+            plasticMaterial->SetShader(standardShader);
+
+            plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
+            plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
+            plasticMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
+            plasticMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
+            plasticMaterial->ApplyProperties();
+
             {
-                Vec3 cubePositions[4] = { Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(0, -1, 0) };
+                const Vec3 cubePositions[4] = { Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(0, -1, 0) };
 
 	            for (int i = 0; i < 4; ++i)
 	            {
@@ -106,9 +120,23 @@ namespace CE::Editor
                     StaticMeshComponent* cubeMeshComponent = cubeActor->GetMeshComponent();
                     cubeMeshComponent->SetStaticMesh(cubeMesh);
 
-                    cubeMeshComponent->SetLocalPosition(cubePositions[i] * 1.5f);
+                    cubeMeshComponent->SetLocalPosition(cubePositions[i] * 1);
 
-                    cubeMeshComponent->SetMaterial(material, 0);
+                    cubeMeshComponent->SetMaterial(plasticMaterial);
+
+                    for (int j = 0; i == 2 && j < 4; ++j)
+                    {
+                        StaticMeshActor* subActor = CreateObject<StaticMeshActor>(meshActor, String::Format("SubActor_{}", j));
+                        cubeActor->AttachActor(subActor);
+
+                        StaticMeshComponent* subActorMeshComponent = subActor->GetMeshComponent();
+                        subActorMeshComponent->SetStaticMesh(sphereMesh);
+
+                        subActorMeshComponent->SetLocalPosition(cubePositions[i] * 2);
+                        subActorMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 0.5f);
+
+                        subActorMeshComponent->SetMaterial(material);
+                    }
 	            }
             }
 

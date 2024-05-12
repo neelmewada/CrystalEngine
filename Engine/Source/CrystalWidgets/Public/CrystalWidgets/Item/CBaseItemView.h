@@ -68,9 +68,12 @@ namespace CE::Widgets
 
         Rect GetVerticalScrollBarRect();
 
-        void CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parent = {});
+        void CalculateRowHeights(const CModelIndex& parent = {});
 
-        void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parent = {});
+        void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel);
+
+        void PaintRowsInternal(CPainter* painter, const Rect& regionRect, int indentLevel, f32& rowPosY, bool& mouseClickedInsideCell, int
+                               & curRowNumber, const CModelIndex& parent = {});
 
         void HandleEvent(CEvent* event) override;
 
@@ -95,6 +98,9 @@ namespace CE::Widgets
 
         FIELD()
         b8 canDrawRowHeader = true;
+
+        FIELD()
+        b8 canExpandRows = true;
 
     private:
 
@@ -140,6 +146,8 @@ namespace CE::Widgets
         f32 totalContentHeight = 0;
 
         Vec2 localMousePos = Vec2(-1, -1);
+        Vec2 windowSpaceMousePos = Vec2(-1, -1);
+
         b8 isMouseHovering = false;
         b8 isMouseLeftClick = false;
     };
