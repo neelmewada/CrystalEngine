@@ -137,7 +137,8 @@ namespace CE::Widgets
 		{ CStylePropertyType::FlexDirection, GetStaticEnum<CFlexDirection>() },
 		{ CStylePropertyType::Display, GetStaticEnum<CDisplay>() },
 		{ CStylePropertyType::Cursor, GetStaticEnum<CCursor>() },
-		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() }
+		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() },
+		{ CStylePropertyType::BackgroundSize, GetStaticEnum<CBackgroundSize>() }
 	};
 
 	CRYSTALWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)

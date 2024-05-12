@@ -118,6 +118,16 @@ namespace CE::Widgets
 	ENUM_CLASS_FLAGS(CStylePropertyTypeFlags);
 
 	ENUM()
+	enum class CBackgroundSize : u8
+	{
+		Fill,
+		Cover,
+		Contain,
+		Auto = Fill
+	};
+	ENUM_CLASS(CBackgroundSize);
+
+	ENUM()
 	enum class CTextAlign : u8
 	{
 		Inherited = 0,
@@ -125,7 +135,7 @@ namespace CE::Widgets
 		MiddleLeft, MiddleCenter, MiddleRight,
 		BottomLeft, BottomCenter, BottomRight
 	};
-	ENUM_CLASS_FLAGS(CTextAlign);
+	ENUM_CLASS(CTextAlign);
 
 	CRYSTALWIDGETS_API CTextAlign StringToAlignment(const String& string);
 
@@ -419,6 +429,13 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::BorderRadius))
 				return Vec4();
 			return properties.Get(CStylePropertyType::BorderRadius).vector;
+		}
+
+		CBackgroundSize GetBackgroundSize() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundSize))
+				return CBackgroundSize::Auto;
+			return (CBackgroundSize)properties.Get(CStylePropertyType::BackgroundSize).enumValue.x;
 		}
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

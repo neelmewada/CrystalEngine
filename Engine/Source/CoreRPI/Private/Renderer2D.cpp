@@ -227,7 +227,8 @@ namespace CE::RPI
 
 	void Renderer2D::PopClipRect()
 	{
-		clipRectStack.Pop();
+		if (clipRectStack.NonEmpty())
+			clipRectStack.Pop();
 	}
 
 	bool Renderer2D::ClipRectExists()

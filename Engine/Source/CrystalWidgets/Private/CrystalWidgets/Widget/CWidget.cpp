@@ -442,12 +442,6 @@ namespace CE::Widgets
 			for (CWidget* widget : attachedWidgets)
 			{
 				widget->UpdateLayoutIfNeeded();
-
-				auto size2 = widget->GetComputedLayoutSize();
-				if (size2.x > 0)
-				{
-					
-				}
 			}
 
 			OnAfterUpdateLayout();
@@ -481,6 +475,11 @@ namespace CE::Widgets
 		}
 
 		contentSize = Vec2(contentMaxX, contentMaxY);
+	}
+
+	Vec2 CWidget::CalculateIntrinsicSize(f32 width, f32 height)
+	{
+		return Vec2();
 	}
 
 	CBehavior* CWidget::AddBehavior(SubClass<CBehavior> behaviorClass)
@@ -1230,15 +1229,20 @@ namespace CE::Widgets
 			painter->DrawRoundedRect(rect, borderRadius);
 		}
 
-		if (bgImage.IsValid())
+		if (bgImage.IsValid() && canDrawBgImage)
 		{
 			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
 			if (texture)
 			{
-				brush.SetColor(foreground);
-				painter->SetBrush(brush);
+				CBackgroundSize backgroundSize = computedStyle.GetBackgroundSize();
 
-				painter->DrawTexture(rect, texture);
+				if (backgroundSize == CBackgroundSize::Fill)
+				{
+					brush.SetColor(foreground);
+					painter->SetBrush(brush);
+
+					painter->DrawTexture(rect, texture);
+				}
 			}
 		}
 

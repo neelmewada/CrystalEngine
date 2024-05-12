@@ -73,6 +73,7 @@
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
+#include "CrystalWidgets/Widget/CIcon.h"
 #include "CrystalWidgets/Widget/CTextInput.h"
 #include "CrystalWidgets/Widget/CTabWidget.h"
 #include "CrystalWidgets/Widget/CTabWidgetContainer.h"
@@ -81,6 +82,9 @@
 #include "CrystalWidgets/Item/CTreeView.h"
 #include "CrystalWidgets/Widget/CListWidgetItem.h"
 #include "CrystalWidgets/Widget/CListWidget.h"
+#include "CrystalWidgets/Widget/CTreeWidgetItem.h"
+#include "CrystalWidgets/Widget/CTreeWidgetRow.h"
+#include "CrystalWidgets/Widget/CTreeWidget.h"
 
 // Popups
 #include "CrystalWidgets/Popup/CPopup.h"

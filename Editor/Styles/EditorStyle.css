@@ -291,3 +291,20 @@ ViewportWindow CViewport {
     flex-grow: 4;
     flex-shrink: 2;
 }
+
+CTreeWidget {
+    background-color: rgb(26, 26, 26);
+    padding: 2px 2px;
+    flex-direction: column;
+}
+
+CTreeWidgetRow {
+    flex-direction: row;
+    padding: 7px 7px;
+}
+
+CTreeWidgetRow::alternate {
+    flex-direction: row;
+    padding: 7px 7px;
+    background-color: rgb(21, 21, 21);
+}

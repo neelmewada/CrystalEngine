@@ -18,6 +18,10 @@ namespace CE::RPI
     
     Texture::Texture(const TextureDescriptor& desc)
     {
+        width = desc.texture.width;
+        height = desc.texture.height;
+        depth = desc.texture.depth;
+
         texture = RHI::gDynamicRHI->CreateTexture(desc.texture);
 
         samplerState = RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
@@ -33,6 +37,13 @@ namespace CE::RPI
     Texture::Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc)
         : texture(texture)
     {
+        if (texture)
+	    {
+		    width = texture->GetWidth();
+	    	height = texture->GetHeight();
+	    	depth = texture->GetDepth();
+	    }
+
         samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
@@ -40,6 +51,13 @@ namespace CE::RPI
         : texture(nullptr)
         , textureView(textureView)
     {
+        if (textureView)
+        {
+            width = textureView->GetTexture()->GetWidth();
+            height = textureView->GetTexture()->GetHeight();
+            depth = textureView->GetTexture()->GetDepth();
+        }
+
         samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
@@ -61,6 +79,9 @@ namespace CE::RPI
         desc.depth = 1;
         desc.dimension = Dimension::Dim2D;
         desc.sampleCount = 1;
+
+        width = desc.width;
+        height = desc.height;
 
         switch (sourceImage.GetFormat())
         {

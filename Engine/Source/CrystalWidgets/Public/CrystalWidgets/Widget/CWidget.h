@@ -78,7 +78,7 @@ namespace CE::Widgets
 
         virtual void OnAfterUpdateLayout();
 
-        virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
+        virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height);
 
         CBehavior* AddBehavior(SubClass<CBehavior> behaviorClass);
 
@@ -285,6 +285,9 @@ namespace CE::Widgets
         FIELD()
         Array<CBehavior*> behaviors{};
 
+        FIELD()
+        b8 canDrawBgImage = true;
+
         // - Configs -
 
         FIELD(Config)
@@ -303,8 +306,6 @@ namespace CE::Widgets
 
         int destroyFrameCounter = 0;
         b8 isQueuedForDestruction = false;
-
-        Name backgroundImagePath{};
 
     protected:
 
