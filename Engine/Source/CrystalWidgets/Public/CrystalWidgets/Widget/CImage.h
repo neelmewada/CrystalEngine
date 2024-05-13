@@ -4,20 +4,25 @@ namespace CE::Widgets
 {
 
     CLASS()
-    class CRYSTALWIDGETS_API CIcon : public CWidget
+    class CRYSTALWIDGETS_API CImage : public CWidget
     {
-        CE_CLASS(CIcon, CWidget)
+        CE_CLASS(CImage, CWidget)
     public:
 
-        CIcon();
+        CImage();
 
-        virtual ~CIcon();
+        virtual ~CImage();
 
         Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
+
+        CE_SIGNAL(OnMouseLeftPress);
+        CE_SIGNAL(OnMouseLeftClick);
 
     private:
 
         void Construct() override;
+
+        void HandleEvent(CEvent* event) override;
 
         void OnPaint(CPaintEvent* paintEvent) override;
 
@@ -25,4 +30,4 @@ namespace CE::Widgets
     
 } // namespace CE::Widgets
 
-#include "CIcon.rtti.h"
+#include "CImage.rtti.h"

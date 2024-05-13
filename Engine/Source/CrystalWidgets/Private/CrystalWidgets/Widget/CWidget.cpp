@@ -1165,6 +1165,45 @@ namespace CE::Widgets
 		}
 	}
 
+	static void RotatePoint(float x, float y, float centerX, float centerY, double angle, float& newX, float& newY) {
+		float radians = angle * (M_PI / 180.0); // Convert degrees to radians
+		float cosine = std::cos(radians);
+		float sine = std::sin(radians);
+
+		newX = centerX + (x - centerX) * cosine - (y - centerY) * sine;
+		newY = centerY + (x - centerX) * sine + (y - centerY) * cosine;
+	}
+
+	// Function to find the bounding box of a rotated rectangle
+	static Rect ComputeBoundingBox(const Rect& rectangle, float angle) {
+		float x1 = rectangle.min.x;
+		float y1 = rectangle.min.y;
+		float x2 = rectangle.max.x;
+		float y2 = rectangle.min.y;
+		float x3 = rectangle.max.x;
+		float y3 = rectangle.max.y;
+		float x4 = rectangle.min.x;
+		float y4 = rectangle.max.y;
+
+		float centerX = (rectangle.min.x + rectangle.max.x) / 2.0f;
+		float centerY = (rectangle.min.y + rectangle.max.y) / 2.0f;
+
+		float newX1, newY1, newX2, newY2, newX3, newY3, newX4, newY4;
+
+		RotatePoint(x1, y1, centerX, centerY, angle, newX1, newY1);
+		RotatePoint(x2, y2, centerX, centerY, angle, newX2, newY2);
+		RotatePoint(x3, y3, centerX, centerY, angle, newX3, newY3);
+		RotatePoint(x4, y4, centerX, centerY, angle, newX4, newY4);
+
+		float minX = std::min({ newX1, newX2, newX3, newX4 });
+		float maxX = std::max({ newX1, newX2, newX3, newX4 });
+		float minY = std::min({ newY1, newY2, newY3, newY4 });
+		float maxY = std::max({ newY1, newY2, newY3, newY4 });
+
+		Rect boundingBox = { minX, minY, maxX - minX, maxY - minY };
+		return boundingBox;
+	}
+
 	void CWidget::OnPaint(CPaintEvent* paintEvent)
 	{
 		CPainter* painter = paintEvent->painter;
@@ -1218,7 +1257,11 @@ namespace CE::Widgets
 			extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
 		}
 
-		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
+		const Vec2 totalSize = GetComputedLayoutSize() + extraSize;
+
+		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), totalSize);
+
+		painter->SetRotation(rotation);
 
 		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
 		{
@@ -1235,14 +1278,62 @@ namespace CE::Widgets
 			if (texture)
 			{
 				CBackgroundSize backgroundSize = computedStyle.GetBackgroundSize();
+				CTextAlign backgroundPosition = computedStyle.GetBackgroundPosition();
+				Vec2 imageSize = Vec2(texture->GetWidth(), texture->GetHeight());
+				f32 imageAspectRatio = imageSize.width / imageSize.height;
+				f32 rectAspectRatio = totalSize.width / totalSize.height;
 
-				if (backgroundSize == CBackgroundSize::Fill)
+				painter->PushChildCoordinateSpace(GetComputedLayoutTopLeft());
+				Rect clipRect = Rect::FromSize(Vec2(), totalSize);
+				if (abs(rotation) > 0.01f)
 				{
-					brush.SetColor(foreground);
-					painter->SetBrush(brush);
-
-					painter->DrawTexture(rect, texture);
+					clipRect = ComputeBoundingBox(clipRect, rotation);
 				}
+				painter->PushClipRect(clipRect);
+
+				brush.SetColor(foreground);
+				painter->SetBrush(brush);
+
+				// Fill by default
+				Rect textureRect = Rect::FromSize(Vec2(), totalSize);
+
+				if (backgroundSize == CBackgroundSize::Cover)
+				{
+					// If the rectangle aspect ratio is greater than the image aspect ratio
+					if (rectAspectRatio > imageAspectRatio)
+					{
+						Vec2 drawSize = Vec2(totalSize.width, totalSize.width / imageAspectRatio);
+						Vec2 drawPos = Vec2(0, (totalSize.height - drawSize.height) / 2);
+						textureRect = Rect::FromSize(drawPos, drawSize);
+					}
+					else
+					{
+						Vec2 drawSize = Vec2(totalSize.height * imageAspectRatio, totalSize.height);
+						Vec2 drawPos = Vec2((totalSize.width - drawSize.width) / 2, 0);
+						textureRect = Rect::FromSize(drawPos, drawSize);
+					}
+				}
+				else if (backgroundSize == CBackgroundSize::Contain)
+				{
+					// If the rectangle aspect ratio is greater than the image aspect ratio
+					if (rectAspectRatio > imageAspectRatio)
+					{
+						Vec2 drawSize = Vec2(totalSize.height * imageAspectRatio, totalSize.height);
+						Vec2 drawPos = Vec2((totalSize.width - drawSize.width) / 2, 0);
+						textureRect = Rect::FromSize(drawPos, drawSize);
+					}
+					else
+					{
+						Vec2 drawSize = Vec2(totalSize.width, totalSize.width / imageAspectRatio);
+						Vec2 drawPos = Vec2(0, (totalSize.height - drawSize.height) / 2);
+						textureRect = Rect::FromSize(drawPos, drawSize);
+					}
+				}
+
+				painter->DrawTexture(textureRect, texture);
+
+				painter->PopClipRect();
+				painter->PopChildCoordinateSpace();
 			}
 		}
 
@@ -1250,6 +1341,8 @@ namespace CE::Widgets
 		{
 			behavior->OnPaint(painter);
 		}
+
+		painter->SetRotation(0);
 	}
 
 	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
@@ -1300,6 +1393,7 @@ namespace CE::Widgets
 			return;
 
 		bool popPaintCoords = false;
+		bool popPaintClipRect = false;
 		bool shouldPropagateDownwards = true;
 		bool skipPaint = false;
 
@@ -1333,7 +1427,6 @@ namespace CE::Widgets
 			}
 		}
 
-		// Paint event
 		if (event->type == CEventType::PaintEvent)
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
@@ -1365,6 +1458,7 @@ namespace CE::Widgets
 					}
 					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
 					paintEvent->painter->PushClipRect(contentRect);
+					popPaintClipRect = true;
 				}
 
 				if (!skipPaint)
@@ -1460,6 +1554,12 @@ namespace CE::Widgets
 				{
 					if (event->stopPropagation)
 					{
+						if (event->type == CEventType::PaintEvent && popPaintClipRect)
+						{
+							((CPaintEvent*)event)->painter->PopClipRect();
+							popPaintClipRect = true;
+						}
+
 						// Only stop propagation to the children, but continue propagation to widgets outside this hierarchy
 						event->stopPropagation = false;
 						return;
@@ -1486,9 +1586,10 @@ namespace CE::Widgets
 			if (paintEvent->painter != nullptr)
 			{
 				OnPaintOverlay(paintEvent);
-				if (clipChildren)
+				if (popPaintClipRect)
 				{
 					paintEvent->painter->PopClipRect();
+					popPaintClipRect = false;
 				}
 				if (popPaintCoords)
 				{

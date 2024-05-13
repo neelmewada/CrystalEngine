@@ -288,6 +288,9 @@ namespace CE::Widgets
         FIELD()
         b8 canDrawBgImage = true;
 
+        FIELD()
+        f32 rotation = 0.0f;
+
         // - Configs -
 
         FIELD(Config)

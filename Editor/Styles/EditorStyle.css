@@ -308,3 +308,21 @@ CTreeWidgetRow::alternate {
     padding: 7px 7px;
     background-color: rgb(21, 21, 21);
 }
+
+CTreeWidgetItem {
+    flex-direction: row;
+    align-items: center;
+    column-gap: 6px;
+}
+
+CTreeWidgetItem #ArrowButton {
+    background-size: contain;
+    color: rgb(160, 160, 160);
+    width: 10px;
+    height: 10px;
+}
+
+CTreeWidgetItem #ArrowButton:hovered {
+    color: rgb(220, 220, 220);
+}
+

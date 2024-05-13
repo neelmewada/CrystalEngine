@@ -36,8 +36,11 @@ namespace CE::Widgets
             CTreeWidgetItem* item = static_cast<CTreeWidgetItem*>(subobject);
             item->treeWidget = this;
 
-            items.Add(item);
-            UpdateRows();
+            if (!items.Exists(item))
+	        {
+		        items.Add(item);
+            	UpdateRows();
+	        }
         }
         else if (subobject->IsOfType<CTreeWidgetRow>())
         {
@@ -86,12 +89,27 @@ namespace CE::Widgets
 
                 item->row = row;
                 row->ownerItem = item;
+
+                for (int i = row->attachedWidgets.GetSize() - 1; i >= 0; --i)
+                {
+                    CWidget* widget = row->attachedWidgets[i];
+                    if (!widget)
+                        continue;
+                    if (widget->IsOfType<CTreeWidgetItem>())
+                    {
+                        row->RemoveSubWidget(widget);
+                    }
+                }
+
 				if (item->parent != row && item->parent != nullptr)
 				{
                     item->parent->RemoveSubWidget(item);
 				}
+				
                 row->AddSubWidget(item);
                 row->rootPadding = Vec4(indentLevel * 15.0f, 0, 0, 0);
+
+                item->arrowIcon->SetVisible(item->children.NonEmpty());
 
 				if (item->IsExpanded())
 				{
@@ -110,6 +128,25 @@ namespace CE::Widgets
         for (int i = 0; i < rows.GetSize(); ++i)
         {
             rows[i]->SetAlternate(i % 2 != 0);
+        }
+
+        for (int i = rows.GetSize() - 1; i >= 0; --i)
+        {
+	        if (rows[i]->GetSubWidgetCount() == 0 || rows[i]->ownerItem == nullptr || i >= rowCounter)
+	        {
+                CTreeWidgetRow* row = rows[i];
+
+                for (int j = row->attachedWidgets.GetSize() - 1; j >= 0; --j)
+                {
+	                if (row->attachedWidgets[j]->IsOfType<CTreeWidgetItem>())
+	                {
+                        row->RemoveSubWidget(row->attachedWidgets[j]);
+	                }
+                }
+
+                row->Destroy();
+                rows.Remove(row);
+	        }
         }
     }
 

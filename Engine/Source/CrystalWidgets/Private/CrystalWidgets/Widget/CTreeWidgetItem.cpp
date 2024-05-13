@@ -10,6 +10,8 @@ namespace CE::Widgets
         createLabel = true;
         isExpanded = true;
         clipChildren = false;
+
+        arrowIcon = CreateDefaultSubobject<CImage>("ArrowButton");
     }
 
     CTreeWidgetItem::~CTreeWidgetItem()
@@ -22,12 +24,23 @@ namespace CE::Widgets
 	    return Super::IsSubWidgetAllowed(subWidgetClass);
     }
 
+    bool CTreeWidgetItem::IsExpandedInHierarchy() const
+    {
+        if (isExpanded)
+            return true;
+        if (parent == nullptr || !parent->IsOfType<CTreeWidgetItem>())
+            return true;
+
+        return ((CTreeWidgetItem*)parent)->IsExpandedInHierarchy();
+    }
+
     void CTreeWidgetItem::SetExpanded(bool expanded)
     {
         if (isExpanded == expanded)
             return;
 
         isExpanded = expanded;
+        arrowIcon->rotation = isExpanded ? 90 : 0;
 
         GetTreeWidget()->UpdateRows();
 
@@ -71,9 +84,34 @@ namespace CE::Widgets
             label->SetText(text);
     }
 
+    void CTreeWidgetItem::AddChild(CTreeWidgetItem* child)
+    {
+        children.Add(child);
+    }
+
+    void CTreeWidgetItem::SetForceExpanded(bool forceExpanded)
+    {
+        this->forceExpanded = forceExpanded;
+
+        arrowIcon->SetEnabled(!forceExpanded);
+
+        SetNeedsLayout();
+        SetNeedsPaint();
+    }
+
     void CTreeWidgetItem::Construct()
     {
 	    Super::Construct();
+
+        arrowIcon->SetBackgroundImage("/Editor/Assets/Icons/Arrow");
+
+        Bind(arrowIcon, MEMBER_FUNCTION(CImage, OnMouseLeftPress), [&]
+            {
+                if (arrowIcon->IsVisible())
+                {
+                    SetExpanded(!isExpanded);
+                }
+            });
 
         if (createLabel)
 	    {
@@ -81,6 +119,7 @@ namespace CE::Widgets
 	    	label->SetText("");
 	    }
 
+        arrowIcon->rotation = isExpanded ? 90 : 0;
     }
 
     void CTreeWidgetItem::OnSubobjectAttached(Object* subobject)
@@ -103,9 +142,9 @@ namespace CE::Widgets
         if (subobject->IsOfType<CTreeWidgetItem>())
         {
             CTreeWidgetItem* treeItem = static_cast<CTreeWidgetItem*>(subobject);
-            treeItem->treeWidget = nullptr;
+            //treeItem->treeWidget = nullptr;
 
-            children.Remove(treeItem);
+            //children.Remove(treeItem);
         }
     }
 

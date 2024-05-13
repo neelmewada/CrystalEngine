@@ -1049,9 +1049,11 @@ namespace CE::RPI
 		scale.y = size.height * 2;
 
 		Vec2 quadPos = cursorPosition;
-		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+		Vec3 translation1 = Vec3(-scale.x / 2, -scale.y / 2);
+		Vec3 translation2 = Vec3(quadPos.x * 2 + scale.x / 2, quadPos.y * 2 + scale.y / 2, 0);
 
-		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		drawItem.transform = Matrix4x4::Translation(translation2) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * 
+			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_Texture;
 		drawItem.fillColor = fillColor.ToVec4();
 		drawItem.outlineColor = outlineColor.ToVec4();

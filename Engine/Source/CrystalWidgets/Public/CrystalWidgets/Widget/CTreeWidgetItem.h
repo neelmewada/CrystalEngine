@@ -19,6 +19,8 @@ namespace CE::Widgets
 
 		bool IsExpanded() const { return isExpanded; }
 
+		bool IsExpandedInHierarchy() const;
+
 		void SetExpanded(bool expanded);
 
 		CTreeWidget* GetTreeWidget();
@@ -26,6 +28,10 @@ namespace CE::Widgets
 		const String& GetText() const;
 
 		void SetText(const String& text);
+
+		void AddChild(CTreeWidgetItem* child);
+
+		void SetForceExpanded(bool forceExpanded);
 
 	private:
 
@@ -57,7 +63,13 @@ namespace CE::Widgets
 		CTreeWidgetRow* row = nullptr;
 
 		FIELD()
+		CImage* arrowIcon = nullptr;
+
+		FIELD()
 		bool isExpanded = false;
+
+		FIELD()
+		bool forceExpanded = false;
 
 		friend class CTreeWidget;
 		friend class CTreeWidgetRow;

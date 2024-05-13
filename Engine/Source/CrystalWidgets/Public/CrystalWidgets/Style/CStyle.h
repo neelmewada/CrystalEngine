@@ -68,6 +68,7 @@ namespace CE::Widgets
 		Background,
         BackgroundImage,
 		BackgroundSize,
+		BackgroundPosition,
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
@@ -436,6 +437,13 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::BackgroundSize))
 				return CBackgroundSize::Auto;
 			return (CBackgroundSize)properties.Get(CStylePropertyType::BackgroundSize).enumValue.x;
+		}
+
+		CTextAlign GetBackgroundPosition() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
+				return CTextAlign::MiddleCenter;
+			return (CTextAlign)properties.Get(CStylePropertyType::BackgroundPosition).enumValue.x;
 		}
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};
