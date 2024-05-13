@@ -45,7 +45,7 @@ namespace CE::Editor
 
                 for (int i = 0; i < 3; ++i)
                 {
-	                CTreeWidgetItem* componentItem = CreateObject<CTreeWidgetItem>(rootItem, "ActorComponent");
+	                CTreeWidgetItem* componentItem = CreateObject<CTreeWidgetItem>(rootItem, String("ActorComponent_") + i);
 	                componentItem->SetText(String("ActorComponent_") + i);
 	                componentItem->SetExpanded(false); // TODO: Perform manual update
 	                componentItem->SetExpanded(true);
@@ -53,7 +53,7 @@ namespace CE::Editor
             }
         }
 
-        for (int i = 0; i < 64; ++i)
+        for (int i = 0; i < 32; ++i)
         {
             CButton* testButton = CreateObject<CButton>(this, String("TestButton_") + i);
             testButton->SetText(String("Click Me ") + i);

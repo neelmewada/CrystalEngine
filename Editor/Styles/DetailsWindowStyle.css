@@ -7,3 +7,7 @@ DetailsWindow #TitleLabel {
     margin: 5px 0 0 0;
     margin: 0 0 0 10px;
 }
+
+#ComponentTree {
+    height: 200px;
+}
