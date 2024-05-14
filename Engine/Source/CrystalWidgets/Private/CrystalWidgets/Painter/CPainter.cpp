@@ -59,13 +59,29 @@ namespace CE::Widgets
 
     void CPainter::DrawRect(const Rect& rect)
     {
-        renderer->SetCursor(GetOrigin() + rect.min);
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+
+        renderer->SetCursor(windowSpaceRect.min);
         renderer->DrawRect(rect.GetSize());
     }
 
     void CPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
     {
-        renderer->SetCursor(GetOrigin() + rect.min);
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+
+        renderer->SetCursor(windowSpaceRect.min);
         if (cornerRadius == Vec4())
             renderer->DrawRect(rect.GetSize());
         else
@@ -99,13 +115,32 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
+        if (renderer->ClipRectExists())
+        {
+            Vec2 textSize = renderer->CalculateTextSize(text);
+            Rect windowSpaceRect = Rect::FromSize(GetOrigin() + position, textSize);
+            Rect clipRect = renderer->GetLastClipRect();
+
+            if (!windowSpaceRect.Overlaps(clipRect))
+                return;
+        }
+
         renderer->SetCursor(GetOrigin() + position);
         renderer->DrawText(text);
     }
 
     void CPainter::DrawText(const String& text, const Rect& rect)
     {
-        renderer->SetCursor(GetOrigin() + rect.min);
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+
+            if (!windowSpaceRect.Overlaps(clipRect))
+                return;
+        }
+
+        renderer->SetCursor(windowSpaceRect.min);
         renderer->DrawText(text, rect.GetSize());
     }
 

@@ -19,26 +19,61 @@ namespace CE::Widgets
         {
             auto app = CApplication::Get();
 
+            Vec2 originalPos = self->GetComputedLayoutTopLeft();
             Vec2 originalSize = self->GetComputedLayoutSize();
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = self->contentSize.height;
 
             if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
             {
-                Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - app->styleConstants.scrollRectWidth, 0),
+                Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - app->styleConstants.scrollRectWidth, 0) + originalPos,
                     Vec2(app->styleConstants.scrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
 
                 Rect scrollRect = Rect::FromSize(scrollRegion.min,
-                    Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio,
-                        app->styleConstants.minScrollRectSize)));
+                    Vec2(scrollRegion.GetSize().width, 
+                        Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, app->styleConstants.minScrollRectSize)));
                 scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * self->normalizedScroll.y));
-
+                
                 return scrollRect;
             }
         }
 
         return Rect();
+    }
+
+    void CScrollBehavior::OnPaintOverlay(CPainter* painter)
+    {
+        auto app = CApplication::Get();
+
+        if (self->allowVerticalScroll) // Draw Vertical Scroll Bar
+        {
+            Vec2 originalSize = self->GetComputedLayoutSize();
+            f32 originalHeight = originalSize.height;
+            f32 contentMaxY = self->contentSize.height;
+
+            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
+            {
+                Rect scrollRect = GetVerticalScrollBarRect();
+
+                CPen pen{};
+                CBrush brush = CBrush(Color::RGBA(87, 87, 87));
+
+                if (isVerticalScrollHovered || isVerticalScrollPressed)
+                {
+                    brush.SetColor(Color::RGBA(128, 128, 128));
+                }
+
+                painter->SetPen(pen);
+                painter->SetBrush(brush);
+
+                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * app->styleConstants.scrollRectWidth * 0.5f);
+            }
+            else
+            {
+                self->normalizedScroll = Vec2(0, 0);
+            }
+        }
     }
 
     bool CScrollBehavior::IsVerticalScrollVisible()
@@ -63,8 +98,6 @@ namespace CE::Widgets
         {
             CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
             Vec2 globalMousePos = mouseEvent->mousePos;
-            Rect screenSpaceWindowRect = self->GetScreenSpaceRect();
-            Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
             if (mouseEvent->type == CEventType::MouseMove && (self->allowVerticalScroll || self->allowHorizontalScroll))
@@ -81,6 +114,8 @@ namespace CE::Widgets
                     if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
+                        scrollRect.min -= self->GetComputedLayoutTopLeft();
+                        scrollRect.max -= self->GetComputedLayoutTopLeft();
                         scrollRect = self->LocalToScreenSpaceRect(scrollRect);
 
                         if (scrollRect.Contains(globalMousePos))
@@ -108,6 +143,8 @@ namespace CE::Widgets
                     if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
+                        scrollRect.min -= self->GetComputedLayoutTopLeft();
+                        scrollRect.max -= self->GetComputedLayoutTopLeft();
                         scrollRect = self->LocalToScreenSpaceRect(scrollRect);
 
                         if (scrollRect.Contains(globalMousePos))
@@ -143,59 +180,42 @@ namespace CE::Widgets
                 isVerticalScrollPressed = false;
                 dragEvent->ConsumeAndStopPropagation(self);
             }
-            else if (mouseEvent->type == CEventType::MouseWheel && self->allowVerticalScroll)
+            else if (mouseEvent->type == CEventType::MouseWheel && self->allowVerticalScroll && event->sender != nullptr)
             {
-                Vec2 originalSize = self->GetComputedLayoutSize();
-                f32 originalHeight = originalSize.height;
-                f32 contentMaxY = self->contentSize.height;
+                CWidget* sender = event->sender;
 
-                if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
+                while (sender != nullptr)
                 {
-                    self->normalizedScroll.y += -mouseEvent->wheelDelta.y * self->scrollSensitivity / (contentMaxY - originalHeight);
-                    self->normalizedScroll.y = Math::Clamp01(self->normalizedScroll.y);
+                    CScrollBehavior* scrollBehavior = sender->GetBehavior<CScrollBehavior>();
+                    
+                    if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible() && sender->allowVerticalScroll)
+                    {
+                        if (sender == self)
+                        {
+                            Vec2 originalSize = self->GetComputedLayoutSize();
+                            f32 originalHeight = originalSize.height;
+                            f32 contentMaxY = self->contentSize.height;
 
-                    self->SetNeedsLayout();
-                    self->SetNeedsPaint();
+                            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
+                            {
+                                self->normalizedScroll.y += -mouseEvent->wheelDelta.y * self->scrollSensitivity / (contentMaxY - originalHeight);
+                                self->normalizedScroll.y = Math::Clamp01(self->normalizedScroll.y);
+
+                                self->SetNeedsLayout();
+                                self->SetNeedsPaint();
+                            }
+                        }
+
+	                    break;
+                    }
+
+                    sender = sender->parent;
                 }
             }
 
             Super::HandleEvent(event);
         }
 
-    }
-
-    void CScrollBehavior::OnPaintOverlay(CPainter* painter)
-    {
-        auto app = CApplication::Get();
-
-        if (self->allowVerticalScroll) // Draw Vertical Scroll Bar
-        {
-            Vec2 originalSize = self->GetComputedLayoutSize();
-            f32 originalHeight = originalSize.height;
-            f32 contentMaxY = self->contentSize.height;
-
-            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer)
-            {
-                Rect scrollRect = GetVerticalScrollBarRect();
-
-                CPen pen{};
-                CBrush brush = CBrush(Color::RGBA(87, 87, 87));
-
-                if (isVerticalScrollHovered || isVerticalScrollPressed)
-                {
-                    brush.SetColor(Color::RGBA(128, 128, 128));
-                }
-
-                painter->SetPen(pen);
-                painter->SetBrush(brush);
-
-                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * app->styleConstants.scrollRectWidth * 0.5f);
-            }
-            else
-            {
-                self->normalizedScroll = Vec2(0, 0);
-            }
-        }
     }
 
     Vec4 CScrollBehavior::GetExtraRootPadding()

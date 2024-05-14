@@ -77,4 +77,7 @@ Crystal Editor window:
 ![](./Screenshots/EditorWindow.png)
 
 
+### Credits
+
+<a href="https://www.flaticon.com/">Icons by FlatIcon - flaticon.com</a>
 

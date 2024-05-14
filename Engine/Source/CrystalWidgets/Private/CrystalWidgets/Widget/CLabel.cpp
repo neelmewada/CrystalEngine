@@ -82,6 +82,10 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::Foreground))
             color = computedStyle.properties[CStylePropertyType::Foreground].color;
 
+        CWordWrap wordWrap = CWordWrap::BreakWord;
+        if (computedStyle.properties.KeyExists(CStylePropertyType::WordWrap))
+            wordWrap = (CWordWrap)computedStyle.properties[CStylePropertyType::WordWrap].enumValue.x;
+
         CFont font = CFont(fontName, (u32)fontSize, false);
         CPen pen = CPen(color);
 
@@ -89,8 +93,11 @@ namespace CE::Widgets
         painter->SetPen(pen);
 
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
-
-        painter->DrawText(text, rect);
+        
+        if (wordWrap == CWordWrap::Normal) // Go to new line when a word goes out of bounds
+            painter->DrawText(text, rect);
+        else // Just clip the word that goes out of bounds
+            painter->DrawText(text, rect.min);
     }
 
     

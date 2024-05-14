@@ -2,14 +2,6 @@
 
 namespace CE::Widgets
 {
-	ENUM()
-	enum class COrientation
-	{
-		Horizontal = 0,
-		Vertical
-	};
-	ENUM_CLASS(COrientation);
-
 
 	enum class CItemDataUsage : u32
 	{

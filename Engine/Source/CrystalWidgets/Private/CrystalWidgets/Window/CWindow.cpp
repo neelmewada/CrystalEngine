@@ -334,7 +334,6 @@ namespace CE::Widgets
             Vec2 globalMousePos = mouseEvent->mousePos;
             Rect screenSpaceWindowRect = GetScreenSpaceRect();
             Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
-            Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
             // Window controls on top-right corner
 

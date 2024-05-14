@@ -62,11 +62,14 @@ namespace CE
 
 		inline SIZE_T GetSize() const { return impl.size(); }
         
-        CE_INLINE auto Begin() { return impl.begin(); }
-        CE_INLINE auto End() { return impl.end(); }
+        auto Begin() { return impl.begin(); }
+        auto End() { return impl.end(); }
         
-        CE_INLINE auto begin() { return Begin(); }
-        CE_INLINE auto end() { return End(); }
+        auto begin() { return impl.begin(); }
+        auto end() { return impl.end(); }
+
+        auto cbegin() const { return impl.cbegin(); }
+        auto cend() const { return impl.cend(); }
         
     private:
         std::unordered_set<T, HashFunc<T>> impl{};

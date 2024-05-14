@@ -138,7 +138,7 @@ namespace CE::Widgets
 						}
 						else if (tokenStack.Top().type == CSS::ColonToken)
 						{
-							curMatchCond.states = StateFlagsFromString(token.lexeme);
+							curMatchCond.states |= StateFlagsFromString(token.lexeme);
 							curMatchCond.matches |= CSSSelector::State;
 							tokenStack.Push(token);
 						}

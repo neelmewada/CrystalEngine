@@ -17,6 +17,9 @@ namespace CE::Editor
 
         void Construct() override;
 
+        FIELD()
+        CTreeWidget* treeWidget = nullptr;
+
     };
     
 } // namespace CE::Editor
