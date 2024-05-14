@@ -41,13 +41,13 @@ constexpr bool EnumHasAllFlags(Enum Flags, Enum Contains)
 template<typename Enum>
 constexpr bool EnumHasAnyFlags(Enum Flags, Enum Contains)
 {
-	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ( Contains == 0 );
+	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ((__underlying_type(Enum))Contains == 0 );
 }
 
 template<typename Enum>
 constexpr bool EnumHasFlag(Enum Flags, Enum Contains)
 {
-	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ( Contains == 0 );
+	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ((__underlying_type(Enum))Contains == 0 );
 }
 
 template<typename Enum>

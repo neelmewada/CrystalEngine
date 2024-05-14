@@ -1620,6 +1620,11 @@ namespace CE::Widgets
 				}
 			}
 		}
+
+		if (IsOfType<CTreeWidgetRow>())
+		{
+			CE_LOG(Info, All, "States: {}", stateFlags);
+		}
 	}
 
 	void CWidget::OnBeforeDestroy()
