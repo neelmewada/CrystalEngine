@@ -215,6 +215,8 @@ namespace CE::Widgets
 
         virtual void HandleEvent(CEvent* event);
 
+    protected:
+
         FIELD()
         Array<CWidget*> attachedWidgets{};
 

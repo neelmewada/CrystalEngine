@@ -9,6 +9,8 @@ DetailsWindow #TitleLabel {
 }
 
 #ComponentTree {
-    height: 200px;
-    word-wrap: clip;
+    flex-grow: 4;
+    flex-shrink: 2;
+    background-color: green;
 }
+

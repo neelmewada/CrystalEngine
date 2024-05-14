@@ -307,6 +307,7 @@ namespace CE::Widgets
 
                     if (i == hoveredMenuItem || i == activeMenuItem)
                     {
+                        // TODO: Use style sheet for fetching these colors
                         Color menuItemColor = i == activeMenuItem ? Color::RGBA(0, 112, 224) : Color::RGBA(87, 87, 87);
 
                         painter->SetBrush(CBrush(menuItemColor));

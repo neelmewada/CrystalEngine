@@ -85,11 +85,6 @@ namespace CE::Widgets
         if (parentSplitView == nullptr || dockSpace->GetDockType() != CDockType::Minor)
             return Super::GetComputedLayoutSize();
 
-        if (dockSpace->GetDockType() == CDockType::Minor)
-        {
-            String::IsAlphabet('a');
-        }
-
         Vec2 parentSize = parentSplitView->GetComputedLayoutSize();
         int index = parentSplitView->children.IndexOf(this);
         int numChildren = parentSplitView->children.GetSize();
