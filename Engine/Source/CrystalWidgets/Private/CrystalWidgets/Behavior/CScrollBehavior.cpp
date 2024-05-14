@@ -187,7 +187,7 @@ namespace CE::Widgets
                 while (sender != nullptr)
                 {
                     CScrollBehavior* scrollBehavior = sender->GetBehavior<CScrollBehavior>();
-
+                    
                     if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible() && sender->allowVerticalScroll)
                     {
                         if (sender == self)

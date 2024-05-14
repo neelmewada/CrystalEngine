@@ -197,25 +197,38 @@ namespace CE::Widgets
             break;
         }
 
+        std::function<void(CTreeWidgetItem*)> visitor = [&](CTreeWidgetItem* treeWidgetItem)
+            {
+                bool isSelected = selectedItems.Exists(treeWidgetItem);
+                CTreeWidgetRow* row = treeWidgetItem->row;
+
+                if (row && isSelected && !EnumHasFlag(row->stateFlags, CStateFlag::Active))
+                {
+                    row->stateFlags |= CStateFlag::Active;
+
+                    row->SetNeedsStyle();
+                    row->SetNeedsPaint();
+                }
+                else if (row && !isSelected && EnumHasFlag(row->stateFlags, CStateFlag::Active))
+                {
+                    row->stateFlags &= ~CStateFlag::Active;
+
+                    row->SetNeedsStyle();
+                    row->SetNeedsPaint();
+                }
+
+				for (CTreeWidgetItem* child : treeWidgetItem->children)
+				{
+                    visitor(child);
+				}
+            };
+
         for (CTreeWidgetItem* treeWidgetItem : items)
         {
-            bool isSelected = selectedItems.Exists(treeWidgetItem);
-
-            if (isSelected && !EnumHasFlag(treeWidgetItem->stateFlags, CStateFlag::Active))
-            {
-                treeWidgetItem->stateFlags |= CStateFlag::Active;
-
-                treeWidgetItem->SetNeedsStyle();
-                treeWidgetItem->SetNeedsPaint();
-            }
-            else if (!isSelected && EnumHasFlag(treeWidgetItem->stateFlags, CStateFlag::Active))
-            {
-                treeWidgetItem->stateFlags &= ~CStateFlag::Active;
-
-                treeWidgetItem->SetNeedsStyle();
-                treeWidgetItem->SetNeedsPaint();
-            }
+            visitor(treeWidgetItem);
         }
+
+        emit OnSelectionChanged(this);
     }
 
 } // namespace CE::Widgets

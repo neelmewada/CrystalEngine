@@ -18,6 +18,12 @@ namespace CE::Widgets
 
 		void Select(CTreeWidgetItem* item, bool selectAdditive = false);
 
+		const auto& GetSelectedItems() const { return selectedItems; }
+
+		// - Signals -
+
+		CE_SIGNAL(OnSelectionChanged, CTreeWidget*);
+
 	protected:
 
 		void UpdateRows();

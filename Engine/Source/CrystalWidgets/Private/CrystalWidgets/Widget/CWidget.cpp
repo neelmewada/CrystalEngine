@@ -579,6 +579,10 @@ namespace CE::Widgets
 				stateFlags &= ~CStateFlag::Disabled;
 			}
 
+			bool isRow = IsOfType<CTreeWidgetRow>();
+
+			CStyleSheet* globalStyleSheet = CApplication::Get()->globalStyleSheet;
+
 			auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
 
 			computedStyle.ApplyProperties(selectStyle);
@@ -1619,11 +1623,6 @@ namespace CE::Widgets
 					paintEvent->painter->PopChildCoordinateSpace();
 				}
 			}
-		}
-
-		if (IsOfType<CTreeWidgetRow>())
-		{
-			CE_LOG(Info, All, "States: {}", stateFlags);
 		}
 	}
 

@@ -140,6 +140,14 @@ namespace CE::Widgets
 	CRYSTALWIDGETS_API CTextAlign StringToAlignment(const String& string);
 
 	ENUM()
+	enum class COrientation
+	{
+		Horizontal = 0,
+		Vertical
+	};
+	ENUM_CLASS(COrientation);
+
+	ENUM()
 	enum class CCursor : u8
 	{
 		Inherited = 0,
@@ -192,9 +200,9 @@ namespace CE::Widgets
 	{
 		Inherited = 0,
 		Normal,
-		BreakWord,
 		Clip,
-		Ellipsis,
+		// WARNING: Not implemented yet
+		BreakWord
 	};
 	ENUM_CLASS(CWordWrap);
 
@@ -443,6 +451,13 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
 				return CTextAlign::MiddleCenter;
 			return (CTextAlign)properties.Get(CStylePropertyType::BackgroundPosition).enumValue.x;
+		}
+
+		CWordWrap GetWordWarp() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
+				return CWordWrap::Normal;
+			return (CWordWrap)properties.Get(CStylePropertyType::WordWrap).enumValue.x;
 		}
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

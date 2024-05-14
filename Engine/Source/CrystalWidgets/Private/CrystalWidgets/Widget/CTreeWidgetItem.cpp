@@ -131,6 +131,8 @@ namespace CE::Widgets
             CTreeWidgetItem* treeItem = static_cast<CTreeWidgetItem*>(subobject);
             treeItem->treeWidget = treeWidget;
 
+            GetTreeWidget()->UpdateRows();
+
             children.Add(treeItem);
         }
     }

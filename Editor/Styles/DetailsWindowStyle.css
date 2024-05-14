@@ -10,4 +10,5 @@ DetailsWindow #TitleLabel {
 
 #ComponentTree {
     height: 200px;
+    word-wrap: clip;
 }

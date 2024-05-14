@@ -25,6 +25,8 @@ namespace CE::Editor
         title->SetText("SomeActorName");
 
         treeWidget = CreateObject<CTreeWidget>(this, "ComponentTree");
+        treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);
+
         {
             CTreeWidgetItem* rootItem = CreateObject<CTreeWidgetItem>(treeWidget, "RootItem");
             rootItem->SetText("SomeActorName (Self)");
@@ -52,6 +54,17 @@ namespace CE::Editor
                 }
             }
         }
+
+        Bind(treeWidget, MEMBER_FUNCTION(CTreeWidget, OnSelectionChanged), [this](CTreeWidget*)
+            {
+                const auto& selectedItems = treeWidget->GetSelectedItems();
+
+	            for (auto it = selectedItems.cbegin(); it != selectedItems.cend(); ++it)
+	            {
+                    CTreeWidgetItem* selected = *it;
+                    break;
+	            }
+            });
 
         for (int i = 0; i < 32; ++i)
         {
