@@ -133,11 +133,6 @@ namespace CE::Widgets
 				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
 				if (nativeWindow)
 				{
-					if (widget->IsOfType<CDockSpace>() && widget->parent == nullptr)
-					{
-						//CE_LOG(Info, All, "{} | {} | {}", nativeWindow->IsFocused(), nativeWindow->IsShown(), nativeWindow->IsMinimized());
-					}
-
 					if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
 					{
 						return nullptr;

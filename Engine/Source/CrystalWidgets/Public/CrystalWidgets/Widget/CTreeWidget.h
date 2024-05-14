@@ -14,6 +14,16 @@ namespace CE::Widgets
 
 		bool IsSubWidgetAllowed(Class* subWidgetClass) override;
 
+		void SetSelectionMode(CItemSelectionMode selectionMode);
+
+		void Select(CTreeWidgetItem* item, bool selectAdditive = false);
+
+	protected:
+
+		void UpdateRows();
+
+		void UpdateSelection();
+
 	private:
 
 		void Construct() override;
@@ -21,7 +31,8 @@ namespace CE::Widgets
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;
 
-		void UpdateRows();
+		FIELD()
+		CItemSelectionMode selectionMode = CItemSelectionMode::SingleSelection;
 
 		FIELD()
 		Array<CTreeWidgetItem*> items{};
@@ -29,7 +40,10 @@ namespace CE::Widgets
 		FIELD()
 		Array<CTreeWidgetRow*> rows{};
 
+		HashSet<CTreeWidgetItem*> selectedItems{};
+
 		friend class CTreeWidgetItem;
+		friend class CTreeWidgetRow;
 	};
 
 } // namespace CE::Widgets

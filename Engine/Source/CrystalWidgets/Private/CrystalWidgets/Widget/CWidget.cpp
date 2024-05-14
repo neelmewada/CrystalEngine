@@ -431,11 +431,6 @@ namespace CE::Widgets
 			
 			if (parent)
 			{
-				Vec2 scrollOffset = Vec2();
-				if (parent->allowHorizontalScroll || parent->allowVerticalScroll)
-					scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
-
-				// TODO: Added the -scrollOffset part recently. It needs to be tested properly before pushing
 				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->GetFinalRootPadding().min;
 			}
 
@@ -512,6 +507,13 @@ namespace CE::Widgets
 
 	Vec4 CWidget::GetFinalRootPadding()
 	{
+		CScrollBehavior* scrollBehavior = GetBehavior<CScrollBehavior>();
+		if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible())
+		{
+			auto app = CApplication::Get();
+			return rootPadding + Vec4(0, 0, app->styleConstants.scrollRectWidth, 0);
+		}
+
 		return rootPadding;
 	}
 
@@ -880,6 +882,16 @@ namespace CE::Widgets
 		DetachSubobject(widget);
 	}
 
+	Vec2 CWidget::GetComputedLayoutTopLeft()
+	{
+		return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node));
+	}
+
+	Vec2 CWidget::GetComputedLayoutSize()
+	{
+		return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node));
+	}
+
 	Rect CWidget::GetScreenSpaceRect()
 	{
 		if (IsWindow())
@@ -1122,6 +1134,12 @@ namespace CE::Widgets
 		isQueuedForDestruction = true;
 
 		SetEnabled(false);
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+			window->Hide();
+		}
 
 		if (parent)
 		{
@@ -1607,17 +1625,6 @@ namespace CE::Widgets
 		{
 			app->OnWidgetDestroyed(this);
 		}
-
-		/*if (IsWindow())
-		{
-			CWindow* window = (CWindow*)this;
-			if (window->nativeWindow != nullptr)
-			{
-				//PlatformApplication::Get()->DestroyWindow(window->nativeWindow);
-				delete window->nativeWindow;
-				window->nativeWindow = nullptr;
-			}
-		}*/
 	}
     
 } // namespace CE::Widgets

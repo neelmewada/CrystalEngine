@@ -309,6 +309,26 @@ CTreeWidgetRow::alternate {
     background-color: rgb(21, 21, 21);
 }
 
+CTreeWidgetRow:hovered, CTreeWidgetRow::alternate:hovered {
+    background-color: rgb(40, 40, 40);
+}
+
+CTreeWidgetRow:active {
+    background-color: rgb(64, 87, 111);
+}
+
+CTreeWidgetRow::alternate:active {
+    background-color: rgb(64, 87, 111);
+}
+
+CTreeWidgetRow:active:focused {
+    background-color: rgb(0, 112, 224);
+}
+
+CTreeWidgetRow::alternate:active:focused {
+    background-color: rgb(0, 112, 224);
+}
+
 CTreeWidgetItem {
     flex-direction: row;
     align-items: center;

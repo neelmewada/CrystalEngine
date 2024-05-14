@@ -22,6 +22,29 @@ namespace CE::Widgets
         return subWidgetClass->IsSubclassOf<CTreeWidgetRow>();
     }
 
+    void CTreeWidget::SetSelectionMode(CItemSelectionMode selectionMode)
+    {
+        this->selectionMode = selectionMode;
+
+        UpdateSelection();
+    }
+
+    void CTreeWidget::Select(CTreeWidgetItem* item, bool selectAdditive)
+    {
+        if (selectionMode == CItemSelectionMode::NoSelection)
+        {
+            UpdateSelection();
+            return;
+        }
+
+        if (!selectAdditive || selectionMode == CItemSelectionMode::SingleSelection)
+            selectedItems.Clear();
+
+        selectedItems.Add(item);
+
+        UpdateSelection();
+    }
+
     void CTreeWidget::Construct()
     {
 	    Super::Construct();
@@ -147,6 +170,51 @@ namespace CE::Widgets
                 row->Destroy();
                 rows.Remove(row);
 	        }
+        }
+    }
+
+    void CTreeWidget::UpdateSelection()
+    {
+        switch (selectionMode)
+        {
+        case CItemSelectionMode::SingleSelection:
+            if (selectedItems.GetSize() > 1)
+            {
+                CTreeWidgetItem* item = *selectedItems.begin();
+                selectedItems.Clear();
+                selectedItems.Add(item);
+                SetNeedsPaint();
+            }
+            break;
+        case CItemSelectionMode::NoSelection:
+            if (!selectedItems.IsEmpty())
+            {
+                selectedItems.Clear();
+                SetNeedsPaint();
+            }
+            break;
+        default:
+            break;
+        }
+
+        for (CTreeWidgetItem* treeWidgetItem : items)
+        {
+            bool isSelected = selectedItems.Exists(treeWidgetItem);
+
+            if (isSelected && !EnumHasFlag(treeWidgetItem->stateFlags, CStateFlag::Active))
+            {
+                treeWidgetItem->stateFlags |= CStateFlag::Active;
+
+                treeWidgetItem->SetNeedsStyle();
+                treeWidgetItem->SetNeedsPaint();
+            }
+            else if (!isSelected && EnumHasFlag(treeWidgetItem->stateFlags, CStateFlag::Active))
+            {
+                treeWidgetItem->stateFlags &= ~CStateFlag::Active;
+
+                treeWidgetItem->SetNeedsStyle();
+                treeWidgetItem->SetNeedsPaint();
+            }
         }
     }
 

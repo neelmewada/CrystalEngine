@@ -155,8 +155,8 @@ namespace CE::Widgets
             return styleClasses.Exists(styleClass);
         }
 
-        virtual Vec2 GetComputedLayoutTopLeft() { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
-        virtual Vec2 GetComputedLayoutSize() { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+        virtual Vec2 GetComputedLayoutTopLeft();
+        virtual Vec2 GetComputedLayoutSize();
 
         Vec4 GetComputedLayoutPadding() {
             return Vec4(YGNodeLayoutGetPadding(node, YGEdgeLeft),

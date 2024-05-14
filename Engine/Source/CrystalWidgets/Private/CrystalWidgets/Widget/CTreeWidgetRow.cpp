@@ -25,4 +25,19 @@ namespace CE::Widgets
 		SetNeedsPaint();
 	}
 
+	void CTreeWidgetRow::HandleEvent(CEvent* event)
+	{
+		if (event->IsMouseEvent())
+		{
+			CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+
+			if (event->type == CEventType::MousePress && ownerItem)
+			{
+				treeWidget->Select(ownerItem);
+			}
+		}
+
+		Super::HandleEvent(event);
+	}
+
 } // namespace CE::Widgets

@@ -19,6 +19,8 @@ namespace CE::Widgets
 
 	private:
 
+		void HandleEvent(CEvent* event) override;
+
 		FIELD()
 		CTreeWidgetItem* ownerItem = nullptr;
 
