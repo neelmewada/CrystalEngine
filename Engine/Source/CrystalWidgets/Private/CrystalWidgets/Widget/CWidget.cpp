@@ -268,11 +268,6 @@ namespace CE::Widgets
 	void CWidget::SetNeedsPaint()
 	{
 		needsPaint = true;
-
-		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
-		{
-			attachedWidgets[i]->SetNeedsPaint();
-		}
 	}
 
 	void CWidget::SetNeedsLayout()
@@ -436,6 +431,11 @@ namespace CE::Widgets
 			
 			if (parent)
 			{
+				Vec2 scrollOffset = Vec2();
+				if (parent->allowHorizontalScroll || parent->allowVerticalScroll)
+					scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+				// TODO: Added the -scrollOffset part recently. It needs to be tested properly before pushing
 				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->GetFinalRootPadding().min;
 			}
 
@@ -494,6 +494,20 @@ namespace CE::Widgets
 		}
 
 		return CreateObject<CBehavior>(this, behaviorClass->GetName().GetLastComponent(), OF_Transient, behaviorClass);
+	}
+
+	CBehavior* CWidget::GetBehavior(SubClass<CBehavior> behaviorClass)
+	{
+		if (behaviorClass == nullptr)
+			return nullptr;
+
+		for (CBehavior* behavior : behaviors)
+		{
+			if (behavior->GetClass() == behaviorClass) // Same behavior class already exists!
+				return behavior;
+		}
+
+		return nullptr;
 	}
 
 	Vec4 CWidget::GetFinalRootPadding()
@@ -1062,6 +1076,7 @@ namespace CE::Widgets
 		}
 
 		Vec2 scrollOffset = Vec2();
+
 		if (parent != nullptr)
 			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
@@ -1368,9 +1383,14 @@ namespace CE::Widgets
 
 	bool CWidget::IsClipped(CPainter* painter)
 	{
+		return false;
+
 		if (painter->ClipRectExists() && parent)
 		{
-			// TODO: Do NOT OnPaint() if outside clip rect
+			bool isRow = parent->IsOfType<CTreeWidgetRow>();
+			const Name& rowName = GetName();
+			bool rowFound = rowName == "ActorComponent_2";
+
 			Vec2 scrollOffset = Vec2();
 			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
@@ -1438,7 +1458,7 @@ namespace CE::Widgets
 			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
-			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled() && !IsClipped(painter))
+			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
 			{
 				paintEvent->painter->Reset();
 				popPaintCoords = true;
@@ -1456,6 +1476,7 @@ namespace CE::Widgets
 					{
 						extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
 					}
+
 					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
 					paintEvent->painter->PushClipRect(contentRect);
 					popPaintClipRect = true;
@@ -1488,6 +1509,7 @@ namespace CE::Widgets
 				stateFlags |= CStateFlag::Pressed;
 				isPressed = true;
 				SetNeedsStyle();
+				SetNeedsPaint();
 			}
 			else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
 			{
@@ -1495,6 +1517,7 @@ namespace CE::Widgets
 				stateFlags &= ~CStateFlag::Pressed;
 				isPressed = false;
 				SetNeedsStyle();
+				SetNeedsPaint();
 			}
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))

@@ -88,6 +88,14 @@ namespace CE::Widgets
             return (T*)AddBehavior(GetStaticClass<T>());
         }
 
+        CBehavior* GetBehavior(SubClass<CBehavior> behaviorClass);
+
+        template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
+        T* GetBehavior()
+        {
+            return (T*)GetBehavior(GetStaticClass<T>());
+        }
+
         // - Style API -
 
         CStateFlag GetStateFlags() const { return stateFlags; }

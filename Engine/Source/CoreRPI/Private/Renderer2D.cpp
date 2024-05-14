@@ -1214,6 +1214,8 @@ namespace CE::RPI
 			}
 		}
 
+		CE_LOG(Info, All, "2D Draw Items: {}", drawItemCount);
+
 		while (oldPackets.NonEmpty())
 		{
 			delete oldPackets[0];

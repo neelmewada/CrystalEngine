@@ -143,19 +143,36 @@ namespace CE::Widgets
                 isVerticalScrollPressed = false;
                 dragEvent->ConsumeAndStopPropagation(self);
             }
-            else if (mouseEvent->type == CEventType::MouseWheel && self->allowVerticalScroll)
+            else if (mouseEvent->type == CEventType::MouseWheel && self->allowVerticalScroll && event->sender != nullptr)
             {
-                Vec2 originalSize = self->GetComputedLayoutSize();
-                f32 originalHeight = originalSize.height;
-                f32 contentMaxY = self->contentSize.height;
+                CWidget* sender = event->sender;
 
-                if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
+                while (sender != nullptr)
                 {
-                    self->normalizedScroll.y += -mouseEvent->wheelDelta.y * self->scrollSensitivity / (contentMaxY - originalHeight);
-                    self->normalizedScroll.y = Math::Clamp01(self->normalizedScroll.y);
+                    CScrollBehavior* scrollBehavior = sender->GetBehavior<CScrollBehavior>();
 
-                    self->SetNeedsLayout();
-                    self->SetNeedsPaint();
+                    if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible() && sender->allowVerticalScroll)
+                    {
+                        if (sender == self)
+                        {
+                            Vec2 originalSize = self->GetComputedLayoutSize();
+                            f32 originalHeight = originalSize.height;
+                            f32 contentMaxY = self->contentSize.height;
+
+                            if (contentMaxY > originalHeight + app->styleConstants.scrollSizeBuffer) // If scrolling is possible
+                            {
+                                self->normalizedScroll.y += -mouseEvent->wheelDelta.y * self->scrollSensitivity / (contentMaxY - originalHeight);
+                                self->normalizedScroll.y = Math::Clamp01(self->normalizedScroll.y);
+
+                                self->SetNeedsLayout();
+                                self->SetNeedsPaint();
+                            }
+                        }
+
+	                    break;
+                    }
+
+                    sender = sender->parent;
                 }
             }
 
