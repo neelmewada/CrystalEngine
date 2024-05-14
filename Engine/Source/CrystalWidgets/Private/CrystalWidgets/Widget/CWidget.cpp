@@ -913,8 +913,14 @@ namespace CE::Widgets
 			return {};
 
 		Vec2 scrollOffset = Vec2();
-		if (parent != nullptr)
-			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+		CWidget* parentWidget = parent;
+
+		while (parentWidget != nullptr)
+		{
+			scrollOffset += parentWidget->normalizedScroll * (parentWidget->contentSize - parentWidget->GetComputedLayoutSize());
+
+			parentWidget = parentWidget->parent;
+		}
 
 		{
 			Vec2i posInt = nativeWindow->GetWindowPosition();
