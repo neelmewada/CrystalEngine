@@ -1381,30 +1381,6 @@ namespace CE::Widgets
 		return CreateDefaultSubobject<CBehavior>(behaviorClass, behaviorClass->GetName().GetLastComponent());
 	}
 
-	bool CWidget::IsClipped(CPainter* painter)
-	{
-		return false;
-
-		if (painter->ClipRectExists() && parent)
-		{
-			bool isRow = parent->IsOfType<CTreeWidgetRow>();
-			const Name& rowName = GetName();
-			bool rowFound = rowName == "ActorComponent_2";
-
-			Vec2 scrollOffset = Vec2();
-			if (parent != nullptr && (parent->allowVerticalScroll || parent->allowHorizontalScroll))
-				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
-
-			auto rect = Rect::FromSize(GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
-			Rect windowSpaceRect = parent->LocalToWindowSpaceRect(rect);
-			Rect prevClipRect = painter->GetLastClipRect();
-
-			return !windowSpaceRect.Overlaps(prevClipRect);
-		}
-
-		return false;
-	}
-
 	void CWidget::HandleEvent(CEvent* event)
 	{
 		if (event == nullptr)

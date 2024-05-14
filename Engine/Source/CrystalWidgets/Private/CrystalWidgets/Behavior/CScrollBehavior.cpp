@@ -98,8 +98,6 @@ namespace CE::Widgets
         {
             CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
             Vec2 globalMousePos = mouseEvent->mousePos;
-            Rect screenSpaceWindowRect = self->GetScreenSpaceRect();
-            Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
             if (mouseEvent->type == CEventType::MouseMove && (self->allowVerticalScroll || self->allowHorizontalScroll))

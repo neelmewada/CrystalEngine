@@ -328,8 +328,6 @@ namespace CE::Widgets
             return (T*)AddDefaultBehavior(GetStaticClass<T>());
         }
 
-        bool IsClipped(CPainter* painter);
-
         virtual void OnBeforeDestroy() override;
 
         static YGSize MeasureFunctionCallback(YGNodeConstRef node,
