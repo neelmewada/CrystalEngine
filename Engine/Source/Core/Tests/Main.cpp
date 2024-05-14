@@ -1016,6 +1016,29 @@ TEST(Reflection, TypeId)
     TEST_END;
 }
 
+
+enum class CustomFlagsEnum
+{
+	None = 0,
+	Transient = BIT(0),
+	Active = BIT(1),
+	Focused = BIT(2),
+	Hovered = BIT(3),
+	Pressed = BIT(4),
+};
+ENUM_CLASS_FLAGS(CustomFlagsEnum);
+
+CE_RTTI_ENUM(, , CustomFlagsEnum,
+	CE_ATTRIBS(Flags),
+	CE_CONST(None),
+	CE_CONST(Transient),
+	CE_CONST(Active),
+	CE_CONST(Focused),
+	CE_CONST(Hovered),
+	CE_CONST(Pressed),
+);
+CE_RTTI_ENUM_IMPL(, , CustomFlagsEnum);
+
 TEST(Reflection, RTTI_Registry_Testing)
 {
     // 1. Test Loading & Unloading
@@ -1050,6 +1073,19 @@ TEST(Reflection, RTTI_Registry_Testing)
 	EXPECT_NE(enumType, nullptr);
 	EXPECT_EQ(enumType->GetName(), "CE::EventResult");
 	EXPECT_EQ(enumType->GetTypeName(), "/Code/Core.CE::EventResult");
+
+	CE_REGISTER_TYPES(CustomFlagsEnum);
+    {
+		CustomFlagsEnum customFlags = CustomFlagsEnum::Active | CustomFlagsEnum::Pressed | CustomFlagsEnum::Transient;
+		String string = String::Format("Value: {}", customFlags);
+
+		EXPECT_EQ(string, "Value: Transient|Active|Pressed");
+
+		EventResult eventResult = EventResult::HandleAndStopPropagation;
+		string = String::Format("Value: {}", eventResult);
+		EXPECT_EQ(string, "Value: HandleAndStopPropagation");
+    }
+	CE_DEREGISTER_TYPES(CustomFlagsEnum);
 
     // 5. Test Object class
 

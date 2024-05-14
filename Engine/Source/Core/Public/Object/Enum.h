@@ -221,6 +221,21 @@ template <> struct fmt::formatter<Namespace::Enum> {\
     template <typename FormatContext>\
     auto format(const Namespace::Enum& value, FormatContext& ctx) const -> decltype(ctx.out()) {\
         auto enumType = CE::GetStaticEnum<Namespace::Enum>();\
+        if (enumType->IsFlagsEnum())\
+        {\
+            CE::String result = "";\
+            for (int i = 0; i < enumType->GetConstantsCount(); ++i)\
+            {\
+                s64 constValue = enumType->GetConstant(i)->GetValue();\
+                if (constValue != 0 && EnumHasFlag(value, (Namespace::Enum)constValue))\
+                {\
+                    if (result.NonEmpty())\
+                        result += "|";\
+                    result += enumType->GetConstant(i)->GetName().GetString();\
+                }\
+            }\
+            return fmt::format_to(ctx.out(), "{}", result);\
+        }\
         auto constant = enumType->FindConstantWithValue((s64)value);\
         if (constant == nullptr)\
         {\

@@ -78,7 +78,7 @@ namespace CE::Widgets
 
         virtual void OnAfterUpdateLayout();
 
-        virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
+        virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height);
 
         CBehavior* AddBehavior(SubClass<CBehavior> behaviorClass);
 
@@ -86,6 +86,14 @@ namespace CE::Widgets
         T* AddBehavior()
         {
             return (T*)AddBehavior(GetStaticClass<T>());
+        }
+
+        CBehavior* GetBehavior(SubClass<CBehavior> behaviorClass);
+
+        template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
+        T* GetBehavior()
+        {
+            return (T*)GetBehavior(GetStaticClass<T>());
         }
 
         // - Style API -
@@ -147,8 +155,8 @@ namespace CE::Widgets
             return styleClasses.Exists(styleClass);
         }
 
-        virtual Vec2 GetComputedLayoutTopLeft() { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
-        virtual Vec2 GetComputedLayoutSize() { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+        virtual Vec2 GetComputedLayoutTopLeft();
+        virtual Vec2 GetComputedLayoutSize();
 
         Vec4 GetComputedLayoutPadding() {
             return Vec4(YGNodeLayoutGetPadding(node, YGEdgeLeft),
@@ -285,6 +293,12 @@ namespace CE::Widgets
         FIELD()
         Array<CBehavior*> behaviors{};
 
+        FIELD()
+        b8 canDrawBgImage = true;
+
+        FIELD()
+        f32 rotation = 0.0f;
+
         // - Configs -
 
         FIELD(Config)
@@ -304,8 +318,6 @@ namespace CE::Widgets
         int destroyFrameCounter = 0;
         b8 isQueuedForDestruction = false;
 
-        Name backgroundImagePath{};
-
     protected:
 
         CBehavior* AddDefaultBehavior(SubClass<CBehavior> behaviorClass);
@@ -315,8 +327,6 @@ namespace CE::Widgets
         {
             return (T*)AddDefaultBehavior(GetStaticClass<T>());
         }
-
-        bool IsClipped(CPainter* painter);
 
         virtual void OnBeforeDestroy() override;
 

@@ -133,11 +133,6 @@ namespace CE::Widgets
 				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
 				if (nativeWindow)
 				{
-					if (widget->IsOfType<CDockSpace>() && widget->parent == nullptr)
-					{
-						//CE_LOG(Info, All, "{} | {} | {}", nativeWindow->IsFocused(), nativeWindow->IsShown(), nativeWindow->IsMinimized());
-					}
-
 					if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
 					{
 						return nullptr;
@@ -346,27 +341,36 @@ namespace CE::Widgets
 					widgetsPressedPerMouseButton[i] = event.sender;
 					hoveredWidgetsStack.Top()->HandleEvent(&event);
 
-					if (hoveredWidgetsStack.Top()->receiveDragEvents && mouseButton == MouseButton::Left)
+					CWidget* dragEventWidget = hoveredWidgetsStack.Top();
+
+					while (dragEventWidget != nullptr)
 					{
-						CDragEvent dragEvent{};
-						dragEvent.name = "DragEvent";
-						dragEvent.type = CEventType::DragBegin;
-						dragEvent.button = mouseButton;
-						dragEvent.mousePos = globalMousePos;
-						dragEvent.prevMousePos = prevMousePos;
-						dragEvent.direction = CEventDirection::BottomToTop;
-						dragEvent.isInside = true;
-						dragEvent.wheelDelta = mouseWheelDelta;
-						dragEvent.keyModifiers = keyModifierStates;
-
-						dragEvent.sender = hoveredWidgetsStack.Top();
-						dragEvent.draggedWidget = hoveredWidgetsStack.Top();
-						hoveredWidgetsStack.Top()->HandleEvent(&dragEvent);
-
-						if (dragEvent.isConsumed)
+						if (dragEventWidget->receiveDragEvents && mouseButton == MouseButton::Left)
 						{
-							draggedWidget = dragEvent.draggedWidget;
+							CDragEvent dragEvent{};
+							dragEvent.name = "DragEvent";
+							dragEvent.type = CEventType::DragBegin;
+							dragEvent.button = mouseButton;
+							dragEvent.mousePos = globalMousePos;
+							dragEvent.prevMousePos = prevMousePos;
+							dragEvent.direction = CEventDirection::BottomToTop;
+							dragEvent.isInside = true;
+							dragEvent.wheelDelta = mouseWheelDelta;
+							dragEvent.keyModifiers = keyModifierStates;
+
+							dragEvent.sender = dragEventWidget;
+							dragEvent.draggedWidget = dragEventWidget;
+							dragEventWidget->HandleEvent(&dragEvent);
+
+							if (dragEvent.isConsumed)
+							{
+								draggedWidget = dragEvent.draggedWidget;
+							}
+
+							break;
 						}
+
+						dragEventWidget = dragEventWidget->parent;
 					}
 				}
 			}

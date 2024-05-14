@@ -18,9 +18,8 @@ namespace CE::Widgets
 		Window = BIT(9),
 		Collapsed = BIT(10),
 		Active = BIT(11),
-		Inactive = BIT(12),
-		Major = BIT(13),
-		Minor = BIT(14)
+		Major = BIT(12),
+		Minor = BIT(13)
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 
@@ -68,6 +67,7 @@ namespace CE::Widgets
 		Background,
         BackgroundImage,
 		BackgroundSize,
+		BackgroundPosition,
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
@@ -118,6 +118,16 @@ namespace CE::Widgets
 	ENUM_CLASS_FLAGS(CStylePropertyTypeFlags);
 
 	ENUM()
+	enum class CBackgroundSize : u8
+	{
+		Fill,
+		Cover,
+		Contain,
+		Auto = Fill
+	};
+	ENUM_CLASS(CBackgroundSize);
+
+	ENUM()
 	enum class CTextAlign : u8
 	{
 		Inherited = 0,
@@ -125,9 +135,17 @@ namespace CE::Widgets
 		MiddleLeft, MiddleCenter, MiddleRight,
 		BottomLeft, BottomCenter, BottomRight
 	};
-	ENUM_CLASS_FLAGS(CTextAlign);
+	ENUM_CLASS(CTextAlign);
 
 	CRYSTALWIDGETS_API CTextAlign StringToAlignment(const String& string);
+
+	ENUM()
+	enum class COrientation
+	{
+		Horizontal = 0,
+		Vertical
+	};
+	ENUM_CLASS(COrientation);
 
 	ENUM()
 	enum class CCursor : u8
@@ -182,9 +200,9 @@ namespace CE::Widgets
 	{
 		Inherited = 0,
 		Normal,
-		BreakWord,
 		Clip,
-		Ellipsis,
+		// WARNING: Not implemented yet
+		BreakWord
 	};
 	ENUM_CLASS(CWordWrap);
 
@@ -419,6 +437,27 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::BorderRadius))
 				return Vec4();
 			return properties.Get(CStylePropertyType::BorderRadius).vector;
+		}
+
+		CBackgroundSize GetBackgroundSize() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundSize))
+				return CBackgroundSize::Auto;
+			return (CBackgroundSize)properties.Get(CStylePropertyType::BackgroundSize).enumValue.x;
+		}
+
+		CTextAlign GetBackgroundPosition() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
+				return CTextAlign::MiddleCenter;
+			return (CTextAlign)properties.Get(CStylePropertyType::BackgroundPosition).enumValue.x;
+		}
+
+		CWordWrap GetWordWarp() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
+				return CWordWrap::Normal;
+			return (CWordWrap)properties.Get(CStylePropertyType::WordWrap).enumValue.x;
 		}
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

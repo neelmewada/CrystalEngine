@@ -24,6 +24,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::Background, TYPE(Color), false },
 		{ CStylePropertyType::BackgroundImage, TYPE(String), false },
 		{ CStylePropertyType::BackgroundSize, TYPE(Vec2), false },
+		{ CStylePropertyType::BackgroundPosition, TYPE(CTextAlign), false },
 		{ CStylePropertyType::BorderRadius, TYPE(Vec4), false },
 		{ CStylePropertyType::BorderWidth, TYPE(f32), false },
 		{ CStylePropertyType::BorderColor, TYPE(Color), false },
@@ -88,6 +89,7 @@ namespace CE::Widgets
 		{ "image-tint", CStylePropertyType::ImageTint }, { "tint", CStylePropertyType::ImageTint },
 		{ "shadow", CStylePropertyType::ShadowColor }, { "box-shadow", CStylePropertyType::ShadowColor }, { "shadow-color", CStylePropertyType::ShadowColor },
 		{ "background-size", CStylePropertyType::BackgroundSize },
+		{ "background-position", CStylePropertyType::BackgroundPosition },
 		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
 		{ "word-wrap", CStylePropertyType::WordWrap },
@@ -137,7 +139,9 @@ namespace CE::Widgets
 		{ CStylePropertyType::FlexDirection, GetStaticEnum<CFlexDirection>() },
 		{ CStylePropertyType::Display, GetStaticEnum<CDisplay>() },
 		{ CStylePropertyType::Cursor, GetStaticEnum<CCursor>() },
-		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() }
+		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() },
+		{ CStylePropertyType::BackgroundSize, GetStaticEnum<CBackgroundSize>() },
+		{ CStylePropertyType::BackgroundPosition, GetStaticEnum<CTextAlign>() },
 	};
 
 	CRYSTALWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)

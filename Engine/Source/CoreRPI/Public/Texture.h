@@ -27,11 +27,21 @@ namespace CE::RPI
 
         virtual void UploadData(u8* src, u64 dataSize);
 
+        u32 GetWidth() const { return width; }
+
+        u32 GetHeight() const { return height; }
+
+        u32 GetDepth() const { return depth; }
+
     protected:
 
         RHI::Texture* texture = nullptr;
         RHI::TextureView* textureView = nullptr;
         RHI::Sampler* samplerState = nullptr;
+
+        u32 width = 0;
+        u32 height = 0;
+        u32 depth = 1;
     };
 
 } // namespace CE::RPI

@@ -52,6 +52,7 @@ namespace CE::IO
     
 } // namespace CE::IO
 
+
 CE_RTTI_ENUM(CORE_API, CE::IO, FileAction,
     CE_ATTRIBS(),
     CE_CONST(Add),
@@ -59,4 +60,3 @@ CE_RTTI_ENUM(CORE_API, CE::IO, FileAction,
     CE_CONST(Modified),
     CE_CONST(Moved)
 )
-
