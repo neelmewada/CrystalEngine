@@ -18,6 +18,8 @@ namespace CE
         FIELD_Config = BIT(3),
         FIELD_ImportSetting = BIT(4),
 		FIELD_Internal = BIT(5),
+        FIELD_EditAnywhere = BIT(6),
+        FIELD_VisibleAnywhere = BIT(7),
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -91,6 +93,9 @@ namespace CE
         bool IsHidden() const;
         bool IsReadOnly() const;
 		bool IsInternal() const;
+
+        bool IsEditAnywhere() const;
+        bool IsVisibleAnywhere() const;
 
         /// The strict owner of this field, which remains same for all derived classes.
 		TypeInfo* GetOwnerType();
