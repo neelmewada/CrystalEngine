@@ -45,6 +45,52 @@ namespace CE::Widgets
         UpdateSelection();
     }
 
+    void CTreeWidget::RemoveItem(CTreeWidgetItem* item)
+    {
+        if (item->row)
+        {
+            item->row->RemoveSubWidget(item);
+        }
+
+        selectedItems.Remove(item);
+        items.Remove(item);
+        item->treeWidget = nullptr;
+        item->row = nullptr;
+
+        item->Destroy();
+        
+        UpdateRows();
+        UpdateSelection();
+    }
+
+    void CTreeWidget::RemoveAllItems()
+    {
+        selectedItems.Clear();
+
+        for (int i = items.GetSize() - 1; i >= 0; --i)
+        {
+            CTreeWidgetItem* item = items[i];
+            if (item->row)
+            {
+                item->row->RemoveSubWidget(item);
+            }
+
+            items.RemoveAt(i);
+            item->treeWidget = nullptr;
+            item->row = nullptr;
+
+            item->Destroy();
+        }
+
+        for (int i = rows.GetSize() - 1; i >= 0; --i)
+        {
+            rows[i]->Destroy();
+        }
+
+        UpdateRows();
+        UpdateSelection();
+    }
+
     void CTreeWidget::Construct()
     {
 	    Super::Construct();

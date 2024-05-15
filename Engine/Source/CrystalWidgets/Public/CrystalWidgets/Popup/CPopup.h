@@ -27,6 +27,8 @@ namespace CE::Widgets
 
     protected:
 
+        void OnFocusLost() override;
+
         bool WindowHitTest(PlatformWindow* window, Vec2 position) override;
 
         void HandleEvent(CEvent* event) override;

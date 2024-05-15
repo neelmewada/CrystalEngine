@@ -15,6 +15,14 @@ namespace CE::Editor
 
 		void SetScene(CE::Scene* scene);
 
+		CTreeView* GetHierarchyTreeView() const { return hierarchyTreeView; }
+
+		// - Signals -
+
+		CE_SIGNAL(OnActorSelected, Actor*);
+
+		CE_SIGNAL(OnSceneSelectionChanged, CItemSelection*);
+
 	private:
 
 		void Construct() override;

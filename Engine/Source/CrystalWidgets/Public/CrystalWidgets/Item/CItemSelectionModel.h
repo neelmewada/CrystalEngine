@@ -36,6 +36,8 @@ namespace CE::Widgets
 
         b8 HasSelection() const { return hasSelection; }
 
+        const CItemSelection& GetSelection() const { return selection; }
+
         bool IsSelected(const CModelIndex& index) const
         {
             return selection.IsSelected(index);

@@ -5,12 +5,49 @@ namespace CE::Editor
 
     DetailsWindow::DetailsWindow()
     {
-	    
+        receiveKeyEvents = true;
+        receiveMouseEvents = true;
     }
 
     DetailsWindow::~DetailsWindow()
     {
 	    
+    }
+
+    void DetailsWindow::SetupForActor(Actor* actor)
+    {
+        treeWidget->RemoveAllItems();
+
+        if (!actor)
+        {
+            splitView->SetEnabled(false);
+            noSelectionLabel->SetEnabled(true);
+	        return;
+        }
+
+        splitView->SetEnabled(true);
+        noSelectionLabel->SetEnabled(false);
+
+        CTreeWidgetItem* rootItem = CreateObject<CTreeWidgetItem>(treeWidget, "RootItem");
+        rootItem->SetText( actor->GetName().GetString() + " (Self)");
+        rootItem->SetForceExpanded(true);
+
+        std::function<void(SceneComponent*, CTreeWidgetItem*)> sceneComponentVisitor = [&](SceneComponent* sceneComponent, CTreeWidgetItem* parentItem)
+            {
+                if (!sceneComponent)
+                    return;
+
+                CTreeWidgetItem* item = CreateObject<CTreeWidgetItem>(parentItem, sceneComponent->GetName().GetString());
+                item->SetText(sceneComponent->GetName().GetString());
+
+                for (int i = 0; i < sceneComponent->GetAttachedComponentCount(); ++i)
+                {
+                    SceneComponent* attachedComponent = sceneComponent->GetAttachedComponent(i);
+                    sceneComponentVisitor(attachedComponent, item);
+                }
+            };
+
+        sceneComponentVisitor(actor->GetRootComponent(), rootItem);
     }
 
     void DetailsWindow::Construct()
@@ -21,7 +58,10 @@ namespace CE::Editor
 
         LoadStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/DetailsWindowStyle.css");
 
-        CSplitView* splitView = CreateObject<CSplitView>(this, "DetailsSplitter");
+        noSelectionLabel = CreateObject<CLabel>(this, "NoSelectionLabel");
+        noSelectionLabel->SetText("Select an object to view it's details");
+
+        splitView = CreateObject<CSplitView>(this, "DetailsSplitter");
         splitView->SetOrientation(COrientation::Vertical);
 
         splitView->AddSplit(0.6f);
@@ -42,34 +82,6 @@ namespace CE::Editor
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);
 
-        {
-            CTreeWidgetItem* rootItem = CreateObject<CTreeWidgetItem>(treeWidget, "RootItem");
-            rootItem->SetText("SomeActorName (Self)");
-            rootItem->SetForceExpanded(true);
-
-            {
-                CTreeWidgetItem* sceneItem = CreateObject<CTreeWidgetItem>(rootItem, "SceneItem");
-                sceneItem->SetText("SceneComponent");
-
-                for (int i = 0; i < 2; i++)
-                {
-                    CTreeWidgetItem* meshComponentItem = CreateObject<CTreeWidgetItem>(sceneItem, "MeshItem");
-                    meshComponentItem->SetText(String("StaticMeshComponent_") + i);
-
-                    CTreeWidgetItem* meshComponentItem2 = CreateObject<CTreeWidgetItem>(meshComponentItem, "MeshItem");
-                    meshComponentItem2->SetText("StaticMeshComponent_Child");
-                }
-
-                for (int i = 0; i < 3; ++i)
-                {
-	                CTreeWidgetItem* componentItem = CreateObject<CTreeWidgetItem>(rootItem, String("ActorComponent_") + i);
-	                componentItem->SetText(String("ActorComponent_") + i);
-	                componentItem->SetExpanded(false); // TODO: Perform manual update
-	                componentItem->SetExpanded(true);
-                }
-            }
-        }
-
         Bind(treeWidget, MEMBER_FUNCTION(CTreeWidget, OnSelectionChanged), [this](CTreeWidget*)
             {
                 const auto& selectedItems = treeWidget->GetSelectedItems();
@@ -77,6 +89,7 @@ namespace CE::Editor
 	            for (auto it = selectedItems.cbegin(); it != selectedItems.cend(); ++it)
 	            {
                     CTreeWidgetItem* selected = *it;
+                    
                     break;
 	            }
             });
@@ -93,6 +106,21 @@ namespace CE::Editor
             CButton* testButton = CreateObject<CButton>(outer, String("TestButton_") + i);
             testButton->SetText(String("Click Me ") + i);
         }
+
+        splitView->SetEnabled(false);
+        noSelectionLabel->SetEnabled(true);
     }
-    
+
+    void DetailsWindow::HandleEvent(CEvent* event)
+    {
+        if (event->type == CEventType::KeyPress)
+        {
+            CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
+
+
+        }
+
+	    Super::HandleEvent(event);
+    }
+
 } // namespace CE::Editor
