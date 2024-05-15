@@ -13,6 +13,13 @@ DetailsWindow #HeaderRow {
     margin: 5px 5px 0 5px;
 }
 
+DetailsWindow #NoSelectionLabel {
+    align-self: center;
+    margin: 0 20px 0 0;
+    color: rgb(140, 140, 140);
+    font-size: 12px;
+}
+
 #SplitContainer {
     padding: 5px 5px;
 }

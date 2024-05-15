@@ -22,6 +22,9 @@ namespace CE::Editor
         {
             splitView->SetEnabled(false);
             noSelectionLabel->SetEnabled(true);
+
+            UpdateLayoutIfNeeded();
+
 	        return;
         }
 
@@ -113,12 +116,6 @@ namespace CE::Editor
 
     void DetailsWindow::HandleEvent(CEvent* event)
     {
-        if (event->type == CEventType::KeyPress)
-        {
-            CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
-
-
-        }
 
 	    Super::HandleEvent(event);
     }
