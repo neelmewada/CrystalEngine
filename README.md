@@ -2,9 +2,7 @@
 
 A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a Widget library that uses CSS & Yoga Layout engine.
 
-PBR Demo            |  Widgets Demo
-|-|-|
-| ![](./Screenshots/IBL%20Demo%20Night.png)  |  ![](./Screenshots/EditorDemo.gif) |
+![](./Screenshots/EditorDemo.gif)
 
 ### Check more [screenshots below](#screenshots).
 
@@ -79,6 +77,10 @@ Crystal Editor window:
 GIF Demo:
 
 ![](./Screenshots/EditorDemo.gif)
+
+PBR Demo:
+
+![](./Screenshots/IBL%20Demo%20Night.png)
 
 ### Credits
 
