@@ -346,6 +346,7 @@ CTreeWidgetItem #ArrowButton:hovered {
     color: rgb(220, 220, 220);
 }
 
+
 CSplitView::splitter {
     background-color: rgb(28, 28, 28);
 }
@@ -380,3 +381,4 @@ CCollapsibleSection CImage#SectionArrow:hovered {
 CCollapsibleSection #SectionContent {
     flex-direction: column;
 }
+

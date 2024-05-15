@@ -20,7 +20,7 @@ namespace CE::Editor
         SetTitle("Details");
 
         LoadStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/DetailsWindowStyle.css");
-
+      
         CSplitView* splitView = CreateObject<CSplitView>(this, "DetailsSplitter");
         splitView->SetOrientation(COrientation::Vertical);
 
@@ -40,6 +40,7 @@ namespace CE::Editor
         title->SetText("SomeActorName");
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
+
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);
 
         {
@@ -91,6 +92,7 @@ namespace CE::Editor
                 outer = bottomView;
 
             CButton* testButton = CreateObject<CButton>(outer, String("TestButton_") + i);
+          
             testButton->SetText(String("Click Me ") + i);
         }
     }
