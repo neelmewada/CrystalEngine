@@ -14,7 +14,7 @@ namespace CE::Widgets
         virtual ~CImage();
 
         Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
-
+        
     private:
 
         void Construct() override;

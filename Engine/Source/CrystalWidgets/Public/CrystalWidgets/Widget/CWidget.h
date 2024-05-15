@@ -172,6 +172,7 @@ namespace CE::Widgets
 
         virtual Vec2 GetAvailableSizeForChild(CWidget* childWidget);
 
+
         Vec4 GetComputedLayoutPadding() {
             return Vec4(YGNodeLayoutGetPadding(node, YGEdgeLeft),
                 YGNodeLayoutGetPadding(node, YGEdgeTop),
