@@ -87,6 +87,8 @@
 #include "CrystalWidgets/Widget/CScrollArea.h"
 #include "CrystalWidgets/Widget/CSplitViewContainer.h"
 #include "CrystalWidgets/Widget/CSplitView.h"
+#include "CrystalWidgets/Widget/CCollapsibleSection.h"
+
 #include "CrystalWidgets/Item/CBaseItemView.h"
 #include "CrystalWidgets/Item/CTreeView.h"
 #include "CrystalWidgets/Widget/CListWidgetItem.h"

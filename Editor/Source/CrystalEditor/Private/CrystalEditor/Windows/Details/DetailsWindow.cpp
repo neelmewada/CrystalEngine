@@ -27,10 +27,16 @@ namespace CE::Editor
         splitView->AddSplit(0.6f);
 
         CSplitViewContainer* topView = splitView->GetContainer(0);
-        topView->SetName("SplitContainerTop");
-        CSplitViewContainer* bottomView = splitView->GetContainer(1);
+        topView->SetName("SplitContainer");
 
-        CLabel* title = CreateObject<CLabel>(topView, "TitleLabel");
+        CSplitViewContainer* bottomView = splitView->GetContainer(1);
+        bottomView->SetName("SplitContainer");
+        bottomView->SetVerticalScrollAllowed(true);
+        bottomView->AddBehavior<CScrollBehavior>();
+
+        CWidget* header = CreateObject<CWidget>(topView, "HeaderRow");
+
+        CLabel* title = CreateObject<CLabel>(header, "TitleLabel");
         title->SetText("SomeActorName");
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
@@ -75,9 +81,16 @@ namespace CE::Editor
 	            }
             });
 
+        CCollapsibleSection* collapsibleSection = CreateObject<CCollapsibleSection>(bottomView, "CollapsibleSection");
+        collapsibleSection->SetTitle("Expansible Section");
+
         for (int i = 0; i < 32; ++i)
         {
-            CButton* testButton = CreateObject<CButton>(bottomView, String("TestButton_") + i);
+            CWidget* outer = collapsibleSection->GetContent();
+            if (i >= 8)
+                outer = bottomView;
+
+            CButton* testButton = CreateObject<CButton>(outer, String("TestButton_") + i);
             testButton->SetText(String("Click Me ") + i);
         }
     }

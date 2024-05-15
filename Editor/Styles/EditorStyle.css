@@ -346,3 +346,37 @@ CTreeWidgetItem #ArrowButton:hovered {
     color: rgb(220, 220, 220);
 }
 
+CSplitView::splitter {
+    background-color: rgb(28, 28, 28);
+}
+
+CSplitView::splitter:active {
+    background-color: rgb(96, 96, 96);
+}
+
+CCollapsibleSection {
+    flex-direction: column;
+}
+
+CCollapsibleSection #SectionHeader {
+    flex-direction: row;
+    background-color: rgb(50, 50, 50);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 5px;
+    column-gap: 5px;
+}
+
+CCollapsibleSection CImage#SectionArrow {
+    width: 10px;
+    height: 10px;
+    color: rgb(160, 160, 160);
+}
+
+CCollapsibleSection CImage#SectionArrow:hovered {
+    color: rgb(220, 220, 220);
+}
+
+CCollapsibleSection #SectionContent {
+    flex-direction: column;
+}

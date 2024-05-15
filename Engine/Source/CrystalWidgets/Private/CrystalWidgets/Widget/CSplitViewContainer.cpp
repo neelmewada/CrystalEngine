@@ -6,7 +6,7 @@ namespace CE::Widgets
 
 	CSplitViewContainer::CSplitViewContainer()
 	{
-		
+		clipChildren = true;
 	}
 
 	CSplitViewContainer::~CSplitViewContainer()
@@ -52,7 +52,7 @@ namespace CE::Widgets
 		int numChildren = splitView->containers.GetSize();
 		if (index < 0)
 			return Super::GetComputedLayoutSize();
-
+		
 		if (splitView->GetOrientation() == COrientation::Horizontal)
 			return Vec2(parentSize.x * splitRatio - (f32)(numChildren - 1) * splitterWidth, parentSize.y);
 

@@ -16,6 +16,16 @@ namespace CE::Editor
 		
 	}
 
+	void AboutWindow::OnPlatformWindowSet()
+	{
+		Super::OnPlatformWindowSet();
+
+		if (nativeWindow)
+		{
+			nativeWindow->SetAlwaysOnTop(true);
+		}
+	}
+
 	void AboutWindow::Construct()
 	{
 		Super::Construct();

@@ -28,6 +28,8 @@ namespace CE::Widgets
 
         bool IsAlwaysOnTop();
 
+        void SetAlwaysOnTop(bool set);
+
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
         PlatformWindow* GetPlatformWindow() const { return platformWindow; }

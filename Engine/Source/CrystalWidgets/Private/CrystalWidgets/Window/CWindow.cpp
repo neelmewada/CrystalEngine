@@ -415,6 +415,23 @@ namespace CE::Widgets
         return IsOfType<CViewport>();
     }
 
+    bool CWindow::IsAlwaysOnTop() const
+    {
+        if (nativeWindow)
+        {
+            return nativeWindow->IsAlwaysOnTop();
+        }
+        return false;
+    }
+
+    void CWindow::SetAlwaysOnTop(bool set)
+    {
+        if (nativeWindow)
+        {
+            nativeWindow->SetAlwaysOnTop(set);
+        }
+    }
+
     void CWindow::OnPlatformWindowSet()
     {
 

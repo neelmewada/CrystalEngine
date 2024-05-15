@@ -41,6 +41,10 @@ namespace CE::Widgets
 
         bool IsViewportWindow() const;
 
+        bool IsAlwaysOnTop() const;
+
+        void SetAlwaysOnTop(bool set);
+
     protected:
 
         virtual void OnPlatformWindowSet();

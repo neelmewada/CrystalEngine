@@ -1327,7 +1327,7 @@ namespace CE::RPI
 	void Renderer2D::IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd)
 	{
 		u32 curNumItems = drawItemsBuffer[0]->GetBufferSize() / sizeof(DrawItem2D);
-		u32 incrementCount = curNumItems / 2; // Add 50% to the storage
+		u32 incrementCount = (u32)(curNumItems * 0.25f); // Add 25% to the storage
 
 		numCharactersToAdd = Math::Max(numCharactersToAdd, incrementCount);
 
@@ -1361,7 +1361,7 @@ namespace CE::RPI
 	void Renderer2D::IncrementClipRectsBuffer(u32 numRectsToAdd)
 	{
 		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(Rect);
-		u32 incrementCount = curNumRects / 2;
+		u32 incrementCount = (u32)(curNumRects * 0.25f); // Add 25% to the storage
 
 		numRectsToAdd = Math::Max(numRectsToAdd, incrementCount);
 

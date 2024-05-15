@@ -25,7 +25,20 @@ namespace CE::Widgets
 
 		CSplitViewContainer* GetContainer(u32 index) const { return containers[index]; }
 
+		Vec2 GetAvailableSizeForChild(CWidget* childWidget) override;
+
+		int GetIndexOfContainer(CSplitViewContainer* container) const;
+
+		void SetContainerSplitRatio(CSplitViewContainer* container, f32 newSplitRatio);
+
+		// - Signals -
+
+		// Params: CSplitView* sender, int draggedSplitterIndex
+		CE_SIGNAL(OnSplitterDragged, CSplitView*, int);
+
 	private:
+
+		void OnBeforeComputeStyle() override;
 
 		void OnPaint(CPaintEvent* paintEvent) override;
 
@@ -42,6 +55,13 @@ namespace CE::Widgets
 
 		FIELD()
 		Array<CSplitViewContainer*> containers{};
+
+		Color splitterColor = Color();
+		Color splitterActiveColor = Color();
+
+		int draggedSplitIdx = -1;
+		int hoveredSplitIdx = -1;
+		b8 hasPushedResizeCursor = false;
 
 		friend class CSplitViewContainer;
 	};

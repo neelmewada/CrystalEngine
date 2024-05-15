@@ -46,20 +46,6 @@ namespace CE::Widgets
 
     void CImage::HandleEvent(CEvent* event)
     {
-        if (event->IsMouseEvent())
-        {
-            CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
-
-            if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
-            {
-                emit OnMouseLeftPress();
-            }
-            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
-            {
-                emit OnMouseLeftClick();
-            }
-        }
-
 	    Super::HandleEvent(event);
     }
 
