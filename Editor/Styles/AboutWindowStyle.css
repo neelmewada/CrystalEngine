@@ -7,7 +7,6 @@ AboutWindow {
 }
 
 AboutWindow #Splash {
-    background-image: "/Editor/Assets/Images/Splash";
     background-size: cover;
     width: 100%;
     height: 300px;

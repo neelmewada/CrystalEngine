@@ -42,12 +42,14 @@ namespace CE
 		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "1");
 		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
 
+#if PAL_TRAIT_BUILD_EDITOR
 		// Hints for editor window
 		SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
 		SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
 
 		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
+#endif
 	}
 
 	void SDLApplication::PreShutdown()

@@ -293,6 +293,11 @@ namespace CE::Widgets
         return platformWindow->IsAlwaysOnTop();
     }
 
+    void CPlatformWindow::SetAlwaysOnTop(bool set)
+    {
+        platformWindow->SetAlwaysOnTop(set);
+    }
+
     const Array<RHI::DrawPacket*>& CPlatformWindow::FlushDrawPackets(u32 imageIndex)
     {
         static const Array<RHI::DrawPacket*> empty{};

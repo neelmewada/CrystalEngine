@@ -21,6 +21,13 @@
 	friend class CPlatformWindow;\
 	friend class CStyleSheet;\
 	friend class CSSStyleSheet;\
+	friend class CTreeWidgetItem;\
+	friend class CScrollBehavior;\
+	friend class CMenuItem;\
+	friend class CSSSelector;\
+	friend class CSplitViewContainer;\
+	friend class CSplitView;\
+
 
 // Style
 #include "CrystalWidgets/Style/FlexEnums.h"
@@ -78,6 +85,10 @@
 #include "CrystalWidgets/Widget/CTabWidget.h"
 #include "CrystalWidgets/Widget/CTabWidgetContainer.h"
 #include "CrystalWidgets/Widget/CScrollArea.h"
+#include "CrystalWidgets/Widget/CSplitViewContainer.h"
+#include "CrystalWidgets/Widget/CSplitView.h"
+#include "CrystalWidgets/Widget/CCollapsibleSection.h"
+
 #include "CrystalWidgets/Item/CBaseItemView.h"
 #include "CrystalWidgets/Item/CTreeView.h"
 #include "CrystalWidgets/Widget/CListWidgetItem.h"

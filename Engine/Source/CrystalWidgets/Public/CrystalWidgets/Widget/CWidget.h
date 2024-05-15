@@ -40,6 +40,18 @@ namespace CE::Widgets
         void SetEnabled(bool enabled);
         void SetInteractable(bool interactable);
 
+        f32 GetRotation() const { return rotation; }
+
+        void SetRotation(f32 rotation);
+
+        bool IsVerticalScrollAllowed() const { return allowVerticalScroll; }
+
+        bool IsHorizontalScrollAllowed() const { return allowHorizontalScroll; }
+
+        void SetVerticalScrollAllowed(bool value) { allowVerticalScroll = value; }
+
+        void SetHorizontalScrollAllowed(bool value) { allowHorizontalScroll = value; }
+
         FUNCTION()
         void SetNeedsPaint();
 
@@ -158,6 +170,9 @@ namespace CE::Widgets
         virtual Vec2 GetComputedLayoutTopLeft();
         virtual Vec2 GetComputedLayoutSize();
 
+        virtual Vec2 GetAvailableSizeForChild(CWidget* childWidget);
+
+
         Vec4 GetComputedLayoutPadding() {
             return Vec4(YGNodeLayoutGetPadding(node, YGEdgeLeft),
                 YGNodeLayoutGetPadding(node, YGEdgeTop),
@@ -195,6 +210,10 @@ namespace CE::Widgets
 
         CE_SIGNAL(OnUnfocused);
 
+        CE_SIGNAL(OnMouseLeftPress);
+
+        CE_SIGNAL(OnMouseLeftClick);
+
         virtual void OnFocusGained() {}
         virtual void OnFocusLost() {}
 
@@ -214,6 +233,8 @@ namespace CE::Widgets
         void OnSubobjectAttached(Object* object) override;
 
         virtual void HandleEvent(CEvent* event);
+
+    protected:
 
         FIELD()
         Array<CWidget*> attachedWidgets{};

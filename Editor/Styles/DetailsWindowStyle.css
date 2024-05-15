@@ -4,11 +4,21 @@ DetailsWindow {
 }
 
 DetailsWindow #TitleLabel {
-    margin: 5px 0 0 0;
-    margin: 0 0 0 10px;
+    
+}
+
+DetailsWindow #HeaderRow {
+    flex-direction: row;
+    min-height: 25px;
+    margin: 5px 5px 0 5px;
+}
+
+#SplitContainer {
+    padding: 5px 5px;
 }
 
 #ComponentTree {
-    height: 200px;
-    word-wrap: clip;
+    flex-grow: 4;
+    flex-shrink: 2;
 }
+

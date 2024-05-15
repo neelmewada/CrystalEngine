@@ -14,6 +14,8 @@ namespace CE::Editor
 
     private:
 
+        void OnPlatformWindowSet() override;
+
         void Construct() override;
 
     };

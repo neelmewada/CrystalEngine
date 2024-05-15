@@ -16,13 +16,24 @@ namespace CE::Editor
 		
 	}
 
+	void AboutWindow::OnPlatformWindowSet()
+	{
+		Super::OnPlatformWindowSet();
+
+		if (nativeWindow)
+		{
+			nativeWindow->SetAlwaysOnTop(true);
+		}
+	}
+
 	void AboutWindow::Construct()
 	{
 		Super::Construct();
 
 		LoadStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/AboutWindowStyle.css");
-
+		
 		CWidget* splash = CreateObject<CWidget>(this, "Splash");
+		splash->SetBackgroundImage("/Editor/Assets/Images/Splash");
 
 		CLabel* titleLabel = CreateObject<CLabel>(this, "TitleLabel");
 		titleLabel->SetText("CrystalEditor");

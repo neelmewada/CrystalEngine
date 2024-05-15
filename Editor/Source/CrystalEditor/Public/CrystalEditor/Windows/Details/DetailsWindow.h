@@ -13,13 +13,25 @@ namespace CE::Editor
 
         virtual ~DetailsWindow();
 
+        FUNCTION()
+        void SetupForActor(Actor* actor);
+
     private:
 
         void Construct() override;
 
+        void HandleEvent(CEvent* event) override;
+
         FIELD()
         CTreeWidget* treeWidget = nullptr;
 
+        FIELD()
+        CSplitView* splitView = nullptr;
+
+        FIELD()
+        CLabel* noSelectionLabel = nullptr;
+
+        friend class SceneEditorWindow;
     };
     
 } // namespace CE::Editor

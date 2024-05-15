@@ -93,6 +93,11 @@ namespace CE::Widgets
 		return nativeWindow != nullptr;
 	}
 
+	void CPopup::OnFocusLost()
+	{
+		Super::OnFocusLost();
+	}
+
 	bool CPopup::WindowHitTest(PlatformWindow* window, Vec2 position)
 	{
 		return false;

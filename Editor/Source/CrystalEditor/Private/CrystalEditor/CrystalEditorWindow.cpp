@@ -170,8 +170,8 @@ namespace CE::Editor
         auto curTime = clock();
         const f32 deltaTime = (f32)(curTime - prevClock) / CLOCKS_PER_SEC;
 
-        rotation += 30 * deltaTime;
-        meshComponent->SetLocalEulerAngles(Vec3(0, 0, rotation));
+        //rotation += 30 * deltaTime;
+        //meshComponent->SetLocalEulerAngles(Vec3(0, 0, rotation));
 
         prevClock = curTime;
     }

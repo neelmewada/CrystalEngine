@@ -2,10 +2,7 @@
 
 namespace CE::Widgets
 {
-    //constexpr f32 ScrollRectWidth = 10.0f;
-    //constexpr f32 MinScrollRectSize = 20.0f;
-    //constexpr f32 ScrollSizeBuffer = 1.0f;
-    
+
     CWindow::CWindow()
     {
         receiveMouseEvents = false;
@@ -30,8 +27,6 @@ namespace CE::Widgets
 	    {
             nativeWindow->Show();
 	    }
-
-        //SetEnabled(true);
     }
 
     void CWindow::Hide()
@@ -40,8 +35,6 @@ namespace CE::Widgets
 	    {
             nativeWindow->Hide();
 	    }
-
-        //SetEnabled(false);
     }
 
     void CWindow::SetPlatformWindow(PlatformWindow* window)
@@ -420,6 +413,23 @@ namespace CE::Widgets
     bool CWindow::IsViewportWindow() const
     {
         return IsOfType<CViewport>();
+    }
+
+    bool CWindow::IsAlwaysOnTop() const
+    {
+        if (nativeWindow)
+        {
+            return nativeWindow->IsAlwaysOnTop();
+        }
+        return false;
+    }
+
+    void CWindow::SetAlwaysOnTop(bool set)
+    {
+        if (nativeWindow)
+        {
+            nativeWindow->SetAlwaysOnTop(set);
+        }
     }
 
     void CWindow::OnPlatformWindowSet()

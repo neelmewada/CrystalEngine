@@ -52,6 +52,12 @@ namespace CE
 
 		const Vec3& GetRightwardVector() const { return rightwardVector; }
 
+		u32 GetAttachedComponentCount() const { return attachedComponents.GetSize(); }
+
+		SceneComponent* GetAttachedComponent(u32 index) const { return attachedComponents[index]; }
+
+		SceneComponent* GetParentComponent() const { return parentComponent; }
+
     protected:
 
 		bool IsTransformUpdated() const { return transformUpdated; }

@@ -111,9 +111,9 @@ namespace CE::Widgets
             }
             else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
             {
-                emit OnMenuItemClicked();
+                emit OnMenuItemClicked(this);
                 event->Consume(this);
-
+                
                 if (subMenu == nullptr) // A leaf menu item
                 {
                     auto parent = this->parent;

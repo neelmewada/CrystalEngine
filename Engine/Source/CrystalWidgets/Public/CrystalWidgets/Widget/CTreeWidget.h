@@ -18,6 +18,10 @@ namespace CE::Widgets
 
 		void Select(CTreeWidgetItem* item, bool selectAdditive = false);
 
+		void RemoveItem(CTreeWidgetItem* item);
+
+		void RemoveAllItems();
+
 		const auto& GetSelectedItems() const { return selectedItems; }
 
 		// - Signals -

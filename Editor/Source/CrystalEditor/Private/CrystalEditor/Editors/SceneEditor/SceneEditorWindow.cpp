@@ -37,7 +37,7 @@ namespace CE::Editor
 
             CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
             exit->SetText("Exit");
-            Bind(exit, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [this]
+            Bind(exit, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [this](CMenuItem* menuItem)
                 {
                     RequestEngineExit("USER_QUIT");
                 });
@@ -64,7 +64,7 @@ namespace CE::Editor
             CMenuItem* aboutItem = CreateObject<CMenuItem>(helpMenu, "AboutItem");
             aboutItem->SetText("About Crystal Editor");
 
-            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [&]
+            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [&](CMenuItem*)
                 {
                     PlatformWindowInfo windowInfo{};
                     windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
@@ -97,6 +97,9 @@ namespace CE::Editor
         sceneHierarchyWindow = CreateObject<SceneHierarchyWindow>(rightTop, "SceneHierarchy");
 
         detailsWindow = CreateObject<DetailsWindow>(rightBottom, "Details");
+
+        Bind(sceneHierarchyWindow, MEMBER_FUNCTION(SceneHierarchyWindow, OnActorSelected),
+            detailsWindow, MEMBER_FUNCTION(DetailsWindow, SetupForActor));
 
         minorDockSpace->Split(center, 0.4f, CDockSplitDirection::Vertical, "SplitTop", "SplitBottom");
         auto centerTop = center->GetSplit(0);

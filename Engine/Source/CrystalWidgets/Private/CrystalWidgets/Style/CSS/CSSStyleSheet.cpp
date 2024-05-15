@@ -53,7 +53,7 @@ namespace CE::Widgets
 
 		cachedStyle[hash] = result;
 
-		return result;
+		return cachedStyle[hash];
 	}
 
 	void CSSStyleSheet::Clear()

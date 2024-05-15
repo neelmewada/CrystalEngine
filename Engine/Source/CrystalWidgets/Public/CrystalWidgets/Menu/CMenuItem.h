@@ -31,7 +31,8 @@ namespace CE::Widgets
 
         // - Signals -
 
-        CE_SIGNAL(OnMenuItemClicked);
+        // Params: CMenuItem* menuItem
+        CE_SIGNAL(OnMenuItemClicked, CMenuItem*);
 
     protected:
 

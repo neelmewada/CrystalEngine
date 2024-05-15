@@ -14,10 +14,7 @@ namespace CE::Widgets
         virtual ~CImage();
 
         Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
-
-        CE_SIGNAL(OnMouseLeftPress);
-        CE_SIGNAL(OnMouseLeftClick);
-
+        
     private:
 
         void Construct() override;

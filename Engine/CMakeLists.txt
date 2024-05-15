@@ -42,9 +42,6 @@ add_subdirectory(Source/System)
 add_subdirectory(Source/CrystalWidgets)
 
 if(${CE_STANDALONE})
-    add_subdirectory(Source/VulkanSandbox)
-    add_subdirectory(Source/WidgetSandbox)
-    
     add_subdirectory(Source/GameSystem)
     add_subdirectory(Source/GameLauncher)
 endif()

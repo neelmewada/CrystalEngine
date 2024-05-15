@@ -255,6 +255,16 @@ namespace CE::Widgets
 		SetNeedsPaint();
 	}
 
+	void CWidget::SetRotation(f32 rotation)
+	{
+		if (this->rotation == rotation)
+			return;
+
+		this->rotation = rotation;
+
+		SetNeedsPaint();
+	}
+
 	bool CWidget::IsSubWidgetAllowed(Class* subWidgetClass)
 	{
 		return subWidgetClass != nullptr && subWidgetClass->IsSubclassOf<CWidget>();
@@ -406,10 +416,17 @@ namespace CE::Widgets
 			{
 				auto parentRootPadding = parent->GetFinalRootPadding();
 
-				Vec2 parentSize = parent->GetComputedLayoutSize();
+				Vec2 parentSize = parent->GetAvailableSizeForChild(this);
 				availableSize = parentSize -
 					Vec2(parentRootPadding.left + parentRootPadding.right,
 						parentRootPadding.top + parentRootPadding.bottom);
+
+				// TODO: Remove the below block if it causes layout bugs because it is a 'hack'
+				if (!IsOfType<CDockSpace>() && !IsOfType<CDockSplitView>())
+				{
+					availableSize -= Vec2(rootPadding.left + rootPadding.right,
+						rootPadding.top + rootPadding.bottom);
+				}
 			}
 
 			if (IsLayoutCalculationRoot()) // Found a widget with independent layout calculation
@@ -417,10 +434,9 @@ namespace CE::Widgets
 				YGNodeCalculateLayout(node, availableSize.width, availableSize.height, YGDirectionLTR);
 			}
 
-			auto size = GetComputedLayoutSize();
-
 			if (IsOfType<CWindow>())
 			{
+				auto size = GetComputedLayoutSize();
 				CWindow* window = (CWindow*)this;
 
 				if (size != Vec2(0, 0) && !isnan(size.x) && !isnan(size.y))
@@ -895,6 +911,12 @@ namespace CE::Widgets
 	{
 		return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node));
 	}
+
+	Vec2 CWidget::GetAvailableSizeForChild(CWidget* childWidget)
+	{
+		return GetComputedLayoutSize();
+	}
+
 
 	Rect CWidget::GetScreenSpaceRect()
 	{
@@ -1506,6 +1528,15 @@ namespace CE::Widgets
 		if (receiveMouseEvents && event->IsMouseEvent() && !event->IsDragEvent() && (!event->isConsumed || event->firstConsumer == this))
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
+
+			if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
+			{
+				emit OnMouseLeftPress();
+			}
+			else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
+			{
+				emit OnMouseLeftClick();
+			}
 			
 			if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
 			{
