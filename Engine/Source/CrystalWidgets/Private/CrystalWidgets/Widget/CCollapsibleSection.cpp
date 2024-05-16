@@ -24,6 +24,7 @@ namespace CE::Widgets
         dropDownArrow->SetRotation(isExpanded ? 90 : 0);
 
         SetNeedsLayout();
+        SetNeedsStyle();
         SetNeedsPaint();
     }
 

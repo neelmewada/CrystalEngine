@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORSYSTEM_API PropertyDrawer : public CSplitView
+    class EDITORSYSTEM_API PropertyDrawer : public CWidget
     {
-        CE_CLASS(PropertyDrawer, CSplitView)
+        CE_CLASS(PropertyDrawer, CWidget)
     public:
 
         PropertyDrawer();
@@ -23,11 +23,18 @@ namespace CE::Editor
 
         virtual void CreateGUI(FieldType* field, void* instance);
 
+        CSplitView* GetSplitView() const { return splitView; }
+
+        // - Signals -
+
         CE_SIGNAL(OnPropertyModified, PropertyDrawer*);
 
     protected:
 
         void Construct() override;
+
+        FIELD()
+        CSplitView* splitView = nullptr;
 
 		FIELD()
 		CSplitViewContainer* left = nullptr;
@@ -38,6 +45,8 @@ namespace CE::Editor
     private:
 
         static HashMap<Pair<TypeId, TypeId>, Array<SubClass<PropertyDrawer>>> customProperyDrawers;
+
+        friend class ObjectEditor;
     };
     
 } // namespace CE::Editor

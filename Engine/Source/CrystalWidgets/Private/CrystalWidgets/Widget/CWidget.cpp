@@ -283,6 +283,7 @@ namespace CE::Widgets
 	void CWidget::SetNeedsLayout()
 	{
 		needsLayout = true;
+
 		if (YGNodeGetChildCount(node) == 0)
 		{
 			if (!YGNodeHasMeasureFunc(node))

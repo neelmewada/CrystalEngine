@@ -6,7 +6,7 @@ namespace CE::Editor
 
 	PropertyDrawer::PropertyDrawer()
 	{
-		orientation = COrientation::Horizontal;
+		
 	}
 
 	PropertyDrawer::~PropertyDrawer()
@@ -110,8 +110,6 @@ namespace CE::Editor
 		if (!declType)
 			return;
 
-		return;
-
 		// TODO: Create editor widget
 
 		if (field->IsObjectField())
@@ -174,12 +172,15 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
-		AddSplit(0.6f);
+		splitView = CreateObject<CSplitView>(this, "SplitView");
+		splitView->SetOrientation(COrientation::Horizontal);
 
-		left = GetContainer(0);
+		splitView->AddSplit(0.6f);
+
+		left = splitView->GetContainer(0);
 		left->SetName("PropertyEditorRowLeft");
 
-		right = GetContainer(1);
+		right = splitView->GetContainer(1);
 		right->SetName("PropertyEditorRowRight");
 
 	}

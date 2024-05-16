@@ -131,10 +131,11 @@ namespace CE::Editor
 				PropertyDrawer* propertyDrawer = PropertyDrawer::Create(field, container);
 				if (propertyDrawer)
 				{
-					//CLabel* testLabel = CreateObject<CLabel>(container, "Title");
-					//testLabel->SetText("Text Label");
 					propertyDrawer->CreateGUI(field, target);
 					propertyDrawers.Add(propertyDrawer);
+
+					//CLabel* testLabel = CreateObject<CLabel>(container, "Title");
+					//testLabel->SetText("Text Label");
 				}
 			}
 
@@ -148,7 +149,7 @@ namespace CE::Editor
 					if ((CSplitView*)propertyDrawer != splitView)
 					{
 						f32 splitRatio = splitView->GetContainer(splitterIndex)->GetSplitRatio();
-						propertyDrawer->SetContainerSplitRatio(propertyDrawer->GetContainer(0), splitRatio);
+						propertyDrawer->splitView->SetContainerSplitRatio(propertyDrawer->splitView->GetContainer(0), splitRatio);
 					}
 				}
 			};
@@ -158,7 +159,7 @@ namespace CE::Editor
 			propertyDrawer->SetNeedsLayout();
 			propertyDrawer->SetNeedsPaint();
 
-			Bind(propertyDrawer, MEMBER_FUNCTION(PropertyDrawer, OnSplitterDragged), splitterCallback);
+			Bind(propertyDrawer->splitView, MEMBER_FUNCTION(CSplitView, OnSplitterDragged), splitterCallback);
 		}
 
 		parent->SetNeedsLayout();

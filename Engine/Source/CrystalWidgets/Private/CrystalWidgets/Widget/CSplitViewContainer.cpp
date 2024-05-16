@@ -29,7 +29,7 @@ namespace CE::Widgets
 		if (splitView == nullptr)
 			return Super::GetComputedLayoutTopLeft();
 
-		Vec2 pos = Vec2();
+		Vec2 pos = splitView->GetComputedLayoutTopLeft();
 		Vec2 parentSize = splitView->GetComputedLayoutSize();
 		int index = splitView->containers.IndexOf(this);
 		

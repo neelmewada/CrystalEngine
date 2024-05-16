@@ -53,7 +53,7 @@ namespace CE::Widgets
 				if (i != containers.GetSize() - 1)
 					size.x += splitterWidth;
 
-				size.y = Math::Max(size.y, splitterRect.GetSize().height);
+				size.y = Math::Max(size.y, childRect.GetSize().height);
 			}
 			else if (orientation == COrientation::Vertical)
 			{
@@ -64,7 +64,7 @@ namespace CE::Widgets
 				if (i != containers.GetSize() - 1)
 					size.y += splitterWidth;
 
-				size.x = Math::Max(size.x, splitterRect.GetSize().width);
+				size.x = Math::Max(size.x, childRect.GetSize().width);
 			}
 		}
 
@@ -153,7 +153,7 @@ namespace CE::Widgets
 				containers[i]->splitRatio = weights[i] / totalSplitRatio;
 			}
 		}
-
+		
 		SetNeedsLayout();
 		SetNeedsPaint();
 	}
@@ -172,13 +172,6 @@ namespace CE::Widgets
 	void CSplitView::OnPaint(CPaintEvent* paintEvent)
 	{
 		CPainter* painter = paintEvent->painter;
-
-		if (GetName() == "PropertyDrawer")
-		{
-			Vec2 size = GetComputedLayoutSize();
-			Vec2 pos = GetComputedLayoutTopLeft();
-			String::IsAlphabet('a');
-		}
 
 		for (int i = 0; i < containers.GetSize() - 1; i++)
 		{
