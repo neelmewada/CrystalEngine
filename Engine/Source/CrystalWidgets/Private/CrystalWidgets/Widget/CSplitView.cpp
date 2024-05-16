@@ -2,7 +2,7 @@
 
 namespace CE::Widgets
 {
-	constexpr f32 splitterWidth = 2.0f;
+	constexpr f32 splitterWidth = 3.0f;
 
 	CSplitView::CSplitView()
 	{
@@ -31,6 +31,44 @@ namespace CE::Widgets
 	bool CSplitView::IsLayoutCalculationRoot()
 	{
 		return true;
+	}
+
+	Vec2 CSplitView::CalculateIntrinsicSize(f32 width, f32 height)
+	{
+		SetNeedsLayout();
+		UpdateLayoutIfNeeded();
+
+		Vec2 size = Vec2();
+
+		for (int i = 0; i < containers.GetSize(); i++)
+		{
+			Rect childRect = Rect::FromSize(containers[i]->GetComputedLayoutTopLeft(), containers[i]->GetComputedLayoutSize());
+
+			if (orientation == COrientation::Horizontal)
+			{
+				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
+					Vec2(splitterWidth, childRect.GetSize().height));
+
+				size.x += childRect.GetSize().width;
+				if (i != containers.GetSize() - 1)
+					size.x += splitterWidth;
+
+				size.y = Math::Max(size.y, splitterRect.GetSize().height);
+			}
+			else if (orientation == COrientation::Vertical)
+			{
+				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
+					Vec2(childRect.GetSize().width, splitterWidth));
+
+				size.y += childRect.GetSize().height;
+				if (i != containers.GetSize() - 1)
+					size.y += splitterWidth;
+
+				size.x = Math::Max(size.x, splitterRect.GetSize().width);
+			}
+		}
+
+		return size;
 	}
 
 	void CSplitView::AddSplit(f32 ratio)
@@ -115,6 +153,9 @@ namespace CE::Widgets
 				containers[i]->splitRatio = weights[i] / totalSplitRatio;
 			}
 		}
+
+		SetNeedsLayout();
+		SetNeedsPaint();
 	}
 
 	void CSplitView::OnBeforeComputeStyle()
@@ -132,6 +173,13 @@ namespace CE::Widgets
 	{
 		CPainter* painter = paintEvent->painter;
 
+		if (GetName() == "PropertyDrawer")
+		{
+			Vec2 size = GetComputedLayoutSize();
+			Vec2 pos = GetComputedLayoutTopLeft();
+			String::IsAlphabet('a');
+		}
+
 		for (int i = 0; i < containers.GetSize() - 1; i++)
 		{
 			Rect childRect = Rect::FromSize(containers[i]->GetComputedLayoutTopLeft(), containers[i]->GetComputedLayoutSize());
@@ -142,14 +190,14 @@ namespace CE::Widgets
 			if (orientation == COrientation::Horizontal)
 			{
 				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
-					Vec2(splitterWidth * 2, childRect.GetSize().height));
+					Vec2(splitterWidth, childRect.GetSize().height));
 
 				painter->DrawRect(splitterRect);
 			}
 			else if (orientation == COrientation::Vertical)
 			{
 				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
-					Vec2(childRect.GetSize().width, splitterWidth * 2));
+					Vec2(childRect.GetSize().width, splitterWidth));
 
 				painter->DrawRect(splitterRect);
 			}
@@ -175,7 +223,7 @@ namespace CE::Widgets
 					if (orientation == COrientation::Horizontal)
 					{
 						Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
-							Vec2(splitterWidth * 2, childRect.GetSize().height));
+							Vec2(splitterWidth, childRect.GetSize().height));
 
 						if (splitterRect.Contains(mouseEvent->mousePos))
 						{
@@ -186,7 +234,7 @@ namespace CE::Widgets
 					else if (orientation == COrientation::Vertical)
 					{
 						Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
-							Vec2(childRect.GetSize().width, splitterWidth * 2));
+							Vec2(childRect.GetSize().width, splitterWidth));
 
 						if (splitterRect.Contains(mouseEvent->mousePos))
 						{

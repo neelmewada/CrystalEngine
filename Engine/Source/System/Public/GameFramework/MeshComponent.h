@@ -39,7 +39,7 @@ namespace CE
 	protected:
 
 		//! @brief Materials per LOD mesh
-		FIELD()
+		FIELD(EditAnywhere)
         Array<LodMaterial> materialsPerLod{};
 
 	};

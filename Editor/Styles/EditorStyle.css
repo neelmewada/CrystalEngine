@@ -381,3 +381,42 @@ CCollapsibleSection #SectionContent {
     flex-direction: column;
 }
 
+FieldEditor {
+    flex-direction: row;
+}
+
+PropertyDrawer {
+    width: 100%;
+    min-height: 15px;
+}
+
+VectorComponentInput {
+    flex-direction: row;
+    column-gap: 0;
+    align-items: stretch;
+}
+
+VectorComponentInput CWidget.Tag {
+    border-radius: 2.5px 0 0 2.5px;
+    width: 5px;
+}
+
+VectorComponentInput CWidget#Red {
+    background-color: red;
+}
+
+VectorComponentInput CWidget#Green {
+    background-color: green;
+}
+
+VectorComponentInput CWidget#Blue {
+    background-color: blue;
+}
+
+VectorComponentInput CWidget#White {
+    background-color: white;
+}
+
+VectorComponentInput CTextInput {
+    border-radius: 0 3px 3px 0;
+}

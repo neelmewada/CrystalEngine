@@ -7,9 +7,6 @@
 // Platform
 #include "PAL/Common/EditorPlatform.h"
 
-// Editor Prefs
-#include "Editor/EditorGlobals.h"
-
 // Project
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"

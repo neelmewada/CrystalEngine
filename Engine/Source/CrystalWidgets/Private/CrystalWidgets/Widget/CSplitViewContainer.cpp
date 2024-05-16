@@ -2,7 +2,7 @@
 
 namespace CE::Widgets
 {
-	constexpr f32 splitterWidth = 2.0f;
+	constexpr f32 splitterWidth = 3.0f;
 
 	CSplitViewContainer::CSplitViewContainer()
 	{
@@ -17,6 +17,11 @@ namespace CE::Widgets
 	bool CSplitViewContainer::IsLayoutCalculationRoot()
 	{
 		return true;
+	}
+
+	Vec2 CSplitViewContainer::CalculateIntrinsicSize(f32 width, f32 height)
+	{
+		return Super::CalculateIntrinsicSize(width, height);
 	}
 
 	Vec2 CSplitViewContainer::GetComputedLayoutTopLeft()

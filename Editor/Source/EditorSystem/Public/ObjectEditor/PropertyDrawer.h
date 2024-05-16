@@ -1,0 +1,45 @@
+#pragma once
+
+namespace CE::Editor
+{
+    CLASS()
+    class EDITORSYSTEM_API PropertyDrawer : public CSplitView
+    {
+        CE_CLASS(PropertyDrawer, CSplitView)
+    public:
+
+        PropertyDrawer();
+
+        virtual ~PropertyDrawer();
+
+        static void RegisterPropertyDrawer(TypeId fieldDeclTypeId, SubClass<PropertyDrawer> propertyDrawer);
+        static void RegisterPropertyDrawer(TypeId fieldDeclTypeId, TypeId underlyingTypeId, SubClass<PropertyDrawer> propertyDrawer);
+
+        static void DeregisterPropertyDrawer(TypeId fieldDeclTypeId, SubClass<PropertyDrawer> propertyDrawer);
+        static void DeregisterPropertyDrawer(TypeId fieldDeclTypeId, TypeId underlyingTypeId, SubClass<PropertyDrawer> propertyDrawer);
+
+        //! @brief The targetField is used only for figuring out the type of the field.
+        static PropertyDrawer* Create(FieldType* targetField, CWidget* outer, const String& name = "");
+
+        virtual void CreateGUI(FieldType* field, void* instance);
+
+        CE_SIGNAL(OnPropertyModified, PropertyDrawer*);
+
+    protected:
+
+        void Construct() override;
+
+		FIELD()
+		CSplitViewContainer* left = nullptr;
+
+		FIELD()
+		CSplitViewContainer* right = nullptr;
+
+    private:
+
+        static HashMap<Pair<TypeId, TypeId>, Array<SubClass<PropertyDrawer>>> customProperyDrawers;
+    };
+    
+} // namespace CE::Editor
+
+#include "PropertyDrawer.rtti.h"

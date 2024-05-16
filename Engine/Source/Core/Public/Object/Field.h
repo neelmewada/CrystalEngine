@@ -144,6 +144,9 @@ namespace CE
 		template<typename T>
 		INLINE void ForceSetFieldValue(void* instance, const T& value)
 		{
+            if (instance == nullptr)
+                return;
+
 			*(T*)((SIZE_T)instance + offset) = value;
 		}
 

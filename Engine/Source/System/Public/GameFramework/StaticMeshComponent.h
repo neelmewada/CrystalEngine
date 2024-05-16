@@ -21,7 +21,7 @@ namespace CE
 
 		void Tick(f32 delta) override;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Static Mesh")
 		StaticMesh* staticMesh = nullptr;
 
 		RPI::ModelHandle meshHandle{};

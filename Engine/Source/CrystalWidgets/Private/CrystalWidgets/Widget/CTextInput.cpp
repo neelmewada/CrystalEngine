@@ -133,16 +133,16 @@ namespace CE::Widgets
 
         DeselectAll();
 
-        if (isEditing)
-        {
-            emit OnEditingFinished(this);
-        }
-
         textScrollOffset = 0;
         timer->Stop();
         isEditing = false;
         cursorState = false;
         SetNeedsPaint();
+
+        if (isEditing)
+        {
+            emit OnEditingFinished(this);
+        }
     }
 
     void CTextInput::RecalculateOffsets()
@@ -396,6 +396,12 @@ namespace CE::Widgets
                     RecalculateOffsets();
 
                     SetCursorPos(selectedIdx);
+
+                    if (selectAllOnEdit)
+                    {
+                        SelectAll();
+                    }
+
                     SetNeedsPaint();
                 }
             }

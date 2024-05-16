@@ -191,6 +191,8 @@ namespace CE
         
     protected:
 
+        virtual void OnFieldModified(FieldType* field);
+
 		void LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject);
 
 		void LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap,

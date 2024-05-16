@@ -73,16 +73,16 @@ namespace CE
 		FIELD(ReadOnly)
 		Array<SceneComponent*> attachedComponents{};
 
-		FIELD()
+		FIELD(ReadOnly)
 		SceneComponent* parentComponent = nullptr;
 
-		FIELD(EditAnywhere, Category = Transform, Display = "Position")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Position", CategoryOrder = "-1")
 		Vec3 localPosition{};
 
-		FIELD(EditAnywhere, Category = Transform, Display = "Rotation")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Rotation")
 		Vec3 localEulerAngles{};
 
-		FIELD(EditAnywhere, Category = Transform, Display = "Scale")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Scale")
 		Vec3 localScale = Vec3(1, 1, 1);
 
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
