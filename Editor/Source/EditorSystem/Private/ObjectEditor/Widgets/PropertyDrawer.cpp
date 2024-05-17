@@ -172,7 +172,7 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
-		splitView = CreateObject<CSplitView>(this, "SplitView");
+		splitView = CreateObject<EditorSplitter>(this, "SplitView");
 		splitView->SetOrientation(COrientation::Horizontal);
 
 		splitView->AddSplit(0.6f);

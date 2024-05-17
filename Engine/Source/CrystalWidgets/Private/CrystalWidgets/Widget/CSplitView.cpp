@@ -67,7 +67,7 @@ namespace CE::Widgets
 				size.x = Math::Max(size.x, childRect.GetSize().width);
 			}
 		}
-
+		
 		return size;
 	}
 
