@@ -37,6 +37,7 @@ namespace CE::Editor
 
             CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
             exit->SetText("Exit");
+
             Bind(exit, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [this](CMenuItem* menuItem)
                 {
                     RequestEngineExit("USER_QUIT");
@@ -51,6 +52,20 @@ namespace CE::Editor
             CMenuItem* projectSettingsItem = CreateObject<CMenuItem>(editMenu, "ProjectSettingsItem");
             projectSettingsItem->SetText("Project Settings...");
 
+            Bind(projectSettingsItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem*)
+                {
+                    PlatformWindowInfo windowInfo{};
+                    windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+                    windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::Utility;
+                    PlatformWindow* platformWindow = PlatformApplication::Get()->CreatePlatformWindow("About Crystal Editor", 1024, 600, windowInfo);
+
+                    platformWindow->SetBorderless(true);
+                    platformWindow->SetAlwaysOnTop(true);
+
+                    ProjectSettingsWindow* window = CreateWindow<ProjectSettingsWindow>("ProjectSettingsWindow", platformWindow);
+                    window->Show();
+                });
+
             CMenuItem* editorSettingsItem = CreateObject<CMenuItem>(editMenu, "editorSettingsItem");
             editorSettingsItem->SetText("Editor Settings...");
         }
@@ -64,7 +79,7 @@ namespace CE::Editor
             CMenuItem* aboutItem = CreateObject<CMenuItem>(helpMenu, "AboutItem");
             aboutItem->SetText("About Crystal Editor");
 
-            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [&](CMenuItem*)
+            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem*)
                 {
                     PlatformWindowInfo windowInfo{};
                     windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;

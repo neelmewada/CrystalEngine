@@ -56,6 +56,7 @@ Shader "2D/SDF Geometry"
                 uint bold;
                 uint clipRect;
                 uint textureIndex;
+                float dashLength;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
@@ -90,7 +91,8 @@ Shader "2D/SDF Geometry"
                 DRAW_RoundedX,
                 DRAW_Texture,
                 DRAW_FrameBuffer,
-                DRAW_Triangle
+                DRAW_Triangle,
+                DRAW_DashedLine,
             };
 
             #if VERTEX
@@ -166,6 +168,25 @@ Shader "2D/SDF Geometry"
                 return length(p-min(p.x+p.y,w)*0.5) - r;
             }
 
+            float SDFSegment(float2 p, float2 a, float2 b) {
+                float2 pa = p - a;
+                float2 ba = b - a;
+                float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+                return length(pa - ba * h);
+            }
+
+            float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength) 
+            {
+                float2 ba = b - a;
+                float totalLength = length(ba);
+                ba = normalize(ba);
+                float t = dot(p - a, ba) / totalLength;
+                float pattern = fmod(t, dashLength * 2.0);
+                float dashMask = step(pattern, dashLength);
+                float d = SDFSegment(p, a, b);
+                return lerp(1.0, d, dashMask);
+            }
+
             // Credit: https://iquilezles.org/articles/distfunctions2d/
             float SDFIsoscelesTriangle(in float2 p, in float2 q)
             {
@@ -186,6 +207,7 @@ Shader "2D/SDF Geometry"
                 float2 itemSize;
                 float2 uv;
                 float borderThickness;
+                float dashLength;
             };
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
@@ -292,6 +314,21 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, invSdf);
             }
 
+            float4 RenderDashedLine(in GeometryInfo info, float2 p)
+            {
+                const float sdf = SDFDashedLine(p, 
+                    float2(0, info.itemSize.y * 0.5), 
+                    float2(info.itemSize.x, info.itemSize.y * 0.5), 
+                    info.dashLength / info.itemSize.x);
+                
+                const float4 color = info.outlineColor;
+
+                const float lineThickness = 0.01;
+                float alpha = smoothstep(lineThickness, 0.0, sdf);
+
+                return float4(color.rgb * alpha, alpha);
+            }
+
             #define idx input.instanceId
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -303,6 +340,7 @@ Shader "2D/SDF Geometry"
                 info.itemSize = _DrawList[idx].itemSize;
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
+                info.dashLength = _DrawList[idx].dashLength;
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
 
@@ -330,6 +368,8 @@ Shader "2D/SDF Geometry"
                     return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
                 case DRAW_Triangle:
                     return RenderTriangle(info, p);
+                case DRAW_DashedLine:
+                    return RenderDashedLine(info, p);
                 }
 
                 return float4(0, 0, 0, 0);

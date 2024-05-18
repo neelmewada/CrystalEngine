@@ -180,6 +180,9 @@ namespace CE::Editor
     {
 	    Super::OnBeforeDestroy();
 
+        if (IsDefaultInstance())
+            return;
+
         if (sceneSubsystem && sceneSubsystem->GetMainViewport() == viewportWindow->GetViewport())
         {
             sceneSubsystem->SetMainViewport(nullptr);

@@ -17,6 +17,8 @@ namespace CE::Editor
 
 		void Construct() override;
 
+		void OnPaint(CPaintEvent* paintEvent) override;
+
 	};
 
 } // namespace CE::Editor

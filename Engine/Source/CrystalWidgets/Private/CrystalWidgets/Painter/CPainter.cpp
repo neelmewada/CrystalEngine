@@ -27,12 +27,14 @@ namespace CE::Widgets
 
     void CPainter::SetPen(const CPen& pen)
     {
+        this->pen = pen;
         renderer->SetBorderThickness(pen.width);
         renderer->SetOutlineColor(pen.color);
     }
 
     void CPainter::SetBrush(const CBrush& brush)
     {
+        this->brush = brush;
         renderer->SetFillColor(brush.color);
     }
 
@@ -52,9 +54,9 @@ namespace CE::Widgets
         return renderer->CalculateTextOffsets(outOffsets, text, width);
     }
 
-    void CPainter::SetRotation(f32 rotation)
+    void CPainter::SetRotation(f32 degrees)
     {
-        renderer->SetRotation(rotation);
+        renderer->SetRotation(degrees);
     }
 
     void CPainter::DrawCircle(const Rect& rect)
@@ -69,6 +71,47 @@ namespace CE::Widgets
 
         renderer->SetCursor(windowSpaceRect.min);
         renderer->DrawCircle(rect.GetSize());
+    }
+
+    void CPainter::DrawLine(Vec2 from, Vec2 to)
+    {
+        Vec2 center = (from + to) / 2.0f;
+        float rotation = atan2(to.y - from.y, to.x - from.x);
+        float width = sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y));
+        float height = pen.width;  // You define the thickness of the line
+        if (height < 0.001f)
+            return;
+
+        f32 origRotation = renderer->GetRotation();
+
+        SetRotation(rotation * RAD_TO_DEG);
+
+        Rect rect = Rect::FromSize(from.x, center.y, width, height);
+
+        if (pen.style == CPenStyle::SolidLine)
+        {
+	        DrawRect(rect);
+        }
+        else
+        {
+            DrawDashedLine(rect);
+        }
+
+        renderer->SetRotation(origRotation);
+    }
+
+    void CPainter::DrawDashedLine(const Rect& rect)
+    {
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+
+        renderer->SetCursor(windowSpaceRect.min);
+        renderer->DrawDashedLine(rect.GetSize(), pen.dashLength);
     }
 
     void CPainter::DrawRect(const Rect& rect)

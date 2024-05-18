@@ -20,9 +20,11 @@ namespace CE::Widgets
         void SetPen(const CPen& pen);
         void SetBrush(const CBrush& brush);
 
-        void SetRotation(f32 rotation);
+        void SetRotation(f32 degrees);
 
         void DrawCircle(const Rect& rect);
+
+        void DrawLine(Vec2 from, Vec2 to);
 
         void DrawRect(const Rect& rect);
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
@@ -56,6 +58,8 @@ namespace CE::Widgets
 
     private:
 
+        void DrawDashedLine(const Rect& rect);
+
         Array<Vec2> coordinateSpaceStack{};
 
         Vec2 GetOrigin() const
@@ -67,6 +71,9 @@ namespace CE::Widgets
 
         Renderer2D* renderer = nullptr;
         int numFontsPushed = 0;
+
+        CPen pen{};
+        CBrush brush{};
 
         friend class CWidget;
         friend class CWindow;

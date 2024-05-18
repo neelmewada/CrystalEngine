@@ -23,8 +23,18 @@ namespace CE::Editor
 
 		SubClass<ObjectEditor> editorClass = nullptr;
 
-		if (!customObjectEditors.KeyExists(targetClass))
-			editorClass = customObjectEditors[targetClass];
+		Class* parentClass = targetClass;
+
+		while (editorClass == nullptr && parentClass != nullptr)
+		{
+			if (customObjectEditors.KeyExists(parentClass))
+				editorClass = customObjectEditors[parentClass];
+
+			if (parentClass->GetSuperClassCount() == 0)
+				break;
+
+			parentClass = parentClass->GetSuperClass(0);
+		}
 
 		if (editorClass == nullptr)
 			editorClass = GetStaticClass<ObjectEditor>();

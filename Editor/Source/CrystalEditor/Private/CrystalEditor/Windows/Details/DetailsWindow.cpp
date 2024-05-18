@@ -62,6 +62,8 @@ namespace CE::Editor
 
         this->targetObject = target;
 
+        // Cleanup previous editor
+
         CSplitViewContainer* container = splitView->GetContainer(1);
 
         for (int i = container->GetSubWidgetCount() - 1; i >= 0; --i)

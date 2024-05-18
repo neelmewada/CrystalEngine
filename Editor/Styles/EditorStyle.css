@@ -361,16 +361,12 @@ CCollapsibleSection {
 
 CCollapsibleSection #SectionHeader {
     flex-direction: row;
-    background-color: rgb(48, 48, 48);
+    background-color: rgb(28, 28, 28);
     align-items: center;
     justify-content: flex-start;
     padding: 10px 5px;
     column-gap: 5px;
     border-radius: 5px 5px 0 0;
-}
-
-CCollapsibleSection #SectionHeader:hovered {
-    background-color: rgb(48, 48, 48);
 }
 
 CCollapsibleSection CImage#SectionArrow {
@@ -384,7 +380,7 @@ CCollapsibleSection CImage#SectionArrow:hovered {
 }
 
 CCollapsibleSection #SectionContent {
-    background-color: rgb(60, 60, 60);
+    background-color: rgb(48, 48, 48);
     flex-direction: column;
     padding: 15px 5px;
     border-radius: 0 0 5px 5px;

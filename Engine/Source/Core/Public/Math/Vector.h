@@ -754,6 +754,45 @@ namespace CE
             return Rect(xmin, ymin, xmax, ymax);
         }
 
+        static void RotatePoint(float x, float y, float centerX, float centerY, double angle, float& newX, float& newY) {
+            float radians = angle * (M_PI / 180.0); // Convert degrees to radians
+            float cosine = std::cos(radians);
+            float sine = std::sin(radians);
+
+            newX = centerX + (x - centerX) * cosine - (y - centerY) * sine;
+            newY = centerY + (x - centerX) * sine + (y - centerY) * cosine;
+        }
+
+        // Function to find the bounding box of a rotated rectangle
+        static Rect ComputeBoundingBox(const Rect& rectangle, float angle) {
+            float x1 = rectangle.min.x;
+            float y1 = rectangle.min.y;
+            float x2 = rectangle.max.x;
+            float y2 = rectangle.min.y;
+            float x3 = rectangle.max.x;
+            float y3 = rectangle.max.y;
+            float x4 = rectangle.min.x;
+            float y4 = rectangle.max.y;
+
+            float centerX = (rectangle.min.x + rectangle.max.x) / 2.0f;
+            float centerY = (rectangle.min.y + rectangle.max.y) / 2.0f;
+
+            float newX1, newY1, newX2, newY2, newX3, newY3, newX4, newY4;
+
+            RotatePoint(x1, y1, centerX, centerY, angle, newX1, newY1);
+            RotatePoint(x2, y2, centerX, centerY, angle, newX2, newY2);
+            RotatePoint(x3, y3, centerX, centerY, angle, newX3, newY3);
+            RotatePoint(x4, y4, centerX, centerY, angle, newX4, newY4);
+
+            float minX = std::min({ newX1, newX2, newX3, newX4 });
+            float maxX = std::max({ newX1, newX2, newX3, newX4 });
+            float minY = std::min({ newY1, newY2, newY3, newY4 });
+            float maxY = std::max({ newY1, newY2, newY3, newY4 });
+
+            Rect boundingBox = { minX, minY, maxX - minX, maxY - minY };
+            return boundingBox;
+        }
+
         inline bool operator==(const Rect& rhs) const
         {
             return (left == rhs.left) && (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom);
