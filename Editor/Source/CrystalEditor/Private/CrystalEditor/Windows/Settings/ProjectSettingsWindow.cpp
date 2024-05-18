@@ -85,7 +85,17 @@ namespace CE::Editor
 			settingsByCategory[category].Add({ .category = category, .name = name, .settingsClass = settingsClass });
 		}
 
-		
+		for (Name settingCategory : settingCategories)
+		{
+			CLabel* title = CreateObject<CLabel>(sideBar, "SideBarTitle");
+			title->SetText(settingCategory.GetString());
+
+			for (const auto& settingsEntry : settingsByCategory[settingCategory])
+			{
+				CLabel* entry = CreateObject<CLabel>(sideBar, "SideBarEntryLabel");
+				entry->SetText(settingsEntry.settingsClass->GetDisplayName());
+			}
+		}
 	}
 
 } // namespace CE::Editor
