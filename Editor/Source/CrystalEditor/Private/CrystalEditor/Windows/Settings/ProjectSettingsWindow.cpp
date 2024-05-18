@@ -33,20 +33,59 @@ namespace CE::Editor
 
 		LoadStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/ProjectSettingsStyle.css");
 
-		splitView = CreateObject<CSplitView>(this, "ProjectSettingsSplitView");
-		splitView->SetOrientation(COrientation::Horizontal);
-
-		splitView->AddSplit(0.75f);
-
-		sideBar = splitView->GetContainer(0);
+		sideBar = CreateObject<CWidget>(this, "SideBar");
 		sideBar->SetVerticalScrollAllowed(true);
 		sideBar->AddBehavior<CScrollBehavior>();
 
-		container = splitView->GetContainer(1);
-		container->SetVerticalScrollAllowed(true);
-		container->AddBehavior<CScrollBehavior>();
+		content = CreateObject<CWidget>(this, "ContentView");
+		content->SetVerticalScrollAllowed(true);
+		content->AddBehavior<CScrollBehavior>();
 
+		const Array<ClassType*>& settingsClasses = SettingsBase::GetAllSettingsClasses();
 
+		struct SettingsEntry
+		{
+			Name category{};
+			Name name{};
+			ClassType* settingsClass = nullptr;
+		};
+
+		Array<Name> settingCategories{};
+		HashSet<Name> visitedCategories{};
+
+		HashMap<Name, Array<SettingsEntry>> settingsByCategory{};
+
+		for (ClassType* settingsClass : settingsClasses)
+		{
+			if (!settingsClass->HasAttribute("SettingsCategory"))
+				continue;
+
+			Name category = settingsClass->GetAttribute("SettingsCategory").GetStringValue();
+			if (!category.IsValid())
+				continue;
+
+			Name name{};
+
+			if (settingsClass->HasAttribute("Settings"))
+			{
+				name = settingsClass->GetAttribute("Settings").GetStringValue();
+			}
+
+			if (!name.IsValid())
+			{
+				name = settingsClass->GetName().GetLastComponent();
+			}
+
+			if (!visitedCategories.Exists(category))
+			{
+				settingCategories.Add(category);
+				visitedCategories.Add(category);
+			}
+
+			settingsByCategory[category].Add({ .category = category, .name = name, .settingsClass = settingsClass });
+		}
+
+		
 	}
 
 } // namespace CE::Editor

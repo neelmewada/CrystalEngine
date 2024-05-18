@@ -173,6 +173,10 @@ namespace CE::Widgets
 	{
 		CPainter* painter = paintEvent->painter;
 
+		Vec4 rootPadding = Vec4();
+		if (parent != nullptr)
+			rootPadding = parent->rootPadding;
+
 		for (int i = 0; i < containers.GetSize() - 1; i++)
 		{
 			Rect childRect = Rect::FromSize(containers[i]->GetComputedLayoutTopLeft(), containers[i]->GetComputedLayoutSize());
@@ -182,14 +186,14 @@ namespace CE::Widgets
 
 			if (orientation == COrientation::Horizontal)
 			{
-				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
+				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0) + rootPadding.min,
 					Vec2(splitterWidth, childRect.GetSize().height));
 
 				painter->DrawRect(splitterRect);
 			}
 			else if (orientation == COrientation::Vertical)
 			{
-				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
+				Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height) + rootPadding.min,
 					Vec2(childRect.GetSize().width, splitterWidth));
 
 				painter->DrawRect(splitterRect);

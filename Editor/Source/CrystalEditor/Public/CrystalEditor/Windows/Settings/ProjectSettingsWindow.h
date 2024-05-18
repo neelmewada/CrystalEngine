@@ -20,13 +20,10 @@ namespace CE::Editor
 		void Construct() override;
 
 		FIELD(ReadOnly)
-		CSplitView* splitView = nullptr;
+		CWidget* sideBar = nullptr;
 
 		FIELD(ReadOnly)
-		CSplitViewContainer* sideBar = nullptr;
-
-		FIELD(ReadOnly)
-		CSplitViewContainer* container = nullptr;
+		CWidget* content = nullptr;
 
 	};
 

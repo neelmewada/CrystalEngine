@@ -1,5 +1,15 @@
 
 ProjectSettingsWindow {
     background-color: rgb(21, 21, 21);
+    flex-direction: row;
+    align-items: stretch;
+}
+
+ProjectSettingsWindow #SideBar {
+    width: 300px;
+}
+
+ProjectSettingsWindow #ContentView {
+
 }
 

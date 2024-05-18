@@ -37,6 +37,8 @@ namespace CE::Editor
 
         painter->SetPen(pen);
 
+        painter->SetRotation(30);
+
         painter->DrawRect(Rect::FromSize(0, 0, 100, 100));
         
         painter->DrawLine(Vec2(10, 0), Vec2(100, 100));
