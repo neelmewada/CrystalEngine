@@ -8,6 +8,7 @@
 
 namespace CE
 {
+    class Object;
 
     enum FieldFlags
     {
@@ -139,6 +140,11 @@ namespace CE
 			if (IsReadOnly())
 				return;
 			ForceSetFieldValue(instance, value);
+
+            if (instanceOwner && instanceOwner->IsObject())
+            {
+                NotifyObjectFieldUpdate((Object*)instance);
+            }
         }
 
 		template<typename T>
@@ -181,6 +187,9 @@ namespace CE
 		Array<FieldType> GetArrayFieldList(void* instance);
 
     private:
+
+        void NotifyObjectFieldUpdate(Object* instance);
+
         FieldFlags fieldFlags = FIELD_NoFlags;
         
 		Name typeName{};

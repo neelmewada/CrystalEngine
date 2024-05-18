@@ -110,6 +110,9 @@ namespace CE::Editor
 		if (!declType)
 			return;
 
+		targetField = field;
+		targetInstance = instance;
+
 		// TODO: Create editor widget
 
 		if (field->IsObjectField())
@@ -135,6 +138,34 @@ namespace CE::Editor
 				declTypeId == TYPEID(Vec4) || declTypeId == TYPEID(Vec4i))
 			{
 				VectorFieldEditor* editorWidget = CreateObject<VectorFieldEditor>(right, "VectorFieldEditor");
+				//editorWidget->SetVectorType(declTypeId);
+
+				{
+					if (declTypeId == TYPEID(Vec2))
+					{
+						editorWidget->SetVectorValue(field->GetFieldValue<Vec2>(instance));
+					}
+					else if (declTypeId == TYPEID(Vec3))
+					{
+						editorWidget->SetVectorValue(field->GetFieldValue<Vec3>(instance));
+					}
+					else if (declTypeId == TYPEID(Vec4))
+					{
+						editorWidget->SetVectorValue(field->GetFieldValue<Vec4>(instance));
+					}
+					else if (declTypeId == TYPEID(Vec2i))
+					{
+						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec2i>(instance));
+					}
+					else if (declTypeId == TYPEID(Vec3i))
+					{
+						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec3i>(instance));
+					}
+					else if (declTypeId == TYPEID(Vec4i))
+					{
+						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec4i>(instance));
+					}
+				}
 
 				Bind(editorWidget, MEMBER_FUNCTION(VectorFieldEditor, OnValueModified), 
 					[declTypeId, field, instance, this](VectorFieldEditor* editor)
@@ -172,16 +203,9 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
-		splitView = CreateObject<EditorSplitter>(this, "SplitView");
-		splitView->SetOrientation(COrientation::Horizontal);
+		left = CreateObject<CWidget>(this, "PropertyEditorRowLeft");
 
-		splitView->AddSplit(0.6f);
-
-		left = splitView->GetContainer(0);
-		left->SetName("PropertyEditorRowLeft");
-
-		right = splitView->GetContainer(1);
-		right->SetName("PropertyEditorRowRight");
+		right = CreateObject<CWidget>(this, "PropertyEditorRowRight");
 
 	}
 

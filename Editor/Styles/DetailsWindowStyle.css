@@ -20,8 +20,12 @@ DetailsWindow #NoSelectionLabel {
     font-size: 12px;
 }
 
-#SplitContainer {
+#SplitContainerTop, #SplitContainerBottom {
     padding: 5px 5px;
+}
+
+#SplitContainerBottom {
+    row-gap: 1px;
 }
 
 #ComponentTree {

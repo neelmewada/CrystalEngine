@@ -2,28 +2,44 @@
 
 namespace CE::Editor
 {
+	void VectorComponentInput::OnFocusLost()
+	{
+		Super::OnFocusLost();
+
+        if (GetText().IsEmpty() || GetText() == "-" || GetText() == "+")
+        {
+            SetText("0");
+        }
+	}
+
 	void VectorComponentInput::Construct()
 	{
 		Super::Construct();
 
-        tagWidget = CreateObject<CWidget>(this, "Tag");
-        tagWidget->AddStyleClass("Tag");
-
-        inputField = CreateObject<CTextInput>(this, "TextInput");
-        inputField->SetInputValidator(CFloatInputValidator);
-        inputField->SetText("0");
-        inputField->SetSelectAllOnEdit(true);
+        SetInputValidator(CFloatInputValidator);
+        SetText("0");
+        SetSelectAllOnEdit(true);
 	}
 
-    VectorFieldEditor::VectorFieldEditor()
-    {
-	    
-    }
+	void VectorComponentInput::OnPaintOverlay(CPaintEvent* paintEvent)
+	{
+		Super::OnPaintOverlay(paintEvent);
 
-    VectorFieldEditor::~VectorFieldEditor()
-    {
-	    
-    }
+        CPainter* painter = paintEvent->painter;
+
+        Vec2 pos = GetComputedLayoutTopLeft();
+        Vec2 size = GetComputedLayoutSize();
+
+        Rect rect = Rect::FromSize(pos + Vec2(2.5f, 2.5f), Vec2(5.0f, size.height - 5.0f));
+
+        if (tagColor.a > 0)
+        {
+            painter->SetBrush(CBrush(tagColor));
+            painter->SetPen(CPen());
+
+            painter->DrawRoundedRect(rect, Vec4(2.5f, 0, 0, 2.5f));
+        }
+	}
 
     void VectorFieldEditor::SetVectorType(TypeId vectorTypeId)
     {
@@ -56,21 +72,37 @@ namespace CE::Editor
     Vec4 VectorFieldEditor::GetVectorValue()
     {
         Vec4 result{};
-        String::TryParse(fieldX->inputField->GetText(), result.x);
-        String::TryParse(fieldX->inputField->GetText(), result.y);
-        String::TryParse(fieldX->inputField->GetText(), result.z);
-        String::TryParse(fieldX->inputField->GetText(), result.w);
+        String::TryParse(fieldX->GetText(), result.x);
+        String::TryParse(fieldY->GetText(), result.y);
+        String::TryParse(fieldZ->GetText(), result.z);
+        String::TryParse(fieldW->GetText(), result.w);
         return result;
     }
 
     Vec4i VectorFieldEditor::GetVectorIntValue()
     {
         Vec4i result{};
-        String::TryParse(fieldX->inputField->GetText(), result.x);
-        String::TryParse(fieldX->inputField->GetText(), result.y);
-        String::TryParse(fieldX->inputField->GetText(), result.z);
-        String::TryParse(fieldX->inputField->GetText(), result.w);
+        String::TryParse(fieldX->GetText(), result.x);
+        String::TryParse(fieldY->GetText(), result.y);
+        String::TryParse(fieldZ->GetText(), result.z);
+        String::TryParse(fieldW->GetText(), result.w);
         return result;
+    }
+
+    void VectorFieldEditor::SetVectorValue(const Vec4& value)
+    {
+        fieldX->SetText(String::Format("{}", value.x));
+        fieldY->SetText(String::Format("{}", value.y));
+        fieldZ->SetText(String::Format("{}", value.z));
+        fieldW->SetText(String::Format("{}", value.w));
+    }
+
+    void VectorFieldEditor::SetVectorIntValue(const Vec4i& value)
+    {
+        fieldX->SetText(String::Format("{}", value.x));
+        fieldY->SetText(String::Format("{}", value.y));
+        fieldZ->SetText(String::Format("{}", value.z));
+        fieldW->SetText(String::Format("{}", value.w));
     }
 
     void VectorFieldEditor::Construct()
@@ -78,42 +110,42 @@ namespace CE::Editor
 	    Super::Construct();
 
         fieldX = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldX->tagWidget->SetName("Red");
+        fieldX->tagColor = Color::Red();
 
         fieldY = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldY->tagWidget->SetName("Green");
+        fieldY->tagColor = Color::Green();
 
         fieldZ = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldZ->tagWidget->SetName("Blue");
+        fieldZ->tagColor = Color::Blue();
 
         fieldW = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldW->tagWidget->SetName("White");
+        fieldW->tagColor = Color::White();
 
         Delegate<void(CTextInput*)> callback = [this](CTextInput*)
             {
-                if (!fieldX->inputField->IsEditing() &&
-                    !fieldY->inputField->IsEditing() &&
-                    !fieldZ->inputField->IsEditing() &&
-                    !fieldW->inputField->IsEditing())
+                if (!fieldX->IsEditing() &&
+                    !fieldY->IsEditing() &&
+                    !fieldZ->IsEditing() &&
+                    !fieldW->IsEditing())
                 {
                     emit OnEditingFinished(this);
                 }
             };
 
-        Bind(fieldX->inputField, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
-        Bind(fieldY->inputField, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
-        Bind(fieldZ->inputField, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
-        Bind(fieldW->inputField, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
+        Bind(fieldX, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
+        Bind(fieldY, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
+        Bind(fieldZ, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
+        Bind(fieldW, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
 
         Delegate<void(CTextInput*)> editingCallback = [this](CTextInput*)
             {
                 emit OnValueModified(this);
             };
 
-        Bind(fieldX->inputField, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
-        Bind(fieldY->inputField, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
-        Bind(fieldZ->inputField, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
-        Bind(fieldW->inputField, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
+        Bind(fieldX, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
+        Bind(fieldY, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
+        Bind(fieldZ, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
+        Bind(fieldW, MEMBER_FUNCTION(CTextInput, OnTextChanged), editingCallback);
 
         SetVectorType<Vec4>();
     }

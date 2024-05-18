@@ -40,6 +40,10 @@ namespace CE::Widgets
         void SetEnabled(bool enabled);
         void SetInteractable(bool interactable);
 
+        bool ClipsChildren() const { return clipChildren; }
+
+        void SetClipChildren(bool set) { clipChildren = set; }
+
         f32 GetRotation() const { return rotation; }
 
         void SetRotation(f32 rotation);

@@ -60,6 +60,8 @@ namespace CE
 
     protected:
 
+		void OnFieldModified(FieldType* field) override;
+
 		bool IsTransformUpdated() const { return transformUpdated; }
 
 	private:

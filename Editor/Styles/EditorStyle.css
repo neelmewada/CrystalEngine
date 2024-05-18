@@ -356,15 +356,21 @@ CSplitView::splitter:active {
 
 CCollapsibleSection {
     flex-direction: column;
+    row-gap: 0;
 }
 
 CCollapsibleSection #SectionHeader {
     flex-direction: row;
-    background-color: rgb(50, 50, 50);
+    background-color: rgb(48, 48, 48);
     align-items: center;
     justify-content: flex-start;
     padding: 10px 5px;
     column-gap: 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+CCollapsibleSection #SectionHeader:hovered {
+    background-color: rgb(48, 48, 48);
 }
 
 CCollapsibleSection CImage#SectionArrow {
@@ -378,45 +384,50 @@ CCollapsibleSection CImage#SectionArrow:hovered {
 }
 
 CCollapsibleSection #SectionContent {
+    background-color: rgb(60, 60, 60);
     flex-direction: column;
+    padding: 15px 5px;
+    border-radius: 0 0 5px 5px;
 }
 
-FieldEditor {
-    flex-direction: row;
+CCollapsibleSection:collapsed #SectionHeader {
+    border-radius: 5px 5px 5px 5px;
 }
 
 PropertyDrawer {
     width: 100%;
     min-height: 15px;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+#PropertyEditorRowLeft {
+    width: 160px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 13px;
+}
+
+#PropertyEditorRowRight {
+    flex-grow: 3;
+    flex-shrink: 1;
+    flex-direction: row;
+}
+
+FieldEditor {
+    flex-direction: row;
+    width: 100%;
+    font-size: 13px;
 }
 
 VectorComponentInput {
     flex-direction: row;
     column-gap: 0;
     align-items: stretch;
+    flex-grow: 2;
+    flex-shrink: 1;
+    border-radius: 4px 4px 4px 4px;
+    padding: 12px 4px 4px 5px;
 }
 
-VectorComponentInput CWidget.Tag {
-    border-radius: 2.5px 0 0 2.5px;
-    width: 5px;
-}
-
-VectorComponentInput CWidget#Red {
-    background-color: red;
-}
-
-VectorComponentInput CWidget#Green {
-    background-color: green;
-}
-
-VectorComponentInput CWidget#Blue {
-    background-color: blue;
-}
-
-VectorComponentInput CWidget#White {
-    background-color: white;
-}
-
-VectorComponentInput CTextInput {
-    border-radius: 0 3px 3px 0;
-}

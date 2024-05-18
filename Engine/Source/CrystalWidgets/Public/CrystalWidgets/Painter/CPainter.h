@@ -22,6 +22,8 @@ namespace CE::Widgets
 
         void SetRotation(f32 rotation);
 
+        void DrawCircle(const Rect& rect);
+
         void DrawRect(const Rect& rect);
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
         void DrawRoundedX(const Rect& rect);

@@ -257,8 +257,8 @@ Shader "2D/SDF Geometry"
                 float4 color = info.fillColor;
 
                 float borderMask = 0.0;
-                //if (sdf > -borderThickness && sdf <= 0)
-		        //    borderMask = 1.0;
+                if (sdf > -borderThickness && sdf <= 0)
+		            borderMask = 1.0;
 
                 if (borderThickness > 0.1)
                 {

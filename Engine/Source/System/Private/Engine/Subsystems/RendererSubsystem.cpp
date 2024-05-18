@@ -352,7 +352,7 @@ namespace CE
 						// TODO: Add support for multiple cameras in scene
 						if (camera != scene->mainCamera)
 							continue;
-            
+
 						if (renderWindow && renderWindow->GetCurrentNativeWindow())
 						{
 							CPlatformWindow* nativeWindow = renderWindow->GetCurrentNativeWindow();

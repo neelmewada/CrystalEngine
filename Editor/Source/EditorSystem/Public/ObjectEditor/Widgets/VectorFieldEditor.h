@@ -3,21 +3,22 @@
 namespace CE::Editor
 {
 	CLASS()
-	class EDITORSYSTEM_API VectorComponentInput : public CWidget
+	class EDITORSYSTEM_API VectorComponentInput : public CTextInput
 	{
-		CE_CLASS(VectorComponentInput, CWidget)
+		CE_CLASS(VectorComponentInput, CTextInput)
 	public:
 
 
 	protected:
 
+		void OnFocusLost() override;
+
 		void Construct() override;
 
-		FIELD()
-		CWidget* tagWidget = nullptr;
+		void OnPaintOverlay(CPaintEvent* paintEvent) override;
 
 		FIELD()
-		CTextInput* inputField = nullptr;
+		Color tagColor = Color::Clear();
 
 		friend class VectorFieldEditor;
 	};
@@ -27,10 +28,6 @@ namespace CE::Editor
 	{
 		CE_CLASS(VectorFieldEditor, FieldEditor)
 	public:
-
-		VectorFieldEditor();
-
-		virtual ~VectorFieldEditor();
 
 		template<typename T> requires TContainsType<T, Vec2, Vec3, Vec4, Vec2i, Vec3i, Vec4i>::Value
 		void SetVectorType()
@@ -50,20 +47,25 @@ namespace CE::Editor
 				fieldZ->SetEnabled(true);
 				fieldW->SetEnabled(true);
 			}
+			else
+			{
+				fieldZ->SetEnabled(false);
+				fieldW->SetEnabled(false);
+			}
 
 			if constexpr (TContainsType<T, Vec2, Vec3, Vec4>::Value)
 			{
-				fieldX->inputField->SetInputValidator(CFloatInputValidator);
-				fieldY->inputField->SetInputValidator(CFloatInputValidator);
-				fieldZ->inputField->SetInputValidator(CFloatInputValidator);
-				fieldW->inputField->SetInputValidator(CFloatInputValidator);
+				fieldX->SetInputValidator(CFloatInputValidator);
+				fieldY->SetInputValidator(CFloatInputValidator);
+				fieldZ->SetInputValidator(CFloatInputValidator);
+				fieldW->SetInputValidator(CFloatInputValidator);
 			}
 			else if constexpr (TContainsType<T, Vec2i, Vec3i, Vec4i>::Value)
 			{
-				fieldX->inputField->SetInputValidator(CIntegerInputValidator);
-				fieldY->inputField->SetInputValidator(CIntegerInputValidator);
-				fieldZ->inputField->SetInputValidator(CIntegerInputValidator);
-				fieldW->inputField->SetInputValidator(CIntegerInputValidator);
+				fieldX->SetInputValidator(CIntegerInputValidator);
+				fieldY->SetInputValidator(CIntegerInputValidator);
+				fieldZ->SetInputValidator(CIntegerInputValidator);
+				fieldW->SetInputValidator(CIntegerInputValidator);
 			}
 		}
 
@@ -75,6 +77,9 @@ namespace CE::Editor
 		Vec4 GetVectorValue();
 
 		Vec4i GetVectorIntValue();
+
+		void SetVectorValue(const Vec4& value);
+		void SetVectorIntValue(const Vec4i& value);
 
 	protected:
 

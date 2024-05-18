@@ -133,35 +133,12 @@ namespace CE::Editor
 				{
 					propertyDrawer->CreateGUI(field, target);
 					propertyDrawers.Add(propertyDrawer);
-
-					//CLabel* testLabel = CreateObject<CLabel>(container, "Title");
-					//testLabel->SetText("Text Label");
 				}
 			}
 
 			section->SetExpanded(true);
 		}
-
-		Delegate<void(CSplitView*, int)> splitterCallback = [this](CSplitView* splitView, int splitterIndex)
-			{
-				for (PropertyDrawer* propertyDrawer : propertyDrawers)
-				{
-					if ((CSplitView*)propertyDrawer != splitView)
-					{
-						f32 splitRatio = splitView->GetContainer(splitterIndex)->GetSplitRatio();
-						propertyDrawer->splitView->SetContainerSplitRatio(propertyDrawer->splitView->GetContainer(0), splitRatio);
-					}
-				}
-			};
-
-		for (PropertyDrawer* propertyDrawer : propertyDrawers)
-		{
-			propertyDrawer->SetNeedsLayout();
-			propertyDrawer->SetNeedsPaint();
-
-			Bind(propertyDrawer->splitView, MEMBER_FUNCTION(CSplitView, OnSplitterDragged), splitterCallback);
-		}
-
+		
 		parent->SetNeedsLayout();
 		parent->SetNeedsPaint();
 

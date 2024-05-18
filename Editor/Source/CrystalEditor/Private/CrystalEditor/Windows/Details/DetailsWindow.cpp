@@ -97,13 +97,13 @@ namespace CE::Editor
         splitView = CreateObject<CSplitView>(this, "DetailsSplitter");
         splitView->SetOrientation(COrientation::Vertical);
 
-        splitView->AddSplit(0.6f);
+        splitView->AddSplit(0.7f);
 
         CSplitViewContainer* topView = splitView->GetContainer(0);
-        topView->SetName("SplitContainer");
+        topView->SetName("SplitContainerTop");
 
         CSplitViewContainer* bottomView = splitView->GetContainer(1);
-        bottomView->SetName("SplitContainer");
+        bottomView->SetName("SplitContainerBottom");
         bottomView->SetVerticalScrollAllowed(true);
         bottomView->AddBehavior<CScrollBehavior>();
 

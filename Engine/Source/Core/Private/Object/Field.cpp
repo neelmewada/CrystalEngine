@@ -805,6 +805,13 @@ namespace CE
 		return array;
 	}
 
+	void FieldType::NotifyObjectFieldUpdate(Object* instance)
+	{
+		if (instance)
+		{
+			instance->OnFieldModified(this);
+		}
+	}
 }
 
 CE_RTTI_TYPEINFO_IMPL(CE, FieldType)

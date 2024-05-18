@@ -23,8 +23,6 @@ namespace CE::Editor
 
         virtual void CreateGUI(FieldType* field, void* instance);
 
-        EditorSplitter* GetSplitView() const { return splitView; }
-
         // - Signals -
 
         CE_SIGNAL(OnPropertyModified, PropertyDrawer*);
@@ -33,14 +31,15 @@ namespace CE::Editor
 
         void Construct() override;
 
-        FIELD()
-        EditorSplitter* splitView = nullptr;
+		FIELD()
+		CWidget* left = nullptr;
 
 		FIELD()
-		EditorSplitterContainer* left = nullptr;
+		CWidget* right = nullptr;
 
-		FIELD()
-		EditorSplitterContainer* right = nullptr;
+        FieldType* targetField = nullptr;
+
+        void* targetInstance = nullptr;
 
     private:
 

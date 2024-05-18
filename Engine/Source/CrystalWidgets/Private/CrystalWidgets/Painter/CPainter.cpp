@@ -57,7 +57,7 @@ namespace CE::Widgets
         renderer->SetRotation(rotation);
     }
 
-    void CPainter::DrawRect(const Rect& rect)
+    void CPainter::DrawCircle(const Rect& rect)
     {
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
@@ -67,6 +67,20 @@ namespace CE::Widgets
                 return;
         }
 
+        renderer->SetCursor(windowSpaceRect.min);
+        renderer->DrawCircle(rect.GetSize());
+    }
+
+    void CPainter::DrawRect(const Rect& rect)
+    {
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+        
         renderer->SetCursor(windowSpaceRect.min);
         renderer->DrawRect(rect.GetSize());
     }

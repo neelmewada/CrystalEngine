@@ -64,8 +64,6 @@ namespace CE::Widgets
 			return TestMatch(widget, primary, curStates, subControl);
 		}
 
-		// Second rule exists
-
 		bool secondRuleMatches = TestMatch(widget, secondary, curStates, subControl);
 		if (!secondRuleMatches)
 			return false;
