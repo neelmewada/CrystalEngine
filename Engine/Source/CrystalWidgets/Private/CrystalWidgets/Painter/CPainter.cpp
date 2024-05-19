@@ -40,7 +40,9 @@ namespace CE::Widgets
 
     void CPainter::SetFont(const CFont& font)
     {
-        renderer->PushFont(font.family, font.size, font.bold);
+        this->font = font;
+
+        renderer->PushFont(font.family, (u32)font.size, font.bold);
         numFontsPushed++;
     }
 
@@ -78,7 +80,7 @@ namespace CE::Widgets
         Vec2 center = (from + to) / 2.0f;
         float rotation = atan2(to.y - from.y, to.x - from.x);
         float width = sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y));
-        float height = pen.width;  // You define the thickness of the line
+        float height = pen.width;
         if (height < 0.001f)
             return;
 
@@ -110,8 +112,16 @@ namespace CE::Widgets
                 return;
         }
 
+        f32 dashLength = 1.0f;
+        if (pen.style == CPenStyle::DashedLine)
+            dashLength = pen.dashLength;
+        else if (pen.style == CPenStyle::SolidLine)
+            dashLength = rect.GetSize().width;
+        else if (pen.style == CPenStyle::DottedLine)
+            dashLength = 1.0f;
+
         renderer->SetCursor(windowSpaceRect.min);
-        renderer->DrawDashedLine(rect.GetSize(), pen.dashLength);
+        renderer->DrawDashedLine(rect.GetSize(), dashLength);
     }
 
     void CPainter::DrawRect(const Rect& rect)
@@ -172,9 +182,50 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
+        Vec2 textSize = Vec2();
+        static Array<Rect> positions{};
+
+        if (font.underline)
+        {
+            textSize = renderer->CalculateTextOffsets(positions, text);
+            f32 lineHeight = renderer->GetFontLineHeight();
+
+            int numLines = (int)((textSize.height + 2.0f) / lineHeight);
+            int curLine = 0;
+
+            CPen originalPen = pen;
+
+            pen.style = font.lineStyle;
+            SetPen(pen);
+
+            for (int i = 0; i < positions.GetSize(); i++)
+            {
+                const Rect& charRect = positions[i];
+
+                int line = (int)(charRect.max.y / lineHeight);
+
+                if (line > curLine) // New line
+                {
+                    curLine = line;
+                    DrawLine(Vec2(position.x, position.y + curLine * lineHeight), Vec2(position.x + charRect.max.x, position.y + curLine * lineHeight));
+                }
+                else if (i == positions.GetSize() - 1) // Last char
+                {
+                    curLine++;
+                    DrawLine(Vec2(position.x, position.y + curLine * lineHeight), Vec2(position.x + charRect.max.x, position.y + curLine * lineHeight));
+                    break;
+                }
+            }
+
+            SetPen(originalPen);
+        }
+
         if (renderer->ClipRectExists())
         {
-            Vec2 textSize = renderer->CalculateTextSize(text);
+            if (!font.underline) // No need to calculate text size again
+            {
+	            textSize = renderer->CalculateTextSize(text);
+            }
             Rect windowSpaceRect = Rect::FromSize(GetOrigin() + position, textSize);
             Rect clipRect = renderer->GetLastClipRect();
 
@@ -188,6 +239,24 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Rect& rect)
     {
+        Vec2 textSize = Vec2();
+        static Array<Rect> positions{};
+
+        if (font.underline)
+        {
+            textSize = renderer->CalculateTextOffsets(positions, text);
+            f32 lineHeight = renderer->GetFontLineHeight();
+
+            int numLines = (int)((textSize.height + 2.0f) / lineHeight);
+
+            for (const Rect& charRect : positions)
+            {
+                int curLine = (int)(charRect.min.y / lineHeight);
+
+                String::IsAlphabet('a');
+            }
+        }
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {

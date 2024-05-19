@@ -80,6 +80,14 @@ CButton::alternate:disabled {
     color: rgb(128, 128, 128);
 }
 
+CLabelButton {
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-color: white;
+    text-decoration-thickness: 1px;
+    cursor: hand;
+}
+
 CTextInput {
     color: white;
     cursor: edit;

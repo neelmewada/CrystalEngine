@@ -24,9 +24,6 @@ class Package_WriteRead_Test;
 namespace CE
 {
 
-    class CORE_API Component;
-    class CORE_API EventBus;
-
     class ClassType;
     class FieldType;
     class FunctionType;

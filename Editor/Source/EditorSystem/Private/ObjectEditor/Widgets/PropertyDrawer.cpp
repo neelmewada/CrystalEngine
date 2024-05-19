@@ -196,6 +196,16 @@ namespace CE::Editor
 						}
 					});
 			}
+			else if (declTypeId == TYPEID(String))
+			{
+				CTextInput* stringInput = CreateObject<CTextInput>(right, "StringInput");
+				stringInput->SetText(field->GetFieldValue<String>(instance));
+
+				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance](CTextInput* input)
+					{
+						field->SetFieldValue<String>(instance, input->GetText());
+					});
+			}
 		}
 	}
 
@@ -204,7 +214,7 @@ namespace CE::Editor
 		Super::Construct();
 
 		left = CreateObject<CWidget>(this, "PropertyEditorRowLeft");
-
+		
 		right = CreateObject<CWidget>(this, "PropertyEditorRowRight");
 
 	}

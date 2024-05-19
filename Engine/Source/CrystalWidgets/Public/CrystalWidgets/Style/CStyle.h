@@ -86,6 +86,11 @@ namespace CE::Widgets
 		Cursor, // Inherited
 		WordWrap, // Inherited
 
+		TextDecorationStyle,
+		TextDecorationLine,
+		TextDecorationColor,
+		TextDecorationThickness,
+
 		// FlexBox properties
 		AlignContent,
 		AlignItems,
@@ -126,6 +131,33 @@ namespace CE::Widgets
 		Auto = Fill
 	};
 	ENUM_CLASS(CBackgroundSize);
+
+	ENUM(Flags)
+	enum class CTextDecorationLine : u8
+	{
+		None = 0,
+		Underline = BIT(0),
+		Overline = BIT(1),
+		LineThrough = BIT(2)
+	};
+	ENUM_CLASS(CTextDecorationLine);
+
+	ENUM()
+	enum class CTextDecorationStyle : u8
+	{
+		Solid,
+		Dashed,
+		Dotted
+	};
+	ENUM_CLASS(CTextDecorationStyle);
+
+	struct CTextDecoration
+	{
+		CTextDecorationLine linePosition = CTextDecorationLine::None;
+		CTextDecorationStyle lineStyle = CTextDecorationStyle::Solid;
+		Color lineColor = Color::Clear();
+		f32 thickness = 0;
+	};
 
 	ENUM()
 	enum class CTextAlign : u8
@@ -458,6 +490,27 @@ namespace CE::Widgets
 			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))
 				return CWordWrap::Normal;
 			return (CWordWrap)properties.Get(CStylePropertyType::WordWrap).enumValue.x;
+		}
+
+		CTextDecoration GetTextDecoration() const
+		{
+			CTextDecoration result{};
+
+			if (properties.KeyExists(CStylePropertyType::TextDecorationStyle))
+				result.lineStyle = (CTextDecorationStyle)properties.Get(CStylePropertyType::TextDecorationStyle).enumValue.x;
+
+			if (properties.KeyExists(CStylePropertyType::TextDecorationLine))
+				result.linePosition = (CTextDecorationLine)properties.Get(CStylePropertyType::TextDecorationLine).enumValue.x;
+
+			if (properties.KeyExists(CStylePropertyType::TextDecorationThickness))
+				result.thickness = properties.Get(CStylePropertyType::TextDecorationThickness).single;
+
+			if (properties.KeyExists(CStylePropertyType::TextDecorationColor))
+				result.lineColor = properties.Get(CStylePropertyType::TextDecorationColor).color;
+			else
+				result.lineColor = GetForegroundColor();
+
+			return result;
 		}
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

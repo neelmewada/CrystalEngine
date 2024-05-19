@@ -14,7 +14,8 @@ namespace CE::Widgets
         Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
 
         void SetText(const String& text);
-        const String& GetText() const;
+
+        const String& GetText() const { return text; }
 
     private:
 

@@ -31,6 +31,10 @@ namespace CE::Widgets
 		{ CStylePropertyType::ShadowColor, TYPE(Color), false },
 		{ CStylePropertyType::ShadowOffset, TYPE(Vec2), false },
 		{ CStylePropertyType::TextAlign, TYPE(CTextAlign), false },
+		{ CStylePropertyType::TextDecorationColor, TYPE(Color), false },
+		{ CStylePropertyType::TextDecorationLine, TYPE(CTextDecorationLine), false },
+		{ CStylePropertyType::TextDecorationStyle, TYPE(CTextDecorationStyle), false },
+		{ CStylePropertyType::TextDecorationThickness, TYPE(f32), false },
 		{ CStylePropertyType::Width, TYPE(f32), true },
 		{ CStylePropertyType::Height, TYPE(f32), true },
 		{ CStylePropertyType::MinWidth, TYPE(f32), true },
@@ -102,6 +106,10 @@ namespace CE::Widgets
 		{ "font-size", CStylePropertyType::FontSize },
 		{ "font-name", CStylePropertyType::FontName},
 		{ "font", CStylePropertyType::FontName},
+		{ "text-decoration-color", CStylePropertyType::TextDecorationColor },
+		{ "text-decoration-line", CStylePropertyType::TextDecorationLine },
+		{ "text-decoration-style", CStylePropertyType::TextDecorationStyle },
+		{ "text-decoration-thickness", CStylePropertyType::TextDecorationThickness },
 		{ "cursor", CStylePropertyType::Cursor },
 		{ "align-content", CStylePropertyType::AlignContent },
 		{ "align-items", CStylePropertyType::AlignItems },
@@ -142,6 +150,8 @@ namespace CE::Widgets
 		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() },
 		{ CStylePropertyType::BackgroundSize, GetStaticEnum<CBackgroundSize>() },
 		{ CStylePropertyType::BackgroundPosition, GetStaticEnum<CTextAlign>() },
+		{ CStylePropertyType::TextDecorationStyle, GetStaticEnum<CTextDecorationStyle>() },
+		{ CStylePropertyType::TextDecorationLine, GetStaticEnum<CTextDecorationLine>() },
 	};
 
 	CRYSTALWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)

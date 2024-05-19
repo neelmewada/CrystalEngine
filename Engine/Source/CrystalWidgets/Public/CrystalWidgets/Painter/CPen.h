@@ -5,7 +5,8 @@ namespace CE::Widgets
     enum class CPenStyle
     {
 	    SolidLine = 0,
-        DashLine
+        DashedLine,
+        DottedLine
     };
     ENUM_CLASS(CPenStyle);
 
@@ -31,6 +32,11 @@ namespace CE::Widgets
         void SetStyle(CPenStyle style)
         {
             this->style = style;
+
+            if (style == CPenStyle::DottedLine)
+            {
+                dashLength = 1.0f;
+            }
         }
 
         CPenStyle GetStyle() const
@@ -50,11 +56,21 @@ namespace CE::Widgets
 
         void SetDashLength(f32 dashLength)
         {
+            if (style == CPenStyle::DottedLine)
+            {
+                dashLength = 1.0f;
+            }
+
             this->dashLength = dashLength;
         }
 
         f32 GetDashLength() const
         {
+            if (style == CPenStyle::DottedLine)
+            {
+                return 1.0f;
+            }
+
             return dashLength;
         }
 

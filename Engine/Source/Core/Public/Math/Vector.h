@@ -189,6 +189,16 @@ namespace CE
             return *this / GetMagnitude();
         }
 
+        static f32 SqrDistance(TVector2 a, TVector2 b)
+		{
+            return (b - a).GetSqrMagnitude();
+		}
+
+        static f32 Distance(TVector2 a, TVector2 b)
+		{
+            return (b - a).GetMagnitude();
+		}
+
         inline static T Dot(TVector2 a, TVector2 b)
         {
             return a.x * b.x + a.y * b.y;
@@ -417,6 +427,16 @@ namespace CE
             return SignedAngle(*this, b);
         }
 
+        static f32 SqrDistance(TVector3 a, TVector3 b)
+        {
+            return (b - a).GetSqrMagnitude();
+        }
+
+        static f32 Distance(TVector3 a, TVector3 b)
+        {
+            return (b - a).GetMagnitude();
+        }
+
         inline static TVector3<f32> Lerp(TVector3 from, TVector3 to, f32 t)
         {
             return TVector3<f32>(Math::Lerp(from.x, to.x, t), Math::Lerp(from.y, to.y, t), Math::Lerp(from.z, to.z, t));
@@ -634,6 +654,16 @@ namespace CE
         {
             return TVector4(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x, w * b.w);
         }
+
+        static f32 SqrDistance(TVector4 a, TVector4 b)
+		{
+            return (b - a).GetSqrMagnitude();
+		}
+
+        static f32 Distance(TVector4 a, TVector4 b)
+		{
+            return (b - a).GetMagnitude();
+		}
 
         /// Signed angle in radians between 2 vectors
         inline static f32 SignedAngle(TVector4 a, TVector4 b)

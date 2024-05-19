@@ -79,6 +79,7 @@
 
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
+#include "CrystalWidgets/Widget/CLabelButton.h"
 #include "CrystalWidgets/Widget/CButton.h"
 #include "CrystalWidgets/Widget/CImage.h"
 #include "CrystalWidgets/Widget/CTextInput.h"

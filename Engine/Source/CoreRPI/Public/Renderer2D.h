@@ -88,6 +88,8 @@ namespace CE::RPI
         Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 width = 0.0f);
         Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
 
+        f32 GetFontLineHeight();
+
         Vec2 DrawText(const String& text, Vec2 size = {});
 
         inline Vec2 DrawText(const Rect& rect, const String& text)

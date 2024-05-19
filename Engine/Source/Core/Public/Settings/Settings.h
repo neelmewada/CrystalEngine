@@ -3,14 +3,14 @@
 namespace CE
 {
 
-    class CORE_API SettingsBase : public Object
+    class CORE_API Settings : public Object
     {
-        CE_CLASS(SettingsBase, Object)
+        CE_CLASS(Settings, Object)
     public:
         
-        SettingsBase() = default;
+        Settings() = default;
         
-        static SettingsBase* LoadSettings(ClassType* settingsClass, String settingsName = "");
+        static Settings* LoadSettings(ClassType* settingsClass, String settingsName = "");
 
         static void SaveSettings();
 
@@ -32,27 +32,27 @@ namespace CE
         friend class CoreModule;
     };
 
-	template<typename TSettings> requires TIsBaseClassOf<SettingsBase, TSettings>::Value
+	template<typename TSettings> requires TIsBaseClassOf<Settings, TSettings>::Value
 	TSettings* GetSettings()
 	{
-		return (TSettings*)SettingsBase::LoadSettings(TSettings::Type());
+		return (TSettings*)Settings::LoadSettings(TSettings::Type());
 	}
     
 	FORCE_INLINE void SaveSettings()
 	{
-		SettingsBase::SaveSettings();
+		Settings::SaveSettings();
 	}
 
 #if PAL_TRAIT_BUILD_EDITOR
     FORCE_INLINE void SaveSettings(const IO::Path& outPackagePath)
 	{
-        SettingsBase::SaveSettings(outPackagePath);
+        Settings::SaveSettings(outPackagePath);
 	}
 #endif
 }
 
 
-CE_RTTI_CLASS(CORE_API, CE, SettingsBase,
+CE_RTTI_CLASS(CORE_API, CE, Settings,
     CE_SUPER(CE::Object),
     CE_ABSTRACT,
     CE_ATTRIBS(),

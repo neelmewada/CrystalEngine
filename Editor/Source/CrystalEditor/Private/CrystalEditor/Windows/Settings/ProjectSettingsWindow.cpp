@@ -16,6 +16,35 @@ namespace CE::Editor
 		
 	}
 
+	void ProjectSettingsWindow::ShowSettingsFor(SubClass<Settings> settingsClass)
+	{
+		for (int i = content->GetSubWidgetCount() - 1; i >= 0; --i)
+		{
+			content->GetSubWidget(i)->Destroy();
+		}
+
+		if (settingsClass == nullptr || !settingsClass->CanBeInstantiated())
+			return;
+
+		Settings* settings = Settings::LoadSettings(settingsClass);
+
+		if (!settings)
+			return;
+
+		if (editor != nullptr && !settingsClass->IsSubclassOf(editor->GetTargetClass()))
+		{
+			editor->Destroy();
+			editor = nullptr;
+		}
+
+		CLabel* titleLabel = CreateObject<CLabel>(content, "SettingsTitle");
+		titleLabel->SetText(settingsClass->GetDisplayName());
+
+		editor = ObjectEditor::Create(settingsClass, content, "ObjectEditor");
+
+
+	}
+
 	void ProjectSettingsWindow::OnPlatformWindowSet()
 	{
 		Super::OnPlatformWindowSet();
@@ -41,7 +70,7 @@ namespace CE::Editor
 		content->SetVerticalScrollAllowed(true);
 		content->AddBehavior<CScrollBehavior>();
 
-		const Array<ClassType*>& settingsClasses = SettingsBase::GetAllSettingsClasses();
+		const Array<ClassType*>& settingsClasses = Settings::GetAllSettingsClasses();
 
 		struct SettingsEntry
 		{
@@ -85,17 +114,35 @@ namespace CE::Editor
 			settingsByCategory[category].Add({ .category = category, .name = name, .settingsClass = settingsClass });
 		}
 
-		for (Name settingCategory : settingCategories)
+		for (const Name& settingCategory : settingCategories)
 		{
 			CLabel* title = CreateObject<CLabel>(sideBar, "SideBarTitle");
 			title->SetText(settingCategory.GetString());
 
 			for (const auto& settingsEntry : settingsByCategory[settingCategory])
 			{
-				CLabel* entry = CreateObject<CLabel>(sideBar, "SideBarEntryLabel");
-				entry->SetText(settingsEntry.settingsClass->GetDisplayName());
+				ClassType* classType = settingsEntry.settingsClass;
+				CLabelButton* entry = CreateObject<CLabelButton>(sideBar, "SideBarEntryLabel");
+				entry->SetText(classType->GetDisplayName());
+
+				if (classType->GetTypeId() == TYPEID(ProjectSettings))
+				{
+					ShowSettingsFor(classType);
+				}
+
+				Bind(entry, MEMBER_FUNCTION(CLabelButton, OnMouseLeftClick), [entry, settingsEntry, this]
+					{
+						ShowSettingsFor(settingsEntry.settingsClass);
+					});
 			}
 		}
+	}
+
+	void ProjectSettingsWindow::OnPaint(CPaintEvent* paintEvent)
+	{
+		Super::OnPaint(paintEvent);
+
+		CPainter* painter = paintEvent->painter;
 	}
 
 } // namespace CE::Editor

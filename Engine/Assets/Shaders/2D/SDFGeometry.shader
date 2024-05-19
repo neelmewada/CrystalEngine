@@ -167,23 +167,24 @@ Shader "2D/SDF Geometry"
                 p = abs(p);
                 return length(p-min(p.x+p.y,w)*0.5) - r;
             }
-
-            float SDFSegment(float2 p, float2 a, float2 b) {
-                float2 pa = p - a;
-                float2 ba = b - a;
-                float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-                return length(pa - ba * h);
+               
+            float SDFSegment( in float2 p, in float2 a, in float2 b )
+            {
+                float2 ba = b-a;
+                float2 pa = p-a;
+                float h =clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+                return length(pa-h*ba);
             }
 
-            float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength) 
-            {
+            // Signed distance function for a dashed line segment
+            float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength, float thickness) {
                 float2 ba = b - a;
                 float totalLength = length(ba);
                 ba = normalize(ba);
                 float t = dot(p - a, ba) / totalLength;
                 float pattern = fmod(t, dashLength * 2.0);
                 float dashMask = step(pattern, dashLength);
-                float d = SDFSegment(p, a, b);
+                float d = SDFSegment(p, a, b) - thickness;
                 return lerp(1.0, d, dashMask);
             }
 
@@ -262,10 +263,12 @@ Shader "2D/SDF Geometry"
                 
                 if (sdf > -borderThickness && sdf <= 0)
 		            borderMask = 1.0;
+                if (info.outlineColor.a < 0.001)
+                    info.outlineColor = color;
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                const float sharpness = 5.0;
+                const float sharpness = 50.0;
                 return lerp(float4(color.rgb, 0), color, clamp(-sdf * sharpness, 0, 1));
             }
 
@@ -317,16 +320,14 @@ Shader "2D/SDF Geometry"
             float4 RenderDashedLine(in GeometryInfo info, float2 p)
             {
                 const float sdf = SDFDashedLine(p, 
-                    float2(0, info.itemSize.y * 0.5), 
-                    float2(info.itemSize.x, info.itemSize.y * 0.5), 
-                    info.dashLength / info.itemSize.x);
+                    float2(-info.itemSize.x, 0.0), 
+                    float2(info.itemSize.x, 0.0), 
+                    info.dashLength * 0.5 / info.itemSize.x,
+                    info.borderThickness);
                 
                 const float4 color = info.outlineColor;
 
-                const float lineThickness = 0.01;
-                float alpha = smoothstep(lineThickness, 0.0, sdf);
-
-                return float4(color.rgb * alpha, alpha);
+                return lerp(float4(color.rgb, 0), color, -sdf * 1.5);
             }
 
             #define idx input.instanceId

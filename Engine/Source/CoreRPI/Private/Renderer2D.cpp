@@ -534,7 +534,8 @@ namespace CE::RPI
 
 			outRects[i].min = position - cursorPosition;
 			outRects[i].max = outRects[i].min + Vec2(glyphWidth * fontSize / atlasFontSize, glyphHeight * fontSize / atlasFontSize);
-			if (glyphWidth == 0)
+
+			if (abs(glyphWidth) < 0.00001f)
 			{
 				// TODO: Temporary hack
 				const FontGlyphLayout& hLayout = fontAtlas->GetGlyphLayout('h');
@@ -583,6 +584,24 @@ namespace CE::RPI
 		if (isFixedWidth)
 			size.width = width;
 		return size;
+	}
+
+	f32 Renderer2D::GetFontLineHeight()
+	{
+		const FontInfo& font = fontStack.Top();
+		Name fontName = font.fontName;
+
+		if (!fontName.IsValid())
+			fontName = defaultFontName;
+
+		RPI::FontAtlasAsset* fontAtlas = fontAtlasesByName[fontName];
+		if (fontAtlas == nullptr)
+			return 0;
+
+		const auto& metrics = fontAtlas->GetMetrics();
+		f32 atlasFontSize = metrics.fontSize;
+
+		return metrics.lineHeight * (f32)font.fontSize / atlasFontSize;
 	}
 
 	Vec2 Renderer2D::DrawText(const String& text, Vec2 size)
@@ -1372,9 +1391,15 @@ namespace CE::RPI
 		scale.y = size.height * 2;
 
 		Vec2 quadPos = cursorPosition;
-		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+		//Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 
-		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		Vec3 translation1 = Vec3(-scale.x / 2, -scale.y / 2);
+		Vec3 translation2 = Vec3(quadPos.x * 2 + scale.x / 2, quadPos.y * 2 + scale.y / 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation2) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() *
+			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
+
+		//drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
 		drawItem.drawType = drawType;
 		drawItem.fillColor = fillColor.ToVec4();
 		drawItem.outlineColor = outlineColor.ToVec4();

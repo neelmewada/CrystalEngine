@@ -56,6 +56,10 @@ namespace CE::Widgets
 
         Vec2 GetCurrentOrigin() const { return GetOrigin(); }
 
+        const CPen& GetPen() const { return pen; }
+        const CFont& GetFont() const { return font; }
+        const CBrush& GetBrush() const { return brush; }
+
     private:
 
         void DrawDashedLine(const Rect& rect);
@@ -74,6 +78,7 @@ namespace CE::Widgets
 
         CPen pen{};
         CBrush brush{};
+        CFont font{};
 
         friend class CWidget;
         friend class CWindow;

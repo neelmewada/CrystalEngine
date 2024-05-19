@@ -813,3 +813,37 @@ namespace CE
 
 CE_RTTI_TYPEINFO(CORE_API, CE, StructType, TYPEID(CE::TypeInfo))
 CE_RTTI_TYPEINFO(CORE_API, CE, ClassType, TYPEID(CE::TypeInfo))
+
+/// fmt user-defined Formatter for CE::String
+template <> struct fmt::formatter<CE::StructType*> {
+	// Parses format specifications of the form ['f' | 'e'].
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		// Return an iterator past the end of the parsed range:
+		return ctx.end();
+	}
+
+	// Formats the point p using the parsed format specification (presentation)
+	// stored in this formatter.
+	template <typename FormatContext>
+	auto format(CE::StructType* structType, FormatContext& ctx) const -> decltype(ctx.out()) {
+		// ctx.out() is an output iterator to write to.
+		return fmt::format_to(ctx.out(), "{}", structType->GetTypeName().GetString());
+	}
+};
+
+/// fmt user-defined Formatter for CE::String
+template <> struct fmt::formatter<CE::ClassType*> {
+	// Parses format specifications of the form ['f' | 'e'].
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		// Return an iterator past the end of the parsed range:
+		return ctx.end();
+	}
+
+	// Formats the point p using the parsed format specification (presentation)
+	// stored in this formatter.
+	template <typename FormatContext>
+	auto format(CE::ClassType* clazz, FormatContext& ctx) const -> decltype(ctx.out()) {
+		// ctx.out() is an output iterator to write to.
+		return fmt::format_to(ctx.out(), "{}", clazz->GetTypeName().GetString());
+	}
+};

@@ -2,21 +2,21 @@
 
 namespace CE
 {
-	Array<ClassType*> SettingsBase::settingsClasses{};
+	Array<ClassType*> Settings::settingsClasses{};
 
-	static SettingsBase* LoadSettingsFromPackage(ClassType* settingsClass)
+	static Settings* LoadSettingsFromPackage(ClassType* settingsClass)
 	{
-		if (!settingsClass->IsSubclassOf<SettingsBase>() || !settingsClass->CanBeInstantiated())
+		if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
 			return nullptr;
-		return (SettingsBase*)GetSettingsPackage()->LoadObject(settingsClass->GetTypeName());
+		return (Settings*)GetSettingsPackage()->LoadObject(settingsClass->GetTypeName());
 	}
 
-    SettingsBase* SettingsBase::LoadSettings(ClassType* settingsClass, String settingsName)
+    Settings* Settings::LoadSettings(ClassType* settingsClass, String settingsName)
     {
-        if (!settingsClass->IsSubclassOf<SettingsBase>() || !settingsClass->CanBeInstantiated())
+        if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
             return nullptr;
 		
-		SettingsBase* settings = LoadSettingsFromPackage(settingsClass);
+		Settings* settings = LoadSettingsFromPackage(settingsClass);
 
 		if (settings == nullptr)
 		{
@@ -29,13 +29,13 @@ namespace CE
 				settingsName = settingsClass->GetName().GetLastComponent();
 			}
 
-			settings = CreateObject<SettingsBase>(GetSettingsPackage(), settingsName, OF_NoFlags, settingsClass);
+			settings = CreateObject<Settings>(GetSettingsPackage(), settingsName, OF_NoFlags, settingsClass);
 		}
 		
 		return settings;
     }
 
-	void SettingsBase::SaveSettings()
+	void Settings::SaveSettings()
 	{
 		Package* settingsPackage = GetSettingsPackage();
 		if (settingsPackage == nullptr)
@@ -48,7 +48,7 @@ namespace CE
 	}
 
 #if PAL_TRAIT_BUILD_EDITOR
-	void SettingsBase::SaveSettings(const IO::Path& customPath)
+	void Settings::SaveSettings(const IO::Path& customPath)
 	{
 		Package* settingsPackage = GetSettingsPackage();
 		if (settingsPackage == nullptr)
@@ -62,7 +62,7 @@ namespace CE
 #endif
 
 
-	Array<ClassType*> SettingsBase::GetSettingsClassesWithCategory(const String& settingsCategory)
+	Array<ClassType*> Settings::GetSettingsClassesWithCategory(const String& settingsCategory)
     {
 		Array<ClassType*> result{};
 		
@@ -80,22 +80,22 @@ namespace CE
         return result;
     }
 
-	void SettingsBase::OnClassRegistered(ClassType* classType)
+	void Settings::OnClassRegistered(ClassType* classType)
 	{
-		if (classType != nullptr && classType->IsSubclassOf<SettingsBase>() && classType != GetStaticClass<SettingsBase>())
+		if (classType != nullptr && classType->IsSubclassOf<Settings>() && classType != GetStaticClass<Settings>())
 		{
 			settingsClasses.Add(classType);
 		}
 	}
 
-	void SettingsBase::OnClassDeregistered(ClassType* classType)
+	void Settings::OnClassDeregistered(ClassType* classType)
 	{
-		if (classType != nullptr && classType->IsSubclassOf<SettingsBase>() && classType != GetStaticClass<SettingsBase>())
+		if (classType != nullptr && classType->IsSubclassOf<Settings>() && classType != GetStaticClass<Settings>())
 		{
 			settingsClasses.Remove(classType);
 		}
 	}
 }
 
-CE_RTTI_CLASS_IMPL(CORE_API, CE, SettingsBase)
+CE_RTTI_CLASS_IMPL(CORE_API, CE, Settings)
 

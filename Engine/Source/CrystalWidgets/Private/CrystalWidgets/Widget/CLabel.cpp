@@ -57,11 +57,6 @@ namespace CE::Widgets
         SetNeedsPaint();
     }
 
-    const String& CLabel::GetText() const
-    {
-        return text;
-    }
-
     void CLabel::OnPaint(CPaintEvent* paintEvent)
     {
         Super::OnPaint(paintEvent);
@@ -71,7 +66,7 @@ namespace CE::Widgets
 
         CPainter* painter = paintEvent->painter;
 
-        Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
+        Name fontName = computedStyle.GetFontName();
 
         f32 fontSize = 14;
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
@@ -86,8 +81,30 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::WordWrap))
             wordWrap = (CWordWrap)computedStyle.properties[CStylePropertyType::WordWrap].enumValue.x;
 
+        CTextDecoration decoration = computedStyle.GetTextDecoration();
+
+        CFont originalFont = painter->GetFont();
+        CPen originalPen = painter->GetPen();
+
         CFont font = CFont(fontName, (u32)fontSize, false);
+		font.SetUnderline(EnumHasFlag(decoration.linePosition, CTextDecorationLine::Underline));
+        switch (decoration.lineStyle)
+        {
+        case CTextDecorationStyle::Solid:
+            font.SetLineStyle(CPenStyle::SolidLine);
+	        break;
+        case CTextDecorationStyle::Dashed:
+            font.SetLineStyle(CPenStyle::DashedLine);
+	        break;
+        case CTextDecorationStyle::Dotted:
+            font.SetLineStyle(CPenStyle::DottedLine);
+            break;
+        }
+        
+        font.SetLineColor(decoration.lineColor);
+
         CPen pen = CPen(color);
+        pen.SetWidth(decoration.thickness);
 
         painter->SetFont(font);
         painter->SetPen(pen);
@@ -98,6 +115,9 @@ namespace CE::Widgets
             painter->DrawText(text, rect);
         else // Just clip the word that goes out of bounds
             painter->DrawText(text, rect.min);
+
+        painter->SetFont(originalFont);
+        painter->SetPen(originalPen);
     }
 
     
