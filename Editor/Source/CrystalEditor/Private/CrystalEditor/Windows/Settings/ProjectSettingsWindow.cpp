@@ -40,9 +40,9 @@ namespace CE::Editor
 		CLabel* titleLabel = CreateObject<CLabel>(content, "SettingsTitle");
 		titleLabel->SetText(settingsClass->GetDisplayName());
 
-		editor = ObjectEditor::Create(settingsClass, content, "ObjectEditor");
+		editor = ObjectEditor::Create(settings, content, "ObjectEditor");
 
-
+		editor->CreateGUI(content);
 	}
 
 	void ProjectSettingsWindow::OnPlatformWindowSet()
@@ -130,9 +130,9 @@ namespace CE::Editor
 					ShowSettingsFor(classType);
 				}
 
-				Bind(entry, MEMBER_FUNCTION(CLabelButton, OnMouseLeftClick), [entry, settingsEntry, this]
+				Bind(entry, MEMBER_FUNCTION(CLabelButton, OnMouseLeftClick), [classType, this]
 					{
-						ShowSettingsFor(settingsEntry.settingsClass);
+						ShowSettingsFor(classType);
 					});
 			}
 		}

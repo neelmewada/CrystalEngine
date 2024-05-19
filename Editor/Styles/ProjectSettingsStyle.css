@@ -6,7 +6,7 @@ ProjectSettingsWindow {
 }
 
 ProjectSettingsWindow #SideBar {
-    width: 300px;
+    width: 250px;
     padding: 15px 10px;
     row-gap: 10px;
     align-items: flex-start;

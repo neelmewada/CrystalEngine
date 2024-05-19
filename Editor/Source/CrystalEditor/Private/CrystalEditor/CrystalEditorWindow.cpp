@@ -40,9 +40,9 @@ namespace CE::Editor
         auto assetManager = gEngine->GetAssetManager();
 
         CTimer* timer = CreateObject<CTimer>(this, "TickTimer");
-        Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
-            this, MEMBER_FUNCTION(Self, TimerTick));
-        timer->Start(10);
+        //Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
+        //    this, MEMBER_FUNCTION(Self, TimerTick));
+        //timer->Start(10);
 
         CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");

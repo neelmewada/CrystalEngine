@@ -12,21 +12,21 @@ namespace CE
 
         // Description
         
-        FIELD(Category = "Description", Validator = "Name")
+        FIELD(EditAnywhere, Category = "Description", Validator = "Name")
 		String projectName = "Untitled";
 
-        FIELD(Category = "Description", Validator = "LongVersion")
+        FIELD(EditAnywhere, Category = "Description", Validator = "LongVersion")
 		String projectVersion = "0.0.1";
 
-        FIELD(Category = "Description")
+        FIELD(EditAnywhere, Category = "Description")
 		String description = "";
 
 		// Legal
 
-        FIELD(Category = "Legal")
+        FIELD(EditAnywhere, Category = "Legal")
 		String copyrightNotice = "";
 
-        FIELD(Category = "Legal", Display = "Privacy Policy URL")
+        FIELD(EditAnywhere, Category = "Legal", Display = "Privacy Policy URL")
 		String privacyPolicyUrl = "";
     };
 }

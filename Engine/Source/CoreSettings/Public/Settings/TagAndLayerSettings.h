@@ -10,10 +10,10 @@ namespace CE
 
 		virtual ~TagAndLayerSettings();
 
-		FIELD(Category = "Tags")
+		FIELD(EditAnywhere, Category = "Tags")
 		bool useTags = true;
 
-		FIELD(Category = "Tags", Validator = "Name")
+		FIELD(EditAnywhere, Category = "Tags", Validator = "Name")
 		Array<String> tags{};
 	};
 

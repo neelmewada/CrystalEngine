@@ -425,6 +425,10 @@ FieldEditor {
     font-size: 13px;
 }
 
+CTextInput#StringInput {
+    min-width: 170px;
+}
+
 VectorComponentInput {
     flex-direction: row;
     column-gap: 0;
