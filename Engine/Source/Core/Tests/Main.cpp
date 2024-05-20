@@ -1074,6 +1074,9 @@ TEST(Reflection, RTTI_Registry_Testing)
 	EXPECT_EQ(enumType->GetName(), "CE::EventResult");
 	EXPECT_EQ(enumType->GetTypeName(), "/Code/Core.CE::EventResult");
 
+	String enumTypeFormat = String::Format("{}", enumType);
+	EXPECT_EQ(enumTypeFormat, "/Code/Core.CE::EventResult");
+
 	CE_REGISTER_TYPES(CustomFlagsEnum);
     {
 		CustomFlagsEnum customFlags = CustomFlagsEnum::Active | CustomFlagsEnum::Pressed | CustomFlagsEnum::Transient;
@@ -1092,6 +1095,9 @@ TEST(Reflection, RTTI_Registry_Testing)
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);
     EXPECT_EQ(objectClass, GetStaticType<Object>());
+
+	String toString = String::Format("{}", objectClass);
+	EXPECT_EQ(toString, "/Code/Core.CE::Object");
 
     if (objectClass != nullptr)
     {

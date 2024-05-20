@@ -22,6 +22,12 @@ namespace CE::Widgets
 
 		void RemoveAllItems();
 
+		u32 GetItemCount() const { return items.GetSize(); }
+
+		CTreeWidgetItem* GetItem(u32 index) const { return items[index]; }
+
+		const Array<CTreeWidgetItem*>& GetItems() const { return items; }
+
 		const auto& GetSelectedItems() const { return selectedItems; }
 
 		// - Signals -

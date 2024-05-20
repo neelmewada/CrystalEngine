@@ -3,17 +3,17 @@
 namespace CE
 {
     CLASS(Settings = "TagAndLayerSettings", Display = "Tags and Layers", SettingsCategory = "Project")
-	class CORESETTINGS_API TagAndLayerSettings : public SettingsBase
+	class CORESETTINGS_API TagAndLayerSettings : public Settings
 	{
-		CE_CLASS(TagAndLayerSettings, SettingsBase)
+		CE_CLASS(TagAndLayerSettings, Settings)
 	public:
 
 		virtual ~TagAndLayerSettings();
 
-		FIELD(Category = "Tags")
+		FIELD(EditAnywhere, Category = "Tags")
 		bool useTags = true;
 
-		FIELD(Category = "Tags", Validator = "Name")
+		FIELD(EditAnywhere, Category = "Tags", Validator = "Name")
 		Array<String> tags{};
 	};
 

@@ -133,16 +133,16 @@ namespace CE::Widgets
 
         DeselectAll();
 
-        if (isEditing)
-        {
-            emit OnEditingFinished(this);
-        }
-
         textScrollOffset = 0;
         timer->Stop();
         isEditing = false;
         cursorState = false;
         SetNeedsPaint();
+
+        if (isEditing)
+        {
+            emit OnEditingFinished(this);
+        }
     }
 
     void CTextInput::RecalculateOffsets()
@@ -396,6 +396,12 @@ namespace CE::Widgets
                     RecalculateOffsets();
 
                     SetCursorPos(selectedIdx);
+
+                    if (selectAllOnEdit)
+                    {
+                        SelectAll();
+                    }
+
                     SetNeedsPaint();
                 }
             }
@@ -627,6 +633,73 @@ namespace CE::Widgets
                     InsertAt(str, cursorPos);
                 }
             }
+            else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&
+                keyEvent->key != KeyCode::KeypadEnter
+                && IsEditing() &&
+                EnumHasFlag(keyEvent->modifier, KeyModifier::Num))
+            {
+	            switch (keyEvent->key)
+	            {
+	            case KeyCode::KeypadDivide:
+                    c = '/';
+                    break;
+	            case KeyCode::KeypadPlus:
+                    c = '+';
+                    break;
+	            case KeyCode::KeypadMinus:
+                    c = '-';
+                    break;
+	            case KeyCode::KeypadMultiply:
+                    c = '*';
+                    break;
+	            case KeyCode::Keypad0:
+                    c = '0';
+                    break;
+                case KeyCode::Keypad1:
+                    c = '1';
+                    break;
+                case KeyCode::Keypad2:
+                    c = '2';
+                    break;
+                case KeyCode::Keypad3:
+                    c = '3';
+                    break;
+                case KeyCode::Keypad4:
+                    c = '4';
+                    break;
+                case KeyCode::Keypad5:
+                    c = '5';
+                    break;
+                case KeyCode::Keypad6:
+                    c = '6';
+                    break;
+                case KeyCode::Keypad7:
+                    c = '7';
+                    break;
+                case KeyCode::Keypad8:
+                    c = '8';
+                    break;
+                case KeyCode::Keypad9:
+                    c = '9';
+                    break;
+                case KeyCode::KeypadPeriod:
+                    c = '0';
+                    break;
+	            }
+
+                if (c != 0)
+                {
+                    if (IsTextSelected())
+                    {
+                        RemoveSelected();
+                    }
+
+                    String str = "";
+                    str.Append(c);
+
+                    InsertAt(str, cursorPos);
+                }
+            }
             else if (keyEvent->key == KeyCode::Backspace && cursorPos > 0 && !IsTextSelected())
             {
                 RemoveRange(cursorPos - 1, 1);
@@ -834,6 +907,7 @@ namespace CE::Widgets
                 painter->DrawText(display, textRect.min - rect.min);
             }
         }
+
         painter->PopChildCoordinateSpace();
 		painter->PopClipRect();
     }

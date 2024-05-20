@@ -60,7 +60,14 @@ namespace CE
 
     protected:
 
+		void OnFieldModified(FieldType* field) override;
+
+		void OnFieldEdited(FieldType* field) override;
+
 		bool IsTransformUpdated() const { return transformUpdated; }
+
+		void OnEnabled() override;
+		void OnDisabled() override;
 
 	private:
 
@@ -70,19 +77,19 @@ namespace CE
 
 		void SetDirty();
 
-		FIELD()
+		FIELD(ReadOnly)
 		Array<SceneComponent*> attachedComponents{};
 
-		FIELD()
+		FIELD(ReadOnly)
 		SceneComponent* parentComponent = nullptr;
 
-		FIELD(Category = Transform, Display = "Position")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Position", CategoryOrder = "-1")
 		Vec3 localPosition{};
 
-		FIELD(Category = Transform, Display = "Rotation")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Rotation")
 		Vec3 localEulerAngles{};
 
-		FIELD(Category = Transform, Display = "Scale")
+		FIELD(EditAnywhere, Category = "Transform", Display = "Scale")
 		Vec3 localScale = Vec3(1, 1, 1);
 
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
@@ -111,6 +118,8 @@ namespace CE
 		Matrix4x4 localScaleMat = Matrix4x4::Identity();
         
         friend class CE::Scene;
+		friend class Actor;
+		friend class ActorComponent;
 	};
 
 } // namespace CE

@@ -16,8 +16,12 @@ namespace CE::Widgets
 
 		bool IsLayoutCalculationRoot() override;
 
+		Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
+
 		Vec2 GetComputedLayoutTopLeft() override;
 		Vec2 GetComputedLayoutSize() override;
+
+		f32 GetSplitRatio() const { return splitRatio; }
 
 	private:
 

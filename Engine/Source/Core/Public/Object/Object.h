@@ -24,9 +24,6 @@ class Package_WriteRead_Test;
 namespace CE
 {
 
-    class CORE_API Component;
-    class CORE_API EventBus;
-
     class ClassType;
     class FieldType;
     class FunctionType;
@@ -188,8 +185,12 @@ namespace CE
         // - Config API -
 
         void LoadConfig(ClassType* configClass, String fileName);
-        
+
+        virtual void OnFieldEdited(FieldType* field);
+
     protected:
+
+        virtual void OnFieldModified(FieldType* field);
 
 		void LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject);
 
@@ -307,6 +308,7 @@ namespace CE
         friend class Package;
 		friend class SavePackageContext;
         friend class BinaryDeserializer;
+        friend class FieldType;
         
         friend class EventBus;
         friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);

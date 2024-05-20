@@ -226,6 +226,8 @@ namespace CE::RPI
 						{
 							if (it->drawPacketsListByLod.IsEmpty())
 								continue;
+							if (!it->flags.visible)
+								continue;
 
 							it->UpdateSrgs(imageIndex);
 

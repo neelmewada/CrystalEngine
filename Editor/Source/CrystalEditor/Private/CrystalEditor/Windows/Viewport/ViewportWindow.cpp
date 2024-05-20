@@ -5,7 +5,7 @@ namespace CE::Editor
 
     ViewportWindow::ViewportWindow()
     {
-	    
+        allowHorizontalScroll = allowVerticalScroll = false;
     }
 
     ViewportWindow::~ViewportWindow()

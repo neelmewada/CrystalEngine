@@ -555,7 +555,17 @@ namespace CE
         }
     }
 
-	Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
+    void Object::OnFieldModified(FieldType* field)
+    {
+
+    }
+
+    void Object::OnFieldEdited(FieldType* field)
+    {
+
+    }
+
+    Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
 	{
 		return CreateObject<Object>(this, name, flags | OF_DefaultSubobject, classType);
 	}
@@ -1146,7 +1156,7 @@ namespace CE
 		if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
 			return 0;
 
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 		
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 
@@ -1165,7 +1175,7 @@ namespace CE
 
 	void Object::EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args)
 	{
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		Array<TypeId> argHashes{};
 		for (const Variant& arg : args)
@@ -1176,8 +1186,10 @@ namespace CE
 
 		const Array<SignalBinding>& bindings = outgoingBindingsMap[signalInstance];
 
-		for (const auto& binding : bindings)
+		for (int i = 0; i < bindings.GetSize(); i++)
 		{
+			const auto& binding = bindings[i];
+
 			if (binding.signalFunction == nullptr ||
 				binding.signalInstance == nullptr)
 				continue;
@@ -1187,6 +1199,7 @@ namespace CE
 				binding.boundDelegate.IsValid())
 			{
 				binding.boundDelegate.Invoke(args);
+				continue;
 			}
 
 			if (binding.boundFunction == nullptr ||
@@ -1211,7 +1224,7 @@ namespace CE
 		if (sourceFunction->GetFunctionSignature() != destinationFunction->GetFunctionSignature())
 			return false;
 
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 		auto& incomingBindings = incomingBindingsMap[destinationInstance];
@@ -1230,7 +1243,7 @@ namespace CE
 
 	void Object::UnbindSignals(void* toInstance, void* fromInstance)
 	{
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		auto& incoming = incomingBindingsMap[toInstance];
 
@@ -1243,7 +1256,7 @@ namespace CE
 
 	void Object::UnbindAllIncomingSignals(void* toInstance)
 	{
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		auto& incoming = incomingBindingsMap[toInstance];
 
@@ -1255,7 +1268,7 @@ namespace CE
 
 	void Object::UnbindAllOutgoingSignals(void* fromInstance)
 	{
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		auto& outgoing = outgoingBindingsMap[fromInstance];
 
@@ -1267,7 +1280,7 @@ namespace CE
 
 	void Object::UnbindAllSignals(void* instance)
 	{
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
 		if (outgoingBindingsMap.KeyExists(instance))
 		{
@@ -1309,7 +1322,7 @@ namespace CE
 
     void Object::Unbind(void* instance, DelegateHandle delegateInstance)
     {
-		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
+		LockGuard lock{ bindingsMutex };
 
         auto& outgoing = outgoingBindingsMap[instance];
         for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING

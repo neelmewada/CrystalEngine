@@ -800,6 +800,18 @@ namespace CE::Widgets
 				widgetsPressedPerMouseButton[i] = nullptr;
 			}
 		}
+
+		if (curFocusedWidget == widget)
+		{
+			curFocusedWidget = nullptr;
+		}
+
+		if (focusWidget == widget)
+		{
+			focusWidget = nullptr;
+		}
+
+		hoveredWidgetsStack.Remove(widget);
 	}
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)

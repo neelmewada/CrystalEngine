@@ -44,17 +44,6 @@ namespace CE::Widgets
 	{
 		Super::OnPaint(paintEvent);
 
-		if (nativeWindow)
-		{
-			auto titleBarStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::TitleBar);
-
-			Color titleBarColor = titleBarStyle.GetBackgroundColor();
-
-			Vec2 size = GetComputedLayoutSize();
-			Vec2 pos = GetComputedLayoutTopLeft();
-
-			
-		}
 	}
 
 	void CToolWindow::OnPaintOverlay(CPaintEvent* paintEvent)

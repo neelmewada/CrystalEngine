@@ -61,7 +61,7 @@ namespace CE::Widgets
 
 		for (auto subWidget : attachedWidgets)
 		{
-			if (!subWidget->IsEnabled())
+			if (!subWidget->IsSelfEnabled())
 				continue;
 
 			if (subWidget->IsLayoutCalculationRoot())
@@ -207,15 +207,14 @@ namespace CE::Widgets
 			stateFlags = CStateFlag::Default;
 		}
 
+		if (parent)
+		{
+			parent->ReAddChildNodes();
+		}
+
 		SetNeedsLayout();
 		SetNeedsStyle();
 		SetNeedsPaint();
-
-		if (parent)
-		{
-			parent->ClearChildNodes();
-			parent->ReAddChildNodes();
-		}
 	}
 
 	bool CWidget::IsEnabled() const
@@ -283,6 +282,7 @@ namespace CE::Widgets
 	void CWidget::SetNeedsLayout()
 	{
 		needsLayout = true;
+
 		if (YGNodeGetChildCount(node) == 0)
 		{
 			if (!YGNodeHasMeasureFunc(node))
@@ -1325,16 +1325,22 @@ namespace CE::Widgets
 		const Vec2 totalSize = GetComputedLayoutSize() + extraSize;
 
 		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), totalSize);
+		Rect bgColorRect = Rect::FromSize(rect.min + Vec2(1, 1) * borderWidth * 0.5f, rect.GetSize() - Vec2(1, 1) * borderWidth);
+
+		if (IsWindow())
+		{
+			bgColorRect = rect;
+		}
 
 		painter->SetRotation(rotation);
 
 		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
 		{
-			painter->DrawRect(rect);
+			painter->DrawRect(bgColorRect);
 		}
 		else if ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
 		{
-			painter->DrawRoundedRect(rect, borderRadius);
+			painter->DrawRoundedRect(bgColorRect, borderRadius);
 		}
 
 		if (bgImage.IsValid() && canDrawBgImage)
@@ -1354,7 +1360,7 @@ namespace CE::Widgets
 				{
 					clipRect = ComputeBoundingBox(clipRect, rotation);
 				}
-				painter->PushClipRect(clipRect);
+				painter->PushClipRect(clipRect, borderRadius); // Texture clip rect
 
 				brush.SetColor(foreground);
 				painter->SetBrush(brush);
@@ -1503,8 +1509,15 @@ namespace CE::Widgets
 						extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
 					}
 
+					Vec4 borderRadius = Vec4();
+
+					if (computedStyle.properties.KeyExists(CStylePropertyType::BorderRadius))
+					{
+						borderRadius = computedStyle.properties[CStylePropertyType::BorderRadius].vector;
+					}
+
 					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize() + extraSize);
-					paintEvent->painter->PushClipRect(contentRect);
+					paintEvent->painter->PushClipRect(contentRect, borderRadius);
 					popPaintClipRect = true;
 				}
 

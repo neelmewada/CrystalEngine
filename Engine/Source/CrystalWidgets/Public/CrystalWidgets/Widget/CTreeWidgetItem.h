@@ -33,6 +33,10 @@ namespace CE::Widgets
 
 		void SetForceExpanded(bool forceExpanded);
 
+		void* GetInternalDataPtr() const { return internalData; }
+
+		void SetInternalDataPtr(void* ptr) { internalData = ptr; }
+
 	private:
 
 		void Construct() override;
@@ -52,6 +56,8 @@ namespace CE::Widgets
 		CLabel* label = nullptr;
 
 	private:
+
+		void* internalData = nullptr;
 
 		FIELD()
 		CTreeWidget* treeWidget = nullptr;

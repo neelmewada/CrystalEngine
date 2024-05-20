@@ -30,10 +30,39 @@ namespace CE
 	    return Super::GetLodCount();
     }
 
+    u32 StaticMeshComponent::GetLodSubMeshCount(u32 lodIndex)
+    {
+        if (staticMesh)
+        {
+            return staticMesh->GetLodSubMeshCount(lodIndex);
+        }
+	    return Super::GetLodSubMeshCount(lodIndex);
+    }
+
     void StaticMeshComponent::SetStaticMesh(StaticMesh* staticMesh)
     {
         this->staticMesh = staticMesh;
         meshChanged = true;
+    }
+
+    void StaticMeshComponent::OnEnabled()
+    {
+	    Super::OnEnabled();
+
+        if (meshHandle.IsValid())
+        {
+            meshHandle->flags.visible = true;
+        }
+    }
+
+    void StaticMeshComponent::OnDisabled()
+    {
+        Super::OnDisabled();
+
+        if (meshHandle.IsValid())
+        {
+            meshHandle->flags.visible = false;
+        }
     }
 
     void StaticMeshComponent::Tick(f32 delta)

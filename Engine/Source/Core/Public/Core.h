@@ -12,8 +12,7 @@
 #include "Resource/ResourceManager.h"
 
 // Settings
-#include "Settings/SettingsBase.h"
-#include "Settings/ProjectSettings.h"
+#include "Settings/Settings.h"
 
 // Assets
 #include "Asset/Asset.h"

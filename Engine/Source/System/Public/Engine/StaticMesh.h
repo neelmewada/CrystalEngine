@@ -29,6 +29,16 @@ namespace CE
 	        return modelAsset->GetLodCount();
         }
 
+        u32 GetLodSubMeshCount(u32 lodIndex) const
+        {
+            if (!modelAsset || lodIndex >= modelAsset->GetLodCount())
+                return 0;
+            ModelLodAsset* lod = modelAsset->GetModelLod(lodIndex);
+            if (!lod)
+                return 0;
+            return lod->GetSubMeshCount();
+        }
+
     private:
 
         FIELD()

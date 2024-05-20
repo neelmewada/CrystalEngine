@@ -19,6 +19,8 @@ namespace CE::Widgets
 
 		bool IsLayoutCalculationRoot() override;
 
+		Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
+
 		void AddSplit(f32 ratio);
 
 		u32 GetContainerCount() const { return containers.GetSize(); }
@@ -36,7 +38,7 @@ namespace CE::Widgets
 		// Params: CSplitView* sender, int draggedSplitterIndex
 		CE_SIGNAL(OnSplitterDragged, CSplitView*, int);
 
-	private:
+	protected:
 
 		void OnBeforeComputeStyle() override;
 
@@ -55,6 +57,8 @@ namespace CE::Widgets
 
 		FIELD()
 		Array<CSplitViewContainer*> containers{};
+
+	private:
 
 		Color splitterColor = Color();
 		Color splitterActiveColor = Color();

@@ -18,6 +18,8 @@ namespace CE::Editor
 
     private:
 
+        void SetEditTarget(Object* target);
+
         void Construct() override;
 
         void HandleEvent(CEvent* event) override;
@@ -30,6 +32,12 @@ namespace CE::Editor
 
         FIELD()
         CLabel* noSelectionLabel = nullptr;
+
+        FIELD()
+        Object* targetObject = nullptr;
+
+        FIELD()
+        ObjectEditor* objectEditor = nullptr;
 
         friend class SceneEditorWindow;
     };

@@ -12,9 +12,22 @@
 /////////////////////////////////////////////
 
 #include "Editor/Widgets/EditorViewport.h"
+#include "Editor/Widgets/EditorSplitterContainer.h"
+#include "Editor/Widgets/EditorSplitter.h"
 
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
+
+////////////////
+
+#include "ObjectEditor/Widgets/FieldEditor.h"
+#include "ObjectEditor/Widgets/VectorFieldEditor.h"
+
+#include "ObjectEditor/Widgets/PropertyEditorRow.h"
+#include "ObjectEditor/Widgets/PropertyEditorSection.h"
+#include "ObjectEditor/PropertyDrawer.h"
+
+#include "ObjectEditor/ObjectEditor.h"
 
 namespace CE::Editor
 {

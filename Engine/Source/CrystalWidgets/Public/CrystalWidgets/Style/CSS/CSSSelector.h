@@ -86,6 +86,7 @@ namespace CE::Widgets
 
 		friend class CSSSelectorList;
 		friend class CSSParser;
+		friend class CSSStyleSheet;
 	};
 
 	ENUM_CLASS_FLAGS(CSSSelector::Match);

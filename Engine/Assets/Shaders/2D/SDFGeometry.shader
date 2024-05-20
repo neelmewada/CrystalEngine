@@ -56,11 +56,18 @@ Shader "2D/SDF Geometry"
                 uint bold;
                 uint clipRect;
                 uint textureIndex;
+                float dashLength;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
-            StructuredBuffer<float4> _ClipRects : SRG_PerDraw(t1);
+            struct ClipRect
+            {
+                float4 rect;
+                float4 cornerRadius;;
+            };
+
+            StructuredBuffer<ClipRect> _ClipRects : SRG_PerDraw(t1);
 
             SamplerState _TextureSampler : SRG_PerDraw(s2);
 
@@ -90,7 +97,8 @@ Shader "2D/SDF Geometry"
                 DRAW_RoundedX,
                 DRAW_Texture,
                 DRAW_FrameBuffer,
-                DRAW_Triangle
+                DRAW_Triangle,
+                DRAW_DashedLine,
             };
 
             #if VERTEX
@@ -165,6 +173,26 @@ Shader "2D/SDF Geometry"
                 p = abs(p);
                 return length(p-min(p.x+p.y,w)*0.5) - r;
             }
+               
+            float SDFSegment( in float2 p, in float2 a, in float2 b )
+            {
+                float2 ba = b-a;
+                float2 pa = p-a;
+                float h =clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+                return length(pa-h*ba);
+            }
+
+            // Signed distance function for a dashed line segment
+            float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength, float thickness) {
+                float2 ba = b - a;
+                float totalLength = length(ba);
+                ba = normalize(ba);
+                float t = dot(p - a, ba) / totalLength;
+                float pattern = fmod(t, dashLength * 2.0);
+                float dashMask = step(pattern, dashLength);
+                float d = SDFSegment(p, a, b) - thickness;
+                return lerp(1.0, d, dashMask);
+            }
 
             // Credit: https://iquilezles.org/articles/distfunctions2d/
             float SDFIsoscelesTriangle(in float2 p, in float2 q)
@@ -186,6 +214,7 @@ Shader "2D/SDF Geometry"
                 float2 itemSize;
                 float2 uv;
                 float borderThickness;
+                float dashLength;
             };
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
@@ -240,37 +269,29 @@ Shader "2D/SDF Geometry"
                 
                 if (sdf > -borderThickness && sdf <= 0)
 		            borderMask = 1.0;
+                if (info.outlineColor.a < 0.001)
+                    info.outlineColor = color;
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                const float sharpness = 5.0;
+                const float sharpness = 50.0;
                 return lerp(float4(color.rgb, 0), color, clamp(-sdf * sharpness, 0, 1));
             }
 
             float4 RenderRoundedRect(in GeometryInfo info, float2 p)
             {
-                const float sdf = SDFRoundRect(p, info.itemSize * 0.5, float4(info.cornerRadius.z, info.cornerRadius.y, info.cornerRadius.w, info.cornerRadius.x));
-                const float invSdf = -sdf;
+                const float borderThickness = max(info.borderThickness, 0.0);
 
-                const float borderThickness = info.borderThickness;
+                float fillSdf = SDFRoundRect(p, info.itemSize * 0.5, float4(info.cornerRadius.z, info.cornerRadius.y, info.cornerRadius.w, info.cornerRadius.x));
+                float borderSdf = abs(fillSdf + borderThickness) - borderThickness;
+                const float sharpness = 1.0;
 
-                float4 color = info.fillColor;
+                fillSdf = clamp(-fillSdf * sharpness, 0.0, 1.0);
+                borderSdf = clamp(-borderSdf * sharpness, 0.0, 1.0);
 
-                float borderMask = 0.0;
-                //if (sdf > -borderThickness && sdf <= 0)
-		        //    borderMask = 1.0;
+                float4 color = lerp(info.fillColor, info.outlineColor, borderSdf);
 
-                if (borderThickness > 0.1)
-                {
-                    const float borderSmoothStart = -borderThickness - 1.0;
-                    const float borderSmoothEnd = -borderThickness;
-                    borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
-                    borderMask = clamp(borderMask, 0, 1);
-                }
-
-                color = lerp(color, info.outlineColor, borderMask);
-
-                return lerp(float4(color.rgb, 0), color, invSdf * 0.9);
+                return lerp(float4(color.rgb, 0), color, fillSdf);
             }
 
             float4 RenderRoundedX(in GeometryInfo info, float2 p)
@@ -292,6 +313,19 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, invSdf);
             }
 
+            float4 RenderDashedLine(in GeometryInfo info, float2 p)
+            {
+                const float sdf = SDFDashedLine(p, 
+                    float2(-info.itemSize.x, 0.0), 
+                    float2(info.itemSize.x, 0.0), 
+                    info.dashLength * 0.5 / info.itemSize.x,
+                    info.borderThickness);
+                
+                const float4 color = info.outlineColor;
+
+                return lerp(float4(color.rgb, 0), color, -sdf * 5.0);
+            }
+
             #define idx input.instanceId
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -303,12 +337,13 @@ Shader "2D/SDF Geometry"
                 info.itemSize = _DrawList[idx].itemSize;
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
+                info.dashLength = _DrawList[idx].dashLength;
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
 
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
 
-                const float4 clipRect = _ClipRects[_DrawList[idx].clipRect];
+                const float4 clipRect = _ClipRects[_DrawList[idx].clipRect].rect;
                 if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
                     discard;
                 
@@ -330,6 +365,8 @@ Shader "2D/SDF Geometry"
                     return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
                 case DRAW_Triangle:
                     return RenderTriangle(info, p);
+                case DRAW_DashedLine:
+                    return RenderDashedLine(info, p);
                 }
 
                 return float4(0, 0, 0, 0);

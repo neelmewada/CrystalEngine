@@ -47,7 +47,7 @@ namespace CE
 
 		bool IsEnabled() const;
 
-		void SetEnabled(bool enabled) { isEnabled = enabled; }
+		void SetEnabled(bool enabled);
 
 		bool IsSelfEnabled() const { return isEnabled; }
 
@@ -57,6 +57,11 @@ namespace CE
 
 	protected:
 
+		void OnFieldEdited(FieldType* field) override;
+
+		virtual void OnEnabled();
+
+		virtual void OnDisabled();
 
 	private:
 
@@ -75,7 +80,7 @@ namespace CE
 		FIELD()
 		CE::Scene* scene = nullptr;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Actor")
 		bool isEnabled = true;
 
 		b8 hasBegunPlaying = false;

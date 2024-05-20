@@ -22,6 +22,9 @@ namespace CE::Editor
         {
             splitView->SetEnabled(false);
             noSelectionLabel->SetEnabled(true);
+
+            UpdateLayoutIfNeeded();
+
 	        return;
         }
 
@@ -29,7 +32,8 @@ namespace CE::Editor
         noSelectionLabel->SetEnabled(false);
 
         CTreeWidgetItem* rootItem = CreateObject<CTreeWidgetItem>(treeWidget, "RootItem");
-        rootItem->SetText( actor->GetName().GetString() + " (Self)");
+        rootItem->SetText(actor->GetName().GetString() + " (Self)");
+        rootItem->SetInternalDataPtr(actor);
         rootItem->SetForceExpanded(true);
 
         std::function<void(SceneComponent*, CTreeWidgetItem*)> sceneComponentVisitor = [&](SceneComponent* sceneComponent, CTreeWidgetItem* parentItem)
@@ -39,6 +43,7 @@ namespace CE::Editor
 
                 CTreeWidgetItem* item = CreateObject<CTreeWidgetItem>(parentItem, sceneComponent->GetName().GetString());
                 item->SetText(sceneComponent->GetName().GetString());
+                item->SetInternalDataPtr(sceneComponent);
 
                 for (int i = 0; i < sceneComponent->GetAttachedComponentCount(); ++i)
                 {
@@ -48,6 +53,36 @@ namespace CE::Editor
             };
 
         sceneComponentVisitor(actor->GetRootComponent(), rootItem);
+    }
+
+    void DetailsWindow::SetEditTarget(Object* target)
+    {
+        if (this->targetObject == target)
+            return;
+
+        this->targetObject = target;
+
+        // Cleanup previous editor
+
+        CSplitViewContainer* container = splitView->GetContainer(1);
+
+        for (int i = container->GetSubWidgetCount() - 1; i >= 0; --i)
+        {
+            container->GetSubWidget(i)->Destroy();
+        }
+
+        if (objectEditor)
+        {
+            objectEditor->Destroy();
+            objectEditor = nullptr;
+        }
+
+        if (targetObject)
+        {
+            objectEditor = ObjectEditor::Create(targetObject, this, "ObjectEditor");
+
+            objectEditor->CreateGUI(container);
+        }
     }
 
     void DetailsWindow::Construct()
@@ -64,13 +99,13 @@ namespace CE::Editor
         splitView = CreateObject<CSplitView>(this, "DetailsSplitter");
         splitView->SetOrientation(COrientation::Vertical);
 
-        splitView->AddSplit(0.6f);
+        splitView->AddSplit(0.7f);
 
         CSplitViewContainer* topView = splitView->GetContainer(0);
-        topView->SetName("SplitContainer");
+        topView->SetName("SplitContainerTop");
 
         CSplitViewContainer* bottomView = splitView->GetContainer(1);
-        bottomView->SetName("SplitContainer");
+        bottomView->SetName("SplitContainerBottom");
         bottomView->SetVerticalScrollAllowed(true);
         bottomView->AddBehavior<CScrollBehavior>();
 
@@ -81,7 +116,7 @@ namespace CE::Editor
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);
-
+        
         Bind(treeWidget, MEMBER_FUNCTION(CTreeWidget, OnSelectionChanged), [this](CTreeWidget*)
             {
                 const auto& selectedItems = treeWidget->GetSelectedItems();
@@ -89,23 +124,12 @@ namespace CE::Editor
 	            for (auto it = selectedItems.cbegin(); it != selectedItems.cend(); ++it)
 	            {
                     CTreeWidgetItem* selected = *it;
-                    
-                    break;
+                    SetEditTarget((Object*)selected->GetInternalDataPtr());
+                    return;
 	            }
+                
+                SetEditTarget(nullptr);
             });
-
-        CCollapsibleSection* collapsibleSection = CreateObject<CCollapsibleSection>(bottomView, "CollapsibleSection");
-        collapsibleSection->SetTitle("Expansible Section");
-
-        for (int i = 0; i < 32; ++i)
-        {
-            CWidget* outer = collapsibleSection->GetContent();
-            if (i >= 8)
-                outer = bottomView;
-
-            CButton* testButton = CreateObject<CButton>(outer, String("TestButton_") + i);
-            testButton->SetText(String("Click Me ") + i);
-        }
 
         splitView->SetEnabled(false);
         noSelectionLabel->SetEnabled(true);
@@ -113,12 +137,6 @@ namespace CE::Editor
 
     void DetailsWindow::HandleEvent(CEvent* event)
     {
-        if (event->type == CEventType::KeyPress)
-        {
-            CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
-
-
-        }
 
 	    Super::HandleEvent(event);
     }

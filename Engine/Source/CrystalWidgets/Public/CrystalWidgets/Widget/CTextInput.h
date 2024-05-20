@@ -40,6 +40,8 @@ namespace CE::Widgets
 
 		bool IsTextSelected();
 
+		void SetSelectAllOnEdit(bool set) { selectAllOnEdit = set; }
+
 		// - Signals -
 
 		CE_SIGNAL(OnEditingFinished, CTextInput*);
@@ -81,6 +83,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isEditable = true;
+
+		FIELD()
+		b8 selectAllOnEdit = false;
 
 		FIELD()
 		CTimer* timer = nullptr;

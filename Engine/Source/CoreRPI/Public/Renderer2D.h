@@ -66,7 +66,7 @@ namespace CE::RPI
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
-        void PushClipRect(Rect clipRect);
+        void PushClipRect(Rect clipRect, Vec4 cornerRadius = {});
         void PopClipRect();
         bool ClipRectExists();
         Rect GetLastClipRect();
@@ -76,6 +76,10 @@ namespace CE::RPI
         void SetBorderThickness(f32 thickness);
         void SetRotation(f32 degrees);
 
+        f32 GetRotation() const { return rotation; }
+
+        f32 GetBorderThickness() const { return borderThickness; }
+
         void SetCursor(Vec2 position);
 
         Vec2 CalculateTextSize(const String& text, f32 width = 0.0f);
@@ -83,6 +87,8 @@ namespace CE::RPI
 
         Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 width = 0.0f);
         Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
+
+        f32 GetFontLineHeight();
 
         Vec2 DrawText(const String& text, Vec2 size = {});
 
@@ -114,6 +120,14 @@ namespace CE::RPI
         {
             SetCursor(rect.min);
             return DrawRoundedRect(rect.GetSize(), cornerRadius);
+        }
+
+        Vec2 DrawDashedLine(Vec2 size, f32 dashLength);
+
+        Vec2 DrawDashedLine(const Rect& rect, f32 dashLength)
+        {
+            SetCursor(rect.min);
+            return DrawDashedLine(rect.GetSize(), dashLength);
         }
 
         //! @brief Draws a simple isosceles triangle in the given rect
@@ -156,7 +170,24 @@ namespace CE::RPI
     private:
 
         struct DrawBatch;
+        struct DrawItem2D;
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
+
+        enum DrawType : u32
+        {
+            DRAW_None = 0,
+            DRAW_Text,
+            DRAW_Circle,
+            DRAW_Rect,
+            DRAW_RoundedRect,
+            DRAW_RoundedX,
+            DRAW_Texture,
+            DRAW_FrameBuffer,
+            DRAW_Triangle,
+            DRAW_DashedLine,
+        };
+
+        DrawItem2D& DrawCustomItem(DrawType drawType, Vec2 size);
 
         void IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
         void IncrementClipRectsBuffer(u32 numRectsToAdd = 0);
@@ -171,19 +202,6 @@ namespace CE::RPI
         RPI::Material* GetOrCreateMaterial(const DrawBatch& textDrawBatch);
 
         // - Data Structs -
-
-        enum DrawType : u32
-        {
-            DRAW_None = 0,
-            DRAW_Text,
-            DRAW_Circle,
-            DRAW_Rect,
-            DRAW_RoundedRect,
-            DRAW_RoundedX,
-            DRAW_Texture,
-            DRAW_FrameBuffer,
-            DRAW_Triangle,
-        };
 
         struct alignas(4) DrawDataConstants
         {
@@ -203,6 +221,13 @@ namespace CE::RPI
             u32 bold = 0;
             u32 clipRectIdx = 0;
             u32 textureIndex = 0;
+            f32 dashLength = 0;
+        };
+
+        struct alignas(16) ClipRect2D
+        {
+            Rect rect{};
+            Vec4 cornerRadius{};
         };
 
         struct FontInfo
@@ -281,7 +306,7 @@ namespace CE::RPI
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         Array<RPI::Texture*> textures{};
-        Array<Rect> clipRects{};
+        Array<ClipRect2D> clipRects{};
         u32 drawItemCount = 0;
         u32 clipRectCount = 0;
         u32 textureCount = 0;

@@ -8,6 +8,7 @@
 
 namespace CE
 {
+    class Object;
 
     enum FieldFlags
     {
@@ -18,6 +19,8 @@ namespace CE
         FIELD_Config = BIT(3),
         FIELD_ImportSetting = BIT(4),
 		FIELD_Internal = BIT(5),
+        FIELD_EditAnywhere = BIT(6),
+        FIELD_VisibleAnywhere = BIT(7),
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -92,6 +95,9 @@ namespace CE
         bool IsReadOnly() const;
 		bool IsInternal() const;
 
+        bool IsEditAnywhere() const;
+        bool IsVisibleAnywhere() const;
+
         /// The strict owner of this field, which remains same for all derived classes.
 		TypeInfo* GetOwnerType();
         
@@ -134,11 +140,19 @@ namespace CE
 			if (IsReadOnly())
 				return;
 			ForceSetFieldValue(instance, value);
+
+            if (instanceOwner && instanceOwner->IsObject())
+            {
+                NotifyObjectFieldUpdate((Object*)instance);
+            }
         }
 
 		template<typename T>
 		INLINE void ForceSetFieldValue(void* instance, const T& value)
 		{
+            if (instance == nullptr)
+                return;
+
 			*(T*)((SIZE_T)instance + offset) = value;
 		}
 
@@ -173,6 +187,9 @@ namespace CE
 		Array<FieldType> GetArrayFieldList(void* instance);
 
     private:
+
+        void NotifyObjectFieldUpdate(Object* instance);
+
         FieldFlags fieldFlags = FIELD_NoFlags;
         
 		Name typeName{};

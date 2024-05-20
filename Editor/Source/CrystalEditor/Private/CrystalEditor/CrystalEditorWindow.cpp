@@ -40,9 +40,9 @@ namespace CE::Editor
         auto assetManager = gEngine->GetAssetManager();
 
         CTimer* timer = CreateObject<CTimer>(this, "TickTimer");
-        Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
-            this, MEMBER_FUNCTION(Self, TimerTick));
-        timer->Start(10);
+        //Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
+        //    this, MEMBER_FUNCTION(Self, TimerTick));
+        //timer->Start(10);
 
         CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
@@ -162,6 +162,9 @@ namespace CE::Editor
             cameraComponent->SetLocalPosition(Vec3(0, 0, -2));
             cameraComponent->SetFarPlane(500);
             meshComponent->SetupAttachment(cameraComponent);
+
+            DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "DirectionalLight");
+            scene->AddActor(lightActor);
 	    }
     }
 
@@ -179,6 +182,9 @@ namespace CE::Editor
     void CrystalEditorWindow::OnBeforeDestroy()
     {
 	    Super::OnBeforeDestroy();
+
+        if (IsDefaultInstance())
+            return;
 
         if (sceneSubsystem && sceneSubsystem->GetMainViewport() == viewportWindow->GetViewport())
         {

@@ -80,13 +80,21 @@ CButton::alternate:disabled {
     color: rgb(128, 128, 128);
 }
 
+CLabelButton {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: white;
+    text-decoration-thickness: 1px;
+    cursor: hand;
+}
+
 CTextInput {
     color: white;
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 1.5px;
-    border-color: rgb(50, 50, 50);
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
     border-radius: 5px 5px;
     min-height: 22.5px;
     min-width: 40px;
@@ -106,8 +114,28 @@ CTextInput:disabled {
     color: rgb(140, 140, 140);
 }
 
-#Fourth {
-    align-items: stretch;
+CCheckBox {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px 3px 3px 3px;
+    background: rgb(15, 15, 15);
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
+    color: rgb(0, 112, 224);
+}
+
+CCheckBox:hovered {
+    border-color: rgb(74, 74, 74);
+}
+
+CCheckBox:pressed {
+    color: rgb(0, 60, 112);
+}
+
+CCheckBox:disabled {
+    border-color: rgb(50, 50, 50);
+    background-color: rgb(26, 26, 26);
+    color: rgb(0, 60, 112);
 }
 
 CTreeView {
@@ -300,12 +328,12 @@ CTreeWidget {
 
 CTreeWidgetRow {
     flex-direction: row;
-    padding: 7px 7px;
+    padding: 7px 5px;
 }
 
 CTreeWidgetRow::alternate {
     flex-direction: row;
-    padding: 7px 7px;
+    padding: 7px 5px;
     background-color: rgb(21, 21, 21);
 }
 
@@ -356,15 +384,17 @@ CSplitView::splitter:active {
 
 CCollapsibleSection {
     flex-direction: column;
+    row-gap: 0;
 }
 
 CCollapsibleSection #SectionHeader {
     flex-direction: row;
-    background-color: rgb(50, 50, 50);
+    background-color: rgb(28, 28, 28);
     align-items: center;
     justify-content: flex-start;
     padding: 10px 5px;
     column-gap: 5px;
+    border-radius: 5px 5px 0 0;
 }
 
 CCollapsibleSection CImage#SectionArrow {
@@ -378,6 +408,55 @@ CCollapsibleSection CImage#SectionArrow:hovered {
 }
 
 CCollapsibleSection #SectionContent {
+    background-color: rgb(48, 48, 48);
     flex-direction: column;
+    padding: 15px 5px;
+    border-radius: 0 0 5px 5px;
+}
+
+CCollapsibleSection:collapsed #SectionHeader {
+    border-radius: 5px 5px 5px 5px;
+}
+
+PropertyDrawer {
+    width: 100%;
+    min-height: 15px;
+    padding: 0 2px;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+#PropertyEditorRowLeft {
+    width: 160px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 13px;
+}
+
+#PropertyEditorRowRight {
+    flex-grow: 3;
+    flex-shrink: 1;
+    flex-direction: row;
+}
+
+FieldEditor {
+    flex-direction: row;
+    min-width: 250px;
+    font-size: 13px;
+}
+
+CTextInput#StringInput, CTextInput#NumberInput {
+    min-width: 175px;
+}
+
+VectorComponentInput {
+    flex-direction: row;
+    column-gap: 0;
+    align-items: stretch;
+    flex-grow: 2;
+    flex-shrink: 1;
+    border-radius: 4px 4px 4px 4px;
+    padding: 12px 5px 5px 5px;
 }
 

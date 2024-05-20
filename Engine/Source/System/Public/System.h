@@ -57,6 +57,8 @@
 // Components
 #include "GameFramework/ActorComponent.h"
 #include "GameFramework/SceneComponent.h"
+#include "GameFramework/LightComponent.h"
+#include "GameFramework/DirectionalLightComponent.h"
 #include "GameFramework/GeometryComponent.h"
 #include "GameFramework/MeshComponent.h"
 #include "GameFramework/StaticMeshComponent.h"
@@ -66,6 +68,8 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/StaticMeshActor.h"
 #include "GameFramework/CameraActor.h"
+#include "GameFramework/Light.h"
+#include "GameFramework/DirectionalLight.h"
 
 namespace CE
 {

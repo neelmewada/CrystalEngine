@@ -25,6 +25,24 @@ namespace CE::Widgets
 		CombineHash(hash, state);
 		CombineHash(hash, subControl);
 
+		CWidget* parentWidget = widget->parent;
+
+		while (parentWidget != nullptr && !parentWidget->IsWindow())
+		{
+			CombineHash(hash, parentWidget->GetName().GetHashValue());
+			CombineHash(hash, parentWidget->GetClass()->GetName());
+
+			for (const auto& styleClass : parentWidget->styleClasses)
+			{
+				CombineHash(hash, styleClass);
+			}
+
+			CombineHash(hash, parentWidget->stateFlags);
+			CombineHash(hash, parentWidget->subControl);
+
+			parentWidget = parentWidget->parent;
+		}
+
 		if (cachedStyle.KeyExists(hash))
 		{
 			return cachedStyle[hash];
@@ -46,10 +64,10 @@ namespace CE::Widgets
 		for (auto& rule : rules)
 		{
 			if (rule.selectorList.TestWidget(widget, state, subControl))
+			{
 				result.ApplyProperties(rule.style);
+			}
 		}
-
-		// TODO: Inherit style from parent widget
 
 		cachedStyle[hash] = result;
 

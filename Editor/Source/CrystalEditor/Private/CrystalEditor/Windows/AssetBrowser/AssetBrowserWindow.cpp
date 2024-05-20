@@ -21,5 +21,14 @@ namespace CE::Editor
 
 
     }
-    
+
+    void AssetBrowserWindow::OnPaint(CPaintEvent* paintEvent)
+    {
+	    Super::OnPaint(paintEvent);
+
+        CPainter* painter = paintEvent->painter;
+
+
+    }
+
 } // namespace CE::Editor

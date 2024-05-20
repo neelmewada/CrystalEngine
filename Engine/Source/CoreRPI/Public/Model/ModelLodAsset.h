@@ -39,7 +39,9 @@ namespace CE::RPI
 
         static ModelLodAsset* CreateSphereAsset(Object* outer = nullptr);
 
-        inline u32 GetNumVertices() const { return numVertices; }
+        u32 GetNumVertices() const { return numVertices; }
+
+        u32 GetSubMeshCount() const { return subMeshes.GetSize(); }
 
     private:
 

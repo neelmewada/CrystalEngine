@@ -19,6 +19,10 @@ namespace CE
             fieldFlags |= FIELD_ImportSetting;
 		if (HasAttribute("Internal"))
 			fieldFlags |= FIELD_Internal;
+		if (HasAttribute("VisibleAnywhere"))
+			fieldFlags |= FIELD_VisibleAnywhere;
+		if (HasAttribute("EditAnywhere"))
+			fieldFlags |= FIELD_EditAnywhere;
     }
 
 	void FieldType::InitializeDefaults(void* instance)
@@ -109,7 +113,17 @@ namespace CE
         return fieldFlags & FIELD_Internal;
     }
 
-	TypeInfo* FieldType::GetOwnerType()
+    bool FieldType::IsEditAnywhere() const
+    {
+		return fieldFlags & FIELD_EditAnywhere;
+    }
+
+    bool FieldType::IsVisibleAnywhere() const
+    {
+		return fieldFlags & FIELD_VisibleAnywhere;
+    }
+
+    TypeInfo* FieldType::GetOwnerType()
 	{
 		return const_cast<TypeInfo*>(owner);
 	}
@@ -373,7 +387,7 @@ namespace CE
 			}
 			else if (fieldTypeId == TYPEID(UUID32))
 			{
-				return  (u32)GetFieldValue<UUID32>(instance);
+				return (u32)GetFieldValue<UUID32>(instance);
 			}
 			else if (fieldTypeId == TYPEID(c8))
 			{
@@ -791,6 +805,13 @@ namespace CE
 		return array;
 	}
 
+	void FieldType::NotifyObjectFieldUpdate(Object* instance)
+	{
+		if (instance)
+		{
+			instance->OnFieldModified(this);
+		}
+	}
 }
 
 CE_RTTI_TYPEINFO_IMPL(CE, FieldType)

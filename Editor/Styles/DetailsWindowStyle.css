@@ -13,8 +13,19 @@ DetailsWindow #HeaderRow {
     margin: 5px 5px 0 5px;
 }
 
-#SplitContainer {
+DetailsWindow #NoSelectionLabel {
+    align-self: center;
+    margin: 0 20px 0 0;
+    color: rgb(140, 140, 140);
+    font-size: 12px;
+}
+
+#SplitContainerTop, #SplitContainerBottom {
     padding: 5px 5px;
+}
+
+#SplitContainerBottom {
+    row-gap: 1px;
 }
 
 #ComponentTree {

@@ -23,6 +23,16 @@ namespace CE::Widgets
 
         dropDownArrow->SetRotation(isExpanded ? 90 : 0);
 
+        if (isExpanded)
+        {
+            stateFlags &= ~CStateFlag::Collapsed;
+        }
+        else
+        {
+            stateFlags |= CStateFlag::Collapsed;
+        }
+
+        SetNeedsStyle();
         SetNeedsLayout();
         SetNeedsPaint();
     }
@@ -37,6 +47,8 @@ namespace CE::Widgets
 	    Super::Construct();
 
         header = CreateObject<CWidget>(this, "SectionHeader");
+        header->SetClipChildren(true);
+
 	    {
             dropDownArrow = CreateObject<CImage>(header, "SectionArrow");
             dropDownArrow->SetBackgroundImage("/Editor/Assets/Icons/Arrow");
@@ -45,6 +57,11 @@ namespace CE::Widgets
             titleLabel->SetText("Title");
 	    }
 
+        Bind(dropDownArrow, MEMBER_FUNCTION(CWidget, OnMouseLeftPress), [this]
+            {
+                SetExpanded(!isExpanded);
+            });
+
         Bind(header, MEMBER_FUNCTION(CWidget, OnMouseLeftPress), [this]
             {
                 SetExpanded(!isExpanded);
@@ -52,8 +69,18 @@ namespace CE::Widgets
         
         content = CreateObject<CWidget>(this, "SectionContent");
         content->SetEnabled(isInitiallyExpanded);
+        content->SetClipChildren(true);
 
         isExpanded = isInitiallyExpanded;
+
+        if (isExpanded)
+        {
+            stateFlags &= ~CStateFlag::Collapsed;
+        }
+        else
+        {
+            stateFlags |= CStateFlag::Collapsed;
+        }
     }
 
 } // namespace CE::Widgets

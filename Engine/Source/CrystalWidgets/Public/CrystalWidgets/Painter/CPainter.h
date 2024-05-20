@@ -20,7 +20,11 @@ namespace CE::Widgets
         void SetPen(const CPen& pen);
         void SetBrush(const CBrush& brush);
 
-        void SetRotation(f32 rotation);
+        void SetRotation(f32 degrees);
+
+        void DrawCircle(const Rect& rect);
+
+        void DrawLine(Vec2 from, Vec2 to);
 
         void DrawRect(const Rect& rect);
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
@@ -44,7 +48,7 @@ namespace CE::Widgets
         void PushChildCoordinateSpace(Vec2 newOrigin);
         void PopChildCoordinateSpace();
 
-        void PushClipRect(const Rect& clipRect);
+        void PushClipRect(const Rect& clipRect, const Vec4& cornerRadius = {});
         void PopClipRect();
 
         bool ClipRectExists();
@@ -52,7 +56,13 @@ namespace CE::Widgets
 
         Vec2 GetCurrentOrigin() const { return GetOrigin(); }
 
+        const CPen& GetPen() const { return pen; }
+        const CFont& GetFont() const { return font; }
+        const CBrush& GetBrush() const { return brush; }
+
     private:
+
+        void DrawDashedLine(const Rect& rect);
 
         Array<Vec2> coordinateSpaceStack{};
 
@@ -65,6 +75,10 @@ namespace CE::Widgets
 
         Renderer2D* renderer = nullptr;
         int numFontsPushed = 0;
+
+        CPen pen{};
+        CBrush brush{};
+        CFont font{};
 
         friend class CWidget;
         friend class CWindow;

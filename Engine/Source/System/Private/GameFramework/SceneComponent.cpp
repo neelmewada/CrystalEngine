@@ -105,6 +105,50 @@ namespace CE
 		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
 	}
 
+	void SceneComponent::OnFieldModified(FieldType* field)
+	{
+		Super::OnFieldModified(field);
+
+		thread_local const Name localPositionName = "localPosition";
+		thread_local const Name localEulerAnglesName = "localEulerAngles";
+		thread_local const Name localScaleName = "localScale";
+
+		if (field->GetName() == localPositionName ||
+			field->GetName() == localEulerAnglesName ||
+			field->GetName() == localScaleName)
+		{
+			if (!IsDirty())
+				SetDirty();
+		}
+	}
+
+	void SceneComponent::OnFieldEdited(FieldType* field)
+	{
+		Super::OnFieldEdited(field);
+
+		
+	}
+
+	void SceneComponent::OnEnabled()
+	{
+		Super::OnEnabled();
+
+		for (SceneComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnEnabled();
+		}
+	}
+
+	void SceneComponent::OnDisabled()
+	{
+		Super::OnDisabled();
+
+		for (SceneComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnDisabled();
+		}
+	}
+
 	void SceneComponent::UpdateTransformInternal()
 	{
 		auto actor = GetActor();

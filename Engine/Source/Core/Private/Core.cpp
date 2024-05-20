@@ -40,8 +40,8 @@ namespace CE
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
 
-		settingsBaseOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&SettingsBase::OnClassRegistered);
-		settingsBaseOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&SettingsBase::OnClassDeregistered);
+		settingsBaseOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&Settings::OnClassRegistered);
+		settingsBaseOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&Settings::OnClassDeregistered);
 
         prefsOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&Prefs::OnClassRegistered);
         prefsOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&Prefs::OnClassDeregistered);
@@ -108,19 +108,12 @@ namespace CE
         CE_REGISTER_TYPES(
             Object,
             Package,
-            SystemObject,
-            Component,
-            SystemComponent,
 			Asset,
 			ResourceManager,
 			Resource,
-			SettingsBase
+			Settings
         );
 
-		// Register Settings
-		CE_REGISTER_TYPES(
-			ProjectSettings
-		);
     }
 
 }

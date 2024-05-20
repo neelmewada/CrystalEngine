@@ -26,11 +26,27 @@ namespace CE::Widgets
 
         bool IsBold() const { return bold; }
 
+        void SetUnderline(bool underline) { this->underline = underline; }
+
+        bool IsUnderline() const { return underline; }
+
+        void SetLineStyle(CPenStyle style) { lineStyle = style; }
+
+        CPenStyle GetLineStyle() const { return lineStyle; }
+
+        void SetLineColor(const Color& color) { lineColor = color; }
+
+        const Color& GetLineColor() const { return lineColor; }
+
     private:
 
         Name family = "";
         f32 size = 14;
         bool bold = false;
+        bool underline = false;
+
+        CPenStyle lineStyle = CPenStyle::SolidLine;
+        Color lineColor{};
 
         friend class CPainter;
     };

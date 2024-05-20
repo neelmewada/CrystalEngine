@@ -2,7 +2,7 @@
 
 namespace CE::Widgets
 {
-	constexpr f32 splitterWidth = 2.0f;
+	constexpr f32 splitterWidth = 3.0f;
 
 	CSplitViewContainer::CSplitViewContainer()
 	{
@@ -19,12 +19,17 @@ namespace CE::Widgets
 		return true;
 	}
 
+	Vec2 CSplitViewContainer::CalculateIntrinsicSize(f32 width, f32 height)
+	{
+		return Super::CalculateIntrinsicSize(width, height);
+	}
+
 	Vec2 CSplitViewContainer::GetComputedLayoutTopLeft()
 	{
 		if (splitView == nullptr)
 			return Super::GetComputedLayoutTopLeft();
 
-		Vec2 pos = Vec2();
+		Vec2 pos = splitView->GetComputedLayoutTopLeft();
 		Vec2 parentSize = splitView->GetComputedLayoutSize();
 		int index = splitView->containers.IndexOf(this);
 		

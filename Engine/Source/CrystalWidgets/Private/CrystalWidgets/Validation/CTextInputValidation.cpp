@@ -9,6 +9,9 @@ namespace CE::Widgets
 
 		for (int i = 0; i < text.GetLength(); ++i)
 		{
+			if (i == 0 && (text[0] == '-' || text[0] == '+'))
+				continue;
+
 			if (text[i] == '.')
 			{
 				if (periodCount > 0)

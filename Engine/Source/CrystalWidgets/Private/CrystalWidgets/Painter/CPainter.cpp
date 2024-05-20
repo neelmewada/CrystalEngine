@@ -27,18 +27,22 @@ namespace CE::Widgets
 
     void CPainter::SetPen(const CPen& pen)
     {
+        this->pen = pen;
         renderer->SetBorderThickness(pen.width);
         renderer->SetOutlineColor(pen.color);
     }
 
     void CPainter::SetBrush(const CBrush& brush)
     {
+        this->brush = brush;
         renderer->SetFillColor(brush.color);
     }
 
     void CPainter::SetFont(const CFont& font)
     {
-        renderer->PushFont(font.family, font.size, font.bold);
+        this->font = font;
+
+        renderer->PushFont(font.family, (u32)font.size, font.bold);
         numFontsPushed++;
     }
 
@@ -52,9 +56,72 @@ namespace CE::Widgets
         return renderer->CalculateTextOffsets(outOffsets, text, width);
     }
 
-    void CPainter::SetRotation(f32 rotation)
+    void CPainter::SetRotation(f32 degrees)
     {
-        renderer->SetRotation(rotation);
+        renderer->SetRotation(degrees);
+    }
+
+    void CPainter::DrawCircle(const Rect& rect)
+    {
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+
+        renderer->SetCursor(windowSpaceRect.min);
+        renderer->DrawCircle(rect.GetSize());
+    }
+
+    void CPainter::DrawLine(Vec2 from, Vec2 to)
+    {
+        Vec2 center = (from + to) / 2.0f;
+        float rotation = atan2(to.y - from.y, to.x - from.x);
+        float width = sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y));
+        float height = pen.width;
+        if (height < 0.001f)
+            return;
+
+        f32 origRotation = renderer->GetRotation();
+
+        SetRotation(rotation * RAD_TO_DEG);
+
+        Rect rect = Rect::FromSize(from.x, center.y, width, height);
+
+        if (pen.style == CPenStyle::SolidLine)
+        {
+	        DrawRect(rect);
+        }
+        else
+        {
+            DrawDashedLine(rect);
+        }
+
+        renderer->SetRotation(origRotation);
+    }
+
+    void CPainter::DrawDashedLine(const Rect& rect)
+    {
+        Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
+        if (renderer->ClipRectExists())
+        {
+            Rect clipRect = renderer->GetLastClipRect();
+            if (!clipRect.Overlaps(windowSpaceRect))
+                return;
+        }
+
+        f32 dashLength = 1.0f;
+        if (pen.style == CPenStyle::DashedLine)
+            dashLength = pen.dashLength;
+        else if (pen.style == CPenStyle::SolidLine)
+            dashLength = rect.GetSize().width;
+        else if (pen.style == CPenStyle::DottedLine)
+            dashLength = 1.0f;
+
+        renderer->SetCursor(windowSpaceRect.min);
+        renderer->DrawDashedLine(rect.GetSize(), dashLength);
     }
 
     void CPainter::DrawRect(const Rect& rect)
@@ -66,7 +133,7 @@ namespace CE::Widgets
             if (!clipRect.Overlaps(windowSpaceRect))
                 return;
         }
-
+        
         renderer->SetCursor(windowSpaceRect.min);
         renderer->DrawRect(rect.GetSize());
     }
@@ -115,9 +182,50 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
+        Vec2 textSize = Vec2();
+        static Array<Rect> positions{};
+
+        if (font.underline)
+        {
+            textSize = renderer->CalculateTextOffsets(positions, text);
+            f32 lineHeight = renderer->GetFontLineHeight();
+
+            int numLines = (int)((textSize.height + 2.0f) / lineHeight);
+            int curLine = 0;
+
+            CPen originalPen = pen;
+
+            pen.style = font.lineStyle;
+            SetPen(pen);
+
+            for (int i = 0; i < positions.GetSize(); i++)
+            {
+                const Rect& charRect = positions[i];
+
+                int line = (int)(charRect.max.y / lineHeight);
+
+                if (line > curLine) // New line
+                {
+                    curLine = line;
+                    DrawLine(Vec2(position.x, position.y + curLine * lineHeight), Vec2(position.x + charRect.max.x, position.y + curLine * lineHeight));
+                }
+                else if (i == positions.GetSize() - 1) // Last char
+                {
+                    curLine++;
+                    DrawLine(Vec2(position.x, position.y + curLine * lineHeight), Vec2(position.x + charRect.max.x, position.y + curLine * lineHeight));
+                    break;
+                }
+            }
+
+            SetPen(originalPen);
+        }
+
         if (renderer->ClipRectExists())
         {
-            Vec2 textSize = renderer->CalculateTextSize(text);
+            if (!font.underline) // No need to calculate text size again
+            {
+	            textSize = renderer->CalculateTextSize(text);
+            }
             Rect windowSpaceRect = Rect::FromSize(GetOrigin() + position, textSize);
             Rect clipRect = renderer->GetLastClipRect();
 
@@ -131,6 +239,24 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Rect& rect)
     {
+        Vec2 textSize = Vec2();
+        static Array<Rect> positions{};
+
+        if (font.underline)
+        {
+            textSize = renderer->CalculateTextOffsets(positions, text);
+            f32 lineHeight = renderer->GetFontLineHeight();
+
+            int numLines = (int)((textSize.height + 2.0f) / lineHeight);
+
+            for (const Rect& charRect : positions)
+            {
+                int curLine = (int)(charRect.min.y / lineHeight);
+
+                String::IsAlphabet('a');
+            }
+        }
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {
@@ -161,10 +287,10 @@ namespace CE::Widgets
         coordinateSpaceStack.Pop();
     }
 
-    void CPainter::PushClipRect(const Rect& clipRect)
+    void CPainter::PushClipRect(const Rect& clipRect, const Vec4& cornerRadius)
     {
         Rect rect = Rect::FromSize(GetOrigin() + clipRect.min, clipRect.GetSize());
-        renderer->PushClipRect(rect);
+        renderer->PushClipRect(rect, cornerRadius);
     }
 
     void CPainter::PopClipRect()

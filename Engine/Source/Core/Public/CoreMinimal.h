@@ -102,10 +102,8 @@
 #include "Object/Serialization/BinarySerializer.h"
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
-#include "Object/SystemObject.h"
 #include "Object/BasePrefs.h"
 #include "Object/Prefs.h"
-#include "Component/Component.h"
 #include "Object/Package.h"
 
 // Asset types
@@ -120,8 +118,4 @@
 // ******************************************************
 // Messaging
 #include "Messaging/MessageBus.h"
-#include "Component/ComponentBus.h"
-#include "Component/Component.h"
-#include "Component/SystemComponent.h"
-#include "Component/ComponentApplication.h"
 

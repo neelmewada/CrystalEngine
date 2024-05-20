@@ -370,3 +370,21 @@ CE_RTTI_POD_TEMPLATE(CORE_API, CE, Array, u8)
 
 CE_RTTI_POD(CORE_API, CE, Color)
 CE_RTTI_POD(CORE_API, CE, Gradient)
+
+/// fmt user-defined Formatter for CE::String
+template <> struct fmt::formatter<CE::TypeInfo*> {
+	// Parses format specifications of the form ['f' | 'e'].
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		// Return an iterator past the end of the parsed range:
+		return ctx.end();
+	}
+
+	// Formats the point p using the parsed format specification (presentation)
+	// stored in this formatter.
+	template <typename FormatContext>
+	auto format(CE::TypeInfo* type, FormatContext& ctx) const -> decltype(ctx.out()) {
+		// ctx.out() is an output iterator to write to.
+		return fmt::format_to(ctx.out(), "{}", type->GetTypeName().GetString());
+	}
+};
+
