@@ -37,7 +37,7 @@ namespace CE::Widgets
 
 		RPI::Texture* image = CApplication::Get()->LoadImage("/Engine/Assets/Icons/Check");
 
-		Vec2 imagePadding = Vec2(5, 5);
+		Vec2 imagePadding = Vec2(3.5f, 3.5f);
 		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft() + imagePadding, GetComputedLayoutSize() - imagePadding * 2);
 
 		if (image && isChecked)

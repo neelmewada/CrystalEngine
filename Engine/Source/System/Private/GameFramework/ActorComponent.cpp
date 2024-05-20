@@ -31,5 +31,43 @@ namespace CE
 		return isEnabled && owner->IsEnabled();
 	}
 
+	void ActorComponent::SetEnabled(bool enabled)
+	{
+		if (isEnabled == enabled)
+			return;
+
+		isEnabled = enabled;
+
+		if (isEnabled)
+			OnEnabled();
+		else
+			OnDisabled();
+	}
+
+	void ActorComponent::OnFieldValidate(FieldType* field)
+	{
+		Super::OnFieldValidate(field);
+
+		thread_local const Name isEnabledName = "isEnabled";
+
+		if (field->GetName() == isEnabledName)
+		{
+			if (isEnabled)
+				OnEnabled();
+			else
+				OnDisabled();
+		}
+	}
+
+	void ActorComponent::OnEnabled()
+	{
+		
+	}
+
+	void ActorComponent::OnDisabled()
+	{
+
+	}
+
 } // namespace CE
 

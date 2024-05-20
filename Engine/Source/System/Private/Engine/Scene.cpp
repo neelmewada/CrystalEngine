@@ -44,6 +44,9 @@ namespace CE
 	{
 		for (Actor* actor : actors)
 		{
+			if (!actor->isEnabled)
+				continue;
+
 			actor->Tick(delta);
 		}
     

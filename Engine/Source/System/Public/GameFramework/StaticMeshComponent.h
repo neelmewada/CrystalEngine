@@ -21,6 +21,10 @@ namespace CE
         
 	protected:
 
+		void OnEnabled() override;
+
+		void OnDisabled() override;
+
 		void Tick(f32 delta) override;
 
 		FIELD(EditAnywhere, Category = "Static Mesh")

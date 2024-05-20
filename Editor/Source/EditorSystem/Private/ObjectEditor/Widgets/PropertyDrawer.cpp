@@ -204,6 +204,11 @@ namespace CE::Editor
 				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance](CTextInput* input)
 					{
 						field->SetFieldValue<String>(instance, input->GetText());
+
+						if (field->GetInstanceOwnerType()->IsClass())
+						{
+							((Object*)instance)->OnFieldValidate(field);
+						}
 					});
 			}
 			else if (declTypeId == TYPEID(bool))
@@ -214,6 +219,11 @@ namespace CE::Editor
 				Bind(checkBox, MEMBER_FUNCTION(CCheckBox, OnCheckChanged), [field, instance](CCheckBox* checkBox)
 					{
 						field->SetFieldValue<bool>(instance, checkBox->IsChecked());
+
+						if (field->GetInstanceOwnerType()->IsClass())
+						{
+							((Object*)instance)->OnFieldValidate(field);
+						}
 					});
 			}
 		}

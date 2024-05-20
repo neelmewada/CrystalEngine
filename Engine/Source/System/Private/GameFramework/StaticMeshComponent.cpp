@@ -45,6 +45,26 @@ namespace CE
         meshChanged = true;
     }
 
+    void StaticMeshComponent::OnEnabled()
+    {
+	    Super::OnEnabled();
+
+        if (meshHandle.IsValid())
+        {
+            meshHandle->flags.visible = true;
+        }
+    }
+
+    void StaticMeshComponent::OnDisabled()
+    {
+        Super::OnDisabled();
+
+        if (meshHandle.IsValid())
+        {
+            meshHandle->flags.visible = false;
+        }
+    }
+
     void StaticMeshComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);

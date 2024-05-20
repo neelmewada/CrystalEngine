@@ -560,6 +560,11 @@ namespace CE
 
     }
 
+    void Object::OnFieldValidate(FieldType* field)
+    {
+
+    }
+
     Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
 	{
 		return CreateObject<Object>(this, name, flags | OF_DefaultSubobject, classType);

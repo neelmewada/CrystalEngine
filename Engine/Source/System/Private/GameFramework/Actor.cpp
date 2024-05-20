@@ -171,4 +171,102 @@ namespace CE
 		return isEnabled && parent->IsEnabled();
 	}
 
+	void Actor::SetEnabled(bool enabled)
+	{
+		if (isEnabled == enabled)
+			return;
+
+		isEnabled = enabled;
+
+		if (isEnabled)
+		{
+			OnEnabled();
+
+			if (rootComponent != nullptr)
+			{
+				rootComponent->OnEnabled();
+			}
+
+			for (ActorComponent* attachedComponent : attachedComponents)
+			{
+				attachedComponent->OnEnabled();
+			}
+
+			for (Actor* child : children)
+			{
+				child->OnEnabled();
+			}
+		}
+		else
+		{
+			OnDisabled();
+
+			if (rootComponent != nullptr)
+			{
+				rootComponent->OnDisabled();
+			}
+
+			for (ActorComponent* attachedComponent : attachedComponents)
+			{
+				attachedComponent->OnDisabled();
+			}
+
+			for (Actor* child : children)
+			{
+				child->OnDisabled();
+			}
+		}
+	}
+
+	void Actor::OnFieldValidate(FieldType* field)
+	{
+		Super::OnFieldValidate(field);
+
+		thread_local const Name isEnabledName = "isEnabled";
+
+		if (field->GetName() == isEnabledName)
+		{
+			if (isEnabled)
+				OnEnabled();
+			else
+				OnDisabled();
+		}
+	}
+
+	void Actor::OnEnabled()
+	{
+		if (rootComponent != nullptr)
+		{
+			rootComponent->OnEnabled();
+		}
+
+		for (ActorComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnEnabled();
+		}
+
+		for (Actor* child : children)
+		{
+			child->OnEnabled();
+		}
+	}
+
+	void Actor::OnDisabled()
+	{
+		if (rootComponent != nullptr)
+		{
+			rootComponent->OnDisabled();
+		}
+
+		for (ActorComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnDisabled();
+		}
+
+		for (Actor* child : children)
+		{
+			child->OnDisabled();
+		}
+	}
+
 } // namespace CE

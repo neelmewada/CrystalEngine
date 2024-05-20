@@ -185,7 +185,9 @@ namespace CE
         // - Config API -
 
         void LoadConfig(ClassType* configClass, String fileName);
-        
+
+        virtual void OnFieldValidate(FieldType* field);
+
     protected:
 
         virtual void OnFieldModified(FieldType* field);

@@ -62,7 +62,12 @@ namespace CE
 
 		void OnFieldModified(FieldType* field) override;
 
+		void OnFieldValidate(FieldType* field) override;
+
 		bool IsTransformUpdated() const { return transformUpdated; }
+
+		void OnEnabled() override;
+		void OnDisabled() override;
 
 	private:
 
@@ -113,6 +118,8 @@ namespace CE
 		Matrix4x4 localScaleMat = Matrix4x4::Identity();
         
         friend class CE::Scene;
+		friend class Actor;
+		friend class ActorComponent;
 	};
 
 } // namespace CE

@@ -30,7 +30,7 @@ namespace CE
 
 		bool IsSelfEnabled() const { return isEnabled; }
 
-		void SetEnabled(bool enabled) { isEnabled = enabled; }
+		void SetEnabled(bool enabled);
 
 		bool CanTick() const { return canTick; }
 
@@ -39,6 +39,12 @@ namespace CE
 		bool HasBegunPlaying() const { return hasBegunPlaying; }
 
 	protected:
+
+		void OnFieldValidate(FieldType* field) override;
+
+		virtual void OnEnabled();
+
+		virtual void OnDisabled();
 
 		FIELD()
 		bool canTick = true;
@@ -52,6 +58,8 @@ namespace CE
 		bool isEnabled = true;
 
 		b8 hasBegunPlaying = false;
+		b8 onEnabledCalled = false;
+		b8 onDisabledCalled = false;
 
 		friend class Actor;
 		friend class RendererSubsystem;

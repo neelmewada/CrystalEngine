@@ -109,9 +109,9 @@ namespace CE
 	{
 		Super::OnFieldModified(field);
 
-		static const Name localPositionName = "localPosition";
-		static const Name localEulerAnglesName = "localEulerAngles";
-		static const Name localScaleName = "localScale";
+		thread_local const Name localPositionName = "localPosition";
+		thread_local const Name localEulerAnglesName = "localEulerAngles";
+		thread_local const Name localScaleName = "localScale";
 
 		if (field->GetName() == localPositionName ||
 			field->GetName() == localEulerAnglesName ||
@@ -119,6 +119,33 @@ namespace CE
 		{
 			if (!IsDirty())
 				SetDirty();
+		}
+	}
+
+	void SceneComponent::OnFieldValidate(FieldType* field)
+	{
+		Super::OnFieldValidate(field);
+
+		
+	}
+
+	void SceneComponent::OnEnabled()
+	{
+		Super::OnEnabled();
+
+		for (SceneComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnEnabled();
+		}
+	}
+
+	void SceneComponent::OnDisabled()
+	{
+		Super::OnDisabled();
+
+		for (SceneComponent* attachedComponent : attachedComponents)
+		{
+			attachedComponent->OnDisabled();
 		}
 	}
 

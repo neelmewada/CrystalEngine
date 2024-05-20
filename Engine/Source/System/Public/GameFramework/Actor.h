@@ -47,7 +47,7 @@ namespace CE
 
 		bool IsEnabled() const;
 
-		void SetEnabled(bool enabled) { isEnabled = enabled; }
+		void SetEnabled(bool enabled);
 
 		bool IsSelfEnabled() const { return isEnabled; }
 
@@ -57,6 +57,11 @@ namespace CE
 
 	protected:
 
+		void OnFieldValidate(FieldType* field) override;
+
+		virtual void OnEnabled();
+
+		virtual void OnDisabled();
 
 	private:
 

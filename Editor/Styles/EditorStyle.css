@@ -93,8 +93,8 @@ CTextInput {
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 1.5px;
-    border-color: rgb(50, 50, 50);
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
     border-radius: 5px 5px;
     min-height: 22.5px;
     min-width: 40px;
@@ -119,9 +119,9 @@ CCheckBox {
     height: 20px;
     border-radius: 3px 3px 3px 3px;
     background: rgb(15, 15, 15);
-    border-width: 1.5px;
-    border-color: rgb(50, 50, 50);
-    color: rgb(0, 112, 224);
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
+    color: rgb(255, 255, 255);
 }
 
 CCheckBox:hovered {
@@ -129,17 +129,13 @@ CCheckBox:hovered {
 }
 
 CCheckBox:pressed {
-    color: rgb(0, 80, 160);
+    color: rgb(180, 180, 180);
 }
 
 CCheckBox:disabled {
     border-color: rgb(50, 50, 50);
     background-color: rgb(26, 26, 26);
-    color: rgb(0, 80, 160);
-}
-
-#Fourth {
-    align-items: stretch;
+    color: rgb(180, 180, 180);
 }
 
 CTreeView {
