@@ -62,7 +62,7 @@ namespace CE
 
 		void OnFieldModified(FieldType* field) override;
 
-		void OnFieldValidate(FieldType* field) override;
+		void OnFieldEdited(FieldType* field) override;
 
 		bool IsTransformUpdated() const { return transformUpdated; }
 

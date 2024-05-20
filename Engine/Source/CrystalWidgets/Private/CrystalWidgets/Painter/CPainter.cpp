@@ -287,10 +287,10 @@ namespace CE::Widgets
         coordinateSpaceStack.Pop();
     }
 
-    void CPainter::PushClipRect(const Rect& clipRect)
+    void CPainter::PushClipRect(const Rect& clipRect, const Vec4& cornerRadius)
     {
         Rect rect = Rect::FromSize(GetOrigin() + clipRect.min, clipRect.GetSize());
-        renderer->PushClipRect(rect);
+        renderer->PushClipRect(rect, cornerRadius);
     }
 
     void CPainter::PopClipRect()

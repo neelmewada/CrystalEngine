@@ -162,6 +162,9 @@ namespace CE::Editor
             cameraComponent->SetLocalPosition(Vec3(0, 0, -2));
             cameraComponent->SetFarPlane(500);
             meshComponent->SetupAttachment(cameraComponent);
+
+            DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "DirectionalLight");
+            scene->AddActor(lightActor);
 	    }
     }
 

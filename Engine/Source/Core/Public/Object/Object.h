@@ -186,7 +186,7 @@ namespace CE
 
         void LoadConfig(ClassType* configClass, String fileName);
 
-        virtual void OnFieldValidate(FieldType* field);
+        virtual void OnFieldEdited(FieldType* field);
 
     protected:
 

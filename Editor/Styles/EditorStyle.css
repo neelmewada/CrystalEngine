@@ -82,7 +82,7 @@ CButton::alternate:disabled {
 
 CLabelButton {
     text-decoration-line: underline;
-    text-decoration-style: solid;
+    text-decoration-style: dotted;
     text-decoration-color: white;
     text-decoration-thickness: 1px;
     cursor: hand;
@@ -121,7 +121,7 @@ CCheckBox {
     background: rgb(15, 15, 15);
     border-width: 1.25px;
     border-color: rgb(60, 60, 60);
-    color: rgb(255, 255, 255);
+    color: rgb(0, 112, 224);
 }
 
 CCheckBox:hovered {
@@ -129,13 +129,13 @@ CCheckBox:hovered {
 }
 
 CCheckBox:pressed {
-    color: rgb(180, 180, 180);
+    color: rgb(0, 60, 112);
 }
 
 CCheckBox:disabled {
     border-color: rgb(50, 50, 50);
     background-color: rgb(26, 26, 26);
-    color: rgb(180, 180, 180);
+    color: rgb(0, 60, 112);
 }
 
 CTreeView {
@@ -421,6 +421,7 @@ CCollapsibleSection:collapsed #SectionHeader {
 PropertyDrawer {
     width: 100%;
     min-height: 15px;
+    padding: 0 2px;
     flex-direction: row;
     align-items: stretch;
 }
@@ -445,8 +446,8 @@ FieldEditor {
     font-size: 13px;
 }
 
-CTextInput#StringInput {
-    min-width: 200px;
+CTextInput#StringInput, CTextInput#NumberInput {
+    min-width: 175px;
 }
 
 VectorComponentInput {
@@ -456,6 +457,6 @@ VectorComponentInput {
     flex-grow: 2;
     flex-shrink: 1;
     border-radius: 4px 4px 4px 4px;
-    padding: 12px 4px 4px 5px;
+    padding: 12px 5px 5px 5px;
 }
 

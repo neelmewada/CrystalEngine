@@ -61,7 +61,13 @@ Shader "2D/SDF Geometry"
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
-            StructuredBuffer<float4> _ClipRects : SRG_PerDraw(t1);
+            struct ClipRect
+            {
+                float4 rect;
+                float4 cornerRadius;;
+            };
+
+            StructuredBuffer<ClipRect> _ClipRects : SRG_PerDraw(t1);
 
             SamplerState _TextureSampler : SRG_PerDraw(s2);
 
@@ -317,7 +323,7 @@ Shader "2D/SDF Geometry"
                 
                 const float4 color = info.outlineColor;
 
-                return lerp(float4(color.rgb, 0), color, -sdf * 1.5);
+                return lerp(float4(color.rgb, 0), color, -sdf * 5.0);
             }
 
             #define idx input.instanceId
@@ -337,7 +343,7 @@ Shader "2D/SDF Geometry"
 
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
 
-                const float4 clipRect = _ClipRects[_DrawList[idx].clipRect];
+                const float4 clipRect = _ClipRects[_DrawList[idx].clipRect].rect;
                 if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
                     discard;
                 

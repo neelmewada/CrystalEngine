@@ -57,7 +57,7 @@ namespace CE
 
 	protected:
 
-		void OnFieldValidate(FieldType* field) override;
+		void OnFieldEdited(FieldType* field) override;
 
 		virtual void OnEnabled();
 

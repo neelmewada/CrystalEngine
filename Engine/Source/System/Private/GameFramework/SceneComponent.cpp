@@ -122,9 +122,9 @@ namespace CE
 		}
 	}
 
-	void SceneComponent::OnFieldValidate(FieldType* field)
+	void SceneComponent::OnFieldEdited(FieldType* field)
 	{
-		Super::OnFieldValidate(field);
+		Super::OnFieldEdited(field);
 
 		
 	}

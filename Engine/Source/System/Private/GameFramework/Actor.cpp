@@ -218,15 +218,15 @@ namespace CE
 		}
 	}
 
-	void Actor::OnFieldValidate(FieldType* field)
+	void Actor::OnFieldEdited(FieldType* field)
 	{
-		Super::OnFieldValidate(field);
+		Super::OnFieldEdited(field);
 
 		thread_local const Name isEnabledName = "isEnabled";
 
 		if (field->GetName() == isEnabledName)
 		{
-			if (isEnabled)
+			if (IsEnabled())
 				OnEnabled();
 			else
 				OnDisabled();
@@ -235,37 +235,41 @@ namespace CE
 
 	void Actor::OnEnabled()
 	{
-		if (rootComponent != nullptr)
+		if (rootComponent != nullptr && rootComponent->IsEnabled())
 		{
 			rootComponent->OnEnabled();
 		}
 
 		for (ActorComponent* attachedComponent : attachedComponents)
 		{
-			attachedComponent->OnEnabled();
+			if (attachedComponent->IsEnabled())
+				attachedComponent->OnEnabled();
 		}
 
 		for (Actor* child : children)
 		{
-			child->OnEnabled();
+			if (child->IsEnabled())
+				child->OnEnabled();
 		}
 	}
 
 	void Actor::OnDisabled()
 	{
-		if (rootComponent != nullptr)
+		if (rootComponent != nullptr && !rootComponent->IsEnabled())
 		{
 			rootComponent->OnDisabled();
 		}
 
 		for (ActorComponent* attachedComponent : attachedComponents)
 		{
-			attachedComponent->OnDisabled();
+			if (!attachedComponent->IsEnabled())
+				attachedComponent->OnDisabled();
 		}
 
 		for (Actor* child : children)
 		{
-			child->OnDisabled();
+			if (!child->IsEnabled())
+				child->OnDisabled();
 		}
 	}
 

@@ -66,7 +66,7 @@ namespace CE::RPI
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
-        void PushClipRect(Rect clipRect);
+        void PushClipRect(Rect clipRect, Vec4 cornerRadius = {});
         void PopClipRect();
         bool ClipRectExists();
         Rect GetLastClipRect();
@@ -224,6 +224,12 @@ namespace CE::RPI
             f32 dashLength = 0;
         };
 
+        struct alignas(16) ClipRect2D
+        {
+            Rect rect{};
+            Vec4 cornerRadius{};
+        };
+
         struct FontInfo
         {
             Name fontName = "Roboto";
@@ -300,7 +306,7 @@ namespace CE::RPI
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         Array<RPI::Texture*> textures{};
-        Array<Rect> clipRects{};
+        Array<ClipRect2D> clipRects{};
         u32 drawItemCount = 0;
         u32 clipRectCount = 0;
         u32 textureCount = 0;

@@ -138,7 +138,7 @@ namespace CE::Editor
 				declTypeId == TYPEID(Vec4) || declTypeId == TYPEID(Vec4i))
 			{
 				VectorFieldEditor* editorWidget = CreateObject<VectorFieldEditor>(right, "VectorFieldEditor");
-				//editorWidget->SetVectorType(declTypeId);
+				editorWidget->SetVectorType(declTypeId);
 
 				{
 					if (declTypeId == TYPEID(Vec2))
@@ -207,7 +207,7 @@ namespace CE::Editor
 
 						if (field->GetInstanceOwnerType()->IsClass())
 						{
-							((Object*)instance)->OnFieldValidate(field);
+							((Object*)instance)->OnFieldEdited(field);
 						}
 					});
 			}
@@ -222,7 +222,82 @@ namespace CE::Editor
 
 						if (field->GetInstanceOwnerType()->IsClass())
 						{
-							((Object*)instance)->OnFieldValidate(field);
+							((Object*)instance)->OnFieldEdited(field);
+						}
+					});
+			}
+			else if (declTypeId == TYPEID(Color))
+			{
+				
+			}
+			else if (field->IsDecimalField() || field->IsNumberField())
+			{
+				CTextInput* numberInput = CreateObject<CTextInput>(right, "NumberInput");
+
+				if (field->IsDecimalField())
+				{
+					numberInput->SetText(String::Format("{}", field->GetNumericFieldValue(instance)));
+				}
+				else
+				{
+					if (declTypeId == TYPEID(u64))
+						numberInput->SetText(String::Format("{}", (u64)field->GetNumericFieldValue(instance)));
+					else
+						numberInput->SetText(String::Format("{}", (s64)field->GetNumericFieldValue(instance)));
+				}
+
+				Bind(numberInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance, declTypeId](CTextInput* textInput)
+					{
+						const String& text = textInput->GetText();
+						f64 numberValue = 0.0f;
+
+						if (String::TryParse(text, numberValue))
+						{
+							if (declTypeId == TYPEID(f32))
+							{
+								field->SetFieldValue<f32>(instance, (f32)numberValue);
+							}
+							else if (declTypeId == TYPEID(f64))
+							{
+								field->SetFieldValue<f64>(instance, numberValue);
+							}
+							else if (declTypeId == TYPEID(u32))
+							{
+								field->SetFieldValue<u32>(instance, (u32)numberValue);
+							}
+							else if (declTypeId == TYPEID(s32))
+							{
+								field->SetFieldValue<s32>(instance, (s32)numberValue);
+							}
+							else if (declTypeId == TYPEID(u64))
+							{
+								field->SetFieldValue<u64>(instance, (u64)numberValue);
+							}
+							else if (declTypeId == TYPEID(s64))
+							{
+								field->SetFieldValue<s64>(instance, (s64)numberValue);
+							}
+							else if (declTypeId == TYPEID(u16))
+							{
+								field->SetFieldValue<u16>(instance, (u16)numberValue);
+							}
+							else if (declTypeId == TYPEID(s16))
+							{
+								field->SetFieldValue<s16>(instance, (s16)numberValue);
+							}
+							else if (declTypeId == TYPEID(u8))
+							{
+								field->SetFieldValue<u8>(instance, (u8)numberValue);
+							}
+							else if (declTypeId == TYPEID(s8))
+							{
+								field->SetFieldValue<s8>(instance, (s8)numberValue);
+							}
+
+							if (field->GetInstanceOwnerType()->IsClass())
+							{
+								((Object*)instance)->OnFieldEdited(field);
+							}
 						}
 					});
 			}

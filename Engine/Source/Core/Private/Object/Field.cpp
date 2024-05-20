@@ -387,7 +387,7 @@ namespace CE
 			}
 			else if (fieldTypeId == TYPEID(UUID32))
 			{
-				return  (u32)GetFieldValue<UUID32>(instance);
+				return (u32)GetFieldValue<UUID32>(instance);
 			}
 			else if (fieldTypeId == TYPEID(c8))
 			{

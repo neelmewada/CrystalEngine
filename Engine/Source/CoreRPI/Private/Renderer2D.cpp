@@ -1,5 +1,6 @@
 #include "Renderer2D.h"
 #include "Renderer2D.h"
+#include "Renderer2D.h"
 
 #include "CoreRPI.h"
 
@@ -50,10 +51,10 @@ namespace CE::RPI
 
 			RHI::BufferDescriptor clipRectBufferDesc{};
 			clipRectBufferDesc.name = "ClipRect Buffer";
-			clipRectBufferDesc.bufferSize = 100 * sizeof(Rect);
+			clipRectBufferDesc.bufferSize = 100 * sizeof(ClipRect2D);
 			clipRectBufferDesc.defaultHeapType = MemoryHeapType::Upload;
 			clipRectBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
-			clipRectBufferDesc.structureByteStride = sizeof(Rect);
+			clipRectBufferDesc.structureByteStride = sizeof(ClipRect2D);
 
 			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(clipRectBufferDesc);
 			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);
@@ -205,7 +206,7 @@ namespace CE::RPI
 		fontStack.Pop();
 	}
 
-	void Renderer2D::PushClipRect(Rect clipRect)
+	void Renderer2D::PushClipRect(Rect clipRect, Vec4 cornerRadius)
 	{
 		if (clipRects.GetSize() < clipRectCount + 1)
 		{
@@ -214,13 +215,13 @@ namespace CE::RPI
 
 		if (clipRectStack.NonEmpty())
 		{
-			clipRect.min.y = Math::Max(clipRect.min.y, clipRects[clipRectStack.Top()].min.y);
-			clipRect.max.y = Math::Min(clipRect.max.y, clipRects[clipRectStack.Top()].max.y);
-			clipRect.min.x = Math::Max(clipRect.min.x, clipRects[clipRectStack.Top()].min.x);
-			clipRect.max.x = Math::Min(clipRect.max.x, clipRects[clipRectStack.Top()].max.x);
+			clipRect.min.y = Math::Max(clipRect.min.y, clipRects[clipRectStack.Top()].rect.min.y);
+			clipRect.max.y = Math::Min(clipRect.max.y, clipRects[clipRectStack.Top()].rect.max.y);
+			clipRect.min.x = Math::Max(clipRect.min.x, clipRects[clipRectStack.Top()].rect.min.x);
+			clipRect.max.x = Math::Min(clipRect.max.x, clipRects[clipRectStack.Top()].rect.max.x);
 		}
 
-		clipRects[clipRectCount] = clipRect;
+		clipRects[clipRectCount] = { .rect = clipRect, .cornerRadius = cornerRadius };
 		clipRectStack.Push(clipRectCount);
 		clipRectCount++;
 	}
@@ -240,7 +241,7 @@ namespace CE::RPI
 	{
 		if (!ClipRectExists())
 			return Rect();
-		return clipRects[clipRectStack.Top()];
+		return clipRects[clipRectStack.Top()].rect;
 	}
 
 	void Renderer2D::SetFillColor(const Color& color)
@@ -1317,7 +1318,7 @@ namespace CE::RPI
 		{
 			resubmitClipRects[imageIndex] = false;
 
-			if (clipRectsBuffer[imageIndex]->GetBufferSize() < clipRectCount * sizeof(Rect))
+			if (clipRectsBuffer[imageIndex]->GetBufferSize() < clipRectCount * sizeof(ClipRect2D))
 			{
 				IncrementClipRectsBuffer(clipRectCount + 10);
 			}
@@ -1325,7 +1326,7 @@ namespace CE::RPI
 			void* data;
 			clipRectsBuffer[imageIndex]->Map(0, clipRectsBuffer[imageIndex]->GetBufferSize(), &data);
 			{
-				memcpy(data, clipRects.GetData(), clipRectCount * sizeof(Rect));
+				memcpy(data, clipRects.GetData(), clipRectCount * sizeof(ClipRect2D));
 			}
 			clipRectsBuffer[imageIndex]->Unmap();
 		}
@@ -1450,7 +1451,7 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementClipRectsBuffer(u32 numRectsToAdd)
 	{
-		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(Rect);
+		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(ClipRect2D);
 		u32 incrementCount = (u32)(curNumRects * 0.25f); // Add 25% to the storage
 
 		numRectsToAdd = Math::Max(numRectsToAdd, incrementCount);
@@ -1463,8 +1464,8 @@ namespace CE::RPI
 			newBufferDesc.name = "ClipRects Buffer";
 			newBufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 			newBufferDesc.defaultHeapType = MemoryHeapType::Upload;
-			newBufferDesc.structureByteStride = sizeof(Rect);
-			newBufferDesc.bufferSize = original->GetBufferSize() + numRectsToAdd * sizeof(Rect);
+			newBufferDesc.structureByteStride = sizeof(ClipRect2D);
+			newBufferDesc.bufferSize = original->GetBufferSize() + numRectsToAdd * sizeof(ClipRect2D);
 
 			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(newBufferDesc);
 			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);

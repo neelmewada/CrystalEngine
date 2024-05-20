@@ -48,7 +48,7 @@ namespace CE::Widgets
         void PushChildCoordinateSpace(Vec2 newOrigin);
         void PopChildCoordinateSpace();
 
-        void PushClipRect(const Rect& clipRect);
+        void PushClipRect(const Rect& clipRect, const Vec4& cornerRadius = {});
         void PopClipRect();
 
         bool ClipRectExists();

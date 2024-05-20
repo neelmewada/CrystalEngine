@@ -74,10 +74,6 @@ Crystal Editor window:
 
 ![](./Screenshots/EditorWindow.png)
 
-GIF Demo:
-
-![](./Screenshots/EditorDemo.gif)
-
 PBR Demo:
 
 ![](./Screenshots/IBL%20Demo%20Night.png)

@@ -560,7 +560,7 @@ namespace CE
 
     }
 
-    void Object::OnFieldValidate(FieldType* field)
+    void Object::OnFieldEdited(FieldType* field)
     {
 
     }

@@ -185,7 +185,10 @@ namespace CE::Editor
 			for (FieldType* field : fields)
 			{
 				PropertyDrawer* propertyDrawer = PropertyDrawer::Create(field, container);
-				if (propertyDrawer && ((ClassType*)field->GetInstanceOwnerType())->IsSubclassOf<ActorComponent>())
+				if (!propertyDrawer)
+					continue;
+
+				if (((ClassType*)field->GetInstanceOwnerType())->IsSubclassOf<ActorComponent>())
 				{
 					if (target->IsOfType<Actor>())
 					{
@@ -204,7 +207,7 @@ namespace CE::Editor
 						propertyDrawers.Add(propertyDrawer);
 					}
 				}
-				else if (propertyDrawer && ((ClassType*)field->GetInstanceOwnerType())->IsSubclassOf<Actor>())
+				else
 				{
 					propertyDrawer->CreateGUI(field, target);
 					propertyDrawers.Add(propertyDrawer);

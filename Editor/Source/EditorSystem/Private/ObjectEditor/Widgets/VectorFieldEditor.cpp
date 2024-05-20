@@ -30,7 +30,10 @@ namespace CE::Editor
         Vec2 pos = GetComputedLayoutTopLeft();
         Vec2 size = GetComputedLayoutSize();
 
-        Rect rect = Rect::FromSize(pos + Vec2(2.5f, 2.5f), Vec2(5.0f, size.height - 5.0f));
+        f32 padding = 3.0f;
+        f32 width = 5.0f;
+
+        Rect rect = Rect::FromSize(pos + Vec2(padding, padding), Vec2(width, size.height - padding * 2));
 
         if (tagColor.a > 0)
         {
