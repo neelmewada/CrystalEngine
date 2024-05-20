@@ -82,6 +82,52 @@ namespace CE::Editor
 		HashMap<Name, int> categoryOrders{};
 		categoryOrders["General"] = 0;
 
+		if (target->IsOfType<Actor>())
+		{
+			Actor* actor = static_cast<Actor*>(target);
+
+			SceneComponent* rootComponent = actor->GetRootComponent();
+
+			if (rootComponent)
+			{
+				ClassType* componentClass = rootComponent->GetClass();
+
+				for (auto field = componentClass->GetFirstField(); field != nullptr; field = field->GetNext())
+				{
+					if (field->IsEditAnywhere() || field->IsVisibleAnywhere())
+					{
+						if (!field->HasAttribute("Category"))
+						{
+							fieldsByCategory["General"].Add(field);
+						}
+						else
+						{
+							Name category = field->GetAttribute("Category").GetStringValue();
+							if (!category.IsValid())
+							{
+								fieldsByCategory["General"].Add(field);
+							}
+							else
+							{
+								fieldsByCategory[category].Add(field);
+								if (!categories.Exists(category))
+									categories.Add(category);
+								if (field->HasAttribute("CategoryOrder"))
+								{
+									String orderString = field->GetAttribute("CategoryOrder");
+									int order = 0;
+									if (String::TryParse(orderString, order))
+									{
+										categoryOrders[category] = order;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		for (auto field = targetClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			if (field->IsEditAnywhere() || field->IsVisibleAnywhere())
@@ -139,7 +185,26 @@ namespace CE::Editor
 			for (FieldType* field : fields)
 			{
 				PropertyDrawer* propertyDrawer = PropertyDrawer::Create(field, container);
-				if (propertyDrawer)
+				if (propertyDrawer && ((ClassType*)field->GetInstanceOwnerType())->IsSubclassOf<ActorComponent>())
+				{
+					if (target->IsOfType<Actor>())
+					{
+						Actor* actor = static_cast<Actor*>(target);
+						SceneComponent* rootComponent = actor->GetRootComponent();
+
+						if (rootComponent)
+						{
+							propertyDrawer->CreateGUI(field, rootComponent);
+							propertyDrawers.Add(propertyDrawer);
+						}
+					}
+					else
+					{
+						propertyDrawer->CreateGUI(field, target);
+						propertyDrawers.Add(propertyDrawer);
+					}
+				}
+				else if (propertyDrawer && ((ClassType*)field->GetInstanceOwnerType())->IsSubclassOf<Actor>())
 				{
 					propertyDrawer->CreateGUI(field, target);
 					propertyDrawers.Add(propertyDrawer);

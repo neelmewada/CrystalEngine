@@ -26,6 +26,8 @@ namespace CE
 
 		virtual u32 GetLodCount() const { return 1; }
 
+		virtual u32 GetLodSubMeshCount(u32 lodIndex) { return 1; }
+
 		RPI::CustomMaterialMap GetRpiMaterialMap();
 
 		MaterialInterface* GetMaterial(u32 subMeshIndex = 0);
@@ -39,7 +41,7 @@ namespace CE
 	protected:
 
 		//! @brief Materials per LOD mesh
-		FIELD(EditAnywhere)
+		FIELD(EditAnywhere, Category = "Materials")
         Array<LodMaterial> materialsPerLod{};
 
 	};

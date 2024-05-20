@@ -114,6 +114,30 @@ CTextInput:disabled {
     color: rgb(140, 140, 140);
 }
 
+CCheckBox {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px 3px 3px 3px;
+    background: rgb(15, 15, 15);
+    border-width: 1.5px;
+    border-color: rgb(50, 50, 50);
+    color: rgb(0, 112, 224);
+}
+
+CCheckBox:hovered {
+    border-color: rgb(74, 74, 74);
+}
+
+CCheckBox:pressed {
+    color: rgb(0, 80, 160);
+}
+
+CCheckBox:disabled {
+    border-color: rgb(50, 50, 50);
+    background-color: rgb(26, 26, 26);
+    color: rgb(0, 80, 160);
+}
+
 #Fourth {
     align-items: stretch;
 }
@@ -421,12 +445,12 @@ PropertyDrawer {
 
 FieldEditor {
     flex-direction: row;
-    width: 100%;
+    min-width: 250px;
     font-size: 13px;
 }
 
 CTextInput#StringInput {
-    min-width: 170px;
+    min-width: 200px;
 }
 
 VectorComponentInput {

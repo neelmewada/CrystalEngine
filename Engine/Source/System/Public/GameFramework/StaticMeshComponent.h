@@ -15,6 +15,8 @@ namespace CE
 
 		virtual u32 GetLodCount() const override;
 
+		virtual u32 GetLodSubMeshCount(u32 lodIndex) override;
+
 		void SetStaticMesh(StaticMesh* staticMesh);
         
 	protected:

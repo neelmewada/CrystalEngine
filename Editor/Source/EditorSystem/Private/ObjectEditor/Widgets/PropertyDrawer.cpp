@@ -206,6 +206,16 @@ namespace CE::Editor
 						field->SetFieldValue<String>(instance, input->GetText());
 					});
 			}
+			else if (declTypeId == TYPEID(bool))
+			{
+				CCheckBox* checkBox = CreateObject<CCheckBox>(right, "BooleanInput");
+				checkBox->SetChecked(field->GetFieldValue<bool>(instance));
+
+				Bind(checkBox, MEMBER_FUNCTION(CCheckBox, OnCheckChanged), [field, instance](CCheckBox* checkBox)
+					{
+						field->SetFieldValue<bool>(instance, checkBox->IsChecked());
+					});
+			}
 		}
 	}
 

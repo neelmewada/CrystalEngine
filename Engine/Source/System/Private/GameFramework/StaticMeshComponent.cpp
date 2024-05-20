@@ -30,6 +30,15 @@ namespace CE
 	    return Super::GetLodCount();
     }
 
+    u32 StaticMeshComponent::GetLodSubMeshCount(u32 lodIndex)
+    {
+        if (staticMesh)
+        {
+            return staticMesh->GetLodSubMeshCount(lodIndex);
+        }
+	    return Super::GetLodSubMeshCount(lodIndex);
+    }
+
     void StaticMeshComponent::SetStaticMesh(StaticMesh* staticMesh)
     {
         this->staticMesh = staticMesh;
