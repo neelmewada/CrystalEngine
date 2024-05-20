@@ -78,10 +78,6 @@ PBR Demo:
 
 ![](./Screenshots/IBL%20Demo%20Night.png)
 
-PBR Demo:
-
-![](./Screenshots/IBL%20Demo%20Night.png)
-
 ### Credits
 
 <a href="https://www.flaticon.com/">Icons by FlatIcon - flaticon.com</a>
