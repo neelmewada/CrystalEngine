@@ -557,7 +557,7 @@ namespace CE
 
     void Object::OnFieldModified(FieldType* field)
     {
-
+		emit OnFieldValueUpdated(field);
     }
 
     void Object::OnFieldEdited(FieldType* field)

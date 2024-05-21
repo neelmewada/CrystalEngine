@@ -9,7 +9,7 @@ namespace CE::Widgets
 
     CRYSTALWIDGETS_API bool CIntegerInputValidator(const String& text);
 
-    CRYSTALWIDGETS_API bool CSignedIntegerInputValidator(const String& text);
+    CRYSTALWIDGETS_API bool CUnsignedIntegerInputValidator(const String& text);
 
     CRYSTALWIDGETS_API bool CObjectNameInputValidator(const String& text);
 

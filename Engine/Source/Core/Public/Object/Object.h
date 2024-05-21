@@ -188,6 +188,8 @@ namespace CE
 
         virtual void OnFieldEdited(FieldType* field);
 
+        CE_SIGNAL(OnFieldValueUpdated, FieldType*);
+
     protected:
 
         virtual void OnFieldModified(FieldType* field);
@@ -347,6 +349,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
 		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
-        
+        CE_FUNCTION(OnFieldValueUpdated, Signal)
     )
 )

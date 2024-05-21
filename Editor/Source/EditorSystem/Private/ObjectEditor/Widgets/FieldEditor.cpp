@@ -16,6 +16,7 @@ namespace CE::Editor
 	void FieldEditor::Construct()
 	{
 		Super::Construct();
+
 	}
 
 } // namespace CE::Editor

@@ -71,15 +71,14 @@ namespace CE::Editor
 
 		void SetVectorType(TypeId vectorTypeId);
 
-		CE_SIGNAL(OnEditingFinished, VectorFieldEditor*);
-		CE_SIGNAL(OnValueModified, VectorFieldEditor*);
-
 		Vec4 GetVectorValue();
 
 		Vec4i GetVectorIntValue();
 
 		void SetVectorValue(const Vec4& value);
 		void SetVectorIntValue(const Vec4i& value);
+
+		void BindField(FieldType* field, void* instance) override;
 
 	protected:
 
@@ -98,6 +97,9 @@ namespace CE::Editor
 		VectorComponentInput* fieldW = nullptr;
 
 	private:
+
+		FieldType* field = nullptr;
+		void* instance = nullptr;
 
 		TypeId vectorType = 0;
 	};

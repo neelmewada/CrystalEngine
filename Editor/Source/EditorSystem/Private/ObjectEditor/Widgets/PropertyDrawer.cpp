@@ -140,61 +140,7 @@ namespace CE::Editor
 				VectorFieldEditor* editorWidget = CreateObject<VectorFieldEditor>(right, "VectorFieldEditor");
 				editorWidget->SetVectorType(declTypeId);
 
-				{
-					if (declTypeId == TYPEID(Vec2))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec2>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec3))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec3>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec4))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec4>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec2i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec2i>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec3i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec3i>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec4i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec4i>(instance));
-					}
-				}
-
-				Bind(editorWidget, MEMBER_FUNCTION(VectorFieldEditor, OnValueModified), 
-					[declTypeId, field, instance, this](VectorFieldEditor* editor)
-					{
-						if (declTypeId == TYPEID(Vec2) || declTypeId == TYPEID(Vec3) || declTypeId == TYPEID(Vec4))
-						{
-							Vec4 vec4Value = editor->GetVectorValue();
-							if (declTypeId == TYPEID(Vec2))
-								field->SetFieldValue<Vec2>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec3))
-								field->SetFieldValue<Vec3>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec4))
-								field->SetFieldValue<Vec4>(instance, vec4Value);
-
-							emit OnPropertyModified(this);
-						}
-						else
-						{
-							Vec4i vec4Value = editor->GetVectorIntValue();
-							if (declTypeId == TYPEID(Vec2i))
-								field->SetFieldValue<Vec2i>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec3i))
-								field->SetFieldValue<Vec3i>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec4i))
-								field->SetFieldValue<Vec4i>(instance, vec4Value);
-
-							emit OnPropertyModified(this);
-						}
-					});
+				editorWidget->BindField(field, instance);
 			}
 			else if (declTypeId == TYPEID(String))
 			{

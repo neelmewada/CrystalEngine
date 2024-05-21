@@ -39,10 +39,13 @@ namespace CE::Widgets
 		return true;
 	}
 
-	CRYSTALWIDGETS_API bool CSignedIntegerInputValidator(const String& text)
+	CRYSTALWIDGETS_API bool CUnsignedIntegerInputValidator(const String& text)
 	{
 		for (int i = 0; i < text.GetLength(); ++i)
 		{
+			if (i == 0 && text[0] == '+')
+				continue;
+
 			if (!String::IsNumeric(text[i]))
 				return false;
 		}

@@ -25,8 +25,6 @@ namespace CE::Editor
 
         // - Signals -
 
-        CE_SIGNAL(OnPropertyModified, PropertyDrawer*);
-
     protected:
 
         void Construct() override;
