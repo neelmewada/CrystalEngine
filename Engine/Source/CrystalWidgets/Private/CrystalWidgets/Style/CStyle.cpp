@@ -25,6 +25,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::BackgroundImage, TYPE(String), false },
 		{ CStylePropertyType::BackgroundSize, TYPE(Vec2), false },
 		{ CStylePropertyType::BackgroundPosition, TYPE(CTextAlign), false },
+		{ CStylePropertyType::BackgroundRepeat, TYPE(CBackgroundRepeat), false },
 		{ CStylePropertyType::BorderRadius, TYPE(Vec4), false },
 		{ CStylePropertyType::BorderWidth, TYPE(f32), false },
 		{ CStylePropertyType::BorderColor, TYPE(Color), false },
@@ -94,6 +95,7 @@ namespace CE::Widgets
 		{ "shadow", CStylePropertyType::ShadowColor }, { "box-shadow", CStylePropertyType::ShadowColor }, { "shadow-color", CStylePropertyType::ShadowColor },
 		{ "background-size", CStylePropertyType::BackgroundSize },
 		{ "background-position", CStylePropertyType::BackgroundPosition },
+		{ "background-repeat", CStylePropertyType::BackgroundRepeat },
 		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
 		{ "word-wrap", CStylePropertyType::WordWrap },
@@ -150,6 +152,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() },
 		{ CStylePropertyType::BackgroundSize, GetStaticEnum<CBackgroundSize>() },
 		{ CStylePropertyType::BackgroundPosition, GetStaticEnum<CTextAlign>() },
+		{ CStylePropertyType::BackgroundRepeat, GetStaticEnum<CBackgroundRepeat>() },
 		{ CStylePropertyType::TextDecorationStyle, GetStaticEnum<CTextDecorationStyle>() },
 		{ CStylePropertyType::TextDecorationLine, GetStaticEnum<CTextDecorationLine>() },
 	};

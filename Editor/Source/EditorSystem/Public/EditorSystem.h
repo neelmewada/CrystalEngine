@@ -23,6 +23,8 @@
 #include "ObjectEditor/Widgets/FieldEditor.h"
 #include "ObjectEditor/Widgets/VectorFieldEditor.h"
 #include "ObjectEditor/Widgets/NumberFieldEditor.h"
+#include "ObjectEditor/Widgets/ColorInput.h"
+#include "ObjectEditor/Widgets/ColorFieldEditor.h"
 
 #include "ObjectEditor/Widgets/PropertyEditorRow.h"
 #include "ObjectEditor/Widgets/PropertyEditorSection.h"

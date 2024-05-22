@@ -68,6 +68,7 @@ namespace CE::Widgets
         BackgroundImage,
 		BackgroundSize,
 		BackgroundPosition,
+		BackgroundRepeat,
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
@@ -133,6 +134,16 @@ namespace CE::Widgets
 	ENUM_CLASS(CBackgroundSize);
 
 	ENUM(Flags)
+	enum class CBackgroundRepeat : u8
+	{
+		NoRepeat = 0,
+		RepeatX = BIT(0),
+		RepeatY = BIT(1),
+		Repeat = RepeatX | RepeatY
+	};
+	ENUM_CLASS_FLAGS(CBackgroundRepeat);
+
+	ENUM(Flags)
 	enum class CTextDecorationLine : u8
 	{
 		None = 0,
@@ -140,7 +151,7 @@ namespace CE::Widgets
 		Overline = BIT(1),
 		LineThrough = BIT(2)
 	};
-	ENUM_CLASS(CTextDecorationLine);
+	ENUM_CLASS_FLAGS(CTextDecorationLine);
 
 	ENUM()
 	enum class CTextDecorationStyle : u8

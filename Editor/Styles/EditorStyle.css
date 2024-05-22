@@ -450,6 +450,10 @@ CTextInput#StringInput, CTextInput#NumberInput {
     min-width: 175px;
 }
 
+ColorInput {
+    background-image: "/Editor/Assets/Images/GridPattern";
+}
+
 VectorComponentInput {
     flex-direction: row;
     column-gap: 0;
