@@ -593,6 +593,11 @@ namespace CE
 			return;
 
 		ForceSetFieldEnumValue(instance, value);
+
+		if (instanceOwner && instanceOwner->IsObject())
+		{
+			NotifyObjectFieldUpdate((Object*)instance);
+		}
     }
 
 	void FieldType::ForceSetFieldEnumValue(void* instance, s64 value)

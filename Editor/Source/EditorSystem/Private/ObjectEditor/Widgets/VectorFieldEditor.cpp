@@ -163,25 +163,8 @@ namespace CE::Editor
         {
             SetVectorIntValue(vec4IntValue);
         }
-    }
 
-    void VectorFieldEditor::Construct()
-    {
-	    Super::Construct();
-
-        fieldX = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldX->tagColor = Color::Red();
-
-        fieldY = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldY->tagColor = Color::Green();
-
-        fieldZ = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldZ->tagColor = Color::Blue();
-
-        fieldW = CreateObject<VectorComponentInput>(this, "VectorInput");
-        fieldW->tagColor = Color::White();
-
-        Delegate<void(CTextInput*)> callback = [this](CTextInput*)
+        Delegate<void(CTextInput*)> callback = [this, field, instance](CTextInput*)
             {
                 if (!fieldX->IsEditing() &&
                     !fieldY->IsEditing() &&
@@ -227,11 +210,11 @@ namespace CE::Editor
         Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
         Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
 
-        Delegate<void(CTextInput*)> editingCallback = [this](CTextInput*)
+        Delegate<void(CTextInput*)> editingCallback = [this, field, instance](CTextInput*)
             {
                 //emit OnValueModified(this);
-				if (field && instance)
-				{
+                if (field && instance)
+                {
                     Vec4 vec4Value = GetVectorValue();
 
                     TypeId declId = field->GetDeclarationTypeId();
@@ -260,13 +243,30 @@ namespace CE::Editor
                     {
                         field->SetFieldValue<Vec4i>(instance, vec4Value.ToVec4i());
                     }
-				}
+                }
             };
 
         Bind(fieldX, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
         Bind(fieldY, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
         Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
         Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
+    }
+
+    void VectorFieldEditor::Construct()
+    {
+	    Super::Construct();
+
+        fieldX = CreateObject<VectorComponentInput>(this, "VectorInput");
+        fieldX->tagColor = Color::Red();
+
+        fieldY = CreateObject<VectorComponentInput>(this, "VectorInput");
+        fieldY->tagColor = Color::Green();
+
+        fieldZ = CreateObject<VectorComponentInput>(this, "VectorInput");
+        fieldZ->tagColor = Color::Blue();
+
+        fieldW = CreateObject<VectorComponentInput>(this, "VectorInput");
+        fieldW->tagColor = Color::White();
 
         SetVectorType<Vec4>();
     }

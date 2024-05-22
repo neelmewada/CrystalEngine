@@ -70,7 +70,7 @@ namespace CE::Editor
 
 		textInput->SetInteractable(field->IsEditAnywhere());
 
-        Delegate<void(CTextInput*)> callback = [this, declId, field, instance](CTextInput* inputField)
+        Delegate<void(CTextInput*)> callback = [this, declId, field, instance](CTextInput*)
             {
 				if (field->IsReadOnly() || !field->IsEditAnywhere())
 					return;
@@ -80,7 +80,43 @@ namespace CE::Editor
 				{
 					if (declId == TYPEID(s32))
 					{
-						
+						field->SetFieldValue<s32>(instance, (s32)numberValue);
+					}
+					else if (declId == TYPEID(u32))
+					{
+						field->SetFieldValue<u32>(instance, (u32)numberValue);
+					}
+					else if (declId == TYPEID(s64))
+					{
+						field->SetFieldValue<s64>(instance, (s64)numberValue);
+					}
+					else if (declId == TYPEID(u64))
+					{
+						field->SetFieldValue<u64>(instance, (u64)numberValue);
+					}
+					else if (declId == TYPEID(s16))
+					{
+						field->SetFieldValue<s16>(instance, (s16)numberValue);
+					}
+					else if (declId == TYPEID(u16))
+					{
+						field->SetFieldValue<u16>(instance, (u16)numberValue);
+					}
+					else if (declId == TYPEID(s8))
+					{
+						field->SetFieldValue<s8>(instance, (s8)numberValue);
+					}
+					else if (declId == TYPEID(u8))
+					{
+						field->SetFieldValue<u8>(instance, (u8)numberValue);
+					}
+					else if (declId == TYPEID(f32))
+					{
+						field->SetFieldValue<f32>(instance, (f32)numberValue);
+					}
+					else if (declId == TYPEID(f64))
+					{
+						field->SetFieldValue<f64>(instance, numberValue);
 					}
 				}
             };

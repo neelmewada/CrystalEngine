@@ -64,7 +64,7 @@ Shader "2D/SDF Geometry"
             struct ClipRect
             {
                 float4 rect;
-                float4 cornerRadius;;
+                float4 cornerRadius;
             };
 
             StructuredBuffer<ClipRect> _ClipRects : SRG_PerDraw(t1);
@@ -344,32 +344,53 @@ Shader "2D/SDF Geometry"
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
 
                 const float4 clipRect = _ClipRects[_DrawList[idx].clipRect].rect;
-                if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
+                const float4 clipRectCorners = _ClipRects[_DrawList[idx].clipRect].cornerRadius;
+                const float2 clipSize = float2(clipRect.z - clipRect.x, clipRect.w - clipRect.y);
+
+                //if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
+                //    discard;
+
+                float clipRectSdf = SDFRoundRect(screenPos - clipSize * 0.5 - clipRect.xy, clipSize * 0.5, 
+                    float4(clipRectCorners.z, clipRectCorners.y, clipRectCorners.w, clipRectCorners.x));
+
+                if (clipRectSdf > 0.01)
                     discard;
+
+                float4 col = float4(0, 0, 0, 0);
                 
                 switch (_DrawList[idx].drawType)
                 {
                 case DRAW_Text:
                     return RenderText(_DrawList[idx].fillColor, input.uv, info.itemSize, _DrawList[idx].bold, input.uvBounds);
                 case DRAW_Circle:
-                    return RenderCircle(info, p);
+                    col = RenderCircle(info, p);
+                    break;
                 case DRAW_Rect:
-                    return RenderRect(info, p);
+                    col = RenderRect(info, p);
+                    break;
                 case DRAW_RoundedRect:
-                    return RenderRoundedRect(info, p);
+                    col = RenderRoundedRect(info, p);
+                    break;
                 case DRAW_RoundedX:
-                    return RenderRoundedX(info, p);
+                    col = RenderRoundedX(info, p);
+                    break;
                 case DRAW_Texture:
-                    return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    break;
                 case DRAW_FrameBuffer:
-                    return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    break;
                 case DRAW_Triangle:
-                    return RenderTriangle(info, p);
+                    col = RenderTriangle(info, p);
+                    break;
                 case DRAW_DashedLine:
-                    return RenderDashedLine(info, p);
+                    col = RenderDashedLine(info, p);
+                    break;
                 }
 
-                return float4(0, 0, 0, 0);
+                float t = clamp(-clipRectSdf, 0, 1);
+
+                return lerp(float4(col.rgb, 0), col, t);
             }
 
             #endif

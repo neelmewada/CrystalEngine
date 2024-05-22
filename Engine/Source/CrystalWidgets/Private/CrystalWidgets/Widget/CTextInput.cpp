@@ -683,7 +683,7 @@ namespace CE::Widgets
                     c = '9';
                     break;
                 case KeyCode::KeypadPeriod:
-                    c = '0';
+                    c = '.';
                     break;
 	            }
 
