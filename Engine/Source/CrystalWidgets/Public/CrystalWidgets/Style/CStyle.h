@@ -496,6 +496,13 @@ namespace CE::Widgets
 			return (CTextAlign)properties.Get(CStylePropertyType::BackgroundPosition).enumValue.x;
 		}
 
+		CBackgroundRepeat GetBackgroundRepeat() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::BackgroundRepeat))
+				return CBackgroundRepeat::NoRepeat;
+			return (CBackgroundRepeat)properties.Get(CStylePropertyType::BackgroundRepeat).enumValue.x;
+		}
+
 		CWordWrap GetWordWarp() const
 		{
 			if (!properties.KeyExists(CStylePropertyType::BackgroundPosition))

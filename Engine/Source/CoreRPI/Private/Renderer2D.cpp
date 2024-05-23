@@ -85,12 +85,40 @@ namespace CE::RPI
 			drawItemSrg->Bind(i, "_DrawDataConstants", drawDataConstantsBuffer[i]);
 		}
 
-		RHI::SamplerDescriptor textureSampler{};
-		textureSampler.addressModeU = textureSampler.addressModeV = textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
-		textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
-		textureSampler.enableAnisotropy = false;
-		textureSampler.samplerFilterMode = FilterMode::Cubic;
-		drawItemSrg->Bind("_TextureSampler", RPISystem::Get().FindOrCreateSampler(textureSampler));
+		{
+			RHI::SamplerDescriptor textureSampler{};
+			textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+			textureSampler.enableAnisotropy = false;
+			textureSampler.samplerFilterMode = FilterMode::Cubic;
+
+			textureSampler.addressModeU = textureSampler.addressModeV = textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+			textureSampler.addressModeV = SamplerAddressMode::ClampToBorder;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::ClampToBorder;
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+			samplerDescriptors.Add(textureSampler);
+		}
+
+		{
+			samplers.Reserve(samplerDescriptors.GetSize());
+			samplerIndices.Clear();
+
+			for (int i = 0; i < samplerDescriptors.GetSize(); i++)
+			{
+				samplerIndices[samplerDescriptors[i]] = i;
+				samplers.Add(RPISystem::Get().FindOrCreateSampler(samplerDescriptors[i]));
+			}
+
+			drawItemSrg->Bind("_TextureSamplers", samplers.GetSize(), samplers.GetData());
+		}
 		
 		perViewSrg->FlushBindings();
 		drawItemSrg->FlushBindings();
@@ -1093,13 +1121,101 @@ namespace CE::RPI
 			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_Texture;
 		drawItem.fillColor = fillColor.ToVec4();
-		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.outlineColor = Vec4(1, 1, 0, 0); // Offset & Scaling
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 		drawItem.textureIndex = textureIndex;
+		drawItem.samplerIndex = 0;
 		
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawTexture(RPI::Texture* texture, Vec2 size, 
+		bool repeatX, bool repeatY, 
+		Vec2 textureScale, Vec2 textureOffset)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		int textureIndex = 0;
+
+		if (textureIndices.KeyExists(texture))
+		{
+			textureIndex = textureIndices[texture];
+		}
+		else
+		{
+			textureIndex = textureCount;
+			if (textures.GetSize() < textureCount + 1)
+				textures.Resize(textureCount + 1);
+
+			textureIndices[texture] = textureIndex;
+
+			textureCount++;
+		}
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		textures[textureIndex] = texture;
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation1 = Vec3(-scale.x / 2, -scale.y / 2);
+		Vec3 translation2 = Vec3(quadPos.x * 2 + scale.x / 2, quadPos.y * 2 + scale.y / 2, 0);
+
+		RHI::SamplerDescriptor textureSampler{};
+		textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+		textureSampler.enableAnisotropy = false;
+		textureSampler.samplerFilterMode = FilterMode::Cubic;
+		textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+
+		if (repeatX)
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+		if (repeatY)
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+
+		drawItem.transform = Matrix4x4::Translation(translation2) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() *
+			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Texture;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = Vec4(textureScale, textureOffset); // Offset & Scaling
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
+		drawItem.textureIndex = textureIndex;
+		drawItem.samplerIndex = samplerIndices[textureSampler];
+
 		curDrawBatch.drawItemCount++;
 
 		drawItemCount++;
@@ -1169,7 +1285,7 @@ namespace CE::RPI
 		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_FrameBuffer;
 		drawItem.fillColor = fillColor.ToVec4();
-		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.outlineColor = Vec4(1, 1, 0, 0);  // Offset & Scaling
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;

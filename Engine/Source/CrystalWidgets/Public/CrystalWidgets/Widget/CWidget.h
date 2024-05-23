@@ -222,7 +222,10 @@ namespace CE::Widgets
         virtual void OnFocusLost() {}
 
         virtual void OnBeforeComputeStyle() {}
-        virtual void OnAfterComputeStyle() {}
+
+        //! @brief Override to get a callback on after computing the style.
+        //! @return Override and return true if you are changing the layout in this function.
+        virtual bool OnAfterComputeStyle() { return false; }
 
         void SetNeedsPaintRecursively(bool newValue = false);
 

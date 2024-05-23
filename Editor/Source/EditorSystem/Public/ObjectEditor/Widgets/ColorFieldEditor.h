@@ -8,6 +8,8 @@ namespace CE::Editor
         CE_CLASS(ColorFieldEditor, FieldEditor)
     public:
 
+        void BindField(FieldType* field, void* instance) override;
+
     protected:
 
         void Construct() override;

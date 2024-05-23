@@ -524,7 +524,7 @@ namespace CE::Widgets
 	Vec4 CWidget::GetFinalRootPadding()
 	{
 		CScrollBehavior* scrollBehavior = GetBehavior<CScrollBehavior>();
-		if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible())
+		if (scrollBehavior != nullptr && allowVerticalScroll && scrollBehavior->IsVerticalScrollVisible())
 		{
 			auto app = CApplication::Get();
 			return rootPadding + Vec4(0, 0, app->styleConstants.scrollRectWidth, 0);
@@ -876,7 +876,7 @@ namespace CE::Widgets
 				}
 			}
 
-			OnAfterComputeStyle();
+			layoutChanged = OnAfterComputeStyle() || layoutChanged;
 
 			needsStyle = false;
 
@@ -1309,6 +1309,11 @@ namespace CE::Widgets
 			borderRadius = computedStyle.properties[CStylePropertyType::BorderRadius].vector;
 		}
 
+		for (CBehavior* behavior : behaviors)
+		{
+			behavior->OnPaintEarly(painter);
+		}
+
 		Color foreground = computedStyle.GetForegroundColor();
 
 		CPen pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
@@ -1350,6 +1355,8 @@ namespace CE::Widgets
 			{
 				CBackgroundSize backgroundSize = computedStyle.GetBackgroundSize();
 				CTextAlign backgroundPosition = computedStyle.GetBackgroundPosition();
+				CBackgroundRepeat backgroundRepeat = computedStyle.GetBackgroundRepeat();
+
 				Vec2 imageSize = Vec2(texture->GetWidth(), texture->GetHeight());
 				f32 imageAspectRatio = imageSize.width / imageSize.height;
 				f32 rectAspectRatio = totalSize.width / totalSize.height;
@@ -1365,8 +1372,7 @@ namespace CE::Widgets
 				brush.SetColor(foreground);
 				painter->SetBrush(brush);
 
-				// Fill by default
-				Rect textureRect = Rect::FromSize(Vec2(), totalSize);
+				Rect textureRect;
 
 				if (backgroundSize == CBackgroundSize::Cover)
 				{
@@ -1386,11 +1392,28 @@ namespace CE::Widgets
 				}
 				else if (backgroundSize == CBackgroundSize::Contain)
 				{
-					// If the rectangle aspect ratio is greater than the image aspect ratio
+					// If the rectangle is wider than the image
 					if (rectAspectRatio > imageAspectRatio)
 					{
 						Vec2 drawSize = Vec2(totalSize.height * imageAspectRatio, totalSize.height);
 						Vec2 drawPos = Vec2((totalSize.width - drawSize.width) / 2, 0);
+
+						switch (backgroundPosition)
+						{
+						case CTextAlign::TopLeft:
+						case CTextAlign::MiddleLeft:
+						case CTextAlign::BottomLeft:
+							drawPos.x = 0;
+							break;
+						case CTextAlign::TopRight:
+						case CTextAlign::MiddleRight:
+						case CTextAlign::BottomRight:
+							drawPos.x *= 2;
+							break;
+						default:
+							break; 
+						}
+
 						textureRect = Rect::FromSize(drawPos, drawSize);
 					}
 					else
@@ -1400,8 +1423,46 @@ namespace CE::Widgets
 						textureRect = Rect::FromSize(drawPos, drawSize);
 					}
 				}
+				else // Fill
+				{
+					textureRect = Rect::FromSize(Vec2(), totalSize);
 
-				painter->DrawTexture(textureRect, texture);
+					f32 widthScale = imageSize.width / totalSize.width;
+					f32 heightScale = imageSize.height / totalSize.height;
+
+				}
+
+				if (backgroundRepeat == CBackgroundRepeat::NoRepeat)
+				{
+					painter->DrawTexture(textureRect, texture);
+				}
+				else
+				{
+					Rect fullRect = Rect::FromSize(Vec2(), totalSize);
+					Rect drawRect = textureRect;
+					Vec2 scale = Vec2(1, 1);
+					Vec2 offset = Vec2();
+
+					if (EnumHasFlag(backgroundRepeat, CBackgroundRepeat::RepeatX))
+					{
+						drawRect.min.x = fullRect.min.x;
+						drawRect.max.x = fullRect.max.x;
+					}
+					if (EnumHasFlag(backgroundRepeat, CBackgroundRepeat::RepeatY))
+					{
+						drawRect.min.y = fullRect.min.y;
+						drawRect.max.y = fullRect.max.y;
+					}
+
+					Vec2 difference = drawRect.GetSize() - textureRect.GetSize();
+					scale.x = 1 + difference.width / fullRect.GetSize().width;
+					scale.y = 1 + difference.height / fullRect.GetSize().height;
+
+					offset.x = (textureRect.min.x - fullRect.min.x) / fullRect.GetSize().width;
+					offset.y = (textureRect.min.y - fullRect.min.y) / fullRect.GetSize().height;
+
+					painter->DrawTexture(drawRect, texture, backgroundRepeat, scale, offset);
+				}
 
 				painter->PopClipRect();
 				painter->PopChildCoordinateSpace();

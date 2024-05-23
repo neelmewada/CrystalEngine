@@ -167,8 +167,30 @@ namespace CE::Widgets
         renderer->DrawTexture(texture, rect.GetSize());
     }
 
+    void CPainter::DrawTexture(const Rect& rect, RPI::Texture* texture, CBackgroundRepeat repeat, Vec2 scaling, Vec2 offset)
+    {
+        if (!texture)
+            return;
+
+        Vec2 imageSize = Vec2(texture->GetWidth(), texture->GetHeight());
+        
+        if (repeat == CBackgroundRepeat::NoRepeat)
+        {
+            renderer->SetCursor(GetOrigin() + rect.min);
+            renderer->DrawTexture(texture, rect.GetSize());
+        }
+        else
+        {
+            renderer->SetCursor(GetOrigin() + rect.min);
+            renderer->DrawTexture(texture, rect.GetSize(), 
+                EnumHasFlag(repeat, CBackgroundRepeat::RepeatX), 
+                EnumHasFlag(repeat, CBackgroundRepeat::RepeatY),
+                scaling, offset);
+        }
+    }
+
     void CPainter::DrawFrameBuffer(const Rect& rect,
-	    const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
+                                   const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
     {
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawFrameBuffer(frames, rect.GetSize());

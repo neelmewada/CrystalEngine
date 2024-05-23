@@ -92,14 +92,14 @@ namespace CE::Widgets
 
 	private:
 
-		void OnAfterComputeStyle() override
+		bool OnAfterComputeStyle() override
 		{
-			RecalculateOffsets();
+			return RecalculateOffsets();
 		}
 
 		// - Internal API -
 
-		void RecalculateOffsets();
+		bool RecalculateOffsets();
 
 		void SetCursorPos(int cursorPos);
 

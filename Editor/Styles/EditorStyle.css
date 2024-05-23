@@ -452,6 +452,8 @@ CTextInput#StringInput, CTextInput#NumberInput {
 
 ColorInput {
     background-image: "/Editor/Assets/Images/GridPattern";
+    background-size: contain;
+    background-repeat: repeat-x;
 }
 
 VectorComponentInput {

@@ -128,6 +128,9 @@ namespace CE::Widgets
             children.Add(splitView);
             splitView->parentSplitView = this;
             rootPadding = Vec4(0, 0, 0, 0);
+
+            allowVerticalScroll = false;
+            allowHorizontalScroll = false;
         }
         else if (subobject->IsOfType<CDockWindow>())
         {
@@ -143,6 +146,9 @@ namespace CE::Widgets
                 rootPadding = Vec4(0, 60, 0, 0);
             else
                 rootPadding = Vec4(0, 27, 0, 0);
+
+            allowVerticalScroll = false;
+            allowHorizontalScroll = false;
         }
     }
 

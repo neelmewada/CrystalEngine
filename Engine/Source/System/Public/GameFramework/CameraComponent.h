@@ -73,19 +73,19 @@ namespace CE
     	FIELD()
     	CameraType cameraType = CameraType::MainCamera;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Camera")
 		Color clearColor = Color::RGBA(36, 85, 163);
 
-		FIELD()
-		CameraProjection projection{};
+		FIELD(EditAnywhere, Category = "Camera")
+		CameraProjection projection = CameraProjection::Perspective;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Camera")
 		float nearPlane = 0.1f;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Camera")
 		float farPlane = 1000;
 
-		FIELD()
+		FIELD(EditAnywhere, Category = "Camera")
 		float fieldOfView = 60;
 
 		FIELD(ReadOnly)

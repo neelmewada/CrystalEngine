@@ -40,7 +40,7 @@ namespace CE::Editor
 		customProperyDrawers[Pair(fieldDeclTypeId, underlyingTypeId)].Remove(propertyDrawer);
 	}
 
-	PropertyDrawer* PropertyDrawer::Create(FieldType* targetField, CWidget* outer, const String& name)
+	PropertyDrawer* PropertyDrawer::Create(ObjectEditor* owner, FieldType* targetField, CWidget* outer, const String& name)
 	{
 		if (!targetField || !outer)
 			return nullptr;
@@ -91,7 +91,9 @@ namespace CE::Editor
 		if (propertyDrawer == nullptr)
 			propertyDrawer = GetStaticClass<PropertyDrawer>();
 
-		return CreateObject<PropertyDrawer>(outer, name.NonEmpty() ? name : propertyDrawer->GetName().GetLastComponent(), OF_NoFlags, propertyDrawer);
+		PropertyDrawer* result = CreateObject<PropertyDrawer>(outer, name.NonEmpty() ? name : propertyDrawer->GetName().GetLastComponent(), OF_NoFlags, propertyDrawer);
+		result->owner = owner;
+		return result;
 	}
 
 	void PropertyDrawer::CreateGUI(FieldType* field, void* instance)

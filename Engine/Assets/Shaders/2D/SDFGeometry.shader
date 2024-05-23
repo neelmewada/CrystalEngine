@@ -51,12 +51,13 @@ Shader "2D/SDF Geometry"
                 float4 cornerRadius;
                 float2 itemSize; // item size in pixels
                 float borderThickness;
+                float dashLength;
                 uint drawType; // enum DrawType;
                 uint charIndex; // For character drawing
                 uint bold;
                 uint clipRect;
                 uint textureIndex;
-                float dashLength;
+                uint samplerIndex;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
@@ -69,7 +70,9 @@ Shader "2D/SDF Geometry"
 
             StructuredBuffer<ClipRect> _ClipRects : SRG_PerDraw(t1);
 
-            SamplerState _TextureSampler : SRG_PerDraw(s2);
+            #define MAX_SAMPLERS 32
+
+            SamplerState _TextureSamplers[MAX_SAMPLERS] : SRG_PerDraw(s2);
 
             #define MAX_TEXTURES 100000 // 100,000
 
@@ -340,15 +343,15 @@ Shader "2D/SDF Geometry"
                 info.dashLength = _DrawList[idx].dashLength;
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
+                const float2 scaling = info.outlineColor.xy;
+                const float2 tiling = info.outlineColor.zw;
+                const uint samplerIndex = _DrawList[idx].samplerIndex;
 
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
 
                 const float4 clipRect = _ClipRects[_DrawList[idx].clipRect].rect;
                 const float4 clipRectCorners = _ClipRects[_DrawList[idx].clipRect].cornerRadius;
                 const float2 clipSize = float2(clipRect.z - clipRect.x, clipRect.w - clipRect.y);
-
-                //if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
-                //    discard;
 
                 float clipRectSdf = SDFRoundRect(screenPos - clipSize * 0.5 - clipRect.xy, clipSize * 0.5, 
                     float4(clipRectCorners.z, clipRectCorners.y, clipRectCorners.w, clipRectCorners.x));
@@ -375,10 +378,10 @@ Shader "2D/SDF Geometry"
                     col = RenderRoundedX(info, p);
                     break;
                 case DRAW_Texture:
-                    col = _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSamplers[samplerIndex], uv * scaling - tiling, 0.0) * float4(info.fillColor.rgb, 1.0);
                     break;
                 case DRAW_FrameBuffer:
-                    col = _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSamplers[samplerIndex], uv * scaling - tiling, 0.0) * float4(info.fillColor.rgb, 1.0);
                     break;
                 case DRAW_Triangle:
                     col = RenderTriangle(info, p);

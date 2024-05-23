@@ -155,6 +155,14 @@ namespace CE::RPI
             return DrawTexture(texture, rect.GetSize());
         }
 
+        Vec2 DrawTexture(RPI::Texture* texture, Vec2 size, bool repeatX, bool repeatY, Vec2 uvScale = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0));
+
+        Vec2 DrawTexture(RPI::Texture* texture, const Rect& rect, bool repeatX, bool repeatY, Vec2 uvScale = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0))
+	    {
+            SetCursor(rect.min);
+            return DrawTexture(texture, rect.GetSize(), repeatX, repeatY, uvScale, uvOffset);
+	    }
+
         Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, Vec2 size);
 
         Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, const Rect& rect)
@@ -216,12 +224,13 @@ namespace CE::RPI
             Vec4 cornerRadius = Vec4();
             Vec2 itemSize = Vec2(); // Item size in pixels
             float borderThickness = 0;
+            f32 dashLength = 0;
             DrawType drawType = DRAW_None;
             u32 charIndex = 0; // For character drawing
             u32 bold = 0;
             u32 clipRectIdx = 0;
             u32 textureIndex = 0;
-            f32 dashLength = 0;
+            u32 samplerIndex = 0;
         };
 
         struct alignas(16) ClipRect2D
@@ -306,6 +315,8 @@ namespace CE::RPI
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         Array<RPI::Texture*> textures{};
+        Array<RHI::SamplerDescriptor> samplerDescriptors{};
+        Array<RHI::Sampler*> samplers{};
         Array<ClipRect2D> clipRects{};
         u32 drawItemCount = 0;
         u32 clipRectCount = 0;
@@ -333,6 +344,7 @@ namespace CE::RPI
         HashMap<MaterialHash, RPI::Material*> materials{};
         HashMap<MaterialHash, RHI::DrawPacket*> drawPacketsByMaterial{};
         HashMap<RPI::Texture*, int> textureIndices{};
+        HashMap<RHI::SamplerDescriptor, u32> samplerIndices{};
     };
 
 } // namespace CE::RPI

@@ -145,7 +145,7 @@ namespace CE::Widgets
         }
     }
 
-    void CTextInput::RecalculateOffsets()
+    bool CTextInput::RecalculateOffsets()
     {
         Renderer2D* renderer = GetRenderer();
 
@@ -157,8 +157,13 @@ namespace CE::Widgets
             if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
                 fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
+            Vec2 oldTextSize = textSize;
             textSize = renderer->CalculateTextOffsets(characterOffsets, GetDisplayText(), fontSize, fontName);
+
+            return textSize != oldTextSize;
         }
+
+        return false;
     }
 
     void CTextInput::SetCursorPos(int cursorPos)

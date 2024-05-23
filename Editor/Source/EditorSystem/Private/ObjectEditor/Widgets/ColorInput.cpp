@@ -26,8 +26,6 @@ namespace CE::Editor
 
         CPainter* painter = paintEvent->painter;
 
-        static const Name gridPattern = "/Editor/Assets/Images/GridPattern";
-
         Vec2 pos = GetComputedLayoutTopLeft();
         Vec2 size = GetComputedLayoutSize();
 

@@ -78,6 +78,9 @@ namespace CE::Widgets
 
     bool CScrollBehavior::IsVerticalScrollVisible()
     {
+        if (self == nullptr || !self->allowVerticalScroll)
+            return false;
+
         auto app = CApplication::Get();
 
         Vec2 originalSize = self->GetComputedLayoutSize();

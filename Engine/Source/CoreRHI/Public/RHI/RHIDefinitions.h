@@ -264,6 +264,16 @@ namespace CE::RHI
         u8 maxAnisotropy = 16;
 
         SIZE_T GetHash() const;
+
+        bool operator==(const SamplerDescriptor& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const SamplerDescriptor& rhs) const
+        {
+            return !operator==(rhs);
+        }
     };
 
     /*
