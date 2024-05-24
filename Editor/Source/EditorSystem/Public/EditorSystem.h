@@ -15,6 +15,8 @@
 #include "Editor/Widgets/EditorSplitterContainer.h"
 #include "Editor/Widgets/EditorSplitter.h"
 
+#include "Editor/Tools/ColorPickerTool.h"
+
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 

@@ -125,15 +125,11 @@ AboutWindow #Splash {
     /* Background image properties similar to CSS */
     background-size: contain;
     background-position: middle-center;
-    background-repeat: repeat;
+    background-repeat: repeat-x;
     border-radius: 5px 10px 15px 20px;
     width: 100%;
     height: 300px;
     margin: 0 0 0 10px;
-}
-
-#AttributionLinks {
-    font-size: 14px;
 }
 ```
 

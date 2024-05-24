@@ -46,6 +46,16 @@ namespace CE
 			return RGBA8(r, g, b, a);
 		}
 
+        bool operator==(const Color& rhs) const
+		{
+            return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a;
+		}
+
+        bool operator!=(const Color& rhs) const
+        {
+            return operator==(rhs);
+        }
+
         inline Color operator*(s32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);

@@ -356,7 +356,7 @@ Shader "2D/SDF Geometry"
                 float clipRectSdf = SDFRoundRect(screenPos - clipSize * 0.5 - clipRect.xy, clipSize * 0.5, 
                     float4(clipRectCorners.z, clipRectCorners.y, clipRectCorners.w, clipRectCorners.x));
 
-                if (clipRectSdf > 0.01)
+                if (clipRectSdf > 0.025)
                     discard;
 
                 float4 col = float4(0, 0, 0, 0);

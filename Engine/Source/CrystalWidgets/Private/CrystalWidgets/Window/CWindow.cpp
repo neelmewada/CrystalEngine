@@ -432,6 +432,11 @@ namespace CE::Widgets
         }
     }
 
+    CWidget* CWindow::HitTest(Vec2 windowSpaceMousePos)
+    {
+	    return Super::HitTest(windowSpaceMousePos);
+    }
+
     void CWindow::OnPlatformWindowSet()
     {
 

@@ -10,9 +10,13 @@ namespace CE::Editor
 
         void BindField(FieldType* field, void* instance) override;
 
+
     protected:
 
         void Construct() override;
+
+        FIELD()
+        ColorInput* colorInput = nullptr;
 
 
     };

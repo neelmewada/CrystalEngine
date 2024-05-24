@@ -200,7 +200,7 @@ CMenuItem #Label {
 CMenu {
     padding: 0px 10px;
     background: rgb(56, 56, 56);
-    border-color: rgb(63, 63, 63);
+    border-color: rgb(64, 64, 64);
     border-width: 1px;
     flex-direction: column;
     min-width: 150px;
@@ -451,14 +451,32 @@ CTextInput#StringInput, CTextInput#NumberInput {
 }
 
 ColorInput {
-    background-image: "/Editor/Assets/Images/GridPattern";
+    min-width: 150px;
+    min-height: 20px;
+    align-self: stretch;
+    border-radius: 4px 4px 4px 4px;
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
+    padding: 5px 5px 5px 5px;
+}
+
+ColorInput:focused {
+    border-color: rgb(0, 112, 224);
+}
+
+ColorInput.Transparent {
+    background-image: url(/Editor/Assets/Images/GridPattern);
     background-size: contain;
+    background-position: middle-left;
     background-repeat: repeat-x;
+}
+
+VectorFieldEditor {
+    column-gap: 1px;
 }
 
 VectorComponentInput {
     flex-direction: row;
-    column-gap: 0;
     align-items: stretch;
     flex-grow: 2;
     flex-shrink: 1;

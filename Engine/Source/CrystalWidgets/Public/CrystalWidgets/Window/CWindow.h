@@ -45,6 +45,8 @@ namespace CE::Widgets
 
         void SetAlwaysOnTop(bool set);
 
+        CWidget* HitTest(Vec2 windowSpaceMousePos) override;
+
     protected:
 
         virtual void OnPlatformWindowSet();

@@ -96,6 +96,9 @@ namespace CE::Widgets
 
         virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height);
 
+        //! @brief Called before painting the borders/edges, but after painting the background
+        virtual void OnPaintEarly(CPaintEvent* paintEvent);
+
         CBehavior* AddBehavior(SubClass<CBehavior> behaviorClass);
 
         template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
@@ -146,6 +149,7 @@ namespace CE::Widgets
                 styleClasses.Add(styleClass);
                 SetNeedsStyle();
                 SetNeedsLayout();
+                SetNeedsPaint();
             }
         }
 
@@ -163,6 +167,7 @@ namespace CE::Widgets
             {
                 SetNeedsStyle();
                 SetNeedsLayout();
+                SetNeedsPaint();
             }
         }
 
@@ -185,6 +190,7 @@ namespace CE::Widgets
         }
 
         Rect GetScreenSpaceRect();
+        Rect GetWindowSpaceRect();
 
         // - Transformation Utils -
 
@@ -240,6 +246,8 @@ namespace CE::Widgets
         void OnSubobjectAttached(Object* object) override;
 
         virtual void HandleEvent(CEvent* event);
+
+        virtual CWidget* HitTest(Vec2 windowSpaceMousePos);
 
     protected:
 

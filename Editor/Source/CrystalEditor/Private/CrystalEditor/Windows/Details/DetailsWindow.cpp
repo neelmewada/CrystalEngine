@@ -16,7 +16,12 @@ namespace CE::Editor
 
     void DetailsWindow::SetupForActor(Actor* actor)
     {
+        if (actor == selectedActor)
+            return;
+
         treeWidget->RemoveAllItems();
+
+        selectedActor = actor;
 
         if (!actor)
         {
@@ -53,6 +58,8 @@ namespace CE::Editor
             };
 
         sceneComponentVisitor(actor->GetRootComponent(), rootItem);
+
+        treeWidget->Select(rootItem);
     }
 
     void DetailsWindow::SetEditTarget(Object* target)

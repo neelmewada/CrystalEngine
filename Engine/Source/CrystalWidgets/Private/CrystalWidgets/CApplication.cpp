@@ -122,7 +122,7 @@ namespace CE::Widgets
 				keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
 			}
 		}
-
+		/*
 		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
 			{
 				if (widget == nullptr || !widget->IsEnabled() || !widget->interactable)
@@ -133,7 +133,7 @@ namespace CE::Widgets
 				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
 				if (nativeWindow)
 				{
-					if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
+					if (!nativeWindow->IsShown() || nativeWindow->IsMinimized())
 					{
 						return nullptr;
 					}
@@ -155,22 +155,26 @@ namespace CE::Widgets
 
 				return nullptr;
 			};
-
+			*/
 		CWidget* hoveredWidget = nullptr;
-		CWindow* hoveredWindow = nullptr;
 
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			CWidget* curHoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->GetOwner());
+			if (!platformWindows[i]->IsShown() || platformWindows[i]->IsMinimized())
+				continue;
+
+			Vec2 windowPos = platformWindows[i]->GetPlatformWindow()->GetWindowPosition().ToVec2();
+
+			CWidget* curHoveredWidget = platformWindows[i]->GetOwner()->HitTest(globalMousePos - windowPos);
 			if (curHoveredWidget != nullptr)
 			{
 				hoveredWidget = curHoveredWidget;
 			}
 		}
 
-		if (hoveredWidget)
+		while (hoveredWidget != nullptr && !hoveredWidget->receiveMouseEvents)
 		{
-			hoveredWindow = hoveredWidget->ownerWindow;
+			hoveredWidget = hoveredWidget->parent;
 		}
 
 		if (hoveredWidget && hoveredWidget->GetNativeWindow())

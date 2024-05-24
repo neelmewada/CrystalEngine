@@ -176,7 +176,9 @@ namespace CE::Editor
 			}
 			else if (declTypeId == TYPEID(Color))
 			{
-				
+				ColorFieldEditor* colorWidget = CreateObject<ColorFieldEditor>(right, "ColorFieldEditor");
+
+				colorWidget->BindField(field, instance);
 			}
 			else if (field->IsDecimalField() || field->IsNumberField())
 			{
