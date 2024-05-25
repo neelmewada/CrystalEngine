@@ -290,7 +290,7 @@ Shader "2D/SDF Geometry"
                 const float sharpness = 1.0;
 
                 fillSdf = clamp(-fillSdf * sharpness, 0.0, 1.0);
-                borderSdf = clamp(-borderSdf * sharpness, 0.0, 1.0);
+                borderSdf = clamp(-borderSdf * sharpness * 5.0, 0.0, 1.0);
 
                 float4 color = lerp(info.fillColor, info.outlineColor, borderSdf);
 

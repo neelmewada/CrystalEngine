@@ -93,7 +93,7 @@ CTextInput {
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 1.25px;
+    border-width: 1px;
     border-color: rgb(60, 60, 60);
     border-radius: 5px 5px;
     min-height: 22.5px;
@@ -452,7 +452,7 @@ CTextInput#StringInput, CTextInput#NumberInput {
 
 ColorInput {
     min-width: 150px;
-    min-height: 20px;
+    min-height: 22px;
     align-self: stretch;
     border-radius: 4px 4px 4px 4px;
     border-width: 1.25px;

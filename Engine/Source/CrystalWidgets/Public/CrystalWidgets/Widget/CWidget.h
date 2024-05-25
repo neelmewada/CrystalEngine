@@ -242,14 +242,17 @@ namespace CE::Widgets
         virtual void OnPaint(CPaintEvent* paintEvent);
         virtual void OnPaintOverlay(CPaintEvent* paintEvent);
 
-        void OnSubobjectDetached(Object* object) override;
-        void OnSubobjectAttached(Object* object) override;
-
         virtual void HandleEvent(CEvent* event);
 
         virtual CWidget* HitTest(Vec2 windowSpaceMousePos);
 
     protected:
+
+        virtual void OnEnabled();
+        virtual void OnDisabled();
+
+        void OnSubobjectDetached(Object* object) override;
+        void OnSubobjectAttached(Object* object) override;
 
         FIELD()
         Array<CWidget*> attachedWidgets{};

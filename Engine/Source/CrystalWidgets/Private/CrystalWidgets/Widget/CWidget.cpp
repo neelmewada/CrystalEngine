@@ -212,6 +212,11 @@ namespace CE::Widgets
 			parent->ReAddChildNodes();
 		}
 
+		if (enabled)
+			OnEnabled();
+		else
+			OnDisabled();
+
 		SetNeedsLayout();
 		SetNeedsStyle();
 		SetNeedsPaint();
@@ -1455,18 +1460,38 @@ namespace CE::Widgets
 							break; 
 						}
 
-						textureRect = Rect::FromSize(drawPos, drawSize);
+						textureRect = Rect::FromSize(drawPos + Vec2(1, 1) * borderWidth * 0.5f, 
+							drawSize - Vec2(1, 1) * borderWidth);
 					}
 					else
 					{
 						Vec2 drawSize = Vec2(totalSize.width, totalSize.width / imageAspectRatio);
 						Vec2 drawPos = Vec2(0, (totalSize.height - drawSize.height) / 2);
-						textureRect = Rect::FromSize(drawPos, drawSize);
+
+						switch (backgroundPosition)
+						{
+						case CTextAlign::TopLeft:
+						case CTextAlign::TopCenter:
+						case CTextAlign::TopRight:
+							drawPos.y = 0;
+							break;
+						case CTextAlign::BottomLeft:
+						case CTextAlign::BottomCenter:
+						case CTextAlign::BottomRight:
+							drawPos.y *= 2;
+							break;
+						default:
+							break;
+						}
+
+						textureRect = Rect::FromSize(drawPos + Vec2(1, 1) * borderWidth * 0.25f, 
+							drawSize - Vec2(1, 1) * borderWidth * 0.5f);
 					}
 				}
 				else // Fill
 				{
-					textureRect = Rect::FromSize(Vec2(), totalSize);
+					textureRect = Rect::FromSize(Vec2() + Vec2(1, 1) * borderWidth * 0.25f, 
+						totalSize - Vec2(1, 1) * borderWidth * 0.5f);
 				}
 
 				if (backgroundRepeat == CBackgroundRepeat::NoRepeat)
@@ -1483,16 +1508,16 @@ namespace CE::Widgets
 					{
 						drawRect.min.x = fullRect.min.x;
 						drawRect.max.x = fullRect.max.x;
+
+						scale.x = 1 + drawRect.GetSize().width / textureRect.GetSize().width;
 					}
 					if (EnumHasFlag(backgroundRepeat, CBackgroundRepeat::RepeatY))
 					{
 						drawRect.min.y = fullRect.min.y;
 						drawRect.max.y = fullRect.max.y;
-					}
 
-					Vec2 difference = drawRect.GetSize() - textureRect.GetSize();
-					scale.x = 1 + drawRect.GetSize().width / textureRect.GetSize().width;
-					scale.y = 1 + drawRect.GetSize().height / textureRect.GetSize().height;
+						scale.y = Math::Max(1.0f, drawRect.GetSize().height / textureRect.GetSize().height);
+					}
 
 					offset.x = (textureRect.min.x - fullRect.min.x) / fullRect.GetSize().width;
 					offset.y = (textureRect.min.y - fullRect.min.y) / fullRect.GetSize().height;
@@ -1511,6 +1536,8 @@ namespace CE::Widgets
 		{
 			behavior->OnPaintEarly(painter);
 		}
+
+		// - Draw Border -
 
 		pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
 		brush = CBrush();
@@ -1818,6 +1845,29 @@ namespace CE::Widgets
 		}
 
 		return this;
+	}
+
+	void CWidget::OnEnabled()
+	{
+		for (CWidget* widget : attachedWidgets)
+		{
+			widget->OnEnabled();
+		}
+	}
+
+	void CWidget::OnDisabled()
+	{
+		if (IsFocussed())
+		{
+			stateFlags &= ~CStateFlag::Focused;
+			SetNeedsStyle();
+			SetNeedsPaint();
+		}
+
+		for (CWidget* widget : attachedWidgets)
+		{
+			widget->OnDisabled();
+		}
 	}
 
 	void CWidget::OnBeforeDestroy()

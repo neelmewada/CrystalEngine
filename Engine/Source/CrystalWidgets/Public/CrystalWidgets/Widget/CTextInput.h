@@ -66,6 +66,8 @@ namespace CE::Widgets
 
 		void OnFocusLost() override;
 
+		void OnDisabled() override;
+
 		FIELD()
 		String text{};
 

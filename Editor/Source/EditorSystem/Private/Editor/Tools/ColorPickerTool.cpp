@@ -8,12 +8,36 @@ namespace CE::Editor
 	{
 		if (!colorPicker)
 		{
-			// TODO
+			PlatformWindowInfo windowInfo{};
+			windowInfo.fullscreen = windowInfo.resizable = windowInfo.maximised = false;
+			windowInfo.hidden = true;
+			windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::Utility;
+
+			PlatformWindow* nativeWindow = PlatformApplication::Get()->CreatePlatformWindow("Color Picker", 450, 550, windowInfo);
+			nativeWindow->SetAlwaysOnTop(true);
+			nativeWindow->SetBorderless(true);
+
+			colorPicker = CreateWindow<ColorPickerTool>("ColorPicker", nativeWindow);
 		}
 
 		colorPicker->Show();
 
 		return colorPicker;
+	}
+
+	void ColorPickerTool::EnableAlpha(bool enable)
+	{
+		this->enableAlpha = enable;
+	}
+
+	void ColorPickerTool::SetOriginalColor(const Color& original)
+	{
+		this->original = original;
+	}
+
+	void ColorPickerTool::SetColor(const Color& color)
+	{
+		this->value = color;
 	}
 
 	ColorPickerTool::ColorPickerTool()
@@ -37,6 +61,5 @@ namespace CE::Editor
 		Super::Construct();
 
 	}
-
 
 } // namespace CE::Editor

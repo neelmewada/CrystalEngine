@@ -183,9 +183,6 @@ namespace CE
 
 	bool Object::IsTransient() const
 	{
-		//Package* package = GetPackage();
-		//if (package != nullptr && package != this && package->IsTransient())
-		//	return true;
 		return HasAnyObjectFlags(OF_Transient);
 	}
 

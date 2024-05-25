@@ -145,6 +145,27 @@ namespace CE::Widgets
         }
     }
 
+    void CTextInput::OnDisabled()
+    {
+	    Super::OnDisabled();
+
+        DeselectAll();
+
+        if (isEditing)
+        {
+            textScrollOffset = 0;
+            timer->Stop();
+            text = originalText;
+            isEditing = false;
+            cursorState = false;
+            
+            SetNeedsStyle();
+            SetNeedsPaint();
+
+            emit OnEditingFinished(this);
+        }
+    }
+
     bool CTextInput::RecalculateOffsets()
     {
         Renderer2D* renderer = GetRenderer();

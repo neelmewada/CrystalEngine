@@ -1215,7 +1215,7 @@ namespace CE::RPI
 		drawItem.clipRectIdx = clipRectStack.Top();
 		drawItem.textureIndex = textureIndex;
 		drawItem.samplerIndex = samplerIndices[textureSampler];
-
+		
 		curDrawBatch.drawItemCount++;
 
 		drawItemCount++;

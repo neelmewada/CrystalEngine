@@ -26,6 +26,8 @@ namespace CE::Editor
 
         void OnPaintEarly(CPaintEvent* paintEvent) override;
 
+        void HandleEvent(CEvent* event) override;
+
         FIELD()
         Color value{};
         

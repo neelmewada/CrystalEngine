@@ -95,4 +95,29 @@ namespace CE::Editor
         }
     }
 
+    void ColorInput::HandleEvent(CEvent* event)
+    {
+        if (event->type == CEventType::MouseRelease)
+        {
+            CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+
+            if (mouseEvent->isInside)
+            {
+                ColorPickerTool* colorPicker = ColorPickerTool::Open();
+                colorPicker->SetOriginalColor(value);
+
+                UnbindAllSignals(colorPicker);
+
+                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorSelected), [&](Color selectedColor)
+                    {
+                        
+                    });
+
+                event->Consume(this);
+            }
+        }
+
+	    Super::HandleEvent(event);
+    }
+
 } // namespace CE::Editor

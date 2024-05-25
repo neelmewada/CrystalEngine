@@ -109,16 +109,23 @@ namespace CE::Widgets
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
-    TWindow* CreateWindow(const String& name, PlatformWindow* nativeWindow, Class* windowClass = GetStaticClass<TWindow>())
+    TWindow* CreateWindow(Object* outer, const String& name, PlatformWindow* nativeWindow, Class* windowClass = GetStaticClass<TWindow>())
     {
         if (windowClass == nullptr)
             windowClass = GetStaticClass<TWindow>();
 
-        Object* outer = CApplication::Get();
+        if (outer == nullptr)
+            outer = CApplication::Get();
 
         TWindow* window = CreateObject<TWindow>(outer, name, OF_NoFlags, windowClass);
         window->SetPlatformWindow(nativeWindow);
         return window;
+    }
+
+    template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
+    TWindow* CreateWindow(const String& name, PlatformWindow* nativeWindow, Class* windowClass = GetStaticClass<TWindow>())
+    {
+        return CreateWindow<TWindow>(CApplication::Get(), name, nativeWindow, windowClass);
     }
 
 } // namespace CE::Widgets
