@@ -326,7 +326,7 @@ namespace CE::Widgets
 	    return true;
     }
 
-	static HashMap<String, Color> colorIdentifiersMap{
+	static HashMap<Name, Color> colorIdentifiersMap{
 		{ "black", Color::RGBHex(0x000000) },
 		{ "silver", Color::RGBHex(0xc0c0c0) },
 		{ "gray", Color::RGBHex(0x808080) },
@@ -512,7 +512,142 @@ namespace CE::Widgets
 
 		if (current->type == CSS::IdentifierToken)
 		{
-			if (current->lexeme == "url")
+			if (current->lexeme == "linear-gradient")
+			{
+				CGradient gradient{};
+				gradient.gradientType = CGradientType::LinearGradient;
+
+				current = &tokens[cursor];
+				if (current->type == CSS::WhitespaceToken)
+				{
+					cursor++;
+					current = &tokens[cursor];
+				}
+				if (!avail() || current->type != CSS::ParenOpenToken)
+				{
+					returnFailure("No parenthesis found after linear-gradient token", current);
+					return;
+				}
+
+				cursor++;
+				bool endReached = false;
+				int pos = -1;
+				bool isMinus = false;
+
+				while (cursor < tokens.GetSize())
+				{
+					current = &tokens[cursor];
+					if (tokens[cursor].type == CSS::ParenCloseToken)
+					{
+						endReached = true;
+					}
+					else if (tokens[cursor].type == CSS::SemiColonToken)
+					{
+						break;
+					}
+
+					if (!endReached && pos == -1)
+					{
+						if (current->type != CSS::PlusSignToken && current->type != CSS::MinusSignToken &&
+							current->type != CSS::NumberLiteral && current->type != CSS::IdentifierToken &&
+							current->type != CSS::WhitespaceToken && current->type != CSS::CommaToken)
+						{
+							returnFailure("Invalid linear gradient!", current);
+							return;
+						}
+
+						if (current->type == CSS::NumberLiteral)
+						{
+							String::TryParse(current->lexeme, gradient.rotationInDegrees);
+							gradient.rotationInDegrees *= isMinus ? -1 : 1;
+							isMinus = false;
+						}
+						else if (current->type == CSS::MinusSignToken)
+						{
+							isMinus = true;
+						}
+						else if (current->type == CSS::IdentifierToken && current->lexeme == "deg")
+						{
+							
+						}
+						else if (current->type == CSS::CommaToken)
+						{
+							pos++;
+						}
+					}
+					else if (!endReached && pos >= 0)
+					{
+						Name lexeme = current->lexeme;
+						if (current->type == CSS::IdentifierToken && colorIdentifiersMap.KeyExists(lexeme))
+						{
+							if (pos >= gradient.keys.GetSize())
+								gradient.keys.Resize(pos + 1);
+							gradient.keys[pos].color = colorIdentifiersMap[lexeme];
+						}
+						else if (current->type == CSS::NumberLiteral)
+						{
+							f32 number = 0;
+							if (String::TryParse(current->lexeme, number))
+							{
+								if (pos >= gradient.keys.GetSize())
+									gradient.keys.Resize(pos + 1);
+								gradient.keys[pos].position.x = number;
+								gradient.keys[pos].position.y = 0;
+							}
+						}
+						else if (current->type == CSS::PercentageToken)
+						{
+							if (pos >= gradient.keys.GetSize())
+								gradient.keys.Resize(pos + 1);
+							gradient.keys[pos].isPercent = true;
+						}
+						else if (current->type == CSS::CommaToken)
+						{
+							pos++;
+						}
+						else if (current->type == CSS::IdentifierToken && (lexeme == "rgb" || lexeme == "rgba"))
+						{
+							int idx = 0;
+							if (pos >= gradient.keys.GetSize())
+								gradient.keys.Resize(pos + 1);
+							Vec4 vec4{ 0, 0, 0, 1 };
+
+							while (cursor < tokens.GetSize())
+							{
+								if (tokens[cursor].type == CSS::ParenCloseToken)
+								{
+									break;
+								}
+
+								current = &tokens[cursor];
+
+								if (current->type == CSS::NumberLiteral && idx < 4)
+								{
+									String::TryParse(current->lexeme, vec4.xyzw[idx]);
+									vec4.xyzw[idx] /= 255.0f;
+								}
+
+								if (current->type == CSS::CommaToken)
+								{
+									idx++;
+								}
+
+								cursor++;
+							}
+
+							gradient.keys[pos].color = Color(vec4);
+						}
+					}
+
+					cursor++;
+				}
+
+				if (gradient.keys.GetSize() >= 2)
+				{
+					outValue = gradient;
+				}
+			}
+			else if (current->lexeme == "url")
 			{
 				String url = "";
 
@@ -524,7 +659,7 @@ namespace CE::Widgets
 				}
 				if (!avail() || current->type != CSS::ParenOpenToken)
 				{
-					returnFailure("No parenthesis found after rgb/rgba token", current);
+					returnFailure("No parenthesis found after url token", current);
 					return;
 				}
 

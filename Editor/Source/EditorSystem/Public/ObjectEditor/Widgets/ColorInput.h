@@ -22,17 +22,28 @@ namespace CE::Editor
 
     protected:
 
+        void OnBeforeDestroy() override;
+
         void Construct() override;
 
         void OnPaintEarly(CPaintEvent* paintEvent) override;
 
         void HandleEvent(CEvent* event) override;
 
+        FUNCTION()
+        void OnColorSelected(Color newColor);
+
+        FUNCTION()
+        void OnColorPickerToolClosed(ColorPickerTool* colorPicker);
+
         FIELD()
         Color value{};
         
         FIELD()
         b8 hasAlpha = true;
+
+        FIELD()
+        ColorPickerTool* colorPicker = nullptr;
 
         friend class ColorFieldEditor;
     };

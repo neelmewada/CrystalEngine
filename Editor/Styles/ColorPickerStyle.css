@@ -1,0 +1,94 @@
+
+ColorPickerTool {
+    padding: 10px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    row-gap: 10px;
+}
+
+ColorPickerTool #ColorMap {
+    flex-grow: 2;
+    flex-shrink: 1;
+    height: 200px;
+}
+
+ColorPickerTool #TopBox {
+    flex-grow: 2;
+    flex-shrink: 1;
+}
+
+ColorPickerTool #BottomBox {
+    flex-grow: 2;
+    flex-shrink: 1;
+}
+
+ColorPickerTool #TopLeftContainer {
+    flex-grow: 3;
+    flex-shrink: 1;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 10px;
+    height: 100%;
+}
+
+ColorPickerTool #TopRightContainer {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 10px 10px;
+    height: 100%;
+}
+
+#PreviewSeparator {
+    background-color: rgb(60, 60, 60);
+    height: 2px;
+}
+
+ColorPickerTool ColorPickerPreview {
+    height: 32px;
+}
+
+ColorPickerTool #BottomLeftContainer {
+    width: 50%;
+    justify-content: flex-start;
+    align-items: stretch;
+    row-gap: 15px;
+    height: 100%;
+    padding: 0 0 5px 0;
+}
+
+#HexFieldBox, #ButtonBox {
+    justify-content: flex-end;
+}
+
+#ButtonBox {
+    column-gap: 10px;
+}
+
+#ButtonBox CButton {
+    min-width: 80px;
+    justify-content: center;
+}
+
+ColorPickerTool #HexInput {
+    width: 100px;
+    margin: 5px 0 0 0;
+}
+
+ColorPickerTool #BottomRightContainer {
+    width: 50%;
+    justify-content: flex-start;
+    align-items: stretch;
+    row-gap: 15px;
+    height: 100%;
+    padding: 5px 0 0 0;
+}
+
+ColorPickerTool #InputField {
+    flex-grow: 2;
+    flex-shrink: 1;
+    margin: 5px 0 0 0;
+}
+

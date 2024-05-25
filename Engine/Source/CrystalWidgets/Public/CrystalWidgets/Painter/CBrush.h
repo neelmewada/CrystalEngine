@@ -14,6 +14,8 @@ namespace CE::Widgets
 
 		void SetColor(const Color& color) { this->color = color; }
 
+		const Color& GetColor() const { return color; }
+
 	private:
 
 		Color color{};

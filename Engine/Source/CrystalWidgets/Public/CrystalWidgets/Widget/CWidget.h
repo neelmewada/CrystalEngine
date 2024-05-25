@@ -248,6 +248,8 @@ namespace CE::Widgets
 
     protected:
 
+        virtual void OnDestroyQueued();
+
         virtual void OnEnabled();
         virtual void OnDisabled();
 

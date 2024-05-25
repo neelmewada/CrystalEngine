@@ -25,15 +25,31 @@ namespace CE::Editor
 
         CE_SIGNAL(OnColorSelected, Color);
 
+        CE_SIGNAL(OnColorPickerClosed, ColorPickerTool*);
+
     private:
 
+        void OnBeforeDestroy() override;
+
         void Construct() override;
+
+        FUNCTION()
+        void DoAccept();
+
+        FUNCTION()
+        void DoCancel();
 
         FIELD()
         Color original{};
 
         FIELD()
         Color value{};
+
+        FIELD()
+        CTextInput* hexInput = nullptr;
+
+        FIELD()
+        Vec3 hsv = {};
 
         FIELD()
         bool enableAlpha = true;

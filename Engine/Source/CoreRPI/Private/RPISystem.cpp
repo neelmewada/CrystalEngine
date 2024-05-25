@@ -94,6 +94,7 @@ namespace CE::RPI
     {
         this->standardShader = initInfo.standardShader;
         this->iblConvolutionShader = initInfo.iblConvolutionShader;
+        this->textureGenShader = initInfo.textureGenShader;
 
         if (standardShader != nullptr)
 	    {

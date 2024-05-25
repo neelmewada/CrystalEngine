@@ -170,6 +170,8 @@ namespace CE
 			return (TClass*)instance;
 		}
 
+        u64 ComputeMemoryFootprint();
+
 		Name GetPathInPackage();
         
 		// Returns the package this object belongs to.

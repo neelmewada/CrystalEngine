@@ -1207,6 +1207,8 @@ namespace CE::Widgets
 			return;
 		isQueuedForDestruction = true;
 
+		OnDestroyQueued();
+
 		SetEnabled(false);
 
 		if (IsWindow())
@@ -1325,8 +1327,9 @@ namespace CE::Widgets
 		{
 			bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 		}
-
-		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage))
+		
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage) &&
+			computedStyle.properties[CStylePropertyType::BackgroundImage].IsString())
 		{
 			bgImage = computedStyle.properties[CStylePropertyType::BackgroundImage].string;
 		}
@@ -1845,6 +1848,11 @@ namespace CE::Widgets
 		}
 
 		return this;
+	}
+
+	void CWidget::OnDestroyQueued()
+	{
+
 	}
 
 	void CWidget::OnEnabled()

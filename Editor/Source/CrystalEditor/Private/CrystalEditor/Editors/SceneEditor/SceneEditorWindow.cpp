@@ -128,7 +128,6 @@ namespace CE::Editor
             rendererSubsystem, MEMBER_FUNCTION(RendererSubsystem, RebuildFrameGraph));
 
         assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
-
     }
 
 } // namespace CE::Editor

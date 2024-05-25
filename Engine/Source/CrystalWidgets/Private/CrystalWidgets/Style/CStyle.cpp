@@ -188,7 +188,7 @@ namespace CE::Widgets
 
 	void CStyleValue::Release()
 	{
-		string.~String();
+		
 	}
 
 	CStyleValue::CStyleValue(f32 single, bool isPercent)
@@ -215,6 +215,11 @@ namespace CE::Widgets
 		: string(string), valueType(Type_String)
 	{
 
+	}
+
+	CStyleValue::CStyleValue(const CGradient& gradient)
+		: gradient(gradient), valueType(Type_Gradient)
+	{
 	}
 
 	CStyleValue::CStyleValue(const CStyleValue& copy)

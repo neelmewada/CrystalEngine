@@ -21,7 +21,8 @@ namespace CE::Widgets
         {
             image = CApplication::Get()->LoadImage(backgroundImageOverride);
         }
-        else if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage))
+        else if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage) &&
+            computedStyle.properties[CStylePropertyType::BackgroundImage].IsString())
         {
             Name imageName = computedStyle.properties[CStylePropertyType::BackgroundImage].string;
 

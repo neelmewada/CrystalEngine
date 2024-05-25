@@ -249,6 +249,48 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS(CWordWrap);
 
+	ENUM()
+	enum class CGradientType : u8
+	{
+		None = 0,
+		LinearGradient,
+		LinearGradient2D
+	};
+	ENUM_CLASS(CGradientType);
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CGradientKey
+	{
+		CE_STRUCT(CGradientKey)
+	public:
+
+		FIELD()
+		Color color{};
+
+		FIELD()
+		Vec2 position{};
+
+		FIELD()
+		bool isPercent = false;
+
+	};
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CGradient
+	{
+		CE_STRUCT(CGradient)
+	public:
+
+		FIELD()
+		f32 rotationInDegrees = 0;
+
+		FIELD()
+		CGradientType gradientType = CGradientType::None;
+
+		FIELD()
+		Array<CGradientKey> keys{};
+	};
+
 	STRUCT()
 	struct CRYSTALWIDGETS_API CStyleValue
 	{
@@ -263,6 +305,7 @@ namespace CE::Widgets
 			Type_Vector,
 			Type_Color,
 			Type_String,
+			Type_Gradient,
 		};
 
 		enum EnumValue : int
@@ -281,25 +324,26 @@ namespace CE::Widgets
 		template<typename TEnum> requires TIsEnum<TEnum>::Value
 		CStyleValue(TEnum enumValue) : enumValue(Vec4i(1, 1, 1, 1)* (int)enumValue), valueType(Type_Enum)
 		{
-
+			enumTypeId = TYPEID(TEnum);
 		}
 
 		template<typename TEnum> requires TIsEnum<TEnum>::Value
 		CStyleValue(TVector4<TEnum> enumValue4) : enumValue(Vec4i(enumValue4.x, enumValue4.y, enumValue4.z, enumValue4.w)), valueType(Type_Enum)
 		{
-
+			enumTypeId = TYPEID(TEnum);
 		}
 
 		template<>
 		CStyleValue(EnumValue value) : enumValue(Vec4i(1, 1, 1, 1) * (int)value), valueType(Type_Enum)
 		{
-
+			enumTypeId = TYPEID(EnumValue);
 		}
 
 		CStyleValue(f32 single, bool isPercent = false);
 		CStyleValue(const Vec4& vector, bool isPercent = false);
 		CStyleValue(const Color& color);
 		CStyleValue(const String& string);
+		CStyleValue(const CGradient& gradient);
 
 		CStyleValue(const CStyleValue& copy);
 
@@ -309,17 +353,18 @@ namespace CE::Widgets
 
 		void CopyFrom(const CStyleValue& copy);
 
-		inline bool IsOfType(ValueType checkType) const { return valueType == checkType; }
+		bool IsOfType(ValueType checkType) const { return valueType == checkType; }
 
-		inline bool IsPercentValue() const { return enumValue == Vec4i(1, 1, 1, 1) * Percent; }
-		inline bool IsAutoValue() const { return IsEnum() && enumValue == Vec4i(1, 1, 1, 1) * Auto; }
+		bool IsPercentValue() const { return enumValue == Vec4i(1, 1, 1, 1) * Percent; }
+		bool IsAutoValue() const { return IsEnum() && enumValue == Vec4i(1, 1, 1, 1) * Auto; }
 
-		inline bool IsValid() const { return valueType != Type_None; }
-		inline bool IsEnum() const { return IsOfType(Type_Enum); }
-		inline bool IsSingle() const { return IsOfType(Type_Single); }
-		inline bool IsVector() const { return IsOfType(Type_Vector); }
-		inline bool IsColor() const { return IsOfType(Type_Color); }
-		inline bool IsString() const { return IsOfType(Type_String); }
+		bool IsValid() const { return valueType != Type_None; }
+		bool IsEnum() const { return IsOfType(Type_Enum); }
+		bool IsSingle() const { return IsOfType(Type_Single); }
+		bool IsVector() const { return IsOfType(Type_Vector); }
+		bool IsColor() const { return IsOfType(Type_Color); }
+		bool IsString() const { return IsOfType(Type_String); }
+		bool IsGradient() const { return IsOfType(Type_Gradient); }
 
 		bool operator==(const CStyleValue& rhs) const
 		{
@@ -415,8 +460,12 @@ namespace CE::Widgets
 		CSubControl subControl{}; // Style for a specific subcontrol
 
 		FIELD()
+		CGradient gradient{};
+
+		FIELD()
 		int valueType = 0;
 
+		TypeId enumTypeId = 0;
 	};
 
 	struct CRYSTALWIDGETS_API CStyle

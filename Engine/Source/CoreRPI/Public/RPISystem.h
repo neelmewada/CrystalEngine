@@ -22,6 +22,7 @@ namespace CE::RPI
 	{
 		RPI::ShaderCollection* standardShader = nullptr;
 		RPI::ShaderCollection* iblConvolutionShader = nullptr;
+		RPI::ShaderCollection* textureGenShader = nullptr;
 	};
 
 	/// @brief RPISystem owns and manages all scenes.
@@ -117,6 +118,7 @@ namespace CE::RPI
 
 		RPI::ShaderCollection* standardShader = nullptr;
 		RPI::ShaderCollection* iblConvolutionShader = nullptr;
+		RPI::ShaderCollection* textureGenShader = nullptr;
 
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;

@@ -41,6 +41,8 @@ namespace CE
 
 		static Color RGBAHex(u32 hex);
 
+        static Color HSV(f32 h, f32 s, f32 v);
+
 		static inline Color RGBA(u8 r, u8 g, u8 b, u8 a = (u8)255)
 		{
 			return RGBA8(r, g, b, a);
@@ -166,6 +168,8 @@ namespace CE
         u32 ToU32() const;
         
         Vec4 ToVec4() const;
+
+        Vec3 ToHSV() const;
 
 		inline static Color Lerp(const Color& from, const Color& to, f32 t)
 		{

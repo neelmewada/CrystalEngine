@@ -42,6 +42,17 @@ namespace CE::Editor
         SetNeedsPaint();
     }
 
+    void ColorInput::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (colorPicker)
+        {
+            colorPicker->Destroy();
+            colorPicker = nullptr;
+        }
+    }
+
     void ColorInput::Construct()
     {
         Super::Construct();
@@ -103,21 +114,32 @@ namespace CE::Editor
 
             if (mouseEvent->isInside)
             {
-                ColorPickerTool* colorPicker = ColorPickerTool::Open();
+                colorPicker = ColorPickerTool::Open();
                 colorPicker->SetOriginalColor(value);
+                colorPicker->SetColor(value);
 
-                UnbindAllSignals(colorPicker);
+                UnbindSignals(this, colorPicker);
 
-                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorSelected), [&](Color selectedColor)
-                    {
-                        
-                    });
+                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorSelected), 
+                    this, MEMBER_FUNCTION(Self, OnColorSelected));
+
+                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorPickerClosed), 
+                    this, MEMBER_FUNCTION(Self, OnColorPickerToolClosed));
 
                 event->Consume(this);
             }
         }
 
 	    Super::HandleEvent(event);
+    }
+
+    void ColorInput::OnColorSelected(Color newColor)
+    {
+    }
+
+    void ColorInput::OnColorPickerToolClosed(ColorPickerTool* colorPicker)
+    {
+        this->colorPicker = nullptr;
     }
 
 } // namespace CE::Editor
