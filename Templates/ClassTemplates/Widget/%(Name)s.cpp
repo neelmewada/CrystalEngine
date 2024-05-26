@@ -1,6 +1,6 @@
 #include "%(Module)s.h"
 
-namespace CE::Widgets
+namespace %(NameSpace)s
 {
 
     %(Name)s::%(Name)s()
@@ -13,10 +13,11 @@ namespace CE::Widgets
         
     }
 
-    void %(Name)s::OnDrawGUI()
+    void %(Name)s::Construct()
     {
-
+        Super::Construct();
+        
     }
     
-} // namespace CE
+}
 
