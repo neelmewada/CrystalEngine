@@ -7,7 +7,8 @@ namespace CE::RPI
 
     enum class GradientType
     {
-        Linear = 0
+        None = 0,
+        Linear,
     };
     ENUM_CLASS(GradientType);
 
@@ -28,6 +29,16 @@ namespace CE::RPI
         f32 degrees = 0.0f;
 
         SIZE_T GetHash() const;
+
+        bool operator==(const ColorGradient& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const ColorGradient& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
     };
 
     struct Renderer2DDescriptor
@@ -194,7 +205,7 @@ namespace CE::RPI
         Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, const Rect& rect)
         {
             SetCursor(rect.min);
-            return DrawFrameBuffer(frames, rect);
+            return DrawFrameBuffer(frames, rect.GetSize());
         }
 
         void End();
@@ -290,7 +301,6 @@ namespace CE::RPI
             bool bold = false;
         };
 
-
         struct DrawBatch
         {
             FontInfo font{};
@@ -333,11 +343,11 @@ namespace CE::RPI
         Vec2 cursorPosition{};
         Color fillColor = Color(1, 1, 1, 1);
         Color outlineColor = Color(0, 0, 0, 0);
-        Pair<int, int> currentGradient = { 0, 0 };
+        Vec2i currentGradient = { 0, 0 };
+        GradientType currentGradientType = GradientType::Linear;
+        f32 gradientDegrees = 0;
         float borderThickness = 0.0f;
         f32 rotation = 0;
-        u32 startGradientIdx = 0;
-        u32 endGradientIdx = 0;
 
         // - Constants -
 
@@ -391,7 +401,7 @@ namespace CE::RPI
         HashMap<MaterialHash, RHI::DrawPacket*> drawPacketsByMaterial{};
         HashMap<RPI::Texture*, int> textureIndices{};
         HashMap<RHI::SamplerDescriptor, u32> samplerIndices{};
-        HashMap<ColorGradient, Pair<int, int>> gradientIndices{};
+        HashMap<ColorGradient, Vec2i> gradientIndices{};
     };
 
 } // namespace CE::RPI

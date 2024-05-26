@@ -19,7 +19,7 @@ namespace CE::Editor
 
         SetTitle("Assets");
 
-
+        CWidget* testWidget = CreateObject<CWidget>(this, "SampleGradient");
     }
 
     void AssetBrowserWindow::OnPaint(CPaintEvent* paintEvent)

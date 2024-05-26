@@ -254,7 +254,6 @@ namespace CE::Widgets
 	{
 		None = 0,
 		LinearGradient,
-		LinearGradient2D
 	};
 	ENUM_CLASS(CGradientType);
 

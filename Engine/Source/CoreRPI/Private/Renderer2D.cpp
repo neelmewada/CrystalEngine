@@ -305,6 +305,16 @@ namespace CE::RPI
 
 	void Renderer2D::SetFillGradient(const ColorGradient& gradient, GradientType gradientType)
 	{
+		if (gradient.keys.GetSize() < 2)
+		{
+			currentGradientType = GradientType::None;
+			currentGradient = Vec2i();
+			return;
+		}
+
+		currentGradientType = gradientType;
+		gradientDegrees = gradient.degrees;
+
 		if (gradientIndices.KeyExists(gradient))
 		{
 			currentGradient = gradientIndices[gradient];
@@ -885,6 +895,13 @@ namespace CE::RPI
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
+
 		curDrawBatch.drawItemCount++;
 		
 		drawItemCount++;
@@ -917,6 +934,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -941,6 +959,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 
@@ -993,6 +1018,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 

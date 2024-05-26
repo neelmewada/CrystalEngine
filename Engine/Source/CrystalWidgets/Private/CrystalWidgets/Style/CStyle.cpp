@@ -106,8 +106,9 @@ namespace CE::Widgets
 		{ "max-width", CStylePropertyType::MaxWidth },
 		{ "max-height", CStylePropertyType::MaxHeight },
 		{ "font-size", CStylePropertyType::FontSize },
-		{ "font-name", CStylePropertyType::FontName},
-		{ "font", CStylePropertyType::FontName},
+		{ "font-name", CStylePropertyType::FontName },
+		{ "font-family", CStylePropertyType::FontName },
+		{ "font", CStylePropertyType::FontName },
 		{ "text-decoration-color", CStylePropertyType::TextDecorationColor },
 		{ "text-decoration-line", CStylePropertyType::TextDecorationLine },
 		{ "text-decoration-style", CStylePropertyType::TextDecorationStyle },
@@ -238,6 +239,8 @@ namespace CE::Widgets
 		CopyFrom(move);
 
 		move.string.~String();
+		move.gradient.~CGradient();
+		memset(&move, 0, sizeof(CStyleValue));
 	}
 
 	void CStyleValue::CopyFrom(const CStyleValue& copy)
@@ -253,6 +256,7 @@ namespace CE::Widgets
 		vector = copy.vector;
 		color = copy.color;
 		string = copy.string;
+		gradient = copy.gradient;
 	}
 
 	const Array<CStylePropertyType>& CStyle::GetInheritedProperties()
