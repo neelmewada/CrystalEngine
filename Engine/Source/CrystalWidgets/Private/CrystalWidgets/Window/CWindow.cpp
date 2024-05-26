@@ -356,8 +356,11 @@ namespace CE::Widgets
                                     nativeWindow->GetPlatformWindow()->Restore();
                                 else if (clickedControlIdx == 1)
                                     nativeWindow->GetPlatformWindow()->Maximize();
-                                else if (clickedControlIdx == 2)
-                                    QueueDestroy();
+                                else if (clickedControlIdx == 2) // Close button clicked
+                                {
+                                    OnClickClose();
+	                                QueueDestroy();
+                                }
                             }
 		                }
 	                }
@@ -435,6 +438,11 @@ namespace CE::Widgets
     CWidget* CWindow::HitTest(Vec2 windowSpaceMousePos)
     {
 	    return Super::HitTest(windowSpaceMousePos);
+    }
+
+    void CWindow::OnClickClose()
+    {
+
     }
 
     void CWindow::OnPlatformWindowSet()

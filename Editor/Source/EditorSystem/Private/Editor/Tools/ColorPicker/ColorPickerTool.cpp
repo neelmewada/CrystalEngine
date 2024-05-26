@@ -80,10 +80,23 @@ namespace CE::Editor
 			CWidget* topLeft = CreateObject<CWidget>(topBox, "TopLeftContainer");
 			{
 				CColorPicker* colorMap = CreateObject<CColorPicker>(topLeft, "ColorMap");
+
+				Bind(colorMap, MEMBER_FUNCTION(CColorPicker, OnColorChanged), [this](Color newColor)
+					{
+						value = newColor;
+						hsv = value.ToHSV();
+						
+						SetNeedsPaint();
+
+						emit OnColorSelected(value);
+					});
 			}
 
 			CWidget* topRight = CreateObject<CWidget>(topBox, "TopRightContainer");
 			{
+				CLabel* oldLabel = CreateObject<CLabel>(topRight, "OldLabel");
+				oldLabel->SetText("Old");
+				
 				ColorPickerPreview* previewOld = CreateObject<ColorPickerPreview>(topRight, "PreviewOld");
 				previewOld->SetColor(Color::Cyan());
 
@@ -91,6 +104,18 @@ namespace CE::Editor
 
 				ColorPickerPreview* previewNew = CreateObject<ColorPickerPreview>(topRight, "PreviewNew");
 				previewNew->SetColor(Color::RGBA(128, 128, 128, 0));
+
+				CLabel* newLabel = CreateObject<CLabel>(topRight, "NewLabel");
+				newLabel->SetText("New");
+
+				CImageButton* eyeDropButton = CreateObject<CImageButton>(topRight, "EyeDropButton");
+				eyeDropButton->SetText("");
+				eyeDropButton->SetImage("/Editor/Assets/Icons/ColorPicker");
+
+				Bind(eyeDropButton, MEMBER_FUNCTION(CImageButton, OnMouseLeftClick), [this]
+					{
+						CE_LOG(Info, All, "Eye Drop Clicked");
+					});
 			}
 		}
 
@@ -131,6 +156,8 @@ namespace CE::Editor
 
 									hsv = value.ToHSV();
 									SetNeedsPaint();
+
+									emit OnColorSelected(value);
 								}
 							});
 					}
@@ -169,6 +196,8 @@ namespace CE::Editor
 
 									value = Color::HSV(hsv.x, hsv.y, hsv.z);
 									SetNeedsPaint();
+
+									emit OnColorSelected(value);
 								}
 							});
 					}
@@ -206,13 +235,24 @@ namespace CE::Editor
 		}
 	}
 
+	void ColorPickerTool::OnClickClose()
+	{
+		Super::OnClickClose();
+
+		emit OnColorSelected(original);
+	}
+
 	void ColorPickerTool::DoAccept()
 	{
+		emit OnColorSelected(value);
+
 		QueueDestroy();
 	}
 
 	void ColorPickerTool::DoCancel()
 	{
+		emit OnColorSelected(original);
+
 		QueueDestroy();
 	}
 

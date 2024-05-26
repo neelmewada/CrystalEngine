@@ -268,7 +268,7 @@ namespace CE::Widgets
 		Color color{};
 
 		FIELD()
-		Vec2 position{};
+		f32 position = 0;
 
 		FIELD()
 		bool isPercent = false;

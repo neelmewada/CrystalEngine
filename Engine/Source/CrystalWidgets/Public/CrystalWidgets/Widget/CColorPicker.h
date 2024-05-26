@@ -21,6 +21,8 @@ namespace CE::Widgets
 		// Params: Vec2 normalizedPosition
 		CE_SIGNAL(OnPositionChanged, Vec2);
 
+		CE_SIGNAL(OnColorChanged, Color);
+
 	protected:
 
 		void Construct() override;

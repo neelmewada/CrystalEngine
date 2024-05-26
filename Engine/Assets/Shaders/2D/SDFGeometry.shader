@@ -53,12 +53,16 @@ Shader "2D/SDF Geometry"
                 float borderThickness;
                 float dashLength;
                 uint drawType; // enum DrawType;
-                uint charIndex; // For character drawing
-                uint bold;
+                uint charIndex;
+                uint bold; 
                 uint clipRect;
-                uint textureIndex;
-                uint samplerIndex;
+                uint textureIndex; // OR gradientStartIdx
+                uint samplerIndex; // OR gradientEndIdx
             };
+
+            #define gradientStartIdx textureIndex
+            #define gradientEndIdx samplerIndex
+            #define gradientRadians dashLength
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
@@ -83,6 +87,14 @@ Shader "2D/SDF Geometry"
                 uint _FrameIndex;
             };
 
+            struct GradientKey
+            {
+                float4 color;
+                float position;
+            };
+
+            StructuredBuffer<GradientKey> _GradientKeys : SRG_PerDraw(t5);
+
             struct CharacterItem
             {
                 float4 atlasUV;
@@ -102,6 +114,7 @@ Shader "2D/SDF Geometry"
                 DRAW_FrameBuffer,
                 DRAW_Triangle,
                 DRAW_DashedLine,
+                DRAW_LinearGradient,
             };
 
             #if VERTEX
@@ -218,6 +231,8 @@ Shader "2D/SDF Geometry"
                 float2 uv;
                 float borderThickness;
                 float dashLength;
+                uint textureIndex;
+                uint samplerIndex;
             };
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
@@ -275,6 +290,11 @@ Shader "2D/SDF Geometry"
                 if (info.outlineColor.a < 0.001)
                     info.outlineColor = color;
 
+                for (int i = info.gradientStartIdx; info.gradientStartIdx < info.gradientEndIdx && i < info.gradientEndIdx; i++)
+                {
+
+                }
+
                 color = lerp(color, info.outlineColor, borderMask);
 
                 const float sharpness = 50.0;
@@ -292,7 +312,14 @@ Shader "2D/SDF Geometry"
                 fillSdf = clamp(-fillSdf * sharpness, 0.0, 1.0);
                 borderSdf = clamp(-borderSdf * sharpness * 5.0, 0.0, 1.0);
 
-                float4 color = lerp(info.fillColor, info.outlineColor, borderSdf);
+                float4 fillColor = info.fillColor;
+
+                for (int i = info.gradientStartIdx; info.gradientStartIdx < info.gradientEndIdx && i < info.gradientEndIdx; i++)
+                {
+
+                }
+
+                float4 color = lerp(fillColor, info.outlineColor, borderSdf);
 
                 return lerp(float4(color.rgb, 0), color, fillSdf);
             }
@@ -329,6 +356,17 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, -sdf * 5.0);
             }
 
+            float4 RenderLinearGradient(in GeometryInfo info, float2 p)
+            {
+                for (int i = info.gradientStartIdx; i <= info.gradientEndIdx; i++)
+                {
+                    float4 color = _GradientKeys[i].color;
+                    float position = _GradientKeys[i].position;
+                }
+
+                return float4(p.x / info.itemSize.x, 0, 0, 0);
+            }
+
             #define idx input.instanceId
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -341,6 +379,9 @@ Shader "2D/SDF Geometry"
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
                 info.dashLength = _DrawList[idx].dashLength;
+                info.textureIndex = _DrawList[idx].textureIndex;
+                info.samplerIndex = _DrawList[idx].samplerIndex;
+
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
                 const float2 scaling = info.outlineColor.xy;

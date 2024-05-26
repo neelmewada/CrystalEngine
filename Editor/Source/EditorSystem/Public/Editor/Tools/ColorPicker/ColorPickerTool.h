@@ -33,6 +33,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnClickClose() override;
+
         FUNCTION()
         void DoAccept();
 

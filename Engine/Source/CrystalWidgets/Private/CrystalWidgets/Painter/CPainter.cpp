@@ -35,7 +35,15 @@ namespace CE::Widgets
     void CPainter::SetBrush(const CBrush& brush)
     {
         this->brush = brush;
-        renderer->SetFillColor(brush.color);
+
+        if (!brush.isGradient)
+        {
+	        renderer->SetFillColor(brush.color);
+        }
+        else
+        {
+            renderer->SetFillGradient(, Renderer2D::Gradient_Linear);
+        }
     }
 
     void CPainter::SetFont(const CFont& font)

@@ -127,4 +127,17 @@ namespace CE::Editor
 		return result;
 	}
 
+	Color WindowsEditorPlatform::GetScreenPixel(Vec2i screenPos)
+	{
+		HDC dc = GetDC(nullptr);
+
+		COLORREF color = GetPixel(dc, screenPos.x, screenPos.y);
+
+		Color retVal = Color::RGBA(GetRValue(color), GetGValue(color), GetBValue(color));
+
+		ReleaseDC(nullptr, dc);
+
+		return retVal;
+	}
+
 } // namespace CE::Editor

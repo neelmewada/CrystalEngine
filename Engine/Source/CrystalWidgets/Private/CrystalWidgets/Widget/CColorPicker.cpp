@@ -8,6 +8,7 @@ namespace CE::Widgets
 		clipChildren = false;
 
 		receiveMouseEvents = true;
+		receiveDragEvents = false;
 	}
 
 	Vec2 CColorPicker::CalculateIntrinsicSize(f32 width, f32 height)
@@ -90,19 +91,48 @@ namespace CE::Widgets
 		constexpr f32 circleRadius = 5;
 
 		Rect drawRect = Rect::FromSize(drawCenter - Vec2(1, 1) * circleRadius, Vec2(1, 1) * circleRadius * 2.0f);
+		painter->DrawCircle(drawRect);
 
+		pen.SetColor(Color::RGBA(128, 128, 128));
+		pen.SetWidth(1);
+		painter->SetPen(pen);
+
+		drawRect = Rect::FromSize(drawRect.min + Vec2(1, 1), drawRect.GetSize() - Vec2(1, 1) * 2);
 		painter->DrawCircle(drawRect);
 	}
 
 	void CColorPicker::HandleEvent(CEvent* event)
 	{
-		Super::HandleEvent(event);
-
 		if (event->IsMouseEvent())
 		{
 			CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
 
+			if ((mouseEvent->type == CEventType::MousePress || mouseEvent->type == CEventType::MouseMove) && mouseEvent->button == MouseButton::Left)
+			{
+				Rect screenSpaceRect = GetScreenSpaceRect();
+
+				Vec2 size = screenSpaceRect.GetSize();
+
+				Vec2 diff = mouseEvent->mousePos - screenSpaceRect.min;
+
+				normalizedPosition = Vec2(diff.x / size.x, diff.y / size.y);
+				normalizedPosition.x = Math::Clamp01(normalizedPosition.x);
+				normalizedPosition.y = Math::Clamp01(normalizedPosition.y);
+
+				emit OnPositionChanged(normalizedPosition);
+
+				f32 h = normalizedPosition.x * 360;
+				f32 s = Math::Clamp01(normalizedPosition.y / 0.5f);
+				f32 v = 1.0f - Math::Clamp01((normalizedPosition.y - 0.5f) / 0.5f);
+
+				emit OnColorChanged(Color::HSV(h, s, v));
+
+				mouseEvent->Consume(this);
+				SetNeedsPaint();
+			}
 		}
+
+		Super::HandleEvent(event);
 	}
 
 } // namespace CE::Widgets

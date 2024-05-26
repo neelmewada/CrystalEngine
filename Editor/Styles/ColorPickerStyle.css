@@ -72,6 +72,17 @@ ColorPickerTool #BottomLeftContainer {
     justify-content: center;
 }
 
+CImageButton#EyeDropButton {
+    align-self: flex-end;
+    justify-content: center;
+    width: 35px;
+}
+
+CImageButton#EyeDropButton CImage {
+    width: 20px;
+    height: 20px;
+}
+
 ColorPickerTool #HexInput {
     width: 100px;
     margin: 5px 0 0 0;
@@ -90,5 +101,9 @@ ColorPickerTool #InputField {
     flex-grow: 2;
     flex-shrink: 1;
     margin: 5px 0 0 0;
+}
+
+#SampleGradient {
+    background-image: linear-gradient(-90deg, rgba(0, 0, 0, 255) 0%, red 100%);
 }
 

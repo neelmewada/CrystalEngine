@@ -8,30 +8,37 @@ namespace CE
     public:
         struct Key
         {
+			Color value{};
             f32 position{};
-            Color value{};
-        };
 
-		enum Direction
-		{
-			LeftToRight = 0,
-			TopToBottom
-		};
+			SIZE_T GetHash() const
+			{
+				SIZE_T hash = value.GetHash();
+				CombineHash(hash, position);
+				return hash;
+			}
+        };
         
         Gradient();
-        Gradient(std::initializer_list<Key> list, Direction dir = LeftToRight);
-        
-		Direction GetDirection() const { return direction; }
+		Gradient(std::initializer_list<Key> list, f32 degrees = 0);
+		Gradient(const Array<Key>& list, f32 degrees = 0);
 
-		void SetDirection(Direction direction)
+		f32 GetDegrees() const
 		{
-			this->direction = direction;
+			return degrees;
+		}
+
+		void SetDegrees(f32 degrees)
+		{
+			this->degrees = degrees;
 		}
 
 		u32 GetNumKeys() const
 		{
 			return keys.GetSize();
 		}
+
+		const Array<Key>& GetKeys() const { return keys; }
 
 		const Key& GetKeyAt(u32 index) const
 		{
@@ -53,11 +60,23 @@ namespace CE
 
 		void RemoveKeyAt(u32 index);
 
+		SIZE_T GetHash() const;
+
+		bool operator==(const Gradient& rhs) const
+		{
+			return GetHash() == rhs.GetHash();
+		}
+
+		bool operator!=(const Gradient& rhs) const
+		{
+			return !operator==(rhs);
+		}
+
     private:
 
         Array<Key> keys{};
 
-		Direction direction{};
+		f32 degrees = 0.0f;
     };
     
 } // namespace CE

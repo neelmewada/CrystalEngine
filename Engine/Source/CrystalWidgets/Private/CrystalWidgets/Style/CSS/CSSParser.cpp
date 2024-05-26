@@ -566,9 +566,9 @@ namespace CE::Widgets
 						{
 							isMinus = true;
 						}
-						else if (current->type == CSS::IdentifierToken && current->lexeme == "deg")
+						else if (current->type == CSS::IdentifierToken && current->lexeme == "rad")
 						{
-							
+							gradient.rotationInDegrees *= RAD_TO_DEG;
 						}
 						else if (current->type == CSS::CommaToken)
 						{
@@ -591,8 +591,7 @@ namespace CE::Widgets
 							{
 								if (pos >= gradient.keys.GetSize())
 									gradient.keys.Resize(pos + 1);
-								gradient.keys[pos].position.x = number;
-								gradient.keys[pos].position.y = 0;
+								gradient.keys[pos].position = number;
 							}
 						}
 						else if (current->type == CSS::PercentageToken)
