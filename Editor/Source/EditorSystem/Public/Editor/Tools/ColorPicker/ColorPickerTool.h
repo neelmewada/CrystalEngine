@@ -2,7 +2,6 @@
 
 namespace CE::Editor
 {
-
     CLASS()
     class EDITORSYSTEM_API ColorPickerTool final : public CToolWindow
     {
@@ -15,7 +14,7 @@ namespace CE::Editor
 
         static ColorPickerTool* Open();
 
-        void EnableAlpha(bool enable);
+        void SetAlphaEnabled(bool enable);
 
         void SetOriginalColor(const Color& original);
 
@@ -28,6 +27,8 @@ namespace CE::Editor
         CE_SIGNAL(OnColorPickerClosed, ColorPickerTool*);
 
     private:
+
+        void UpdateFields(CTextInput* excludeField = nullptr);
 
         void OnBeforeDestroy() override;
 
@@ -49,6 +50,51 @@ namespace CE::Editor
 
         FIELD()
         CTextInput* hexInput = nullptr;
+
+        FIELD()
+        CWidget* alphaBox = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientR = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientG = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientB = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientA = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientH = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientS = nullptr;
+
+        FIELD()
+        ColorPickerGradient* gradientV = nullptr;
+
+        FIELD()
+        CTextInput* inputR = nullptr;
+
+        FIELD()
+        CTextInput* inputG = nullptr;
+
+        FIELD()
+        CTextInput* inputB = nullptr;
+
+        FIELD()
+        CTextInput* inputA = nullptr;
+
+        FIELD()
+        CTextInput* inputH = nullptr;
+
+        FIELD()
+        CTextInput* inputS = nullptr;
+
+        FIELD()
+        CTextInput* inputV = nullptr;
 
         FIELD()
         Vec3 hsv = {};

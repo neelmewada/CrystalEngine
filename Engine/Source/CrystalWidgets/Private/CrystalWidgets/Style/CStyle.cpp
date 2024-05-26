@@ -182,6 +182,28 @@ namespace CE::Widgets
 		return stringToAlignmentMap[string];
 	}
 
+	CGradient& CGradient::WithRotation(f32 degrees)
+	{
+		rotationInDegrees = degrees;
+		return *this;
+	}
+
+	CGradient& CGradient::WithType(CGradientType gradientType)
+	{
+		this->gradientType = gradientType;
+		return *this;
+	}
+
+	CGradient& CGradient::AddKey(const Color& color, f32 position, bool isPercent)
+	{
+		CGradientKey key{};
+		key.color = color;
+		key.position = position;
+		key.isPercent = isPercent;
+		keys.Add(key);
+		return *this;
+	}
+
 	CStyleValue::CStyleValue()
 	{
 

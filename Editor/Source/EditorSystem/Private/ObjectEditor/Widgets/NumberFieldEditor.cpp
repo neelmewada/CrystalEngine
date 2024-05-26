@@ -122,7 +122,7 @@ namespace CE::Editor
             };
 
 		Bind(textInput, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
-		Bind(textInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), callback);
+		Bind(textInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), callback);
 	}
 
 	void NumberFieldEditor::Construct()

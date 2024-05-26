@@ -60,6 +60,26 @@ namespace CE::Widgets
         return true;
     }
 
+    bool CTextInput::SetTextInternal(const String& value)
+    {
+        if (inputValidator.IsValid() && !inputValidator.Invoke(value))
+        {
+            return false;
+        }
+
+        this->text = value;
+
+        RecalculateOffsets();
+
+        emit OnTextEdited(this);
+        emit OnTextChanged(this);
+
+        SetNeedsLayout();
+        SetNeedsPaint();
+
+        return true;
+    }
+
     void CTextInput::SetHint(const String& hint)
     {
         this->hint = hint;
@@ -285,7 +305,7 @@ namespace CE::Widgets
             newText.InsertAt(string[i], insertPos + i);
         }
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 
@@ -300,7 +320,7 @@ namespace CE::Widgets
         String newText = text;
         newText.Remove(startIndex, count);
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 

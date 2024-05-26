@@ -999,6 +999,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1069,6 +1070,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1604,6 +1606,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 

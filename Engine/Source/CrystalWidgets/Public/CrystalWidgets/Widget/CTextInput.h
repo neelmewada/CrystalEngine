@@ -46,9 +46,15 @@ namespace CE::Widgets
 
 		CE_SIGNAL(OnEditingFinished, CTextInput*);
 
+		// Called when text is modified through user input!
+		CE_SIGNAL(OnTextEdited, CTextInput*);
+
+		// Called when text is modified through either user input or through code!
 		CE_SIGNAL(OnTextChanged, CTextInput*);
 
 	protected:
+
+		bool SetTextInternal(const String& value);
 
 		FUNCTION()
 		void OnTimerTick();

@@ -2,6 +2,11 @@
 
 namespace CE
 {
+    static const Color hueValues[] = { Color(1, 0, 0), Color(1, 1, 0), Color(0, 1, 0),
+    									Color(0, 1, 1), Color(0, 0, 1), Color(1, 0, 1),
+    									Color(1, 0, 0)
+    };
+
 	Color Color::RGBA8(u8 r, u8 g, u8 b, u8 a)
 	{
 		return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
@@ -22,46 +27,48 @@ namespace CE
         Color rgb{};
         rgb.a = 1.0f;
 
-        float c = v * s; // Chroma
-        float x = c * (1 - (f32)std::fabs(fmod(h / 60.0, 2) - 1));
-        float m = v - c;
+        int i = static_cast<int>(h / 60) % 6;
+        f32 f = (h / 60) - i;
+        f32 p = v * (1 - s);
+        f32 q = v * (1 - f * s);
+        f32 t = v * (1 - (1 - f) * s);
 
-        float r_prime, g_prime, b_prime;
+        f32& r = rgb.r;
+        f32& g = rgb.g;
+        f32& b = rgb.b;
 
-        if (0 <= h && h < 60) {
-            r_prime = c;
-            g_prime = x;
-            b_prime = 0;
+        switch (i) {
+        case 0:
+            r = v;
+            g = t;
+            b = p;
+            break;
+        case 1:
+            r = q;
+            g = v;
+            b = p;
+            break;
+        case 2:
+            r = p;
+            g = v;
+            b = t;
+            break;
+        case 3:
+            r = p;
+            g = q;
+            b = v;
+            break;
+        case 4:
+            r = t;
+            g = p;
+            b = v;
+            break;
+        case 5:
+            r = v;
+            g = p;
+            b = q;
+            break;
         }
-        else if (60 <= h && h < 120) {
-            r_prime = x;
-            g_prime = c;
-            b_prime = 0;
-        }
-        else if (120 <= h && h < 180) {
-            r_prime = 0;
-            g_prime = c;
-            b_prime = x;
-        }
-        else if (180 <= h && h < 240) {
-            r_prime = 0;
-            g_prime = x;
-            b_prime = c;
-        }
-        else if (240 <= h && h < 300) {
-            r_prime = x;
-            g_prime = 0;
-            b_prime = c;
-        }
-        else {
-            r_prime = c;
-            g_prime = 0;
-            b_prime = x;
-        }
-
-        rgb.r = r_prime + m;
-        rgb.g = g_prime + m;
-        rgb.b = b_prime + m;
 
         return rgb;
 	}

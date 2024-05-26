@@ -246,10 +246,10 @@ namespace CE::Editor
                 }
             };
 
-        Bind(fieldX, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
-        Bind(fieldY, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
-        Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
-        Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnTextChanged), editingCallback);
+        Bind(fieldX, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
+        Bind(fieldY, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
+        Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
+        Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
     }
 
     void VectorFieldEditor::Construct()

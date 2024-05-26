@@ -280,6 +280,10 @@ namespace CE::Widgets
 		CE_STRUCT(CGradient)
 	public:
 
+		CGradient& WithRotation(f32 degrees);
+		CGradient& WithType(CGradientType gradientType);
+		CGradient& AddKey(const Color& color, f32 position, bool isPercent = true);
+
 		FIELD()
 		f32 rotationInDegrees = 0;
 
