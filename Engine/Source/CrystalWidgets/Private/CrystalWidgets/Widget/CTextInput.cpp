@@ -49,6 +49,7 @@ namespace CE::Widgets
         }
 
         this->text = value;
+        OnValidateText();
 
         RecalculateOffsets();
 
@@ -153,15 +154,18 @@ namespace CE::Widgets
 
         DeselectAll();
 
-        textScrollOffset = 0;
-        timer->Stop();
-        isEditing = false;
-        cursorState = false;
-        SetNeedsPaint();
-
         if (isEditing)
         {
-            emit OnEditingFinished(this);
+	        textScrollOffset = 0;
+        	timer->Stop();
+        	isEditing = false;
+        	cursorState = false;
+
+            SetNeedsStyle();
+        	SetNeedsPaint();
+
+	        emit OnEditingFinished(this);
+	        OnValidateText();
         }
     }
 
@@ -183,6 +187,7 @@ namespace CE::Widgets
             SetNeedsPaint();
 
             emit OnEditingFinished(this);
+            OnValidateText();
         }
     }
 

@@ -488,6 +488,11 @@ namespace CE::Widgets
 			}
 		}
 
+		if (curFocusedWidget != nullptr && InputManager::IsKeyDown(KeyCode::Tab))
+		{
+			
+		}
+
 		// Per window events inside Tick()
 
 		for (int i = 0; i < platformWindows.GetSize(); i++)

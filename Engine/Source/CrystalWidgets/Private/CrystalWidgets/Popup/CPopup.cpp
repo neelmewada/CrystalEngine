@@ -28,6 +28,8 @@ namespace CE::Widgets
 
 	void CPopup::Show()
 	{
+		SetEnabled(true);
+
 		if (nativeWindow)
 		{
 			nativeWindow->Show();
@@ -66,6 +68,8 @@ namespace CE::Widgets
 
 		delete nativeWindow;
 		nativeWindow = nullptr;
+
+		SetEnabled(false);
 	}
 
 	void CPopup::Show(Vec2i screenPosition, Vec2i size)

@@ -54,6 +54,8 @@ namespace CE::Widgets
 
 	protected:
 
+		virtual void OnValidateText() {}
+
 		bool SetTextInternal(const String& value);
 
 		FUNCTION()

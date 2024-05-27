@@ -135,6 +135,7 @@ namespace CE::Editor
 
     void ColorInput::OnColorSelected(Color newColor)
     {
+        emit OnColorSelectSignal(newColor);
     }
 
     void ColorInput::OnColorPickerToolClosed(ColorPickerTool* colorPicker)

@@ -9,6 +9,34 @@ namespace CE::Editor
 										Color(1, 0, 0)
 	};
 
+	static u8 ParseByte(const char* str)
+	{
+		char msb = str[0];
+		char lsb = str[1];
+
+		u8 value = 0;
+
+		if (lsb >= '0' && lsb <= '9')
+		{
+			value = (u8)lsb - '0';
+		}
+		else if (lsb >= 'A' && lsb <= 'F')
+		{
+			value = 10 + (u8)lsb - 'A';
+		}
+
+		if (msb >= '0' && msb <= '9')
+		{
+			value += ((u8)msb - '0') * 16;
+		}
+		else if (msb >= 'A' && msb <= 'F')
+		{
+			value += (10 + (u8)msb - 'A') * 16;
+		}
+
+		return value;
+	}
+
 	ColorPickerTool* ColorPickerTool::Open()
 	{
 		if (!colorPicker)
@@ -44,12 +72,16 @@ namespace CE::Editor
 	void ColorPickerTool::SetOriginalColor(const Color& original)
 	{
 		this->original = original;
+
+		previewOld->SetColor(original);
 	}
 
 	void ColorPickerTool::SetColor(const Color& color)
 	{
 		this->value = color;
 		this->hsv = color.ToHSV();
+
+		UpdateFields();
 
 		SetNeedsPaint();
 	}
@@ -90,6 +122,16 @@ namespace CE::Editor
 		if (inputA != excludeField)
 			inputA->SetText(String::Format(format, value.a));
 
+		if (hexInput != excludeField)
+			hexInput->SetText(String::Format("{:08X}", value.ToU32()));
+
+		previewNew->SetColor(value);
+
+		if (excludeField != nullptr)
+		{
+
+		}
+
 		gradientR->SetGradient(CGradient()
 			.WithRotation(0)
 			.WithType(CGradientType::LinearGradient)
@@ -101,7 +143,7 @@ namespace CE::Editor
 			.WithRotation(0)
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color(value.r, 0, value.b, 1), 0)
-			.AddKey(Color(value.r, 1, value.b, 1), 1000)
+			.AddKey(Color(value.r, 1, value.b, 1), 100)
 		);
 
 		gradientB->SetGradient(CGradient()
@@ -116,7 +158,17 @@ namespace CE::Editor
 			.AddKey(Color(value.r, value.g, value.b, 1), 100)
 		);
 
-		
+		gradientS->SetGradient(CGradient()
+			.WithType(CGradientType::LinearGradient)
+			.AddKey(Color::HSV(hsv.x, 0, hsv.z), 0)
+			.AddKey(Color::HSV(hsv.x, 1, hsv.z), 100)
+		);
+
+		gradientV->SetGradient(CGradient()
+			.WithType(CGradientType::LinearGradient)
+			.AddKey(Color::HSV(hsv.x, hsv.y, 0), 0)
+			.AddKey(Color::HSV(hsv.x, hsv.y, 1), 100)
+		);
 	}
 
 	void ColorPickerTool::OnBeforeDestroy()
@@ -137,12 +189,14 @@ namespace CE::Editor
 		{
 			CWidget* topLeft = CreateObject<CWidget>(topBox, "TopLeftContainer");
 			{
-				CColorPicker* colorMap = CreateObject<CColorPicker>(topLeft, "ColorMap");
+				colorMap = CreateObject<CColorPicker>(topLeft, "ColorMap");
 
 				Bind(colorMap, MEMBER_FUNCTION(CColorPicker, OnHSVColorChanged), [this](f32 h, f32 s, f32 v)
 					{
 						hsv = Vec3(h, s, v);
+						f32 a = value.a;
 						value = Color::HSV(h, s, v);
+						value.a = a;
 
 						UpdateFields();
 						SetNeedsPaint();
@@ -156,13 +210,13 @@ namespace CE::Editor
 				CLabel* oldLabel = CreateObject<CLabel>(topRight, "OldLabel");
 				oldLabel->SetText("Old");
 				
-				ColorPickerPreview* previewOld = CreateObject<ColorPickerPreview>(topRight, "PreviewOld");
+				previewOld = CreateObject<ColorPickerPreview>(topRight, "PreviewOld");
 				previewOld->SetColor(Color::Cyan());
 
 				CreateObject<CWidget>(topRight, "PreviewSeparator");
 
-				ColorPickerPreview* previewNew = CreateObject<ColorPickerPreview>(topRight, "PreviewNew");
-				previewNew->SetColor(Color::RGBA(128, 128, 128, 0));
+				previewNew = CreateObject<ColorPickerPreview>(topRight, "PreviewNew");
+				previewNew->SetColor(value);
 
 				CLabel* newLabel = CreateObject<CLabel>(topRight, "NewLabel");
 				newLabel->SetText("New");
@@ -201,8 +255,8 @@ namespace CE::Editor
 						CWidget* vBox = CreateObject<CWidget>(hBox, "InputBox");
 						vBox->AddStyleClass("VStack");
 						{
-							CTextInput* inputField = CreateObject<CTextInput>(vBox, "InputField");
-							inputField->SetInputValidator(CFloatInputValidator);
+							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
+							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
 
 							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
@@ -292,8 +346,8 @@ namespace CE::Editor
 						CWidget* vBox = CreateObject<CWidget>(hBox, "InputBox");
 						vBox->AddStyleClass("VStack");
 						{
-							CTextInput* inputField = CreateObject<CTextInput>(vBox, "InputField");
-							inputField->SetInputValidator(CFloatInputValidator);
+							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
+							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
 
 							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
@@ -332,7 +386,10 @@ namespace CE::Editor
 									f32 number = 0.0f;
 									if (String::TryParse(inputField->GetText(), number))
 									{
-										number = Math::Clamp01(number);
+										if (i == 0)
+											number = Math::Clamp<f32>(number, 0, 360);
+										else
+											number = Math::Clamp01(number);
 
 										if (i == 0)
 											hsv.x = number;
@@ -361,6 +418,74 @@ namespace CE::Editor
 
 					hexInput = CreateObject<CTextInput>(hbox, "HexInput");
 					hexInput->SetText(String::Format("{:08X}", value.ToU32()));
+
+					Bind(hexInput, MEMBER_FUNCTION(CTextInput, OnEditingFinished), [this](CTextInput*)
+						{
+							String text = hexInput->GetText().ToUpper();
+							if (text.GetLength() == 6)
+							{
+								f32 r = ParseByte(text.GetCString());
+								f32 g = ParseByte(text.GetCString() + 2);
+								f32 b = ParseByte(text.GetCString() + 4);
+
+								value.r = r / 255.0f;
+								value.g = g / 255.0f;
+								value.b = b / 255.0f;
+							}
+							else if (text.GetLength() >= 8)
+							{
+								f32 r = ParseByte(text.GetCString());
+								f32 g = ParseByte(text.GetCString() + 2);
+								f32 b = ParseByte(text.GetCString() + 4);
+								f32 a = ParseByte(text.GetCString() + 6);
+
+								value.r = r / 255.0f;
+								value.g = g / 255.0f;
+								value.b = b / 255.0f;
+								value.a = a / 255.0f;
+							}
+							else if (text.GetLength() == 1)
+							{
+								char c = text[0];
+								u8 halfByte = 0;
+
+								if (c >= '0' && c <= '9')
+									halfByte = c - '0';
+								else if (c >= 'A' && c <= 'F')
+									halfByte = 10 + c - 'A';
+
+								value.r = value.g = value.b = (f32)halfByte / 15.0f;
+							}
+							else if (text.GetLength() == 2)
+							{
+								f32 byte = ParseByte(text.GetCString());
+
+								value.r = value.g = value.b = byte / 255.0f;
+							}
+							else if (text.GetLength() >= 3 && text.GetLength() <= 5)
+							{
+								f32 components[3] = { 0, 0, 0 };
+
+								for (int i = 0; i < 3; ++i)
+								{
+									char c = text[i];
+									u8 halfByte = 0;
+
+									if (c >= '0' && c <= '9')
+										halfByte = c - '0';
+									else if (c >= 'A' && c <= 'F')
+										halfByte = 10 + c - 'A';
+
+									components[i] = (f32)halfByte / 15.0f;
+								}
+
+								value.r = components[0];
+								value.g = components[1];
+								value.b = components[2];
+							}
+
+							SetColor(value);
+						});
 				}
 
 				CWidget* spacer = CreateObject<CWidget>(bottomRight, "Spacer");

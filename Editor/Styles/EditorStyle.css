@@ -489,11 +489,3 @@ VectorComponentInput {
     padding: 12px 5px 5px 5px;
 }
 
-#SampleGradient {
-    margin: 50px 50px 0 0;
-    height: 100px;
-    width: 300px;
-    border-radius: 25px 25px 25px 25px;
-    background-image: linear-gradient(90deg, red 0%, yellow 25%, rgb(0, 255, 0) 50%, rgb(0, 255, 255) 75%, rgb(0, 0, 255) 100%);
-}
-

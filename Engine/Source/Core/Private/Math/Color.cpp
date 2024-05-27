@@ -27,50 +27,54 @@ namespace CE
         Color rgb{};
         rgb.a = 1.0f;
 
-        int i = static_cast<int>(h / 60) % 6;
-        f32 f = (h / 60) - i;
-        f32 p = v * (1 - s);
-        f32 q = v * (1 - f * s);
-        f32 t = v * (1 - (1 - f) * s);
+		if (h >= 360)
+			h = 359.999f;
 
-        f32& r = rgb.r;
-        f32& g = rgb.g;
-        f32& b = rgb.b;
+		f32 rgbRange = v * s;
+		f32 maxRGB = v;
+		f32 minRGB = v - rgbRange;
+		f32 hPrime = h / 60.0;
+		f32 x1 = fmod(hPrime, 1.0);
+		f32 x2 = 1.0 - fmod(hPrime, 1.0);
 
-        switch (i) {
-        case 0:
-            r = v;
-            g = t;
-            b = p;
-            break;
-        case 1:
-            r = q;
-            g = v;
-            b = p;
-            break;
-        case 2:
-            r = p;
-            g = v;
-            b = t;
-            break;
-        case 3:
-            r = p;
-            g = q;
-            b = v;
-            break;
-        case 4:
-            r = t;
-            g = p;
-            b = v;
-            break;
-        case 5:
-            r = v;
-            g = p;
-            b = q;
-            break;
-        }
+		if ((hPrime >= 0) && (hPrime < 1))
+		{
+			rgb.r = maxRGB;
+			rgb.g = (x1 * rgbRange) + minRGB;
+			rgb.b = minRGB;
+		}
+		else if ((hPrime >= 1) && (hPrime < 2))
+		{
+			rgb.r = (x2 * rgbRange) + minRGB;
+			rgb.g = maxRGB;
+			rgb.b = minRGB;
+		}
+		else if ((hPrime >= 2) && (hPrime < 3))
+		{
+			rgb.r = minRGB;
+			rgb.g = maxRGB;
+			rgb.b = (x1 * rgbRange) + minRGB;
+		}
+		else if ((hPrime >= 3) && (hPrime < 4))
+		{
+			rgb.r = minRGB;
+			rgb.g = (x2 * rgbRange) + minRGB;
+			rgb.b = maxRGB;
+		}
+		else if ((hPrime >= 4) && (hPrime < 5))
+		{
+			rgb.r = (x1 * rgbRange) + minRGB;
+			rgb.g = minRGB;
+			rgb.b = maxRGB;
+		}
+		else if ((hPrime >= 5) && (hPrime < 6))
+		{
+			rgb.r = maxRGB;
+			rgb.g = minRGB;
+			rgb.b = (x2 * rgbRange) + minRGB;
+		}
 
-        return rgb;
+		return rgb;
 	}
 
 	u32 Color::ToU32() const

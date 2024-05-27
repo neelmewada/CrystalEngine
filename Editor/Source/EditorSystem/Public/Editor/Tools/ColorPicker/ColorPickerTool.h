@@ -55,6 +55,9 @@ namespace CE::Editor
         CWidget* alphaBox = nullptr;
 
         FIELD()
+        CColorPicker* colorMap = nullptr;
+
+        FIELD()
         ColorPickerGradient* gradientR = nullptr;
 
         FIELD()
@@ -76,25 +79,31 @@ namespace CE::Editor
         ColorPickerGradient* gradientV = nullptr;
 
         FIELD()
-        CTextInput* inputR = nullptr;
+        NumericFieldInput* inputR = nullptr;
 
         FIELD()
-        CTextInput* inputG = nullptr;
+        NumericFieldInput* inputG = nullptr;
 
         FIELD()
-        CTextInput* inputB = nullptr;
+        NumericFieldInput* inputB = nullptr;
 
         FIELD()
-        CTextInput* inputA = nullptr;
+        NumericFieldInput* inputA = nullptr;
 
         FIELD()
-        CTextInput* inputH = nullptr;
+        NumericFieldInput* inputH = nullptr;
 
         FIELD()
-        CTextInput* inputS = nullptr;
+        NumericFieldInput* inputS = nullptr;
 
         FIELD()
-        CTextInput* inputV = nullptr;
+        NumericFieldInput* inputV = nullptr;
+
+        FIELD()
+        ColorPickerPreview* previewOld = nullptr;
+
+        FIELD()
+        ColorPickerPreview* previewNew = nullptr;
 
         FIELD()
         Vec3 hsv = {};

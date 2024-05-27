@@ -20,6 +20,10 @@ namespace CE::Editor
 
         void SetHasAlpha(bool set);
 
+        // - Signals -
+
+        CE_SIGNAL(OnColorSelectSignal, Color);
+
     protected:
 
         void OnBeforeDestroy() override;
