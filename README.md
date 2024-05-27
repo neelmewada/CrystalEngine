@@ -2,7 +2,7 @@
 
 A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a Widget library that uses CSS & Yoga Layout engine.
 
-![](./Screenshots/EditorDemo.gif)
+![](./Screenshots/ColorPicker.png)
 
 ### Check more [screenshots below](#screenshots).
 
@@ -64,17 +64,19 @@ Contains all the editor modules.
 # Screenshots
 
 
-### Editor tools using CrystalWidgets
-
-Project browser window:
+### Project browser window:
 
 ![](./Screenshots/ProjectBrowser.png)
 
-Crystal Editor window:
+### GIF:
+
+![](./Screenshots/EditorDemo.gif)
+
+### Project Settings window:
 
 ![](./Screenshots/EditorWindow.png)
 
-PBR Demo:
+### PBR Demo:
 
 ![](./Screenshots/IBL%20Demo%20Night.png)
 
