@@ -182,10 +182,15 @@ namespace CE::Editor
 			}
 			else if (field->IsDecimalField() || field->IsNumberField())
 			{
-				CTextInput* numberInput = CreateObject<CTextInput>(right, "NumberInput");
+				NumericFieldInput* numberInput = CreateObject<NumericFieldInput>(right, "NumberInput");
 
 				if (field->IsDecimalField())
 				{
+					if (declTypeId == TYPEID(f32))
+						numberInput->SetPrecision(floatPrecision);
+					else
+						numberInput->SetPrecision(doublePrecision);
+
 					numberInput->SetText(String::Format("{}", field->GetNumericFieldValue(instance)));
 				}
 				else
@@ -196,7 +201,7 @@ namespace CE::Editor
 						numberInput->SetText(String::Format("{}", (s64)field->GetNumericFieldValue(instance)));
 				}
 
-				Bind(numberInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [field, instance, declTypeId](CTextInput* textInput)
+				Bind(numberInput, MEMBER_FUNCTION(NumericFieldInput, OnTextEdited), [field, instance, declTypeId](CTextInput* textInput)
 					{
 						const String& text = textInput->GetText();
 						f64 numberValue = 0.0f;

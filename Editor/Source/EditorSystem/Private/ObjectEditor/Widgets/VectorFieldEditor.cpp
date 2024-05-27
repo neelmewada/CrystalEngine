@@ -18,6 +18,8 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
+        SetPrecision(4);
+
         SetInputValidator(CFloatInputValidator);
         SetText("0");
         SetSelectAllOnEdit(true);

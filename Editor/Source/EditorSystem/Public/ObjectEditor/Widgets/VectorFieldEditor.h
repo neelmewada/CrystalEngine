@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
 	CLASS()
-	class EDITORSYSTEM_API VectorComponentInput : public CTextInput
+	class EDITORSYSTEM_API VectorComponentInput : public NumericFieldInput
 	{
-		CE_CLASS(VectorComponentInput, CTextInput)
+		CE_CLASS(VectorComponentInput, NumericFieldInput)
 	public:
 
 

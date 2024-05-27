@@ -379,7 +379,7 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
             fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
-        if (event->IsMouseEvent())
+        if (event->IsMouseEvent() && !event->isConsumed)
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
             Vec2 screenMousePos = mouseEvent->mousePos;
@@ -401,6 +401,8 @@ namespace CE::Widgets
             else if (renderer && mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
                 int selectedIdx = -1;
+
+                event->Consume(this);
 
                 if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty())
                 {
@@ -531,11 +533,12 @@ namespace CE::Widgets
                 SetNeedsPaint();
             }
         }
-        else if (event->type == CEventType::KeyHeld || event->type == CEventType::KeyPress)
+        else if (!event->isConsumed && (event->type == CEventType::KeyHeld || event->type == CEventType::KeyPress))
         {
             Renderer2D* renderer = GetRenderer();
             
             CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
+            event->Consume(this);
 
         	bool shiftPressed = EnumHasAnyFlags(keyEvent->modifier, KeyModifier::LShift | KeyModifier::RShift);
             bool capslock = EnumHasAnyFlags(keyEvent->modifier, KeyModifier::Caps);

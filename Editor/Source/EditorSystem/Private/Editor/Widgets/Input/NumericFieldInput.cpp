@@ -61,7 +61,7 @@ namespace CE::Editor
     {
         Super::Construct();
 
-
+        SetSelectAllOnEdit(true);
     }
     
 }

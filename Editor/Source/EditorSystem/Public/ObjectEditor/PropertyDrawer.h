@@ -4,7 +4,7 @@ namespace CE::Editor
 {
     class ObjectEditor;
 
-    CLASS()
+    CLASS(Config = Editor)
     class EDITORSYSTEM_API PropertyDrawer : public CWidget
     {
         CE_CLASS(PropertyDrawer, CWidget)
@@ -30,6 +30,12 @@ namespace CE::Editor
     protected:
 
         void Construct() override;
+
+        FIELD(Config)
+        u32 floatPrecision = 4;
+
+        FIELD(Config)
+        u32 doublePrecision = 8;
 
 		FIELD()
 		CWidget* left = nullptr;
