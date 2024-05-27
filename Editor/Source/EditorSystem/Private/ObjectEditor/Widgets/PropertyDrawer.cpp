@@ -149,7 +149,7 @@ namespace CE::Editor
 				CTextInput* stringInput = CreateObject<CTextInput>(right, "StringInput");
 				stringInput->SetText(field->GetFieldValue<String>(instance));
 
-				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance](CTextInput* input)
+				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [field, instance](CTextInput* input)
 					{
 						field->SetFieldValue<String>(instance, input->GetText());
 
@@ -196,7 +196,7 @@ namespace CE::Editor
 						numberInput->SetText(String::Format("{}", (s64)field->GetNumericFieldValue(instance)));
 				}
 
-				Bind(numberInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance, declTypeId](CTextInput* textInput)
+				Bind(numberInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [field, instance, declTypeId](CTextInput* textInput)
 					{
 						const String& text = textInput->GetText();
 						f64 numberValue = 0.0f;

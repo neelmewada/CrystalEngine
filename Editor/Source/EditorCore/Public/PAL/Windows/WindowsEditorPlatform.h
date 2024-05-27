@@ -12,6 +12,8 @@ namespace CE::Editor
 
 		static IO::Path ShowFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& fileTypes);
 
+		static Color GetScreenPixel(Vec2i screenPos);
+
 	};
 
 	typedef WindowsEditorPlatform EditorPlatform;

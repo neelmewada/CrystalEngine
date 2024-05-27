@@ -49,9 +49,30 @@ namespace CE::Widgets
         }
 
         this->text = value;
+        OnValidateText();
 
         RecalculateOffsets();
 
+        emit OnTextChanged(this);
+
+        SetNeedsLayout();
+        SetNeedsPaint();
+
+        return true;
+    }
+
+    bool CTextInput::SetTextInternal(const String& value)
+    {
+        if (inputValidator.IsValid() && !inputValidator.Invoke(value))
+        {
+            return false;
+        }
+
+        this->text = value;
+
+        RecalculateOffsets();
+
+        emit OnTextEdited(this);
         emit OnTextChanged(this);
 
         SetNeedsLayout();
@@ -133,15 +154,18 @@ namespace CE::Widgets
 
         DeselectAll();
 
-        textScrollOffset = 0;
-        timer->Stop();
-        isEditing = false;
-        cursorState = false;
-        SetNeedsPaint();
-
         if (isEditing)
         {
-            emit OnEditingFinished(this);
+	        textScrollOffset = 0;
+        	timer->Stop();
+        	isEditing = false;
+        	cursorState = false;
+
+            SetNeedsStyle();
+        	SetNeedsPaint();
+
+	        emit OnEditingFinished(this);
+	        OnValidateText();
         }
     }
 
@@ -163,6 +187,7 @@ namespace CE::Widgets
             SetNeedsPaint();
 
             emit OnEditingFinished(this);
+            OnValidateText();
         }
     }
 
@@ -285,7 +310,7 @@ namespace CE::Widgets
             newText.InsertAt(string[i], insertPos + i);
         }
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 
@@ -300,7 +325,7 @@ namespace CE::Widgets
         String newText = text;
         newText.Remove(startIndex, count);
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 

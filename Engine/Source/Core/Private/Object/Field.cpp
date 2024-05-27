@@ -72,7 +72,7 @@ namespace CE
 
     String FieldType::GetDisplayName()
     {
-        String displayAttrib = GetAttribute("Display").GetStringValue();
+        String displayAttrib = GetAttribute("DisplayName").GetStringValue();
 
         if (!displayAttrib.IsEmpty())
             return displayAttrib;

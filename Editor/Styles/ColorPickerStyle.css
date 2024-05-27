@@ -72,6 +72,17 @@ ColorPickerTool #BottomLeftContainer {
     justify-content: center;
 }
 
+CImageButton#EyeDropButton {
+    align-self: flex-end;
+    justify-content: center;
+    width: 35px;
+}
+
+CImageButton#EyeDropButton CImage {
+    width: 20px;
+    height: 20px;
+}
+
 ColorPickerTool #HexInput {
     width: 100px;
     margin: 5px 0 0 0;
@@ -86,9 +97,23 @@ ColorPickerTool #BottomRightContainer {
     padding: 5px 0 0 0;
 }
 
-ColorPickerTool #InputField {
+ColorPickerTool #InputField, ColorPickerTool #InputBox {
     flex-grow: 2;
     flex-shrink: 1;
+}
+
+ColorPickerTool #InputBox {
     margin: 5px 0 0 0;
+}
+
+ColorPickerGradient {
+    height: 6px;
+}
+
+ColorPickerGradient.Transparent {
+    background-image: url(/Editor/Assets/Images/GridSmall);
+    background-size: contain;
+    background-position: top-left;
+    background-repeat: repeat-x;
 }
 

@@ -88,7 +88,7 @@ namespace CE::Editor
                         input->SetText(defaultOpenProjectLocation);
                     });
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextChanged),
+                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
                     this, MEMBER_FUNCTION(Self, ValidateInputFields));
 
                 Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
@@ -178,7 +178,7 @@ namespace CE::Editor
                         input->SetText(defaultNewProjectLocation);
                     });
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextChanged),
+                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
                     this, MEMBER_FUNCTION(Self, ValidateInputFields));
 
                 Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
@@ -195,7 +195,7 @@ namespace CE::Editor
                 input->SetHint("Enter project name...");
                 newProjectName = input;
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextChanged),
+                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
                     this, MEMBER_FUNCTION(Self, ValidateInputFields));
 
                 Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),

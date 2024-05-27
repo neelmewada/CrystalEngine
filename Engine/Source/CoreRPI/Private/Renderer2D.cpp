@@ -1,12 +1,27 @@
-#include "Renderer2D.h"
-#include "Renderer2D.h"
-#include "Renderer2D.h"
-
 #include "CoreRPI.h"
 
 namespace CE::RPI
 {
 	constexpr bool ForceDisableBatching = false;
+
+	SIZE_T ColorGradient::Key::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(color);
+		CombineHash(hash, position);
+		return hash;
+	}
+
+	SIZE_T ColorGradient::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(degrees);
+
+		for (int i = 0; i < keys.GetSize(); ++i)
+		{
+			CombineHash(hash, keys[i]);
+		}
+
+		return hash;
+	}
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
@@ -58,6 +73,16 @@ namespace CE::RPI
 
 			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(clipRectBufferDesc);
 			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);
+
+			RHI::BufferDescriptor gradientKeysBufferDesc{};
+			gradientKeysBufferDesc.name = "ClipRect Buffer";
+			gradientKeysBufferDesc.bufferSize = 50 * sizeof(ColorGradient::Key);
+			gradientKeysBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			gradientKeysBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
+			gradientKeysBufferDesc.structureByteStride = sizeof(ColorGradient::Key);
+
+			gradientKeysBuffer[i] = gDynamicRHI->CreateBuffer(gradientKeysBufferDesc);
+			drawItemSrg->Bind(i, "_GradientKeys", gradientKeysBuffer[i]);
 
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
 			viewConstantsBufferDesc.name = "ViewConstants";
@@ -139,6 +164,9 @@ namespace CE::RPI
 
 			delete drawDataConstantsBuffer[i];
 			drawDataConstantsBuffer[i] = nullptr;
+
+			delete gradientKeysBuffer[i];
+			gradientKeysBuffer[i] = nullptr;
 		}
 
 		for (const auto& [variant, material] : materials)
@@ -185,10 +213,12 @@ namespace CE::RPI
 		drawBatches.Clear();
 		clipRectStack.Clear();
 		textureIndices.Clear();
+		gradientIndices.Clear();
 
 		drawItemCount = 0;
 		clipRectCount = 0;
 		textureCount = 0;
+		gradientKeyCount = 0;
 		createNewDrawBatch = true;
 
 		ResetToDefaults();
@@ -199,6 +229,7 @@ namespace CE::RPI
 		{
 			resubmitDrawData[i] = true;
 			resubmitClipRects[i] = true;
+			resubmitGradientKeys[i] = true;
 		}
 	}
 
@@ -270,6 +301,38 @@ namespace CE::RPI
 		if (!ClipRectExists())
 			return Rect();
 		return clipRects[clipRectStack.Top()].rect;
+	}
+
+	void Renderer2D::SetFillGradient(const ColorGradient& gradient, GradientType gradientType)
+	{
+		if (gradient.keys.GetSize() < 2)
+		{
+			currentGradientType = GradientType::None;
+			currentGradient = Vec2i();
+			return;
+		}
+
+		currentGradientType = gradientType;
+		gradientDegrees = gradient.degrees;
+
+		if (gradientIndices.KeyExists(gradient))
+		{
+			currentGradient = gradientIndices[gradient];
+			return;
+		}
+
+		if (gradientKeys.GetSize() < gradientKeyCount + gradient.keys.GetSize())
+			gradientKeys.Resize(gradientKeyCount + gradient.keys.GetSize());
+
+		for (int i = 0; i < gradient.keys.GetSize(); ++i)
+		{
+			gradientKeys[gradientKeyCount + i] = gradient.keys[i];
+		}
+
+		gradientIndices[gradient] = { (int)gradientKeyCount, (int)(gradientKeyCount + gradient.keys.GetSize() - 1) };
+		currentGradient = gradientIndices[gradient];
+
+		gradientKeyCount += gradient.keys.GetSize();
 	}
 
 	void Renderer2D::SetFillColor(const Color& color)
@@ -832,6 +895,13 @@ namespace CE::RPI
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
+
 		curDrawBatch.drawItemCount++;
 		
 		drawItemCount++;
@@ -864,6 +934,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -888,6 +959,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 
@@ -921,6 +999,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -940,6 +1019,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 
@@ -984,6 +1070,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1447,7 +1534,26 @@ namespace CE::RPI
 			clipRectsBuffer[imageIndex]->Unmap();
 		}
 
-		 // - Update Texture Array -
+		// - Update Gradient Keys -
+
+		if (gradientKeysBuffer[imageIndex] != nullptr && resubmitGradientKeys[imageIndex])
+		{
+			resubmitGradientKeys[imageIndex] = false;
+
+			if (gradientKeysBuffer[imageIndex]->GetBufferSize() < gradientKeyCount * sizeof(ColorGradient::Key))
+			{
+				IncrementGradientKeysBuffer(gradientKeyCount + 10);
+			}
+
+			void* data;
+			gradientKeysBuffer[imageIndex]->Map(0, gradientKeysBuffer[imageIndex]->GetBufferSize(), &data);
+			{
+				memcpy(data, gradientKeys.GetData(), gradientKeyCount * sizeof(ColorGradient::Key));
+			}
+			gradientKeysBuffer[imageIndex]->Unmap();
+		}
+
+		// - Update Texture Array -
 
 		Array<RHI::TextureView*> textureViews{};
 		textureViews.Reserve(textureCount);
@@ -1500,6 +1606,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1590,6 +1697,40 @@ namespace CE::RPI
 			original->Map(0, original->GetBufferSize(), &data);
 			{
 				clipRectsBuffer[i]->UploadData(data, original->GetBufferSize());
+			}
+			original->Unmap();
+
+			QueueDestroy(original);
+		}
+
+		drawItemSrg->FlushBindings();
+	}
+
+	void Renderer2D::IncrementGradientKeysBuffer(u32 numKeysToAdd)
+	{
+		u32 curNumKeys = gradientKeysBuffer[0]->GetBufferSize() / sizeof(ColorGradient::Key);
+		u32 incrementCount = (u32)(curNumKeys * 0.25f); // Add 25% to the storage
+
+		numKeysToAdd = Math::Max(numKeysToAdd, incrementCount);
+
+		for (int i = 0; i < numFramesInFlight; ++i)
+		{
+			RHI::Buffer* original = gradientKeysBuffer[i];
+
+			RHI::BufferDescriptor newBufferDesc{};
+			newBufferDesc.name = "GradientKeys Buffer";
+			newBufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
+			newBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			newBufferDesc.structureByteStride = sizeof(ColorGradient::Key);
+			newBufferDesc.bufferSize = original->GetBufferSize() + numKeysToAdd * sizeof(ColorGradient::Key);
+
+			gradientKeysBuffer[i] = gDynamicRHI->CreateBuffer(newBufferDesc);
+			drawItemSrg->Bind(i, "_GradientKeys", gradientKeysBuffer[i]);
+
+			void* data;
+			original->Map(0, original->GetBufferSize(), &data);
+			{
+				gradientKeysBuffer[i]->UploadData(data, original->GetBufferSize());
 			}
 			original->Unmap();
 

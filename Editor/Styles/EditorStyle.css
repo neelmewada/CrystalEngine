@@ -1,6 +1,6 @@
 
 * {
-    font-name: Roboto;
+    font: Roboto;
 }
 
 CDockSpace {
@@ -30,7 +30,7 @@ CDockWindow {
     column-gap: 10px;
 }
 
-CButton {
+CButton, CImageButton {
     background: rgb(56, 56, 56);
     flex-direction: row;
     min-width: 40px;
@@ -41,21 +41,26 @@ CButton {
     border-width: 1px;
 }
 
-CButton:hovered {
+CButton:hovered, CImageButton:hovered {
     background: rgb(95, 95, 95);
 }
 
-CButton:pressed {
+CButton:pressed, CImageButton:pressed {
     background: rgb(50, 50, 50);
     padding: 15px 6px 15px 4px;
 }
 
-CButton:disabled {
+CButton:disabled, CImageButton:disabled {
     background: rgb(50, 50, 50);
     color: rgb(128, 128, 128);
 }
 
-CButton::alternate {
+CImageButton CImage, CImageButton::alternate CImage {
+    min-width: 14px;
+    min-height: 14px;
+}
+
+CButton::alternate, CImageButton::alternate {
     background: rgb(0, 112, 224);
     flex-direction: row;
     min-width: 40px;
@@ -66,16 +71,16 @@ CButton::alternate {
     border-width: 1px;
 }
 
-CButton::alternate:hovered {
+CButton::alternate:hovered, CImageButton::alternate:hovered {
     background: rgb(14, 134, 255);
 }
 
-CButton::alternate:pressed {
+CButton::alternate:pressed, CImageButton::alternate:pressed {
     background: rgb(0, 100, 200);
     padding: 15px 6px 15px 4px;
 }
 
-CButton::alternate:disabled {
+CButton::alternate:disabled, CImageButton::alternate:disabled {
     background: rgb(0, 85, 171);
     color: rgb(128, 128, 128);
 }

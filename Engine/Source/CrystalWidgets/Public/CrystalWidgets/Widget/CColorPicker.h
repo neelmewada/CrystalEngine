@@ -21,6 +21,11 @@ namespace CE::Widgets
 		// Params: Vec2 normalizedPosition
 		CE_SIGNAL(OnPositionChanged, Vec2);
 
+		CE_SIGNAL(OnColorChanged, Color);
+
+		// Params: f32 H, f32 S, f32 V;
+		CE_SIGNAL(OnHSVColorChanged, f32, f32, f32);
+
 	protected:
 
 		void Construct() override;

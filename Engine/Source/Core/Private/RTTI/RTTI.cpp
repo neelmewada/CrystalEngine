@@ -184,9 +184,9 @@ namespace CE
         if (!displayName.IsEmpty())
             return displayName;
 
-		if (HasAttribute("Display") && GetAttribute("Display").IsString())
+		if (HasAttribute("DisplayName") && GetAttribute("DisplayName").IsString())
 		{
-			displayName = GetAttribute("Display").GetStringValue();
+			displayName = GetAttribute("DisplayName").GetStringValue();
 			if (!displayName.IsEmpty())
 				return displayName;
 		}

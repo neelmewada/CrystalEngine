@@ -122,40 +122,7 @@ namespace CE::Widgets
 				keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
 			}
 		}
-		/*
-		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
-			{
-				if (widget == nullptr || !widget->IsEnabled() || !widget->interactable)
-					return nullptr;
 
-				Rect widgetRect = widget->GetScreenSpaceRect();
-
-				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
-				if (nativeWindow)
-				{
-					if (!nativeWindow->IsShown() || nativeWindow->IsMinimized())
-					{
-						return nullptr;
-					}
-				}
-
-				if (widgetRect.Contains(globalMousePos))
-				{
-					for (int i = widget->attachedWidgets.GetSize() - 1; i >= 0; --i)
-					{
-						if (!widget->attachedWidgets[i]->IsEnabled())
-							continue;
-						CWidget* insideWidget = getBottomMostHoveredWidget(widget->attachedWidgets[i]);
-						if (insideWidget && insideWidget->receiveMouseEvents)
-							return insideWidget;
-					}
-
-					return widget;
-				}
-
-				return nullptr;
-			};
-			*/
 		CWidget* hoveredWidget = nullptr;
 
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
@@ -519,6 +486,11 @@ namespace CE::Widgets
 					keyEventWidget->HandleEvent(&keyEvent);
 				}
 			}
+		}
+
+		if (curFocusedWidget != nullptr && InputManager::IsKeyDown(KeyCode::Tab))
+		{
+			
 		}
 
 		// Per window events inside Tick()

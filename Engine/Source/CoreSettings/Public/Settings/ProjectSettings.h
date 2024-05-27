@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS(Settings = "ProjectSettings", Display = "Project", SettingsCategory = "Project")
+    CLASS(Settings = "ProjectSettings", DisplayName = "Project", SettingsCategory = "Project")
     class CORESETTINGS_API ProjectSettings : public Settings
     {
         CE_CLASS(ProjectSettings, Settings)
@@ -26,7 +26,7 @@ namespace CE
         FIELD(EditAnywhere, Category = "Legal")
 		String copyrightNotice = "";
 
-        FIELD(EditAnywhere, Category = "Legal", Display = "Privacy Policy URL")
+        FIELD(EditAnywhere, Category = "Legal", DisplayName = "Privacy Policy URL")
 		String privacyPolicyUrl = "";
     };
 }

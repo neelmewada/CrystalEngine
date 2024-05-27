@@ -53,12 +53,16 @@ Shader "2D/SDF Geometry"
                 float borderThickness;
                 float dashLength;
                 uint drawType; // enum DrawType;
-                uint charIndex; // For character drawing
-                uint bold;
+                uint charIndex;
+                uint bold; 
                 uint clipRect;
-                uint textureIndex;
-                uint samplerIndex;
+                uint textureIndex; // OR gradientStartIdx
+                uint samplerIndex; // OR gradientEndIdx
             };
+
+            #define gradientStartIdx textureIndex
+            #define gradientEndIdx samplerIndex
+            #define gradientRadians dashLength
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
@@ -83,6 +87,14 @@ Shader "2D/SDF Geometry"
                 uint _FrameIndex;
             };
 
+            struct GradientKey
+            {
+                float4 color;
+                float position;
+            };
+
+            StructuredBuffer<GradientKey> _GradientKeys : SRG_PerDraw(t5);
+
             struct CharacterItem
             {
                 float4 atlasUV;
@@ -102,6 +114,7 @@ Shader "2D/SDF Geometry"
                 DRAW_FrameBuffer,
                 DRAW_Triangle,
                 DRAW_DashedLine,
+                DRAW_LinearGradient,
             };
 
             #if VERTEX
@@ -218,6 +231,8 @@ Shader "2D/SDF Geometry"
                 float2 uv;
                 float borderThickness;
                 float dashLength;
+                uint textureIndex;
+                uint samplerIndex;
             };
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
@@ -275,6 +290,26 @@ Shader "2D/SDF Geometry"
                 if (info.outlineColor.a < 0.001)
                     info.outlineColor = color;
 
+                if (info.gradientStartIdx < info.gradientEndIdx)
+                {
+                    float2 pos = info.uv * info.itemSize;
+                    float angle = info.gradientRadians;
+                    float ratio = (pos.x / info.itemSize.x) * cos(angle) + (pos.y / info.itemSize.y) * sin(angle);
+                    if (ratio < 0.0)
+                        ratio = 1.0 + ratio;
+                    ratio = clamp(ratio, 0.0, 1.0);
+
+                    for (int i = info.gradientStartIdx; i < info.gradientEndIdx; i++)
+                    {
+                        if (_GradientKeys[i].position <= ratio && ratio <= _GradientKeys[i + 1].position)
+                        {
+                            color = lerp(_GradientKeys[i].color, _GradientKeys[i + 1].color, 
+                                clamp((ratio - _GradientKeys[i].position) / (_GradientKeys[i + 1].position - _GradientKeys[i].position), 0, 1));
+                            break;
+                        }
+                    }
+                }
+
                 color = lerp(color, info.outlineColor, borderMask);
 
                 const float sharpness = 50.0;
@@ -292,7 +327,29 @@ Shader "2D/SDF Geometry"
                 fillSdf = clamp(-fillSdf * sharpness, 0.0, 1.0);
                 borderSdf = clamp(-borderSdf * sharpness * 5.0, 0.0, 1.0);
 
-                float4 color = lerp(info.fillColor, info.outlineColor, borderSdf);
+                float4 fillColor = info.fillColor;
+
+                if (info.gradientStartIdx < info.gradientEndIdx)
+                {
+                    float2 pos = info.uv * info.itemSize;
+                    float angle = info.gradientRadians;
+                    float ratio = (pos.x / info.itemSize.x) * cos(angle) + (pos.y / info.itemSize.y) * sin(angle);
+                    if (ratio < 0.0)
+                        ratio = 1.0 + ratio;
+                    ratio = clamp(ratio, 0.0, 1.0);
+
+                    for (int i = info.gradientStartIdx; i < info.gradientEndIdx; i++)
+                    {
+                        if (_GradientKeys[i].position <= ratio && ratio <= _GradientKeys[i + 1].position)
+                        {
+                            fillColor = lerp(_GradientKeys[i].color, _GradientKeys[i + 1].color, 
+                                clamp((ratio - _GradientKeys[i].position) / (_GradientKeys[i + 1].position - _GradientKeys[i].position), 0, 1));
+                            break;
+                        }
+                    }
+                }
+
+                float4 color = lerp(fillColor, info.outlineColor, borderSdf);
 
                 return lerp(float4(color.rgb, 0), color, fillSdf);
             }
@@ -341,6 +398,9 @@ Shader "2D/SDF Geometry"
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
                 info.dashLength = _DrawList[idx].dashLength;
+                info.textureIndex = _DrawList[idx].textureIndex;
+                info.samplerIndex = _DrawList[idx].samplerIndex;
+
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
                 const float2 scaling = info.outlineColor.xy;

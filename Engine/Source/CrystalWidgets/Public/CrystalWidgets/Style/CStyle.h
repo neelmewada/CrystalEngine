@@ -254,7 +254,6 @@ namespace CE::Widgets
 	{
 		None = 0,
 		LinearGradient,
-		LinearGradient2D
 	};
 	ENUM_CLASS(CGradientType);
 
@@ -268,7 +267,7 @@ namespace CE::Widgets
 		Color color{};
 
 		FIELD()
-		Vec2 position{};
+		f32 position = 0;
 
 		FIELD()
 		bool isPercent = false;
@@ -280,6 +279,10 @@ namespace CE::Widgets
 	{
 		CE_STRUCT(CGradient)
 	public:
+
+		CGradient& WithRotation(f32 degrees);
+		CGradient& WithType(CGradientType gradientType);
+		CGradient& AddKey(const Color& color, f32 position, bool isPercent = true);
 
 		FIELD()
 		f32 rotationInDegrees = 0;

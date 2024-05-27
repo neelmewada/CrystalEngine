@@ -1319,6 +1319,7 @@ namespace CE::Widgets
 
 		Color bgColor = Color();
 		Name bgImage = "";
+		CGradient gradient{};
 		Color outlineColor = Color();
 		f32 borderWidth = 0.0f;
 		Vec4 borderRadius = Vec4();
@@ -1337,6 +1338,12 @@ namespace CE::Widgets
 		if (backgroundImageOverride.IsValid())
 		{
 			bgImage = backgroundImageOverride;
+		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage) &&
+			computedStyle.properties[CStylePropertyType::BackgroundImage].IsGradient())
+		{
+			gradient = computedStyle.properties[CStylePropertyType::BackgroundImage].gradient;
 		}
 
 		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderColor))
@@ -1358,6 +1365,11 @@ namespace CE::Widgets
 
 		CPen pen = CPen();// pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
 		CBrush brush = CBrush(); brush.SetColor(bgColor);
+		if (gradient.keys.NonEmpty())
+		{
+			brush.SetGradient(gradient);
+		}
+
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
@@ -1380,11 +1392,11 @@ namespace CE::Widgets
 
 		painter->SetRotation(rotation);
 
-		if (borderRadius == Vec4(0, 0, 0, 0) && bgColor.a > 0)
+		if (borderRadius == Vec4(0, 0, 0, 0) && (bgColor.a > 0 || gradient.keys.NonEmpty()))
 		{
 			painter->DrawRect(bgDrawRect);
 		}
-		else if (bgColor.a > 0)
+		else if (bgColor.a > 0 || gradient.keys.NonEmpty())
 		{
 			painter->DrawRoundedRect(bgDrawRect, borderRadius);
 		}

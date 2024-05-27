@@ -49,6 +49,8 @@ namespace CE::Widgets
 
     protected:
 
+        virtual void OnClickClose();
+
         virtual void OnPlatformWindowSet();
 
         void UpdateLayoutIfNeeded() override;

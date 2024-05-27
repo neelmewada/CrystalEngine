@@ -2,6 +2,11 @@
 
 namespace CE
 {
+    static const Color hueValues[] = { Color(1, 0, 0), Color(1, 1, 0), Color(0, 1, 0),
+    									Color(0, 1, 1), Color(0, 0, 1), Color(1, 0, 1),
+    									Color(1, 0, 0)
+    };
+
 	Color Color::RGBA8(u8 r, u8 g, u8 b, u8 a)
 	{
 		return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
@@ -22,48 +27,54 @@ namespace CE
         Color rgb{};
         rgb.a = 1.0f;
 
-        float c = v * s; // Chroma
-        float x = c * (1 - (f32)std::fabs(fmod(h / 60.0, 2) - 1));
-        float m = v - c;
+		if (h >= 360)
+			h = 359.999f;
 
-        float r_prime, g_prime, b_prime;
+		f32 rgbRange = v * s;
+		f32 maxRGB = v;
+		f32 minRGB = v - rgbRange;
+		f32 hPrime = h / 60.0;
+		f32 x1 = fmod(hPrime, 1.0);
+		f32 x2 = 1.0 - fmod(hPrime, 1.0);
 
-        if (0 <= h && h < 60) {
-            r_prime = c;
-            g_prime = x;
-            b_prime = 0;
-        }
-        else if (60 <= h && h < 120) {
-            r_prime = x;
-            g_prime = c;
-            b_prime = 0;
-        }
-        else if (120 <= h && h < 180) {
-            r_prime = 0;
-            g_prime = c;
-            b_prime = x;
-        }
-        else if (180 <= h && h < 240) {
-            r_prime = 0;
-            g_prime = x;
-            b_prime = c;
-        }
-        else if (240 <= h && h < 300) {
-            r_prime = x;
-            g_prime = 0;
-            b_prime = c;
-        }
-        else {
-            r_prime = c;
-            g_prime = 0;
-            b_prime = x;
-        }
+		if ((hPrime >= 0) && (hPrime < 1))
+		{
+			rgb.r = maxRGB;
+			rgb.g = (x1 * rgbRange) + minRGB;
+			rgb.b = minRGB;
+		}
+		else if ((hPrime >= 1) && (hPrime < 2))
+		{
+			rgb.r = (x2 * rgbRange) + minRGB;
+			rgb.g = maxRGB;
+			rgb.b = minRGB;
+		}
+		else if ((hPrime >= 2) && (hPrime < 3))
+		{
+			rgb.r = minRGB;
+			rgb.g = maxRGB;
+			rgb.b = (x1 * rgbRange) + minRGB;
+		}
+		else if ((hPrime >= 3) && (hPrime < 4))
+		{
+			rgb.r = minRGB;
+			rgb.g = (x2 * rgbRange) + minRGB;
+			rgb.b = maxRGB;
+		}
+		else if ((hPrime >= 4) && (hPrime < 5))
+		{
+			rgb.r = (x1 * rgbRange) + minRGB;
+			rgb.g = minRGB;
+			rgb.b = maxRGB;
+		}
+		else if ((hPrime >= 5) && (hPrime < 6))
+		{
+			rgb.r = maxRGB;
+			rgb.g = minRGB;
+			rgb.b = (x2 * rgbRange) + minRGB;
+		}
 
-        rgb.r = r_prime + m;
-        rgb.g = g_prime + m;
-        rgb.b = b_prime + m;
-
-        return rgb;
+		return rgb;
 	}
 
 	u32 Color::ToU32() const

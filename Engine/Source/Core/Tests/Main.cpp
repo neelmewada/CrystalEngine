@@ -1133,7 +1133,7 @@ public:
 CE_RTTI_CLASS(, , Core_Reflection_Attribute_Test_Class,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
-    CE_ATTRIBS(Display = "My Class Display Name", meta = (Id = 4124, Tooltip = "A tooltip description"), Redirects = (SomeOldName, "Old Name")),
+    CE_ATTRIBS(DisplayName = "My Class Display Name", meta = (Id = 4124, Tooltip = "A tooltip description"), Redirects = (SomeOldName, "Old Name")),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST()
 )
@@ -1149,9 +1149,9 @@ TEST(Reflection, Attribute_Parsing)
 
     auto classType = GetStaticClass<Core_Reflection_Attribute_Test_Class>();
     auto attrib = classType->GetAttributes();
-    EXPECT_TRUE(attrib.HasKey("Display"));
-    EXPECT_TRUE(classType->GetAttribute("Display").IsString());
-    EXPECT_EQ(classType->GetAttribute("Display").GetStringValue(), "My Class Display Name");
+    EXPECT_TRUE(attrib.HasKey("DisplayName"));
+    EXPECT_TRUE(classType->GetAttribute("DisplayName").IsString());
+    EXPECT_EQ(classType->GetAttribute("DisplayName").GetStringValue(), "My Class Display Name");
 
     EXPECT_TRUE(classType->HasAttribute("meta"));
     EXPECT_TRUE(classType->GetAttribute("meta").IsMap());

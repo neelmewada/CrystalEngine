@@ -17,7 +17,7 @@ namespace CE::Widgets
 
         void SetText(const String& text) { label->SetText(text); }
 
-        String GetText() const { return label->GetText(); }
+        const String& GetText() const { return label->GetText(); }
 
         // - Signals -
 

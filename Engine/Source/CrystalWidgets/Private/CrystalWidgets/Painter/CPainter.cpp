@@ -17,6 +17,8 @@ namespace CE::Widgets
     {
         renderer->ResetToDefaults();
 
+        renderer->SetFillGradient({}, GradientType::None);
+
         for (int i = 0; i < numFontsPushed; i++)
         {
             renderer->PopFont();
@@ -35,7 +37,25 @@ namespace CE::Widgets
     void CPainter::SetBrush(const CBrush& brush)
     {
         this->brush = brush;
+
+        // - Solid Color -
+
         renderer->SetFillColor(brush.color);
+
+        // - Gradient -
+
+        ColorGradient gradient{};
+        gradient.degrees = brush.gradient.rotationInDegrees;
+        gradient.keys.Reserve(brush.gradient.keys.GetSize());
+        for (const auto& key : brush.gradient.keys)
+        {
+            gradient.keys.Add({ .color = key.color.ToVec4(), .position = key.position / 100.0f }); // Percentage to ratio
+        }
+
+        if (brush.gradient.gradientType == CGradientType::LinearGradient)
+        {
+	        renderer->SetFillGradient(gradient, GradientType::Linear);
+        }
     }
 
     void CPainter::SetFont(const CFont& font)

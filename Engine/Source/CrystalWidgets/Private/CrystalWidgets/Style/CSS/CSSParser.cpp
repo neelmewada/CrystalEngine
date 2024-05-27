@@ -566,9 +566,9 @@ namespace CE::Widgets
 						{
 							isMinus = true;
 						}
-						else if (current->type == CSS::IdentifierToken && current->lexeme == "deg")
+						else if (current->type == CSS::IdentifierToken && current->lexeme == "rad")
 						{
-							
+							gradient.rotationInDegrees *= RAD_TO_DEG;
 						}
 						else if (current->type == CSS::CommaToken)
 						{
@@ -591,8 +591,7 @@ namespace CE::Widgets
 							{
 								if (pos >= gradient.keys.GetSize())
 									gradient.keys.Resize(pos + 1);
-								gradient.keys[pos].position.x = number;
-								gradient.keys[pos].position.y = 0;
+								gradient.keys[pos].position = number;
 							}
 						}
 						else if (current->type == CSS::PercentageToken)
@@ -853,13 +852,50 @@ namespace CE::Widgets
 		}
 	}
 
+	static u8 ParseByte(const char* str)
+	{
+		char msb = str[0];
+		char lsb = str[1];
+
+		u8 value = 0;
+
+		if (lsb >= '0' && lsb <= '9')
+		{
+			value = (u8)lsb - '0';
+		}
+		else if (lsb >= 'A' && lsb <= 'F')
+		{
+			value = 10 + (u8)lsb - 'A';
+		}
+
+		if (msb >= '0' && msb <= '9')
+		{
+			value += ((u8)msb - '0') * 16;
+		}
+		else if (msb >= 'A' && msb <= 'F')
+		{
+			value += (10 + (u8)msb - 'A') * 16;
+		}
+
+		return value;
+	}
+
 	void CSSParser::ParseColorU32(int cursor, Color& out)
 	{
-		const auto& lexeme = tokens[cursor].lexeme;
+		auto lexeme = tokens[cursor].lexeme.ToUpper();
 		int len = lexeme.GetLength();
-		u32 value = 0;
-		sscanf(lexeme.GetCString(), "%x", &value);
-		out = Color::RGBAHex(value);
+
+		if (len != 6 && len != 8) // RGB or RGBA
+			return;
+
+		u8 r = ParseByte(lexeme.GetCString());
+		u8 g = ParseByte(lexeme.GetCString() + 2);
+		u8 b = ParseByte(lexeme.GetCString() + 4);
+		u8 a = 255;
+		if (len == 8)
+			a = ParseByte(lexeme.GetCString() + 6);
+		
+		out = Color::RGBA(r, g, b, a);
 	}
 
     

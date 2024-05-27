@@ -5,7 +5,8 @@ namespace CE::Widgets
 
     CImage::CImage()
     {
-        
+        receiveMouseEvents = false;
+        receiveKeyEvents = false;
     }
 
     CImage::~CImage()
