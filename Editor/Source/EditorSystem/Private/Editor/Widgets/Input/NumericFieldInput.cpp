@@ -43,6 +43,15 @@ namespace CE::Editor
         this->precision = precision;
     }
 
+    void NumericFieldInput::SetRange(f64 min, f64 max)
+    {
+        useRange = true;
+        rangeMin = min;
+        rangeMax = max;
+
+        SetNeedsPaint();
+    }
+
     bool NumericFieldInput::OnAfterComputeStyle()
     {
         bool base = Super::OnAfterComputeStyle();
@@ -67,6 +76,10 @@ namespace CE::Editor
         {
             if (String::TryParse(text, floatValue))
             {
+                if (useRange)
+                {
+                    floatValue = Math::Clamp(floatValue, rangeMin, rangeMax);
+                }
                 text = String::Format("{:.{}f}", floatValue, precision);
             }
         }
@@ -74,12 +87,24 @@ namespace CE::Editor
             fieldType == NumericFieldType::Uint32 || fieldType == NumericFieldType::Uint64)
         {
             String::TryParse(text, unsignedValue);
+
+            if (useRange)
+            {
+                unsignedValue = Math::Clamp(unsignedValue, (u64)rangeMin, (u64)rangeMax);
+            }
+
             floatValue = unsignedValue;
         }
         else if (fieldType == NumericFieldType::Int8 || fieldType == NumericFieldType::Int16 ||
             fieldType == NumericFieldType::Int32 || fieldType == NumericFieldType::Int64)
         {
             String::TryParse(text, signedValue);
+
+            if (useRange)
+            {
+                signedValue = Math::Clamp(signedValue, (s64)rangeMin, (s64)rangeMax);
+            }
+
             floatValue = signedValue;
         }
     }
@@ -129,6 +154,11 @@ namespace CE::Editor
 
                 floatValue += deltaX * sensitivity;
 
+                if (useRange)
+                {
+                    floatValue = Math::Clamp(floatValue, rangeMin, rangeMax);
+                }
+
                 if (IsSignedInt())
                 {
                     signedValue = (s64)floatValue;
@@ -150,6 +180,18 @@ namespace CE::Editor
         }
 
 	    Super::HandleEvent(event);
+    }
+
+    void NumericFieldInput::OnPaintEarly(CPaintEvent* paintEvent)
+    {
+	    Super::OnPaintEarly(paintEvent);
+
+        CPainter* painter = paintEvent->painter;
+
+        if (useRange)
+        {
+	        
+        }
     }
 
 }

@@ -102,6 +102,25 @@ namespace CE::Editor
 		}
 	}
 
+	static String FormatHex(u32 hex)
+	{
+		String result = String::Format("{:08X}", hex);
+
+		// 102030F0
+		// F0302010
+
+		for (int i = 0; i < 2; ++i)
+		{
+			int pos = i * 2;
+			int otherPos = 6 - i * 2;
+
+			std::swap(result[pos], result[otherPos]);
+			std::swap(result[pos + 1], result[otherPos + 1]);
+		}
+
+		return result;
+	}
+
 	void ColorPickerTool::UpdateFields(CTextInput* excludeField)
 	{
 		constexpr const char* format = "{:.6f}";
@@ -123,7 +142,9 @@ namespace CE::Editor
 			inputA->SetText(String::Format(format, value.a));
 
 		if (hexInput != excludeField)
-			hexInput->SetText(String::Format("{:08X}", value.ToU32()));
+		{
+			hexInput->SetText(FormatHex(value.ToU32()));
+		}
 
 		previewNew->SetColor(value);
 
@@ -258,6 +279,8 @@ namespace CE::Editor
 							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
 							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
+							inputField->SetRange(0, 1);
+							inputField->SetFloatSensitivity(0.005f);
 
 							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
 
@@ -349,6 +372,7 @@ namespace CE::Editor
 							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
 							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
+							inputField->SetFloatSensitivity(0.01f);
 
 							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
 
@@ -356,6 +380,8 @@ namespace CE::Editor
 							{
 								inputH = inputField;
 								gradientH = gradientPreview;
+								inputField->SetRange(0, 360);
+								inputField->SetFloatSensitivity(4.0f);
 
 								CGradient gradient{};
 								gradient.gradientType = CGradientType::LinearGradient;
@@ -374,11 +400,13 @@ namespace CE::Editor
 							{
 								inputS = inputField;
 								gradientS = gradientPreview;
+								inputField->SetRange(0, 1);
 							}
 							else if (i == 2)
 							{
 								inputV = inputField;
 								gradientV = gradientPreview;
+								inputField->SetRange(0, 1);
 							}
 
 							Bind(inputField, MEMBER_FUNCTION(CTextInput, OnTextEdited), [this, i](CTextInput* inputField)
@@ -417,7 +445,7 @@ namespace CE::Editor
 					hexLabel->SetText("Hex");
 
 					hexInput = CreateObject<CTextInput>(hbox, "HexInput");
-					hexInput->SetText(String::Format("{:08X}", value.ToU32()));
+					hexInput->SetText(FormatHex(value.ToU32()));
 
 					Bind(hexInput, MEMBER_FUNCTION(CTextInput, OnEditingFinished), [this](CTextInput*)
 						{
