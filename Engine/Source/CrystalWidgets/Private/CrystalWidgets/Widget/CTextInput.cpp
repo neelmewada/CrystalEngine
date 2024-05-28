@@ -105,6 +105,10 @@ namespace CE::Widgets
         {
             text = originalText;
             isEditing = false;
+
+            stateFlags &= ~CStateFlag::Active;
+            SetNeedsStyle();
+            SetNeedsPaint();
         }
 
         Unfocus();
@@ -161,8 +165,9 @@ namespace CE::Widgets
         	isEditing = false;
         	cursorState = false;
 
+            stateFlags &= ~CStateFlag::Active;
             SetNeedsStyle();
-        	SetNeedsPaint();
+            SetNeedsPaint();
 
 	        emit OnEditingFinished(this);
 	        OnValidateText();
@@ -182,7 +187,8 @@ namespace CE::Widgets
             text = originalText;
             isEditing = false;
             cursorState = false;
-            
+
+            stateFlags &= ~CStateFlag::Active;
             SetNeedsStyle();
             SetNeedsPaint();
 
@@ -371,6 +377,32 @@ namespace CE::Widgets
         selectionRange.min = selectionRange.max = -1;
     }
 
+    void CTextInput::StartEditing()
+    {
+        Focus();
+
+        DeselectAll();
+        
+        timer->Reset();
+        timer->Start(cursorBlinkMillis);
+        cursorState = true;
+        isEditing = true;
+        originalText = text;
+        stateFlags |= CStateFlag::Active;
+
+        RecalculateOffsets();
+
+        SetCursorPos(0);
+
+        if (selectAllOnEdit)
+        {
+            SelectAll();
+        }
+
+        SetNeedsStyle();
+        SetNeedsPaint();
+    }
+
     void CTextInput::HandleEvent(CEvent* event)
     {
         Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
@@ -404,7 +436,7 @@ namespace CE::Widgets
 
                 event->Consume(this);
 
-                if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty())
+                if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty() && IsEditing())
                 {
                     SelectRange(0, characterOffsets.GetSize() - 1);
                     ScrollTo(characterOffsets.GetSize());
@@ -445,6 +477,7 @@ namespace CE::Widgets
                     cursorState = true;
                     isEditing = true;
                     originalText = text;
+                    stateFlags |= CStateFlag::Active;
 
                     RecalculateOffsets();
 
@@ -455,6 +488,7 @@ namespace CE::Widgets
                         SelectAll();
                     }
 
+                    SetNeedsStyle();
                     SetNeedsPaint();
                 }
             }
@@ -828,6 +862,11 @@ namespace CE::Widgets
             {
                 text = originalText;
                 isEditing = false;
+
+                stateFlags &= ~CStateFlag::Active;
+                SetNeedsStyle();
+                SetNeedsPaint();
+
                 Unfocus();
             }
         }

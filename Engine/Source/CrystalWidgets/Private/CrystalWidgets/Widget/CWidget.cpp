@@ -626,7 +626,7 @@ namespace CE::Widgets
 				{
 					hoverCursor = static_cast<CCursor>(value.enumValue.x);
 				}
-
+				
 				// Yoga Properties
 				if (property == CStylePropertyType::Display && value.IsEnum())
 				{
@@ -1723,6 +1723,12 @@ namespace CE::Widgets
 				isPressed = true;
 				SetNeedsStyle();
 				SetNeedsPaint();
+
+				if (hoverCursor != CCursor::Inherited) // Force update the cursor
+				{
+					CApplication::Get()->PopCursor();
+					CApplication::Get()->PushCursor(hoverCursor);
+				}
 			}
 			else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
 			{
@@ -1731,6 +1737,12 @@ namespace CE::Widgets
 				isPressed = false;
 				SetNeedsStyle();
 				SetNeedsPaint();
+
+				if (hoverCursor != CCursor::Inherited) // Force update the cursor
+				{
+					CApplication::Get()->PopCursor();
+					CApplication::Get()->PushCursor(hoverCursor);
+				}
 			}
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))

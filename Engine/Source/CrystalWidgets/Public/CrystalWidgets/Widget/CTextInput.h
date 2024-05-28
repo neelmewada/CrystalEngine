@@ -29,6 +29,8 @@ namespace CE::Widgets
 
 		void StopEditing(bool restoreOriginalText = false);
 
+		void StartEditing();
+
 		b8 IsEditable() const { return isEditable; }
 
 		void SetEditable(bool editable) { isEditable = editable; }
@@ -100,7 +102,7 @@ namespace CE::Widgets
 		FIELD()
 		CTimer* timer = nullptr;
 
-	private:
+	protected:
 
 		bool OnAfterComputeStyle() override
 		{
