@@ -106,9 +106,6 @@ namespace CE::Editor
 	{
 		String result = String::Format("{:08X}", hex);
 
-		// 102030F0
-		// F0302010
-
 		for (int i = 0; i < 2; ++i)
 		{
 			int pos = i * 2;

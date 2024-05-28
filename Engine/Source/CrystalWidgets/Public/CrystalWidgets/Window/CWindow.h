@@ -47,6 +47,9 @@ namespace CE::Widgets
 
         CWidget* HitTest(Vec2 windowSpaceMousePos) override;
 
+        void AttachSubWindow(CWindow* subWindow);
+        void DetachSubWindow(CWindow* subWindow);
+
     protected:
 
         virtual void OnClickClose();
@@ -94,6 +97,9 @@ namespace CE::Widgets
 
         FIELD()
         Array<CMenuItem*> menuItems{};
+
+        FIELD()
+        Array<CWindow*> attachedWindows{};
 
         Array<Rect> controlRects{};
         StaticArray<bool, 3> hoveredControls{};

@@ -21,9 +21,9 @@ namespace CE::Widgets
 
         void Show(Vec2i screenPosition, Vec2i size);
 
-        void ShowCenteredScreen(Vec2i size);
-
         bool IsShown();
+
+        Vec2 GetComputedLayoutTopLeft() override;
 
     protected:
 
@@ -35,11 +35,14 @@ namespace CE::Widgets
 
         void OnBeforeDestroy() override;
 
+
+        CWindow* rootWindow = nullptr;
         
         Vec2i showPosition = Vec2i(0, 0);
 
         Vec2i showSize = Vec2i(0, 0);
 
+        bool showNativeWindow = false;
 
         CE_WIDGET_FRIENDS();
     };

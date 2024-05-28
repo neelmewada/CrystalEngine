@@ -437,7 +437,42 @@ namespace CE::Widgets
 
     CWidget* CWindow::HitTest(Vec2 windowSpaceMousePos)
     {
+        for (int i = attachedWindows.GetSize() - 1; i >= 0; i--)
+        {
+            CWindow* attachedWindow = attachedWindows[i];
+            if (!attachedWindow->IsEnabled() || !attachedWindow->IsVisible())
+            {
+	            continue;
+            }
+
+	        CWidget* widget = attachedWindow->HitTest(windowSpaceMousePos);
+
+            if (widget)
+            {
+                CE_LOG(Info, All, "Hit Widget: {}", widget->GetName());
+                return widget;
+            }
+        }
+
 	    return Super::HitTest(windowSpaceMousePos);
+    }
+
+    void CWindow::AttachSubWindow(CWindow* subWindow)
+    {
+        if (attachedWindows.Exists(subWindow))
+            return;
+
+        attachedWindows.Add(subWindow);
+
+        subWindow->SetNeedsPaint();
+        SetNeedsPaint();
+    }
+
+    void CWindow::DetachSubWindow(CWindow* subWindow)
+    {
+        attachedWindows.Remove(subWindow);
+
+        SetNeedsPaint();
     }
 
     void CWindow::OnClickClose()

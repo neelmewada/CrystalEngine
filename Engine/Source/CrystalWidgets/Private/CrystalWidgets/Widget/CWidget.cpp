@@ -326,6 +326,16 @@ namespace CE::Widgets
 		{
 			attachedWidgets[i]->SetNeedsStyle();
 		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				attachedWindow->SetNeedsStyle();
+			}
+		}
 	}
 
 	bool CWidget::NeedsPaint()
@@ -337,6 +347,17 @@ namespace CE::Widgets
 		{
 			if (widget != this && widget != nullptr && widget->NeedsPaint())
 				return true;
+		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				if (attachedWindow != this && attachedWindow->NeedsPaint())
+					return true;
+			}
 		}
 
 		return false;
@@ -458,6 +479,16 @@ namespace CE::Widgets
 			for (CWidget* widget : attachedWidgets)
 			{
 				widget->UpdateLayoutIfNeeded();
+			}
+
+			if (IsWindow())
+			{
+				CWindow* window = static_cast<CWindow*>(this);
+
+				for (CWindow* attachedWindow : window->attachedWindows)
+				{
+					attachedWindow->UpdateLayoutIfNeeded();
+				}
 			}
 
 			OnAfterUpdateLayout();
@@ -901,6 +932,16 @@ namespace CE::Widgets
 		{
 			child->UpdateStyleIfNeeded();
 		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				attachedWindow->UpdateStyleIfNeeded();
+			}
+		}
 	}
 
 	void CWidget::AddSubWidget(CWidget* widget)
@@ -1074,6 +1115,33 @@ namespace CE::Widgets
 		}
 	}
 
+	Vec2 CWidget::LocalToWindowSpacePos(const Vec2& point)
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return rootOrigin + point;
+				}
+			}
+
+			return point;
+		}
+
+		Vec2 scrollOffset = Vec2();
+
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		return rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + point;
+	}
+
 	Vec2 CWidget::ScreenToLocalSpacePoint(const Vec2& point)
 	{
 		if (ownerWindow == nullptr)
@@ -1199,6 +1267,22 @@ namespace CE::Widgets
 		if (!parent)
 			return nullptr;
 		return parent->GetNativeWindow();
+	}
+
+	CWindow* CWidget::GetRootWindow()
+	{
+		if (IsWindow() && ownerWindow == nullptr)
+		{
+			return (CWindow*)this;
+		}
+
+		if (ownerWindow)
+			return ownerWindow->GetRootWindow();
+
+		if (parent)
+			return parent->GetRootWindow();
+
+		return nullptr;
 	}
 
 	void CWidget::QueueDestroy()
@@ -1735,6 +1819,11 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
+				if (IsOfType<CMenuItem>())
+				{
+					//CE_LOG(Info, All, "Widget Mouse Entered: {}", ((CMenuItem*)this)->GetText());
+				}
+
 				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
@@ -1759,6 +1848,11 @@ namespace CE::Widgets
 			}
 			else if (event->type == CEventType::MouseLeave)
 			{
+				if (IsOfType<CMenuItem>())
+				{
+					//CE_LOG(Info, All, "Widget Mouse Exit: {}", ((CMenuItem*)this)->GetText());
+				}
+
 				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Hovered;
 				if (isPressed)
@@ -1801,6 +1895,16 @@ namespace CE::Widgets
 						return;
 					}
 					widget->HandleEvent(event);
+				}
+
+				if (IsWindow())
+				{
+					CWindow* thisWindow = static_cast<CWindow*>(this);
+
+					for (CWindow* attachedWindow : thisWindow->attachedWindows)
+					{
+						attachedWindow->HandleEvent(event);
+					}
 				}
 			}
 		}

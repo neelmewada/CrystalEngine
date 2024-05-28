@@ -35,6 +35,21 @@ namespace CE::Editor
             CMenuItem* openItem = CreateObject<CMenuItem>(fileMenu, "Open");
             openItem->SetText("Open");
 
+            CMenuItem* recentItem = CreateObject<CMenuItem>(fileMenu, "Recent");
+            recentItem->SetText("Recent Projects");
+            {
+                CMenu* recentMenu = CreateObject<CMenu>(recentItem, "RecentMenu");
+
+                CMenuItem* project1 = CreateObject<CMenuItem>(recentMenu, "Project1");
+                project1->SetText("Project 1");
+
+                CMenuItem* project2 = CreateObject<CMenuItem>(recentMenu, "Project2");
+                project2->SetText("Project 2");
+
+                CMenuItem* project3 = CreateObject<CMenuItem>(recentMenu, "Project3");
+                project3->SetText("Project 3");
+            }
+
             CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
             exit->SetText("Exit");
 

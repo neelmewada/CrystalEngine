@@ -196,6 +196,7 @@ namespace CE::Widgets
 
         Vec2 LocalToScreenSpacePos(const Vec2& point);
         Rect LocalToScreenSpaceRect(const Rect& localRect);
+        Vec2 LocalToWindowSpacePos(const Vec2& point);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
         Vec2 ScreenToLocalSpacePoint(const Vec2& point);
         Vec2 ScreenToWindowSpacePoint(const Vec2& point);
@@ -206,6 +207,8 @@ namespace CE::Widgets
         Renderer2D* GetRenderer();
 
         CPlatformWindow* GetNativeWindow();
+
+        CWindow* GetRootWindow();
 
         void QueueDestroy();
 

@@ -80,7 +80,7 @@ namespace CE
 		FIELD()
 		CE::Scene* scene = nullptr;
 
-		FIELD(EditAnywhere, Category = "Actor")
+		FIELD(EditAnywhere, Category = "Actor", DisplayName = "Enabled")
 		bool isEnabled = true;
 
 		b8 hasBegunPlaying = false;
