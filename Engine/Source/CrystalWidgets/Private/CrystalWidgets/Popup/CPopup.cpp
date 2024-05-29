@@ -85,6 +85,13 @@ namespace CE::Widgets
 			SetNeedsLayout();
 			SetNeedsStyle();
 			SetNeedsPaint();
+
+			UpdateStyleIfNeeded();
+			UpdateLayoutIfNeeded();
+
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
 		}
 	}
 
