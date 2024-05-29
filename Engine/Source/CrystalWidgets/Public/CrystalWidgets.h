@@ -27,6 +27,7 @@
 	friend class CSSSelector;\
 	friend class CSplitViewContainer;\
 	friend class CSplitView;\
+	friend class CComboBox;\
 
 
 // Style
@@ -77,15 +78,19 @@
 #include "CrystalWidgets/Item/CBaseItemDelegate.h"
 #include "CrystalWidgets/Item/CStandardItemDelegate.h"
 
+// Popups
+#include "CrystalWidgets/Popup/CPopup.h"
+
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
-#include "CrystalWidgets/Widget/CLabelButton.h"
-#include "CrystalWidgets/Widget/CButton.h"
+#include "CrystalWidgets/Widget/Input/CLabelButton.h"
+#include "CrystalWidgets/Widget/Input/CButton.h"
 #include "CrystalWidgets/Widget/CImage.h"
-#include "CrystalWidgets/Widget/CImageButton.h"
-#include "CrystalWidgets/Widget/CColorPicker.h"
-#include "CrystalWidgets/Widget/CCheckBox.h"
-#include "CrystalWidgets/Widget/CTextInput.h"
+#include "CrystalWidgets/Widget/Input/CImageButton.h"
+#include "CrystalWidgets/Widget/Input/CColorPicker.h"
+#include "CrystalWidgets/Widget/Input/CCheckBox.h"
+#include "CrystalWidgets/Widget/Input/CTextInput.h"
+#include "CrystalWidgets/Widget/Input/CComboBox.h"
 #include "CrystalWidgets/Widget/CTabWidget.h"
 #include "CrystalWidgets/Widget/CTabWidgetContainer.h"
 #include "CrystalWidgets/Widget/CScrollArea.h"
@@ -100,9 +105,6 @@
 #include "CrystalWidgets/Widget/CTreeWidgetItem.h"
 #include "CrystalWidgets/Widget/CTreeWidgetRow.h"
 #include "CrystalWidgets/Widget/CTreeWidget.h"
-
-// Popups
-#include "CrystalWidgets/Popup/CPopup.h"
 
 //Menu
 #include "CrystalWidgets/Menu/CMenu.h"

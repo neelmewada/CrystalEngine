@@ -18,6 +18,15 @@ namespace CE::Editor
         Super::Construct();
 
         SetTitle("Assets");
+
+        CComboBox* comboBox = CreateObject<CComboBox>(this, "TestComboBox");
+        {
+	        for (int i = 0; i < 8; ++i)
+	        {
+                CComboBoxItem* item = CreateObject<CComboBoxItem>(comboBox, "ComboBoxItem");
+                item->SetText(String::Format("Item {}", i));
+	        }
+        }
     }
 
     void AssetBrowserWindow::OnPaint(CPaintEvent* paintEvent)

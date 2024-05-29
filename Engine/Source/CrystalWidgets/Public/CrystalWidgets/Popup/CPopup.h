@@ -25,7 +25,11 @@ namespace CE::Widgets
 
         Vec2 GetComputedLayoutTopLeft() override;
 
+        Vec2 GetComputedLayoutSize() override;
+
     protected:
+
+        bool PostComputeStyle() override;
 
         void OnFocusLost() override;
 
@@ -35,14 +39,17 @@ namespace CE::Widgets
 
         void OnBeforeDestroy() override;
 
+        FIELD(Config)
+        bool useNativeWindow = false;
+
+        FIELD()
+        bool hideWhenUnfocused = false;
 
         CWindow* rootWindow = nullptr;
         
         Vec2i showPosition = Vec2i(0, 0);
 
         Vec2i showSize = Vec2i(0, 0);
-
-        bool showNativeWindow = false;
 
         CE_WIDGET_FRIENDS();
     };

@@ -61,6 +61,7 @@ namespace CE::Widgets
             subMenu->UpdateLayoutIfNeeded();
 
             Vec2 menuSize = subMenu->GetComputedLayoutSize();
+            menuSize = Vec2();
 
             stateFlags |= CStateFlag::Active;
 

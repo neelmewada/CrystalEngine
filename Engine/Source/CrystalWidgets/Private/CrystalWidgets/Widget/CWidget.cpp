@@ -918,7 +918,7 @@ namespace CE::Widgets
 				}
 			}
 
-			layoutChanged = OnAfterComputeStyle() || layoutChanged;
+			layoutChanged = PostComputeStyle() || layoutChanged;
 
 			needsStyle = false;
 
@@ -1987,6 +1987,8 @@ namespace CE::Widgets
 			SetNeedsStyle();
 			SetNeedsPaint();
 		}
+
+		stateFlags &= ~(CStateFlag::Pressed | CStateFlag::Hovered);
 
 		for (CWidget* widget : attachedWidgets)
 		{

@@ -52,9 +52,9 @@ namespace CE::Editor
         SetNeedsPaint();
     }
 
-    bool NumericFieldInput::OnAfterComputeStyle()
+    bool NumericFieldInput::PostComputeStyle()
     {
-        bool base = Super::OnAfterComputeStyle();
+        bool base = Super::PostComputeStyle();
 
         if (IsEditing())
         {

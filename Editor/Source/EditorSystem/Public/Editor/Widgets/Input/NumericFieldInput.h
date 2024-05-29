@@ -48,7 +48,7 @@ namespace CE::Editor
 
     protected:
 
-        bool OnAfterComputeStyle() override;
+        bool PostComputeStyle() override;
 
         void OnValidateText() override;
 
