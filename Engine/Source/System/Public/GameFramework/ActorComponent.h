@@ -54,7 +54,7 @@ namespace CE
 
 	private:
 
-		FIELD(EditAnywhere, Category = "Component")
+		FIELD(EditAnywhere, Category = "Component", DisplayName = "Enabled")
 		bool isEnabled = true;
 
 		b8 hasBegunPlaying = false;

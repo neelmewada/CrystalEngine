@@ -7,7 +7,6 @@ namespace CE::Widgets
     {
         canBeClosed = canBeMaximized = canBeMinimized = false;
 
-
         receiveMouseEvents = receiveKeyEvents = true;
     }
 
@@ -37,12 +36,11 @@ namespace CE::Widgets
 
     void CMenu::Hide()
     {
-        if (nativeWindow)
+        for (auto menuItem : menuItems)
         {
-            for (auto menuItem : menuItems)
-            {
-                menuItem->HideSubMenu();
-            }
+            menuItem->SetStateFlags(CStateFlag::Default);
+
+            menuItem->HideSubMenu();
         }
 
         Super::Hide();

@@ -25,6 +25,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::BackgroundImage, TYPE(String), false },
 		{ CStylePropertyType::BackgroundSize, TYPE(Vec2), false },
 		{ CStylePropertyType::BackgroundPosition, TYPE(CTextAlign), false },
+		{ CStylePropertyType::BackgroundRepeat, TYPE(CBackgroundRepeat), false },
 		{ CStylePropertyType::BorderRadius, TYPE(Vec4), false },
 		{ CStylePropertyType::BorderWidth, TYPE(f32), false },
 		{ CStylePropertyType::BorderColor, TYPE(Color), false },
@@ -94,6 +95,7 @@ namespace CE::Widgets
 		{ "shadow", CStylePropertyType::ShadowColor }, { "box-shadow", CStylePropertyType::ShadowColor }, { "shadow-color", CStylePropertyType::ShadowColor },
 		{ "background-size", CStylePropertyType::BackgroundSize },
 		{ "background-position", CStylePropertyType::BackgroundPosition },
+		{ "background-repeat", CStylePropertyType::BackgroundRepeat },
 		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
 		{ "word-wrap", CStylePropertyType::WordWrap },
@@ -104,8 +106,9 @@ namespace CE::Widgets
 		{ "max-width", CStylePropertyType::MaxWidth },
 		{ "max-height", CStylePropertyType::MaxHeight },
 		{ "font-size", CStylePropertyType::FontSize },
-		{ "font-name", CStylePropertyType::FontName},
-		{ "font", CStylePropertyType::FontName},
+		{ "font-name", CStylePropertyType::FontName },
+		{ "font-family", CStylePropertyType::FontName },
+		{ "font", CStylePropertyType::FontName },
 		{ "text-decoration-color", CStylePropertyType::TextDecorationColor },
 		{ "text-decoration-line", CStylePropertyType::TextDecorationLine },
 		{ "text-decoration-style", CStylePropertyType::TextDecorationStyle },
@@ -150,6 +153,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() },
 		{ CStylePropertyType::BackgroundSize, GetStaticEnum<CBackgroundSize>() },
 		{ CStylePropertyType::BackgroundPosition, GetStaticEnum<CTextAlign>() },
+		{ CStylePropertyType::BackgroundRepeat, GetStaticEnum<CBackgroundRepeat>() },
 		{ CStylePropertyType::TextDecorationStyle, GetStaticEnum<CTextDecorationStyle>() },
 		{ CStylePropertyType::TextDecorationLine, GetStaticEnum<CTextDecorationLine>() },
 	};
@@ -178,6 +182,28 @@ namespace CE::Widgets
 		return stringToAlignmentMap[string];
 	}
 
+	CGradient& CGradient::WithRotation(f32 degrees)
+	{
+		rotationInDegrees = degrees;
+		return *this;
+	}
+
+	CGradient& CGradient::WithType(CGradientType gradientType)
+	{
+		this->gradientType = gradientType;
+		return *this;
+	}
+
+	CGradient& CGradient::AddKey(const Color& color, f32 position, bool isPercent)
+	{
+		CGradientKey key{};
+		key.color = color;
+		key.position = position;
+		key.isPercent = isPercent;
+		keys.Add(key);
+		return *this;
+	}
+
 	CStyleValue::CStyleValue()
 	{
 
@@ -185,7 +211,7 @@ namespace CE::Widgets
 
 	void CStyleValue::Release()
 	{
-		string.~String();
+		
 	}
 
 	CStyleValue::CStyleValue(f32 single, bool isPercent)
@@ -214,6 +240,11 @@ namespace CE::Widgets
 
 	}
 
+	CStyleValue::CStyleValue(const CGradient& gradient)
+		: gradient(gradient), valueType(Type_Gradient)
+	{
+	}
+
 	CStyleValue::CStyleValue(const CStyleValue& copy)
 	{
 		CopyFrom(copy);
@@ -230,6 +261,8 @@ namespace CE::Widgets
 		CopyFrom(move);
 
 		move.string.~String();
+		move.gradient.~CGradient();
+		memset(&move, 0, sizeof(CStyleValue));
 	}
 
 	void CStyleValue::CopyFrom(const CStyleValue& copy)
@@ -245,6 +278,7 @@ namespace CE::Widgets
 		vector = copy.vector;
 		color = copy.color;
 		string = copy.string;
+		gradient = copy.gradient;
 	}
 
 	const Array<CStylePropertyType>& CStyle::GetInheritedProperties()

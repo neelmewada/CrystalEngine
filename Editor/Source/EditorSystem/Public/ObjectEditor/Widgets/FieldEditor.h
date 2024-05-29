@@ -10,13 +10,15 @@ namespace CE::Editor
 
         virtual ~FieldEditor();
 
-    protected:
+        virtual void BindField(FieldType* field, void* instance) = 0;
 
-        void Construct() override;
+    protected:
 
         FieldEditor();
 
-        
+        void Construct() override;
+
+
     };
 
 } // namespace CE::Editor

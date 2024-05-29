@@ -64,6 +64,10 @@ namespace CE::Widgets
 
             stateFlags |= CStateFlag::Active;
 
+            SetNeedsStyle();
+            SetNeedsLayout();
+            SetNeedsPaint();
+
             subMenu->Show(pos.ToVec2i(), menuSize.ToVec2i());
         }
     }
@@ -106,6 +110,8 @@ namespace CE::Widgets
 
             if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
+                CE_LOG(Info, All, "Mouse Press: {}", label->GetText());
+
                 SetNeedsPaint();
                 event->Consume(this);
             }
@@ -144,6 +150,8 @@ namespace CE::Widgets
             {
                 CMenu* parentMenu = static_cast<CMenu*>(parent);
 
+                //CE_LOG(Info, All, "Mouse Enter: {}", label->GetText());
+
                 for (int i = 0; i < parentMenu->GetMenuItemCount(); ++i)
                 {
                     CMenuItem* menuItem = parentMenu->GetMenuItem(i);
@@ -155,9 +163,9 @@ namespace CE::Widgets
                 }
 
                 ShowSubMenu();
-                event->Consume(this);
             }
 
+            SetNeedsStyle();
             SetNeedsPaint();
         }
 

@@ -49,9 +49,30 @@ namespace CE::Widgets
         }
 
         this->text = value;
+        OnValidateText();
 
         RecalculateOffsets();
 
+        emit OnTextChanged(this);
+
+        SetNeedsLayout();
+        SetNeedsPaint();
+
+        return true;
+    }
+
+    bool CTextInput::SetTextInternal(const String& value)
+    {
+        if (inputValidator.IsValid() && !inputValidator.Invoke(value))
+        {
+            return false;
+        }
+
+        this->text = value;
+
+        RecalculateOffsets();
+
+        emit OnTextEdited(this);
         emit OnTextChanged(this);
 
         SetNeedsLayout();
@@ -84,6 +105,10 @@ namespace CE::Widgets
         {
             text = originalText;
             isEditing = false;
+
+            stateFlags &= ~CStateFlag::Active;
+            SetNeedsStyle();
+            SetNeedsPaint();
         }
 
         Unfocus();
@@ -133,19 +158,46 @@ namespace CE::Widgets
 
         DeselectAll();
 
-        textScrollOffset = 0;
-        timer->Stop();
-        isEditing = false;
-        cursorState = false;
-        SetNeedsPaint();
-
         if (isEditing)
         {
-            emit OnEditingFinished(this);
+	        textScrollOffset = 0;
+        	timer->Stop();
+        	isEditing = false;
+        	cursorState = false;
+
+            stateFlags &= ~CStateFlag::Active;
+            SetNeedsStyle();
+            SetNeedsPaint();
+
+	        emit OnEditingFinished(this);
+	        OnValidateText();
         }
     }
 
-    void CTextInput::RecalculateOffsets()
+    void CTextInput::OnDisabled()
+    {
+	    Super::OnDisabled();
+
+        DeselectAll();
+
+        if (isEditing)
+        {
+            textScrollOffset = 0;
+            timer->Stop();
+            text = originalText;
+            isEditing = false;
+            cursorState = false;
+
+            stateFlags &= ~CStateFlag::Active;
+            SetNeedsStyle();
+            SetNeedsPaint();
+
+            emit OnEditingFinished(this);
+            OnValidateText();
+        }
+    }
+
+    bool CTextInput::RecalculateOffsets()
     {
         Renderer2D* renderer = GetRenderer();
 
@@ -157,8 +209,13 @@ namespace CE::Widgets
             if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
                 fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
+            Vec2 oldTextSize = textSize;
             textSize = renderer->CalculateTextOffsets(characterOffsets, GetDisplayText(), fontSize, fontName);
+
+            return textSize != oldTextSize;
         }
+
+        return false;
     }
 
     void CTextInput::SetCursorPos(int cursorPos)
@@ -259,7 +316,7 @@ namespace CE::Widgets
             newText.InsertAt(string[i], insertPos + i);
         }
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 
@@ -274,7 +331,7 @@ namespace CE::Widgets
         String newText = text;
         newText.Remove(startIndex, count);
 
-        bool success = SetText(newText);
+        bool success = SetTextInternal(newText);
         if (!success)
             return;
 
@@ -320,6 +377,32 @@ namespace CE::Widgets
         selectionRange.min = selectionRange.max = -1;
     }
 
+    void CTextInput::StartEditing()
+    {
+        Focus();
+
+        DeselectAll();
+        
+        timer->Reset();
+        timer->Start(cursorBlinkMillis);
+        cursorState = true;
+        isEditing = true;
+        originalText = text;
+        stateFlags |= CStateFlag::Active;
+
+        RecalculateOffsets();
+
+        SetCursorPos(0);
+
+        if (selectAllOnEdit)
+        {
+            SelectAll();
+        }
+
+        SetNeedsStyle();
+        SetNeedsPaint();
+    }
+
     void CTextInput::HandleEvent(CEvent* event)
     {
         Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
@@ -328,7 +411,7 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
             fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
-        if (event->IsMouseEvent())
+        if (event->IsMouseEvent() && !event->isConsumed)
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
             Vec2 screenMousePos = mouseEvent->mousePos;
@@ -351,7 +434,9 @@ namespace CE::Widgets
             {
                 int selectedIdx = -1;
 
-                if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty())
+                event->Consume(this);
+
+                if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty() && IsEditing())
                 {
                     SelectRange(0, characterOffsets.GetSize() - 1);
                     ScrollTo(characterOffsets.GetSize());
@@ -392,6 +477,7 @@ namespace CE::Widgets
                     cursorState = true;
                     isEditing = true;
                     originalText = text;
+                    stateFlags |= CStateFlag::Active;
 
                     RecalculateOffsets();
 
@@ -402,6 +488,7 @@ namespace CE::Widgets
                         SelectAll();
                     }
 
+                    SetNeedsStyle();
                     SetNeedsPaint();
                 }
             }
@@ -480,11 +567,12 @@ namespace CE::Widgets
                 SetNeedsPaint();
             }
         }
-        else if (event->type == CEventType::KeyHeld || event->type == CEventType::KeyPress)
+        else if (!event->isConsumed && (event->type == CEventType::KeyHeld || event->type == CEventType::KeyPress))
         {
             Renderer2D* renderer = GetRenderer();
             
             CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
+            event->Consume(this);
 
         	bool shiftPressed = EnumHasAnyFlags(keyEvent->modifier, KeyModifier::LShift | KeyModifier::RShift);
             bool capslock = EnumHasAnyFlags(keyEvent->modifier, KeyModifier::Caps);
@@ -683,7 +771,7 @@ namespace CE::Widgets
                     c = '9';
                     break;
                 case KeyCode::KeypadPeriod:
-                    c = '0';
+                    c = '.';
                     break;
 	            }
 
@@ -774,6 +862,11 @@ namespace CE::Widgets
             {
                 text = originalText;
                 isEditing = false;
+
+                stateFlags &= ~CStateFlag::Active;
+                SetNeedsStyle();
+                SetNeedsPaint();
+
                 Unfocus();
             }
         }

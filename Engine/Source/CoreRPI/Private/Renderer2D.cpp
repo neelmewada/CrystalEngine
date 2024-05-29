@@ -1,12 +1,27 @@
-#include "Renderer2D.h"
-#include "Renderer2D.h"
-#include "Renderer2D.h"
-
 #include "CoreRPI.h"
 
 namespace CE::RPI
 {
 	constexpr bool ForceDisableBatching = false;
+
+	SIZE_T ColorGradient::Key::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(color);
+		CombineHash(hash, position);
+		return hash;
+	}
+
+	SIZE_T ColorGradient::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(degrees);
+
+		for (int i = 0; i < keys.GetSize(); ++i)
+		{
+			CombineHash(hash, keys[i]);
+		}
+
+		return hash;
+	}
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
@@ -59,6 +74,16 @@ namespace CE::RPI
 			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(clipRectBufferDesc);
 			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);
 
+			RHI::BufferDescriptor gradientKeysBufferDesc{};
+			gradientKeysBufferDesc.name = "ClipRect Buffer";
+			gradientKeysBufferDesc.bufferSize = 50 * sizeof(ColorGradient::Key);
+			gradientKeysBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			gradientKeysBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
+			gradientKeysBufferDesc.structureByteStride = sizeof(ColorGradient::Key);
+
+			gradientKeysBuffer[i] = gDynamicRHI->CreateBuffer(gradientKeysBufferDesc);
+			drawItemSrg->Bind(i, "_GradientKeys", gradientKeysBuffer[i]);
+
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
 			viewConstantsBufferDesc.name = "ViewConstants";
 			viewConstantsBufferDesc.bufferSize = sizeof(viewConstants);
@@ -85,12 +110,40 @@ namespace CE::RPI
 			drawItemSrg->Bind(i, "_DrawDataConstants", drawDataConstantsBuffer[i]);
 		}
 
-		RHI::SamplerDescriptor textureSampler{};
-		textureSampler.addressModeU = textureSampler.addressModeV = textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
-		textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
-		textureSampler.enableAnisotropy = false;
-		textureSampler.samplerFilterMode = FilterMode::Cubic;
-		drawItemSrg->Bind("_TextureSampler", RPISystem::Get().FindOrCreateSampler(textureSampler));
+		{
+			RHI::SamplerDescriptor textureSampler{};
+			textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+			textureSampler.enableAnisotropy = false;
+			textureSampler.samplerFilterMode = FilterMode::Cubic;
+
+			textureSampler.addressModeU = textureSampler.addressModeV = textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+			textureSampler.addressModeV = SamplerAddressMode::ClampToBorder;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::ClampToBorder;
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+			samplerDescriptors.Add(textureSampler);
+
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+			samplerDescriptors.Add(textureSampler);
+		}
+
+		{
+			samplers.Reserve(samplerDescriptors.GetSize());
+			samplerIndices.Clear();
+
+			for (int i = 0; i < samplerDescriptors.GetSize(); i++)
+			{
+				samplerIndices[samplerDescriptors[i]] = i;
+				samplers.Add(RPISystem::Get().FindOrCreateSampler(samplerDescriptors[i]));
+			}
+
+			drawItemSrg->Bind("_TextureSamplers", samplers.GetSize(), samplers.GetData());
+		}
 		
 		perViewSrg->FlushBindings();
 		drawItemSrg->FlushBindings();
@@ -111,6 +164,9 @@ namespace CE::RPI
 
 			delete drawDataConstantsBuffer[i];
 			drawDataConstantsBuffer[i] = nullptr;
+
+			delete gradientKeysBuffer[i];
+			gradientKeysBuffer[i] = nullptr;
 		}
 
 		for (const auto& [variant, material] : materials)
@@ -157,10 +213,12 @@ namespace CE::RPI
 		drawBatches.Clear();
 		clipRectStack.Clear();
 		textureIndices.Clear();
+		gradientIndices.Clear();
 
 		drawItemCount = 0;
 		clipRectCount = 0;
 		textureCount = 0;
+		gradientKeyCount = 0;
 		createNewDrawBatch = true;
 
 		ResetToDefaults();
@@ -171,6 +229,7 @@ namespace CE::RPI
 		{
 			resubmitDrawData[i] = true;
 			resubmitClipRects[i] = true;
+			resubmitGradientKeys[i] = true;
 		}
 	}
 
@@ -242,6 +301,38 @@ namespace CE::RPI
 		if (!ClipRectExists())
 			return Rect();
 		return clipRects[clipRectStack.Top()].rect;
+	}
+
+	void Renderer2D::SetFillGradient(const ColorGradient& gradient, GradientType gradientType)
+	{
+		if (gradient.keys.GetSize() < 2)
+		{
+			currentGradientType = GradientType::None;
+			currentGradient = Vec2i();
+			return;
+		}
+
+		currentGradientType = gradientType;
+		gradientDegrees = gradient.degrees;
+
+		if (gradientIndices.KeyExists(gradient))
+		{
+			currentGradient = gradientIndices[gradient];
+			return;
+		}
+
+		if (gradientKeys.GetSize() < gradientKeyCount + gradient.keys.GetSize())
+			gradientKeys.Resize(gradientKeyCount + gradient.keys.GetSize());
+
+		for (int i = 0; i < gradient.keys.GetSize(); ++i)
+		{
+			gradientKeys[gradientKeyCount + i] = gradient.keys[i];
+		}
+
+		gradientIndices[gradient] = { (int)gradientKeyCount, (int)(gradientKeyCount + gradient.keys.GetSize() - 1) };
+		currentGradient = gradientIndices[gradient];
+
+		gradientKeyCount += gradient.keys.GetSize();
 	}
 
 	void Renderer2D::SetFillColor(const Color& color)
@@ -804,6 +895,13 @@ namespace CE::RPI
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
+
 		curDrawBatch.drawItemCount++;
 		
 		drawItemCount++;
@@ -836,6 +934,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -860,6 +959,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 
@@ -893,6 +999,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -912,6 +1019,13 @@ namespace CE::RPI
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
+
+		if (currentGradientType == GradientType::Linear && currentGradient.x < currentGradient.y)
+		{
+			drawItem.gradientStartIndex = currentGradient.x;
+			drawItem.gradientEndIndex = currentGradient.y;
+			drawItem.gradientRadians = gradientDegrees * DEG_TO_RAD;
+		}
 
 		curDrawBatch.drawItemCount++;
 
@@ -956,6 +1070,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1093,12 +1208,100 @@ namespace CE::RPI
 			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_Texture;
 		drawItem.fillColor = fillColor.ToVec4();
-		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.outlineColor = Vec4(1, 1, 0, 0); // Offset & Scaling
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 		drawItem.textureIndex = textureIndex;
+		drawItem.samplerIndex = 0;
+		
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawTexture(RPI::Texture* texture, Vec2 size, 
+		bool repeatX, bool repeatY, 
+		Vec2 textureScale, Vec2 textureOffset)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		int textureIndex = 0;
+
+		if (textureIndices.KeyExists(texture))
+		{
+			textureIndex = textureIndices[texture];
+		}
+		else
+		{
+			textureIndex = textureCount;
+			if (textures.GetSize() < textureCount + 1)
+				textures.Resize(textureCount + 1);
+
+			textureIndices[texture] = textureIndex;
+
+			textureCount++;
+		}
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		textures[textureIndex] = texture;
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation1 = Vec3(-scale.x / 2, -scale.y / 2);
+		Vec3 translation2 = Vec3(quadPos.x * 2 + scale.x / 2, quadPos.y * 2 + scale.y / 2, 0);
+
+		RHI::SamplerDescriptor textureSampler{};
+		textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+		textureSampler.enableAnisotropy = false;
+		textureSampler.samplerFilterMode = FilterMode::Cubic;
+		textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+
+		if (repeatX)
+			textureSampler.addressModeU = SamplerAddressMode::Repeat;
+		if (repeatY)
+			textureSampler.addressModeV = SamplerAddressMode::Repeat;
+
+		drawItem.transform = Matrix4x4::Translation(translation2) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() *
+			Matrix4x4::Translation(translation1) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Texture;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = Vec4(textureScale, textureOffset); // Offset & Scaling
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
+		drawItem.textureIndex = textureIndex;
+		drawItem.samplerIndex = samplerIndices[textureSampler];
 		
 		curDrawBatch.drawItemCount++;
 
@@ -1169,7 +1372,7 @@ namespace CE::RPI
 		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_FrameBuffer;
 		drawItem.fillColor = fillColor.ToVec4();
-		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.outlineColor = Vec4(1, 1, 0, 0);  // Offset & Scaling
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
@@ -1331,7 +1534,26 @@ namespace CE::RPI
 			clipRectsBuffer[imageIndex]->Unmap();
 		}
 
-		 // - Update Texture Array -
+		// - Update Gradient Keys -
+
+		if (gradientKeysBuffer[imageIndex] != nullptr && resubmitGradientKeys[imageIndex])
+		{
+			resubmitGradientKeys[imageIndex] = false;
+
+			if (gradientKeysBuffer[imageIndex]->GetBufferSize() < gradientKeyCount * sizeof(ColorGradient::Key))
+			{
+				IncrementGradientKeysBuffer(gradientKeyCount + 10);
+			}
+
+			void* data;
+			gradientKeysBuffer[imageIndex]->Map(0, gradientKeysBuffer[imageIndex]->GetBufferSize(), &data);
+			{
+				memcpy(data, gradientKeys.GetData(), gradientKeyCount * sizeof(ColorGradient::Key));
+			}
+			gradientKeysBuffer[imageIndex]->Unmap();
+		}
+
+		// - Update Texture Array -
 
 		Array<RHI::TextureView*> textureViews{};
 		textureViews.Reserve(textureCount);
@@ -1384,6 +1606,7 @@ namespace CE::RPI
 		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		DrawItem2D& drawItem = drawItems[drawItemCount];
+		drawItem = {};
 
 		Vec3 scale = Vec3(1, 1, 1);
 
@@ -1474,6 +1697,40 @@ namespace CE::RPI
 			original->Map(0, original->GetBufferSize(), &data);
 			{
 				clipRectsBuffer[i]->UploadData(data, original->GetBufferSize());
+			}
+			original->Unmap();
+
+			QueueDestroy(original);
+		}
+
+		drawItemSrg->FlushBindings();
+	}
+
+	void Renderer2D::IncrementGradientKeysBuffer(u32 numKeysToAdd)
+	{
+		u32 curNumKeys = gradientKeysBuffer[0]->GetBufferSize() / sizeof(ColorGradient::Key);
+		u32 incrementCount = (u32)(curNumKeys * 0.25f); // Add 25% to the storage
+
+		numKeysToAdd = Math::Max(numKeysToAdd, incrementCount);
+
+		for (int i = 0; i < numFramesInFlight; ++i)
+		{
+			RHI::Buffer* original = gradientKeysBuffer[i];
+
+			RHI::BufferDescriptor newBufferDesc{};
+			newBufferDesc.name = "GradientKeys Buffer";
+			newBufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
+			newBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			newBufferDesc.structureByteStride = sizeof(ColorGradient::Key);
+			newBufferDesc.bufferSize = original->GetBufferSize() + numKeysToAdd * sizeof(ColorGradient::Key);
+
+			gradientKeysBuffer[i] = gDynamicRHI->CreateBuffer(newBufferDesc);
+			drawItemSrg->Bind(i, "_GradientKeys", gradientKeysBuffer[i]);
+
+			void* data;
+			original->Map(0, original->GetBufferSize(), &data);
+			{
+				gradientKeysBuffer[i]->UploadData(data, original->GetBufferSize());
 			}
 			original->Unmap();
 

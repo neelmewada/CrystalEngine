@@ -9,6 +9,16 @@ namespace CE::Widgets
 		allowHorizontalScroll = false;
 
 		canBeClosed = canBeMaximized = canBeMinimized = false;
+		enabled = false;
+
+#if PAL_TRAIT_BUILD_EDITOR
+		showNativeWindow = true;
+#else
+		showNativeWindow = false;
+#endif
+
+		// TODO: Testing only
+		showNativeWindow = false;
 	}
 
 	CPopup::~CPopup()
@@ -28,60 +38,107 @@ namespace CE::Widgets
 
 	void CPopup::Show()
 	{
-		if (nativeWindow)
+		SetEnabled(true);
+
+#if PAL_TRAIT_BUILD_STANDALONE
+		showNativeWindow = false;
+#endif
+
+		if (showNativeWindow)
 		{
+			if (nativeWindow)
+			{
+				nativeWindow->Show();
+				return;
+			}
+
+			PlatformWindowInfo windowInfo{};
+			windowInfo.windowFlags = PlatformWindowFlags::SkipTaskbar | PlatformWindowFlags::PopupMenu;
+			windowInfo.fullscreen = windowInfo.maximised = windowInfo.resizable = false;
+			windowInfo.hidden = true;
+
+			CPlatformWindow* parentWindow = GetNativeWindow();
+
+			nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo, parentWindow);
+
+			nativeWindow->GetPlatformWindow()->SetWindowPosition(showPosition);
+			nativeWindow->GetPlatformWindow()->SetBorderless(true);
+			nativeWindow->GetPlatformWindow()->SetAlwaysOnTop(true);
 			nativeWindow->Show();
-			return;
+
+			nativeWindow->GetPlatformWindow()->SetInputFocus();
+
+			nativeWindow->GetPlatformWindow()->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
 		}
+		else
+		{
+			rootWindow = GetRootWindow();
+			if (!rootWindow)
+				return;
 
-		PlatformWindowInfo windowInfo{};
-		windowInfo.windowFlags = PlatformWindowFlags::SkipTaskbar | PlatformWindowFlags::PopupMenu;
-		windowInfo.fullscreen = windowInfo.maximised = windowInfo.resizable = false;
-		windowInfo.hidden = true;
+			rootWindow->AttachSubWindow(this);
 
-		CPlatformWindow* parentWindow = GetNativeWindow();
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
 
-		nativeWindow = new CPlatformWindow(this, showSize.width, showSize.height, windowInfo, parentWindow);
+			UpdateStyleIfNeeded();
+			UpdateLayoutIfNeeded();
 
-		nativeWindow->GetPlatformWindow()->SetWindowPosition(showPosition);
-		nativeWindow->GetPlatformWindow()->SetBorderless(true);
-		nativeWindow->GetPlatformWindow()->SetAlwaysOnTop(true);
-		nativeWindow->Show();
-
-		nativeWindow->GetPlatformWindow()->SetInputFocus();
-
-		nativeWindow->GetPlatformWindow()->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
-
-		SetNeedsLayout();
-		SetNeedsStyle();
-		SetNeedsPaint();
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
+		}
 	}
 
 	void CPopup::Hide()
 	{
-		if (!nativeWindow)
-			return;
+#if PAL_TRAIT_BUILD_STANDALONE
+		showNativeWindow = false;
+#endif
 
-		nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
+		SetEnabled(false);
 
-		delete nativeWindow;
-		nativeWindow = nullptr;
+		if (nativeWindow)
+		{
+			nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
+
+			delete nativeWindow;
+			nativeWindow = nullptr;
+
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
+		}
+		else if (rootWindow)
+		{
+			rootWindow->DetachSubWindow(this);
+
+			SetNeedsLayout();
+			SetNeedsStyle();
+			SetNeedsPaint();
+
+			rootWindow = nullptr;
+		}
 	}
 
 	void CPopup::Show(Vec2i screenPosition, Vec2i size)
 	{
 		showPosition = screenPosition;
-		showSize = size;
-		windowSize = showSize.ToVec2();
+		if (!showNativeWindow)
+		{
+			rootWindow = GetRootWindow();
+			if (rootWindow && rootWindow->GetNativeWindow())
+			{
+				Vec2i windowPos = rootWindow->GetNativeWindow()->platformWindow->GetWindowPosition();
+				showPosition -= windowPos;
+			}
+		}
 
-		Show();
-	}
-
-	void CPopup::ShowCenteredScreen(Vec2i size)
-	{
-		Vec2i screenSize = CApplication::Get()->GetScreenBounds(0).GetSize().ToVec2i();
-
-		showPosition = screenSize / 2 - size / 2;
 		showSize = size;
 		windowSize = showSize.ToVec2();
 
@@ -90,7 +147,18 @@ namespace CE::Widgets
 
 	bool CPopup::IsShown()
 	{
-		return nativeWindow != nullptr;
+		return IsEnabled();
+	}
+
+	Vec2 CPopup::GetComputedLayoutTopLeft()
+	{
+		if (IsShown() && !showNativeWindow && rootWindow && rootWindow->GetNativeWindow())
+		{
+			return showPosition.ToVec2();
+			//Vec2i windowPos = rootWindow->GetNativeWindow()->platformWindow->GetWindowPosition();
+			//return (showPosition - windowPos).ToVec2();
+		}
+		return Super::GetComputedLayoutTopLeft();
 	}
 
 	void CPopup::OnFocusLost()

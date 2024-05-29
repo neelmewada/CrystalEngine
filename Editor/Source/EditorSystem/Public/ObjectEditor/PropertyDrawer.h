@@ -2,7 +2,9 @@
 
 namespace CE::Editor
 {
-    CLASS()
+    class ObjectEditor;
+
+    CLASS(Config = Editor)
     class EDITORSYSTEM_API PropertyDrawer : public CWidget
     {
         CE_CLASS(PropertyDrawer, CWidget)
@@ -19,23 +21,30 @@ namespace CE::Editor
         static void DeregisterPropertyDrawer(TypeId fieldDeclTypeId, TypeId underlyingTypeId, SubClass<PropertyDrawer> propertyDrawer);
 
         //! @brief The targetField is used only for figuring out the type of the field.
-        static PropertyDrawer* Create(FieldType* targetField, CWidget* outer, const String& name = "");
+        static PropertyDrawer* Create(ObjectEditor* owner, FieldType* targetField, CWidget* outer, const String& name = "");
 
         virtual void CreateGUI(FieldType* field, void* instance);
 
         // - Signals -
 
-        CE_SIGNAL(OnPropertyModified, PropertyDrawer*);
-
     protected:
 
         void Construct() override;
+
+        FIELD(Config)
+        u32 floatPrecision = 4;
+
+        FIELD(Config)
+        u32 doublePrecision = 8;
 
 		FIELD()
 		CWidget* left = nullptr;
 
 		FIELD()
 		CWidget* right = nullptr;
+
+        FIELD()
+        ObjectEditor* owner = nullptr;
 
         FieldType* targetField = nullptr;
 

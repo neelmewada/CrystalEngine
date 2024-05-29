@@ -96,6 +96,9 @@ namespace CE::Widgets
 
         virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height);
 
+        //! @brief Called before painting the borders/edges, but after painting the background
+        virtual void OnPaintEarly(CPaintEvent* paintEvent);
+
         CBehavior* AddBehavior(SubClass<CBehavior> behaviorClass);
 
         template<typename T> requires TIsBaseClassOf<CBehavior, T>::Value
@@ -146,6 +149,7 @@ namespace CE::Widgets
                 styleClasses.Add(styleClass);
                 SetNeedsStyle();
                 SetNeedsLayout();
+                SetNeedsPaint();
             }
         }
 
@@ -163,6 +167,7 @@ namespace CE::Widgets
             {
                 SetNeedsStyle();
                 SetNeedsLayout();
+                SetNeedsPaint();
             }
         }
 
@@ -185,11 +190,13 @@ namespace CE::Widgets
         }
 
         Rect GetScreenSpaceRect();
+        Rect GetWindowSpaceRect();
 
         // - Transformation Utils -
 
         Vec2 LocalToScreenSpacePos(const Vec2& point);
         Rect LocalToScreenSpaceRect(const Rect& localRect);
+        Vec2 LocalToWindowSpacePos(const Vec2& point);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
         Vec2 ScreenToLocalSpacePoint(const Vec2& point);
         Vec2 ScreenToWindowSpacePoint(const Vec2& point);
@@ -200,6 +207,8 @@ namespace CE::Widgets
         Renderer2D* GetRenderer();
 
         CPlatformWindow* GetNativeWindow();
+
+        CWindow* GetRootWindow();
 
         void QueueDestroy();
 
@@ -222,7 +231,10 @@ namespace CE::Widgets
         virtual void OnFocusLost() {}
 
         virtual void OnBeforeComputeStyle() {}
-        virtual void OnAfterComputeStyle() {}
+
+        //! @brief Override to get a callback on after computing the style.
+        //! @return Override and return true if you are changing the layout in this function.
+        virtual bool OnAfterComputeStyle() { return false; }
 
         void SetNeedsPaintRecursively(bool newValue = false);
 
@@ -233,12 +245,19 @@ namespace CE::Widgets
         virtual void OnPaint(CPaintEvent* paintEvent);
         virtual void OnPaintOverlay(CPaintEvent* paintEvent);
 
-        void OnSubobjectDetached(Object* object) override;
-        void OnSubobjectAttached(Object* object) override;
-
         virtual void HandleEvent(CEvent* event);
 
+        virtual CWidget* HitTest(Vec2 windowSpaceMousePos);
+
     protected:
+
+        virtual void OnDestroyQueued();
+
+        virtual void OnEnabled();
+        virtual void OnDisabled();
+
+        void OnSubobjectDetached(Object* object) override;
+        void OnSubobjectAttached(Object* object) override;
 
         FIELD()
         Array<CWidget*> attachedWidgets{};

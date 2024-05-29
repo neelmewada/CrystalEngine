@@ -75,21 +75,21 @@ namespace CE
 	ENUM()
 	enum class TextureCompressionSettings : int
 	{
-		ECONST(Display = "Default (Color BC1/3)")
+		ECONST(DisplayName = "Default (Color BC1/3)")
 		Default, // Color BC1/3
-		ECONST(Display = "Normal Map (BC1/5)")
+		ECONST(DisplayName = "Normal Map (BC1/5)")
 		NormalMap, // BC1/5: BC1 = low quality , BC5 = high quality
-		ECONST(Display = "Grayscale (R8/16 or BC4)")
+		ECONST(DisplayName = "Grayscale (R8/16 or BC4)")
 		Grayscale, // R8/16 or BC4
-		ECONST(Display = "Grayscale Alpha (RG16/32 or BC5)")
+		ECONST(DisplayName = "Grayscale Alpha (RG16/32 or BC5)")
 		GrayscaleAlpha, // RG16/32 or BC5
-		ECONST(Display = "HDR (BC6H)")
+		ECONST(DisplayName = "HDR (BC6H)")
 		HDR, // BC6H
-		ECONST(Display = "HDR Uncompressed (RGBA16 Half)")
+		ECONST(DisplayName = "HDR Uncompressed (RGBA16 Half)")
 		HDRUncompressed, // RGBAHalf
-		ECONST(Display = "BC7 RGBA")
+		ECONST(DisplayName = "BC7 RGBA")
 		BC7, // BC7 RGBA
-		ECONST(Display = "Color Uncompressed RGB(A)")
+		ECONST(DisplayName = "Color Uncompressed RGB(A)")
 		ColorUncompressed,
 	};
 	ENUM_CLASS(TextureCompressionSettings);
@@ -118,7 +118,7 @@ namespace CE
 	enum class TextureColorSpace : int
 	{
 		None = 0,
-		ECONST(Display = "sRGB")
+		ECONST(DisplayName = "sRGB")
 		SRGB
 	};
 	ENUM_CLASS(TextureColorSpace);
@@ -138,13 +138,13 @@ namespace CE
 	ENUM()
 	enum MSAA
 	{
-		ECONST(Display = "x1")
+		ECONST(DisplayName = "x1")
 		MSAA1,
-		ECONST(Display = "x2")
+		ECONST(DisplayName = "x2")
 		MSAA2,
-		ECONST(Display = "x4")
+		ECONST(DisplayName = "x4")
 		MSAA4,
-		ECONST(Display = "x8")
+		ECONST(DisplayName = "x8")
 		MSAA8
 	};
 

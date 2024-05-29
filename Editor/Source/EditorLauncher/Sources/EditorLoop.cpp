@@ -177,10 +177,12 @@ void EditorLoop::PostInit()
 
 	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
 	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+	CE::Shader* textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
 
 	RPI::RPISystemInitInfo rpiInitInfo{};
 	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
 	rpiInitInfo.iblConvolutionShader = iblConvolutionShader->GetShaderCollection();
+	rpiInitInfo.textureGenShader = textureGenShader->GetShaderCollection();
 
 	RPISystem::Get().PostInitialize(rpiInitInfo);
 

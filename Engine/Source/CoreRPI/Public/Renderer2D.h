@@ -5,6 +5,42 @@ namespace CE::RPI
     class Shader;
     class Texture;
 
+    enum class GradientType
+    {
+        None = 0,
+        Linear,
+    };
+    ENUM_CLASS(GradientType);
+
+    struct CORERPI_API ColorGradient
+    {
+    public:
+
+        struct alignas(16) Key
+        {
+            Vec4 color{};
+            f32 position = 0;
+
+            SIZE_T GetHash() const;
+        };
+
+        Array<Key> keys{};
+
+        f32 degrees = 0.0f;
+
+        SIZE_T GetHash() const;
+
+        bool operator==(const ColorGradient& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const ColorGradient& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+    };
+
     struct Renderer2DDescriptor
     {
         Vec2i screenSize{};
@@ -17,7 +53,7 @@ namespace CE::RPI
 
         Matrix4x4 rootTransform = Matrix4x4::Identity();
         
-#if PLATFORM_DESKTOP
+#if PAL_TRAIT_BUILD_EDITOR
         // Pre-allocates storage for a set number of draw items. Ex: 10,000 characters
         u32 initialDrawItemStorage = 50'000;
         u32 drawItemStorageIncrement = 50'000;
@@ -71,6 +107,7 @@ namespace CE::RPI
         bool ClipRectExists();
         Rect GetLastClipRect();
 
+        void SetFillGradient(const ColorGradient& gradient, GradientType gradientType = GradientType::Linear);
         void SetFillColor(const Color& color);
         void SetOutlineColor(const Color& color);
         void SetBorderThickness(f32 thickness);
@@ -155,12 +192,20 @@ namespace CE::RPI
             return DrawTexture(texture, rect.GetSize());
         }
 
+        Vec2 DrawTexture(RPI::Texture* texture, Vec2 size, bool repeatX, bool repeatY, Vec2 uvScale = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0));
+
+        Vec2 DrawTexture(RPI::Texture* texture, const Rect& rect, bool repeatX, bool repeatY, Vec2 uvScale = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0))
+	    {
+            SetCursor(rect.min);
+            return DrawTexture(texture, rect.GetSize(), repeatX, repeatY, uvScale, uvOffset);
+	    }
+
         Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, Vec2 size);
 
         Vec2 DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, const Rect& rect)
         {
             SetCursor(rect.min);
-            return DrawFrameBuffer(frames, rect);
+            return DrawFrameBuffer(frames, rect.GetSize());
         }
 
         void End();
@@ -191,6 +236,7 @@ namespace CE::RPI
 
         void IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
         void IncrementClipRectsBuffer(u32 numRectsToAdd = 0);
+        void IncrementGradientKeysBuffer(u32 numKeysToAdd = 0);
 
         // - Helpers -
 
@@ -210,18 +256,36 @@ namespace CE::RPI
 
         struct alignas(16) DrawItem2D
         {
+            DrawItem2D() = default;
+
+            DrawItem2D(const DrawItem2D&) = default;
+            DrawItem2D& operator=(const DrawItem2D&) = default;
+
             Matrix4x4 transform{};
             Vec4 fillColor = Vec4();
             Vec4 outlineColor = Vec4();
             Vec4 cornerRadius = Vec4();
             Vec2 itemSize = Vec2(); // Item size in pixels
             float borderThickness = 0;
+            union
+            {
+                f32 dashLength = 0;
+                f32 gradientRadians;
+            };
             DrawType drawType = DRAW_None;
             u32 charIndex = 0; // For character drawing
             u32 bold = 0;
             u32 clipRectIdx = 0;
-            u32 textureIndex = 0;
-            f32 dashLength = 0;
+            union
+            {
+                u32 textureIndex = 0;
+                u32 gradientStartIndex;
+            };
+            union
+            {
+                u32 samplerIndex = 0;
+                u32 gradientEndIndex;
+            };
         };
 
         struct alignas(16) ClipRect2D
@@ -235,13 +299,6 @@ namespace CE::RPI
             Name fontName = "Roboto";
             u32 fontSize = 16;
             bool bold = false;
-        };
-
-        struct TextDrawRequest
-        {
-            String text{};
-            Vec2 position{};
-            Vec2 size{};
         };
 
         struct DrawBatch
@@ -286,6 +343,9 @@ namespace CE::RPI
         Vec2 cursorPosition{};
         Color fillColor = Color(1, 1, 1, 1);
         Color outlineColor = Color(0, 0, 0, 0);
+        Vec2i currentGradient = { 0, 0 };
+        GradientType currentGradientType = GradientType::Linear;
+        f32 gradientDegrees = 0;
         float borderThickness = 0.0f;
         f32 rotation = 0;
 
@@ -302,20 +362,27 @@ namespace CE::RPI
 
         StaticArray<RHI::Buffer*, MaxImageCount> drawItemsBuffer{};
         StaticArray<RHI::Buffer*, MaxImageCount> clipRectsBuffer{};
+        StaticArray<RHI::Buffer*, MaxImageCount> gradientKeysBuffer{};
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         Array<RPI::Texture*> textures{};
+        Array<RHI::SamplerDescriptor> samplerDescriptors{};
+        Array<RHI::Sampler*> samplers{};
         Array<ClipRect2D> clipRects{};
+        Array<ColorGradient::Key> gradientKeys{};
+
         u32 drawItemCount = 0;
         u32 clipRectCount = 0;
         u32 textureCount = 0;
+        u32 gradientKeyCount = 0;
         Array<u32> clipRectStack{};
         bool createNewDrawBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};
         StaticArray<bool, MaxImageCount> resubmitDrawData = {};
         StaticArray<bool, MaxImageCount> resubmitClipRects = {};
+        StaticArray<bool, MaxImageCount> resubmitGradientKeys = {};
         
         // - Utils -
 
@@ -333,6 +400,8 @@ namespace CE::RPI
         HashMap<MaterialHash, RPI::Material*> materials{};
         HashMap<MaterialHash, RHI::DrawPacket*> drawPacketsByMaterial{};
         HashMap<RPI::Texture*, int> textureIndices{};
+        HashMap<RHI::SamplerDescriptor, u32> samplerIndices{};
+        HashMap<ColorGradient, Vec2i> gradientIndices{};
     };
 
 } // namespace CE::RPI

@@ -44,6 +44,8 @@ def main():
     print('Class Template: ' + str(classTemplatePath))
     print('Output Dir: ' + str(outDir))
 
+    namespaceFound = False
+
     templateArgs = dict()
     for tArg in args.tArgs:
         if "=" in tArg:
@@ -53,6 +55,11 @@ def main():
             templateArgs[name + "_Upper"] = tArg.split("=")[1].upper()
             if name == 'Module':
                 templateArgs[name + "_API"] = tArg.split("=")[1].upper() + "_API"
+            if name == "NameSpace":
+                namespaceFound = True
+    
+    if not namespaceFound:
+        templateArgs["NameSpace"] = "CE"
     
     print("Generating from template with following args:")
     print(templateArgs)

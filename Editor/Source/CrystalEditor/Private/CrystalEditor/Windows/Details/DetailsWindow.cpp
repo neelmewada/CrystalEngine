@@ -16,7 +16,12 @@ namespace CE::Editor
 
     void DetailsWindow::SetupForActor(Actor* actor)
     {
+        if (actor == selectedActor)
+            return;
+
         treeWidget->RemoveAllItems();
+
+        selectedActor = actor;
 
         if (!actor)
         {
@@ -53,6 +58,38 @@ namespace CE::Editor
             };
 
         sceneComponentVisitor(actor->GetRootComponent(), rootItem);
+
+        treeWidget->Select(rootItem);
+    }
+
+    void DetailsWindow::SetEditTarget(Object* target)
+    {
+        if (this->targetObject == target)
+            return;
+
+        this->targetObject = target;
+
+        // Cleanup previous editor
+
+        CSplitViewContainer* container = splitView->GetContainer(1);
+
+        for (int i = container->GetSubWidgetCount() - 1; i >= 0; --i)
+        {
+            container->GetSubWidget(i)->Destroy();
+        }
+
+        if (objectEditor)
+        {
+            objectEditor->Destroy();
+            objectEditor = nullptr;
+        }
+
+        if (targetObject)
+        {
+            objectEditor = ObjectEditor::Create(targetObject, this, "ObjectEditor");
+
+            objectEditor->CreateGUI(container);
+        }
     }
 
     void DetailsWindow::SetEditTarget(Object* target)

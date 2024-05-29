@@ -51,25 +51,32 @@ Shader "2D/SDF Geometry"
                 float4 cornerRadius;
                 float2 itemSize; // item size in pixels
                 float borderThickness;
-                uint drawType; // enum DrawType;
-                uint charIndex; // For character drawing
-                uint bold;
-                uint clipRect;
-                uint textureIndex;
                 float dashLength;
+                uint drawType; // enum DrawType;
+                uint charIndex;
+                uint bold; 
+                uint clipRect;
+                uint textureIndex; // OR gradientStartIdx
+                uint samplerIndex; // OR gradientEndIdx
             };
+
+            #define gradientStartIdx textureIndex
+            #define gradientEndIdx samplerIndex
+            #define gradientRadians dashLength
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
             struct ClipRect
             {
                 float4 rect;
-                float4 cornerRadius;;
+                float4 cornerRadius;
             };
 
             StructuredBuffer<ClipRect> _ClipRects : SRG_PerDraw(t1);
 
-            SamplerState _TextureSampler : SRG_PerDraw(s2);
+            #define MAX_SAMPLERS 32
+
+            SamplerState _TextureSamplers[MAX_SAMPLERS] : SRG_PerDraw(s2);
 
             #define MAX_TEXTURES 100000 // 100,000
 
@@ -79,6 +86,14 @@ Shader "2D/SDF Geometry"
             {
                 uint _FrameIndex;
             };
+
+            struct GradientKey
+            {
+                float4 color;
+                float position;
+            };
+
+            StructuredBuffer<GradientKey> _GradientKeys : SRG_PerDraw(t5);
 
             struct CharacterItem
             {
@@ -99,6 +114,7 @@ Shader "2D/SDF Geometry"
                 DRAW_FrameBuffer,
                 DRAW_Triangle,
                 DRAW_DashedLine,
+                DRAW_LinearGradient,
             };
 
             #if VERTEX
@@ -215,6 +231,8 @@ Shader "2D/SDF Geometry"
                 float2 uv;
                 float borderThickness;
                 float dashLength;
+                uint textureIndex;
+                uint samplerIndex;
             };
 
             float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
@@ -272,6 +290,26 @@ Shader "2D/SDF Geometry"
                 if (info.outlineColor.a < 0.001)
                     info.outlineColor = color;
 
+                if (info.gradientStartIdx < info.gradientEndIdx)
+                {
+                    float2 pos = info.uv * info.itemSize;
+                    float angle = info.gradientRadians;
+                    float ratio = (pos.x / info.itemSize.x) * cos(angle) + (pos.y / info.itemSize.y) * sin(angle);
+                    if (ratio < 0.0)
+                        ratio = 1.0 + ratio;
+                    ratio = clamp(ratio, 0.0, 1.0);
+
+                    for (int i = info.gradientStartIdx; i < info.gradientEndIdx; i++)
+                    {
+                        if (_GradientKeys[i].position <= ratio && ratio <= _GradientKeys[i + 1].position)
+                        {
+                            color = lerp(_GradientKeys[i].color, _GradientKeys[i + 1].color, 
+                                clamp((ratio - _GradientKeys[i].position) / (_GradientKeys[i + 1].position - _GradientKeys[i].position), 0, 1));
+                            break;
+                        }
+                    }
+                }
+
                 color = lerp(color, info.outlineColor, borderMask);
 
                 const float sharpness = 50.0;
@@ -287,9 +325,31 @@ Shader "2D/SDF Geometry"
                 const float sharpness = 1.0;
 
                 fillSdf = clamp(-fillSdf * sharpness, 0.0, 1.0);
-                borderSdf = clamp(-borderSdf * sharpness, 0.0, 1.0);
+                borderSdf = clamp(-borderSdf * sharpness * 5.0, 0.0, 1.0);
 
-                float4 color = lerp(info.fillColor, info.outlineColor, borderSdf);
+                float4 fillColor = info.fillColor;
+
+                if (info.gradientStartIdx < info.gradientEndIdx)
+                {
+                    float2 pos = info.uv * info.itemSize;
+                    float angle = info.gradientRadians;
+                    float ratio = (pos.x / info.itemSize.x) * cos(angle) + (pos.y / info.itemSize.y) * sin(angle);
+                    if (ratio < 0.0)
+                        ratio = 1.0 + ratio;
+                    ratio = clamp(ratio, 0.0, 1.0);
+
+                    for (int i = info.gradientStartIdx; i < info.gradientEndIdx; i++)
+                    {
+                        if (_GradientKeys[i].position <= ratio && ratio <= _GradientKeys[i + 1].position)
+                        {
+                            fillColor = lerp(_GradientKeys[i].color, _GradientKeys[i + 1].color, 
+                                clamp((ratio - _GradientKeys[i].position) / (_GradientKeys[i + 1].position - _GradientKeys[i].position), 0, 1));
+                            break;
+                        }
+                    }
+                }
+
+                float4 color = lerp(fillColor, info.outlineColor, borderSdf);
 
                 return lerp(float4(color.rgb, 0), color, fillSdf);
             }
@@ -338,38 +398,62 @@ Shader "2D/SDF Geometry"
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
                 info.dashLength = _DrawList[idx].dashLength;
+                info.textureIndex = _DrawList[idx].textureIndex;
+                info.samplerIndex = _DrawList[idx].samplerIndex;
+
                 float2 uv = input.uv;
                 const float2 screenPos = input.screenPosition;
+                const float2 scaling = info.outlineColor.xy;
+                const float2 tiling = info.outlineColor.zw;
+                const uint samplerIndex = _DrawList[idx].samplerIndex;
 
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
 
                 const float4 clipRect = _ClipRects[_DrawList[idx].clipRect].rect;
-                if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
+                const float4 clipRectCorners = _ClipRects[_DrawList[idx].clipRect].cornerRadius;
+                const float2 clipSize = float2(clipRect.z - clipRect.x, clipRect.w - clipRect.y);
+
+                float clipRectSdf = SDFRoundRect(screenPos - clipSize * 0.5 - clipRect.xy, clipSize * 0.5, 
+                    float4(clipRectCorners.z, clipRectCorners.y, clipRectCorners.w, clipRectCorners.x));
+
+                if (clipRectSdf > 0.025)
                     discard;
+
+                float4 col = float4(0, 0, 0, 0);
                 
                 switch (_DrawList[idx].drawType)
                 {
                 case DRAW_Text:
                     return RenderText(_DrawList[idx].fillColor, input.uv, info.itemSize, _DrawList[idx].bold, input.uvBounds);
                 case DRAW_Circle:
-                    return RenderCircle(info, p);
+                    col = RenderCircle(info, p);
+                    break;
                 case DRAW_Rect:
-                    return RenderRect(info, p);
+                    col = RenderRect(info, p);
+                    break;
                 case DRAW_RoundedRect:
-                    return RenderRoundedRect(info, p);
+                    col = RenderRoundedRect(info, p);
+                    break;
                 case DRAW_RoundedX:
-                    return RenderRoundedX(info, p);
+                    col = RenderRoundedX(info, p);
+                    break;
                 case DRAW_Texture:
-                    return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSamplers[samplerIndex], uv * scaling - tiling, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    break;
                 case DRAW_FrameBuffer:
-                    return _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSampler, uv, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    col = _Textures[_DrawList[idx].textureIndex + _FrameIndex].SampleLevel(_TextureSamplers[samplerIndex], uv * scaling - tiling, 0.0) * float4(info.fillColor.rgb, 1.0);
+                    break;
                 case DRAW_Triangle:
-                    return RenderTriangle(info, p);
+                    col = RenderTriangle(info, p);
+                    break;
                 case DRAW_DashedLine:
-                    return RenderDashedLine(info, p);
+                    col = RenderDashedLine(info, p);
+                    break;
                 }
 
-                return float4(0, 0, 0, 0);
+                float t = clamp(-clipRectSdf, 0, 1);
+
+                return lerp(float4(col.rgb, 0), col, t);
             }
 
             #endif

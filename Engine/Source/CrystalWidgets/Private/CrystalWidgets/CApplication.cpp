@@ -123,54 +123,25 @@ namespace CE::Widgets
 			}
 		}
 
-		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
-			{
-				if (widget == nullptr || !widget->IsEnabled() || !widget->interactable)
-					return nullptr;
-
-				Rect widgetRect = widget->GetScreenSpaceRect();
-
-				CPlatformWindow* nativeWindow = widget->GetNativeWindow();
-				if (nativeWindow)
-				{
-					if (!nativeWindow->IsFocused() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
-					{
-						return nullptr;
-					}
-				}
-
-				if (widgetRect.Contains(globalMousePos))
-				{
-					for (int i = widget->attachedWidgets.GetSize() - 1; i >= 0; --i)
-					{
-						if (!widget->attachedWidgets[i]->IsEnabled())
-							continue;
-						CWidget* insideWidget = getBottomMostHoveredWidget(widget->attachedWidgets[i]);
-						if (insideWidget && insideWidget->receiveMouseEvents)
-							return insideWidget;
-					}
-
-					return widget;
-				}
-
-				return nullptr;
-			};
-
 		CWidget* hoveredWidget = nullptr;
-		CWindow* hoveredWindow = nullptr;
 
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
-			CWidget* curHoveredWidget = getBottomMostHoveredWidget(platformWindows[i]->GetOwner());
+			if (!platformWindows[i]->IsShown() || platformWindows[i]->IsMinimized())
+				continue;
+
+			Vec2 windowPos = platformWindows[i]->GetPlatformWindow()->GetWindowPosition().ToVec2();
+
+			CWidget* curHoveredWidget = platformWindows[i]->GetOwner()->HitTest(globalMousePos - windowPos);
 			if (curHoveredWidget != nullptr)
 			{
 				hoveredWidget = curHoveredWidget;
 			}
 		}
 
-		if (hoveredWidget)
+		while (hoveredWidget != nullptr && !hoveredWidget->receiveMouseEvents)
 		{
-			hoveredWindow = hoveredWidget->ownerWindow;
+			hoveredWidget = hoveredWidget->parent;
 		}
 
 		if (hoveredWidget && hoveredWidget->GetNativeWindow())
@@ -515,6 +486,11 @@ namespace CE::Widgets
 					keyEventWidget->HandleEvent(&keyEvent);
 				}
 			}
+		}
+
+		if (curFocusedWidget != nullptr && InputManager::IsKeyDown(KeyCode::Tab))
+		{
+			
 		}
 
 		// Per window events inside Tick()

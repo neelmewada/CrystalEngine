@@ -170,6 +170,8 @@ namespace CE
 			return (TClass*)instance;
 		}
 
+        u64 ComputeMemoryFootprint();
+
 		Name GetPathInPackage();
         
 		// Returns the package this object belongs to.
@@ -187,6 +189,8 @@ namespace CE
         void LoadConfig(ClassType* configClass, String fileName);
 
         virtual void OnFieldEdited(FieldType* field);
+
+        CE_SIGNAL(OnFieldValueUpdated, FieldType*);
 
     protected:
 
@@ -347,6 +351,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
 		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
-        
+        CE_FUNCTION(OnFieldValueUpdated, Signal)
     )
 )

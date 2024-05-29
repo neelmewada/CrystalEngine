@@ -18,8 +18,6 @@ namespace CE::Editor
         Super::Construct();
 
         SetTitle("Assets");
-
-
     }
 
     void AssetBrowserWindow::OnPaint(CPaintEvent* paintEvent)

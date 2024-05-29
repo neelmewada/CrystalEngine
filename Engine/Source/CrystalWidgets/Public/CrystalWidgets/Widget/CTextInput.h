@@ -29,6 +29,8 @@ namespace CE::Widgets
 
 		void StopEditing(bool restoreOriginalText = false);
 
+		void StartEditing();
+
 		b8 IsEditable() const { return isEditable; }
 
 		void SetEditable(bool editable) { isEditable = editable; }
@@ -46,9 +48,17 @@ namespace CE::Widgets
 
 		CE_SIGNAL(OnEditingFinished, CTextInput*);
 
+		// Called when text is modified through user input!
+		CE_SIGNAL(OnTextEdited, CTextInput*);
+
+		// Called when text is modified through either user input or through code!
 		CE_SIGNAL(OnTextChanged, CTextInput*);
 
 	protected:
+
+		virtual void OnValidateText() {}
+
+		bool SetTextInternal(const String& value);
 
 		FUNCTION()
 		void OnTimerTick();
@@ -65,6 +75,8 @@ namespace CE::Widgets
 		void OnFocusGained() override;
 
 		void OnFocusLost() override;
+
+		void OnDisabled() override;
 
 		FIELD()
 		String text{};
@@ -90,16 +102,16 @@ namespace CE::Widgets
 		FIELD()
 		CTimer* timer = nullptr;
 
-	private:
+	protected:
 
-		void OnAfterComputeStyle() override
+		bool OnAfterComputeStyle() override
 		{
-			RecalculateOffsets();
+			return RecalculateOffsets();
 		}
 
 		// - Internal API -
 
-		void RecalculateOffsets();
+		bool RecalculateOffsets();
 
 		void SetCursorPos(int cursorPos);
 

@@ -28,8 +28,6 @@ namespace CE::Widgets
 
     protected:
 
-        void OnAfterComputeStyle() override;
-
         void OnPaint(CPaintEvent* paintEvent) override;
 
         void OnSubobjectAttached(Object* subobject) override;

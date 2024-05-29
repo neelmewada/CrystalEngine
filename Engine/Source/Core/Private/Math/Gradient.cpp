@@ -7,7 +7,12 @@ namespace CE
 
 	}
 
-	Gradient::Gradient(std::initializer_list<Key> list, Direction dir) : keys(list), direction(dir)
+	Gradient::Gradient(std::initializer_list<Key> list, f32 degrees) : keys(list), degrees(degrees)
+	{
+
+	}
+
+	Gradient::Gradient(const Array<Key>& list, f32 degrees) : keys(list), degrees(degrees)
 	{
 
 	}
@@ -44,12 +49,27 @@ namespace CE
 
 	void Gradient::AddKey(f32 position, const Color& color)
 	{
-		keys.Add({ position, color });
+		keys.Add({ color, position });
 	}
 
 	void Gradient::RemoveKeyAt(u32 index)
 	{
 		keys.RemoveAt(index);
+	}
+
+	SIZE_T Gradient::GetHash() const
+	{
+		if (keys.IsEmpty())
+			return 0;
+
+		SIZE_T hash = CE::GetHash(degrees);
+
+		for (int i = 0; i < keys.GetSize(); ++i)
+		{
+			CombineHash(hash, keys[i]);
+		}
+
+		return hash;
 	}
 
 } // namespace CE

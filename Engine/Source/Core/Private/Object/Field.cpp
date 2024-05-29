@@ -72,7 +72,7 @@ namespace CE
 
     String FieldType::GetDisplayName()
     {
-        String displayAttrib = GetAttribute("Display").GetStringValue();
+        String displayAttrib = GetAttribute("DisplayName").GetStringValue();
 
         if (!displayAttrib.IsEmpty())
             return displayAttrib;
@@ -593,6 +593,11 @@ namespace CE
 			return;
 
 		ForceSetFieldEnumValue(instance, value);
+
+		if (instanceOwner && instanceOwner->IsObject())
+		{
+			NotifyObjectFieldUpdate((Object*)instance);
+		}
     }
 
 	void FieldType::ForceSetFieldEnumValue(void* instance, s64 value)

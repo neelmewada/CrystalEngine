@@ -184,7 +184,7 @@ namespace CE::Editor
 
 			for (FieldType* field : fields)
 			{
-				PropertyDrawer* propertyDrawer = PropertyDrawer::Create(field, container);
+				PropertyDrawer* propertyDrawer = PropertyDrawer::Create(this, field, container);
 				if (!propertyDrawer)
 					continue;
 

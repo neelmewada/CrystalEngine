@@ -15,6 +15,8 @@ namespace CE::Widgets
 
 		virtual void HandleEvent(CEvent* event) {}
 
+		virtual void OnPaintEarly(CPainter* painter) {}
+
 		virtual void OnPaint(CPainter* painter) {}
 
 		virtual void OnPaintOverlay(CPainter* painter) {}

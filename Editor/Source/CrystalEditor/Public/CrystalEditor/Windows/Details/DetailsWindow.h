@@ -25,6 +25,9 @@ namespace CE::Editor
         void HandleEvent(CEvent* event) override;
 
         FIELD()
+        Actor* selectedActor = nullptr;
+
+        FIELD()
         CTreeWidget* treeWidget = nullptr;
 
         FIELD()

@@ -183,9 +183,6 @@ namespace CE
 
 	bool Object::IsTransient() const
 	{
-		//Package* package = GetPackage();
-		//if (package != nullptr && package != this && package->IsTransient())
-		//	return true;
 		return HasAnyObjectFlags(OF_Transient);
 	}
 
@@ -206,6 +203,43 @@ namespace CE
         }
         
         return nullptr;
+    }
+
+    u64 Object::ComputeMemoryFootprint()
+    {
+		u64 totalSize = GetClass()->GetSize();
+
+		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (field->IsArrayField())
+			{
+				TypeInfo* elementType = field->GetUnderlyingType();
+				u64 arrayLength = field->GetArraySize(this);
+				if (arrayLength > 0 && elementType)
+				{
+					u64 underlyingTypeSize = elementType->GetSize();
+
+					if (elementType->IsObject() || elementType->IsTypeInfo())
+					{
+						underlyingTypeSize = sizeof(void*);
+					}
+
+					totalSize += arrayLength * underlyingTypeSize;
+				}
+			}
+			else if (field->IsStringField())
+			{
+				const String& value = field->GetFieldValue<String>(this);
+				totalSize += value.GetCapacity();
+			}
+		}
+
+		for (Object* object : attachedObjects)
+		{
+			totalSize += object->ComputeMemoryFootprint();
+		}
+
+		return totalSize;
     }
 
 	Name Object::GetPathInPackage()
@@ -557,7 +591,7 @@ namespace CE
 
     void Object::OnFieldModified(FieldType* field)
     {
-
+		emit OnFieldValueUpdated(field);
     }
 
     void Object::OnFieldEdited(FieldType* field)

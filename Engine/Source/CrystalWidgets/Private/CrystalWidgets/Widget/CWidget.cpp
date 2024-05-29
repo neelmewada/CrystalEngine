@@ -212,6 +212,11 @@ namespace CE::Widgets
 			parent->ReAddChildNodes();
 		}
 
+		if (enabled)
+			OnEnabled();
+		else
+			OnDisabled();
+
 		SetNeedsLayout();
 		SetNeedsStyle();
 		SetNeedsPaint();
@@ -321,6 +326,16 @@ namespace CE::Widgets
 		{
 			attachedWidgets[i]->SetNeedsStyle();
 		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				attachedWindow->SetNeedsStyle();
+			}
+		}
 	}
 
 	bool CWidget::NeedsPaint()
@@ -332,6 +347,17 @@ namespace CE::Widgets
 		{
 			if (widget != this && widget != nullptr && widget->NeedsPaint())
 				return true;
+		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				if (attachedWindow != this && attachedWindow->NeedsPaint())
+					return true;
+			}
 		}
 
 		return false;
@@ -455,6 +481,16 @@ namespace CE::Widgets
 				widget->UpdateLayoutIfNeeded();
 			}
 
+			if (IsWindow())
+			{
+				CWindow* window = static_cast<CWindow*>(this);
+
+				for (CWindow* attachedWindow : window->attachedWindows)
+				{
+					attachedWindow->UpdateLayoutIfNeeded();
+				}
+			}
+
 			OnAfterUpdateLayout();
 
 			needsLayout = false;
@@ -493,6 +529,11 @@ namespace CE::Widgets
 		return Vec2();
 	}
 
+	void CWidget::OnPaintEarly(CPaintEvent* paintEvent)
+	{
+
+	}
+
 	CBehavior* CWidget::AddBehavior(SubClass<CBehavior> behaviorClass)
 	{
 		if (behaviorClass == nullptr)
@@ -524,7 +565,7 @@ namespace CE::Widgets
 	Vec4 CWidget::GetFinalRootPadding()
 	{
 		CScrollBehavior* scrollBehavior = GetBehavior<CScrollBehavior>();
-		if (scrollBehavior != nullptr && scrollBehavior->IsVerticalScrollVisible())
+		if (scrollBehavior != nullptr && allowVerticalScroll && scrollBehavior->IsVerticalScrollVisible())
 		{
 			auto app = CApplication::Get();
 			return rootPadding + Vec4(0, 0, app->styleConstants.scrollRectWidth, 0);
@@ -616,7 +657,7 @@ namespace CE::Widgets
 				{
 					hoverCursor = static_cast<CCursor>(value.enumValue.x);
 				}
-
+				
 				// Yoga Properties
 				if (property == CStylePropertyType::Display && value.IsEnum())
 				{
@@ -794,16 +835,17 @@ namespace CE::Widgets
 				}
 				else if (property == CStylePropertyType::BorderWidth) // Do not apply border width for layout purposes
 				{
+					constexpr f32 multiplier = 0.0f;
 					if (value.IsSingle())
 					{
-						//YGNodeStyleSetBorder(node, YGEdgeAll, value.single);
+						YGNodeStyleSetBorder(node, YGEdgeAll, value.single * multiplier);
 					}
 					else if (value.IsVector())
 					{
-						// YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left);
-						// YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top);
-						// YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right);
-						// YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom);
+						YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left * multiplier);
+						YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top * multiplier);
+						YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right * multiplier);
+						YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom * multiplier);
 					}
 				}
 				else if (property == CStylePropertyType::Width)
@@ -876,7 +918,7 @@ namespace CE::Widgets
 				}
 			}
 
-			OnAfterComputeStyle();
+			layoutChanged = OnAfterComputeStyle() || layoutChanged;
 
 			needsStyle = false;
 
@@ -889,6 +931,16 @@ namespace CE::Widgets
 		for (CWidget* child : attachedWidgets)
 		{
 			child->UpdateStyleIfNeeded();
+		}
+
+		if (IsWindow())
+		{
+			CWindow* window = static_cast<CWindow*>(this);
+
+			for (CWindow* attachedWindow : window->attachedWindows)
+			{
+				attachedWindow->UpdateStyleIfNeeded();
+			}
 		}
 	}
 
@@ -954,6 +1006,37 @@ namespace CE::Widgets
 
 			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
 		}
+	}
+
+	Rect CWidget::GetWindowSpaceRect()
+	{
+		if (IsWindow())
+		{
+			CWindow* window = (CWindow*)this;
+			if (window->nativeWindow != nullptr)
+			{
+				u32 w, h;
+				window->nativeWindow->GetWindowSize(&w, &h);
+
+				return Rect::FromSize(rootOrigin, Vec2(w, h));
+			}
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow()->GetPlatformWindow();
+		if (nativeWindow == nullptr)
+			return {};
+
+		Vec2 scrollOffset = Vec2();
+		CWidget* parentWidget = parent;
+
+		while (parentWidget != nullptr)
+		{
+			scrollOffset += parentWidget->normalizedScroll * (parentWidget->contentSize - parentWidget->GetComputedLayoutSize());
+
+			parentWidget = parentWidget->parent;
+		}
+
+		return Rect::FromSize(rootOrigin + GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
 	}
 
 	Vec2 CWidget::LocalToScreenSpacePos(const Vec2& point)
@@ -1030,6 +1113,33 @@ namespace CE::Widgets
 
 			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + rect.min, size);
 		}
+	}
+
+	Vec2 CWidget::LocalToWindowSpacePos(const Vec2& point)
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return rootOrigin + point;
+				}
+			}
+
+			return point;
+		}
+
+		Vec2 scrollOffset = Vec2();
+
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		return rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + point;
 	}
 
 	Vec2 CWidget::ScreenToLocalSpacePoint(const Vec2& point)
@@ -1159,11 +1269,29 @@ namespace CE::Widgets
 		return parent->GetNativeWindow();
 	}
 
+	CWindow* CWidget::GetRootWindow()
+	{
+		if (IsWindow() && ownerWindow == nullptr)
+		{
+			return (CWindow*)this;
+		}
+
+		if (ownerWindow)
+			return ownerWindow->GetRootWindow();
+
+		if (parent)
+			return parent->GetRootWindow();
+
+		return nullptr;
+	}
+
 	void CWidget::QueueDestroy()
 	{
 		if (isQueuedForDestruction)
 			return;
 		isQueuedForDestruction = true;
+
+		OnDestroyQueued();
 
 		SetEnabled(false);
 
@@ -1275,6 +1403,7 @@ namespace CE::Widgets
 
 		Color bgColor = Color();
 		Name bgImage = "";
+		CGradient gradient{};
 		Color outlineColor = Color();
 		f32 borderWidth = 0.0f;
 		Vec4 borderRadius = Vec4();
@@ -1283,8 +1412,9 @@ namespace CE::Widgets
 		{
 			bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 		}
-
-		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage))
+		
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage) &&
+			computedStyle.properties[CStylePropertyType::BackgroundImage].IsString())
 		{
 			bgImage = computedStyle.properties[CStylePropertyType::BackgroundImage].string;
 		}
@@ -1292,6 +1422,12 @@ namespace CE::Widgets
 		if (backgroundImageOverride.IsValid())
 		{
 			bgImage = backgroundImageOverride;
+		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage) &&
+			computedStyle.properties[CStylePropertyType::BackgroundImage].IsGradient())
+		{
+			gradient = computedStyle.properties[CStylePropertyType::BackgroundImage].gradient;
 		}
 
 		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderColor))
@@ -1311,8 +1447,13 @@ namespace CE::Widgets
 
 		Color foreground = computedStyle.GetForegroundColor();
 
-		CPen pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
+		CPen pen = CPen();// pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
 		CBrush brush = CBrush(); brush.SetColor(bgColor);
+		if (gradient.keys.NonEmpty())
+		{
+			brush.SetGradient(gradient);
+		}
+
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
@@ -1325,24 +1466,26 @@ namespace CE::Widgets
 		const Vec2 totalSize = GetComputedLayoutSize() + extraSize;
 
 		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), totalSize);
-		Rect bgColorRect = Rect::FromSize(rect.min + Vec2(1, 1) * borderWidth * 0.5f, rect.GetSize() - Vec2(1, 1) * borderWidth);
+		Rect bgDrawRect = rect;
 
-		if (IsWindow())
+		if (borderWidth > 0.1f)
 		{
-			bgColorRect = rect;
+			bgDrawRect = Rect::FromSize(rect.min + Vec2(1, 1) * borderWidth * 0.25f,
+				rect.GetSize() - Vec2(1, 1) * borderWidth * 0.5f);
 		}
 
 		painter->SetRotation(rotation);
 
-		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
+		if (borderRadius == Vec4(0, 0, 0, 0) && (bgColor.a > 0 || gradient.keys.NonEmpty()))
 		{
-			painter->DrawRect(bgColorRect);
+			painter->DrawRect(bgDrawRect);
 		}
-		else if ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
+		else if (bgColor.a > 0 || gradient.keys.NonEmpty())
 		{
-			painter->DrawRoundedRect(bgColorRect, borderRadius);
+			painter->DrawRoundedRect(bgDrawRect, borderRadius);
 		}
 
+		// Draw Background Image
 		if (bgImage.IsValid() && canDrawBgImage)
 		{
 			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
@@ -1350,9 +1493,18 @@ namespace CE::Widgets
 			{
 				CBackgroundSize backgroundSize = computedStyle.GetBackgroundSize();
 				CTextAlign backgroundPosition = computedStyle.GetBackgroundPosition();
+				CBackgroundRepeat backgroundRepeat = computedStyle.GetBackgroundRepeat();
+
 				Vec2 imageSize = Vec2(texture->GetWidth(), texture->GetHeight());
 				f32 imageAspectRatio = imageSize.width / imageSize.height;
 				f32 rectAspectRatio = totalSize.width / totalSize.height;
+
+				Rect fullRect = Rect::FromSize(Vec2(), totalSize);
+				if (borderWidth > 0.1f)
+				{
+					fullRect = Rect::FromSize(fullRect.min + Vec2(1, 1) * borderWidth * 0.25f,
+						fullRect.GetSize() - Vec2(1, 1) * borderWidth * 0.5f);
+				}
 
 				painter->PushChildCoordinateSpace(GetComputedLayoutTopLeft());
 				Rect clipRect = Rect::FromSize(Vec2(), totalSize);
@@ -1365,8 +1517,7 @@ namespace CE::Widgets
 				brush.SetColor(foreground);
 				painter->SetBrush(brush);
 
-				// Fill by default
-				Rect textureRect = Rect::FromSize(Vec2(), totalSize);
+				Rect textureRect;
 
 				if (backgroundSize == CBackgroundSize::Cover)
 				{
@@ -1386,25 +1537,123 @@ namespace CE::Widgets
 				}
 				else if (backgroundSize == CBackgroundSize::Contain)
 				{
-					// If the rectangle aspect ratio is greater than the image aspect ratio
+					// If the rectangle is wider than the image
 					if (rectAspectRatio > imageAspectRatio)
 					{
 						Vec2 drawSize = Vec2(totalSize.height * imageAspectRatio, totalSize.height);
 						Vec2 drawPos = Vec2((totalSize.width - drawSize.width) / 2, 0);
-						textureRect = Rect::FromSize(drawPos, drawSize);
+
+						switch (backgroundPosition)
+						{
+						case CTextAlign::TopLeft:
+						case CTextAlign::MiddleLeft:
+						case CTextAlign::BottomLeft:
+							drawPos.x = 0;
+							break;
+						case CTextAlign::TopRight:
+						case CTextAlign::MiddleRight:
+						case CTextAlign::BottomRight:
+							drawPos.x *= 2;
+							break;
+						default:
+							break; 
+						}
+
+						textureRect = Rect::FromSize(drawPos + Vec2(1, 1) * borderWidth * 0.5f, 
+							drawSize - Vec2(1, 1) * borderWidth);
 					}
 					else
 					{
 						Vec2 drawSize = Vec2(totalSize.width, totalSize.width / imageAspectRatio);
 						Vec2 drawPos = Vec2(0, (totalSize.height - drawSize.height) / 2);
-						textureRect = Rect::FromSize(drawPos, drawSize);
+
+						switch (backgroundPosition)
+						{
+						case CTextAlign::TopLeft:
+						case CTextAlign::TopCenter:
+						case CTextAlign::TopRight:
+							drawPos.y = 0;
+							break;
+						case CTextAlign::BottomLeft:
+						case CTextAlign::BottomCenter:
+						case CTextAlign::BottomRight:
+							drawPos.y *= 2;
+							break;
+						default:
+							break;
+						}
+
+						textureRect = Rect::FromSize(drawPos + Vec2(1, 1) * borderWidth * 0.25f, 
+							drawSize - Vec2(1, 1) * borderWidth * 0.5f);
 					}
 				}
+				else // Fill
+				{
+					textureRect = Rect::FromSize(Vec2() + Vec2(1, 1) * borderWidth * 0.25f, 
+						totalSize - Vec2(1, 1) * borderWidth * 0.5f);
+				}
 
-				painter->DrawTexture(textureRect, texture);
+				if (backgroundRepeat == CBackgroundRepeat::NoRepeat)
+				{
+					painter->DrawTexture(textureRect, texture);
+				}
+				else
+				{
+					Rect drawRect = textureRect;
+					Vec2 scale = Vec2(1, 1);
+					Vec2 offset = Vec2();
+
+					if (EnumHasFlag(backgroundRepeat, CBackgroundRepeat::RepeatX))
+					{
+						drawRect.min.x = fullRect.min.x;
+						drawRect.max.x = fullRect.max.x;
+
+						scale.x = 1 + drawRect.GetSize().width / textureRect.GetSize().width;
+					}
+					if (EnumHasFlag(backgroundRepeat, CBackgroundRepeat::RepeatY))
+					{
+						drawRect.min.y = fullRect.min.y;
+						drawRect.max.y = fullRect.max.y;
+
+						scale.y = Math::Max(1.0f, drawRect.GetSize().height / textureRect.GetSize().height);
+					}
+
+					offset.x = (textureRect.min.x - fullRect.min.x) / fullRect.GetSize().width;
+					offset.y = (textureRect.min.y - fullRect.min.y) / fullRect.GetSize().height;
+
+					painter->DrawTexture(drawRect, texture, backgroundRepeat, scale, offset);
+				}
 
 				painter->PopClipRect();
 				painter->PopChildCoordinateSpace();
+			}
+		}
+
+		OnPaintEarly(paintEvent);
+
+		for (CBehavior* behavior : behaviors)
+		{
+			behavior->OnPaintEarly(painter);
+		}
+
+		// - Draw Border -
+
+		pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
+		brush = CBrush();
+		painter->SetPen(pen);
+		painter->SetBrush(brush);
+
+		Rect borderRect = rect;
+
+		if (borderWidth > 0.01f && outlineColor.a > 0.001f)
+		{
+			if (borderRadius == Vec4(0, 0, 0, 0))
+			{
+				painter->DrawRect(borderRect);
+			}
+			else if ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
+			{
+				painter->DrawRoundedRect(borderRect, borderRadius);
 			}
 		}
 
@@ -1570,6 +1819,11 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
+				if (IsOfType<CMenuItem>())
+				{
+					//CE_LOG(Info, All, "Widget Mouse Entered: {}", ((CMenuItem*)this)->GetText());
+				}
+
 				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
@@ -1594,6 +1848,11 @@ namespace CE::Widgets
 			}
 			else if (event->type == CEventType::MouseLeave)
 			{
+				if (IsOfType<CMenuItem>())
+				{
+					//CE_LOG(Info, All, "Widget Mouse Exit: {}", ((CMenuItem*)this)->GetText());
+				}
+
 				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Hovered;
 				if (isPressed)
@@ -1637,6 +1896,16 @@ namespace CE::Widgets
 					}
 					widget->HandleEvent(event);
 				}
+
+				if (IsWindow())
+				{
+					CWindow* thisWindow = static_cast<CWindow*>(this);
+
+					for (CWindow* attachedWindow : thisWindow->attachedWindows)
+					{
+						attachedWindow->HandleEvent(event);
+					}
+				}
 			}
 		}
 		else if (event->direction == CEventDirection::BottomToTop) // Pass event up the chain
@@ -1667,6 +1936,67 @@ namespace CE::Widgets
 					paintEvent->painter->PopChildCoordinateSpace();
 				}
 			}
+		}
+	}
+
+	CWidget* CWidget::HitTest(Vec2 windowSpaceMousePos)
+	{
+		if (!IsEnabled() || !IsInteractable())
+			return nullptr;
+
+		Rect rect = GetWindowSpaceRect();
+
+		if (!rect.Contains(windowSpaceMousePos))
+			return nullptr;
+
+		if (GetName() == "RecentMenu")
+		{
+			String::IsAlphabet('a');
+		}
+
+		for (int i = attachedWidgets.GetSize() - 1; i >= 0; --i)
+		{
+			CWidget* childWidget = attachedWidgets[i];
+
+			if (childWidget == nullptr)
+				continue;
+
+			CWidget* hit = childWidget->HitTest(windowSpaceMousePos);
+			if (hit != nullptr)
+			{
+				hit = childWidget->HitTest(windowSpaceMousePos);
+				return hit;
+			}
+		}
+
+		return this;
+	}
+
+	void CWidget::OnDestroyQueued()
+	{
+
+	}
+
+	void CWidget::OnEnabled()
+	{
+		for (CWidget* widget : attachedWidgets)
+		{
+			widget->OnEnabled();
+		}
+	}
+
+	void CWidget::OnDisabled()
+	{
+		if (IsFocussed())
+		{
+			stateFlags &= ~CStateFlag::Focused;
+			SetNeedsStyle();
+			SetNeedsPaint();
+		}
+
+		for (CWidget* widget : attachedWidgets)
+		{
+			widget->OnDisabled();
 		}
 	}
 

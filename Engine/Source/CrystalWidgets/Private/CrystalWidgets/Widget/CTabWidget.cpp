@@ -44,12 +44,6 @@ namespace CE::Widgets
 		return -1;
 	}
 
-	void CTabWidget::OnAfterComputeStyle()
-	{
-		Super::OnAfterComputeStyle();
-
-	}
-
 	void CTabWidget::OnPaint(CPaintEvent* paintEvent)
 	{
 		Super::OnPaint(paintEvent);

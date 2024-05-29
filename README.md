@@ -2,7 +2,7 @@
 
 A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a Widget library that uses CSS & Yoga Layout engine.
 
-![](./Screenshots/EditorWindow.png)
+![](./Screenshots/ColorPicker.png)
 
 ### Check more [screenshots below](#screenshots).
 
@@ -17,8 +17,6 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 ## Features
 
 - Modular engine architecture.
-- **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
-- **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 - Use HLSL to write shaders for Vulkan.
 - Forward PBR rendering with CubeMap IBL.
 - Directional shadow maps.
@@ -27,6 +25,8 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Frame graph based GPU scheduling with automatic resource dependencies.
+- **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
+- **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
 ## Modules Overview
 
@@ -64,17 +64,19 @@ Contains all the editor modules.
 # Screenshots
 
 
-### Editor tools using CrystalWidgets
-
-Editor GIF
-
-![](./Screenshots/EditorDemo.gif)
-
-Project browser window:
+### Project browser window:
 
 ![](./Screenshots/ProjectBrowser.png)
 
-PBR Demo:
+### GIF:
+
+![](./Screenshots/EditorDemo.gif)
+
+### Project Settings window:
+
+![](./Screenshots/EditorWindow.png)
+
+### PBR Demo:
 
 ![](./Screenshots/IBL%20Demo%20Night.png)
 

@@ -17,6 +17,8 @@ namespace CE::Widgets
     {
         renderer->ResetToDefaults();
 
+        renderer->SetFillGradient({}, GradientType::None);
+
         for (int i = 0; i < numFontsPushed; i++)
         {
             renderer->PopFont();
@@ -35,7 +37,25 @@ namespace CE::Widgets
     void CPainter::SetBrush(const CBrush& brush)
     {
         this->brush = brush;
+
+        // - Solid Color -
+
         renderer->SetFillColor(brush.color);
+
+        // - Gradient -
+
+        ColorGradient gradient{};
+        gradient.degrees = brush.gradient.rotationInDegrees;
+        gradient.keys.Reserve(brush.gradient.keys.GetSize());
+        for (const auto& key : brush.gradient.keys)
+        {
+            gradient.keys.Add({ .color = key.color.ToVec4(), .position = key.position / 100.0f }); // Percentage to ratio
+        }
+
+        if (brush.gradient.gradientType == CGradientType::LinearGradient)
+        {
+	        renderer->SetFillGradient(gradient, GradientType::Linear);
+        }
     }
 
     void CPainter::SetFont(const CFont& font)
@@ -167,8 +187,30 @@ namespace CE::Widgets
         renderer->DrawTexture(texture, rect.GetSize());
     }
 
+    void CPainter::DrawTexture(const Rect& rect, RPI::Texture* texture, CBackgroundRepeat repeat, Vec2 scaling, Vec2 offset)
+    {
+        if (!texture)
+            return;
+
+        Vec2 imageSize = Vec2(texture->GetWidth(), texture->GetHeight());
+        
+        if (repeat == CBackgroundRepeat::NoRepeat)
+        {
+            renderer->SetCursor(GetOrigin() + rect.min);
+            renderer->DrawTexture(texture, rect.GetSize());
+        }
+        else
+        {
+            renderer->SetCursor(GetOrigin() + rect.min);
+            renderer->DrawTexture(texture, rect.GetSize(), 
+                EnumHasFlag(repeat, CBackgroundRepeat::RepeatX), 
+                EnumHasFlag(repeat, CBackgroundRepeat::RepeatY),
+                scaling, offset);
+        }
+    }
+
     void CPainter::DrawFrameBuffer(const Rect& rect,
-	    const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
+                                   const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
     {
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawFrameBuffer(frames, rect.GetSize());

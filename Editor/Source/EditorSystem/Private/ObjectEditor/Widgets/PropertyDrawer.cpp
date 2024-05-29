@@ -40,7 +40,7 @@ namespace CE::Editor
 		customProperyDrawers[Pair(fieldDeclTypeId, underlyingTypeId)].Remove(propertyDrawer);
 	}
 
-	PropertyDrawer* PropertyDrawer::Create(FieldType* targetField, CWidget* outer, const String& name)
+	PropertyDrawer* PropertyDrawer::Create(ObjectEditor* owner, FieldType* targetField, CWidget* outer, const String& name)
 	{
 		if (!targetField || !outer)
 			return nullptr;
@@ -91,7 +91,9 @@ namespace CE::Editor
 		if (propertyDrawer == nullptr)
 			propertyDrawer = GetStaticClass<PropertyDrawer>();
 
-		return CreateObject<PropertyDrawer>(outer, name.NonEmpty() ? name : propertyDrawer->GetName().GetLastComponent(), OF_NoFlags, propertyDrawer);
+		PropertyDrawer* result = CreateObject<PropertyDrawer>(outer, name.NonEmpty() ? name : propertyDrawer->GetName().GetLastComponent(), OF_NoFlags, propertyDrawer);
+		result->owner = owner;
+		return result;
 	}
 
 	void PropertyDrawer::CreateGUI(FieldType* field, void* instance)
@@ -140,68 +142,14 @@ namespace CE::Editor
 				VectorFieldEditor* editorWidget = CreateObject<VectorFieldEditor>(right, "VectorFieldEditor");
 				editorWidget->SetVectorType(declTypeId);
 
-				{
-					if (declTypeId == TYPEID(Vec2))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec2>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec3))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec3>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec4))
-					{
-						editorWidget->SetVectorValue(field->GetFieldValue<Vec4>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec2i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec2i>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec3i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec3i>(instance));
-					}
-					else if (declTypeId == TYPEID(Vec4i))
-					{
-						editorWidget->SetVectorIntValue(field->GetFieldValue<Vec4i>(instance));
-					}
-				}
-
-				Bind(editorWidget, MEMBER_FUNCTION(VectorFieldEditor, OnValueModified), 
-					[declTypeId, field, instance, this](VectorFieldEditor* editor)
-					{
-						if (declTypeId == TYPEID(Vec2) || declTypeId == TYPEID(Vec3) || declTypeId == TYPEID(Vec4))
-						{
-							Vec4 vec4Value = editor->GetVectorValue();
-							if (declTypeId == TYPEID(Vec2))
-								field->SetFieldValue<Vec2>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec3))
-								field->SetFieldValue<Vec3>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec4))
-								field->SetFieldValue<Vec4>(instance, vec4Value);
-
-							emit OnPropertyModified(this);
-						}
-						else
-						{
-							Vec4i vec4Value = editor->GetVectorIntValue();
-							if (declTypeId == TYPEID(Vec2i))
-								field->SetFieldValue<Vec2i>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec3i))
-								field->SetFieldValue<Vec3i>(instance, vec4Value);
-							else if (declTypeId == TYPEID(Vec4i))
-								field->SetFieldValue<Vec4i>(instance, vec4Value);
-
-							emit OnPropertyModified(this);
-						}
-					});
+				editorWidget->BindField(field, instance);
 			}
 			else if (declTypeId == TYPEID(String))
 			{
 				CTextInput* stringInput = CreateObject<CTextInput>(right, "StringInput");
 				stringInput->SetText(field->GetFieldValue<String>(instance));
 
-				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance](CTextInput* input)
+				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [field, instance](CTextInput* input)
 					{
 						field->SetFieldValue<String>(instance, input->GetText());
 
@@ -228,14 +176,21 @@ namespace CE::Editor
 			}
 			else if (declTypeId == TYPEID(Color))
 			{
-				
+				ColorFieldEditor* colorWidget = CreateObject<ColorFieldEditor>(right, "ColorFieldEditor");
+
+				colorWidget->BindField(field, instance);
 			}
 			else if (field->IsDecimalField() || field->IsNumberField())
 			{
-				CTextInput* numberInput = CreateObject<CTextInput>(right, "NumberInput");
+				NumericFieldInput* numberInput = CreateObject<NumericFieldInput>(right, "NumberInput");
 
 				if (field->IsDecimalField())
 				{
+					if (declTypeId == TYPEID(f32))
+						numberInput->SetPrecision(floatPrecision);
+					else
+						numberInput->SetPrecision(doublePrecision);
+
 					numberInput->SetText(String::Format("{}", field->GetNumericFieldValue(instance)));
 				}
 				else
@@ -246,7 +201,7 @@ namespace CE::Editor
 						numberInput->SetText(String::Format("{}", (s64)field->GetNumericFieldValue(instance)));
 				}
 
-				Bind(numberInput, MEMBER_FUNCTION(CTextInput, OnTextChanged), [field, instance, declTypeId](CTextInput* textInput)
+				Bind(numberInput, MEMBER_FUNCTION(NumericFieldInput, OnTextEdited), [field, instance, declTypeId](CTextInput* textInput)
 					{
 						const String& text = textInput->GetText();
 						f64 numberValue = 0.0f;

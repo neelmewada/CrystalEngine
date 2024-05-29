@@ -1,6 +1,6 @@
 
 * {
-    font-name: Roboto;
+    font: Roboto;
 }
 
 CDockSpace {
@@ -30,7 +30,7 @@ CDockWindow {
     column-gap: 10px;
 }
 
-CButton {
+CButton, CImageButton {
     background: rgb(56, 56, 56);
     flex-direction: row;
     min-width: 40px;
@@ -41,21 +41,26 @@ CButton {
     border-width: 1px;
 }
 
-CButton:hovered {
+CButton:hovered, CImageButton:hovered {
     background: rgb(95, 95, 95);
 }
 
-CButton:pressed {
+CButton:pressed, CImageButton:pressed {
     background: rgb(50, 50, 50);
     padding: 15px 6px 15px 4px;
 }
 
-CButton:disabled {
+CButton:disabled, CImageButton:disabled {
     background: rgb(50, 50, 50);
     color: rgb(128, 128, 128);
 }
 
-CButton::alternate {
+CImageButton CImage, CImageButton::alternate CImage {
+    min-width: 14px;
+    min-height: 14px;
+}
+
+CButton::alternate, CImageButton::alternate {
     background: rgb(0, 112, 224);
     flex-direction: row;
     min-width: 40px;
@@ -66,16 +71,16 @@ CButton::alternate {
     border-width: 1px;
 }
 
-CButton::alternate:hovered {
+CButton::alternate:hovered, CImageButton::alternate:hovered {
     background: rgb(14, 134, 255);
 }
 
-CButton::alternate:pressed {
+CButton::alternate:pressed, CImageButton::alternate:pressed {
     background: rgb(0, 100, 200);
     padding: 15px 6px 15px 4px;
 }
 
-CButton::alternate:disabled {
+CButton::alternate:disabled, CImageButton::alternate:disabled {
     background: rgb(0, 85, 171);
     color: rgb(128, 128, 128);
 }
@@ -93,7 +98,7 @@ CTextInput {
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 1.25px;
+    border-width: 1px;
     border-color: rgb(60, 60, 60);
     border-radius: 5px 5px;
     min-height: 22.5px;
@@ -112,6 +117,10 @@ CTextInput:disabled {
     border-color: rgb(50, 50, 50);
     background-color: rgb(26, 26, 26);
     color: rgb(140, 140, 140);
+}
+
+CTextInput:active {
+    cursor: edit;
 }
 
 CCheckBox {
@@ -200,7 +209,7 @@ CMenuItem #Label {
 CMenu {
     padding: 0px 10px;
     background: rgb(56, 56, 56);
-    border-color: rgb(63, 63, 63);
+    border-color: rgb(64, 64, 64);
     border-width: 1px;
     flex-direction: column;
     min-width: 150px;
@@ -450,13 +459,45 @@ CTextInput#StringInput, CTextInput#NumberInput {
     min-width: 175px;
 }
 
+ColorInput {
+    min-width: 150px;
+    min-height: 22px;
+    align-self: stretch;
+    border-radius: 4px 4px 4px 4px;
+    border-width: 1.25px;
+    border-color: rgb(60, 60, 60);
+    padding: 5px 5px 5px 5px;
+}
+
+ColorInput:focused {
+    border-color: rgb(0, 112, 224);
+}
+
+ColorInput.Transparent {
+    background-image: url(/Editor/Assets/Images/GridPattern);
+    background-size: contain;
+    background-position: middle-left;
+    background-repeat: repeat-x;
+}
+
+VectorFieldEditor {
+    column-gap: 1px;
+}
+
 VectorComponentInput {
     flex-direction: row;
-    column-gap: 0;
     align-items: stretch;
     flex-grow: 2;
     flex-shrink: 1;
     border-radius: 4px 4px 4px 4px;
     padding: 12px 5px 5px 5px;
+}
+
+NumberFieldInput {
+    cursor: size-h;
+}
+
+NumberFieldInput:active {
+    cursor: edit;
 }
 

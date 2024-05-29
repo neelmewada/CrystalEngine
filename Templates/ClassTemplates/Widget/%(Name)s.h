@@ -1,8 +1,7 @@
 #pragma once
 
-namespace CE::Widgets
+namespace %(NameSpace)s
 {
-
     CLASS()
     class %(Module_API)s %(Name)s : public CWidget
     {
@@ -15,10 +14,10 @@ namespace CE::Widgets
 
     protected:
 
-        virtual void OnDrawGUI() override;
+        void Construct() override;
 
     };
     
-} // namespace CE
+}
 
 #include "%(Name)s.rtti.h"

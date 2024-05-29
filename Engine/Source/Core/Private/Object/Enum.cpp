@@ -24,7 +24,7 @@ namespace CE
 
 	String EnumConstant::GetDisplayName()
 	{
-		String displayAttrib = GetAttribute("Display").GetStringValue();
+		String displayAttrib = GetAttribute("DisplayName").GetStringValue();
 
 		if (!displayAttrib.IsEmpty())
 			return displayAttrib;
@@ -55,7 +55,7 @@ namespace CE
 
 	String EnumType::GetDisplayName()
 	{
-		String displayAttrib = GetAttribute("Display").GetStringValue();
+		String displayAttrib = GetAttribute("DisplayName").GetStringValue();
 
 		if (!displayAttrib.IsEmpty())
 			return displayAttrib;
