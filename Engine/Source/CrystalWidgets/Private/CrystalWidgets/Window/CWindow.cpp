@@ -449,7 +449,6 @@ namespace CE::Widgets
 
             if (widget)
             {
-                CE_LOG(Info, All, "Hit Widget: {}", widget->GetName());
                 return widget;
             }
         }

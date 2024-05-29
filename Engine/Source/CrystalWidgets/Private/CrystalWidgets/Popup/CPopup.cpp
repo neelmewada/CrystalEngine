@@ -82,10 +82,6 @@ namespace CE::Widgets
 
 			rootWindow->AttachSubWindow(this);
 
-			SetNeedsLayout();
-			SetNeedsStyle();
-			SetNeedsPaint();
-
 			UpdateStyleIfNeeded();
 			UpdateLayoutIfNeeded();
 

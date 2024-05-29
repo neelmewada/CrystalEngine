@@ -1949,11 +1949,6 @@ namespace CE::Widgets
 		if (!rect.Contains(windowSpaceMousePos))
 			return nullptr;
 
-		if (GetName() == "RecentMenu")
-		{
-			String::IsAlphabet('a');
-		}
-
 		for (int i = attachedWidgets.GetSize() - 1; i >= 0; --i)
 		{
 			CWidget* childWidget = attachedWidgets[i];
@@ -1964,7 +1959,6 @@ namespace CE::Widgets
 			CWidget* hit = childWidget->HitTest(windowSpaceMousePos);
 			if (hit != nullptr)
 			{
-				hit = childWidget->HitTest(windowSpaceMousePos);
 				return hit;
 			}
 		}
