@@ -127,7 +127,8 @@ namespace CE::Editor
 		}
 		else if (field->IsEnumField())
 		{
-			
+			EnumFieldEditor* enumInput = CreateObject<EnumFieldEditor>(right, "EnumFieldEditor");
+			enumInput->BindField(field, instance);
 		}
 		else if (field->IsArrayField())
 		{

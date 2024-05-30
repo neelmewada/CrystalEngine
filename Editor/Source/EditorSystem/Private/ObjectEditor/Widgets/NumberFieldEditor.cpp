@@ -63,6 +63,8 @@ namespace CE::Editor
 				{
 					textInput->SetText(String::Format("{}", field->GetFieldValue<u64>(instance)));
 				}
+
+				emit OnValueUpdated();
 			};
 
 		// Manually update the gui text box initially
@@ -118,6 +120,8 @@ namespace CE::Editor
 					{
 						field->SetFieldValue<f64>(instance, numberValue);
 					}
+
+					emit OnValueUpdated();
 				}
             };
 

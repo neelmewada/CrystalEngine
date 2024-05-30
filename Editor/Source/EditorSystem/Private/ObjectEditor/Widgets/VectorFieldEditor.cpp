@@ -203,6 +203,8 @@ namespace CE::Editor
                         {
                             field->SetFieldValue<Vec4i>(instance, vec4Value.ToVec4i());
                         }
+
+                        emit OnValueUpdated();
                     }
                 }
             };
@@ -245,6 +247,8 @@ namespace CE::Editor
                     {
                         field->SetFieldValue<Vec4i>(instance, vec4Value.ToVec4i());
                     }
+
+                    emit OnValueUpdated();
                 }
             };
 

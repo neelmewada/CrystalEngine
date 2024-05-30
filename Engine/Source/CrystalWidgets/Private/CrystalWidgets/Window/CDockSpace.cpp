@@ -366,7 +366,9 @@ namespace CE::Widgets
         }
 
         if (position.y < 60)
-            return true;
+        {
+	        return true;
+        }
         return false;
     }
 

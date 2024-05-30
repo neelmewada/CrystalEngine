@@ -244,7 +244,7 @@ Shader "2D/SDF Geometry"
                 float numerator = max(itemSize.x, itemSize.y) * 0.5;
                 float denominator = max(origSize.x, origSize.y) * 0.5;
 
-                const float screenPxRange = numerator / denominator * 3.0; // / 10.0
+                const float screenPxRange = numerator / denominator * 3.0; // * 3.0
                 float sdf = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
                 float screenPxDistance = screenPxRange * (sdf - 0.5);
                 float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);

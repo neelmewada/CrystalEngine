@@ -308,7 +308,9 @@ namespace CE::Widgets
             }
 
             if (position.y < rootPadding.y && position.x < minX)
-                return true;
+            {
+	            return true;
+            }
         }
 
         return false;

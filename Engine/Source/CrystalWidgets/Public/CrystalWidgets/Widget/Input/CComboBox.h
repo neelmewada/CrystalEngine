@@ -49,6 +49,8 @@ namespace CE::Widgets
 
         CPopup* GetComboPopup() const { return comboPopup; }
 
+        int GetSelectedItemIndex() const { return selectedItemIndex; }
+
         void AddItem(CComboBoxItem* item);
         void RemoveItem(CComboBoxItem* item);
 
@@ -57,6 +59,11 @@ namespace CE::Widgets
 
         void SelectItem(int index);
         void SelectItem(CComboBoxItem* item);
+
+        // - Signals -
+
+        // Params: int index
+        CE_SIGNAL(OnSelectionChanged, int);
 
     protected:
 

@@ -135,6 +135,7 @@ CComboBox {
     min-height: 20px;
     flex-direction: row;
     align-items: center;
+    column-gap: 2.5px;
 }
 
 CComboBox:hovered {

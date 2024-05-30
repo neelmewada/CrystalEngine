@@ -91,10 +91,27 @@ namespace CE::Widgets
         comboPopup->SetNeedsLayout();
 
         Rect rect = GetScreenSpaceRect();
+        Vec2 comboBoxSize = rect.GetSize();
+
         Vec2 size = comboPopup->GetComputedLayoutSize();
         size.width = rect.GetSize().width;
 
-        comboPopup->Show(rect.min.ToVec2i() + Vec2i(0, (int)rect.GetSize().height), size.ToVec2i());
+        Vec2 pos = rect.min + Vec2(0, (int)rect.GetSize().height);
+        rect = Rect::FromSize(pos, size);
+
+        CWindow* rootWindow = GetRootWindow();
+
+    	if (rootWindow)
+    	{
+            Rect windowRect = rootWindow->GetScreenSpaceRect();
+
+    		if (rect.max.y > windowRect.max.y)
+    		{
+                rect = rect.Translate(Vec2(0, -size.y - comboBoxSize.height));
+    		}
+    	}
+
+        comboPopup->Show(rect.min.ToVec2i(), rect.GetSize().ToVec2i());
     }
 
     void CComboBox::ClosePopup()
@@ -109,6 +126,8 @@ namespace CE::Widgets
 
         selectedItemIndex = index;
         displayLabel->SetText(items[index]->GetText());
+
+        emit OnSelectionChanged(index);
     }
 
     void CComboBox::SelectItem(CComboBoxItem* item)

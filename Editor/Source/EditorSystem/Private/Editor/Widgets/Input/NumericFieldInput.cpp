@@ -188,9 +188,25 @@ namespace CE::Editor
 
         CPainter* painter = paintEvent->painter;
 
+        Vec2 pos = GetComputedLayoutTopLeft();
+        Vec2 size = GetComputedLayoutSize();
+        Vec4 borderRadius = computedStyle.GetBorderRadius();
+        Color borderColor = computedStyle.properties[CStylePropertyType::BorderColor].color;
+
         if (useRange)
         {
-	        
+            f32 padding = 2.5f;
+            Rect fullRect = Rect::FromSize(pos + Vec2(1, 1) * padding, size - Vec2(1, 1) * padding * 2);
+            f64 ratio = Math::Clamp01((floatValue - rangeMin) / (rangeMax - rangeMin));
+            fullRect = Rect::FromSize(fullRect.min, fullRect.GetSize() * Vec2(ratio, 1));
+
+            CPen pen{};
+            CBrush brush = CBrush(borderColor);
+
+            painter->SetPen(pen);
+            painter->SetBrush(brush);
+
+            painter->DrawRoundedRect(fullRect, borderRadius * 0.5f);
         }
     }
 
