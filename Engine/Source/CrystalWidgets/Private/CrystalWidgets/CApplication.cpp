@@ -72,6 +72,12 @@ namespace CE::Widgets
 	{
 		constexpr u32 destroyAfterFrames = RHI::Limits::MaxSwapChainImageCount;
 
+		for (int i = queueDestroyWindows.GetSize() - 1; i >= 0; --i)
+		{
+			delete queueDestroyWindows[i];
+			queueDestroyWindows.RemoveAt(i);
+		}
+
 		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
 		{
 			destructionQueue[i]->destroyFrameCounter++;

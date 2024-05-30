@@ -188,9 +188,13 @@ namespace CE
 
         void LoadConfig(ClassType* configClass, String fileName);
 
+        // - Updates -
+
         virtual void OnFieldEdited(FieldType* field);
 
         CE_SIGNAL(OnFieldValueUpdated, FieldType*);
+
+        virtual void OnFieldValidate() {}
 
     protected:
 

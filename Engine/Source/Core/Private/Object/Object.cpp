@@ -96,7 +96,7 @@ namespace CE
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
 		
-		// Detach the passed subobject from it's parent
+		// Detach the passed subobject from its parent first
 		if (subobject->outer != nullptr && subobject->outer != this)
 			subobject->outer->DetachSubobject(subobject);
 

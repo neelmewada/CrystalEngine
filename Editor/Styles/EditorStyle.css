@@ -123,6 +123,75 @@ CTextInput:active {
     cursor: edit;
 }
 
+CComboBox {
+    color: white;
+    padding: 6px 6px;
+    font-size: 12px;
+    background: rgb(15, 15, 15);
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+    border-radius: 5px 5px;
+    min-width: 40px;
+    min-height: 20px;
+    flex-direction: row;
+    align-items: center;
+    column-gap: 2.5px;
+}
+
+CComboBox:hovered {
+    border-color: rgb(74, 74, 74);
+}
+
+CComboBox:pressed {
+    padding: 6px 7px 6px 5px;
+}
+
+CComboBox:disabled {
+    border-color: rgb(50, 50, 50);
+    background-color: rgb(26, 26, 26);
+    color: rgb(140, 140, 140);
+}
+
+CPopup#ComboPopup {
+    flex-direction: column;
+    align-items: stretch;
+    background-color: rgb(26, 26, 26);
+    border-width: 1px;
+    border-color: rgb(42, 42, 42);
+}
+
+CComboBoxItem {
+    font-size: 12px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    min-width: 64px;
+    padding: 5px 5px 5px 5px;
+}
+
+CComboBoxItem:hovered {
+    background-color: rgb(36, 36, 36);
+}
+
+CComboBoxItem:active {
+    border-radius: 5px 5px 5px 5px;
+    border-width: 1px;
+    border-color: rgb(0, 112, 224);
+}
+
+CComboBoxItem #ItemLabel {
+    
+}
+
+#TestComboBox {
+    width: 100px;
+}
+
+CComboBox #DownwardArrow {
+    width: 10px;
+    height: 10px;
+}
+
 CCheckBox {
     width: 20px;
     height: 20px;
@@ -217,7 +286,7 @@ CMenu {
 
 .Spacer {
     flex-grow: 4;
-    flex-shrink: 2;
+    flex-shrink: 1;
 }
 
 #ForwardArrow {
@@ -427,6 +496,14 @@ CCollapsibleSection:collapsed #SectionHeader {
     border-radius: 5px 5px 5px 5px;
 }
 
+NumericFieldInput::frame {
+    background-color: rgb(60, 60, 60);
+}
+
+NumericFieldInput::frame:hovered {
+    background-color: rgb(74, 74, 74);
+}
+
 PropertyDrawer {
     width: 100%;
     min-height: 15px;
@@ -436,7 +513,7 @@ PropertyDrawer {
 }
 
 #PropertyEditorRowLeft {
-    width: 160px;
+    width: 140px;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
@@ -457,6 +534,10 @@ FieldEditor {
 
 CTextInput#StringInput, CTextInput#NumberInput {
     min-width: 175px;
+}
+
+ColorComponentInput {
+    padding: 10px 5px 5px 12px;
 }
 
 ColorInput {
@@ -491,13 +572,5 @@ VectorComponentInput {
     flex-shrink: 1;
     border-radius: 4px 4px 4px 4px;
     padding: 12px 5px 5px 5px;
-}
-
-NumberFieldInput {
-    cursor: size-h;
-}
-
-NumberFieldInput:active {
-    cursor: edit;
 }
 

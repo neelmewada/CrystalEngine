@@ -42,6 +42,9 @@ namespace CE::Editor
         FIELD()
         ObjectEditor* objectEditor = nullptr;
 
+        FIELD()
+        CLabel* titleLabel = nullptr;
+
         friend class SceneEditorWindow;
     };
     

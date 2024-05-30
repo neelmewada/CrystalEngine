@@ -58,46 +58,25 @@ namespace CE::Editor
         CColorPicker* colorMap = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientR = nullptr;
+        ColorComponentInput* inputR = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientG = nullptr;
+        ColorComponentInput* inputG = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientB = nullptr;
+        ColorComponentInput* inputB = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientA = nullptr;
+        ColorComponentInput* inputA = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientH = nullptr;
+        ColorComponentInput* inputH = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientS = nullptr;
+        ColorComponentInput* inputS = nullptr;
 
         FIELD()
-        ColorPickerGradient* gradientV = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputR = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputG = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputB = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputA = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputH = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputS = nullptr;
-
-        FIELD()
-        NumericFieldInput* inputV = nullptr;
+        ColorComponentInput* inputV = nullptr;
 
         FIELD()
         ColorPickerPreview* previewOld = nullptr;

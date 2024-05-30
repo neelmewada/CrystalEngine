@@ -48,7 +48,7 @@ namespace CE::Editor
 
     protected:
 
-        bool OnAfterComputeStyle() override;
+        bool PostComputeStyle() override;
 
         void OnValidateText() override;
 
@@ -69,6 +69,12 @@ namespace CE::Editor
 
         FIELD()
         f32 integerSensitivity = 0.5f;
+
+        FIELD()
+        Vec4 rangePadding = Vec4(1, 1, 1, 1) * 2.5f;
+
+        Color draggerColor{};
+        Color draggerHoverColor{};
 
         bool useRange = false;
 

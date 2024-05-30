@@ -52,9 +52,9 @@ namespace CE::Editor
         SetNeedsPaint();
     }
 
-    bool NumericFieldInput::OnAfterComputeStyle()
+    bool NumericFieldInput::PostComputeStyle()
     {
-        bool base = Super::OnAfterComputeStyle();
+        bool base = Super::PostComputeStyle();
 
         if (IsEditing())
         {
@@ -64,6 +64,9 @@ namespace CE::Editor
         {
             hoverCursor = CCursor::SizeH;
         }
+
+        draggerColor = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Frame).GetBackgroundColor();
+        draggerHoverColor = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Frame).GetBackgroundColor();
 
         return base;
     }
@@ -128,7 +131,7 @@ namespace CE::Editor
                 startMousePos = mouseEvent->mousePos;
                 event->Consume(this);
             }
-            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && !IsEditing())
+            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && !IsEditing() && !useRange)
             {
                 Vec2 diff = mouseEvent->mousePos - startMousePos;
 
@@ -188,9 +191,25 @@ namespace CE::Editor
 
         CPainter* painter = paintEvent->painter;
 
-        if (useRange)
+        Vec2 pos = GetComputedLayoutTopLeft();
+        Vec2 size = GetComputedLayoutSize();
+
+        Vec4 borderRadius = computedStyle.GetBorderRadius();
+        Color dragColor = EnumHasFlag(stateFlags, CStateFlag::Hovered) ? draggerHoverColor : draggerColor;
+
+        if (useRange && !IsEditing() && dragColor.a > 0)
         {
-	        
+            Rect fullRect = Rect::FromSize(pos + rangePadding.min, size - Vec2(1, 1) * (rangePadding.min + rangePadding.max));
+            f32 ratio = (f32)Math::Clamp01((floatValue - rangeMin) / (rangeMax - rangeMin));
+            fullRect = Rect::FromSize(fullRect.min, fullRect.GetSize() * Vec2(ratio, 1));
+
+            CPen pen{};
+            CBrush brush = CBrush(dragColor);
+
+            painter->SetPen(pen);
+            painter->SetBrush(brush);
+
+            painter->DrawRoundedRect(fullRect, borderRadius);
         }
     }
 

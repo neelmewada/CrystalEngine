@@ -106,6 +106,7 @@ namespace CE::Widgets
                                 menuPopup->UpdateLayoutIfNeeded();
 
                                 Vec2 menuSize = menuPopup->GetComputedLayoutSize();
+                                menuSize = Vec2();
                                 Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
 
                                 menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), menuSize.ToVec2i());
@@ -141,6 +142,7 @@ namespace CE::Widgets
                         menuPopup->UpdateLayoutIfNeeded();
 
                         Vec2 menuSize = menuPopup->GetComputedLayoutSize();
+                        menuSize = Vec2();
                         Vec2 screenSpacePos = LocalToScreenSpacePos(pos);
 
                         menuPopup->Show(Vec2i((int)screenSpacePos.x, (int)screenSpacePos.y), menuSize.ToVec2i());
@@ -364,7 +366,9 @@ namespace CE::Widgets
         }
 
         if (position.y < 60)
-            return true;
+        {
+	        return true;
+        }
         return false;
     }
 

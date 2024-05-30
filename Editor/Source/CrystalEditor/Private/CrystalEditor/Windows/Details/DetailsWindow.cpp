@@ -33,6 +33,7 @@ namespace CE::Editor
 	        return;
         }
 
+
         splitView->SetEnabled(true);
         noSelectionLabel->SetEnabled(false);
 
@@ -92,36 +93,6 @@ namespace CE::Editor
         }
     }
 
-    void DetailsWindow::SetEditTarget(Object* target)
-    {
-        if (this->targetObject == target)
-            return;
-
-        this->targetObject = target;
-
-        // Cleanup previous editor
-
-        CSplitViewContainer* container = splitView->GetContainer(1);
-
-        for (int i = container->GetSubWidgetCount() - 1; i >= 0; --i)
-        {
-            container->GetSubWidget(i)->Destroy();
-        }
-
-        if (objectEditor)
-        {
-            objectEditor->Destroy();
-            objectEditor = nullptr;
-        }
-
-        if (targetObject)
-        {
-            objectEditor = ObjectEditor::Create(targetObject, this, "ObjectEditor");
-
-            objectEditor->CreateGUI(container);
-        }
-    }
-
     void DetailsWindow::Construct()
     {
         Super::Construct();
@@ -148,8 +119,8 @@ namespace CE::Editor
 
         CWidget* header = CreateObject<CWidget>(topView, "HeaderRow");
 
-        CLabel* title = CreateObject<CLabel>(header, "TitleLabel");
-        title->SetText("SomeActorName");
+        titleLabel = CreateObject<CLabel>(header, "TitleLabel");
+        titleLabel->SetText("Actor");
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);

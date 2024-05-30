@@ -12,13 +12,12 @@ namespace CE::Widgets
 		enabled = false;
 
 #if PAL_TRAIT_BUILD_EDITOR
-		showNativeWindow = true;
+		useNativeWindow = true;
 #else
 		showNativeWindow = false;
 #endif
 
-		// TODO: Testing only
-		showNativeWindow = false;
+		useNativeWindow = false;
 	}
 
 	CPopup::~CPopup()
@@ -44,7 +43,7 @@ namespace CE::Widgets
 		showNativeWindow = false;
 #endif
 
-		if (showNativeWindow)
+		if (useNativeWindow)
 		{
 			if (nativeWindow)
 			{
@@ -73,6 +72,12 @@ namespace CE::Widgets
 			SetNeedsLayout();
 			SetNeedsStyle();
 			SetNeedsPaint();
+
+			// FIXME: Temporary hack, need a better focus/un-focus logic
+			if (!IsOfType<CMenu>())
+			{
+				Focus();
+			}
 		}
 		else
 		{
@@ -81,17 +86,19 @@ namespace CE::Widgets
 				return;
 
 			rootWindow->AttachSubWindow(this);
-
-			SetNeedsLayout();
-			SetNeedsStyle();
-			SetNeedsPaint();
-
+			
 			UpdateStyleIfNeeded();
 			UpdateLayoutIfNeeded();
 
 			SetNeedsLayout();
 			SetNeedsStyle();
 			SetNeedsPaint();
+
+			// FIXME: Temporary hack, need a better focus/un-focus logic
+			if (!IsOfType<CMenu>())
+			{
+				Focus();
+			}
 		}
 	}
 
@@ -107,7 +114,8 @@ namespace CE::Widgets
 		{
 			nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
 
-			delete nativeWindow;
+			//delete nativeWindow; nativeWindow = nullptr;
+			nativeWindow->QueueDestroy();
 			nativeWindow = nullptr;
 
 			SetNeedsLayout();
@@ -129,7 +137,7 @@ namespace CE::Widgets
 	void CPopup::Show(Vec2i screenPosition, Vec2i size)
 	{
 		showPosition = screenPosition;
-		if (!showNativeWindow)
+		if (!useNativeWindow)
 		{
 			rootWindow = GetRootWindow();
 			if (rootWindow && rootWindow->GetNativeWindow())
@@ -152,18 +160,39 @@ namespace CE::Widgets
 
 	Vec2 CPopup::GetComputedLayoutTopLeft()
 	{
-		if (IsShown() && !showNativeWindow && rootWindow && rootWindow->GetNativeWindow())
+		if (IsShown() && !useNativeWindow && rootWindow && rootWindow->GetNativeWindow())
 		{
 			return showPosition.ToVec2();
-			//Vec2i windowPos = rootWindow->GetNativeWindow()->platformWindow->GetWindowPosition();
-			//return (showPosition - windowPos).ToVec2();
 		}
 		return Super::GetComputedLayoutTopLeft();
+	}
+
+	Vec2 CPopup::GetComputedLayoutSize()
+	{
+		return Super::GetComputedLayoutSize();
+	}
+
+	bool CPopup::PostComputeStyle()
+	{
+		bool layoutUpdated = Super::PostComputeStyle();
+
+		if (showSize.width > 0.1f)
+		{
+			YGNodeStyleSetMinWidth(node, showSize.width);
+			return true;
+		}
+
+		return layoutUpdated;
 	}
 
 	void CPopup::OnFocusLost()
 	{
 		Super::OnFocusLost();
+
+		if (hideWhenUnfocused)
+		{
+			Hide();
+		}
 	}
 
 	bool CPopup::WindowHitTest(PlatformWindow* window, Vec2 position)

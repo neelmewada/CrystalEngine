@@ -32,6 +32,8 @@ namespace CE
         virtual void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) {}
         virtual void OnWindowMinimized(PlatformWindow* window) {}
         virtual void OnWindowCreated(PlatformWindow* window) {}
+        virtual void OnWindowExposed(PlatformWindow* window) {}
+
     };
     
 } // namespace CE

@@ -10,8 +10,6 @@ namespace %(NameSpace)s
 
         %(Name)s();
 
-        virtual ~%(Name)s();
-
     protected:
 
         void Construct() override;

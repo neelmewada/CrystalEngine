@@ -312,12 +312,13 @@ namespace CE
 
     void StructType::CacheAllFunctions()
     {
+        LockGuard<SharedMutex> lock{ cachedFunctionsMutex };
+
         if (functionsCached)
             return;
 
         functionsCached = true;
 
-        LockGuard<SharedMutex> lock{ cachedFunctionsMutex };
         cachedFunctions.Clear();
 		cachedFunctionsMap.Clear();
 

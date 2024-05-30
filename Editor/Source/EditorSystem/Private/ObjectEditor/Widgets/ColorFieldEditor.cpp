@@ -17,6 +17,8 @@ namespace CE::Editor
             {
                 field->SetFieldValue<Color>(instance, newColor);
                 colorInput->SetValue(newColor);
+
+                emit OnValueUpdated();
             });
 	}
 

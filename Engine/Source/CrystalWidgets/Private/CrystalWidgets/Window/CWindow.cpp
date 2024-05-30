@@ -308,7 +308,9 @@ namespace CE::Widgets
             }
 
             if (position.y < rootPadding.y && position.x < minX)
-                return true;
+            {
+	            return true;
+            }
         }
 
         return false;
@@ -437,7 +439,9 @@ namespace CE::Widgets
 
     CWidget* CWindow::HitTest(Vec2 windowSpaceMousePos)
     {
-        for (int i = attachedWindows.GetSize() - 1; i >= 0; i--)
+        bool shouldBreak = false;
+
+        for (int i = attachedWindows.GetSize() - 1; !shouldBreak && i >= 0; i--)
         {
             CWindow* attachedWindow = attachedWindows[i];
             if (!attachedWindow->IsEnabled() || !attachedWindow->IsVisible())
@@ -445,11 +449,19 @@ namespace CE::Widgets
 	            continue;
             }
 
+            if (attachedWindow->IsOfType<CPopup>())
+            {
+                CPopup* popup = static_cast<CPopup*>(attachedWindow);
+                if (popup->blockHitTest)
+                {
+                    shouldBreak = true;
+                }
+            }
+
 	        CWidget* widget = attachedWindow->HitTest(windowSpaceMousePos);
 
             if (widget)
             {
-                CE_LOG(Info, All, "Hit Widget: {}", widget->GetName());
                 return widget;
             }
         }

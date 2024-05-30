@@ -104,7 +104,7 @@ namespace CE::Widgets
 
 	protected:
 
-		bool OnAfterComputeStyle() override
+		bool PostComputeStyle() override
 		{
 			return RecalculateOffsets();
 		}

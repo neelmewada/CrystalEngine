@@ -209,6 +209,19 @@ namespace CE::Widgets
         }
     }
 
+    void CPainter::DrawTexture(const Rect& rect, const Name& texturePath)
+    {
+        RPI::Texture* texture = CApplication::Get()->LoadImage(texturePath);
+        DrawTexture(rect, texture);
+    }
+
+    void CPainter::DrawTexture(const Rect& rect, const Name& texturePath, CBackgroundRepeat repeat, Vec2 scaling,
+	    Vec2 offset)
+    {
+        RPI::Texture* texture = CApplication::Get()->LoadImage(texturePath);
+        DrawTexture(rect, texture, repeat, scaling, offset);
+    }
+
     void CPainter::DrawFrameBuffer(const Rect& rect,
                                    const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
     {

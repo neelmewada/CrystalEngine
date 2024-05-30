@@ -67,7 +67,6 @@ namespace CE
 
 		b8 isInitialized = false;
 
-
 		static Array<ClassType*> subsystemClassQueue;
 
 		friend class SystemModule;

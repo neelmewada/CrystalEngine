@@ -2,10 +2,10 @@
 
 namespace CE::Editor
 {
-
+    
     AssetBrowserWindow::AssetBrowserWindow()
     {
-	    
+        
     }
 
     AssetBrowserWindow::~AssetBrowserWindow()
