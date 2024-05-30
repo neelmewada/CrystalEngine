@@ -528,6 +528,10 @@ CTextInput#StringInput, CTextInput#NumberInput {
     min-width: 175px;
 }
 
+ColorComponentInput {
+    padding: 10px 5px 5px 12px;
+}
+
 ColorInput {
     min-width: 150px;
     min-height: 22px;
@@ -560,13 +564,5 @@ VectorComponentInput {
     flex-shrink: 1;
     border-radius: 4px 4px 4px 4px;
     padding: 12px 5px 5px 5px;
-}
-
-NumberFieldInput {
-    cursor: size-h;
-}
-
-NumberFieldInput:active {
-    cursor: edit;
 }
 

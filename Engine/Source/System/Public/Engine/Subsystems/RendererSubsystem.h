@@ -41,6 +41,7 @@ namespace CE
 		void OnWindowMinimized(PlatformWindow* window) override;
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 		void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowExposed(PlatformWindow* window) override;
 
 		void Initialize() override;
 

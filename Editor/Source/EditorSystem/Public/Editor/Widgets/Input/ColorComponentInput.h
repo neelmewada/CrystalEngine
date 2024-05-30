@@ -14,11 +14,19 @@ namespace CE::Editor
 
         void SetGradient(const CGradient& gradient) { this->gradient = gradient; }
 
+        void ShowTransparency(bool show);
+
     protected:
 
         void Construct() override;
 
+        void OnPaint(CPaintEvent* paintEvent) override;
+
+        FIELD()
         CGradient gradient{};
+
+        FIELD()
+        bool showTransparency = false;
 
     };
     

@@ -35,6 +35,11 @@ namespace CE::Widgets
         void DrawTexture(const Rect& rect, RPI::Texture* texture, CBackgroundRepeat repeat, 
             Vec2 scaling = Vec2(1, 1), Vec2 offset = Vec2(0, 0));
 
+        void DrawTexture(const Rect& rect, const Name& texturePath);
+
+        void DrawTexture(const Rect& rect, const Name& texturePath, CBackgroundRepeat repeat,
+            Vec2 scaling = Vec2(1, 1), Vec2 offset = Vec2(0, 0));
+
         void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
 
         void DrawTriangle(const Rect& rect);

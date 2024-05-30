@@ -436,14 +436,14 @@ namespace CE::Widgets
 
                 event->Consume(this);
 
+                DeselectAll();
+
                 if (mouseEvent->isDoubleClick && !characterOffsets.IsEmpty() && IsEditing())
                 {
                     SelectRange(0, characterOffsets.GetSize() - 1);
                     ScrollTo(characterOffsets.GetSize());
                     return;
                 }
-
-                DeselectAll();
 
                 for (int i = 0; i < characterOffsets.GetSize(); ++i)
                 {
@@ -909,6 +909,9 @@ namespace CE::Widgets
 
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
         Vec4 padding = GetComputedLayoutPadding();
+        Vec2 usableSize = rect.GetSize();
+        usableSize.y -= padding.top + padding.bottom;
+        usableSize.x -= padding.left + padding.right;
 
         Rect contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
         contentRect.min += padding.min;
@@ -919,8 +922,8 @@ namespace CE::Widgets
             textSize = painter->CalculateTextSize(" ");
         }
 
-        Rect textRect = rect.Translate(Vec2(padding.left - textScrollOffset, rect.GetSize().height / 2 - textSize.height / 2));
-        textRect.max -= Vec2(padding.left + padding.right, rect.GetSize().height / 2 - textSize.height / 2);
+        Rect textRect = rect.Translate(Vec2(padding.left - textScrollOffset, padding.top + usableSize.height / 2 - textSize.height / 2));
+        textRect.max -= Vec2(padding.left + padding.right, usableSize.height / 2 - textSize.height / 2);
 
         cursorPos = Math::Clamp(cursorPos, 0, (int)text.GetLength());
 

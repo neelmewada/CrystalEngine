@@ -58,6 +58,11 @@ namespace CE
 		rebuildFrameGraph = recompileFrameGraph = true;
     }
 
+	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
+	{
+		
+	}
+
     void RendererSubsystem::Initialize()
 	{
 		Super::Initialize();

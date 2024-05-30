@@ -70,6 +70,9 @@ namespace CE::Editor
         FIELD()
         f32 integerSensitivity = 0.5f;
 
+        FIELD()
+        Vec4 rangePadding = Vec4(1, 1, 1, 1) * 2.5f;
+
         bool useRange = false;
 
         f64 rangeMin = 0, rangeMax = 0;

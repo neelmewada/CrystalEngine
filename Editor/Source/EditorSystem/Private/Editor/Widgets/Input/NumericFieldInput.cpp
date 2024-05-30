@@ -128,7 +128,7 @@ namespace CE::Editor
                 startMousePos = mouseEvent->mousePos;
                 event->Consume(this);
             }
-            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && !IsEditing())
+            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && !IsEditing() && !useRange)
             {
                 Vec2 diff = mouseEvent->mousePos - startMousePos;
 
@@ -190,13 +190,13 @@ namespace CE::Editor
 
         Vec2 pos = GetComputedLayoutTopLeft();
         Vec2 size = GetComputedLayoutSize();
+
         Vec4 borderRadius = computedStyle.GetBorderRadius();
         Color borderColor = computedStyle.properties[CStylePropertyType::BorderColor].color;
 
-        if (useRange)
+        if (useRange && !IsEditing() && borderColor.a > 0)
         {
-            f32 padding = 2.5f;
-            Rect fullRect = Rect::FromSize(pos + Vec2(1, 1) * padding, size - Vec2(1, 1) * padding * 2);
+            Rect fullRect = Rect::FromSize(pos + rangePadding.min, size - Vec2(1, 1) * (rangePadding.min + rangePadding.max));
             f64 ratio = Math::Clamp01((floatValue - rangeMin) / (rangeMax - rangeMin));
             fullRect = Rect::FromSize(fullRect.min, fullRect.GetSize() * Vec2(ratio, 1));
 
@@ -206,7 +206,7 @@ namespace CE::Editor
             painter->SetPen(pen);
             painter->SetBrush(brush);
 
-            painter->DrawRoundedRect(fullRect, borderRadius * 0.5f);
+            painter->DrawRoundedRect(fullRect, borderRadius);
         }
     }
 

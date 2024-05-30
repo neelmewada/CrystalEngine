@@ -46,7 +46,7 @@ namespace CE::Editor
 			windowInfo.resizable = false;
 			windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::Utility;
 
-			PlatformWindow* nativeWindow = PlatformApplication::Get()->CreatePlatformWindow("Color Picker", 450, 500, windowInfo);
+			PlatformWindow* nativeWindow = PlatformApplication::Get()->CreatePlatformWindow("Color Picker", 450, 520, windowInfo);
 			nativeWindow->SetMinimumSize(Vec2i(400, 500));
 			nativeWindow->SetAlwaysOnTop(true);
 			nativeWindow->SetBorderless(true);
@@ -150,39 +150,39 @@ namespace CE::Editor
 
 		}
 
-		gradientR->SetGradient(CGradient()
+		inputR->SetGradient(CGradient()
 			.WithRotation(0)
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color(0, value.g, value.b, 1), 0)
 			.AddKey(Color(1, value.g, value.b, 1), 100)
 		);
 
-		gradientG->SetGradient(CGradient()
+		inputG->SetGradient(CGradient()
 			.WithRotation(0)
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color(value.r, 0, value.b, 1), 0)
 			.AddKey(Color(value.r, 1, value.b, 1), 100)
 		);
 
-		gradientB->SetGradient(CGradient()
+		inputB->SetGradient(CGradient()
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color(value.r, value.g, 0, 1), 0)
 			.AddKey(Color(value.r, value.g, 1, 1), 100)
 		);
 
-		gradientA->SetGradient(CGradient()
+		inputA->SetGradient(CGradient()
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color(value.r, value.g, value.b, 0), 0)
 			.AddKey(Color(value.r, value.g, value.b, 1), 100)
 		);
 
-		gradientS->SetGradient(CGradient()
+		inputS->SetGradient(CGradient()
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color::HSV(hsv.x, 0, hsv.z), 0)
 			.AddKey(Color::HSV(hsv.x, 1, hsv.z), 100)
 		);
 
-		gradientV->SetGradient(CGradient()
+		inputV->SetGradient(CGradient()
 			.WithType(CGradientType::LinearGradient)
 			.AddKey(Color::HSV(hsv.x, hsv.y, 0), 0)
 			.AddKey(Color::HSV(hsv.x, hsv.y, 1), 100)
@@ -273,13 +273,11 @@ namespace CE::Editor
 						CWidget* vBox = CreateObject<CWidget>(hBox, "InputBox");
 						vBox->AddStyleClass("VStack");
 						{
-							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
+							ColorComponentInput* inputField = CreateObject<ColorComponentInput>(vBox, "InputField");
 							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
 							inputField->SetRange(0, 1);
 							inputField->SetFloatSensitivity(0.005f);
-
-							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
 
 							CGradient gradient{};
 							gradient.gradientType = CGradientType::LinearGradient;
@@ -293,24 +291,24 @@ namespace CE::Editor
 
 							if (i == 0)
 							{
-								gradientR = gradientPreview;
+								//gradientR = gradientPreview;
 								inputR = inputField;
 							}
 							else if (i == 1)
 							{
-								gradientG = gradientPreview;
+								//gradientG = gradientPreview;
 								inputG = inputField;
 							}
 							else if (i == 2)
 							{
-								gradientB = gradientPreview;
+								//gradientB = gradientPreview;
 								inputB = inputField;
 							}
 							else if (i == 3)
 							{
-								gradientA = gradientPreview;
+								//gradientA = gradientPreview;
 								inputA = inputField;
-								gradientPreview->AddStyleClass("Transparent");
+								inputA->ShowTransparency(true);
 
 								start.position = 0; end.position = 100.f;
 								start.isPercent = end.isPercent = true;
@@ -320,7 +318,7 @@ namespace CE::Editor
 
 							gradient.keys.AddRange({ start, end });
 
-							gradientPreview->SetGradient(gradient);
+							inputField->SetGradient(gradient);
 
 							Bind(inputField, MEMBER_FUNCTION(CTextInput, OnTextEdited), [this, i](CTextInput* inputField)
 								{
@@ -366,17 +364,15 @@ namespace CE::Editor
 						CWidget* vBox = CreateObject<CWidget>(hBox, "InputBox");
 						vBox->AddStyleClass("VStack");
 						{
-							NumericFieldInput* inputField = CreateObject<NumericFieldInput>(vBox, "InputField");
+							ColorComponentInput* inputField = CreateObject<ColorComponentInput>(vBox, "InputField");
 							inputField->SetFieldType(NumericFieldType::Float32);
 							inputField->SetText(String::Format("{}", value.ToVec4().xyzw[i]));
 							inputField->SetFloatSensitivity(0.01f);
 
-							ColorPickerGradient* gradientPreview = CreateObject<ColorPickerGradient>(vBox, "GradientPreview");
-
 							if (i == 0)
 							{
 								inputH = inputField;
-								gradientH = gradientPreview;
+								//gradientH = gradientPreview;
 								inputField->SetRange(0, 360);
 								inputField->SetFloatSensitivity(4.0f);
 
@@ -391,18 +387,16 @@ namespace CE::Editor
 									gradient.keys.Add(key);
 								}
 
-								gradientH->SetGradient(gradient);
+								inputField->SetGradient(gradient);
 							}
 							else if (i == 1)
 							{
 								inputS = inputField;
-								gradientS = gradientPreview;
 								inputField->SetRange(0, 1);
 							}
 							else if (i == 2)
 							{
 								inputV = inputField;
-								gradientV = gradientPreview;
 								inputField->SetRange(0, 1);
 							}
 
