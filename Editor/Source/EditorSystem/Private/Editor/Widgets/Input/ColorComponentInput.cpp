@@ -44,7 +44,7 @@ namespace CE::Editor
             CBrush brush = CBrush();
 
             constexpr f32 gradientHeight = 6.0f;
-            constexpr f32 spacingY = 1.5f;
+            constexpr f32 spacingY = 1.0f;
 
             Rect gradientRect = Rect::FromSize(pos + Vec2(rangePadding.left, 0), 
                 Vec2(size.x, gradientHeight) - Vec2(rangePadding.left + rangePadding.right, 0));

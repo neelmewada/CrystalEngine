@@ -17,7 +17,6 @@ namespace CE::Widgets
 		showNativeWindow = false;
 #endif
 
-		// TODO: Testing only
 		useNativeWindow = false;
 	}
 
@@ -115,7 +114,8 @@ namespace CE::Widgets
 		{
 			nativeWindow->GetPlatformWindow()->SetHitTestDelegate(nullptr);
 
-			delete nativeWindow;
+			//delete nativeWindow; nativeWindow = nullptr;
+			nativeWindow->QueueDestroy();
 			nativeWindow = nullptr;
 
 			SetNeedsLayout();

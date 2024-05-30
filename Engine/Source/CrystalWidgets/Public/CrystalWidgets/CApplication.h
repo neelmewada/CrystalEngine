@@ -148,6 +148,7 @@ namespace CE::Widgets
         HashMap<CPlatformWindow*, Array<ImageScopeAttachmentDescriptor>> shaderWriteAttachmentDependencies{};
 
         Array<CPlatformWindow*> platformWindows{};
+        Array<CPlatformWindow*> queueDestroyWindows{};
 
         RHI::FrameScheduler* scheduler = nullptr;
 

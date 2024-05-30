@@ -65,6 +65,9 @@ namespace CE::Editor
             hoverCursor = CCursor::SizeH;
         }
 
+        draggerColor = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Frame).GetBackgroundColor();
+        draggerHoverColor = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Frame).GetBackgroundColor();
+
         return base;
     }
 
@@ -192,16 +195,16 @@ namespace CE::Editor
         Vec2 size = GetComputedLayoutSize();
 
         Vec4 borderRadius = computedStyle.GetBorderRadius();
-        Color borderColor = computedStyle.properties[CStylePropertyType::BorderColor].color;
+        Color dragColor = EnumHasFlag(stateFlags, CStateFlag::Hovered) ? draggerHoverColor : draggerColor;
 
-        if (useRange && !IsEditing() && borderColor.a > 0)
+        if (useRange && !IsEditing() && dragColor.a > 0)
         {
             Rect fullRect = Rect::FromSize(pos + rangePadding.min, size - Vec2(1, 1) * (rangePadding.min + rangePadding.max));
-            f64 ratio = Math::Clamp01((floatValue - rangeMin) / (rangeMax - rangeMin));
+            f32 ratio = (f32)Math::Clamp01((floatValue - rangeMin) / (rangeMax - rangeMin));
             fullRect = Rect::FromSize(fullRect.min, fullRect.GetSize() * Vec2(ratio, 1));
 
             CPen pen{};
-            CBrush brush = CBrush(borderColor);
+            CBrush brush = CBrush(dragColor);
 
             painter->SetPen(pen);
             painter->SetBrush(brush);

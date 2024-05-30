@@ -57,11 +57,9 @@ namespace CE::Widgets
         {
             Rect rect = GetScreenSpaceRect();
             Vec2 pos = rect.min + Vec2(rect.GetSize().width, 0);
+
             subMenu->UpdateStyleIfNeeded();
             subMenu->UpdateLayoutIfNeeded();
-
-            Vec2 menuSize = subMenu->GetComputedLayoutSize();
-            menuSize = Vec2();
 
             stateFlags |= CStateFlag::Active;
 
@@ -69,7 +67,24 @@ namespace CE::Widgets
             SetNeedsLayout();
             SetNeedsPaint();
 
-            subMenu->Show(pos.ToVec2i(), menuSize.ToVec2i());
+            CWindow* rootWindow = GetRootWindow();
+            if (rootWindow && !subMenu->useNativeWindow)
+            {
+                Rect subMenuRect = Rect::FromSize(pos, subMenu->GetComputedLayoutSize());
+                Rect windowRect = rootWindow->GetScreenSpaceRect();
+
+                if (subMenuRect.max.x > windowRect.max.x)
+                {
+                    pos.x = windowRect.max.x - subMenuRect.GetSize().width - rect.GetSize().width;
+                }
+
+                if (subMenuRect.max.y > windowRect.max.y)
+                {
+	                pos.y = windowRect.
+                }
+            }
+
+            subMenu->Show(pos.ToVec2i(), Vec2i());
         }
     }
 
@@ -150,8 +165,6 @@ namespace CE::Widgets
             else if (event->type == CEventType::MouseEnter && parent && parent->IsOfType<CMenu>() && SubWidgetExistsRecursive(event->sender))
             {
                 CMenu* parentMenu = static_cast<CMenu*>(parent);
-
-                //CE_LOG(Info, All, "Mouse Enter: {}", label->GetText());
 
                 for (int i = 0; i < parentMenu->GetMenuItemCount(); ++i)
                 {

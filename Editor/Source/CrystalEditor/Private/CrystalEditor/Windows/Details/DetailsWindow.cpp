@@ -33,6 +33,7 @@ namespace CE::Editor
 	        return;
         }
 
+
         splitView->SetEnabled(true);
         noSelectionLabel->SetEnabled(false);
 
@@ -118,8 +119,8 @@ namespace CE::Editor
 
         CWidget* header = CreateObject<CWidget>(topView, "HeaderRow");
 
-        CLabel* title = CreateObject<CLabel>(header, "TitleLabel");
-        title->SetText("SomeActorName");
+        titleLabel = CreateObject<CLabel>(header, "TitleLabel");
+        titleLabel->SetText("Actor");
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);

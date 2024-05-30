@@ -496,6 +496,14 @@ CCollapsibleSection:collapsed #SectionHeader {
     border-radius: 5px 5px 5px 5px;
 }
 
+NumericFieldInput::frame {
+    background-color: rgb(60, 60, 60);
+}
+
+NumericFieldInput::frame:hovered {
+    background-color: rgb(74, 74, 74);
+}
+
 PropertyDrawer {
     width: 100%;
     min-height: 15px;
@@ -505,7 +513,7 @@ PropertyDrawer {
 }
 
 #PropertyEditorRowLeft {
-    width: 160px;
+    width: 140px;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;

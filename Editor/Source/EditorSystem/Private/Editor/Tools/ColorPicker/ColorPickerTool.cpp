@@ -291,22 +291,18 @@ namespace CE::Editor
 
 							if (i == 0)
 							{
-								//gradientR = gradientPreview;
 								inputR = inputField;
 							}
 							else if (i == 1)
 							{
-								//gradientG = gradientPreview;
 								inputG = inputField;
 							}
 							else if (i == 2)
 							{
-								//gradientB = gradientPreview;
 								inputB = inputField;
 							}
 							else if (i == 3)
 							{
-								//gradientA = gradientPreview;
 								inputA = inputField;
 								inputA->ShowTransparency(true);
 
@@ -372,7 +368,6 @@ namespace CE::Editor
 							if (i == 0)
 							{
 								inputH = inputField;
-								//gradientH = gradientPreview;
 								inputField->SetRange(0, 360);
 								inputField->SetFloatSensitivity(4.0f);
 

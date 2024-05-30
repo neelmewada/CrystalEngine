@@ -45,6 +45,10 @@ namespace CE::Widgets
         FIELD()
         bool hideWhenUnfocused = false;
 
+        //! @brief Set to true if this popup should block hits for all background windows and elements.
+        FIELD()
+        bool blockHitTest = false;
+
         CWindow* rootWindow = nullptr;
         
         Vec2i showPosition = Vec2i(0, 0);

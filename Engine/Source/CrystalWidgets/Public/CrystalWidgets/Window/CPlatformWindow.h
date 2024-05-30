@@ -36,6 +36,8 @@ namespace CE::Widgets
 
         void Tick();
 
+        void QueueDestroy();
+
         CWindow* GetOwner() const { return owner; }
 
         RPI::Renderer2D* GetRenderer() const { return renderer; }

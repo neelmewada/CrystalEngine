@@ -242,6 +242,16 @@ namespace CE::Widgets
         //CE_LOG(Info, All, "Total Time: {} | {} | {}", styleTime, layoutTime, paintTime);
     }
 
+    void CPlatformWindow::QueueDestroy()
+    {
+        if (isDeleted)
+            return;
+
+        CApplication::Get()->queueDestroyWindows.Add(this);
+
+        isDeleted = true;
+    }
+
     void CPlatformWindow::GetWindowSize(u32* preferredWidth, u32* preferredHeight)
     {
         platformWindow->GetDrawableWindowSize(preferredWidth, preferredHeight);
