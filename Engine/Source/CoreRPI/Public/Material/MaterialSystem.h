@@ -18,6 +18,10 @@ namespace CE::RPI
 
 		~MaterialSystem() = default;
 
+		void AddMaterial(RPI::Material* material);
+		void RemoveMaterial(RPI::Material* material);
+
+		SharedMutex materialsMutex{};
 		List<RPI::Material*> materials{};
 
 		friend class Material;
