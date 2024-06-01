@@ -1848,7 +1848,7 @@ TEST(Object, Events)
 
 		// - Broadcasts -
 
-		sender->onTextChanged.Broadcast("Hello World");
+		sender->onTextChanged("Hello World");
 		EXPECT_EQ(receiver->text, "Hello World");
 
 		sender->onObjectEvent.Broadcast(receiver);

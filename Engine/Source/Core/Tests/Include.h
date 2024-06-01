@@ -74,6 +74,8 @@ namespace PackageTests
 
 namespace EventTests
 {
+	class SenderClass;
+
 	typedef ScriptEvent<void(const String& text)> TextEvent;
 	typedef ScriptEvent<void(Object* sender)> ObjectEvent;
 	DECLARE_SCRIPT_EVENT(FileActionEvent, CE::IO::FileAction fileAction);
@@ -107,11 +109,6 @@ namespace EventTests
 			this->object = sender;
 		}
 
-		void OnFileAction(IO::FileAction fileAction)
-		{
-			this->fileAction = fileAction;
-		}
-
 		String text{};
 		Object* object = nullptr;
 		IO::FileAction fileAction = IO::FileAction::Add;
@@ -143,8 +140,7 @@ CE_RTTI_CLASS(, EventTests, ReceiverClass,
 	),
 	CE_FUNCTION_LIST(
 		CE_FUNCTION(OnTextChangedCallback)
-		CE_FUNCTION(OnObjectEvent)
-		CE_FUNCTION(OnFileAction)
+		CE_FUNCTION2(OnObjectEvent, auto, (Object*))
 	)
 )
 CE_RTTI_CLASS_IMPL(, EventTests, ReceiverClass)
