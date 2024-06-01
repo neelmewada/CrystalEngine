@@ -1836,15 +1836,12 @@ TEST(Object, Events)
 		IScriptEvent* onObjectEvent = sender->GetClass()->FindField("onObjectEvent")->GetFieldEventValue(sender);
 		onObjectEvent->Bind(FUNCTION_BINDING(receiver, OnObjectEvent));
 
-		// DelegateHandle fileActionHandle = sender->fileActionEvent.Bind([&fileAction](CE::IO::FileAction newFileAction)
-		// 	{
-		// 		fileAction = newFileAction;
-		// 	});
-
-		DelegateHandle fileActionHandle = sender->fileActionEvent + [&fileAction](CE::IO::FileAction newFileAction)
+		auto lambda = [&fileAction](CE::IO::FileAction newFileAction)
 			{
 				fileAction = newFileAction;
 			};
+
+		DelegateHandle fileActionHandle = sender->fileActionEvent + lambda;
 
 		// - Broadcasts -
 

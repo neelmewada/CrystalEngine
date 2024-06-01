@@ -4,6 +4,9 @@
 
 namespace CE::Editor
 {
+	DECLARE_SCRIPT_EVENT(ItemSelectionEvent, CItemSelection* selection);
+	DECLARE_SCRIPT_EVENT(ActorSelectionEvent, Actor* actor);
+
 	CLASS()
 	class CRYSTALEDITOR_API SceneHierarchyWindow : public MinorEditorWindow
 	{
@@ -19,9 +22,12 @@ namespace CE::Editor
 
 		// - Events -
 
-		CE_SIGNAL(OnActorSelected, Actor*);
+		FIELD()
+		ActorSelectionEvent onActorSelected;
 
-		CE_SIGNAL(OnSceneSelectionChanged, CItemSelection*);
+		FIELD()
+		ItemSelectionEvent onSceneSelectionChanged;
+
 
 	private:
 

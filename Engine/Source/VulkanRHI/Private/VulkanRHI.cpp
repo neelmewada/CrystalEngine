@@ -440,17 +440,6 @@ namespace CE::Vulkan
         delete sampler;
     }
 
-    void* VulkanRHI::AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler)
-    {
-        return VulkanPlatform::AddImGuiTexture((Texture*)texture, (Sampler*)sampler);
-    }
-
-    void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)
-    {
-		device->WaitUntilIdle();
-        VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
-    }
-
 	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
 	{
 		return new Vulkan::ShaderModule(device, desc);

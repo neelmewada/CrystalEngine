@@ -215,7 +215,7 @@ namespace CE::Editor
 
 		if (!isGameAsset)
 		{
-			// TODO: Non-game assets must have a fixed UUID based on their path.
+			// TODO: Non-game assets (i.e. Non-user assets) must have a fixed UUID based on their path.
 			// Because They are generated locally when the engine is built.
 
 			HashMap<Name, int> objectPathNameCounter{};
@@ -224,6 +224,12 @@ namespace CE::Editor
 				{
 					if (!object)
 						return;
+
+					if (object->IsOfType<Asset>())
+					{
+						Asset* asset = static_cast<Asset*>(object);
+						asset->GetClass()->FindField("sourceAssetRelativePath")->SetFieldValue(asset, sourceAssetRelativePath);
+					}
 
 					String pathInPackage = object->GetPathInPackage().GetString();
 					if (pathInPackage.NonEmpty())

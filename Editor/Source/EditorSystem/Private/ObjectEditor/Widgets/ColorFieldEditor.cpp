@@ -12,14 +12,14 @@ namespace CE::Editor
             return;
 
         colorInput->SetValue(field->GetFieldValue<Color>(instance));
-
-        Bind(colorInput, MEMBER_FUNCTION(ColorInput, OnColorSelectSignal), [this, field, instance](Color newColor)
+        
+        colorInput->onColorSelected += [this, field, instance](const Color& newColor)
             {
                 field->SetFieldValue<Color>(instance, newColor);
                 colorInput->SetValue(newColor);
 
-                emit OnValueUpdated();
-            });
+                onValueUpdated();
+            };
 	}
 
 	void ColorFieldEditor::Construct()

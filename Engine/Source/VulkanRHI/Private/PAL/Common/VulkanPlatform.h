@@ -12,9 +12,6 @@ namespace CE::Vulkan
         CE_STATIC_CLASS(VulkanPlatformBase)
     public:
         
-        static VkDescriptorSet AddImGuiTexture(Texture* texture, Sampler* sampler);
-        
-        static void RemoveImGuiTexture(VkDescriptorSet imguiTexture);
         
     };
 }

@@ -141,9 +141,6 @@ namespace CE::RHI
         
         virtual RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) = 0;
         virtual void DestroySampler(Sampler* sampler) = 0;
-        
-        virtual void* AddImGuiTexture(RHI::Texture* texture, Sampler* sampler) = 0;
-        virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;

@@ -2,6 +2,10 @@
 
 namespace CE::Editor
 {
+    class ColorPickerTool;
+
+    DECLARE_SCRIPT_EVENT(ColorPickerToolEvent, ColorPickerTool* sender);
+
     CLASS()
     class EDITORSYSTEM_API ColorPickerTool final : public CToolWindow
     {
@@ -22,9 +26,11 @@ namespace CE::Editor
 
         // - Events -
 
-        CE_SIGNAL(OnColorSelected, Color);
+        FIELD()
+        CColorEvent onColorSelected;
 
-        CE_SIGNAL(OnColorPickerClosed, ColorPickerTool*);
+        FIELD()
+        ColorPickerToolEvent onColorPickerClosed;
 
     private:
 

@@ -22,7 +22,8 @@ namespace CE::Editor
 
         // - Events -
 
-        CE_SIGNAL(OnColorSelectSignal, Color);
+        FIELD()
+        CColorEvent onColorSelected;
 
     protected:
 

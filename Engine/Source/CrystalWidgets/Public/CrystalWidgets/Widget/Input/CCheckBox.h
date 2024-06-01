@@ -4,7 +4,7 @@ namespace CE::Widgets
 {
     class CCheckBox;
 
-    DECLARE_SCRIPT_EVENT(onCheckChanged, CCheckBox* checkBox);
+    DECLARE_SCRIPT_EVENT(CCheckBoxEvent, CCheckBox* checkBox);
 
     CLASS()
     class CRYSTALWIDGETS_API CCheckBox : public CWidget
@@ -21,7 +21,7 @@ namespace CE::Widgets
         // - Events -
 
         FIELD()
-        CCheckBox* onCheckChanged{};
+        CCheckBoxEvent onCheckChanged{};
 
     protected:
 

@@ -136,7 +136,7 @@ namespace CE::Editor
     {
         this->scene = scene;
 
-        emit OnModelDataUpdated();
+        onModelDataUpdated();
     }
 
 } // namespace CE::Editor

@@ -118,13 +118,11 @@ namespace CE::Editor
                 colorPicker->SetOriginalColor(value);
                 colorPicker->SetColor(value);
 
-                UnbindSignals(this, colorPicker);
+                colorPicker->onColorSelected.UnbindAll(this);
+                colorPicker->onColorPickerClosed.UnbindAll(this);
 
-                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorSelected), 
-                    this, MEMBER_FUNCTION(Self, OnColorSelected));
-
-                Bind(colorPicker, MEMBER_FUNCTION(ColorPickerTool, OnColorPickerClosed), 
-                    this, MEMBER_FUNCTION(Self, OnColorPickerToolClosed));
+                colorPicker->onColorSelected += FUNCTION_BINDING(this, OnColorSelected);
+                colorPicker->onColorPickerClosed += FUNCTION_BINDING(this, OnColorPickerToolClosed);
 
                 event->Consume(this);
             }
@@ -135,7 +133,7 @@ namespace CE::Editor
 
     void ColorInput::OnColorSelected(Color newColor)
     {
-        emit OnColorSelectSignal(newColor);
+        onColorSelected(newColor);
     }
 
     void ColorInput::OnColorPickerToolClosed(ColorPickerTool* colorPicker)

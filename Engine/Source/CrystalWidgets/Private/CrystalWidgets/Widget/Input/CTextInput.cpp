@@ -14,8 +14,7 @@ namespace CE::Widgets
         timer = CreateDefaultSubobject<CTimer>("Timer");
         if (!IsDefaultInstance())
         {
-            Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
-                this, MEMBER_FUNCTION(Self, OnTimerTick));
+            timer->onTimeOut += FUNCTION_BINDING(this, OnTimerTick);
         }
     }
 

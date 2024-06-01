@@ -64,7 +64,7 @@ namespace CE::Editor
 					textInput->SetText(String::Format("{}", field->GetFieldValue<u64>(instance)));
 				}
 
-				emit OnValueUpdated();
+				onValueUpdated();
 			};
 
 		// Manually update the gui text box initially
@@ -72,7 +72,7 @@ namespace CE::Editor
 
 		textInput->SetInteractable(field->IsEditAnywhere());
 
-        Delegate<void(CTextInput*)> callback = [this, declId, field, instance](CTextInput*)
+        auto callback = [this, declId, field, instance](CTextInput*)
             {
 				if (field->IsReadOnly() || !field->IsEditAnywhere())
 					return;
@@ -121,12 +121,12 @@ namespace CE::Editor
 						field->SetFieldValue<f64>(instance, numberValue);
 					}
 
-					emit OnValueUpdated();
+					onValueUpdated();
 				}
             };
 
-		Bind(textInput, MEMBER_FUNCTION(CTextInput, OnEditingFinished), callback);
-		Bind(textInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), callback);
+		textInput->onEditingFinished += callback;
+		textInput->onTextEdited += callback;
 	}
 
 	void NumberFieldEditor::Construct()

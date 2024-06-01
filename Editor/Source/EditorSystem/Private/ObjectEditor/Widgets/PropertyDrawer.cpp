@@ -150,7 +150,7 @@ namespace CE::Editor
 				CTextInput* stringInput = CreateObject<CTextInput>(right, "StringInput");
 				stringInput->SetText(field->GetFieldValue<String>(instance));
 
-				Bind(stringInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [field, instance](CTextInput* input)
+				stringInput->onTextEdited += [field, instance](CTextInput* input)
 					{
 						field->SetFieldValue<String>(instance, input->GetText());
 
@@ -158,14 +158,14 @@ namespace CE::Editor
 						{
 							((Object*)instance)->OnFieldEdited(field);
 						}
-					});
+					};
 			}
 			else if (declTypeId == TYPEID(bool))
 			{
 				CCheckBox* checkBox = CreateObject<CCheckBox>(right, "BooleanInput");
 				checkBox->SetChecked(field->GetFieldValue<bool>(instance));
 
-				Bind(checkBox, MEMBER_FUNCTION(CCheckBox, OnCheckChanged), [field, instance](CCheckBox* checkBox)
+				checkBox->onCheckChanged += [field, instance](CCheckBox* checkBox)
 					{
 						field->SetFieldValue<bool>(instance, checkBox->IsChecked());
 
@@ -173,7 +173,7 @@ namespace CE::Editor
 						{
 							((Object*)instance)->OnFieldEdited(field);
 						}
-					});
+					};
 			}
 			else if (declTypeId == TYPEID(Color))
 			{
@@ -202,7 +202,7 @@ namespace CE::Editor
 						numberInput->SetText(String::Format("{}", (s64)field->GetNumericFieldValue(instance)));
 				}
 
-				Bind(numberInput, MEMBER_FUNCTION(NumericFieldInput, OnTextEdited), [field, instance, declTypeId](CTextInput* textInput)
+				numberInput->onTextEdited += [field, instance, declTypeId](CTextInput* textInput)
 					{
 						const String& text = textInput->GetText();
 						f64 numberValue = 0.0f;
@@ -255,7 +255,7 @@ namespace CE::Editor
 								((Object*)instance)->OnFieldEdited(field);
 							}
 						}
-					});
+					};
 			}
 		}
 	}

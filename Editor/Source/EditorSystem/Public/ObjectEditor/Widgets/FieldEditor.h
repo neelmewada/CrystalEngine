@@ -14,7 +14,8 @@ namespace CE::Editor
 
         // - Events -
 
-        CE_SIGNAL(OnValueUpdated);
+        FIELD()
+        CVoidEvent onValueUpdated;
 
     protected:
 
