@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreTracy.h"
+
 #include "CoreMinimal.h"
 
 // ******************************************************

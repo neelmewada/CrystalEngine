@@ -389,6 +389,8 @@ namespace CE::Widgets
 
 	void CWidget::UpdateLayoutIfNeeded()
 	{
+		ZoneScoped;
+
 		if (NeedsLayout())
 		{
 			Vec4 rootPadding = GetFinalRootPadding();
@@ -595,6 +597,8 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
+		ZoneScoped;
+
 		bool neededStyle = NeedsStyle();
 
 		if (neededStyle)
@@ -1389,6 +1393,8 @@ namespace CE::Widgets
 
 	void CWidget::OnPaint(CPaintEvent* paintEvent)
 	{
+		ZoneScoped;
+
 		CPainter* painter = paintEvent->painter;
 
 		Color bgColor = Color();
@@ -1657,6 +1663,8 @@ namespace CE::Widgets
 
 	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
 	{
+		ZoneScoped;
+
 		CPainter* painter = paintEvent->painter;
 
 		for (CBehavior* behavior : behaviors)
@@ -1678,6 +1686,8 @@ namespace CE::Widgets
 
 	void CWidget::HandleEvent(CEvent* event)
 	{
+		ZoneScoped;
+
 		if (event == nullptr)
 			return;
 		if (!IsEnabled())

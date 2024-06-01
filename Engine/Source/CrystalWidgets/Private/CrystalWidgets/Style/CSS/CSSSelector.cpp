@@ -5,6 +5,8 @@ namespace CE::Widgets
 
 	bool CSSSelector::TestMatch(CWidget* widget, const MatchCond& rule, CStateFlag curStates, CSubControl subControl)
 	{
+		ZoneScoped;
+
 		if (widget == nullptr)
 			return false;
 		if (!rule.IsValid())
@@ -51,6 +53,8 @@ namespace CE::Widgets
 
     bool CSSSelector::TestMatch(CWidget* widget, CStateFlag curStates, CSubControl subControl)
     {
+		ZoneScoped;
+
 		if (widget == nullptr)
 			return false;
 		if (!primary.IsValid())
@@ -132,6 +136,8 @@ namespace CE::Widgets
 
     bool CSSSelector::TestAttributeMatch(CWidget* widget, const AttributeMatchCond& rule)
     {
+		ZoneScoped;
+
 		ClassType* widgetClass = widget->GetClass();
 		FieldType* field = widgetClass->FindField(rule.attribName);
 		if (field == nullptr && !widgetClass->HasAttribute(rule.attribName.GetString()))
@@ -222,6 +228,8 @@ namespace CE::Widgets
 
 	bool CSSSelectorList::TestWidget(CWidget* widget, CStateFlag curStates, CSubControl subControl)
 	{
+		ZoneScoped;
+
 		for (auto& entry : *this)
 		{
 			if (entry.TestMatch(widget, curStates, subControl))

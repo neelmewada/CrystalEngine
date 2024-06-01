@@ -72,6 +72,8 @@ namespace CE::Widgets
 
 	void CApplication::Tick()
 	{
+		ZoneScoped;
+
 		constexpr u32 destroyAfterFrames = RHI::Limits::MaxSwapChainImageCount;
 
 		for (int i = queueDestroyWindows.GetSize() - 1; i >= 0; --i)

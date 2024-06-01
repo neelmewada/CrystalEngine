@@ -299,6 +299,8 @@ namespace CE::RPI
 
     void RPISystem::SimulationTick(u32 imageIndex)
     {
+        ZoneScoped;
+
         {
             LockGuard lock{ rhiDestructionQueueMutex };
 
@@ -334,6 +336,8 @@ namespace CE::RPI
 
     void RPISystem::RenderTick(u32 imageIndex)
     {
+        ZoneScoped;
+
         MaterialSystem::Get().Update(imageIndex);
 
         for (Scene* scene : scenes)

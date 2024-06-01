@@ -333,6 +333,8 @@ namespace CE::Widgets
 
 	void CStyle::ApplyProperties(const CStyle& from)
 	{
+		ZoneScoped;
+
 		for (const auto& [property, value] : from.properties)
 		{
 			properties[property] = value;
@@ -341,6 +343,8 @@ namespace CE::Widgets
 
 	bool CStyle::CompareLayoutProperties(const CStyle& rhs)
 	{
+		ZoneScoped;
+
 		for (const auto& [property, value] : rhs.properties)
 		{
 			if (!IsLayoutProperty(property))

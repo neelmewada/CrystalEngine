@@ -96,6 +96,11 @@ include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.c
 
 # Options
 
+if(${CE_ENABLE_TRACY})
+    add_compile_definitions(CE_ENABLE_TRACY=1)
+endif()
+
+
 set(CE_HOST_BUILD_DIR "Build/${PAL_HOST_PLATFORM_NAME}" CACHE STRING "Path to the editor/tools build directory. Required when building standalone.")
 if(NOT ${CE_STANDALONE})
     set(CE_HOST_BUILD_DIR "${CMAKE_BINARY_DIR}")

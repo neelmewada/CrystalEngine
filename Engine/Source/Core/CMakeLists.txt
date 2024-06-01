@@ -31,6 +31,7 @@ ce_add_target(Core SHARED
             ThirdParty::spdlog
             ThirdParty::yaml
             ThirdParty::efsw
+            CE::CoreTracy
         TARGETS Config
     RUNTIME_DEPENDENCIES
         

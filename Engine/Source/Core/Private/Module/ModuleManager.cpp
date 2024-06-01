@@ -16,6 +16,8 @@ namespace CE
 
 	Module* ModuleManager::LoadModule(String moduleName, ModuleLoadResult& result)
 	{
+		ZoneScoped;
+
 		TypeInfo::currentlyLoadingModuleStack.Push(moduleName);
 		auto info = FindModuleInfo(moduleName);
 

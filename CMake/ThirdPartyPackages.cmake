@@ -19,6 +19,17 @@ find_package(assimp REQUIRED)
 find_package(freetype REQUIRED)
 #find_package(mono REQUIRED)
 
+FetchContent_Declare(
+    tracy
+    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(tracy)
+
+
 # Yoga
 find_package(yoga REQUIRED)
 

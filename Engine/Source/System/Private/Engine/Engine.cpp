@@ -81,6 +81,8 @@ namespace CE
 
 	void Engine::Tick(f32 deltaTime)
 	{
+		ZoneScoped;
+
 		if (IsEngineRequestingExit())
 		{
 			return;

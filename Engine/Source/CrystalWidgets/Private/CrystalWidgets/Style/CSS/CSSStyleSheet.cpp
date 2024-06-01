@@ -5,6 +5,8 @@ namespace CE::Widgets
 
 	CStyle CSSStyleSheet::SelectStyle(CWidget* widget, CStateFlag state, CSubControl subControl)
 	{
+		ZoneScoped;
+
 		if (widget == nullptr)
 			return {};
 

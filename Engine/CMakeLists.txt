@@ -15,6 +15,7 @@ add_subdirectory(Styles)
 ######################################
 # Core Modules
 
+add_subdirectory(Source/CoreTracy)
 add_subdirectory(Source/Core)
 add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)
@@ -22,10 +23,6 @@ add_subdirectory(Source/CoreMesh)
 add_subdirectory(Source/CoreRHI)
 add_subdirectory(Source/CoreRPI)
 add_subdirectory(Source/CoreSettings)
-
-# Unused modules:
-#add_subdirectory(Source/CoreGUI)
-#add_subdirectory(Source/CoreWidgets)
 
 # Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})

@@ -150,6 +150,8 @@ namespace CE
 
 	void RendererSubsystem::Tick(f32 delta)
 	{
+		ZoneScoped;
+
 		Super::Tick(delta);
 		bool isExiting = IsEngineRequestingExit();
 
