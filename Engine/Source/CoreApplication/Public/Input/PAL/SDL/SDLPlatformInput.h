@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Input/PAL/Common/PlatformInput.h"
+
 namespace CE
 {
 
-    class COREINPUT_API SDLPlatformInput : public PlatformInput
+    class COREAPPLICATION_API SDLPlatformInput : public PlatformInput
     {
     public:
         SDLPlatformInput();

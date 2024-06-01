@@ -126,8 +126,6 @@ namespace CE::Widgets
 
             if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
-                CE_LOG(Info, All, "Mouse Press: {}", label->GetText());
-
                 SetNeedsPaint();
                 event->Consume(this);
             }

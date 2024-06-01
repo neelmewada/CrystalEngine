@@ -158,7 +158,7 @@ namespace CE::Widgets
         Array<CTimer*> timers{};
 
         KeyModifier keyModifierStates{};
-        Array<bool> keyPressStates{};
+        BitSet<128> keyPressStates{};
 
         CWidgetResourceLoader* resourceLoader = nullptr;
 

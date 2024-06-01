@@ -1,4 +1,5 @@
-#include "CoreInput.h"
+#include "CoreApplication.h"
+#include "Input/PAL/SDL/SDLPlatformInput.h"
 
 namespace CE
 {

@@ -12,6 +12,14 @@
 #error SDL not supported! Currently, the engine only supports SDL as the application & windowing platform.
 #endif
 
+#include "Input/CoreInputTypes.h"
+#include "Input/InputManager.h"
+
+#include "Input/PAL/Common/PlatformInput.h"
+#if PAL_TRAIT_SDL_SUPPORTED
+#include "Input/PAL/SDL/SDLPlatformInput.h"
+#endif
+
 namespace CE
 {
     

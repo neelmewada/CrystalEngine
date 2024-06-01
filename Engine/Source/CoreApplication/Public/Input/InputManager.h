@@ -2,8 +2,9 @@
 
 namespace CE
 {
+    class PlatformInput;
 
-    class COREINPUT_API InputManager : public ApplicationMessageHandler
+    class COREAPPLICATION_API InputManager : public ApplicationMessageHandler
     {
     public:
 

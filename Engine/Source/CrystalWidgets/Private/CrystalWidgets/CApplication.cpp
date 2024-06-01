@@ -4,6 +4,8 @@ namespace CE::Widgets
 {
 	static CApplication* instance = nullptr;
 
+	static Array<bool> keyPressStates{};
+
 	CApplication::CApplication()
 	{
 		if (IsDefaultInstance())
@@ -119,7 +121,23 @@ namespace CE::Widgets
 		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
 
 		keyModifierStates = KeyModifier::None;
-		keyPressStates.Resize(keyCodeEnum->GetConstantsCount());
+		keyPressStates.Reset();
+
+		static bool firstTime = true;
+		if (firstTime)
+		{
+			firstTime = false;
+
+			for (int j = 0; j < keyCodeEnum->GetConstantsCount(); ++j)
+			{
+				bool value = keyPressStates.Test(j);
+				KeyCode key = (KeyCode)keyCodeEnum->GetConstant(j)->GetValue();
+				if (value)
+				{
+					CE_LOG(Info, All, "State {} = true", key);
+				}
+			}
+		}
 
 		for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
 		{
@@ -468,19 +486,29 @@ namespace CE::Widgets
 				keyEvent.key = keyCode;
 				keyEvent.sender = keyEventWidget;
 
-				if (isDown && !keyPressStates[i])
+				if (isDown)
+				{
+					CE_LOG(Info, All, "Key down: {}", keyCode);
+
+					for (int j = 0; j < keyCodeEnum->GetConstantsCount(); ++j)
+					{
+						CE_LOG(Info, All, "State {} = {}", (KeyCode)keyCodeEnum->GetConstant(j)->GetValue(), keyPressStates.Test(j));
+					}
+				}
+
+				if (isDown && !keyPressStates.Test(i))
 				{
 					keyEvent.type = CEventType::KeyPress;
 
-					keyPressStates[i] = true;
+					keyPressStates.Set(i, true);
 
 					keyEventWidget->HandleEvent(&keyEvent);
 				}
-				else if (isUp && keyPressStates[i])
+				else if (isUp && keyPressStates.Test(i))
 				{
 					keyEvent.type = CEventType::KeyRelease;
 
-					keyPressStates[i] = false;
+					keyPressStates.Set(i, false);
 
 					keyEventWidget->HandleEvent(&keyEvent);
 				}

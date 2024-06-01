@@ -2,7 +2,6 @@
 
 #include "Core.h"
 #include "CoreApplication.h"
-#include "CoreInput.h"
 #include "CoreRPI.h"
 
 // Yoga

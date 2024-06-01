@@ -17,7 +17,6 @@ add_subdirectory(Styles)
 
 add_subdirectory(Source/Core)
 add_subdirectory(Source/CoreApplication)
-add_subdirectory(Source/CoreInput)
 add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreMesh)
 add_subdirectory(Source/CoreRHI)

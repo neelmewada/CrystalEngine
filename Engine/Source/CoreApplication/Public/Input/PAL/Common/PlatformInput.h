@@ -3,7 +3,7 @@
 namespace CE
 {
 
-    class COREINPUT_API PlatformInput
+    class COREAPPLICATION_API PlatformInput
     {
     public:
         virtual ~PlatformInput() = default;

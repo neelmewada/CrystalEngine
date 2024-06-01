@@ -31,7 +31,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
             CE::CoreMedia
             CE::CoreApplication
-            CE::CoreInput
             CE::CoreRHI
             CE::CoreRPI
     RUNTIME_DEPENDENCIES

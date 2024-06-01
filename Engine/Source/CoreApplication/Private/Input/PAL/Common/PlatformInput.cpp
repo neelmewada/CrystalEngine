@@ -1,4 +1,4 @@
-#include "CoreInput.h"
+#include "CoreApplication.h"
 
 namespace CE
 {
