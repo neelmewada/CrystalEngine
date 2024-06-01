@@ -48,7 +48,7 @@ namespace CE
 		const auto end() const { return objects.end(); }
 
     private:
-        //HashMap<Uuid, Object*> objects{};
+        
 		Array<Object*> objects{};
     };
     

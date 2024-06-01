@@ -65,7 +65,7 @@ namespace CE::Widgets
 		{
 			totalTimeTaken = 0;
 
-			OnTimeOut();
+			onTimeOut();
 
 			if (isSingleShot)
 			{

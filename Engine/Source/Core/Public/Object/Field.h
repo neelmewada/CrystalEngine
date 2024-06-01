@@ -6,9 +6,12 @@
 
 #include <vector>
 
+#include "Event.h"
+
 namespace CE
 {
     class Object;
+    class IScriptEvent;
 
     enum FieldFlags
     {
@@ -75,7 +78,9 @@ namespace CE
 		bool IsEnumField();
 		bool IsEnumFlagsField();
 
-        bool IsNumberField() const { return IsIntegerField() || IsDecimalField(); }
+        bool IsEventField() const;
+
+        bool IsNumericField() const { return IsIntegerField() || IsDecimalField(); }
 
         bool IsObjectField() const;
 		bool IsStructField();
@@ -110,7 +115,7 @@ namespace CE
 
         TypeInfo* GetDeclarationType();
 
-        INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
+        TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
 		String GetFieldValueAsString(void* instance);
 
@@ -133,6 +138,11 @@ namespace CE
         {
             return *(T*)((SIZE_T)instance + offset);
         }
+
+        IScriptEvent* GetFieldEventValue(void* instance) const
+		{
+			return (IScriptEvent*)((SIZE_T)instance + offset);
+		}
         
         template<typename T>
         void SetFieldValue(void* instance, const T& value)

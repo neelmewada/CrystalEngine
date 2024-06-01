@@ -19,7 +19,7 @@ namespace CE::Widgets
 
 		SetNeedsPaint();
 
-		emit OnCheckChanged(this);
+		onCheckChanged(this);
 	}
 
 	void CCheckBox::Construct()

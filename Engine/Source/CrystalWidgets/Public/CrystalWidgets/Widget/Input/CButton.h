@@ -2,6 +2,7 @@
 
 namespace CE::Widgets
 {
+
     CLASS()
     class CRYSTALWIDGETS_API CButton : public CWidget
     {
@@ -19,11 +20,11 @@ namespace CE::Widgets
 
         const String& GetText() const { return label->GetText(); }
 
-        // - Signals -
+        // - Events -
 
-        CE_SIGNAL(OnButtonClicked, MouseButton);
+        CMouseButtonEvent onButtonClicked{};
 
-        CE_SIGNAL(OnButtonLeftClicked);
+        CVoidEvent onButtonLeftClicked{};
 
     protected:
 

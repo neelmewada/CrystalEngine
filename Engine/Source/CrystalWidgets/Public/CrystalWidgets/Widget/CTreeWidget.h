@@ -2,6 +2,10 @@
 
 namespace CE::Widgets
 {
+	class CTreeWidget;
+
+	DECLARE_SCRIPT_EVENT(CTreeWidgetEvent, CTreeWidget* treeWidget);
+
 	CLASS()
 	class CRYSTALWIDGETS_API CTreeWidget : public CWidget
 	{
@@ -30,9 +34,10 @@ namespace CE::Widgets
 
 		const auto& GetSelectedItems() const { return selectedItems; }
 
-		// - Signals -
+		// - Events -
 
-		CE_SIGNAL(OnSelectionChanged, CTreeWidget*);
+		FIELD()
+		CTreeWidgetEvent onSelectionChanged{};
 
 	protected:
 

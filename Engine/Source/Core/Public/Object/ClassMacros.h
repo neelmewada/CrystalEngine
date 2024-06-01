@@ -328,7 +328,6 @@ public:\
 	static CE::String StaticModule();\
 	virtual ~Struct()\
 	{\
-		CE::Object::UnbindAllSignals(this);\
 		if constexpr (TStructReleaseFunction<Struct>::Value)\
 		{\
 			TStructReleaseFunction<Struct>::Release(this);\

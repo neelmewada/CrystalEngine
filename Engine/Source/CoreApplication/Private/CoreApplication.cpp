@@ -1,6 +1,6 @@
 
 #include "CoreApplication.h"
-
+#include "CoreApplication.private.h"
 
 CE_IMPLEMENT_MODULE(CoreApplication, CE::CoreApplicationModule)
 

@@ -304,16 +304,6 @@ namespace CE::Widgets
 		}
 	}
 
-	void CWidget::ClearNeedsLayout()
-	{
-		needsLayout = false;
-
-		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
-		{
-			attachedWidgets[i]->ClearNeedsLayout();
-		}
-	}
-
 	void CWidget::SetNeedsStyle()
 	{
 		if (needsStyle)
@@ -1706,12 +1696,12 @@ namespace CE::Widgets
 			if (focusEvent->GotFocus() && !IsFocussed())
 			{
 				OnFocusGained();
-				emit OnFocused();
+				onFocused.Broadcast();
 			}
 			else if (focusEvent->LostFocus() && IsFocussed())
 			{
 				OnFocusLost();
-				emit OnUnfocused();
+				onUnfocused.Broadcast();
 			}
 
 			if (focusEvent->GotFocus() && !IsFocussed())
@@ -1793,11 +1783,16 @@ namespace CE::Widgets
 
 			if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
 			{
-				emit OnMouseLeftPress();
+				wasClickedInside = true;
+				onMouseLeftPress.Broadcast();
 			}
 			else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
 			{
-				emit OnMouseLeftClick();
+				if (wasClickedInside)
+				{
+					onMouseLeftClick.Broadcast();
+				}
+				wasClickedInside = false;
 			}
 			
 			if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
@@ -1819,11 +1814,6 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
-				if (IsOfType<CMenuItem>())
-				{
-					//CE_LOG(Info, All, "Widget Mouse Entered: {}", ((CMenuItem*)this)->GetText());
-				}
-
 				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
@@ -1848,11 +1838,6 @@ namespace CE::Widgets
 			}
 			else if (event->type == CEventType::MouseLeave)
 			{
-				if (IsOfType<CMenuItem>())
-				{
-					//CE_LOG(Info, All, "Widget Mouse Exit: {}", ((CMenuItem*)this)->GetText());
-				}
-
 				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Hovered;
 				if (isPressed)

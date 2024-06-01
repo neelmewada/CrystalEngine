@@ -87,6 +87,12 @@ namespace CE
 	class SubClassType;
 
 	template<typename T>
+	class ScriptDelegate;
+
+	template<typename T>
+	class ScriptEvent;
+
+	template<typename T>
 	struct TIsArray : TFalseType
 	{
         using ElementType = void;
@@ -108,6 +114,30 @@ namespace CE
 	struct TIsSubClassType<SubClassType<T>> : TTrueType
 	{
 		using RequiredType = T;
+	};
+
+	template<typename T>
+	struct TIsScriptDelegate : TFalseType
+	{
+		using Signature = void;
+	};
+
+	template<typename T>
+	struct TIsScriptDelegate<ScriptDelegate<T>> : TTrueType
+	{
+		using Signature = T;
+	};
+
+	template<typename T>
+	struct TIsScriptEvent : TFalseType
+	{
+		using Signature = void;
+	};
+
+	template<typename T>
+	struct TIsScriptEvent<ScriptEvent<T>> : TTrueType
+	{
+		using Signature = T;
 	};
 
     template<typename T>
@@ -186,6 +216,7 @@ namespace CE
 		enum { NumArgs = sizeof...(Args) };
 
 		typedef TReturnType ReturnType;
+		typedef TClassType ClassType;
 
 		typedef std::tuple<Args...> Tuple;
 
@@ -204,6 +235,7 @@ namespace CE
 		enum { NumArgs = sizeof...(Args) };
 
 		typedef TReturnType ReturnType;
+		typedef TClassType ClassType;
 
 		typedef std::tuple<Args...> Tuple;
 
@@ -222,6 +254,7 @@ namespace CE
 		enum { NumArgs = sizeof...(Args) };
 
 		typedef TReturnType ReturnType;
+		typedef void ClassType;
 
 		typedef std::tuple<Args...> Tuple;
 

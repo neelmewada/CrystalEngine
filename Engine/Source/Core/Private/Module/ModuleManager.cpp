@@ -105,6 +105,13 @@ namespace CE
 		// Deregister resources
 		info->unloadResourcesFuncPtr();
 
+		// Delete transient package
+		if (info->transientPackage != nullptr)
+		{
+			info->transientPackage->RequestDestroy();
+			info->transientPackage = nullptr;
+		}
+
 		// This also deregisters all types that were registered in this module
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
@@ -113,13 +120,6 @@ namespace CE
 
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
-
-		// Delete transient package
-		if (info->transientPackage != nullptr)
-		{
-			info->transientPackage->RequestDestroy();
-			info->transientPackage = nullptr;
-		}
 
 		// Unload module
 		info->isLoaded = false;

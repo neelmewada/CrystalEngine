@@ -153,7 +153,7 @@ namespace CE
         return index < GetFieldCount() ? &cachedFields[index] : nullptr;
     }
 
-    FieldType* StructType::FindFieldWithName(const Name& name, TypeId fieldTypeId)
+    FieldType* StructType::FindField(const Name& name)
     {
         CacheAllFields();
         
@@ -312,12 +312,11 @@ namespace CE
 
     void StructType::CacheAllFunctions()
     {
-        LockGuard<SharedMutex> lock{ cachedFunctionsMutex };
-
         if (functionsCached)
             return;
 
         functionsCached = true;
+        LockGuard lock{ cachedFunctionsMutex };
 
         cachedFunctions.Clear();
 		cachedFunctionsMap.Clear();
@@ -499,8 +498,13 @@ namespace CE
 		{
 			if (type->IsClass())
 			{
-                ((ClassType*)type)->defaultInstance->Destroy();
-				((ClassType*)type)->defaultInstance = nullptr;
+                ClassType* clazz = (ClassType*)type;
+
+                if (clazz->defaultInstance != nullptr)
+				{
+					clazz->defaultInstance->Destroy();
+                	clazz->defaultInstance = nullptr;
+				}
 			}
 		}
 	}

@@ -29,7 +29,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::CoreInput
             CE::CoreMedia
             CE::CoreMesh
             CE::CoreShader

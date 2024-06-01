@@ -163,14 +163,10 @@ CPopup#ComboPopup {
 CComboBoxItem {
     font-size: 12px;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    min-width: 64px;
-    padding: 5px 5px 5px 5px;
-}
-
-CComboBoxItem:hovered {
-    background-color: rgb(36, 36, 36);
+    min-width: 50px;
+    padding: 5px 3px 5px 3px;
 }
 
 CComboBoxItem:active {
@@ -179,12 +175,13 @@ CComboBoxItem:active {
     border-color: rgb(0, 112, 224);
 }
 
-CComboBoxItem #ItemLabel {
-    
+CComboBoxItem:hovered {
+    border-radius: 0 0 0 0;
+    background-color: rgb(0, 112, 224);
 }
 
-#TestComboBox {
-    width: 100px;
+CComboBoxItem #ItemLabel {
+    
 }
 
 CComboBox #DownwardArrow {
@@ -526,14 +523,22 @@ PropertyDrawer {
     flex-direction: row;
 }
 
+EnumFieldEditor CComboBox {
+    min-width: 100px;
+}
+
 FieldEditor {
     flex-direction: row;
     min-width: 250px;
     font-size: 13px;
 }
 
-CTextInput#StringInput, CTextInput#NumberInput {
+CTextInput#NumberInput {
     min-width: 175px;
+}
+
+CTextInput#StringInput {
+    width: 180px;
 }
 
 ColorComponentInput {

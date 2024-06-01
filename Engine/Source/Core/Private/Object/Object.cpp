@@ -3,7 +3,20 @@
 
 namespace CE
 {
-	static HashMap<Object*, List<Object*>> dependencyMap = {};
+	// TODO: Temporary solution to check if object is destroyed
+	// TODO: Implement a garbage collector later and replace this code
+	static HashSet<Object*> gDestroyedObjects{};
+	static SharedMutex gDestroyedObjectsMutex{};
+
+	CORE_API bool IsValidObject(Object* object)
+	{
+		if (object == nullptr)
+			return false;
+
+		LockGuard lock{ gDestroyedObjectsMutex };
+
+		return !gDestroyedObjects.Exists(object);
+	}
 
     Object::Object() : name("Object"), uuid(Uuid())
     {
@@ -20,19 +33,40 @@ namespace CE
 		// Never call delete directly. Use Destroy() instead
 	}
 
+	void Object::UnbindAllEvents()
+	{
+		// TODO: Unbind All Events
+
+		Class* clazz = GetClass();
+
+		for (Field* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (!field->IsEventField())
+				continue;
+
+			IScriptEvent* scriptEvent = field->GetFieldEventValue(this);
+			scriptEvent->UnbindAll();
+		}
+	}
+
 	void Object::RequestDestroy()
 	{
-		if (this == nullptr)
-			return;
-		
 		OnBeforeDestroy();
+
+		{
+			LockGuard lock{ gDestroyedObjectsMutex };
+			gDestroyedObjects.Add(this);
+		}
+
+		//if (!IsDefaultInstance())
+		{
+			UnbindAllEvents();
+		}
+
 		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
 		{
 			Prefs::Get().SavePrefs(this);
 		}
-
-		// Unbind signals
-		UnbindAllSignals(this);
 
 		auto package = GetPackage();
 		if (package != nullptr)
@@ -89,6 +123,11 @@ namespace CE
         if (initializer->uuid != 0)
             this->uuid = initializer->uuid;
         this->name = initializer->name;
+
+		{
+			LockGuard lock{ gDestroyedObjectsMutex };
+			gDestroyedObjects.Remove(this);
+		}
     }
 
     void Object::AttachSubobject(Object* subobject)
@@ -396,7 +435,7 @@ namespace CE
                 continue;
             }
 
-			auto field = GetClass()->FindFieldWithName(configField->GetName());
+			auto field = GetClass()->FindField(configField->GetName());
 			if (field->GetTypeId() != configField->GetTypeId())
 			{
 				configField = configField->GetNext();
@@ -589,11 +628,6 @@ namespace CE
         }
     }
 
-    void Object::OnFieldModified(FieldType* field)
-    {
-		emit OnFieldValueUpdated(field);
-    }
-
     void Object::OnFieldEdited(FieldType* field)
     {
 
@@ -764,10 +798,10 @@ namespace CE
 
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
-			auto destField = thisClass->FindFieldWithName(field->GetName());
+			auto destField = thisClass->FindField(field->GetName());
 			if (destField == nullptr || (SIZE_T)destField == 0xdddddddddddddddd)
 			{
-				destField = thisClass->FindFieldWithName(field->GetName());
+				destField = thisClass->FindField(field->GetName());
 			}
 			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
 				continue;
@@ -1019,7 +1053,7 @@ namespace CE
 				if (rhs.EndsWith("\""))
 					rhs = rhs.GetSubstringView(0, rhs.GetLength() - 1);
                 
-                FieldType* field = structType->FindFieldWithName(lhs);
+                FieldType* field = structType->FindField(lhs);
                 if (field == nullptr)
                     continue;
 
@@ -1140,17 +1174,6 @@ namespace CE
 		}
     }
 
-	// - Bindings API -
-
-	static SharedRecursiveMutex bindingsMutex{};
-
-	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
-	HashMap<void*, Array<SignalBinding>> Object::incomingBindingsMap{};
-
-	void Object::EmitSignal(const String& name, const Array<Variant>& args)
-	{
-		Object::EmitSignal(this, name, args);
-	}
 
 	void Object::OnAfterConstructInternal()
 	{
@@ -1184,191 +1207,6 @@ namespace CE
 			OnAfterConstruct();
 		}
 	}
-
-	DelegateHandle Object::BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
-	{
-		if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
-			return 0;
-
-		LockGuard lock{ bindingsMutex };
-		
-		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
-
-		outgoingBindings.Add({});
-		auto& binding = outgoingBindings.Top();
-
-		binding.signalInstance = sourceInstance;
-		binding.signalFunction = sourceFunction;
-		binding.boundInstance = nullptr;
-		binding.boundFunction = nullptr;
-
-		binding.boundDelegate = delegate;
-
-		return delegate.GetHandle();
-	}
-
-	void Object::EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args)
-	{
-		LockGuard lock{ bindingsMutex };
-
-		Array<TypeId> argHashes{};
-		for (const Variant& arg : args)
-		{
-			argHashes.Add(arg.GetValueTypeId());
-		}
-		TypeId signature = (TypeId)GetCombinedHashes(argHashes);
-
-		const Array<SignalBinding>& bindings = outgoingBindingsMap[signalInstance];
-
-		for (int i = 0; i < bindings.GetSize(); i++)
-		{
-			const auto& binding = bindings[i];
-
-			if (binding.signalFunction == nullptr ||
-				binding.signalInstance == nullptr)
-				continue;
-
-			if (binding.signalFunction->IsSignalFunction() &&
-				binding.signalFunction->GetName() == name &&
-				binding.boundDelegate.IsValid())
-			{
-				binding.boundDelegate.Invoke(args);
-				continue;
-			}
-
-			if (binding.boundFunction == nullptr ||
-				binding.boundInstance == nullptr)
-				continue;
-
-			if (binding.signalFunction->IsSignalFunction() &&
-				binding.signalFunction->GetName() == name &&
-				binding.signalFunction->GetFunctionSignature() == signature &&
-				binding.boundFunction->GetFunctionSignature() == signature)
-			{
-				binding.boundFunction->Invoke(binding.boundInstance, args);
-			}
-		}
-	}
-
-	bool Object::Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction)
-	{
-		if (sourceInstance == nullptr || sourceFunction == nullptr || destinationInstance == nullptr || destinationFunction == nullptr)
-			return false;
-
-		if (sourceFunction->GetFunctionSignature() != destinationFunction->GetFunctionSignature())
-			return false;
-
-		LockGuard lock{ bindingsMutex };
-
-		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
-		auto& incomingBindings = incomingBindingsMap[destinationInstance];
-
-		SignalBinding binding{};
-		binding.signalInstance = sourceInstance;
-		binding.signalFunction = sourceFunction;
-		binding.boundInstance = destinationInstance;
-		binding.boundFunction = destinationFunction;
-
-		outgoingBindings.Add(binding);
-		incomingBindings.Add(binding);
-
-		return true;
-	}
-
-	void Object::UnbindSignals(void* toInstance, void* fromInstance)
-	{
-		LockGuard lock{ bindingsMutex };
-
-		auto& incoming = incomingBindingsMap[toInstance];
-
-		for (int i = incoming.GetSize() - 1; i >= 0; i--)
-		{
-			if (incoming[i].signalInstance == fromInstance)
-				incoming.RemoveAt(i);
-		}
-	}
-
-	void Object::UnbindAllIncomingSignals(void* toInstance)
-	{
-		LockGuard lock{ bindingsMutex };
-
-		auto& incoming = incomingBindingsMap[toInstance];
-
-		for (int i = incoming.GetSize() - 1; i >= 0; i--)
-		{
-			incoming.RemoveAt(i);
-		}
-	}
-
-	void Object::UnbindAllOutgoingSignals(void* fromInstance)
-	{
-		LockGuard lock{ bindingsMutex };
-
-		auto& outgoing = outgoingBindingsMap[fromInstance];
-
-		for (int i = outgoing.GetSize() - 1; i >= 0; i--)
-		{
-			outgoing.RemoveAt(i);
-		}
-	}
-
-	void Object::UnbindAllSignals(void* instance)
-	{
-		LockGuard lock{ bindingsMutex };
-
-		if (outgoingBindingsMap.KeyExists(instance))
-		{
-			auto& outgoing = outgoingBindingsMap[instance];
-			for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
-			{
-				auto& binding = outgoing[i];
-
-				if (binding.boundInstance != nullptr)
-				{
-					UnbindSignals(binding.boundInstance, instance);
-				}
-			}
-
-			outgoing.Clear();
-			outgoingBindingsMap.Remove(instance);
-		}
-
-		if (incomingBindingsMap.KeyExists(instance))
-		{
-			auto& incoming = incomingBindingsMap[instance];
-			for (int i = incoming.GetSize() - 1; i >= 0; i--) // INCOMING
-			{
-				auto& binding = incoming[i];
-
-				auto& outgoingFrom = outgoingBindingsMap[binding.signalInstance];
-
-				for (int j = outgoingFrom.GetSize() - 1; j >= 0; j--)
-				{
-					if (outgoingFrom[j].boundInstance == instance)
-						outgoingFrom.RemoveAt(j);
-				}
-			}
-
-			incoming.Clear();
-			incomingBindingsMap.Remove(instance);
-		}
-	}
-
-    void Object::Unbind(void* instance, DelegateHandle delegateInstance)
-    {
-		LockGuard lock{ bindingsMutex };
-
-        auto& outgoing = outgoingBindingsMap[instance];
-        for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
-        {
-            auto& binding = outgoing[i];
-
-            if (binding.boundDelegate.IsValid() && binding.boundDelegate.GetHandle() == delegateInstance)
-            {
-                outgoing.RemoveAt(i);
-            }
-        }
-    }
 
 }
 

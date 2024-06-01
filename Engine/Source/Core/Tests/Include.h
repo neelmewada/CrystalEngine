@@ -72,6 +72,79 @@ namespace PackageTests
 	};
 }
 
+namespace EventTests
+{
+	class SenderClass;
+
+	typedef ScriptEvent<void(const String& text)> TextEvent;
+	typedef ScriptEvent<void(Object* sender)> ObjectEvent;
+	DECLARE_SCRIPT_EVENT(FileActionEvent, CE::IO::FileAction fileAction);
+
+	CLASS()
+	class SenderClass : public Object
+	{
+		CE_CLASS(SenderClass, Object)
+	public:
+
+		TextEvent onTextChanged{};
+
+		ObjectEvent onObjectEvent{};
+
+		FileActionEvent fileActionEvent{};
+	};
+
+	CLASS()
+	class ReceiverClass : public Object
+	{
+		CE_CLASS(ReceiverClass, Object)
+	public:
+
+		void OnTextChangedCallback(const String& text)
+		{
+			this->text = text;
+		}
+
+		void OnObjectEvent(Object* sender)
+		{
+			this->object = sender;
+		}
+
+		String text{};
+		Object* object = nullptr;
+		IO::FileAction fileAction = IO::FileAction::Add;
+	};
+	
+}
+
+CE_RTTI_CLASS(, EventTests, SenderClass,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(onTextChanged)
+		CE_FIELD(onObjectEvent)
+		CE_FIELD(fileActionEvent)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(, EventTests, SenderClass)
+
+CE_RTTI_CLASS(, EventTests, ReceiverClass,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(text)
+		CE_FIELD(object)
+		CE_FIELD(fileAction)
+	),
+	CE_FUNCTION_LIST(
+		CE_FUNCTION(OnTextChangedCallback)
+		CE_FUNCTION2(OnObjectEvent, auto, (Object*))
+	)
+)
+CE_RTTI_CLASS_IMPL(, EventTests, ReceiverClass)
+
 namespace ObjectTests
 {
 
@@ -103,60 +176,7 @@ namespace ObjectTests
 		SubClassType<Object> anyClass{};
 	};
 
-	CLASS()
-	class Sender : public CE::Object
-	{
-		CE_CLASS(Sender, CE::Object)
-	public:
-
-		CE_SIGNAL(MySignal1, String);
-
-	};
-
-	CLASS()
-	class Receiver : public CE::Object
-	{
-		CE_CLASS(Receiver, CE::Object)
-	public:
-
-		FUNCTION()
-		void PrintString(String string)
-		{
-			printValue = string;
-		}
-
-		FIELD()
-		String printValue{};
-	};
-
-	STRUCT()
-	struct SenderStruct
-	{
-		CE_STRUCT(SenderStruct)
-	public:
-
-		CE_SIGNAL(StructSignal1, String);
-
-	};
-
-	STRUCT()
-	struct ReceiverStruct
-	{
-		CE_STRUCT(ReceiverStruct)
-	public:
-
-		FUNCTION()
-		void PrintStringValue(String string)
-		{
-			stringValue = string;
-		}
-
-		FIELD()
-		String stringValue{};
-
-		FIELD()
-		Array<String> arrayValue{};
-	};
+	
 }
 
 // CDI
@@ -377,27 +397,7 @@ CE_RTTI_CLASS(, ObjectTests, DerivedClassA,
     CE_FUNCTION_LIST(
     )
 )
-CE_RTTI_CLASS(, ObjectTests, Sender,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-    ),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION2(MySignal1, auto, (String), Signal)
-    )
-)
-CE_RTTI_CLASS(, ObjectTests, Receiver,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(printValue)
-    ),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION2(PrintString, void, (String string))
-    )
-)
+
 CE_RTTI_CLASS(, CDITests, BottomObject,
 	CE_SUPER(Object),
 	CE_NOT_ABSTRACT,
@@ -453,26 +453,7 @@ CE_RTTI_STRUCT(, PackageTests, WritingTestStruct1,
     CE_FUNCTION_LIST(
     )
 )
-CE_RTTI_STRUCT(, ObjectTests, SenderStruct,
-    CE_SUPER(),
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-    ),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION2(StructSignal1, auto, (String), Signal)
-    )
-)
-CE_RTTI_STRUCT(, ObjectTests, ReceiverStruct,
-    CE_SUPER(),
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(stringValue)
-        CE_FIELD(arrayValue)
-    ),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION2(PrintStringValue, void, (String string))
-    )
-)
+
 CE_RTTI_STRUCT(, CDITests, TestStruct,
     CE_SUPER(),
     CE_ATTRIBS(),

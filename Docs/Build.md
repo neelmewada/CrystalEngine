@@ -31,11 +31,19 @@ Host tools are command line tools used by standalone platform build. Hence they 
 cmake --build Build/Windows --config Debug --target HostTools -Wno-dev
 ```
 
-**Recommended**: However, if you want to build the editor GUI tolls, you can either build and run the `EditorLauncher` target from Visual studio, or via command line:
+**Recommended**: However, if you want to build the editor GUI tools, you can either build and run the `EditorLauncher` target from Visual studio, or via command line:
 
 ```sh
 cmake --build Build/Windows --config Debug --target EditorLauncher -Wno-dev
 ```
+
+### Important Note
+
+The `EditorLauncher` executable launches the Project Browser by default. If you've already created a project once and want to launch the project by default on launch, then pass the path to your `.cproject` file in the command line arguments when running it through Visual Studio like this:
+
+<p align="center">
+    <img src="./Images/EditorLauncherProjectPath.png" width=400>
+</p>
 
 ## Building standalone (optional)
 

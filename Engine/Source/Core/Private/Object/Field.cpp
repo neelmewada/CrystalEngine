@@ -184,7 +184,12 @@ namespace CE
 		return declType->IsEnum() && ((EnumType*)declType)->IsFlagsEnum();
 	}
 
-    bool FieldType::IsObjectField() const
+	bool FieldType::IsEventField() const
+	{
+		return GetDeclarationTypeId() == Internal::GetScriptEventTypeId();
+	}
+
+	bool FieldType::IsObjectField() const
     {
 		Class* classType = ClassType::FindClass(fieldTypeId);
         return classType != nullptr && classType->IsObject();
@@ -812,10 +817,7 @@ namespace CE
 
 	void FieldType::NotifyObjectFieldUpdate(Object* instance)
 	{
-		if (instance)
-		{
-			instance->OnFieldModified(this);
-		}
+		
 	}
 }
 

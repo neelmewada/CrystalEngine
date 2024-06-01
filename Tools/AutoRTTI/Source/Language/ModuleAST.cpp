@@ -32,6 +32,11 @@ namespace CE
 		{
 			apiName = "";
 		}
+
+		if (headerPath.GetFilename() == "CWidget.h")
+		{
+			String::IsAlphabet('a');
+		}
         
         auto ast = HeaderAST::ProcessHeader(tokens);
 
@@ -125,6 +130,9 @@ namespace CE
 			outStream << "\tCE_FUNCTION_LIST(\n";
 			for (int i = 0; i < classInfo.functions.GetSize(); i++)
 			{
+				if (!classInfo.functions[i].name.IsValid())
+					continue;
+
 				outStream << "\t\tCE_FUNCTION2(" << classInfo.functions[i].name.GetCString()
 					<< ", " << (classInfo.functions[i].returnType.IsEmpty() ? "auto" : classInfo.functions[i].returnType.GetCString())
 					<< ", " << classInfo.functions[i].signature.GetCString();

@@ -107,7 +107,7 @@ namespace CE
 	CORE_API ResourceManager* GetResourceManager()
 	{
 		if (gResourceManager == nullptr)
-			gResourceManager = CreateObject<ResourceManager>(nullptr, TEXT("ResourceManager"), OF_Transient);
+			gResourceManager = CreateObject<ResourceManager>(GetTransientPackage(MODULE_NAME), TEXT("ResourceManager"), OF_Transient);
 		return gResourceManager;
 	}
 

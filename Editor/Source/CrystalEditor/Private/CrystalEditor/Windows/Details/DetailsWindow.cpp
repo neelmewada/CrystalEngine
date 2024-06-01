@@ -124,20 +124,20 @@ namespace CE::Editor
 
         treeWidget = CreateObject<CTreeWidget>(topView, "ComponentTree");
         treeWidget->SetSelectionMode(CItemSelectionMode::SingleSelection);
-        
-        Bind(treeWidget, MEMBER_FUNCTION(CTreeWidget, OnSelectionChanged), [this](CTreeWidget*)
+
+        treeWidget->onSelectionChanged += [this](CTreeWidget*)
             {
                 const auto& selectedItems = treeWidget->GetSelectedItems();
 
-	            for (auto it = selectedItems.cbegin(); it != selectedItems.cend(); ++it)
-	            {
+                for (auto it = selectedItems.cbegin(); it != selectedItems.cend(); ++it)
+                {
                     CTreeWidgetItem* selected = *it;
                     SetEditTarget((Object*)selected->GetInternalDataPtr());
                     return;
-	            }
-                
+                }
+
                 SetEditTarget(nullptr);
-            });
+            };
 
         splitView->SetEnabled(false);
         noSelectionLabel->SetEnabled(true);

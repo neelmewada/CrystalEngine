@@ -55,17 +55,17 @@ namespace CE::Widgets
 
             titleLabel = CreateObject<CLabel>(header, "SectionTitle");
             titleLabel->SetText("Title");
+
+            dropDownArrow->onMouseLeftPress += [this]
+                {
+                    SetExpanded(!isExpanded);
+                };
+
+            header->onMouseLeftPress += [this]
+                {
+                    SetExpanded(!isExpanded);
+                };
 	    }
-
-        Bind(dropDownArrow, MEMBER_FUNCTION(CWidget, OnMouseLeftPress), [this]
-            {
-                SetExpanded(!isExpanded);
-            });
-
-        Bind(header, MEMBER_FUNCTION(CWidget, OnMouseLeftPress), [this]
-            {
-                SetExpanded(!isExpanded);
-            });
         
         content = CreateObject<CWidget>(this, "SectionContent");
         content->SetEnabled(isInitiallyExpanded);

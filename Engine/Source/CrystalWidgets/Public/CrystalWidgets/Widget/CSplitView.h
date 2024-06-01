@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+	DECLARE_SCRIPT_EVENT(CSplitViewEvent, CSplitView* sender, int splitterIndex);
+
 	CLASS()
 	class CRYSTALWIDGETS_API CSplitView : public CWidget
 	{
@@ -33,10 +35,10 @@ namespace CE::Widgets
 
 		void SetContainerSplitRatio(CSplitViewContainer* container, f32 newSplitRatio);
 
-		// - Signals -
+		// - Events -
 
-		// Params: CSplitView* sender, int draggedSplitterIndex
-		CE_SIGNAL(OnSplitterDragged, CSplitView*, int);
+		FIELD()
+		CSplitViewEvent onSplitterDragged{};
 
 	protected:
 

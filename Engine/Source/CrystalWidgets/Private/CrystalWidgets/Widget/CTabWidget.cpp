@@ -29,7 +29,7 @@ namespace CE::Widgets
 		activeTab = containers[tabIndex];
 		activeTab->SetEnabled(true);
 
-		emit OnTabSelectionChanged(tabIndex);
+		onTabSelectionChanged(tabIndex);
 
 		SetNeedsPaint();
 	}

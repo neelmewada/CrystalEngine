@@ -7,15 +7,17 @@
 #include "RTTI/RTTIDefines.h"
 #include "RTTI/RTTI.h"
 #include "RTTI/Variant.h"
+#include "Function.h"
 #include "Class.h"
 #include "Enum.h"
-#include "Field.h"
 #include "Signal.h"
 #include "SubClassType.h"
 
 #include "ObjectThreadContext.h"
 #include "ObjectGlobals.h"
 #include "ObjectMap.h"
+
+#include "Event.h"
 
 #if PAL_TRAIT_BUILD_TESTS
 class Package_WriteRead_Test;
@@ -190,15 +192,13 @@ namespace CE
 
         // - Updates -
 
+        //! @brief Called when a field inside this object is edited by an editor
+        //! @param field The field that was edited.
         virtual void OnFieldEdited(FieldType* field);
-
-        CE_SIGNAL(OnFieldValueUpdated, FieldType*);
 
         virtual void OnFieldValidate() {}
 
     protected:
-
-        virtual void OnFieldModified(FieldType* field);
 
 		void LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject);
 
@@ -245,9 +245,10 @@ namespace CE
         
         virtual void OnAfterConfigLoad() {}
 
-		void EmitSignal(const String& name, const Array<Variant>& args);
 
 	private:
+
+        void UnbindAllEvents();
 
         void OnAfterConstructInternal();
 
@@ -255,59 +256,7 @@ namespace CE
 
 		void FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance);
 
-		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
-
-		template<typename ReturnType, typename... Args, std::size_t... Is>
-		inline static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<ReturnType(Args...)> delegate, std::index_sequence<Is...>)
-		{
-			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
-				return false;
-
-			if (sourceFunction->GetFunctionSignature() != GetFunctionSignature<Args...>())
-			{
-				CE_LOG(Error, All, "Cannot bind signal: Function signature mismatch");
-				return false;
-			}
-
-			return BindInternal(sourceInstance, sourceFunction, Delegate<void(const Array<Variant>&)>([delegate](const Array<Variant>& args)
-				{
-					delegate.InvokeIfValid(((args.begin() + Is)->GetValue<Args>())...);
-				}));
-		}
-
-	public:
-
-		static void EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args);
-
-		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
-
-		template<typename... Args>
-		inline static DelegateHandle Bind(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(Args...)> delegate)
-		{
-			return BindInternal<void, Args...>(sourceInstance, sourceFunction, delegate, std::make_index_sequence<sizeof...(Args)>());
-		}
-
-		template<typename TLambda>
-		inline static DelegateHandle Bind(void* sourceInstance, FunctionType* sourceFunction, TLambda lambda)
-		{
-			typedef FunctionTraits<TLambda> Traits;
-            typedef typename Traits::Tuple TupleType;
-			typedef typename Traits::ReturnType ReturnType;
-			typedef typename MakeDelegateType<TupleType, ReturnType>::DelegateType DelegateType;
-
-			return Bind(sourceInstance, sourceFunction, DelegateType(lambda));
-		}
-
-		static void UnbindAllSignals(void* instance);
-        
-        static void Unbind(void* instance, DelegateHandle delegateInstance);
-
-		static void UnbindSignals(void* toInstance, void* fromInstance);
-
     private:
-
-		static void UnbindAllIncomingSignals(void* toInstance);
-		static void UnbindAllOutgoingSignals(void* fromInstance);
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class ::Package_WriteRead_Test;
@@ -331,15 +280,14 @@ namespace CE
         Name name;
         Uuid uuid;
 
-        ObjectFlags objectFlags = OF_NoFlags;
-
         // Subobject Lifecycle
 		ObjectMap attachedObjects{};
         
         Object* outer = nullptr;
 
-		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
-		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;
+        ObjectFlags objectFlags = OF_NoFlags;
+
+
     };
     
 } // namespace CE
@@ -355,6 +303,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
 		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
-        CE_FUNCTION(OnFieldValueUpdated, Signal)
+        
     )
 )

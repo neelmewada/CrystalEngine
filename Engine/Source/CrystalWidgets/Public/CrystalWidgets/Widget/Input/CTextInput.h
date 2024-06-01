@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+	typedef ScriptEvent<void(CTextInput*)> CTextInputEvent;
+
 	CLASS(Config = Engine)
 	class CRYSTALWIDGETS_API CTextInput : public CWidget
 	{
@@ -44,15 +46,13 @@ namespace CE::Widgets
 
 		void SetSelectAllOnEdit(bool set) { selectAllOnEdit = set; }
 
-		// - Signals -
+		// - Events -
 
-		CE_SIGNAL(OnEditingFinished, CTextInput*);
+		CTextInputEvent onEditingFinished{};
 
-		// Called when text is modified through user input!
-		CE_SIGNAL(OnTextEdited, CTextInput*);
+		CTextInputEvent onTextEdited{};
 
-		// Called when text is modified through either user input or through code!
-		CE_SIGNAL(OnTextChanged, CTextInput*);
+		CTextInputEvent onTextChanged{};
 
 	protected:
 

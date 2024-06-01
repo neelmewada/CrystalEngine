@@ -126,14 +126,12 @@ namespace CE::Widgets
 
             if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
             {
-                CE_LOG(Info, All, "Mouse Press: {}", label->GetText());
-
                 SetNeedsPaint();
                 event->Consume(this);
             }
             else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left && mouseEvent->isInside)
             {
-                emit OnMenuItemClicked(this);
+                onMenuItemClicked(this);
                 event->Consume(this);
                 
                 if (subMenu == nullptr) // A leaf menu item

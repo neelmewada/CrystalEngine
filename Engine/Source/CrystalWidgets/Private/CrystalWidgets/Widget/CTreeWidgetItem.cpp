@@ -105,13 +105,13 @@ namespace CE::Widgets
 
         arrowIcon->SetBackgroundImage("/Editor/Assets/Icons/Arrow");
 
-        Bind(arrowIcon, MEMBER_FUNCTION(CImage, OnMouseLeftPress), [&]
+        arrowIcon->onMouseLeftPress += [this]
             {
                 if (arrowIcon->IsVisible())
                 {
                     SetExpanded(!isExpanded);
                 }
-            });
+            };
 
         if (createLabel)
 	    {

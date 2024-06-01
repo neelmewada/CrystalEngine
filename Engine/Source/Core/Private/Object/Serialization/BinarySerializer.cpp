@@ -404,7 +404,7 @@ namespace CE
 				String fieldName = "";
 				*stream >> fieldName;
 
-				Field* field = clazz->FindFieldWithName(fieldName);
+				Field* field = clazz->FindField(fieldName);
 				if (field == nullptr)
 				{
 					SkipFieldValue(stream);
@@ -442,7 +442,7 @@ namespace CE
 				String fieldName = "";
 				*stream >> fieldName;
 
-				Field* field = structType->FindFieldWithName(fieldName);
+				Field* field = structType->FindField(fieldName);
 				if (field == nullptr)
 				{
 					SkipFieldValue(stream);

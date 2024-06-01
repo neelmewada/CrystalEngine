@@ -130,10 +130,10 @@ namespace CE::Editor
 					ShowSettingsFor(classType);
 				}
 
-				Bind(entry, MEMBER_FUNCTION(CLabelButton, OnMouseLeftClick), [classType, this]
+				entry->onMouseLeftClick += [classType, this]
 					{
 						ShowSettingsFor(classType);
-					});
+					};
 			}
 		}
 	}

@@ -4,6 +4,8 @@ namespace CE::Widgets
 {
 	static CApplication* instance = nullptr;
 
+	static Array<bool> keyPressStates{};
+
 	CApplication::CApplication()
 	{
 		if (IsDefaultInstance())
@@ -119,7 +121,7 @@ namespace CE::Widgets
 		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
 
 		keyModifierStates = KeyModifier::None;
-		keyPressStates.Resize(keyCodeEnum->GetConstantsCount());
+		keyPressStates.Reset();
 
 		for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
 		{
@@ -468,19 +470,19 @@ namespace CE::Widgets
 				keyEvent.key = keyCode;
 				keyEvent.sender = keyEventWidget;
 
-				if (isDown && !keyPressStates[i])
+				if (isDown && !keyPressStates.Test(i))
 				{
 					keyEvent.type = CEventType::KeyPress;
 
-					keyPressStates[i] = true;
+					keyPressStates.Set(i, true);
 
 					keyEventWidget->HandleEvent(&keyEvent);
 				}
-				else if (isUp && keyPressStates[i])
+				else if (isUp && keyPressStates.Test(i))
 				{
 					keyEvent.type = CEventType::KeyRelease;
 
-					keyPressStates[i] = false;
+					keyPressStates.Set(i, false);
 
 					keyEventWidget->HandleEvent(&keyEvent);
 				}

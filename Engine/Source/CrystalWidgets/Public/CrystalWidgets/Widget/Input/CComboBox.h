@@ -3,6 +3,7 @@
 namespace CE::Widgets
 {
     class CPopup;
+    DECLARE_SCRIPT_EVENT(CComboBoxSelectionEvent, int newIndex);
 
     CLASS()
     class CRYSTALWIDGETS_API CComboBoxItem : public CWidget
@@ -60,10 +61,10 @@ namespace CE::Widgets
         void SelectItem(int index);
         void SelectItem(CComboBoxItem* item);
 
-        // - Signals -
+        // - Events -
 
-        // Params: int index
-        CE_SIGNAL(OnSelectionChanged, int);
+        FIELD()
+        CComboBoxSelectionEvent onSelectionChanged{};
 
     protected:
 

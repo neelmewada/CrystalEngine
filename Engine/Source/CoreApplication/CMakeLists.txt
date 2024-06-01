@@ -5,6 +5,7 @@ project(CoreApplication CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTORTTI
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER

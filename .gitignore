@@ -3,6 +3,7 @@
 [Ii]ntermediates
 ThirdParty/*
 !ThirdParty/*.cmake
+!ThirdParty/cmake
 
 # Prerequisites
 *.d

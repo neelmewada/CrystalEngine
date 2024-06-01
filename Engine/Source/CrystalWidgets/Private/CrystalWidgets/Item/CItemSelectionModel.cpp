@@ -39,19 +39,19 @@ namespace CE::Widgets
     void CItemSelectionModel::Select(const CModelIndex& start, const CModelIndex& end)
     {
         selection.Select(start, end);
-        OnSelectionChanged();
+        onSelectionChanged();
     }
 
     void CItemSelectionModel::Select(const CModelIndex& index)
     {
         selection.Select(index, index);
-        OnSelectionChanged();
+        onSelectionChanged();
     }
 
     void CItemSelectionModel::Clear()
     {
         selection.ClearAll();
-        OnSelectionChanged();
+        onSelectionChanged();
     }
 
 } // namespace CE::Widgets

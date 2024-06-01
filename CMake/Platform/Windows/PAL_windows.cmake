@@ -31,8 +31,6 @@ add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
 # For testing only
 add_compile_definitions(PAL_TRAIT_VULKAN_LIMITED_DESCRIPTOR_SETS=1)
 
-add_compile_options("/MP")
-
 ce_set(PAL_TRAIT_BUILD_TESTS_SUPPORTED 1)
 ce_set(PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED 1)
 ce_set(PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED 1)
@@ -50,6 +48,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     ce_set(PAL_TRAIT_COMPILER_ID MSVC)
     ce_set(PAL_TRAIT_COMPILER_ID_LOWERCASE msvc)
     add_compile_definitions(COMPILER_MSVC=1)
+
+    add_compile_options("/MP")
+    add_compile_options("$<$<CONFIG:Development>:/Zi>")
+
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     ce_set(PAL_TRAIT_COMPILER_ID Clang)
     ce_set(PAL_TRAIT_COMPILER_ID_LOWERCASE clang)
