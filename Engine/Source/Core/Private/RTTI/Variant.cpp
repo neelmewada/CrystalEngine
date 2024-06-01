@@ -74,5 +74,23 @@ namespace CE
 
 		memset(this, 0, sizeof(Variant));
 	}
-    
+
+	bool Variant::IsObject() const
+	{
+		TypeInfo* type = CE::GetTypeInfo(valueTypeId);
+		if (type)
+		{
+			return type->IsObject();
+		}
+		return false;
+	}
+
+	bool Variant::CanCastObject(TypeId castTo) const
+	{
+		TypeInfo* valueType = CE::GetTypeInfo(valueTypeId);
+		TypeInfo* castToType = CE::GetTypeInfo(castTo);
+
+		return valueType->IsObject() && castToType->IsObject() && valueType->IsAssignableTo(castTo);
+	}
+
 } // namespace CE

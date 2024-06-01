@@ -62,8 +62,6 @@ namespace CE::Widgets
         FUNCTION()
         void SetNeedsLayout();
 
-        void ClearNeedsLayout();
-
         FUNCTION()
         void SetNeedsStyle();
 
@@ -217,15 +215,19 @@ namespace CE::Widgets
         void Focus();
         void Unfocus();
 
-        // - Signals -
+        // - Events -
 
-        CE_SIGNAL(OnFocused);
+        EVENT()
+        CVoidEvent onFocused;
 
-        CE_SIGNAL(OnUnfocused);
+        EVENT()
+        CVoidEvent onUnfocused;
 
-        CE_SIGNAL(OnMouseLeftPress);
+        EVENT()
+        CVoidEvent onMouseLeftPress;
 
-        CE_SIGNAL(OnMouseLeftClick);
+        EVENT()
+        CVoidEvent onMouseLeftClick;
 
         virtual void OnFocusGained() {}
         virtual void OnFocusLost() {}
@@ -354,10 +356,10 @@ namespace CE::Widgets
         YGNodeRef node = nullptr;
         YGNodeRef detachedNode = nullptr;
 
-        CStyle computedStyle{};
+        CStyle computedStyle;
         CCursor hoverCursor = CCursor::Inherited;
 
-        b8 isMouseInside = false;
+        b8 wasClickedInside = false;
 
         int destroyFrameCounter = 0;
         b8 isQueuedForDestruction = false;

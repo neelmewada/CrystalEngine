@@ -316,7 +316,7 @@ namespace CE::Widgets
 									containers[i + 1]->splitRatio -= mouseDelta.y;
 									containers[i + 1]->splitRatio = Math::Clamp(containers[i + 1]->splitRatio, 0.1f, 0.9f);
 
-									emit OnSplitterDragged(this, draggedSplitIdx);
+									onSplitterDragged(this, draggedSplitIdx);
 
 									SetNeedsStyle();
 									SetNeedsLayout();
@@ -340,7 +340,7 @@ namespace CE::Widgets
 									containers[i + 1]->splitRatio -= mouseDelta.x;
 									containers[i + 1]->splitRatio = Math::Clamp(containers[i + 1]->splitRatio, 0.1f, 0.9f);
 
-									emit OnSplitterDragged(this, draggedSplitIdx);
+									onSplitterDragged(this, draggedSplitIdx);
 
 									SetNeedsStyle();
 									SetNeedsLayout();

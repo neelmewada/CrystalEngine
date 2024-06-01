@@ -29,6 +29,9 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS(CEventType);
 
+	DECLARE_SCRIPT_EVENT(CVoidEvent);
+	DECLARE_SCRIPT_EVENT(CMouseButtonEvent, MouseButton);
+
 } // namespace CE::Widgets
 
 #include "CEventType.rtti.h"

@@ -28,8 +28,8 @@ namespace CE::Widgets
             if (event->type == CEventType::MouseRelease && wasPressedInside)
             {
                 event->Consume(this);
-                OnButtonLeftClicked();
-                OnButtonClicked(mouseEvent->button);
+                onButtonLeftClicked();
+                onButtonClicked(mouseEvent->button);
             }
         }
 

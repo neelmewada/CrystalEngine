@@ -34,6 +34,7 @@
 #include "CrystalWidgets/Style/CStyle.h"
 
 // App & Utils
+#include "CrystalWidgets/Event/CEventType.h"
 #include "CrystalWidgets/Event/CTimer.h"
 #include "CrystalWidgets/CApplication.h"
 #include "CrystalWidgets/Window/CPlatformWindow.h"
@@ -53,7 +54,6 @@
 #include "CrystalWidgets/Painter/CFont.h"
 #include "CrystalWidgets/Painter/CPainter.h"
 
-#include "CrystalWidgets/Event/CEventType.h"
 #include "CrystalWidgets/Event/CEvent.h"
 
 #include "CrystalWidgets/Validation/CTextInputValidation.h"

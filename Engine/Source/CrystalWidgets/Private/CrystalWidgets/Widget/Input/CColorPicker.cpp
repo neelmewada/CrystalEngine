@@ -119,15 +119,15 @@ namespace CE::Widgets
 				normalizedPosition.x = Math::Clamp01(normalizedPosition.x);
 				normalizedPosition.y = Math::Clamp01(normalizedPosition.y);
 
-				emit OnPositionChanged(normalizedPosition);
+				onPositionChanged(normalizedPosition);
 
 				f32 h = normalizedPosition.x * 360;
 				f32 s = Math::Clamp01(normalizedPosition.y / 0.5f);
 				f32 v = 1.0f - Math::Clamp01((normalizedPosition.y - 0.5f) / 0.5f);
 
-				emit OnHSVColorChanged(h, s, v);
+				onHSVColorChanged(h, s, v);
 
-				emit OnColorChanged(Color::HSV(h, s, v));
+				onColorChanged(Color::HSV(h, s, v));
 
 				mouseEvent->Consume(this);
 				SetNeedsPaint();

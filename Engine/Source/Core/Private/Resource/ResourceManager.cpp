@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	extern ResourceManager* gResourceManager;
 
 	ResourceManager::ResourceManager()
 	{
@@ -10,7 +11,10 @@ namespace CE
 
 	ResourceManager::~ResourceManager()
 	{
-
+		if (gResourceManager == this)
+		{
+			gResourceManager = nullptr;
+		}
 	}
 
 	void ResourceManager::RegisterResource(const String& moduleName, const String& pathToResource, void* data, u32 dataSizeInBytes)

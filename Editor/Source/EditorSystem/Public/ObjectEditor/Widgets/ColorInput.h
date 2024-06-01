@@ -20,9 +20,10 @@ namespace CE::Editor
 
         void SetHasAlpha(bool set);
 
-        // - Signals -
+        // - Events -
 
-        CE_SIGNAL(OnColorSelectSignal, Color);
+        FIELD()
+        CColorEvent onColorSelected;
 
     protected:
 

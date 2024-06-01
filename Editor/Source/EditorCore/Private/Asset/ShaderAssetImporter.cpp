@@ -39,8 +39,6 @@ namespace CE::Editor
 			shader = CreateObject<CE::Shader>(package, TEXT("Shader"));
 		}
 
-		shader->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String))->SetFieldValue(shader, sourceAssetRelativePath);
-
 		FileStream fileReader = FileStream(sourcePath, Stream::Permissions::ReadOnly);
 		fileReader.SetAsciiMode(true);
 

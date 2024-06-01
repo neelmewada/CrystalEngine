@@ -135,9 +135,6 @@ namespace CE::Vulkan
         
         virtual RHI::Sampler* CreateSampler(const RHI::SamplerDescriptor& samplerDesc) override;
         virtual void DestroySampler(RHI::Sampler* sampler) override;
-        
-        virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
-        virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;

@@ -53,7 +53,10 @@ namespace CE::Widgets
 
         void Clear();
 
-        CE_SIGNAL(OnSelectionChanged);
+        // - Events -
+
+        FIELD()
+        CVoidEvent onSelectionChanged{};
 
     protected:
 

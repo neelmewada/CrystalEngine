@@ -34,24 +34,24 @@ namespace CE::Editor
 		hierarchyTreeView->SetColumnResizable(1, 0.4f);
 
 		CItemSelectionModel* selectionModel = hierarchyTreeView->GetSelectionModel();
-		
-		Bind(selectionModel, MEMBER_FUNCTION(CItemSelectionModel, OnSelectionChanged), [this, selectionModel]
+
+		selectionModel->onSelectionChanged += [this, selectionModel]
 			{
 				const CItemSelection& selection = selectionModel->GetSelection();
-				emit OnSceneSelectionChanged(const_cast<CItemSelection*>(&selection));
-				
+				onSceneSelectionChanged(const_cast<CItemSelection*>(&selection));
+
 				if (selection.selectionRanges.NonEmpty())
 				{
 					Actor* actor = (Actor*)selection.selectionRanges[0].start.GetInternalData();
 					if (actor)
 					{
-						emit OnActorSelected(actor);
+						onActorSelected(actor);
 						return;
 					}
 				}
 
-				emit OnActorSelected(nullptr);
-			});
+				onActorSelected(nullptr);
+			};
 	}
 
 } // namespace CE::Editor

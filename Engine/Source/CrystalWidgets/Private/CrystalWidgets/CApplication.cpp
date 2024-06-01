@@ -123,22 +123,6 @@ namespace CE::Widgets
 		keyModifierStates = KeyModifier::None;
 		keyPressStates.Reset();
 
-		static bool firstTime = true;
-		if (firstTime)
-		{
-			firstTime = false;
-
-			for (int j = 0; j < keyCodeEnum->GetConstantsCount(); ++j)
-			{
-				bool value = keyPressStates.Test(j);
-				KeyCode key = (KeyCode)keyCodeEnum->GetConstant(j)->GetValue();
-				if (value)
-				{
-					CE_LOG(Info, All, "State {} = true", key);
-				}
-			}
-		}
-
 		for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
 		{
 			if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))

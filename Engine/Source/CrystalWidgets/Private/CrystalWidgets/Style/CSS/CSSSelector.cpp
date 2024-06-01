@@ -133,7 +133,7 @@ namespace CE::Widgets
     bool CSSSelector::TestAttributeMatch(CWidget* widget, const AttributeMatchCond& rule)
     {
 		ClassType* widgetClass = widget->GetClass();
-		FieldType* field = widgetClass->FindFieldWithName(rule.attribName);
+		FieldType* field = widgetClass->FindField(rule.attribName);
 		if (field == nullptr && !widgetClass->HasAttribute(rule.attribName.GetString()))
 			return false;
 

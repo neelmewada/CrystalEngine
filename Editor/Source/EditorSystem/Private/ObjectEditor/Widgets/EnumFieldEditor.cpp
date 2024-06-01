@@ -54,11 +54,11 @@ namespace CE::Editor
 
         if (prevHandle)
         {
-            Unbind(comboBox, prevHandle);
+            comboBox->onSelectionChanged.Unbind(prevHandle);
             prevHandle = 0;
         }
-
-        prevHandle = Bind(comboBox, MEMBER_FUNCTION(CComboBox, OnSelectionChanged), [this, enumType, field, instance](int newIndex)
+        
+        prevHandle = comboBox->onSelectionChanged.Bind([this, enumType, field, instance](int newIndex)
             {
                 for (int i = 0; i < enumType->GetConstantsCount(); ++i)
                 {
@@ -67,8 +67,8 @@ namespace CE::Editor
                     if (i == newIndex)
                     {
                         field->SetFieldEnumValue(instance, constant->GetValue());
-                        emit OnValueUpdated();
-	                    break;
+                        onValueUpdated();
+                        break;
                     }
                 }
             });

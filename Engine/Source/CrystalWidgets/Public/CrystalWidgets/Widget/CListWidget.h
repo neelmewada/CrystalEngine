@@ -22,9 +22,10 @@ namespace CE::Widgets
 
 		const Array<CListWidgetItem*>& GetSelection() const { return selectedItems; }
 
-		// - Signals -
+		// - Events -
 
-		CE_SIGNAL(OnSelectionChanged);
+		FIELD()
+		CVoidEvent onSelectionChanged{};
 
 	protected:
 

@@ -55,8 +55,7 @@ namespace CE::Editor
                 descLabel->SetText(path.GetString().Replace({'\\'}, '/'));
             }
 
-            Bind(recentsList, MEMBER_FUNCTION(CListWidget, OnSelectionChanged),
-                this, MEMBER_FUNCTION(Self, OnProjectTemplateSelectionChanged));
+            recentsList->onSelectionChanged += FUNCTION_BINDING(this, OnProjectTemplateSelectionChanged);
 
             CWidget* bottomSection = CreateObject<CWidget>(recentsTab, "BottomSection");
 
@@ -74,10 +73,10 @@ namespace CE::Editor
                 CButton* openFolderBtn = CreateObject<CButton>(hstack1, "OpenFolderBtn");
                 openFolderBtn->SetText("...");
 
-                Bind(openFolderBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [input, this]
+                openFolderBtn->onButtonLeftClicked += [input, this]
                     {
                         static const Array<EditorPlatform::FileType> fileTypes = { {.desc = "Crystal Project File", .extensions = { "*.cproject" } } };
-						
+
                         String newLocation = EditorPlatform::ShowFileSelectionDialog(defaultOpenProjectLocation, fileTypes)
                             .GetString()
                             .Replace({ '\\' }, '/');
@@ -86,13 +85,11 @@ namespace CE::Editor
 
                         defaultOpenProjectLocation = newLocation;
                         input->SetText(defaultOpenProjectLocation);
-                    });
+                    };
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onTextEdited += FUNCTION_BINDING(this, ValidateInputFields);
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onEditingFinished += FUNCTION_BINDING(this, ValidateInputFields);
             }
 
             openErrorBox = CreateObject<CWidget>(bottomSection, "ErrorBox");
@@ -112,17 +109,16 @@ namespace CE::Editor
                 openButton->SetText("Open");
                 openButton->SetAlternateStyle(true);
 
-                Bind(openButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked),
-                    this, MEMBER_FUNCTION(Self, OpenProject));
+                openButton->onButtonLeftClicked += FUNCTION_BINDING(this, OpenProject);
 
                 CButton* cancelButton = CreateObject<CButton>(buttonGroup, "CancelBtn");
                 cancelButton->SetText("Cancel");
 
-                Bind(cancelButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
+                cancelButton->onButtonLeftClicked += [this]
                     {
                         this->Hide();
                         this->QueueDestroy();
-                    });
+                    };
             }
 	    }
 
@@ -147,8 +143,7 @@ namespace CE::Editor
 
             newList->Select(0);
 
-            Bind(newList, MEMBER_FUNCTION(CListWidget, OnSelectionChanged),
-                this, MEMBER_FUNCTION(Self, OnProjectTemplateSelectionChanged));
+            newList->onSelectionChanged += FUNCTION_BINDING(this, OnProjectTemplateSelectionChanged);
 
             CWidget* bottomSection = CreateObject<CWidget>(newTab, "BottomSection");
 
@@ -166,23 +161,21 @@ namespace CE::Editor
                 CButton* openFolderBtn = CreateObject<CButton>(hstack1, "OpenFolderBtn");
                 openFolderBtn->SetText("...");
 
-                Bind(openFolderBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [input, this]
+                openFolderBtn->onButtonLeftClicked += [input, this]
                     {
                         String newLocation = EditorPlatform::ShowSelectDirectoryDialog(defaultNewProjectLocation)
-                			.GetString()
-                			.Replace({'\\'}, '/');
+                            .GetString()
+                            .Replace({ '\\' }, '/');
                         if (newLocation.IsEmpty())
                             return;
-						
+
                         defaultNewProjectLocation = newLocation;
                         input->SetText(defaultNewProjectLocation);
-                    });
+                    };
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onTextEdited += FUNCTION_BINDING(this, ValidateInputFields);
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onEditingFinished += FUNCTION_BINDING(this, ValidateInputFields);
             }
 
             CWidget* hstack2 = CreateObject<CWidget>(bottomSection, "HStack");
@@ -195,11 +188,9 @@ namespace CE::Editor
                 input->SetHint("Enter project name...");
                 newProjectName = input;
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onTextEdited += FUNCTION_BINDING(this, ValidateInputFields);
 
-                Bind(input, MEMBER_FUNCTION(CTextInput, OnEditingFinished),
-                    this, MEMBER_FUNCTION(Self, ValidateInputFields));
+                input->onEditingFinished += FUNCTION_BINDING(this, ValidateInputFields);
             }
 
             newErrorBox = CreateObject<CWidget>(bottomSection, "ErrorBox");
@@ -219,17 +210,16 @@ namespace CE::Editor
                 createButton->SetText("Create");
                 createButton->SetAlternateStyle(true);
 
-                Bind(createButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked),
-                    this, MEMBER_FUNCTION(Self, CreateProject));
+                createButton->onButtonLeftClicked += FUNCTION_BINDING(this, CreateProject);
                 
                 CButton* cancelButton = CreateObject<CButton>(buttonGroup, "CancelBtn");
                 cancelButton->SetText("Cancel");
 
-                Bind(cancelButton, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
+                cancelButton->onButtonLeftClicked += [this]
                     {
                         this->Hide();
                         this->QueueDestroy();
-                    });
+                    };
             }
 	    }
 

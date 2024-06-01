@@ -12,9 +12,10 @@ namespace CE::Editor
 
         virtual void BindField(FieldType* field, void* instance) = 0;
 
-        // - Signals -
+        // - Events -
 
-        CE_SIGNAL(OnValueUpdated);
+        FIELD()
+        CVoidEvent onValueUpdated;
 
     protected:
 

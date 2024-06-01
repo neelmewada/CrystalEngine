@@ -25,7 +25,7 @@ namespace CE::Editor
 
         virtual void CreateGUI(FieldType* field, void* instance);
 
-        // - Signals -
+        // - Events -
 
     protected:
 

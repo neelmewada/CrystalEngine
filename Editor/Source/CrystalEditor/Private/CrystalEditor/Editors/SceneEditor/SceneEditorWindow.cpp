@@ -53,10 +53,10 @@ namespace CE::Editor
             CMenuItem* exit = CreateObject<CMenuItem>(fileMenu, "Exit");
             exit->SetText("Exit");
 
-            Bind(exit, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [this](CMenuItem* menuItem)
-                {
+            exit->onMenuItemClicked += [this](CMenuItem* menuItem)
+	    		{
                     RequestEngineExit("USER_QUIT");
-                });
+                };
 	    }
 
         CMenuItem* editMenuItem = CreateObject<CMenuItem>(this, "EditMenuItem");
@@ -67,7 +67,7 @@ namespace CE::Editor
             CMenuItem* projectSettingsItem = CreateObject<CMenuItem>(editMenu, "ProjectSettingsItem");
             projectSettingsItem->SetText("Project Settings...");
 
-            Bind(projectSettingsItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem*)
+            projectSettingsItem->onMenuItemClicked += [](CMenuItem*)
                 {
                     PlatformWindowInfo windowInfo{};
                     windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
@@ -79,7 +79,7 @@ namespace CE::Editor
 
                     ProjectSettingsWindow* window = CreateWindow<ProjectSettingsWindow>("ProjectSettingsWindow", platformWindow);
                     window->Show();
-                });
+                };
 
             CMenuItem* editorSettingsItem = CreateObject<CMenuItem>(editMenu, "editorSettingsItem");
             editorSettingsItem->SetText("Editor Settings...");
@@ -94,7 +94,7 @@ namespace CE::Editor
             CMenuItem* aboutItem = CreateObject<CMenuItem>(helpMenu, "AboutItem");
             aboutItem->SetText("About Crystal Editor");
 
-            Bind(aboutItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem*)
+            aboutItem->onMenuItemClicked += [](CMenuItem*)
                 {
                     PlatformWindowInfo windowInfo{};
                     windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
@@ -105,8 +105,7 @@ namespace CE::Editor
 
                     AboutWindow* aboutWindow = CreateWindow<AboutWindow>("AboutWindow", platformWindow);
                     aboutWindow->Show();
-                });
-
+                };
 	    }
 
         // - Child Windows -
@@ -128,8 +127,7 @@ namespace CE::Editor
 
         detailsWindow = CreateObject<DetailsWindow>(rightBottom, "Details");
 
-        Bind(sceneHierarchyWindow, MEMBER_FUNCTION(SceneHierarchyWindow, OnActorSelected),
-            detailsWindow, MEMBER_FUNCTION(DetailsWindow, SetupForActor));
+        sceneHierarchyWindow->onActorSelected += FUNCTION_BINDING(detailsWindow, SetupForActor);
 
         minorDockSpace->Split(center, 0.4f, CDockSplitDirection::Vertical, "SplitTop", "SplitBottom");
         auto centerTop = center->GetSplit(0);
@@ -138,9 +136,8 @@ namespace CE::Editor
         viewportWindow = CreateObject<ViewportWindow>(centerTop, "Viewport");
         centerTop->SetAutoHideTabs(true);
         EditorViewport* editorViewport = viewportWindow->GetViewport();
-        
-        Bind(editorViewport, MEMBER_FUNCTION(EditorViewport, OnFrameBufferRecreated),
-            rendererSubsystem, MEMBER_FUNCTION(RendererSubsystem, RebuildFrameGraph));
+
+        editorViewport->onFrameBufferRecreated += FUNCTION_BINDING(rendererSubsystem, RebuildFrameGraph);
 
         assetBrowserWindow = CreateObject<AssetBrowserWindow>(centerBottom, "Assets");
     }

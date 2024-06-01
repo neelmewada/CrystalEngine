@@ -193,7 +193,7 @@ namespace CE::Editor
 	{
 		Super::OnBeforeDestroy();
 
-		emit OnColorPickerClosed(this);
+		onColorPickerClosed(this);
 	}
 
 	void ColorPickerTool::Construct()
@@ -209,7 +209,7 @@ namespace CE::Editor
 			{
 				colorMap = CreateObject<CColorPicker>(topLeft, "ColorMap");
 
-				Bind(colorMap, MEMBER_FUNCTION(CColorPicker, OnHSVColorChanged), [this](f32 h, f32 s, f32 v)
+				colorMap->onHSVColorChanged += [this](f32 h, f32 s, f32 v)
 					{
 						hsv = Vec3(h, s, v);
 						f32 a = value.a;
@@ -219,8 +219,8 @@ namespace CE::Editor
 						UpdateFields();
 						SetNeedsPaint();
 
-						emit OnColorSelected(value);
-					});
+						onColorSelected(value);
+					};
 			}
 
 			CWidget* topRight = CreateObject<CWidget>(topBox, "TopRightContainer");
@@ -243,10 +243,10 @@ namespace CE::Editor
 				eyeDropButton->SetText("");
 				eyeDropButton->SetImage("/Editor/Assets/Icons/ColorPicker");
 
-				Bind(eyeDropButton, MEMBER_FUNCTION(CImageButton, OnMouseLeftClick), [this]
+				eyeDropButton->onMouseLeftClick += [this]
 					{
-						
-					});
+
+					};
 
 			}
 		}
@@ -315,8 +315,8 @@ namespace CE::Editor
 							gradient.keys.AddRange({ start, end });
 
 							inputField->SetGradient(gradient);
-
-							Bind(inputField, MEMBER_FUNCTION(CTextInput, OnTextEdited), [this, i](CTextInput* inputField)
+							
+							inputField->onTextEdited += [this, i](CTextInput* inputField)
 								{
 									f32 number = 0.0f;
 									if (String::TryParse(inputField->GetText(), number))
@@ -337,9 +337,9 @@ namespace CE::Editor
 										UpdateFields(inputField);
 										SetNeedsPaint();
 
-										emit OnColorSelected(value);
+										onColorSelected(value);
 									}
-								});
+								};
 						}
 					}
 				}
@@ -395,7 +395,7 @@ namespace CE::Editor
 								inputField->SetRange(0, 1);
 							}
 
-							Bind(inputField, MEMBER_FUNCTION(CTextInput, OnTextEdited), [this, i](CTextInput* inputField)
+							inputField->onTextEdited += [this, i](CTextInput* inputField)
 								{
 									f32 number = 0.0f;
 									if (String::TryParse(inputField->GetText(), number))
@@ -417,9 +417,9 @@ namespace CE::Editor
 										UpdateFields(inputField);
 										SetNeedsPaint();
 
-										emit OnColorSelected(value);
+										onColorSelected(value);
 									}
-								});
+								};
 						}
 					}
 				}
@@ -433,7 +433,7 @@ namespace CE::Editor
 					hexInput = CreateObject<CTextInput>(hbox, "HexInput");
 					hexInput->SetText(FormatHex(value.ToU32()));
 
-					Bind(hexInput, MEMBER_FUNCTION(CTextInput, OnEditingFinished), [this](CTextInput*)
+					hexInput->onEditingFinished += [this](CTextInput*)
 						{
 							String text = hexInput->GetText().ToUpper();
 							if (text.GetLength() == 6)
@@ -499,7 +499,7 @@ namespace CE::Editor
 							}
 
 							SetColor(value);
-						});
+						};
 				}
 
 				CWidget* spacer = CreateObject<CWidget>(bottomRight, "Spacer");
@@ -511,14 +511,12 @@ namespace CE::Editor
 					CButton* okButton = CreateObject<CButton>(buttonBox, "OkButton");
 					okButton->SetText("Ok");
 
-					Bind(okButton, MEMBER_FUNCTION(CButton, OnMouseLeftClick),
-						this, MEMBER_FUNCTION(Self, DoAccept));
+					okButton->onMouseLeftClick += FUNCTION_BINDING(this, DoAccept);
 
 					CButton* cancelButton = CreateObject<CButton>(buttonBox, "CancelButton");
 					cancelButton->SetText("Cancel");
 
-					Bind(cancelButton, MEMBER_FUNCTION(CButton, OnMouseLeftClick),
-						this, MEMBER_FUNCTION(Self, DoCancel));
+					cancelButton->onMouseLeftClick += FUNCTION_BINDING(this, DoCancel);
 				}
 			}
 		}
@@ -528,19 +526,19 @@ namespace CE::Editor
 	{
 		Super::OnClickClose();
 
-		emit OnColorSelected(original);
+		onColorSelected(original);
 	}
 
 	void ColorPickerTool::DoAccept()
 	{
-		emit OnColorSelected(value);
+		onColorSelected(value);
 
 		QueueDestroy();
 	}
 
 	void ColorPickerTool::DoCancel()
 	{
-		emit OnColorSelected(original);
+		onColorSelected(original);
 
 		QueueDestroy();
 	}

@@ -127,7 +127,7 @@ namespace CE::Widgets
         selectedItemIndex = index;
         displayLabel->SetText(items[index]->GetText());
 
-        emit OnSelectionChanged(index);
+        onSelectionChanged(index);
     }
 
     void CComboBox::SelectItem(CComboBoxItem* item)

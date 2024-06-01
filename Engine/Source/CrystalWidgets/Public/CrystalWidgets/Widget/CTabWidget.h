@@ -3,6 +3,7 @@
 namespace CE::Widgets
 {
     class CTabWidgetContainer;
+    DECLARE_SCRIPT_EVENT(CTabSelectionEvent, int tabIndex);
 
     CLASS()
     class CRYSTALWIDGETS_API CTabWidget : public CWidget
@@ -21,10 +22,10 @@ namespace CE::Widgets
 
         CTabWidgetContainer* GetActiveTab() const { return activeTab; }
 
-        // - Signals -
+        // - Events -
 
-        // Params: int newTabIndex
-        CE_SIGNAL(OnTabSelectionChanged, int);
+        FIELD()
+        CTabSelectionEvent onTabSelectionChanged{};
 
     protected:
 

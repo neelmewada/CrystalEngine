@@ -166,7 +166,7 @@ namespace CE::Editor
             SetVectorIntValue(vec4IntValue);
         }
 
-        Delegate<void(CTextInput*)> callback = [this, field, instance](CTextInput*)
+        auto callback = [this, field, instance](CTextInput*) -> void
             {
                 if (!fieldX->IsEditing() &&
                     !fieldY->IsEditing() &&
@@ -204,19 +204,19 @@ namespace CE::Editor
                             field->SetFieldValue<Vec4i>(instance, vec4Value.ToVec4i());
                         }
 
-                        emit OnValueUpdated();
+                        onValueUpdated();
                     }
                 }
             };
 
-        Bind(fieldX, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
-        Bind(fieldY, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
-        Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
-        Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnEditingFinished), callback);
+        fieldX->onEditingFinished += callback;
+        fieldY->onEditingFinished += callback;
+        fieldZ->onEditingFinished += callback;
+        fieldW->onEditingFinished += callback;
 
-        Delegate<void(CTextInput*)> editingCallback = [this, field, instance](CTextInput*)
+        auto editingCallback = [this, field, instance](CTextInput*)
             {
-                //emit OnValueModified(this);
+                //OnValueModified(this);
                 if (field && instance)
                 {
                     Vec4 vec4Value = GetVectorValue();
@@ -248,14 +248,14 @@ namespace CE::Editor
                         field->SetFieldValue<Vec4i>(instance, vec4Value.ToVec4i());
                     }
 
-                    emit OnValueUpdated();
+                    onValueUpdated();
                 }
             };
 
-        Bind(fieldX, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
-        Bind(fieldY, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
-        Bind(fieldZ, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
-        Bind(fieldW, MEMBER_FUNCTION(VectorComponentInput, OnTextEdited), editingCallback);
+        fieldX->onTextEdited += editingCallback;
+        fieldY->onTextEdited += editingCallback;
+        fieldZ->onTextEdited += editingCallback;
+        fieldW->onTextEdited += editingCallback;
     }
 
     void VectorFieldEditor::Construct()

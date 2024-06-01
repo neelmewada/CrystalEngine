@@ -72,7 +72,7 @@ namespace CE
         auto cend() const { return impl.cend(); }
         
     private:
-        std::unordered_set<T, HashFunc<T>> impl{};
+        ankerl::unordered_dense::set<T, HashFunc<T>> impl{};
     };
     
 } // namespace CE

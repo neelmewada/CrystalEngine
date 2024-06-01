@@ -27,9 +27,10 @@ namespace CE::Widgets
 
         b8 IsActive() const { return isActive; }
 
-		// - Signals -
+		// - Events -
 
-        CE_SIGNAL(OnTimeOut);
+        FIELD()
+        CVoidEvent onTimeOut{};
 
     private:
 

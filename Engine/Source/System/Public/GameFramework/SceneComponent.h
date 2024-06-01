@@ -2,6 +2,15 @@
 
 namespace CE
 {
+	ENUM()
+	enum class Mobility
+	{
+		Static,
+		Stationary,
+		Moveable
+	};
+	ENUM_CLASS(Mobility);
+
     CLASS()
 	class SYSTEM_API SceneComponent : public ActorComponent
 	{
@@ -60,8 +69,6 @@ namespace CE
 
     protected:
 
-		void OnFieldModified(FieldType* field) override;
-
 		void OnFieldEdited(FieldType* field) override;
 
 		bool IsTransformUpdated() const { return transformUpdated; }
@@ -91,6 +98,9 @@ namespace CE
 
 		FIELD(EditAnywhere, Category = "Transform", DisplayName = "Scale")
 		Vec3 localScale = Vec3(1, 1, 1);
+
+		FIELD(EditAnywhere, Category = "Transform")
+		Mobility mobility = Mobility::Static;
 
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
 
