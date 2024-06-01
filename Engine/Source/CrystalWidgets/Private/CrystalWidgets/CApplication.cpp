@@ -470,16 +470,6 @@ namespace CE::Widgets
 				keyEvent.key = keyCode;
 				keyEvent.sender = keyEventWidget;
 
-				if (isDown)
-				{
-					CE_LOG(Info, All, "Key down: {}", keyCode);
-
-					for (int j = 0; j < keyCodeEnum->GetConstantsCount(); ++j)
-					{
-						CE_LOG(Info, All, "State {} = {}", (KeyCode)keyCodeEnum->GetConstant(j)->GetValue(), keyPressStates.Test(j));
-					}
-				}
-
 				if (isDown && !keyPressStates.Test(i))
 				{
 					keyEvent.type = CEventType::KeyPress;
