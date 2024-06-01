@@ -9,6 +9,8 @@ namespace CE
 
 	RPI::Texture* Texture2D::GetRpiTexture()
     {
+		ZoneScoped;
+
 		if (!rpiTexture)
 		{
 			RPI::TextureDescriptor desc{};
@@ -65,6 +67,8 @@ namespace CE
 
 	RPI::Texture* Texture2D::CloneRpiTexture()
 	{
+		ZoneScoped;
+
 		RPI::TextureDescriptor desc{};
 		desc.samplerDesc.addressModeU = TextureAddressModeToSamplerMode(addressModeU);
 		desc.samplerDesc.addressModeV = TextureAddressModeToSamplerMode(addressModeV);
