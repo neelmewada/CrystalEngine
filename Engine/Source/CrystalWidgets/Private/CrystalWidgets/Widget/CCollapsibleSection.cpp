@@ -57,6 +57,8 @@ namespace CE::Widgets
             titleLabel->SetText("Title");
 	    }
 
+        dropDownArrow->onMouseLeftPress.Bind()
+
         Bind(dropDownArrow, MEMBER_FUNCTION(CWidget, OnMouseLeftPress), [this]
             {
                 SetExpanded(!isExpanded);

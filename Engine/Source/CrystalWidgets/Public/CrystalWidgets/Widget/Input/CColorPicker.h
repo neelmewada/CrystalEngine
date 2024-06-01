@@ -2,6 +2,10 @@
 
 namespace CE::Widgets
 {
+	DECLARE_SCRIPT_EVENT(CColorEvent, const Color& color);
+	DECLARE_SCRIPT_EVENT(CColorHSVEvent, f32 h, f32 s, f32 v);
+	DECLARE_SCRIPT_EVENT(CColorPickerPositionEvent, Vec2 normalizedPosition);
+
 	CLASS()
 	class CRYSTALWIDGETS_API CColorPicker : public CWidget
 	{
@@ -16,15 +20,16 @@ namespace CE::Widgets
 
 		void SetNormalizedPosition(Vec2 newPosition);
 
-		// - Signals -
+		// - Events -
 
-		// Params: Vec2 normalizedPosition
-		CE_SIGNAL(OnPositionChanged, Vec2);
+		FIELD()
+		CColorPickerPositionEvent onPositionChanged{};
 
-		CE_SIGNAL(OnColorChanged, Color);
+		FIELD()
+		CColorEvent onColorChanged{};
 
-		// Params: f32 H, f32 S, f32 V;
-		CE_SIGNAL(OnHSVColorChanged, f32, f32, f32);
+		FIELD()
+		CColorHSVEvent onHSVColorChanged{};
 
 	protected:
 

@@ -20,7 +20,7 @@ namespace CE::Editor
 
         void SetColor(const Color& color);
 
-        // - Signals -
+        // - Events -
 
         CE_SIGNAL(OnColorSelected, Color);
 

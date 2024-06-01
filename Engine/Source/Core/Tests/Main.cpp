@@ -9,15 +9,11 @@ CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj1)
 CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj2)
 CE_RTTI_CLASS_IMPL(, ObjectTests, BaseClass)
 CE_RTTI_CLASS_IMPL(, ObjectTests, DerivedClassA)
-CE_RTTI_CLASS_IMPL(, ObjectTests, Sender)
-CE_RTTI_CLASS_IMPL(, ObjectTests, Receiver)
 CE_RTTI_CLASS_IMPL(, CDITests, AnotherObject)
 CE_RTTI_CLASS_IMPL(, CDITests, BottomObject)
 CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
 CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStructBase)
 CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStruct1)
-CE_RTTI_STRUCT_IMPL(, ObjectTests, SenderStruct)
-CE_RTTI_STRUCT_IMPL(, ObjectTests, ReceiverStruct)
 CE_RTTI_STRUCT_IMPL(, CDITests, TestStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, InnerStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
@@ -29,15 +25,11 @@ static void CERegisterModuleTypes()
         PackageTests::WritingTestObj2,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
-        ObjectTests::Sender,
-        ObjectTests::Receiver,
         CDITests::AnotherObject,
 		CDITests::BottomObject,
         CDITests::TestObject,
         PackageTests::WritingTestStructBase,
         PackageTests::WritingTestStruct1,
-        ObjectTests::SenderStruct,
-        ObjectTests::ReceiverStruct,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -50,15 +42,11 @@ static void CEDeregisterModuleTypes()
         PackageTests::WritingTestObj2,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
-        ObjectTests::Sender,
-        ObjectTests::Receiver,
         CDITests::AnotherObject,
 		CDITests::BottomObject,
         CDITests::TestObject,
         PackageTests::WritingTestStructBase,
         PackageTests::WritingTestStruct1,
-        ObjectTests::SenderStruct,
-        ObjectTests::ReceiverStruct,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -582,6 +570,8 @@ TEST(Containers, Variant)
 	EXPECT_EQ(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(String));
 	EXPECT_NE(value.GetValue<Array<String>>().GetElementTypeId(), TYPEID(f32));
 	EXPECT_NE(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(f32));
+	EXPECT_EQ(value.GetValue<Array<String>>()[0], "Item1");
+	EXPECT_EQ(value.GetValue<Array<String>>()[1], "Item2");
 
 	TEST_END;
 }
@@ -1235,17 +1225,17 @@ TEST(Reflection, SubClassType)
 		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<String>));
 		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<DerivedClassA>));
 
-		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
-		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetDeclarationType(), TYPE(SubClassType<Object>));
-		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
+		EXPECT_EQ(type->FindField("assignedClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
+		EXPECT_EQ(type->FindField("derivedClassType")->GetDeclarationType(), TYPE(SubClassType<Object>));
+		EXPECT_EQ(type->FindField("anyClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
 
-		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetUnderlyingTypeId(), TYPEID(BaseClass));
-		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetUnderlyingTypeId(), TYPEID(DerivedClassA));
-		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetUnderlyingTypeId(), TYPEID(Object));
+		EXPECT_EQ(type->FindField("assignedClass")->GetUnderlyingTypeId(), TYPEID(BaseClass));
+		EXPECT_EQ(type->FindField("derivedClassType")->GetUnderlyingTypeId(), TYPEID(DerivedClassA));
+		EXPECT_EQ(type->FindField("anyClass")->GetUnderlyingTypeId(), TYPEID(Object));
 
-		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetUnderlyingType(), TYPE(BaseClass));
-		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetUnderlyingType(), TYPE(DerivedClassA));
-		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetUnderlyingType(), TYPE(Object));
+		EXPECT_EQ(type->FindField("assignedClass")->GetUnderlyingType(), TYPE(BaseClass));
+		EXPECT_EQ(type->FindField("derivedClassType")->GetUnderlyingType(), TYPE(DerivedClassA));
+		EXPECT_EQ(type->FindField("anyClass")->GetUnderlyingType(), TYPE(Object));
 	}
 
 	// 3. Binary serialization
@@ -1364,8 +1354,8 @@ TEST(Reflection, Fields)
 		ReflectionFieldTest data{};
 		data.testString = "modified";
 		StructType* type = data.GetStruct();
-		auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
-		auto stringField = type->FindFieldWithName("testString", TYPEID(String));
+		auto arrayField = type->FindField("array");
+		auto stringField = type->FindField("testString");
 
 		arrayField->ResizeArray(&data, 3);
 		EXPECT_EQ(data.array[0].myText, "default");
@@ -1381,8 +1371,8 @@ TEST(Reflection, Fields)
 	{
 		ReflectionFieldTest data{};
 		StructType* type = data.GetStruct();
-		auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
-		auto stringField = type->FindFieldWithName("testString", TYPEID(String));
+		auto arrayField = type->FindField("array");
+		auto stringField = type->FindField("testString");
 
 		ReflectionFieldElement::releaseCount = 0;
 		EXPECT_EQ(ReflectionFieldElement::releaseCount, 0);
@@ -1819,78 +1809,86 @@ TEST(Object, CDI2)
 	TEST_END;
 }
 
-TEST(Object, Signals)
+TEST(Object, Events)
 {
 	TEST_BEGIN;
 	CERegisterModuleTypes();
-
-	auto senderFunc = MEMBER_FUNCTION(ObjectTests::Sender, MySignal1);
-	EXPECT_NE(senderFunc, nullptr);
-	EXPECT_EQ(senderFunc->GetName(), "MySignal1");
-	EXPECT_TRUE(senderFunc->IsSignalFunction());
-
-	auto receiverFunc = MEMBER_FUNCTION(ObjectTests::Receiver, PrintString);
-	EXPECT_NE(receiverFunc, nullptr);
-	EXPECT_EQ(receiverFunc->GetName(), "PrintString");
-
-	Sender* sender = CreateObject<Sender>(GetTransientPackage(), "Sender");
-	Receiver* receiver = CreateObject<Receiver>(GetTransientPackage(), "Receiver");
-
-	Object::Bind(sender, senderFunc, receiver, receiverFunc);
-
-	EXPECT_EQ(receiver->printValue, "");
-	sender->MySignal1("Test String");
-	EXPECT_EQ(receiver->printValue, "Test String");
-	receiver->printValue = "";
+	CE_REGISTER_TYPES(
+		EventTests::SenderClass,
+		EventTests::ReceiverClass
+	);
 
 	{
-		SenderStruct senderStruct{};
-		ReceiverStruct receiverStruct{};
-		String localValue = "";
+		using namespace EventTests;
 
-		auto senderFunc2 = MEMBER_FUNCTION(ObjectTests::SenderStruct, StructSignal1);
-		EXPECT_NE(senderFunc2, nullptr);
+		SenderClass* sender = CreateObject<SenderClass>(nullptr, "Sender");
+		ReceiverClass* receiver = CreateObject<ReceiverClass>(nullptr, "Receiver");
+		EXPECT_EQ(receiver->text, "");
+		EXPECT_EQ(receiver->object, nullptr);
+		EXPECT_EQ(receiver->fileAction, IO::FileAction::Add);
 
-		auto receiverFunc2 = MEMBER_FUNCTION(ObjectTests::ReceiverStruct, PrintStringValue);
-		EXPECT_NE(receiverFunc2, nullptr);
+		IO::FileAction fileAction = IO::FileAction::Add;
 
-		Object::Bind(sender, senderFunc, &receiverStruct, receiverFunc2);
+		// - Bindings -
 
-		EXPECT_EQ(receiver->printValue, "");
-		sender->MySignal1("2nd Test Call");
-		EXPECT_EQ(receiver->printValue, "2nd Test Call");
-		EXPECT_EQ(receiverStruct.stringValue, "2nd Test Call");
-		receiver->printValue = "";
-		receiverStruct.stringValue = "";
+		sender->onTextChanged += FUNCTION_BINDING(receiver, OnTextChangedCallback);
 
-		Delegate<void(String)> f = [](String string) {};
-		
-		Object::Bind(&senderStruct, senderFunc2, &receiverStruct, receiverFunc2);
+		IScriptEvent* onObjectEvent = sender->GetClass()->FindField("onObjectEvent")->GetFieldEventValue(sender);
+		onObjectEvent->Bind(FUNCTION_BINDING(receiver, OnObjectEvent));
 
-		auto handle = Object::Bind(&senderStruct, senderFunc2, [&localValue](String string) -> void
+		// DelegateHandle fileActionHandle = sender->fileActionEvent.Bind([&fileAction](CE::IO::FileAction newFileAction)
+		// 	{
+		// 		fileAction = newFileAction;
+		// 	});
+
+		DelegateHandle fileActionHandle = sender->fileActionEvent + [&fileAction](CE::IO::FileAction newFileAction)
 			{
-				localValue = "Changed from lamda";
-			});
-		
-		EXPECT_EQ(localValue, "");
-		EXPECT_EQ(receiverStruct.stringValue, "");
-		senderStruct.StructSignal1("Call from struct");
-		EXPECT_EQ(receiverStruct.stringValue, "Call from struct");
-		EXPECT_EQ(localValue, "Changed from lamda");
+				fileAction = newFileAction;
+			};
 
-		localValue = "";
-		receiverStruct.stringValue = "";
+		// - Broadcasts -
 
-		Object::UnbindAllSignals(&senderStruct);
+		sender->onTextChanged.Broadcast("Hello World");
+		EXPECT_EQ(receiver->text, "Hello World");
 
-		senderStruct.StructSignal1("Call from struct");
-		EXPECT_EQ(localValue, "");
-		EXPECT_EQ(receiverStruct.stringValue, "");
+		sender->onObjectEvent.Broadcast(receiver);
+		EXPECT_EQ(receiver->object, receiver);
+
+		onObjectEvent->Broadcast({ sender });
+		EXPECT_EQ(receiver->object, sender);
+
+		sender->fileActionEvent.Broadcast(IO::FileAction::Modified);
+		EXPECT_EQ(fileAction, IO::FileAction::Modified);
+
+		sender->onTextChanged -= FUNCTION_BINDING(receiver, OnTextChangedCallback);
+		sender->onTextChanged.Broadcast("New Text");
+		EXPECT_EQ(receiver->text, "Hello World");
+
+		sender->onTextChanged += FUNCTION_BINDING(receiver, OnTextChangedCallback);
+		sender->onTextChanged.Broadcast("ReAdded");
+		EXPECT_EQ(receiver->text, "ReAdded");
+
+		receiver->Destroy();
+
+		// To make sure this doesn't crash because we have destroyed the receiver object
+		sender->onTextChanged.Broadcast("New Text");
+		onObjectEvent->Broadcast({ sender });
+		sender->fileActionEvent.Broadcast(IO::FileAction::Delete);
+		EXPECT_EQ(fileAction, IO::FileAction::Delete);
+
+		// - Unbinding -
+
+		sender->fileActionEvent -= fileActionHandle;
+		sender->fileActionEvent.Broadcast(IO::FileAction::Moved);
+		EXPECT_EQ(fileAction, IO::FileAction::Delete);
+
+		sender->Destroy();
 	}
 
-	sender->RequestDestroy();
-	receiver->RequestDestroy();
-
+	CE_DEREGISTER_TYPES(
+		EventTests::SenderClass,
+		EventTests::ReceiverClass
+	);
 	CEDeregisterModuleTypes();
 	TEST_END;
 }

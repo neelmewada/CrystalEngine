@@ -124,7 +124,7 @@ namespace CE\
     template<typename T>\
     struct TemplateType<Namespace::Type<T>> : TTrueType\
     {\
-        typedef DefaultArgType DefaultArg;\
+        using DefaultArg = DefaultArgType;\
         typedef Namespace::Type<DefaultArg> DefaultTemplate;\
     };\
 }
@@ -235,16 +235,21 @@ namespace CE
         CORE_API TypeId GetArrayTypeId();
         CORE_API TypeId GetObjectStoreTypeId();
 		CORE_API TypeId GetSubClassTypeTypeId();
+
+		CORE_API TypeId GetScriptDelegateTypeId();
+		CORE_API TypeId GetScriptEventTypeId();
 	}
 
 	template<typename Type>
 	TypeId GetTypeId()
 	{
-		constexpr const bool isVoid = std::is_void_v<Type>;
-		constexpr const bool isPointer = std::is_pointer_v<Type>;
-		constexpr const bool isArray = TIsArray<Type>::Value;
-		constexpr const bool isObjectStore = IsObjectStoreType<Type>::Value;
-		constexpr const bool isSubClassType = TIsSubClassType<Type>::Value;
+		constexpr bool isVoid = std::is_void_v<Type>;
+		constexpr bool isPointer = std::is_pointer_v<Type>;
+		constexpr bool isArray = TIsArray<Type>::Value;
+		constexpr bool isObjectStore = IsObjectStoreType<Type>::Value;
+		constexpr bool isSubClassType = TIsSubClassType<Type>::Value;
+		constexpr bool isScriptDelegate = TIsScriptDelegate<Type>::Value;
+		constexpr bool isScriptEvent = TIsScriptEvent<Type>::Value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
@@ -275,6 +280,14 @@ namespace CE
 			{
 				return (TypeId)typeid(FinalType).hash_code(); // always ignore pointers for TypeId. Ex: TYPEID(Object) == TYPEID(Object*)
 			}
+		}
+		else if constexpr (isScriptDelegate)
+		{
+			return Internal::GetScriptDelegateTypeId();
+		}
+		else if constexpr (isScriptEvent)
+		{
+			return Internal::GetScriptEventTypeId();
 		}
 		else // a plain data type
 		{

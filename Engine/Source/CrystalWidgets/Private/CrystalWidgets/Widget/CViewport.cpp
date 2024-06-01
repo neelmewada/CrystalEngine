@@ -85,7 +85,7 @@ namespace CE::Widgets
 
         blob.Free();
 
-        emit OnFrameBufferRecreated();
+        onFrameBufferRecreated();
     }
 
     void CViewport::OnPaint(CPaintEvent* paintEvent)

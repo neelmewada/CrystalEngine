@@ -20,6 +20,7 @@ namespace CE
 	class ClassType;
 	class StructType;
 	class EnumType;
+	class Object;
 
 	// **********************************************************
 	// Variant
@@ -161,6 +162,11 @@ namespace CE
 			isPointer = true;
 		}
 
+		Variant(std::nullptr_t nullValue) : valueTypeId(TYPEID(void)), PtrValue(nullptr)
+		{
+			isPointer = true;
+		}
+
 		template<>
 		Variant(char* value)
 		{
@@ -247,6 +253,9 @@ namespace CE
 			return isArray;
 		}
 
+		bool IsObject() const;
+		bool CanCastObject(TypeId castTo) const;
+
 		template<typename T>
 		INLINE bool IsArrayElementOfType() const
 		{
@@ -256,7 +265,11 @@ namespace CE
 		template<typename T>
 		INLINE T GetValue() const
 		{
-			if (valueTypeId != GetTypeId<T>())
+			if (CanCastObject(TYPEID(T)))
+			{
+				
+			}
+			else if (valueTypeId != GetTypeId<T>())
 			{
 				throw VariantCastException(String::Format("Failed to cast Variant to the return type"));
 			}

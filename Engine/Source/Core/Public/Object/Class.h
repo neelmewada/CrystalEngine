@@ -194,7 +194,7 @@ namespace CE
 		u32 GetFieldCount();
 		FieldType* GetFieldAt(u32 index);
         
-        FieldType* FindFieldWithName(const Name& name, TypeId fieldTypeId = 0);
+        FieldType* FindField(const Name& name);
 
 		bool HasFunctions();
 

@@ -274,7 +274,7 @@ namespace CE::Widgets
             visitor(treeWidgetItem);
         }
 
-        emit OnSelectionChanged(this);
+        onSelectionChanged(this);
     }
 
 } // namespace CE::Widgets

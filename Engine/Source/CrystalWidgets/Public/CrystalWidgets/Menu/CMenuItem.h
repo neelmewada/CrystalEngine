@@ -3,6 +3,7 @@
 namespace CE::Widgets
 {
     class CMenu;
+    DECLARE_SCRIPT_EVENT(CMenuItemEvent, CMenuItem* menuItem);
 
     CLASS()
     class CRYSTALWIDGETS_API CMenuItem : public CWidget
@@ -29,10 +30,10 @@ namespace CE::Widgets
 
         void ShowSubMenu();
 
-        // - Signals -
+        // - Events -
 
-        // Params: CMenuItem* menuItem
-        CE_SIGNAL(OnMenuItemClicked, CMenuItem*);
+        FIELD()
+        CMenuItemEvent onMenuItemClicked{};
 
     protected:
 

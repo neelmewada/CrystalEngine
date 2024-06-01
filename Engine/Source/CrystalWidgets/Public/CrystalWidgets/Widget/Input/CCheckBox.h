@@ -2,6 +2,10 @@
 
 namespace CE::Widgets
 {
+    class CCheckBox;
+
+    DECLARE_SCRIPT_EVENT(onCheckChanged, CCheckBox* checkBox);
+
     CLASS()
     class CRYSTALWIDGETS_API CCheckBox : public CWidget
     {
@@ -14,9 +18,10 @@ namespace CE::Widgets
 
         void SetChecked(bool checked);
 
-        // - Signals -
+        // - Events -
 
-        CE_SIGNAL(OnCheckChanged, CCheckBox*);
+        FIELD()
+        CCheckBox* onCheckChanged{};
 
     protected:
 

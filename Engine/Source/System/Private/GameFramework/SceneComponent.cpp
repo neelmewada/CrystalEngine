@@ -105,9 +105,9 @@ namespace CE
 		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
 	}
 
-	void SceneComponent::OnFieldModified(FieldType* field)
+	void SceneComponent::OnFieldEdited(FieldType* field)
 	{
-		Super::OnFieldModified(field);
+		Super::OnFieldEdited(field);
 
 		thread_local const Name localPositionName = "localPosition";
 		thread_local const Name localEulerAnglesName = "localEulerAngles";
@@ -120,13 +120,6 @@ namespace CE
 			if (!IsDirty())
 				SetDirty();
 		}
-	}
-
-	void SceneComponent::OnFieldEdited(FieldType* field)
-	{
-		Super::OnFieldEdited(field);
-
-		
 	}
 
 	void SceneComponent::OnEnabled()

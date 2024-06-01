@@ -17,7 +17,7 @@ namespace CE::Editor
 
 		CTreeView* GetHierarchyTreeView() const { return hierarchyTreeView; }
 
-		// - Signals -
+		// - Events -
 
 		CE_SIGNAL(OnActorSelected, Actor*);
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "Object.h"
 
 namespace CE
 {
@@ -9,10 +10,14 @@ namespace CE
 	class FunctionType;
 	class Package;
 	class ResourceManager;
+	class Object;
 
 	/* **********************************
 	*	Global Functions
 	*/
+
+	//! @brief Returns true if the given object pointer is valid and not destroyed! 
+	CORE_API bool IsValidObject(Object* object);
 
 	/// Transient Package: Same lifetime as Core Module.
 	///	Used to store temporary objects that are not saved to disk.
@@ -125,6 +130,30 @@ namespace CE
 	/* ***********************************
 	*	Delegates
 	*/
+
+	template <class TRetType, class ... TArgs>
+	Variant ScriptDelegate<TRetType(TArgs...)>::Invoke(const Array<Variant>& args) const
+	{
+		if (!isBound)
+			return nullptr;
+
+		if (IsFunction())
+		{
+			if (!IsValidObject(dstObject))
+			{
+				isBound = false;
+				return nullptr;
+			}
+			return dstFunction->Invoke(dstObject, args);
+		}
+
+		if (IsLambda())
+		{
+			return lambda(args);
+		}
+
+		return nullptr;
+	}
 
 	struct CORE_API CoreObjectDelegates
 	{

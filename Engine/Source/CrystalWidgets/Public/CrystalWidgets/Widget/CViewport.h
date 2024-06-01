@@ -46,9 +46,9 @@ namespace CE::Widgets
 
 		RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
 
-		// - Signals -
+		// - Events -
 
-		CE_SIGNAL(OnFrameBufferRecreated);
+		CVoidEvent onFrameBufferRecreated{};
     
 	protected:
 

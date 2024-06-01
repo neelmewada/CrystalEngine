@@ -22,6 +22,17 @@ namespace CE
         {
 			return (TypeId)typeid(CE::SubClassType<Object>).hash_code();
         }
+
+        CORE_API TypeId GetScriptDelegateTypeId()
+        {
+            return (TypeId)typeid(CE::ScriptDelegate<void(void)>).hash_code();
+        }
+
+        CORE_API TypeId GetScriptEventTypeId()
+        {
+            return (TypeId)typeid(CE::ScriptEvent<void(void)>).hash_code();
+        }
+
     }
 
     HashMap<Name, TypeInfo*> TypeInfo::registeredTypesByName{};
@@ -153,7 +164,7 @@ namespace CE
                         attribValue.Append(attribString[j]);
                     }
                 }
-
+                
                 if (attribValue.StartsWith("(") && attribValue.EndsWith(")"))
                 {
                     Attribute subAttrib;

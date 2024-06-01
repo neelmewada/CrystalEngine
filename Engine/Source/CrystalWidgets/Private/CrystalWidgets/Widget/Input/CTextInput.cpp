@@ -53,7 +53,7 @@ namespace CE::Widgets
 
         RecalculateOffsets();
 
-        emit OnTextChanged(this);
+        onTextChanged.Broadcast(this);
 
         SetNeedsLayout();
         SetNeedsPaint();
@@ -72,8 +72,8 @@ namespace CE::Widgets
 
         RecalculateOffsets();
 
-        emit OnTextEdited(this);
-        emit OnTextChanged(this);
+        onTextEdited.Broadcast(this);
+        onTextChanged.Broadcast(this);
 
         SetNeedsLayout();
         SetNeedsPaint();
@@ -169,7 +169,7 @@ namespace CE::Widgets
             SetNeedsStyle();
             SetNeedsPaint();
 
-	        emit OnEditingFinished(this);
+            onEditingFinished.Broadcast(this);
 	        OnValidateText();
         }
     }
@@ -192,7 +192,7 @@ namespace CE::Widgets
             SetNeedsStyle();
             SetNeedsPaint();
 
-            emit OnEditingFinished(this);
+            onEditingFinished.Broadcast(this);
             OnValidateText();
         }
     }

@@ -41,22 +41,23 @@ namespace CE::Widgets
 		if (this->selectionModel == selectionModel)
 			return;
 
+		auto functionBinding = FUNCTION_BINDING(this, OnSelectionModelUpdated);
+
 		if (this->selectionModel != nullptr)
 		{
-			UnbindSignals(this, this->selectionModel);
+			selectionModel->onSelectionChanged.Unbind(functionBinding);
 		}
 
 		this->selectionModel = selectionModel;
 
-		Bind(this->selectionModel, MEMBER_FUNCTION(CItemSelectionModel, OnSelectionChanged),
-			this, MEMBER_FUNCTION(Self, OnSelectionModelUpdated));
+		selectionModel->onSelectionChanged.Bind(functionBinding);
 	}
 
 	void CBaseItemView::SetModel(CBaseItemModel* model)
 	{
 		if (this->model != nullptr)
 		{
-			UnbindSignals(this, this->model);
+			this->model->onModelDataUpdated.UnbindAll(this);
 		}
 
 		this->model = model;
@@ -78,10 +79,8 @@ namespace CE::Widgets
 				}
 			}
 
-			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
-				this, MEMBER_FUNCTION(Self, SetNeedsLayout));
-			Bind(model, MEMBER_FUNCTION(CBaseItemModel, OnModelDataUpdated),
-				this, MEMBER_FUNCTION(Self, SetNeedsPaint));
+			model->onModelDataUpdated.Bind(FUNCTION_BINDING(this, SetNeedsLayout));
+			model->onModelDataUpdated.Bind(FUNCTION_BINDING(this, SetNeedsPaint));
 		}
 	}
 

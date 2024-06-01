@@ -217,7 +217,7 @@ namespace CE
         virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectMap); }
 		virtual bool IsVectorType() const;
         
-        virtual bool IsObject() { return IsClass() && IsAssignableTo(TYPEID(Object)); }
+        virtual bool IsObject() { return IsClass(); }
 
 		virtual void InitializeDefaults(void* instance) = 0;
 		

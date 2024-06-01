@@ -161,7 +161,7 @@ namespace CE
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 
-		if (field->IsNumberField())
+		if (field->IsNumericField())
 		{
 			if (parent.IsObjectValue())
 				parent.GetObjectValue()[fieldName] = field->GetNumericFieldValue(instance);
@@ -262,7 +262,7 @@ namespace CE
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 
-		if (field->IsNumberField())
+		if (field->IsNumericField())
 		{
 			f64 value = 0.0f;
 			if (parent.IsObjectValue())

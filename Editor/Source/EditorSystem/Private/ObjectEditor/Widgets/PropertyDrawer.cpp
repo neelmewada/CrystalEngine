@@ -181,7 +181,7 @@ namespace CE::Editor
 
 				colorWidget->BindField(field, instance);
 			}
-			else if (field->IsDecimalField() || field->IsNumberField())
+			else if (field->IsDecimalField() || field->IsNumericField())
 			{
 				NumericFieldInput* numberInput = CreateObject<NumericFieldInput>(right, "NumberInput");
 

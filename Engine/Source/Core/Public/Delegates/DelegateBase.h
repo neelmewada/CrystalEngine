@@ -67,7 +67,7 @@ namespace CE
 
             bool IsValid() const
             {
-                return impl != nullptr;
+                return impl != nullptr && handle != 0;
             }
 
             TRetType Invoke(TArgs... args) const
