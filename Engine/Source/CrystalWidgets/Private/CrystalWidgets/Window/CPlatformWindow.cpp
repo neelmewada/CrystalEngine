@@ -19,6 +19,8 @@ namespace CE::Widgets
 
     CPlatformWindow::~CPlatformWindow()
     {
+        ZoneScoped;
+
         if (parentWindow)
         {
 	        parentWindow->childrenWindows.Remove(this);
@@ -60,6 +62,8 @@ namespace CE::Widgets
 
     void CPlatformWindow::Init()
     {
+        ZoneScoped;
+
         if (parentWindow)
         {
             parentWindow->childrenWindows.Add(this);
@@ -123,6 +127,8 @@ namespace CE::Widgets
 
     void CPlatformWindow::OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
+        ZoneScoped;
+
         if (!platformWindow || !renderer)
             return;
 
@@ -154,6 +160,9 @@ namespace CE::Widgets
 
     void CPlatformWindow::Tick()
     {
+        ZoneScoped;
+        ZoneTextF(platformWindow->GetTitle().GetCString());
+
         // Tick: Input Handling
         Vec2 globalMousePos = InputManager::GetGlobalMousePosition().ToVec2();
         Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
@@ -244,7 +253,7 @@ namespace CE::Widgets
 
         if (totalTime > 5) // > 5 millis
         {
-            CE_LOG(Info, All, "{:.2f} == {:.2f} + {:.2f} + {:.2f}", totalTime, styleTime * 1000, layoutTime * 1000, paintTime * 1000);
+            //CE_LOG(Info, All, "{:.2f} == {:.2f} + {:.2f} + {:.2f}", totalTime, styleTime * 1000, layoutTime * 1000, paintTime * 1000);
         }
 
     }
@@ -317,6 +326,8 @@ namespace CE::Widgets
 
     const Array<RHI::DrawPacket*>& CPlatformWindow::FlushDrawPackets(u32 imageIndex)
     {
+        ZoneScoped;
+
         static const Array<RHI::DrawPacket*> empty{};
         if (!owner->IsVisible() || !owner->IsEnabled())
         {

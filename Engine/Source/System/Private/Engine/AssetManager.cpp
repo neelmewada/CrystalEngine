@@ -74,6 +74,9 @@ namespace CE
 
 	Array<Asset*> AssetManager::LoadAssetsAtPath(const Name& path, SubClass<Asset> classType)
 	{
+		ZoneScoped;
+		ZoneTextF(path.GetCString());
+
 		Array<AssetData*> assetDatas = GetAssetsDataAtPath(path);
 		if (assetDatas.IsEmpty())
 			return {};
@@ -136,6 +139,9 @@ namespace CE
 
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)
 	{
+		ZoneScoped;
+		ZoneTextF(path.GetCString());
+
 		AssetData* assetData = GetPrimaryAssetDataAtPath(path);
 		if (!assetData)
 			return nullptr;

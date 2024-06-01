@@ -66,6 +66,8 @@ namespace CE::Widgets
 
     void CDockSpace::HandleEvent(CEvent* event)
     {
+        ZoneScoped;
+
         if (dockType == CDockType::Major && dockSplits.NonEmpty())
         {
             if (event->IsMouseEvent())
@@ -229,6 +231,8 @@ namespace CE::Widgets
 
 	void CDockSpace::OnPaint(CPaintEvent* paintEvent)
 	{
+        ZoneScoped;
+
 		Super::OnPaint(paintEvent);
 
         CPainter* painter = paintEvent->painter;

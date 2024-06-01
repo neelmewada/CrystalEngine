@@ -6,6 +6,7 @@ namespace CE::Widgets
 	bool CSSSelector::TestMatch(CWidget* widget, const MatchCond& rule, CStateFlag curStates, CSubControl subControl)
 	{
 		ZoneScoped;
+		ZoneTextF(widget->GetName().GetCString());
 
 		if (widget == nullptr)
 			return false;
@@ -54,6 +55,7 @@ namespace CE::Widgets
     bool CSSSelector::TestMatch(CWidget* widget, CStateFlag curStates, CSubControl subControl)
     {
 		ZoneScoped;
+		ZoneTextF(widget->GetName().GetCString());
 
 		if (widget == nullptr)
 			return false;
@@ -137,6 +139,7 @@ namespace CE::Widgets
     bool CSSSelector::TestAttributeMatch(CWidget* widget, const AttributeMatchCond& rule)
     {
 		ZoneScoped;
+		ZoneTextF(widget->GetName().GetCString());
 
 		ClassType* widgetClass = widget->GetClass();
 		FieldType* field = widgetClass->FindField(rule.attribName);
@@ -203,6 +206,8 @@ namespace CE::Widgets
 
 	SIZE_T CSSSelector::CalculateHash(const MatchCond& rule, SIZE_T hash)
 	{
+		ZoneScoped;
+
 		hash = GetCombinedHash(hash, (SIZE_T)rule.matches);
 
 		if (EnumHasAnyFlags(rule.matches, Tag))
@@ -229,6 +234,9 @@ namespace CE::Widgets
 	bool CSSSelectorList::TestWidget(CWidget* widget, CStateFlag curStates, CSubControl subControl)
 	{
 		ZoneScoped;
+		ZoneTextF(widget->GetName().GetCString());
+		String states = String::Format("{}", curStates);
+		ZoneTextF(states.GetCString());
 
 		for (auto& entry : *this)
 		{

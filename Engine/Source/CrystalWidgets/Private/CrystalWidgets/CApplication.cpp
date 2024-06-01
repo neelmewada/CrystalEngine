@@ -671,6 +671,8 @@ namespace CE::Widgets
 
 	void CApplication::SubmitDrawPackets(RHI::DrawListContext& drawList)
 	{
+		ZoneScoped;
+
 		for (int i = 0; i < platformWindows.GetSize(); ++i)
 		{
 			PlatformWindow* platformWindow = platformWindows[i]->GetPlatformWindow();
@@ -686,6 +688,8 @@ namespace CE::Widgets
 
 	void CApplication::OnWindowDestroyed(PlatformWindow* nativeWindow)
 	{
+		ZoneScoped;
+
 		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
 			if (platformWindows[i]->GetPlatformWindow() == nativeWindow || nativeWindow->IsMainWindow())
@@ -708,6 +712,8 @@ namespace CE::Widgets
 
 	void CApplication::OnWindowClosed(PlatformWindow* nativeWindow)
 	{
+		ZoneScoped;
+
 		for (int i = platformWindows.GetSize() - 1; i >= 0; --i)
 		{
 			if (platformWindows[i]->GetPlatformWindow() == nativeWindow)
@@ -725,6 +731,9 @@ namespace CE::Widgets
 
 	RPI::Texture* CApplication::LoadImage(const Name& assetpath)
 	{
+		ZoneScoped;
+		ZoneTextF(assetpath.GetCString());
+
 		if (texturesByPath.KeyExists(assetpath))
 		{
 			return texturesByPath[assetpath];
@@ -737,6 +746,8 @@ namespace CE::Widgets
 
 	Vec2 CApplication::CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width)
 	{
+		ZoneScoped;
+
 		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->renderer != nullptr)
@@ -751,6 +762,8 @@ namespace CE::Widgets
 	Vec2 CApplication::CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize,
 		Name fontName, f32 width)
 	{
+		ZoneScoped;
+
 		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->renderer != nullptr)
@@ -779,6 +792,8 @@ namespace CE::Widgets
 
 	void CApplication::OnWidgetDestroyed(CWidget* widget)
 	{
+		ZoneScoped;
+
 		for (int i = 0; i < widgetsPressedPerMouseButton.GetSize(); i++)
 		{
 			if (widgetsPressedPerMouseButton[i] == widget)
@@ -802,6 +817,8 @@ namespace CE::Widgets
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
 	{
+		ZoneScoped;
+
 		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->GetPlatformWindow() == nativeWindow)
@@ -815,6 +832,8 @@ namespace CE::Widgets
 
 	void CApplication::OnWindowRestored(PlatformWindow* nativeWindow)
 	{
+		ZoneScoped;
+
 		for (CPlatformWindow* window : platformWindows)
 		{
 			if (window->GetPlatformWindow() == nativeWindow)

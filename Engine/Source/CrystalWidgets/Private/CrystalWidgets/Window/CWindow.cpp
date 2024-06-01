@@ -1,5 +1,9 @@
 #include "CrystalWidgets.h"
 
+#define TRACY_ZONE\
+	ZoneScoped;\
+	ZoneTextF(GetName().GetCString());
+
 namespace CE::Widgets
 {
 
@@ -54,6 +58,8 @@ namespace CE::Widgets
 
     void CWindow::OnAfterUpdateLayout()
     {
+        TRACY_ZONE;
+
 	    Super::OnAfterUpdateLayout();
 
         Vec2 originalSize = GetComputedLayoutSize();
@@ -149,6 +155,8 @@ namespace CE::Widgets
 
     void CWindow::OnPaintOverlay(CPaintEvent* paintEvent)
     {
+        TRACY_ZONE;
+
         Super::OnPaintOverlay(paintEvent);
 
         CPainter* painter = paintEvent->painter;
@@ -318,6 +326,8 @@ namespace CE::Widgets
 
     void CWindow::HandleEvent(CEvent* event)
     {
+        TRACY_ZONE;
+
         if (allowVerticalScroll || allowHorizontalScroll)
             receiveDragEvents = true;
 

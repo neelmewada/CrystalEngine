@@ -36,6 +36,8 @@ namespace CE::Widgets
 
     void CPainter::SetBrush(const CBrush& brush)
     {
+        ZoneScoped;
+
         this->brush = brush;
 
         // - Solid Color -
@@ -68,11 +70,13 @@ namespace CE::Widgets
 
     Vec2 CPainter::CalculateTextSize(const String& text, f32 width)
     {
+        ZoneScoped;
         return renderer->CalculateTextSize(text, width);
     }
 
     Vec2 CPainter::CalculateTextOffsets(Array<Rect>& outOffsets, const String& text, f32 width)
     {
+        ZoneScoped;
         return renderer->CalculateTextOffsets(outOffsets, text, width);
     }
 
@@ -83,6 +87,8 @@ namespace CE::Widgets
 
     void CPainter::DrawCircle(const Rect& rect)
     {
+        ZoneScoped;
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {
@@ -97,6 +103,8 @@ namespace CE::Widgets
 
     void CPainter::DrawLine(Vec2 from, Vec2 to)
     {
+        ZoneScoped;
+
         Vec2 center = (from + to) / 2.0f;
         float rotation = atan2(to.y - from.y, to.x - from.x);
         float width = sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y));
@@ -124,6 +132,8 @@ namespace CE::Widgets
 
     void CPainter::DrawDashedLine(const Rect& rect)
     {
+        ZoneScoped;
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {
@@ -146,6 +156,8 @@ namespace CE::Widgets
 
     void CPainter::DrawRect(const Rect& rect)
     {
+        ZoneScoped;
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {
@@ -160,6 +172,8 @@ namespace CE::Widgets
 
     void CPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
     {
+        ZoneScoped;
+
         Rect windowSpaceRect = Rect::FromSize(GetOrigin() + rect.min, rect.GetSize());
         if (renderer->ClipRectExists())
         {
@@ -177,18 +191,24 @@ namespace CE::Widgets
 
     void CPainter::DrawRoundedX(const Rect& rect)
     {
+        ZoneScoped;
+
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawRoundedX(rect.GetSize());
     }
 
     void CPainter::DrawTexture(const Rect& rect, RPI::Texture* texture)
     {
+        ZoneScoped;
+
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawTexture(texture, rect.GetSize());
     }
 
     void CPainter::DrawTexture(const Rect& rect, RPI::Texture* texture, CBackgroundRepeat repeat, Vec2 scaling, Vec2 offset)
     {
+        ZoneScoped;
+
         if (!texture)
             return;
 
@@ -211,6 +231,8 @@ namespace CE::Widgets
 
     void CPainter::DrawTexture(const Rect& rect, const Name& texturePath)
     {
+        ZoneScoped;
+
         RPI::Texture* texture = CApplication::Get()->LoadImage(texturePath);
         DrawTexture(rect, texture);
     }
@@ -218,6 +240,8 @@ namespace CE::Widgets
     void CPainter::DrawTexture(const Rect& rect, const Name& texturePath, CBackgroundRepeat repeat, Vec2 scaling,
 	    Vec2 offset)
     {
+        ZoneScoped;
+
         RPI::Texture* texture = CApplication::Get()->LoadImage(texturePath);
         DrawTexture(rect, texture, repeat, scaling, offset);
     }
@@ -225,18 +249,24 @@ namespace CE::Widgets
     void CPainter::DrawFrameBuffer(const Rect& rect,
                                    const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
     {
+        ZoneScoped;
+
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawFrameBuffer(frames, rect.GetSize());
     }
 
     void CPainter::DrawTriangle(const Rect& rect)
     {
+        ZoneScoped;
+
         renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawTriangle(rect.GetSize());
     }
 
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
+        ZoneScoped;
+
         Vec2 textSize = Vec2();
         static Array<Rect> positions{};
 
@@ -294,6 +324,8 @@ namespace CE::Widgets
 
     void CPainter::DrawText(const String& text, const Rect& rect)
     {
+        ZoneScoped;
+
         Vec2 textSize = Vec2();
         static Array<Rect> positions{};
 

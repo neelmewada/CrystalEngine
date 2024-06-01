@@ -1,5 +1,10 @@
 #include "CrystalWidgets.h"
 
+#define TRACY_ZONE\
+	ZoneScoped;\
+	ZoneTextF(GetName().GetCString());
+	
+
 namespace CE::Widgets
 {
 	YGSize CWidget::MeasureFunctionCallback(YGNodeConstRef nodeRef,
@@ -198,6 +203,8 @@ namespace CE::Widgets
 
 	void CWidget::SetEnabled(bool enabled)
 	{
+		TRACY_ZONE;
+
 		if (this->enabled == enabled)
 			return;
 
@@ -224,6 +231,8 @@ namespace CE::Widgets
 
 	bool CWidget::IsEnabled() const
 	{
+		TRACY_ZONE;
+
 		if (parent == nullptr)
 			return enabled;
 
@@ -232,6 +241,8 @@ namespace CE::Widgets
 
 	bool CWidget::IsVisible() const
 	{
+		TRACY_ZONE;
+
 		if (parent == nullptr)
 			return enabled && visible;
 
@@ -286,6 +297,8 @@ namespace CE::Widgets
 
 	void CWidget::SetNeedsLayout()
 	{
+		TRACY_ZONE;
+
 		needsLayout = true;
 
 		if (YGNodeGetChildCount(node) == 0)
@@ -306,6 +319,8 @@ namespace CE::Widgets
 
 	void CWidget::SetNeedsStyle()
 	{
+		TRACY_ZONE;
+
 		if (needsStyle)
 			return;
 
@@ -330,6 +345,8 @@ namespace CE::Widgets
 
 	bool CWidget::NeedsPaint()
 	{
+		TRACY_ZONE;
+
 		if (needsPaint)
 			return true;
 
@@ -360,6 +377,8 @@ namespace CE::Widgets
 
 	void CWidget::LoadStyleSheet(const IO::Path& fullPath)
 	{
+		TRACY_ZONE;
+
 		String css = "";
 		FileStream reader = FileStream(fullPath, Stream::Permissions::ReadOnly);
 		if (!reader.IsOpen())
@@ -375,6 +394,8 @@ namespace CE::Widgets
 
 	bool CWidget::NeedsLayout()
 	{
+		TRACY_ZONE;
+
 		if (needsLayout)
 			return true;
 
@@ -389,7 +410,7 @@ namespace CE::Widgets
 
 	void CWidget::UpdateLayoutIfNeeded()
 	{
-		ZoneScoped;
+		TRACY_ZONE;
 
 		if (NeedsLayout())
 		{
@@ -491,6 +512,8 @@ namespace CE::Widgets
 
 	void CWidget::OnAfterUpdateLayout()
 	{
+		TRACY_ZONE;
+
 		Vec2 originalSize = GetComputedLayoutSize();
 		f32 contentMaxY = originalSize.height;
 		f32 contentMaxX = originalSize.width;
@@ -597,7 +620,7 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		ZoneScoped;
+		TRACY_ZONE;
 
 		bool neededStyle = NeedsStyle();
 
@@ -1393,7 +1416,7 @@ namespace CE::Widgets
 
 	void CWidget::OnPaint(CPaintEvent* paintEvent)
 	{
-		ZoneScoped;
+		TRACY_ZONE;
 
 		CPainter* painter = paintEvent->painter;
 
@@ -1663,7 +1686,7 @@ namespace CE::Widgets
 
 	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
 	{
-		ZoneScoped;
+		TRACY_ZONE;
 
 		CPainter* painter = paintEvent->painter;
 
@@ -1686,7 +1709,7 @@ namespace CE::Widgets
 
 	void CWidget::HandleEvent(CEvent* event)
 	{
-		ZoneScoped;
+		TRACY_ZONE;
 
 		if (event == nullptr)
 			return;

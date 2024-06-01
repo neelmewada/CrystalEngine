@@ -208,6 +208,8 @@ namespace CE::RPI
 
 	void Renderer2D::Begin()
 	{
+		ZoneScoped;
+
 		fontStack.Push({ .fontName = defaultFontName, .fontSize = 16});
 
 		drawBatches.Clear();
@@ -1388,6 +1390,8 @@ namespace CE::RPI
 
 	void Renderer2D::End()
 	{
+		ZoneScoped;
+
 		PopClipRect();
 
 		fontStack.Pop(); // Default font
@@ -1463,6 +1467,8 @@ namespace CE::RPI
 
 	const Array<DrawPacket*>& Renderer2D::FlushDrawPackets(u32 imageIndex)
 	{
+		ZoneScoped;
+
 		curImageIndex = (int)imageIndex;
 
 		// - Destroy queued resources only when they are out of usage scope
@@ -1640,6 +1646,8 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd)
 	{
+		ZoneScoped;
+
 		u32 curNumItems = drawItemsBuffer[0]->GetBufferSize() / sizeof(DrawItem2D);
 		u32 incrementCount = (u32)(curNumItems * 0.25f); // Add 25% to the storage
 
@@ -1674,6 +1682,8 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementClipRectsBuffer(u32 numRectsToAdd)
 	{
+		ZoneScoped;
+
 		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(ClipRect2D);
 		u32 incrementCount = (u32)(curNumRects * 0.25f); // Add 25% to the storage
 
@@ -1708,6 +1718,8 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementGradientKeysBuffer(u32 numKeysToAdd)
 	{
+		ZoneScoped;
+
 		u32 curNumKeys = gradientKeysBuffer[0]->GetBufferSize() / sizeof(ColorGradient::Key);
 		u32 incrementCount = (u32)(curNumKeys * 0.25f); // Add 25% to the storage
 
@@ -1742,6 +1754,8 @@ namespace CE::RPI
 
 	RPI::Material* Renderer2D::GetOrCreateMaterial(const DrawBatch& drawBatch)
 	{
+		ZoneScoped;
+
 		Name fontName = drawBatch.font.fontName;
 		bool isBold = drawBatch.font.bold;
 		u32 fontSize = drawBatch.font.fontSize;

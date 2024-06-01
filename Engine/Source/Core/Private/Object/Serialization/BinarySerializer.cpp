@@ -43,6 +43,9 @@ namespace CE
 		if (!stream || !IsValid() || !stream->CanWrite())
 			return -1;
 
+		ZoneScoped;
+		ZoneTextF(targetType->GetName().GetCString());
+
 		stream->SetBinaryMode(true);
 
 		auto type = targetType;
@@ -371,6 +374,9 @@ namespace CE
 	{
 		if (!stream || !IsValid() || !stream->CanRead())
 			return -1;
+
+		ZoneScoped;
+		ZoneTextF(targetType->GetName().GetCString());
 
 		stream->SetBinaryMode(true);
 

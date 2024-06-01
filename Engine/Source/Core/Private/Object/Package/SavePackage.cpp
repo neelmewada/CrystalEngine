@@ -35,6 +35,10 @@ namespace CE
 		{
 			return SavePackageResult::UnknownError;
 		}
+
+		ZoneScoped;
+		ZoneTextF(package->GetName().GetCString());
+
 		if (asset == nullptr)
 			asset = package;
 		
@@ -143,6 +147,10 @@ namespace CE
 
 	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
+		String pathStr = fullPackagePath.GetString();
+		ZoneScoped;
+		ZoneTextF(pathStr.GetCString());
+
 		if (stream == nullptr)
 		{
 			return nullptr;
@@ -318,6 +326,8 @@ namespace CE
 
     void Package::LoadFully()
     {
+		ZoneScoped;
+
         if (isFullyLoaded)
             return;
         if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory())
@@ -379,6 +389,8 @@ namespace CE
 
 	Object* Package::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
     {
+		ZoneScoped;
+
         if (loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
         if (!objectUuidToEntryMap.KeyExists(objectUuid))
