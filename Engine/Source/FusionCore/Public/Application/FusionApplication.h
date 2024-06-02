@@ -30,7 +30,9 @@ namespace CE
 
         void InitializeShaders();
 
-        RPI::Shader* renderingShader = nullptr;
+        RPI::Shader* fusionShader = nullptr;
+
+        FUSION_TESTS;
     };
     
 } // namespace CE

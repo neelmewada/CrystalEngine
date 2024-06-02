@@ -49,6 +49,10 @@ CE_RTTI_STRUCT(, , ResourceStampManifest,
 )
 CE_RTTI_STRUCT_IMPL(, , ResourceStampManifest)
 
+static HashSet<Name> textFileExts = {
+	".txt", ".json", ".xml", ".html", ".css", ".sass", ".scss",
+	".shader", ".hlsl", ".glsl"
+};
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -188,26 +192,49 @@ int main(int argc, char** argv)
 
 			data << "#pragma once\n\n";
 
-			data << "static const char " << relativePathIdentifier << "_Data[] = {\n\t";
-			int counter = 0;
-
-			auto t1 = Clock::now();
-
-			while (!reader.IsOutOfBounds())
+			if (textFileExts.Exists(srcFileRelative.GetExtension().GetString()))
 			{
-				if (counter >= 64)
+				data << "static const char " << relativePathIdentifier << "_Data[] = R\"(";
+				int counter = 0;
+
+				while (!reader.IsOutOfBounds())
 				{
-					counter = 0;
-					data << "\n\t";
+					auto byte = reader.ReadByte();
+					if (byte == 0)
+						break;
+
+					const char append[2] = { (char)byte, 0 };
+					data << String(append);
+					
+					counter++;
 				}
+				data << ")\";\n";
 
-				auto byte = reader.ReadByte();
-				data << "(char)" << (int)byte << ", ";
-				counter++;
+				data << "static const u32 " << relativePathIdentifier << "_Length = sizeof(" << relativePathIdentifier << "_Data);\n";
 			}
-			data << "};\n";
+			else
+			{
+				data << "static const char " << relativePathIdentifier << "_Data[] = {\n\t";
+				int counter = 0;
 
-			data << "static const u32 " << relativePathIdentifier << "_Length = " << length << ";\n";
+				auto t1 = Clock::now();
+
+				while (!reader.IsOutOfBounds())
+				{
+					if (counter >= 64)
+					{
+						counter = 0;
+						data << "\n\t";
+					}
+
+					auto byte = reader.ReadByte();
+					data << "(char)" << (int)byte << ", ";
+					counter++;
+				}
+				data << "};\n";
+
+				data << "static const u32 " << relativePathIdentifier << "_Length = " << length << ";\n";
+			}
 			
 			data.Close();
 			reader.Close();

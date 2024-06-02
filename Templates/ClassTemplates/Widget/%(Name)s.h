@@ -3,9 +3,9 @@
 namespace %(NameSpace)s
 {
     CLASS()
-    class %(Module_API)s %(Name)s : public CWidget
+    class %(Module_API)s %(Name)s : public FWidget
     {
-        CE_CLASS(%(Name)s, CWidget)
+        CE_CLASS(%(Name)s, FWidget)
     public:
 
         %(Name)s();

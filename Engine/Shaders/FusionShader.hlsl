@@ -17,6 +17,16 @@ struct PSInput
     nointerpolation uint instanceId : TEXCOORD1;
 };
 
+enum DrawType
+{
+	DRAW_Rect
+};
+
+struct DrawItem2D
+{
+    DrawType drawType;
+};
+
 PSInput VertMain(VSInput i)
 {
     PSInput o;
