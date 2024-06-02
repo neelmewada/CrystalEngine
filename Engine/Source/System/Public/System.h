@@ -5,7 +5,6 @@
 #include "CoreRPI.h"
 #include "CoreShader.h"
 #include "CoreSettings.h"
-#include "CrystalWidgets.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"

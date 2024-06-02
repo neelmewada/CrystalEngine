@@ -6,7 +6,7 @@ namespace CE
 	class ActorComponent;
 
 	CLASS()
-	class SYSTEM_API RendererSubsystem : public EngineSubsystem, ApplicationMessageHandler, CWidgetResourceLoader
+	class SYSTEM_API RendererSubsystem : public EngineSubsystem, ApplicationMessageHandler
 	{
 		CE_CLASS(RendererSubsystem, EngineSubsystem)
 	public:
@@ -32,8 +32,6 @@ namespace CE
 		SubClass<FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
 
 	protected:
-
-		RPI::Texture* LoadImage(const Name& assetPath) override;
 
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;

@@ -138,6 +138,12 @@ namespace CE
 
 	bool BinarySerializer::SerializeField(Stream* stream, Field* field, void* instance)
 	{
+		ZoneScoped;
+		if (field != nullptr)
+		{
+			ZoneTextF(field->GetName().GetCString());
+		}
+
 		auto fieldDeclId = field->GetDeclarationTypeId();
 		auto fieldDeclType = field->GetDeclarationType();
 
@@ -471,6 +477,9 @@ namespace CE
 			SkipFieldValue(stream);
 			return false;
 		}
+
+		ZoneScoped;
+		ZoneTextF(field->GetName().GetCString());
 
 		auto fieldDeclId = field->GetDeclarationTypeId();
 		auto fieldDeclType = field->GetDeclarationType();

@@ -9,6 +9,7 @@ namespace CE
         int xOffset, yOffset;   // left & top bearing when rendering
         int advance;        // x advance when rendering
         int width; int height;
+        int fontSize;
     };
 
     struct CMFontMetrics
@@ -32,8 +33,10 @@ namespace CE
     struct CMFontAtlasGenerateInfo
     {
         Array<CharRange> charSetRanges{};
-        u32 padding = 0;
+        u32 padding = 1;
         u32 fontSize = 16;
+        int startOffsetX = 0;
+        int startOffsetY = 0;
     };
     
     class COREMEDIA_API CMFontAtlas final

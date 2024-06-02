@@ -70,7 +70,8 @@ namespace CE
 
 		char* pixels = (char*)calloc(tex_width * tex_height, 1);
 
-		int pen_x = padding * 2, pen_y = padding * 2;
+		int pen_x = generateInfo.startOffsetX + padding * 2;
+		int pen_y = generateInfo.startOffsetY + padding * 2;
 		
 		for (int i = 0; i < numGlyphs; ++i) {
 			FT_ULong charCode = charSet[i];
@@ -103,6 +104,7 @@ namespace CE
 			info[i].xOffset = face->glyph->bitmap_left;
 			info[i].yOffset = face->glyph->bitmap_top;
 			info[i].advance = face->glyph->advance.x >> 6;
+			info[i].fontSize = fontSize;
 
 			pen_x += bmp->width + 1;
 			pen_x += padding;

@@ -223,6 +223,9 @@ namespace CE
             }
         }
 
+        if (displayName.StartsWith("m_"))
+            displayName.Remove(0, 2);
+
         return displayName;
     }
 

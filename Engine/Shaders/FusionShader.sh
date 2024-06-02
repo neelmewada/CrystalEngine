@@ -25,11 +25,17 @@ DxCompiler=${DXC}
 CompileShader() {
 
     local FileName=$1".hlsl"
-    local VertOut="../Source/VulkanSandbox/Resources/Shaders/"$1".vert.spv"
-    local FragOut="../Source/VulkanSandbox/Resources/Shaders/"$1".frag.spv"
+    local VertOut="../Source/FusionCore/Resources/Shaders/"$1".vert.spv"
+    local FragOut="../Source/FusionCore/Resources/Shaders/"$1".frag.spv"
+
+    local VertReflection="../Source/FusionCore/Resources/Shaders/"$1".vert.json"
+    local FragReflection="../Source/FusionCore/Resources/Shaders/"$1".frag.json"
 
     ${DxCompiler} -spirv -E VertMain -T vs_6_0 -D PLATFORM_DESKTOP=1 -D COMPILE=1 -D VERTEX=1 -fspv-preserve-bindings -Fo ${VertOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
     ${DxCompiler} -spirv -E FragMain -T ps_6_0 -D PLATFORM_DESKTOP=1 -D COMPILE=1 -D FRAGMENT=1 -fspv-preserve-bindings -Fo ${FragOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
+
+    spirv-cross --dump-resources ${VertOut} --reflect --output ${VertReflection}
+    spirv-cross --dump-resources ${FragOut} --reflect --output ${FragReflection}
 
     echo "Compiled: " ${FileName}
 }
@@ -43,5 +49,4 @@ CompileCS() {
     echo "Compiled: " ${FileName}
 }
 
-CompileShader "Depth"
-CompileShader "ErrorShader"
+CompileShader "FusionShader"

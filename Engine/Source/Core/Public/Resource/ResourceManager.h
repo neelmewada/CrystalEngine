@@ -3,6 +3,12 @@
 namespace CE
 {
 	class Resource;
+
+	struct RawData
+	{
+		u8* data = nullptr;
+		u32 dataSize = 0;
+	};
     
 	class CORE_API ResourceManager : public Object
 	{
@@ -16,6 +22,8 @@ namespace CE
 		void DeregisterResource(const String& moduleName, const String& pathToResource);
 
 		CE::Resource* LoadResource(const Name& path, Object* outer = GetTransientPackage());
+
+		RawData GetRawData(const Name& path);
 
 		String LoadTextResource(const Name& path);
 

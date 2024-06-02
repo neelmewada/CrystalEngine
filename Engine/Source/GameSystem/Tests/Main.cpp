@@ -96,16 +96,7 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-class SampleClass
-{
-public:
 
-	Name MyFunc(const String& stringA, const String& stringB)
-	{
-		return stringA + stringB;
-	}
-
-};
 
 TEST(RPI, Scene)
 {

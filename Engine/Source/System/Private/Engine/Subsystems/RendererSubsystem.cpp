@@ -19,15 +19,6 @@ namespace CE
 		return 2;
     }
 
-    RPI::Texture* RendererSubsystem::LoadImage(const Name& assetPath)
-    {
-		AssetManager* assetManager = gEngine->GetAssetManager();
-		CE::Texture* texture = assetManager->LoadAssetAtPath<CE::Texture>(assetPath);
-		if (!texture)
-			return nullptr;
-		return texture->GetRpiTexture();
-    }
-
     void RendererSubsystem::OnWindowCreated(PlatformWindow* window)
     {
 		rebuildFrameGraph = recompileFrameGraph = true;
@@ -107,7 +98,7 @@ namespace CE
 
 			RPI::ShaderCollection* draw2dShaderCollection = renderer2dShader->GetShaderCollection();
 			
-			CApplicationInitInfo appInitInfo{};
+			/*CApplicationInitInfo appInitInfo{};
 			appInitInfo.draw2dShader = draw2dShaderCollection->At(0).shader;
 			appInitInfo.defaultFont = atlasData;
 			appInitInfo.defaultFontName = "Roboto";
@@ -116,7 +107,7 @@ namespace CE
 
 			CApplication::Get()->Initialize(appInitInfo);
 
-			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
+			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());*/
 
 			// TODO: Implement editor window support later
 			//gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
@@ -129,7 +120,7 @@ namespace CE
 	{
 		Super::PreShutdown();
 
-		CApplication* app = CApplication::TryGet();
+		/*CApplication* app = CApplication::TryGet();
 
 		if (app)
 		{
@@ -137,7 +128,7 @@ namespace CE
 
 			app->Shutdown();
 			app->Destroy();
-		}
+		}*/
 
 		delete scheduler; scheduler = nullptr;
 	}
@@ -155,11 +146,11 @@ namespace CE
 		Super::Tick(delta);
 		bool isExiting = IsEngineRequestingExit();
 
-		CApplication* app = CApplication::TryGet();
+		/*CApplication* app = CApplication::TryGet();
 		if (app)
 		{
 			app->Tick();
-		}
+		}*/
 
 		int submittedImageIndex = -1;
 
@@ -183,14 +174,14 @@ namespace CE
 		RPI::Scene* rpiScene = scene->GetRpiScene();
 		bool isSceneWindowActive = true;
 
-		if (sceneSubsystem->mainViewport != nullptr)
+		/*if (sceneSubsystem->mainViewport != nullptr)
 		{
 			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
 			}
-		}
+		}*/
 
 		int imageIndex = scheduler->BeginExecution();
 
@@ -221,10 +212,10 @@ namespace CE
 
 		// - Setup draw list mask
 
-		if (app)
+		/*if (app)
 		{
 			app->SetDrawListMasks(drawListMask);
-		}
+		}*/
 
 		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
@@ -256,10 +247,10 @@ namespace CE
 
 		drawList.Init(drawListMask);
 
-		if (app)
+		/*if (app)
 		{
 			app->FlushDrawPackets(drawList, curImageIndex);
-		}
+		}*/
 
 		if (isSceneWindowActive)
 	    {
@@ -285,10 +276,10 @@ namespace CE
 
 		// - Set scope draw lists
     
-		if (app) // CWidget Scopes & DrawLists
+		/*if (app) // CWidget Scopes & DrawLists
 		{
 			app->SubmitDrawPackets(drawList);
-		}
+		}*/
 
 		for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
@@ -325,14 +316,14 @@ namespace CE
 
 		bool isSceneWindowActive = true;
 		
-		if (sceneSubsystem->mainViewport != nullptr)
+		/*if (sceneSubsystem->mainViewport != nullptr)
 		{
 			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
 			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
 			{
 				isSceneWindowActive = false;
 			}
-		}
+		}*/
 
 		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
 		RPISystem::Get().SimulationTick(curImageIndex);
@@ -342,7 +333,7 @@ namespace CE
     	
 		scheduler->BeginFrameGraph();
 		{
-			auto cApp = CApplication::TryGet();
+			/*auto cApp = CApplication::TryGet();
 			
 			if (cApp)
 			{
@@ -425,7 +416,7 @@ namespace CE
 				}
 
 				cApp->FrameGraphEnd();
-			}
+			}*/
 		}
 		scheduler->EndFrameGraph();
 	}

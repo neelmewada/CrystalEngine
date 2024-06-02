@@ -28,6 +28,8 @@ namespace CE
 
 	Package* Package::LoadPackageByUuid(Uuid packageUuid, LoadFlags loadFlags)
 	{
+		ZoneScoped;
+
 		LockGuard<SharedMutex> lock{ packageRegistryMutex };
 
 		if (loadedPackagesByUuid.KeyExists(packageUuid))
@@ -131,6 +133,10 @@ namespace CE
 
 	Package* Package::LoadPackage(Package* package, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
+		String pathStr = fullPackagePath.GetString();
+		ZoneScoped;
+		ZoneTextF(pathStr.GetCString());
+
 		auto path = fullPackagePath;
 		if (path.GetExtension().IsEmpty()) // Add extension if one doesn't exist
 		{
@@ -183,6 +189,10 @@ namespace CE
 		{
 			path = path.GetString() + ".casset";
 		}
+
+		String pathStr = path.GetString();
+		ZoneScoped;
+		ZoneTextF(pathStr.GetCString());
 
 		if (!path.GetParentPath().Exists())
 		{

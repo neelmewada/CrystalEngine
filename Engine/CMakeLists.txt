@@ -31,11 +31,13 @@ endif()
 
 add_subdirectory(Source/CoreShader)
 
+add_subdirectory(Source/CrystalWidgets)
+add_subdirectory(Source/FusionCore)
+
 ######################################
 # System Modules
 
 add_subdirectory(Source/System)
-add_subdirectory(Source/CrystalWidgets)
 
 if(${CE_STANDALONE})
     add_subdirectory(Source/GameSystem)

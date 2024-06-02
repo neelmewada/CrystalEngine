@@ -51,6 +51,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
     add_compile_options("/MP")
     add_compile_options("$<$<CONFIG:Development>:/Zi>")
+    add_compile_options("/wd4996")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     ce_set(PAL_TRAIT_COMPILER_ID Clang)

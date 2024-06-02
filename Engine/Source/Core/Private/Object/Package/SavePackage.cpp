@@ -340,6 +340,8 @@ namespace CE
 
     void Package::LoadFully(Stream* stream)
     {
+		ZoneScoped;
+
         if (stream == nullptr)
             return;
         
@@ -353,6 +355,8 @@ namespace CE
 
     Object* Package::LoadObject(Uuid objectUuid)
     {
+		ZoneScoped;
+
         if (objectUuid != 0 && loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
         if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory() || objectUuid == 0)
@@ -365,6 +369,8 @@ namespace CE
 
 	Object* Package::LoadObject(const Name& objectClassName)
 	{
+		ZoneScoped;
+
 		for (const auto& [uuid, entry] : objectUuidToEntryMap)
 		{
 			if (entry.objectClassName == objectClassName)

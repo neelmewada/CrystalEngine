@@ -124,6 +124,8 @@ namespace CE
 
 	void AssetManager::UnloadAsset(Asset* asset)
 	{
+		ZoneScoped;
+
 		if (asset == nullptr)
 			return;
 		Package* package = asset->GetPackage();

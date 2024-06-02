@@ -69,6 +69,15 @@ namespace CE
 		return resource;
 	}
 
+	RawData ResourceManager::GetRawData(const Name& path)
+	{
+		PathTreeNode* node = pathTree.GetNode(path);
+		if (node == nullptr || node->userData == nullptr || node->userDataSize == 0)
+			return {};
+
+		return { .data = (u8*)node->userData, .dataSize = node->userDataSize };
+	}
+
 	String ResourceManager::LoadTextResource(const Name& path)
 	{
 		PathTreeNode* node = pathTree.GetNode(path);
