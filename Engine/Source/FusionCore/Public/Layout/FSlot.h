@@ -29,6 +29,18 @@ namespace CE
         FIELD()
         FHorizontalAlignment m_HAlign = HAlign_Left;
 
+        FIELD()
+        f32 m_MinDesiredWidth = 0.0f;
+
+        FIELD()
+        f32 m_MinDesiredHeight = 0.0f;
+
+        FIELD()
+        f32 m_MaxDesiredWidth = NumericLimits<f32>::Max();
+
+        FIELD()
+        f32 m_MaxDesiredHeight = NumericLimits<f32>::Max();
+
         void OnBeforeDestroy() override;
 
     public:  // - Properties -
@@ -44,6 +56,14 @@ namespace CE
         FUSION_PROPERTY(VAlign);
 
         FUSION_PROPERTY(HAlign);
+
+        FUSION_PROPERTY(MinDesiredWidth);
+
+        FUSION_PROPERTY(MinDesiredHeight);
+
+        FUSION_PROPERTY(MaxDesiredWidth);
+
+        FUSION_PROPERTY(MaxDesiredHeight);
 
         FWidget* GetOwner() const { return m_Owner; }
 

@@ -19,14 +19,19 @@ class FusionCore_Layout_Test;
 #endif
 
 #include "FusionMacros.h"
-
-#include "Application/FusionApplication.h"
 #include "Exception/FusionException.h"
 
+#include "Application/FusionApplication.h"
+#include "Application/FNativeWindow.h"
+#include "Rendering/FusionRenderer.h"
+
 #include "Layout/LayoutTypes.h"
+#include "Layout/FLayoutManager.h"
 #include "Layout/FSlot.h"
 
 #include "Widget/FWidget.h"
+#include "Window/FWindow.h"
+
 #include "Widget/FNullWidget.h"
 #include "Widget/Layout/FStackBox.h"
 #include "Widget/FCompoundWidget.h"

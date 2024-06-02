@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FNativeWindow;
+    class FLayoutManager;
 
     struct FusionInitInfo
     {
@@ -29,6 +31,9 @@ namespace CE
     private:
 
         void InitializeShaders();
+
+        
+        Array<FNativeWindow*> nativeWindows{};
 
         RPI::Shader* fusionShader = nullptr;
 
