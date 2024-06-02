@@ -7,8 +7,10 @@
 
 // Test Classes
 class FusionCore_Construction_Test;
+class FusionCore_Layout_Test;
 #define FUSION_TESTS \
-    friend class FusionCore_Construction_Test;
+    friend class FusionCore_Construction_Test;\
+    friend class FusionCore_Layout_Test;
 
 #else
 
@@ -21,6 +23,7 @@ class FusionCore_Construction_Test;
 #include "Application/FusionApplication.h"
 #include "Exception/FusionException.h"
 
+#include "Layout/LayoutTypes.h"
 #include "Layout/FSlot.h"
 
 #include "Widget/FWidget.h"

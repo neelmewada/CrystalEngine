@@ -23,6 +23,12 @@ namespace CE
         FIELD()
         Vec4 m_Padding{};
 
+        FIELD()
+        FVerticalAlignment m_VAlign = VAlign_Top;
+
+        FIELD()
+        FHorizontalAlignment m_HAlign = HAlign_Left;
+
         void OnBeforeDestroy() override;
 
     public:  // - Properties -
@@ -34,6 +40,10 @@ namespace CE
         void SetChild(FWidget* newChild);
 
         FUSION_PROPERTY(Padding);
+
+        FUSION_PROPERTY(VAlign);
+
+        FUSION_PROPERTY(HAlign);
 
         FWidget* GetOwner() const { return m_Owner; }
 

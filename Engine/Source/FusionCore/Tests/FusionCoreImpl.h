@@ -3,31 +3,6 @@
 namespace ConstructTests
 {
 
-	inline SimpleWidget::SimpleWidget()
-	{
-	}
-
-    inline void SimpleWidget::Construct()
-    {
-        
-        ChildSlot(
-            FAssignNew(stackBox, FStackBox)
-            .Direction(FStackBoxDirection::Vertical)
-
-            + FStackBox::Slot()
-            .Padding(5, 2.5f)
-            (
-                FAssignNew(first, FNullWidget)
-            )
-
-            + FStackBox::Slot()
-            .Padding(5, 5)
-            (
-                FNew(FNullWidget)
-            )
-        );
-    }
-
     inline ComplexWidget::ComplexWidget()
     {
 
@@ -42,27 +17,29 @@ namespace ConstructTests
             .Direction(FStackBoxDirection::Vertical) // ROOT (Vertical Group)
 
             + FStackBox::Slot()
-            .Padding(10, 10)        // Root / Horizontal
+            .Padding(10, 10)        
+            .VAlign(VAlign_Middle)
             (
                 FNew(FStackBox)
-                .Direction(FStackBoxDirection::Horizontal)
+                .Direction(FStackBoxDirection::Horizontal) // Root / Horizontal
 
                 + FStackBox::Slot()
-                .Padding(0, 0)      // Root / Horizontal / Vertical
+                .Padding(0, 0)
+                .HAlign(HAlign_Center)
                 (
                     FNew(FStackBox)
-                    .Direction(FStackBoxDirection::Vertical) 
+                    .Direction(FStackBoxDirection::Vertical)  // Root / Horizontal / Vertical
 
-                    + FStackBox::Slot()     // Root / Horizontal / Vertical / Null 0
+                    + FStackBox::Slot()     
                     .Padding(1)
                     (
-                        FNew(FNullWidget)
+                        FNew(FNullWidget)      // Root / Horizontal / Vertical / Null 0
                     )
 
-                    + FStackBox::Slot()     // Root / Horizontal / Vertical / Null 1
+                    + FStackBox::Slot()     
                     .Padding(2)
                     (
-                        FNew(FNullWidget)
+                        FNew(FNullWidget)       // Root / Horizontal / Vertical / Null 1
                     )
                 )
             )

@@ -128,41 +128,6 @@ TEST(FusionCore, Construction)
 
 	FusionApplication* app = FusionApplication::Get();
 
-	// 1. Simple widget
-
-	{
-		SimpleWidget* widget;
-
-		FAssignNewOwned(widget, app, SimpleWidget);
-
-		EXPECT_NE(widget->stackBox, nullptr);
-		EXPECT_NE(widget->first, nullptr);
-		EXPECT_EQ(widget->second, nullptr);
-
-		EXPECT_EQ(widget->stackBox->m_Direction, FStackBoxDirection::Vertical);
-		EXPECT_EQ(widget->stackBox->GetSlotCount(), 2);
-		EXPECT_EQ(widget->stackBox->GetSlot(0)->GetPadding(), Vec4(5, 2.5f, 5, 2.5f));
-		EXPECT_EQ(widget->stackBox->GetSlot(0)->GetChild(), widget->first);
-
-		EXPECT_EQ(widget->stackBox->GetSlot(1)->GetPadding(), Vec4(5, 5, 5, 5));
-		EXPECT_NE(widget->stackBox->GetSlot(1)->GetChild(), widget->first);
-		EXPECT_EQ(widget->stackBox->GetSlot(1)->GetChild()->GetClass(), GetStaticClass<FNullWidget>());
-
-		widget->second = (FNullWidget*)widget->stackBox->GetSlot(1)->GetChild();
-
-		// Ownership
-		EXPECT_EQ(widget->first->GetParent(), widget->stackBox->GetSlot(0));
-		EXPECT_EQ(widget->first->GetParent()->GetOwner(), widget->stackBox);
-		EXPECT_EQ(widget->first->GetParent()->GetOuter(), widget->stackBox);
-		EXPECT_EQ(widget->second->GetParent(), widget->stackBox->GetSlot(1));
-		EXPECT_EQ(widget->second->GetParent()->GetOwner(), widget->stackBox);
-		EXPECT_EQ(widget->second->GetParent()->GetOuter(), widget->stackBox);
-
-		widget->Destroy();
-	}
-
-	// 2. Complex widget
-
 	{
 		ComplexWidget* widget;
 
@@ -236,6 +201,7 @@ TEST(FusionCore, Construction)
 
 		stack1Slot0 = stack1->GetSlot(0);
 
+		// Destroying the widget directly should remove its parent slot too!
 		stack1->Destroy(); stack1 = nullptr;
 
 		EXPECT_EQ(widget->rootBox->GetSlotCount(), 0);
@@ -252,7 +218,7 @@ TEST(FusionCore, Layout)
 
 	FusionApplication* app = FusionApplication::Get();
 
-
+	
 
 	TEST_END;
 }

@@ -9,6 +9,7 @@ namespace CE
         CE_CLASS(FStackBoxSlot, FSlot)
     public:
 
+        FStackBoxSlot();
 
         FUSION_TESTS;
     };

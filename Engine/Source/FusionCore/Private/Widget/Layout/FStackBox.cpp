@@ -2,6 +2,10 @@
 
 namespace CE
 {
+	FStackBoxSlot::FStackBoxSlot()
+	{
+
+	}
 
 	FStackBox::FStackBox()
 	{
