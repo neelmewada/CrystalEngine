@@ -403,7 +403,7 @@ namespace CE::RPI
 
         if (outer == nullptr)
         {
-            outer = GetTransientPackage(MODULE_NAME);
+            outer = GetTransient(MODULE_NAME);
         }
 
         ModelLodAsset* modelLodAsset = CreateObject<ModelLodAsset>(outer, "CubeModelAsset");
@@ -4807,7 +4807,7 @@ namespace CE::RPI
 
 		if (outer == nullptr)
 		{
-			outer = GetTransientPackage(MODULE_NAME);
+			outer = GetTransient(MODULE_NAME);
 		}
 
 		ModelLodAsset* modelLodAsset = CreateObject<ModelLodAsset>(outer, "CubeModelAsset");

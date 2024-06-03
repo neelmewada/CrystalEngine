@@ -97,7 +97,7 @@ function(ce_add_test NAME)
 
     target_compile_definitions(${NAME} 
         PRIVATE
-            PACKAGE_NAME="/Code/${NAME}"
+            BUNDLE_NAME="/Code/${NAME}"
             MODULE_NAME="${NAME}"
     )
 

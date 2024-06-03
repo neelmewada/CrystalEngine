@@ -13,14 +13,14 @@
 #include "Signal.h"
 #include "SubClassType.h"
 
-#include "ObjectThreadContext.h"
+#include "ObjectCreationContext.h"
 #include "ObjectGlobals.h"
 #include "ObjectMap.h"
 
 #include "Event.h"
 
 #if PAL_TRAIT_BUILD_TESTS
-class Package_WriteRead_Test;
+class Bundle_WriteRead_Test;
 #endif
 
 namespace CE
@@ -29,7 +29,7 @@ namespace CE
     class ClassType;
     class FieldType;
     class FunctionType;
-    class Package;
+    class Bundle;
 
     template<typename TObject>
     class IObjectUpdateListener
@@ -50,15 +50,13 @@ namespace CE
         CE_CLASS(Object)
     protected:
         Object();
-
-        Object(const ObjectCreateInfo& initializer);
         
         virtual ~Object();
 
     private:
 
         void ConstructInternal();
-        void ConstructInternal(ObjectCreateInfo* initializer);
+        void ConstructInternal(Internal::ObjectCreateParams* initializer);
 
     public:
 
@@ -152,7 +150,7 @@ namespace CE
 
         virtual bool IsAsset() const { return false; }
 
-        virtual bool IsPackage() const { return false; }
+        virtual bool IsBundle() const { return false; }
 
 		bool IsOfType(ClassType* classType) const;
 
@@ -174,10 +172,10 @@ namespace CE
 
         u64 ComputeMemoryFootprint();
 
-		Name GetPathInPackage();
+		Name GetPathInBundle();
         
-		// Returns the package this object belongs to.
-        Package* GetPackage();
+		// Returns the bundle this object belongs to.
+        Bundle* GetBundle();
 
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
 		void FetchObjectReferences(HashMap<Uuid, Object*>& outReferences);
@@ -259,16 +257,16 @@ namespace CE
     private:
 
 #if PAL_TRAIT_BUILD_TESTS
-		friend class ::Package_WriteRead_Test;
+		friend class ::Bundle_WriteRead_Test;
 #endif
         
-        friend class Package;
-		friend class SavePackageContext;
+        friend class Bundle;
+		friend class SaveBundleContext;
         friend class BinaryDeserializer;
         friend class FieldType;
         
         friend class EventBus;
-        friend Object* Internal::ConstructObject(const Internal::ConstructObjectParams& params);
+        friend Object* Internal::CreateObjectInternal(const Internal::ObjectCreateParams& params);
 
         template<typename T>
         friend struct Internal::TypeInfoImpl;

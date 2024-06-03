@@ -23,7 +23,7 @@ namespace CE::Editor
 	protected:
 
 		Array<IO::Path> sourceAssetsToImport{};
-		Array<Name> recentlyProcessedPackageNames{};
+		Array<Name> recentlyProcessedBundleNames{};
 
 		Array<AssetImporter*> importersInProgress{};
 

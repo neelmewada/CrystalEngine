@@ -1,7 +1,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Package.inl"
+#include "Bundle.inl"
 
 namespace CE
 {
@@ -294,16 +294,16 @@ namespace CE
 
             *stream << objectRef->GetUuid();
 
-            auto package = objectRef->GetPackage();
+            auto bundle = objectRef->GetBundle();
 
-            if (package != nullptr)
+            if (bundle != nullptr)
 			{
-				*stream << (u64)package->GetUuid();
+				*stream << (u64)bundle->GetUuid();
 				*stream << objectRef->GetClass()->GetTypeName();
 			}
             else
 			{
-				*stream << (u64)0; // Package Uuid: 0
+				*stream << (u64)0; // Bundle Uuid: 0
 				*stream << objectRef->GetClass()->GetTypeName();
 			}
 
@@ -332,9 +332,9 @@ namespace CE
         this->skipHeader = skip;
     }
 
-    FieldDeserializer::FieldDeserializer(FieldType* fieldChain, void* instance, Package* currentPackage)
-        : rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
-		, packageMajor(PACKAGE_VERSION_MAJOR), packageMinor(PACKAGE_VERSION_MINOR)
+    FieldDeserializer::FieldDeserializer(FieldType* fieldChain, void* instance, Bundle* currentBundle)
+        : rawInstance(instance), skipHeader(false), currentBundle(currentBundle)
+		, bundleMajor(BUNDLE_VERSION_MAJOR), bundleMinor(BUNDLE_VERSION_MINOR)
     {
         fields.Clear();
 
@@ -348,9 +348,9 @@ namespace CE
         }
     }
 
-    FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance, Package* currentPackage)
-        : fields(fieldList), rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
-		, packageMajor(PACKAGE_VERSION_MAJOR), packageMinor(PACKAGE_VERSION_MINOR)
+    FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance, Bundle* currentBundle)
+        : fields(fieldList), rawInstance(instance), skipHeader(false), currentBundle(currentBundle)
+		, bundleMajor(BUNDLE_VERSION_MAJOR), bundleMinor(BUNDLE_VERSION_MINOR)
     {
         
     }
@@ -561,7 +561,7 @@ namespace CE
 
                 void* arrayInstance = &array[0];
 
-                FieldDeserializer fieldDeserializer{ fieldListPtr, arrayInstance, currentPackage };
+                FieldDeserializer fieldDeserializer{ fieldListPtr, arrayInstance, currentBundle };
                 fieldDeserializer.SkipHeader(true);
                 while (fieldDeserializer.HasNext())
                 {
@@ -613,7 +613,7 @@ namespace CE
 
             if (firstField != nullptr)
             {
-                FieldDeserializer deserializer{ firstField, structInstance, currentPackage };
+                FieldDeserializer deserializer{ firstField, structInstance, currentBundle };
 
                 while (deserializer.HasNext())
                 {
@@ -647,35 +647,35 @@ namespace CE
         Name objectTypeName{};
         *stream >> objectTypeName;
 
-		u64 packageUuid = 0;
-		*stream >> packageUuid;
+		u64 bundleUuid = 0;
+		*stream >> bundleUuid;
 
-        Name packageName{};
-        *stream >> packageName;
-        Name pathInPackage{};
-        *stream >> pathInPackage;
+        Name bundleName{};
+        *stream >> bundleName;
+        Name pathInBundle{};
+        *stream >> pathInBundle;
 
-        if (objectTypeName == TYPENAME(Package))
+        if (objectTypeName == TYPENAME(Bundle))
         {
-            return Package::LoadPackage(nullptr, packageName);
+            return Bundle::LoadBundleFromDisk(nullptr, bundleName);
         }
-        else if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+        else if (currentBundle != nullptr && bundleName == currentBundle->GetBundleName())
         {
-            return currentPackage->LoadObject(uuid);
+            return currentBundle->LoadObject(uuid);
         }
         else
         {
-            return ResolveObjectReference(uuid, packageUuid, packageName, pathInPackage);
+            return ResolveObjectReference(uuid, bundleUuid, bundleName, pathInBundle);
         }
     }
 
-    Object* FieldDeserializer::ResolveObjectReference(Uuid objectUuid, Uuid packageUuid, Name packageName, Name pathInPackage)
+    Object* FieldDeserializer::ResolveObjectReference(Uuid objectUuid, Uuid bundleUuid, Name bundleName, Name pathInBundle)
     {
-        Package* package = Package::LoadPackage(nullptr, packageName);
-        if (package == nullptr)
+        Bundle* bundle = Bundle::LoadBundleFromDisk(nullptr, bundleName);
+        if (bundle == nullptr)
             return nullptr;
         
-        return package->LoadObject(objectUuid);
+        return bundle->LoadObject(objectUuid);
     }
 
 }

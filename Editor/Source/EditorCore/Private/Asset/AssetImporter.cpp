@@ -113,7 +113,7 @@ namespace CE::Editor
 
 		if (job->success)
 		{
-			AssetManager::GetRegistry()->OnAssetImported(job->packageName);
+			AssetManager::GetRegistry()->OnAssetImported(job->bundleName);
 		}
 
 		importResults.Add(importResult);
@@ -141,7 +141,7 @@ namespace CE::Editor
 			productPath = sourcePath.ReplaceExtension(".casset");
 		editorProductPath = sourcePath.ReplaceExtension(".casset");
 
-		packageName = "";
+		bundleName = "";
 		sourceAssetRelativePath = "";
 		generateDistributionAsset = false;
 
@@ -167,20 +167,20 @@ namespace CE::Editor
 		if (IO::Path::IsSubDirectory(productPath, gProjectPath / "Game/Assets"))
 		{
 			isGameAsset = true;
-			packageName = IO::Path::GetRelative(productPath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
-			if (!packageName.StartsWith("/"))
-				packageName = "/" + packageName;
+			bundleName = IO::Path::GetRelative(productPath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!bundleName.StartsWith("/"))
+				bundleName = "/" + bundleName;
 		}
 		else if (IO::Path::IsSubDirectory(productPath, engineRootDir / "Engine/Assets"))
 		{
 			isGameAsset = false;
-			packageName = IO::Path::GetRelative(productPath, engineRootDir).RemoveExtension().GetString().Replace({ '\\' }, '/');
-			if (!packageName.StartsWith("/"))
-				packageName = "/" + packageName;
+			bundleName = IO::Path::GetRelative(productPath, engineRootDir).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!bundleName.StartsWith("/"))
+				bundleName = "/" + bundleName;
 		}
 		else
 		{
-			packageName = assetName;
+			bundleName = assetName;
 		}
 		
 		if (editorProductPath != productPath)
@@ -197,19 +197,19 @@ namespace CE::Editor
 		productPath = productPath.GetString().Replace({'\\'}, '/');
 #endif
 		
-		Package* package = nullptr;
+		Bundle* bundle = nullptr;
 
 		if (productPath.Exists())
-			package = Package::LoadPackage(nullptr, productPath, LOAD_Full);
+			bundle = Bundle::LoadBundleFromDisk(nullptr, productPath, LOAD_Full);
 		else
-			package = CreateObject<Package>(nullptr, packageName);
+			bundle = CreateObject<Bundle>(nullptr, bundleName);
 
-		success = ProcessAsset(package);
+		success = ProcessAsset(bundle);
 
 		if (!success)
 		{
-			if (package)
-				package->Destroy();
+			if (bundle)
+				bundle->Destroy();
 			return;
 		}
 
@@ -231,17 +231,17 @@ namespace CE::Editor
 						asset->GetClass()->FindField("sourceAssetRelativePath")->SetFieldValue(asset, sourceAssetRelativePath);
 					}
 
-					String pathInPackage = object->GetPathInPackage().GetString();
-					if (pathInPackage.NonEmpty())
-						pathInPackage = "." + pathInPackage;
-					Name fullObjectPath = package->GetPackageName().GetString() + pathInPackage;
+					String pathInBundle = object->GetPathInBundle().GetString();
+					if (pathInBundle.NonEmpty())
+						pathInBundle = "." + pathInBundle;
+					Name fullObjectPath = bundle->GetBundleName().GetString() + pathInBundle;
 					if (objectPathNameCounter[fullObjectPath] > 0)
 					{
 						fullObjectPath = String::Format(fullObjectPath.GetString() + "_{}", objectPathNameCounter[fullObjectPath]);
 					}
 
 					SIZE_T hash = GetHash(fullObjectPath);
-					package->SetObjectUuid(object, Uuid(hash));
+					bundle->SetObjectUuid(object, Uuid(hash));
 
 					objectPathNameCounter[fullObjectPath]++;
 
@@ -252,15 +252,15 @@ namespace CE::Editor
 					}
 				};
 
-			visitorFunc(package);
+			visitorFunc(bundle);
 		}
 
-		auto saveResult = Package::SavePackage(package, nullptr, productPath);
-		package->Destroy();
+		auto saveResult = Bundle::SaveBundleToDisk(bundle, nullptr, productPath);
+		bundle->Destroy();
 
-		if (saveResult != SavePackageResult::Success)
+		if (saveResult != BundleSaveResult::Success)
 		{
-			errorMessage = "Failed to save package " + packageName + " at path: " + productPath.GetString() + ". Error " + (int)saveResult;
+			errorMessage = "Failed to save bundle " + bundleName + " at path: " + productPath.GetString() + ". Error " + (int)saveResult;
 			success = false;
 			return;
 		}

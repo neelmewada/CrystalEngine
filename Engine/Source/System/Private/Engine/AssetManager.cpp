@@ -38,11 +38,11 @@ namespace CE
 		{
 			LockGuard<SharedMutex> lock{ loadedAssetsMutex };
 
-			for (auto [uuid, package] : loadedAssetsByUuid)
+			for (auto [uuid, bundle] : loadedAssetsByUuid)
 			{
-				if (package != nullptr)
+				if (bundle != nullptr)
 				{
-					package->Destroy();
+					bundle->Destroy();
 				}
 			}
 
@@ -81,28 +81,28 @@ namespace CE
 		if (assetDatas.IsEmpty())
 			return {};
 
-		Package* package = nullptr;
+		Bundle* bundle = nullptr;
 
 		loadedAssetsMutex.Lock();
 		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 		{
-			package = loadedAssetsByPath[path];
+			bundle = loadedAssetsByPath[path];
 			loadedAssetsMutex.Unlock();
 		}
 		else
 		{
-			package = Package::LoadPackage(nullptr, path, LOAD_Full);
-			if (package == nullptr)
+			bundle = Bundle::LoadBundleFromDisk(nullptr, path, LOAD_Full);
+			if (bundle == nullptr)
 			{
 				loadedAssetsMutex.Unlock();
 				return {};
 			}
-			loadedAssetsByPath[path] = package;
-			loadedAssetsByUuid[package->GetUuid()] = package;
+			loadedAssetsByPath[path] = bundle;
+			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
 			loadedAssetsMutex.Unlock();
 		}
 		
-		if (!package)
+		if (!bundle)
 			return {};
 
 		Array<Asset*> assets{};
@@ -112,7 +112,7 @@ namespace CE
 
 		for (auto assetData : assetDatas)
 		{
-			Object* object = package->LoadObject(assetData->assetUuid);
+			Object* object = bundle->LoadObject(assetData->assetUuid);
 			if (object && object->IsOfType(classType))
 			{
 				assets.Add((Asset*)object);
@@ -128,15 +128,15 @@ namespace CE
 
 		if (asset == nullptr)
 			return;
-		Package* package = asset->GetPackage();
-		if (package == nullptr)
+		Bundle* bundle = asset->GetBundle();
+		if (bundle == nullptr)
 			return;
 
 		LockGuard lock{ loadedAssetsMutex };
 
-		loadedAssetsByPath.Remove(package->GetPackageName());
-		loadedAssetsByUuid.Remove(package->GetPackageUuid());
-		package->Destroy();
+		loadedAssetsByPath.Remove(bundle->GetBundleName());
+		loadedAssetsByUuid.Remove(bundle->GetBundleUuid());
+		bundle->Destroy();
 	}
 
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)
@@ -148,31 +148,31 @@ namespace CE
 		if (!assetData)
 			return nullptr;
 		
-		Package* package = nullptr;
+		Bundle* bundle = nullptr;
 
 		loadedAssetsMutex.Lock();
 		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 		{
-			package = loadedAssetsByPath[path];
+			bundle = loadedAssetsByPath[path];
 			loadedAssetsMutex.Unlock();
 		}
 		else
 		{
-			package = Package::LoadPackage(nullptr, path, LOAD_Full);
-			if (package == nullptr)
+			bundle = Bundle::LoadBundleFromDisk(nullptr, path, LOAD_Full);
+			if (bundle == nullptr)
 			{
 				loadedAssetsMutex.Unlock();
 				return nullptr;
 			}
-			loadedAssetsByPath[path] = package;
-			loadedAssetsByUuid[package->GetUuid()] = package;
+			loadedAssetsByPath[path] = bundle;
+			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
 			loadedAssetsMutex.Unlock();
 		}
 		
-		if (!package)
+		if (!bundle)
 			return nullptr;
 
-		Object* object = package->LoadObject(package->GetPrimaryObjectUuid());
+		Object* object = bundle->LoadObject(bundle->GetPrimaryObjectUuid());
 		if (!object || !object->IsOfType<Asset>())
 			return nullptr;
 		

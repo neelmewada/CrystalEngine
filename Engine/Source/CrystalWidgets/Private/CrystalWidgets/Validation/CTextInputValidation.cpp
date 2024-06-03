@@ -66,7 +66,7 @@ namespace CE::Widgets
 		return true;
 	}
 
-	CRYSTALWIDGETS_API bool CPackageNameInputValidator(const String& text)
+	CRYSTALWIDGETS_API bool CBundleNameInputValidator(const String& text)
 	{
 		for (int i = 0; i < text.GetLength(); ++i)
 		{

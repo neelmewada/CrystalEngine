@@ -11,16 +11,16 @@ namespace CE
 
 		// - Fields -
 
-		// Path to the package that contains this asset. Ex: /Game/Assets/Textures/DoorTexture
-		Name packageName{};
+		// Path to the bundle that contains this asset. Ex: /Game/Assets/Textures/DoorTexture
+		Name bundleName{};
 
-		// Uuid of the package that contains this asset.
-		Uuid packageUuid{};
+		// Uuid of the bundle that contains this asset.
+		Uuid bundleUuid{};
 
-		// Path of the primary asset within the package. Ex: TextureMap
+		// Path of the primary asset within the bundle. Ex: TextureMap
 		Name assetName{};
 
-		// Uuid of the primary asset within the package.
+		// Uuid of the primary asset within the bundle.
 		Uuid assetUuid{};
 
 		/// Path to the primary asset's class. Ex: /Code/System.CE::Texture2D
@@ -34,10 +34,10 @@ namespace CE
 	inline SIZE_T GetHash<AssetData>(const AssetData& assetData)
 	{
 		return GetCombinedHashes({ 
-			assetData.packageName.GetHashValue(), 
+			assetData.bundleName.GetHashValue(), 
 			assetData.assetName.GetHashValue(), 
 			assetData.assetClassPath.GetHashValue(),
-			assetData.packageUuid,
+			assetData.bundleUuid,
 			assetData.assetUuid,
 			assetData.sourceAssetPath.GetHashValue()
 		});

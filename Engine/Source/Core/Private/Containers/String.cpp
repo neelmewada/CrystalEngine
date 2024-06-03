@@ -9,60 +9,6 @@ using namespace CE;
 
 namespace CE
 {
-    static FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> StaticBufferAllocator{ STRING_BUFFER_GROW_COUNT };
-
-    static ThreadId gMainThreadId = Thread::GetCurrentThreadId();
-
-    namespace Internal
-    {
-        class CORE_API StaticStringBlockAllocator : public ThreadSingleton<StaticStringBlockAllocator>
-        {
-        public:
-            StaticStringBlockAllocator() 
-            {
-                
-            }
-
-            virtual ~StaticStringBlockAllocator()
-            {
-                if (Thread::GetCurrentThreadId() == gMainThreadId)
-                {
-                    // Do NOT clean up string buffers on main thread.
-                    // Sometimes, static/global destructors are called after StaticStringBlockAllocator thread singleton is destroyed, 
-					// which can cause crash on app exit
-                    return;
-                }
-                staticBufferAllocator.FreeAll();
-            }
-			
-            inline void Free(char* buffer)
-            {
-                ThreadId curThreadId = Thread::GetCurrentThreadId();
-                ThreadId creationThreadId = GetThreadId();
-
-                if (creationThreadId != curThreadId)
-                {
-                    Uuid();
-                }
-
-                staticBufferAllocator.Free(buffer);
-            }
-
-            inline char* Allocate()
-            {
-                ThreadId curThreadId = Thread::GetCurrentThreadId();
-
-                return (char*)staticBufferAllocator.Allocate();
-            }
-
-        private:
-
-            FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> staticBufferAllocator{ STRING_BUFFER_GROW_COUNT };
-
-            SharedMutex blocksToFreeMutex{};
-            List<char*> blocksToFree{};
-        };
-    }
 
     String::String()
     {

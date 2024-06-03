@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "CoreApplication.h"
 #include "CoreRPI.h"
 
 #if PAL_TRAIT_BUILD_TESTS
@@ -29,8 +30,8 @@ class FusionCore_Layout_Test;
 #include "Exception/FusionException.h"
 
 #include "Application/FusionApplication.h"
-#include "Application/FusionContext.h"
-#include "Application/FNativeContext.h"
+#include "Context/FFusionContext.h"
+#include "Context/FNativeContext.h"
 #include "Rendering/FusionRenderer.h"
 
 #include "Layout/LayoutTypes.h"

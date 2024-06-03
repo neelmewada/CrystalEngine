@@ -21,6 +21,8 @@ namespace CE
 
 	void FFusionContext::Tick()
 	{
+		ZoneScoped;
+
 
 	}
 

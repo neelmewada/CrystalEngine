@@ -63,8 +63,8 @@ namespace CE::Editor
 		gProjectPath = projectFilePath.GetParentPath();
 		gProjectName = projectFilePath.GetFilename().RemoveExtension().GetString();
 
-		// Load settings package
-		Package* settingsPackage = GetSettingsPackage();
+		// Load settings bundle
+		Bundle* settingsBundle = GetSettingsBundle();
 		
 		return true;
     }
@@ -105,13 +105,13 @@ namespace CE::Editor
 		IO::Path::CreateDirectories(projectFolder / "Logs");
 		IO::Path::CreateDirectories(projectFolder / "Temp");
 
-		Package* settingsPackage = GetSettingsPackage();
+		Bundle* settingsBundle = GetSettingsBundle();
 		
 		ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 		projectSettings->projectName = projectName;
 		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING_SHORT;
 
-		SaveSettings(projectFolder / "Game/Settings.casset"); // Saves the settings package in the global project path gProjectPath
+		SaveSettings(projectFolder / "Game/Settings.casset"); // Saves the settings bundle in the global project path gProjectPath
 
 		// Config files
 		{

@@ -1,6 +1,6 @@
-# Package File Format Specification
+# Bundle File Format Specification
 
-The `Package` class is used by the engine to store & load assets & serialized objects. It stores the data in a binary file with `.casset` extension.
+The `Bundle` class is used by the engine to store & load assets & serialized objects. It stores the data in a binary file with `.casset` extension.
 
 This document describes the file format specification of `.casset` files. The initial version number of this file format is 1.0.
 
@@ -17,15 +17,15 @@ Spec tables with big endian format
 ## **Overview**
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `00 50 41 43 4b 00 00 0a` | Magic Number: `. P A C K . . \n` |
+| +00 | 8B | `00 42 55 4e 44 4c 45 00` | Magic Number: `. B U N D L E .` |
 | +08 | 4B | 2 | Major Version (u32) |
 | +0C | 4B | 0 | Minor Version (u32) |
 | +10 | 4B | `00 00 00 00` | Data checksum |
 | +14 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
-| +1C | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
-| +24 | \0 | `/Game/Assets/SomeAsset\0` | Path/name of Package. |
-| +xx | 4B | `01 00 00 00` | No. of external package dependencies **n** |
-| +xx | 8B | `xx xx xx xx xx xx xx xx` | n-th package dependency. Repeat for n times. |
+| +1C | 8B | `xx xx xx xx xx xx xx xx` | Bundle UUID |
+| +24 | \0 | `/Game/Assets/SomeAsset\0` | Path/name of Bundle. |
+| +xx | 4B | `01 00 00 00` | No. of external Bundle dependencies **n** |
+| +xx | 8B | `xx xx xx xx xx xx xx xx` | n-th Bundle dependency. Repeat for n times. |
 | +01 | 1B | `00/01` | Is cooked? |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual Data. List of [Object Entries](#object-entry)** |
@@ -37,7 +37,7 @@ Spec tables with big endian format
 | +00 | 8B | `00 4f 42 4a 45 43 54 00` | Magic Number: `. O B J E C T .` |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
 | +10 | 1B | `01` | Is Asset? `0` or `1` |
-| +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the package. |
+| +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the Bundle. |
 | +xx | \0 | `/Engine/Core.CE::Texture\0` | Object class TypeName |
 | +10 | \0 | `SomeObjectName\0` | Object name (CE::Name) |
 | +xx | \0 | `/Textures/SomeTexture.png` | Source asset path relative to project (exists only if **Is Asset?**) |
@@ -123,5 +123,5 @@ Spec tables with big endian format
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object UUID (u64 [Field Value](#field-value)) |
-| +10 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (u64 [Field Value](#field-value)) |
+| +10 | 8B | `xx xx xx xx xx xx xx xx` | Bundle UUID it belongs to (u64 [Field Value](#field-value)) |
 

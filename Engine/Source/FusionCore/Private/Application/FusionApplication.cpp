@@ -26,7 +26,7 @@ namespace CE
     {
         if (gInstance == nullptr)
         {
-            gInstance = CreateObject<FusionApplication>(GetTransientPackage(MODULE_NAME), "FusionApplication");
+            gInstance = CreateObject<FusionApplication>(GetTransient(MODULE_NAME), "FusionApplication");
         }
         return gInstance;
     }
@@ -48,6 +48,8 @@ namespace CE
 
     void FusionApplication::Tick()
     {
+        ZoneScoped;
+
         if (rootContext)
         {
             rootContext->Tick();

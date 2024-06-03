@@ -22,8 +22,7 @@ namespace CE
     };
 
 
-    //Package* gTransientPackage = nullptr;
-    Package* gSettingsPackage = nullptr;
+    Bundle* gSettingsBundle = nullptr;
 	ResourceManager* gResourceManager = nullptr;
 
     void CoreModule::StartupModule()
@@ -55,11 +54,11 @@ namespace CE
 		}
         gResourceManager = nullptr;
 
-		if (gSettingsPackage != nullptr)
+		if (gSettingsBundle != nullptr)
 		{
-			gSettingsPackage->RequestDestroy();
+			gSettingsBundle->RequestDestroy();
 		}
-        gSettingsPackage = nullptr;
+        gSettingsBundle = nullptr;
 
 		if (gConfigCache != nullptr)
 		{
@@ -107,7 +106,7 @@ namespace CE
         // Register Objects
         CE_REGISTER_TYPES(
             Object,
-            Package,
+            Bundle,
 			Asset,
 			ResourceManager,
 			Resource,

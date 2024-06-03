@@ -62,7 +62,7 @@ namespace CE
 
 			virtual const CE::Name& GetTypeName() const = 0;
 
-			virtual String GetStructPackage() const = 0;
+			virtual String GetStructBundle() const = 0;
 			virtual String GetStructModule() const = 0;
 
 			virtual void OnAfterDeserialize(void* instance) = 0;
@@ -267,11 +267,11 @@ namespace CE
 			}
 		}
 
-		String GetStructPackage() const
+		String GetStructBundle() const
 		{
 			if (Impl == nullptr)
 				return nullptr;
-			return Impl->GetStructPackage();
+			return Impl->GetStructBundle();
 		}
 
 		String GetStructModule() const
@@ -468,7 +468,7 @@ namespace CE
 
 			virtual const CE::Name& GetTypeName() const = 0;
 
-			virtual String GetClassPackage() const = 0;
+			virtual String GetClassBundle() const = 0;
 
 			virtual String GetClassModule() const = 0;
 		};
@@ -549,11 +549,11 @@ namespace CE
 			return Impl->CallDestructor(instance);
 		}
 
-		String GetClassPackage() const
+		String GetClassBundle() const
 		{
 			if (Impl == nullptr)
 				return "";
-			return Impl->GetClassPackage();
+			return Impl->GetClassBundle();
 		}
 
 		String GetClassModule() const

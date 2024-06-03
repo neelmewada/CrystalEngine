@@ -23,11 +23,6 @@ namespace CE
         ConstructInternal();
     }
 
-    Object::Object(const ObjectCreateInfo& initializer)
-    {
-        ConstructInternal(const_cast<ObjectCreateInfo*>(&initializer));
-    }
-
 	Object::~Object()
 	{
 		// Never call delete directly. Use Destroy() instead
@@ -68,10 +63,10 @@ namespace CE
 			Prefs::Get().SavePrefs(this);
 		}
 
-		auto package = GetPackage();
-		if (package != nullptr)
+		auto bundle = GetBundle();
+		if (bundle != nullptr)
 		{
-			package->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+			bundle->OnObjectUnloaded(this); // Mark the object as 'unloaded'
 		}
 
 		// Detach this object from outer
@@ -108,21 +103,21 @@ namespace CE
 
     void Object::ConstructInternal()
     {
-        auto initializer = ObjectThreadContext::Get().TopInitializer();
-		CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
-        ObjectThreadContext::Get().PopInitializer();
-        ConstructInternal(initializer);
+        auto initParams = GetObjectCreationContext()->GetStorage().Top();
+		CE_ASSERT(initParams != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+		GetObjectCreationContext()->GetStorage().Pop();
+        ConstructInternal(initParams);
     }
 
-    void Object::ConstructInternal(ObjectCreateInfo* initializer)
+    void Object::ConstructInternal(Internal::ObjectCreateParams* parameters)
     {
-        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
-		CE_ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
+        CE_ASSERT(parameters != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+		CE_ASSERT(parameters->objectClass != nullptr, "Object initializer passed with null objectClass!");
 
-        this->objectFlags = initializer->GetObjectFlags();
-        if (initializer->uuid != 0)
-            this->uuid = initializer->uuid;
-        this->name = initializer->name;
+        this->objectFlags = parameters->objectFlags;
+        if (parameters->uuid != 0)
+            this->uuid = parameters->uuid;
+        this->name = parameters->name;
 
 		{
 			LockGuard lock{ gDestroyedObjectsMutex };
@@ -142,11 +137,11 @@ namespace CE
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
 
-		auto package = GetPackage();
-		if (package != nullptr)
+		auto bundle = GetBundle();
+		if (bundle != nullptr)
 		{
-			LockGuard<SharedMutex> lock{ package->loadedObjectsMutex };
-			package->loadedObjects[subobject->GetUuid()] = subobject;
+			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
+			bundle->loadedObjects[subobject->GetUuid()] = subobject;
 		}
 		
 		if (EnumHasFlag(subobject->objectFlags, OF_DefaultSubobject) && 
@@ -169,11 +164,11 @@ namespace CE
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
 
-		auto package = GetPackage();
-		if (package != nullptr)
+		auto bundle = GetBundle();
+		if (bundle != nullptr)
 		{
-			LockGuard<SharedMutex> lock{ package->loadedObjectsMutex };
-			package->loadedObjects.Remove(subobject->GetUuid());
+			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
+			bundle->loadedObjects.Remove(subobject->GetUuid());
 		}
 
 		OnSubobjectDetached(subobject);
@@ -225,10 +220,10 @@ namespace CE
 		return HasAnyObjectFlags(OF_Transient);
 	}
 
-    Package* Object::GetPackage()
+    Bundle* Object::GetBundle()
     {
-		if (GetClass()->IsSubclassOf<Package>())
-			return (Package*)this;
+		if (GetClass()->IsSubclassOf<Bundle>())
+			return (Bundle*)this;
 
         auto outerObject = outer;
         if (outerObject == nullptr)
@@ -236,8 +231,8 @@ namespace CE
         
         while (outerObject != nullptr)
         {
-            if (outerObject->GetClass()->IsSubclassOf<Package>())
-                return (Package*)outerObject;
+            if (outerObject->GetClass()->IsSubclassOf<Bundle>())
+                return (Bundle*)outerObject;
             outerObject = outerObject->outer;
         }
         
@@ -281,16 +276,16 @@ namespace CE
 		return totalSize;
     }
 
-	Name Object::GetPathInPackage()
+	Name Object::GetPathInBundle()
 	{
-        if (IsPackage())
+        if (IsBundle())
             return "";
         
 		String path = name.GetString();
 		
 		auto outerObject = outer;
 
-		while (outerObject != nullptr && !outerObject->IsPackage())
+		while (outerObject != nullptr && !outerObject->IsBundle())
 		{
 			auto outerPathName = outerObject->GetName();
 			if (outerPathName.IsValid())

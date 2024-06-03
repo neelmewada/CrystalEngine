@@ -16,7 +16,7 @@ namespace CE
 
 	typedef void (*LoadTypesFunc)();
 
-	class Package;
+	class Bundle;
 
     struct ModuleInfo
     {
@@ -35,7 +35,7 @@ namespace CE
         bool isPlugin = false;
         Module* moduleImpl; // nullptr if not loaded
 
-		Package* transientPackage = nullptr;
+		Bundle* transientBundle = nullptr;
     };
 
     enum class ModuleLoadResult
@@ -84,8 +84,8 @@ namespace CE
 
 		Module* GetLoadedModule(const String& moduleName);
 
-		/// Returns the transient package of a loaded module. Returns nullptr if module is not loaded or not found.
-		Package* GetLoadedModuleTransientPackage(const String& moduleName);
+		/// Returns the transient bundle of a loaded module. Returns nullptr if module is not loaded or not found.
+		Bundle* GetLoadedModuleTransientBundle(const String& moduleName);
 
     private:
 

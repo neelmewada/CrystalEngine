@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 
-#include "../Package.inl"
+#include "../Bundle.inl"
 
 
 
 namespace CE
 {
 
-	static void SavePackageDependencies(Stream* stream, const Array<Name>& dependencies)
+	static void SaveDependencies(Stream* stream, const Array<Name>& dependencies)
 	{
 		u32 numDependencies = dependencies.GetSize();
 		*stream << numDependencies;
@@ -20,32 +20,32 @@ namespace CE
 		}
 	}
 
-	SavePackageResult Package::SavePackage(Package* package, Object* asset, Stream* stream, const SavePackageArgs& saveArgs)
+	BundleSaveResult Bundle::SaveBundleToDisk(Bundle* bundle, Object* asset, Stream* stream)
 	{
-		if (package == nullptr)
+		if (bundle == nullptr)
 		{
-			return SavePackageResult::InvalidPackage;
+			return BundleSaveResult::InvalidBundle;
 		}
-		if (package->IsTransient())
+		if (bundle->IsTransient())
 		{
-			CE_LOG(Error, All, "Could not save a transient package: {}", package->GetPackageName());
-			return SavePackageResult::InvalidPackage;
+			CE_LOG(Error, All, "Could not save a transient bundle: {}", bundle->GetBundleName());
+			return BundleSaveResult::InvalidBundle;
 		}
 		if (stream == nullptr || !stream->CanWrite())
 		{
-			return SavePackageResult::UnknownError;
+			return BundleSaveResult::UnknownError;
 		}
 
 		ZoneScoped;
-		ZoneTextF(package->GetName().GetCString());
+		ZoneTextF(bundle->GetName().GetCString());
 
 		if (asset == nullptr)
-			asset = package;
+			asset = bundle;
 		
 		HashMap<Uuid, Object*> objectsToSerialize{};
 		objectsToSerialize.Add({ asset->GetUuid(), asset });
 		asset->FetchObjectReferences(objectsToSerialize);
-		Array<Name> packageDependencies{};
+		Array<Name> bundleDependencies{};
 
 		for (const auto& [objectUuid, objectInstance] : objectsToSerialize)
 		{
@@ -53,19 +53,19 @@ namespace CE
 				continue;
 			if (objectInstance->IsTransient())
 				continue;
-			auto objectPackage = objectInstance->GetPackage();
+			auto objectBundle = objectInstance->GetBundle();
 
-			if (package != objectPackage && objectPackage != nullptr && !objectPackage->IsTransient())
+			if (bundle != objectBundle && objectBundle != nullptr && !objectBundle->IsTransient())
 			{
-				packageDependencies.Add(objectPackage->GetPackageName());
+				bundleDependencies.Add(objectBundle->GetBundleName());
 			}
 		}
 
 		stream->SetBinaryMode(true);
 
-		*stream << PACKAGE_MAGIC_NUMBER;
-		*stream << PACKAGE_VERSION_MAJOR;
-		*stream << PACKAGE_VERSION_MINOR;
+		*stream << BUNDLE_MAGIC_NUMBER;
+		*stream << BUNDLE_VERSION_MAJOR;
+		*stream << BUNDLE_VERSION_MINOR;
 
 		u64 fileCrcPos = stream->GetCurrentPosition();
 		*stream << (u32)0; // 0 CRC
@@ -73,11 +73,11 @@ namespace CE
 		u64 dataStartOffsetValuePos = stream->GetCurrentPosition();
 		*stream << (u64)0; // Data Start Offset
 
-		*stream << package->GetPackageUuid();
-		*stream << package->GetPackageName();
+		*stream << bundle->GetBundleUuid();
+		*stream << bundle->GetBundleName();
 
-		// Other packages that `this` package depends upon
-		SavePackageDependencies(stream, packageDependencies);
+		// Other bundles that `this` bundle depends upon
+		SaveDependencies(stream, bundleDependencies);
 
 		u8 isCooked = 0;
 		*stream << isCooked;
@@ -97,16 +97,16 @@ namespace CE
 			if (objectInstance->IsTransient())
 				continue;
 
-			if (package != objectInstance->GetPackage()) // Don't serialize objects outside of `this` package
+			if (bundle != objectInstance->GetBundle()) // Don't serialize objects outside of `this` bundle
 			{
 				continue;
 			}
             
-			*stream << PACKAGE_OBJECT_MAGIC_NUMBER; // .OBJECT.
+			*stream << BUNDLE_OBJECT_MAGIC_NUMBER; // .OBJECT.
 			
 			*stream << objectInstance->GetUuid();
 			*stream << objectInstance->IsAsset();
-			*stream << objectInstance->GetPathInPackage();
+			*stream << objectInstance->GetPathInBundle();
 			*stream << objectInstance->GetClass()->GetTypeName();
 			*stream << objectInstance->GetName();
 
@@ -129,25 +129,25 @@ namespace CE
 
 		*stream << (u64)0; // EOF
 
-		return SavePackageResult::Success;
+		return BundleSaveResult::Success;
 	}
 
-	static void LoadPackageDependencies(Stream* stream, Array<Name>& outDependencies)
+	static void LoadBundleDependencies(Stream* stream, Array<Name>& outDependencies)
 	{
 		u32 numDependencies = 0;
 		*stream >> numDependencies;
 
 		for (int i = 0; i < numDependencies; i++)
 		{
-			String packageName = "";
-			*stream >> packageName;
-			outDependencies.Add(packageName);
+			String bundleName = "";
+			*stream >> bundleName;
+			outDependencies.Add(bundleName);
 		}
 	}
 
-	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
+	Bundle* Bundle::LoadBundleFromDisk(Bundle* outer, Stream* stream, IO::Path fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags)
 	{
-		String pathStr = fullPackagePath.GetString();
+		String pathStr = fullBundlePath.GetString();
 		ZoneScoped;
 		ZoneTextF(pathStr.GetCString());
 
@@ -156,16 +156,16 @@ namespace CE
 			return nullptr;
 		}
 		
-		// Actual package name based on it's path
-		String actualPackageName = "";
+		// Actual bundle name based on it's path
+		String actualBundleName = "";
 
-		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game"))
+		if (IO::Path::IsSubDirectory(fullBundlePath, gProjectPath / "Game"))
 		{
-			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
+			auto relativePath = IO::Path::GetRelative(fullBundlePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePath.StartsWith("/"))
 				relativePath = "/" + relativePath;
 
-			actualPackageName = relativePath;
+			actualBundleName = relativePath;
 		}
 
 		stream->SetBinaryMode(true);
@@ -175,17 +175,17 @@ namespace CE
 		u32 minorVersion = 0;
 		*stream >> magicNumber;
         
-		if (magicNumber != PACKAGE_MAGIC_NUMBER)
+		if (magicNumber != BUNDLE_MAGIC_NUMBER)
 		{
-			outResult = LoadPackageResult::InvalidPackage;
+			outResult = BundleLoadResult::InvalidBundle;
 			return nullptr;
 		}
 
 		*stream >> majorVersion;
 
-		if (majorVersion > PACKAGE_VERSION_MAJOR)
+		if (majorVersion > BUNDLE_VERSION_MAJOR)
 		{
-			outResult = LoadPackageResult::UnsupportedPackageVersion;
+			outResult = BundleLoadResult::UnsupportedBundleVersion;
 			return nullptr;
 		}
 
@@ -196,70 +196,70 @@ namespace CE
 		u64 dataStartOffset;
 		*stream >> dataStartOffset;
 
-		Uuid packageUuid = 0;
-		*stream >> packageUuid;
-		String packageName = "";
-		*stream >> packageName;
+		Uuid bundleUuid = 0;
+		*stream >> bundleUuid;
+		String bundleName = "";
+		*stream >> bundleName;
 
-		if (!actualPackageName.IsEmpty() && actualPackageName != packageName)
+		if (!actualBundleName.IsEmpty() && actualBundleName != bundleName)
 		{
-			packageName = actualPackageName;
+			bundleName = actualBundleName;
 		}
 
-		Array<Name> packageDependendies{};
-		LoadPackageDependencies(stream, packageDependendies);
+		Array<Name> bundleDependendies{};
+		LoadBundleDependencies(stream, bundleDependendies);
 
 		u8 isCooked = 0;
 		*stream >> isCooked;
 
-		Package* package = nullptr;
+		Bundle* bundle = nullptr;
 
 		{
-			LockGuard<SharedMutex> lock{ Package::packageRegistryMutex };
+			LockGuard<SharedMutex> lock{ Bundle::bundleRegistryMutex };
 
-			if (loadedPackages.KeyExists(packageName)) // Package is already loaded
+			if (loadedBundles.KeyExists(bundleName)) // Bundle is already loaded
 			{
-				package = loadedPackages[packageName];
-				package->packageDependencies = packageDependendies;
+				bundle = loadedBundles[bundleName];
+				bundle->bundleDependencies = bundleDependendies;
 			}
-			else if (loadedPackagesByUuid.KeyExists(packageUuid)) // Package is already loaded
+			else if (loadedBundlesByUuid.KeyExists(bundleUuid)) // Bundle is already loaded
 			{
-				package = loadedPackagesByUuid[packageUuid];
-				package->packageDependencies = packageDependendies;
+				bundle = loadedBundlesByUuid[bundleUuid];
+				bundle->bundleDependencies = bundleDependendies;
 			}
 			else
 			{
-				Internal::ConstructObjectParams params{ Package::Type() };
-				params.name = packageName;
-				params.uuid = packageUuid;
+				Internal::ObjectCreateParams params{ Bundle::Type() };
+				params.name = bundleName;
+				params.uuid = bundleUuid;
 				params.templateObject = nullptr;
 				params.objectFlags = OF_NoFlags;
 				params.outer = outer;
 
-				package = (Package*)Internal::ConstructObject(params);
-				package->fullPackagePath = fullPackagePath;
-				package->packageDependencies = packageDependendies;
-				package->isFullyLoaded = false;
-				package->objectUuidToEntryMap.Clear();
+				bundle = (Bundle*)Internal::CreateObjectInternal(params);
+				bundle->fullBundlePath = fullBundlePath;
+				bundle->bundleDependencies = bundleDependendies;
+				bundle->isFullyLoaded = false;
+				bundle->objectUuidToEntryMap.Clear();
 			}
 
-			loadedPackages[packageName] = package;
-			loadedPackagesByUuid[packageUuid] = package;
-			loadedPackageUuidToPath[packageUuid] = packageName;
+			loadedBundles[bundleName] = bundle;
+			loadedBundlesByUuid[bundleUuid] = bundle;
+			loadedBundleUuidToPath[bundleUuid] = bundleName;
 		}
 
-		package->isCooked = isCooked > 0 ? true : false;
-		package->majorVersion = majorVersion;
-		package->minorVersion = minorVersion;
+		bundle->isCooked = isCooked > 0 ? true : false;
+		bundle->majorVersion = majorVersion;
+		bundle->minorVersion = minorVersion;
 
 		stream->Seek(dataStartOffset);
 
 		u64 magicObjectNumber = 0;
 		*stream >> magicObjectNumber;
 
-		package->objectUuidToEntryMap.Clear();
+		bundle->objectUuidToEntryMap.Clear();
 
-		while (magicObjectNumber == PACKAGE_OBJECT_MAGIC_NUMBER)
+		while (magicObjectNumber == BUNDLE_OBJECT_MAGIC_NUMBER)
 		{
 			u64 objectUuid = 0;
 			*stream >> objectUuid;
@@ -267,8 +267,8 @@ namespace CE
 			b8 isAsset = false;
 			*stream >> isAsset;
 
-			String pathInPackage{};
-			*stream >> pathInPackage;
+			String pathInBundle{};
+			*stream >> pathInBundle;
 
 			String objectTypeName{};
 			*stream >> objectTypeName;
@@ -294,13 +294,13 @@ namespace CE
 			*stream >> dataSize;
 			stream->Seek(dataSize, SeekMode::Current);
             
-            package->objectUuidToEntryMap[objectUuid] = ObjectEntryMetaData();
+            bundle->objectUuidToEntryMap[objectUuid] = ObjectEntryMetaData();
             
-            ObjectEntryMetaData& objectEntry = package->objectUuidToEntryMap[objectUuid];
+            ObjectEntryMetaData& objectEntry = bundle->objectUuidToEntryMap[objectUuid];
             objectEntry.instanceUuid = objectUuid;
             objectEntry.isAsset = isAsset;
             objectEntry.objectClassName = objectTypeName;
-            objectEntry.pathInPackage = pathInPackage;
+            objectEntry.pathInBundle = pathInBundle;
             objectEntry.offsetInFile = dataStartOffset;
             objectEntry.objectDataSize = dataSize;
 			objectEntry.objectName = objectName;
@@ -312,33 +312,33 @@ namespace CE
 			*stream >> magicObjectNumber; // magic number is 0 if end of file
 		}
         
-        package->isFullyLoaded = false;
-        package->isLoaded = true;
+        bundle->isFullyLoaded = false;
+        bundle->isLoaded = true;
         
         if (loadFlags & LOAD_Full)
         {
-            package->LoadFully();
+            bundle->LoadFully();
         }
 
-		outResult = LoadPackageResult::Success;
-		return package;
+		outResult = BundleLoadResult::Success;
+		return bundle;
 	}
 
-    void Package::LoadFully()
+    void Bundle::LoadFully()
     {
 		ZoneScoped;
 
         if (isFullyLoaded)
             return;
-        if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory())
+        if (!fullBundlePath.Exists() || fullBundlePath.IsDirectory())
             return;
         
-        FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        FileStream stream = FileStream(fullBundlePath, Stream::Permissions::ReadOnly);
         stream.SetBinaryMode(true);
         LoadFully(&stream);
     }
 
-    void Package::LoadFully(Stream* stream)
+    void Bundle::LoadFully(Stream* stream)
     {
 		ZoneScoped;
 
@@ -353,21 +353,21 @@ namespace CE
 		isFullyLoaded = true;
     }
 
-    Object* Package::LoadObject(Uuid objectUuid)
+    Object* Bundle::LoadObject(Uuid objectUuid)
     {
 		ZoneScoped;
 
         if (objectUuid != 0 && loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
-        if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory() || objectUuid == 0)
+        if (!fullBundlePath.Exists() || fullBundlePath.IsDirectory() || objectUuid == 0)
             return nullptr;
         
-        FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        FileStream fileStream = FileStream(fullBundlePath, Stream::Permissions::ReadOnly);
         fileStream.SetBinaryMode(true);
         return LoadObjectFromEntry(&fileStream, objectUuid);
     }
 
-	Object* Package::LoadObject(const Name& objectClassName)
+	Object* Bundle::LoadObject(const Name& objectClassName)
 	{
 		ZoneScoped;
 
@@ -378,7 +378,7 @@ namespace CE
 				if (loadedObjects.KeyExists(uuid))
 					return loadedObjects[uuid];
 
-				FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+				FileStream fileStream = FileStream(fullBundlePath, Stream::Permissions::ReadOnly);
 				fileStream.SetBinaryMode(true);
 				return LoadObjectFromEntry(&fileStream, uuid);
 			}
@@ -393,7 +393,7 @@ namespace CE
 		return nullptr;
 	}
 
-	Object* Package::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
+	Object* Bundle::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
     {
 		ZoneScoped;
 
@@ -416,20 +416,20 @@ namespace CE
 
 		Object* objectInstance = nullptr;
 
-		if (objectUuid == this->GetPackageUuid() && objectClass->IsSubclassOf<Package>())
+		if (objectUuid == this->GetBundleUuid() && objectClass->IsSubclassOf<Bundle>())
 		{
 			objectInstance = this;
 		}
 		else
 		{
-			Internal::ConstructObjectParams params{ objectClass };
+			Internal::ObjectCreateParams params{ objectClass };
 			params.outer = nullptr;
 			params.name = entry.objectName.GetString();
 			params.templateObject = nullptr;
 			params.objectFlags = OF_NoFlags;
 			params.uuid = objectUuid;
 
-			objectInstance = Internal::ConstructObject(params);
+			objectInstance = Internal::CreateObjectInternal(params);
 		}
 
         loadedObjects[objectUuid] = objectInstance;

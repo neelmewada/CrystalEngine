@@ -4,11 +4,11 @@ namespace CE
 {
 	Array<ClassType*> Settings::settingsClasses{};
 
-	static Settings* LoadSettingsFromPackage(ClassType* settingsClass)
+	static Settings* LoadSettingsFromBundle(ClassType* settingsClass)
 	{
 		if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
 			return nullptr;
-		return (Settings*)GetSettingsPackage()->LoadObject(settingsClass->GetTypeName());
+		return (Settings*)GetSettingsBundle()->LoadObject(settingsClass->GetTypeName());
 	}
 
     Settings* Settings::LoadSettings(ClassType* settingsClass, String settingsName)
@@ -16,7 +16,7 @@ namespace CE
         if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
             return nullptr;
 		
-		Settings* settings = LoadSettingsFromPackage(settingsClass);
+		Settings* settings = LoadSettingsFromBundle(settingsClass);
 
 		if (settings == nullptr)
 		{
@@ -29,7 +29,7 @@ namespace CE
 				settingsName = settingsClass->GetName().GetLastComponent();
 			}
 
-			settings = CreateObject<Settings>(GetSettingsPackage(), settingsName, OF_NoFlags, settingsClass);
+			settings = CreateObject<Settings>(GetSettingsBundle(), settingsName, OF_NoFlags, settingsClass);
 		}
 		
 		return settings;
@@ -37,27 +37,27 @@ namespace CE
 
 	void Settings::SaveSettings()
 	{
-		Package* settingsPackage = GetSettingsPackage();
-		if (settingsPackage == nullptr)
+		Bundle* settingsBundle = GetSettingsBundle();
+		if (settingsBundle == nullptr)
 			return;
 
-		if (!settingsPackage->IsFullyLoaded())
-			settingsPackage->LoadFully();
+		if (!settingsBundle->IsFullyLoaded())
+			settingsBundle->LoadFully();
 
-		Package::SavePackage(settingsPackage, nullptr);
+		Bundle::SaveBundleToDisk(settingsBundle, nullptr);
 	}
 
 #if PAL_TRAIT_BUILD_EDITOR
 	void Settings::SaveSettings(const IO::Path& customPath)
 	{
-		Package* settingsPackage = GetSettingsPackage();
-		if (settingsPackage == nullptr)
+		Bundle* settingsBundle = GetSettingsBundle();
+		if (settingsBundle == nullptr)
 			return;
 
-		if (!settingsPackage->IsFullyLoaded())
-			settingsPackage->LoadFully();
+		if (!settingsBundle->IsFullyLoaded())
+			settingsBundle->LoadFully();
 
-		Package::SavePackage(settingsPackage, nullptr, customPath);
+		Bundle::SaveBundleToDisk(settingsBundle, nullptr, customPath);
 	}
 #endif
 

@@ -6,7 +6,7 @@ namespace CE
 
 	static bool SortAssetData(AssetData* lhs, AssetData* rhs)
 	{
-		return String::NaturalCompare(lhs->packageName.GetLastComponent(), rhs->packageName.GetLastComponent());
+		return String::NaturalCompare(lhs->bundleName.GetLastComponent(), rhs->bundleName.GetLastComponent());
 	}
 
 	AssetRegistry::AssetRegistry()
@@ -82,20 +82,20 @@ namespace CE
 		return directoryTree.GetNode(path);
 	}
 
-	Name AssetRegistry::GetPackagePath(Uuid packageUuid)
+	Name AssetRegistry::ResolveBundlePath(Uuid bundleUuid)
 	{
-		if (!cachedPrimaryAssetByPackageUuid.KeyExists(packageUuid))
+		if (!cachedPrimaryAssetByBundleUuid.KeyExists(bundleUuid))
 			return Name();
-		AssetData* assetData = cachedPrimaryAssetByPackageUuid[packageUuid];
+		AssetData* assetData = cachedPrimaryAssetByBundleUuid[bundleUuid];
 		if (assetData == nullptr)
 			return Name();
-		return assetData->packageName;
+		return assetData->bundleName;
 	}
 
-	void AssetRegistry::OnAssetImported(const Name& packageName, const Name& sourcePath)
+	void AssetRegistry::OnAssetImported(const Name& bundleName, const Name& sourcePath)
 	{
-		IO::Path packagePath = Package::GetPackagePath(packageName);
-		Package* load = Package::LoadPackage(nullptr, packageName, LOAD_Default);
+		IO::Path bundlePath = Bundle::GetBundlePath(bundleName);
+		Bundle* load = Bundle::LoadBundleFromDisk(nullptr, bundleName, LOAD_Default);
 		if (load == nullptr)
 			return;
 
@@ -103,20 +103,20 @@ namespace CE
 		String relativePathStr = "";
 		String parentRelativePathStr = "";
 
-		if (IO::Path::IsSubDirectory(packagePath, projectAssetsPath))
+		if (IO::Path::IsSubDirectory(bundlePath, projectAssetsPath))
 		{
-			relativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
+			relativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePathStr.StartsWith("/"))
 				relativePathStr = "/" + relativePathStr;
 
-			parentRelativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			parentRelativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
 
 		AssetData* assetData = nullptr;
 		bool newEntry = false;
-		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->packageName == load->GetPackageName(); });
+		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetBundleName(); });
 
 		if (originalIndex >= 0)
 		{
@@ -135,10 +135,10 @@ namespace CE
 
 		Name primaryName = load->GetPrimaryObjectName();
 		Name primaryTypeName = load->GetPrimaryObjectTypeName();
-		assetData->packageName = load->GetPackageName();
+		assetData->bundleName = load->GetBundleName();
 		assetData->assetName = primaryName;
 		assetData->assetClassPath = primaryTypeName;
-		assetData->packageUuid = load->GetUuid();
+		assetData->bundleUuid = load->GetUuid();
 		assetData->assetUuid = load->GetPrimaryObjectUuid();
 		
 #if PAL_TRAIT_BUILD_EDITOR
@@ -155,27 +155,27 @@ namespace CE
 		load->RequestDestroy();
 
 		if (listener != nullptr)
-			listener->OnAssetImported(packageName, sourcePath);
+			listener->OnAssetImported(bundleName, sourcePath);
 		
-		onAssetImported.Broadcast(packageName);
+		onAssetImported.Broadcast(bundleName);
 		onAssetRegistryModified.Broadcast();
 	}
 
-	void AssetRegistry::OnAssetDeleted(const Name& packageName)
+	void AssetRegistry::OnAssetDeleted(const Name& bundleName)
 	{
-		IO::Path packagePath = Package::GetPackagePath(packageName);
+		IO::Path bundlePath = Bundle::GetBundlePath(bundleName);
 
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
 		String relativePathStr = "";
 		String parentRelativePathStr = "";
 
-		if (IO::Path::IsSubDirectory(packagePath, projectAssetsPath))
+		if (IO::Path::IsSubDirectory(bundlePath, projectAssetsPath))
 		{
-			relativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			relativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
 			if (!relativePathStr.StartsWith("/"))
 				relativePathStr = "/" + relativePathStr;
 
-			parentRelativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			parentRelativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
@@ -193,7 +193,7 @@ namespace CE
 		cachedAssetsByPath.Remove(relativePathName);
 
 		if (listener != nullptr)
-			listener->OnAssetImported(packageName);
+			listener->OnAssetImported(bundleName);
 
 		onAssetRegistryModified.Broadcast();
 	}
@@ -239,7 +239,7 @@ namespace CE
 					}
                     else if (item.GetExtension() == ".casset") // Product asset file
                     {
-						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
+						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
@@ -247,10 +247,10 @@ namespace CE
 								load->LoadFully();
 							Name primaryName = load->GetPrimaryObjectName();
 							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->packageName = load->GetPackageName();
+							assetData->bundleName = load->GetBundleName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
-							assetData->packageUuid = load->GetUuid();
+							assetData->bundleUuid = load->GetUuid();
 							assetData->assetUuid = load->GetPrimaryObjectUuid();
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
@@ -307,7 +307,7 @@ namespace CE
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
 					{
-						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
+						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
@@ -315,10 +315,10 @@ namespace CE
 								load->LoadFully();
 							Name primaryName = load->GetPrimaryObjectName();
 							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->packageName = load->GetPackageName();
+							assetData->bundleName = load->GetBundleName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
-							assetData->packageUuid = load->GetUuid();
+							assetData->bundleUuid = load->GetUuid();
 							assetData->assetUuid = load->GetPrimaryObjectUuid();
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
@@ -365,7 +365,7 @@ namespace CE
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
 					{
-						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
+						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
@@ -373,10 +373,10 @@ namespace CE
 								load->LoadFully();
 							Name primaryName = load->GetPrimaryObjectName();
 							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->packageName = load->GetPackageName();
+							assetData->bundleName = load->GetBundleName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
-							assetData->packageUuid = load->GetUuid();
+							assetData->bundleUuid = load->GetUuid();
 							assetData->assetUuid = load->GetPrimaryObjectUuid();
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
@@ -400,18 +400,18 @@ namespace CE
 	}
 
 
-	void AssetRegistry::AddAssetEntry(const Name& packageName, AssetData* assetData)
+	void AssetRegistry::AddAssetEntry(const Name& bundleName, AssetData* assetData)
 	{
 		if (assetData == nullptr)
 			return;
 
 		allAssetDatas.Add(assetData);
-		cachedPathTree.AddPath(packageName, assetData);
-		cachedAssetsByPath[packageName].Add(assetData);
-		cachedPrimaryAssetByPath[packageName] = assetData;
-		cachedPrimaryAssetByPackageUuid[assetData->packageUuid] = assetData;
+		cachedPathTree.AddPath(bundleName, assetData);
+		cachedAssetsByPath[bundleName].Add(assetData);
+		cachedPrimaryAssetByPath[bundleName] = assetData;
+		cachedPrimaryAssetByBundleUuid[assetData->bundleUuid] = assetData;
 
-		String parentPathStr = IO::Path(packageName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+		String parentPathStr = IO::Path(bundleName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
 		Name parentPath = parentPathStr;
 		
 		cachedPrimaryAssetsByParentPath[parentPath].Add(assetData);
@@ -423,18 +423,18 @@ namespace CE
 		}
 	}
 
-	void AssetRegistry::DeleteAssetEntry(const Name& packageName)
+	void AssetRegistry::DeleteAssetEntry(const Name& bundleName)
 	{
-		if (!cachedAssetsByPath.KeyExists(packageName))
+		if (!cachedAssetsByPath.KeyExists(bundleName))
 			return;
 
-		auto assetDatas = cachedAssetsByPath[packageName];
+		auto assetDatas = cachedAssetsByPath[bundleName];
 
-		cachedPathTree.RemovePath(packageName);
-		cachedAssetsByPath.Remove(packageName);
-		cachedPrimaryAssetByPath.Remove(packageName);
+		cachedPathTree.RemovePath(bundleName);
+		cachedAssetsByPath.Remove(bundleName);
+		cachedPrimaryAssetByPath.Remove(bundleName);
 		
-		String parentPathStr = IO::Path(packageName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+		String parentPathStr = IO::Path(bundleName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
 		Name parentPath = parentPathStr;
 
 		cachedPrimaryAssetsByParentPath.Remove(parentPath);

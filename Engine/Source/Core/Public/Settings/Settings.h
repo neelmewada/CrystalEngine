@@ -44,9 +44,9 @@ namespace CE
 	}
 
 #if PAL_TRAIT_BUILD_EDITOR
-    FORCE_INLINE void SaveSettings(const IO::Path& outPackagePath)
+    FORCE_INLINE void SaveSettings(const IO::Path& outBundlePath)
 	{
-        Settings::SaveSettings(outPackagePath);
+        Settings::SaveSettings(outBundlePath);
 	}
 #endif
 }

@@ -11,13 +11,13 @@ namespace CE
 
 	struct IAssetRegistryListener
 	{
-		virtual void OnAssetImported(const Name& packageName, const Name& sourcePath = "") {}
+		virtual void OnAssetImported(const Name& bundleName, const Name& sourcePath = "") {}
 
-		virtual void OnAssetDeleted(const Name& packageName) {}
+		virtual void OnAssetDeleted(const Name& bundleName) {}
 	};
 
 	CLASS()
-	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener, public IPackageResolver
+	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener, public IBundleResolver
 	{
 		CE_CLASS(AssetRegistry, Object)
 	public:
@@ -58,7 +58,7 @@ namespace CE
 		Array<String> GetSubDirectoriesAtPath(const Name& path);
 		PathTreeNode* GetDirectoryNode(const Name& path);
 
-		virtual Name GetPackagePath(Uuid packageUuid) override;
+		virtual Name ResolveBundlePath(Uuid bundleUuid) override;
 
 	protected:
 
@@ -70,9 +70,9 @@ namespace CE
 
 		// - Internal API -
 
-		void OnAssetImported(const Name& packageName, const Name& sourcePath = "");
+		void OnAssetImported(const Name& bundleName, const Name& sourcePath = "");
 
-		void OnAssetDeleted(const Name& packageName);
+		void OnAssetDeleted(const Name& bundleName);
 
 	public:
 
@@ -83,8 +83,8 @@ namespace CE
 
 	private:
 
-		void AddAssetEntry(const Name& packageName, AssetData* assetData);
-		void DeleteAssetEntry(const Name& packageName);
+		void AddAssetEntry(const Name& bundleName, AssetData* assetData);
+		void DeleteAssetEntry(const Name& bundleName);
 
 		PathTree directoryTree{};
 		PathTree cachedPathTree{};
@@ -112,7 +112,7 @@ namespace CE
 
 		Array<AssetData*> allAssetDatas{};
 
-		HashMap<Uuid, AssetData*> cachedPrimaryAssetByPackageUuid{};
+		HashMap<Uuid, AssetData*> cachedPrimaryAssetByBundleUuid{};
 		HashMap<Name, AssetData*> cachedPrimaryAssetByPath{};
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
 		HashMap<Name, AssetData*> cachedAssetBySourcePath{};

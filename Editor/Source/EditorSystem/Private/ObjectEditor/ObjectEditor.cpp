@@ -17,7 +17,7 @@ namespace CE::Editor
 	ObjectEditor* ObjectEditor::Create(Class* targetClass, Object* outer, const String& name)
 	{
 		if (outer == nullptr)
-			outer = GetTransientPackage(MODULE_NAME);
+			outer = GetTransient(MODULE_NAME);
 		if (targetClass == nullptr)
 			return nullptr;
 
