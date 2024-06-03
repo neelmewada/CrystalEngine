@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    class ObjectInitializer;
+    class ObjectCreateInfo;
 
     class CORE_API ObjectThreadContext : public ThreadSingleton<ObjectThreadContext>
     {
@@ -12,7 +12,7 @@ namespace CE
 
     public:
 
-        void PushInitializer(ObjectInitializer* initializer)
+        void PushInitializer(ObjectCreateInfo* initializer)
         {
             objectInitializerStack.Add(initializer);
         }
@@ -23,7 +23,7 @@ namespace CE
                 objectInitializerStack.RemoveAt(objectInitializerStack.GetSize() - 1);
         }
 
-        ObjectInitializer* TopInitializer()
+        ObjectCreateInfo* TopInitializer()
         {
             return objectInitializerStack.IsEmpty() ? nullptr : objectInitializerStack.GetLast();
         }
@@ -31,7 +31,7 @@ namespace CE
     public:// TODO: Change to private after finish debugging
         friend class ThreadSingleton<ObjectThreadContext>;
 
-        Array<ObjectInitializer*> objectInitializerStack{};
+        Array<ObjectCreateInfo*> objectInitializerStack{};
     };
 
 } // namespace CE

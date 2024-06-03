@@ -16,7 +16,6 @@ namespace CE
 
     void FCompoundWidget::Construct()
     {
-        Super::Construct();
 
 
     }

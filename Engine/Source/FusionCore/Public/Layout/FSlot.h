@@ -24,10 +24,10 @@ namespace CE
         Vec4 m_Padding{};
 
         FIELD()
-        FVerticalAlignment m_VAlign = VAlign_Top;
+        VAlign m_VAlign = VAlign::Top;
 
         FIELD()
-        FHorizontalAlignment m_HAlign = HAlign_Left;
+        HAlign m_HAlign = HAlign::Left;
 
         FIELD()
         f32 m_MinDesiredWidth = 0.0f;
@@ -41,6 +41,7 @@ namespace CE
         FIELD()
         f32 m_MaxDesiredHeight = NumericLimits<f32>::Max();
 
+
         void OnBeforeDestroy() override;
 
     public:  // - Properties -
@@ -50,6 +51,10 @@ namespace CE
 
         //! @brief Do NOT use this method directly!
         void SetChild(FWidget* newChild);
+
+        FWidget* GetChild() const { return m_Child; }
+
+        FWidget* GetOwner() const { return m_Owner; }
 
         FUSION_PROPERTY(Padding);
 
@@ -64,8 +69,6 @@ namespace CE
         FUSION_PROPERTY(MaxDesiredWidth);
 
         FUSION_PROPERTY(MaxDesiredHeight);
-
-        FWidget* GetOwner() const { return m_Owner; }
 
         Self& Padding(f32 padding)
         {
@@ -85,8 +88,6 @@ namespace CE
             return *this;
         }
 
-        FWidget* GetChild() const { return m_Child; }
-
         virtual Self& Child(FWidget& child);
 
         Self& operator()(FWidget& child)
@@ -94,7 +95,7 @@ namespace CE
             return Child(child);
         }
 
-        FUSION_TESTS;
+        FUSION_FRIENDS;
     };
     
 } // namespace CE

@@ -6,7 +6,7 @@ namespace CE
 	namespace Internal
 	{
 
-		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params)
+		CORE_API Object* ConstructObject(const ConstructObjectParams& params)
 		{
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
@@ -18,7 +18,7 @@ namespace CE
 				return nullptr;
 			}
             
-			ObjectInitializer init = ObjectInitializer();
+			ObjectCreateInfo init = ObjectCreateInfo();
 			init.objectFlags = params.objectFlags | OF_InsideConstructor;
 			init.name = params.name;
 			init.uuid = params.uuid;
@@ -138,12 +138,12 @@ namespace CE
 	*	Object Initializer
 	*/
 
-	ObjectInitializer::ObjectInitializer()
+	ObjectCreateInfo::ObjectCreateInfo()
 	{
 		
 	}
 
-	ObjectInitializer::ObjectInitializer(ObjectFlags flags) : objectFlags(flags)
+	ObjectCreateInfo::ObjectCreateInfo(ObjectFlags flags) : objectFlags(flags)
 	{
 		
 	}

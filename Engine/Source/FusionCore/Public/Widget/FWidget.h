@@ -14,6 +14,8 @@ namespace CE
 
         // - Public API -
 
+        virtual SubClass<FSlot> GetSlotClass() const { return nullptr; }
+
         virtual u32 GetSlotCount() { return 0; }
 
         virtual FSlot* GetSlot(u32 index) { return nullptr; }
@@ -26,6 +28,8 @@ namespace CE
         virtual bool RemoveSlot(FSlot* slot);
 
         void DestroySlot(FSlot* slot);
+
+        void SetContext(FFusionContext* context);
 
     protected:
 
@@ -73,8 +77,7 @@ namespace CE
     private:
 
 
-        FUSION_TESTS;
-        friend class FSlot;
+        FUSION_FRIENDS;
     };
     
 } // namespace CE

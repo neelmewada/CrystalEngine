@@ -184,14 +184,14 @@ namespace CE
 
     String ConfigCache::FindBaseConfigFileName(ConfigType type)
     {
-        int count = COUNTOF(gConfigLayers);
+        int count = COUNTOF(gConfigTiers);
         auto engineRootDir = PlatformDirectories::GetEngineRootDir();
         
         for (int i = 0; i < count; i++)
         {
-            if (gConfigLayers[i].displayName == "Base")
+            if (gConfigTiers[i].displayName == "Base")
             {
-                return String::Format(gConfigLayers[i].relativePath,
+                return String::Format(gConfigTiers[i].relativePath,
                     String::Arg("ENGINE", engineRootDir),
                     String::Arg("TYPE", type.name.GetString()));
             }
@@ -202,14 +202,14 @@ namespace CE
 
     String ConfigCache::FindBaseConfigFileName(ConfigType type, String platform)
     {
-        int count = COUNTOF(gConfigLayers);
+        int count = COUNTOF(gConfigTiers);
         auto engineRootDir = PlatformDirectories::GetEngineRootDir();
         
         for (int i = 0; i < count; i++)
         {
-            if (gConfigLayers[i].displayName == "BasePlatform")
+            if (gConfigTiers[i].displayName == "BasePlatform")
             {
-                return String::Format(gConfigLayers[i].relativePath,
+                return String::Format(gConfigTiers[i].relativePath,
                     String::Arg("ENGINE", engineRootDir),
                     String::Arg("TYPE", type.name.GetString()),
                     String::Arg("PLATFORM", platform));
@@ -237,13 +237,13 @@ namespace CE
         auto projectRootDir = gProjectPath;
         auto platformName = PlatformMisc::GetPlatformName();
 
-        int layerCount = COUNTOF(gConfigLayers);
+        int layerCount = COUNTOF(gConfigTiers);
 
         ConfigFile* file = new ConfigFile;
 
         for (int i = 0; i < layerCount; i++)
         {
-            IO::Path configPath = String::Format(gConfigLayers[i].relativePath,
+            IO::Path configPath = String::Format(gConfigTiers[i].relativePath,
                 String::Arg("ENGINE", engineRootDir),
                 String::Arg("TYPE", type.name.GetString()),
                 String::Arg("PLATFORM", platformName),
@@ -259,7 +259,7 @@ namespace CE
 
     Array<IO::Path> ConfigCache::GetConfigPaths(const ConfigType& type)
     {
-        int layerCount = COUNTOF(gConfigLayers);
+        int layerCount = COUNTOF(gConfigTiers);
         Array<IO::Path> result{};
 
         auto engineRootDir = PlatformDirectories::GetEngineRootDir();
@@ -268,7 +268,7 @@ namespace CE
         
         for (int i = 0; i < layerCount; i++)
         {
-            IO::Path configPath = String::Format(gConfigLayers[i].relativePath,
+            IO::Path configPath = String::Format(gConfigTiers[i].relativePath,
                 String::Arg("ENGINE", engineRootDir),
                 String::Arg("TYPE", type.name.GetString()),
                 String::Arg("PLATFORM", platformName),

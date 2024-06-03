@@ -31,7 +31,7 @@ namespace CE
 
 	struct SavePackageArgs
 	{
-
+		
 	};
 
 	struct IPackageResolver

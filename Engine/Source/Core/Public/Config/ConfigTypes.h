@@ -54,7 +54,7 @@ namespace CE
         return GetHash<Name>(value.name);
     }
     
-    struct ConfigLayer
+    struct ConfigTier
     {
         const char* displayName;
         const char* relativePath;

@@ -52,7 +52,7 @@ namespace CE
 		};
 
 		/// For internal use only
-		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params);
+		CORE_API Object* ConstructObject(const ConstructObjectParams& params);
 		
 	}
 
@@ -77,24 +77,24 @@ namespace CE
 		params.objectFlags = flags;
 		params.uuid = uuid;
 		
-		return static_cast<TClass*>(Internal::StaticConstructObject(params));
+		return static_cast<TClass*>(Internal::ConstructObject(params));
 	}
 
 	/* *************************************
 	*	Object Initializer
 	*/
 
-	class CORE_API ObjectInitializer
+	class CORE_API ObjectCreateInfo
 	{
 	public:
 		friend class Object;
 
-		friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams&);
+		friend Object* Internal::ConstructObject(const Internal::ConstructObjectParams&);
 
 		/// Default constructor.
-		ObjectInitializer();
+		ObjectCreateInfo();
 
-		ObjectInitializer(ObjectFlags flags);
+		ObjectCreateInfo(ObjectFlags flags);
 
 
 		ObjectFlags GetObjectFlags() const

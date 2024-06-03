@@ -21,7 +21,23 @@ namespace ConstructTests
 	
 }
 
+namespace LayoutTests
+{
+	CLASS()
+	class LayoutTestWidget : public FCompoundWidget
+	{
+		CE_CLASS(LayoutTestWidget, FCompoundWidget)
+	public:
+
+		LayoutTestWidget();
+
+		void Construct() override;
+
+	};
+
+	
+}
+
 
 #include "FusionCoreTest.rtti.h"
-
 #include "FusionCoreImpl.h"

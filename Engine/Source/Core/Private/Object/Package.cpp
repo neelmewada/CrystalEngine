@@ -304,6 +304,7 @@ namespace CE
 				}
 			}
 		}
+
 		return primaryObjectName;
 	}
 

@@ -23,9 +23,9 @@ namespace CE
         ConstructInternal();
     }
 
-    Object::Object(const ObjectInitializer& initializer)
+    Object::Object(const ObjectCreateInfo& initializer)
     {
-        ConstructInternal(const_cast<ObjectInitializer*>(&initializer));
+        ConstructInternal(const_cast<ObjectCreateInfo*>(&initializer));
     }
 
 	Object::~Object()
@@ -114,7 +114,7 @@ namespace CE
         ConstructInternal(initializer);
     }
 
-    void Object::ConstructInternal(ObjectInitializer* initializer)
+    void Object::ConstructInternal(ObjectCreateInfo* initializer)
     {
         CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
 		CE_ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");

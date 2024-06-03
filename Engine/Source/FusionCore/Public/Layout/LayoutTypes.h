@@ -3,25 +3,21 @@
 namespace CE
 {
     ENUM()
-    enum FHorizontalAlignment
+    enum class HAlign
     {
-        ECONST(DisplayName = "Left")
-	    HAlign_Left,
-        ECONST(DisplayName = "Center")
-        HAlign_Center,
-        ECONST(DisplayName = "Right")
-        HAlign_Right
+	    Left,
+        Center,
+        Right,
+        Fill
     };
 
     ENUM()
-    enum FVerticalAlignment
+    enum class VAlign
     {
-        ECONST(DisplayName = "Top")
-        VAlign_Top,
-        ECONST(DisplayName = "Middle")
-        VAlign_Middle,
-        ECONST(DisplayName = "Bottom")
-        VAlign_Bottom
+        Top,
+        Center,
+        Bottom,
+        Fill
     };
     
 

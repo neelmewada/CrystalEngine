@@ -236,7 +236,7 @@ namespace CE
 				params.objectFlags = OF_NoFlags;
 				params.outer = outer;
 
-				package = (Package*)Internal::StaticConstructObject(params);
+				package = (Package*)Internal::ConstructObject(params);
 				package->fullPackagePath = fullPackagePath;
 				package->packageDependencies = packageDependendies;
 				package->isFullyLoaded = false;
@@ -429,7 +429,7 @@ namespace CE
 			params.objectFlags = OF_NoFlags;
 			params.uuid = objectUuid;
 
-			objectInstance = Internal::StaticConstructObject(params);
+			objectInstance = Internal::ConstructObject(params);
 		}
 
         loadedObjects[objectUuid] = objectInstance;

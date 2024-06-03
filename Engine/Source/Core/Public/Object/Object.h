@@ -51,14 +51,14 @@ namespace CE
     protected:
         Object();
 
-        Object(const ObjectInitializer& initializer);
+        Object(const ObjectCreateInfo& initializer);
         
         virtual ~Object();
 
     private:
 
         void ConstructInternal();
-        void ConstructInternal(ObjectInitializer* initializer);
+        void ConstructInternal(ObjectCreateInfo* initializer);
 
     public:
 
@@ -268,7 +268,7 @@ namespace CE
         friend class FieldType;
         
         friend class EventBus;
-        friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
+        friend Object* Internal::ConstructObject(const Internal::ConstructObjectParams& params);
 
         template<typename T>
         friend struct Internal::TypeInfoImpl;

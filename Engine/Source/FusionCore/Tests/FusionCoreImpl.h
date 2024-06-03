@@ -10,7 +10,7 @@ namespace ConstructTests
 
     inline void ComplexWidget::Construct()
     {
-	    Super::Construct();
+	    
 
         ChildSlot(
             FAssignNew(rootBox, FStackBox)
@@ -18,14 +18,14 @@ namespace ConstructTests
 
             + FStackBox::Slot()
             .Padding(10, 10)        
-            .VAlign(VAlign_Middle)
+            .VAlign(VAlign::Center)
             (
                 FNew(FStackBox)
                 .Direction(FStackBoxDirection::Horizontal) // Root / Horizontal
 
                 + FStackBox::Slot()
                 .Padding(0, 0)
-                .HAlign(HAlign_Center)
+                .HAlign(HAlign::Center)
                 (
                     FNew(FStackBox)
                     .Direction(FStackBoxDirection::Vertical)  // Root / Horizontal / Vertical
@@ -48,3 +48,17 @@ namespace ConstructTests
 
 } // namespace ConstructTests
 
+
+namespace LayoutTests
+{
+
+    inline LayoutTestWidget::LayoutTestWidget()
+    {
+    }
+
+    inline void LayoutTestWidget::Construct()
+    {
+        
+    }
+
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace CE
 {
 
@@ -34,6 +35,8 @@ namespace CE
 
         // - Public API -
 
+        SubClass<FSlot> GetSlotClass() const override { return FStackBoxSlot::StaticType(); }
+
         u32 GetSlotCount() override;
 
         FSlot* GetSlot(u32 index) override;
@@ -61,7 +64,6 @@ namespace CE
     public:  // - Properties -
 
         FUSION_PROPERTY(Direction);
-
 
         FUSION_TESTS;
     };

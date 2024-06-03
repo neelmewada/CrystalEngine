@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    class FFusionContext;
 
     CLASS()
     class FUSIONCORE_API FLayoutManager : public Object
@@ -13,6 +14,12 @@ namespace CE
 
     private:
 
+        FIELD()
+        FFusionContext* context = nullptr;
+
+        FUSION_FRIENDS;
     };
     
 } // namespace CE
+
+#include "FLayoutManager.rtti.h"

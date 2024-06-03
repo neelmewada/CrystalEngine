@@ -135,6 +135,9 @@ TEST(FusionCore, Construction)
 
 		EXPECT_NE(widget->rootBox, nullptr);
 		EXPECT_EQ(widget->rootBox->GetDirection(), FStackBoxDirection::Vertical);
+		EXPECT_EQ(widget->m_ChildSlot->GetOwner(), widget);
+		EXPECT_EQ(widget->m_ChildSlot->GetChild(), widget->rootBox);
+		EXPECT_EQ(widget->m_ChildSlot, widget->rootBox->m_Parent);
 
 		EXPECT_EQ(widget->rootBox->GetSlotCount(), 1);
 		EXPECT_EQ(widget->rootBox->GetSlot(0)->GetOuter(), widget->rootBox);
@@ -201,7 +204,7 @@ TEST(FusionCore, Construction)
 
 		stack1Slot0 = stack1->GetSlot(0);
 
-		// Destroying the widget directly should remove its parent slot too!
+		// Destroying the widget object directly should remove its parent slot too!
 		stack1->Destroy(); stack1 = nullptr;
 
 		EXPECT_EQ(widget->rootBox->GetSlotCount(), 0);
@@ -218,7 +221,20 @@ TEST(FusionCore, Layout)
 
 	FusionApplication* app = FusionApplication::Get();
 
-	
+	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
+	app->SetRootContext(rootContext);
+
+	int frameCount = 0;
+	constexpr int MaxNumFrames = 4;
+
+
+
+	while (frameCount < MaxNumFrames)
+	{
+		app->Tick();
+
+		frameCount++;
+	}
 
 	TEST_END;
 }

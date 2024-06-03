@@ -48,7 +48,15 @@ namespace CE
 
     void FusionApplication::Tick()
     {
+        if (rootContext)
+        {
+            rootContext->Tick();
+        }
+    }
 
+    void FusionApplication::SetRootContext(FFusionContext* context)
+    {
+        rootContext = context;
     }
 
     void FusionApplication::InitializeShaders()

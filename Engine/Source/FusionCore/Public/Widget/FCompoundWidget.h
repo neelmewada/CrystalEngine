@@ -21,6 +21,8 @@ namespace CE
 
         FCompoundWidget();
 
+        SubClass<FSlot> GetSlotClass() const override { return FCompoundWidgetSlot::StaticType(); }
+
         u32 GetSlotCount() override { return 1; }
 
         FSlot* GetSlot(u32 index) override { return m_ChildSlot; }

@@ -2,7 +2,8 @@
 
 namespace CE
 {
-    class FNativeWindow;
+    class FNativeContext;
+    class FFusionContext;
     class FLayoutManager;
 
     struct FusionInitInfo
@@ -28,12 +29,14 @@ namespace CE
 
         void Tick();
 
+        void SetRootContext(FFusionContext* context);
+
     private:
 
         void InitializeShaders();
 
-        
-        Array<FNativeWindow*> nativeWindows{};
+        FIELD()
+        FFusionContext* rootContext = nullptr;
 
         RPI::Shader* fusionShader = nullptr;
 

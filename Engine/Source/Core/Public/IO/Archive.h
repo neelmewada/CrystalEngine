@@ -21,11 +21,11 @@ namespace CE
     /**
      * \brief A low level API for handling ZIP archives
      */
-    class CORE_API Archive
+    class CORE_API ZipArchive
     {
     public:
-        Archive();
-        ~Archive();
+        ZipArchive();
+        ~ZipArchive();
 
         bool IsOpen();
 

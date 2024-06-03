@@ -18,11 +18,19 @@ class FusionCore_Layout_Test;
 
 #endif
 
+#define FUSION_FRIENDS FUSION_TESTS\
+    friend class FWidget;\
+    friend class FFusionContext;\
+    friend class FNativeContext;\
+    friend class FusionApplication;\
+    friend class FSlot;
+
 #include "FusionMacros.h"
 #include "Exception/FusionException.h"
 
 #include "Application/FusionApplication.h"
-#include "Application/FNativeWindow.h"
+#include "Application/FusionContext.h"
+#include "Application/FNativeContext.h"
 #include "Rendering/FusionRenderer.h"
 
 #include "Layout/LayoutTypes.h"

@@ -283,7 +283,7 @@ namespace CE
 		}
 	};
 
-	class ObjectInitializer;
+	class ObjectCreateInfo;
 
 	/// True if type has default constructor and is NOT abstract
 	template<typename T, typename = void>
