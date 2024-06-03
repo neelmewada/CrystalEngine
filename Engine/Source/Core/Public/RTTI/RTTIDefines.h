@@ -69,7 +69,7 @@ CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType()\
 }\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName()\
 {\
-	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	static Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Type);\
 	return name;\
 }
 
@@ -137,7 +137,7 @@ CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::Stati
 }\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::FullTypeName()\
 {\
-	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	static Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Type);\
 	return name;\
 }
 
@@ -198,7 +198,7 @@ CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType()\
 }\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName()\
 {\
-	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	static Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Type);\
 	return name;\
 }
 

@@ -15,7 +15,7 @@ namespace CE
 
 		void DeregisterResource(const String& moduleName, const String& pathToResource);
 
-		CE::Resource* LoadResource(const Name& path, Object* outer = GetTransientPackage());
+		CE::Resource* LoadResource(const Name& path, Object* outer = GetGlobalTransient());
 
 		String LoadTextResource(const Name& path);
 

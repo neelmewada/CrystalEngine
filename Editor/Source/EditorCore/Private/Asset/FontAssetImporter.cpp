@@ -53,15 +53,15 @@ namespace CE::Editor
 		return dependencies;
 	}
 
-	bool FontAssetImportJob::ProcessAsset(Package* package)
+	bool FontAssetImportJob::ProcessAsset(Bundle* bundle)
 	{
-		if (package == nullptr)
+		if (bundle == nullptr)
 			return false; // Should never happen
 		if (!sourcePath.Exists())
 			return false;
 
-		// Clear the package of any subobjects/assets, we will build the asset from scratch
-		package->DestroyAllSubobjects();
+		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
+		bundle->DestroyAllSubobjects();
 
 		String fileName = sourcePath.GetFilename().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
@@ -91,7 +91,7 @@ namespace CE::Editor
 		///////////////////////////////////////////////////
 		// - Setup objects -
 
-		Font* font = CreateObject<Font>(package, fileName);
+		Font* font = CreateObject<Font>(bundle, fileName);
 		font->atlasAsset = CreateObject<RPI::FontAtlasAsset>(font, "AtlasData");
 		RPI::FontAtlasAsset* atlasAsset = font->atlasAsset;
 		atlasAsset->fontAtlasTexture = CreateObject<TextureAsset>(atlasAsset, "AtlasTexture");

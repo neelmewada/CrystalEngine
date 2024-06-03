@@ -16,7 +16,7 @@ namespace CE::RHI
 
 		DrawList& GetDrawListForTag(DrawListTag tag);
 
-		/// @brief Thread safe function to add a draw package to the DrawList.
+		/// @brief Thread safe function to add a draw bundle to the DrawList.
 		/// @param drawPacket to add.
 		/// @param depth of object from view
 		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);

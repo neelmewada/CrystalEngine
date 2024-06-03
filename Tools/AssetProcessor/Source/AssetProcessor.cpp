@@ -11,7 +11,7 @@ namespace CE
 	{
 		options.add_options()
 			("h,help", "Print this help info.")
-			("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
+			("p,pack", "Bundle the assets for final distribution build. (Not implemented yet)")
 			("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
 			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets.", cxxopts::value<std::string>()->default_value("Game"))
 			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
@@ -266,7 +266,7 @@ namespace CE
 			Array<IO::Path> productDependencies{};
 			for (const Name& productAssetName : productAssetDependencies)
 			{
-				IO::Path assetPath = Package::GetPackagePath(productAssetName);
+				IO::Path assetPath = Bundle::GetBundlePath(productAssetName);
 				if (productAssetPaths.Exists(assetPath))
 				{
 					productDependencies.Add(assetPath);

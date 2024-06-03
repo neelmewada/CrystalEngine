@@ -50,7 +50,7 @@ function(ce_add_target NAME TARGET_TYPE)
     string(TOLOWER ${NAME} NAME_LOWERCASE)
 
     set(options AUTORTTI AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT RESOURCES)
-    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY PACKAGE)
+    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES POST_BUILD)
 
     cmake_parse_arguments(ce_add_target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -153,7 +153,7 @@ function(ce_add_target NAME TARGET_TYPE)
 
     target_compile_definitions(${NAME} 
         PRIVATE 
-            PACKAGE_NAME="/Code/${NAME}"
+            BUNDLE_NAME="/Code/${NAME}"
             MODULE_NAME="${NAME}"
     )
 

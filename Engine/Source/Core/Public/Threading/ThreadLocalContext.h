@@ -1,8 +1,8 @@
 #pragma once
 
-namespace CE::RHI
+namespace CE
 {
-	CORERHI_API u32 GetTheadLocalContextCounter();
+	CORE_API u32 GetTheadLocalContextCounter();
 
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
@@ -141,4 +141,4 @@ namespace CE::RHI
 		return storageList.IsEmpty() || threadIdList.IsEmpty();
 	}
 
-} // namespace CE::RHI
+} // namespace CE

@@ -8,7 +8,7 @@ namespace CE
 	class StructType;
 	class FieldType;
 	class FunctionType;
-	class Package;
+	class Bundle;
 	class ResourceManager;
 	class Object;
 
@@ -19,14 +19,14 @@ namespace CE
 	//! @brief Returns true if the given object pointer is valid and not destroyed! 
 	CORE_API bool IsValidObject(Object* object);
 
-	/// Transient Package: Same lifetime as Core Module.
+	/// Transient Bundle: Same lifetime as Core Module.
 	///	Used to store temporary objects that are not saved to disk.
-	CORE_API Package* GetTransientPackage();
+	CORE_API Bundle* GetGlobalTransient();
 
-	/// @brief Returns the transient package of a specific module.
-	CORE_API Package* GetTransientPackage(const String& moduleName);
+	/// @brief Returns the transient bundle of a specific module.
+	CORE_API Bundle* GetTransient(const String& moduleName);
 
-    CORE_API Package* GetSettingsPackage();
+    CORE_API Bundle* GetSettingsBundle();
 
 	/// Call this to unload all settings. Should be called in PreShutdown phase.
 	CORE_API void UnloadSettings();
@@ -36,10 +36,10 @@ namespace CE
 	namespace Internal
 	{
 		
-		struct CORE_API ConstructObjectParams
+		struct CORE_API ObjectCreateParams
 		{
-			ConstructObjectParams() = default;
-			ConstructObjectParams(ClassType* objectClass)
+			ObjectCreateParams() = default;
+			ObjectCreateParams(ClassType* objectClass)
 				: objectClass(objectClass)
 			{}
 
@@ -52,7 +52,7 @@ namespace CE
 		};
 
 		/// For internal use only
-		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params);
+		CORE_API Object* CreateObjectInternal(const ObjectCreateParams& params);
 		
 	}
 
@@ -60,7 +60,7 @@ namespace CE
 	CORE_API String FixObjectName(const String& name);
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	TClass* CreateObject(Object* outer = (Object*)GetTransientPackage(),
+	TClass* CreateObject(Object* outer = (Object*)GetGlobalTransient(),
 		String objectName = "",
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
@@ -70,62 +70,15 @@ namespace CE
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
 
-		Internal::ConstructObjectParams params{ objectClass };
+		Internal::ObjectCreateParams params{ objectClass };
 		params.outer = outer;
 		params.name = objectName;
 		params.templateObject = templateObject;
 		params.objectFlags = flags;
 		params.uuid = uuid;
 		
-		return static_cast<TClass*>(Internal::StaticConstructObject(params));
+		return static_cast<TClass*>(Internal::CreateObjectInternal(params));
 	}
-
-	/* *************************************
-	*	Object Initializer
-	*/
-
-	class CORE_API ObjectInitializer
-	{
-	public:
-		friend class Object;
-
-		friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams&);
-
-		/// Default constructor.
-		ObjectInitializer();
-
-		ObjectInitializer(ObjectFlags flags);
-
-
-		ObjectFlags GetObjectFlags() const
-		{
-			return objectFlags;
-		}
-
-		String GetName() const
-		{
-			return name;
-		}
-
-		Uuid GetUuid() const
-		{
-			return uuid;
-		}
-
-		ClassType* GetObjectClass() const
-		{
-			return objectClass;
-		}
-
-	private:
-		
-
-        ClassType* objectClass = nullptr;
-		ObjectFlags objectFlags{};
-		String name{};
-		Uuid uuid{};
-        Package* package = nullptr;
-	};
 
 	/* ***********************************
 	*	Delegates

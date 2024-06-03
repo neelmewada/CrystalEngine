@@ -4,7 +4,7 @@
 
 using namespace CE;
 
-namespace PackageTests
+namespace BundleTests
 {
 	using namespace CE;
 
@@ -350,7 +350,7 @@ namespace JsonTests
 	};
 }
 
-CE_RTTI_CLASS(, PackageTests, WritingTestObj1,
+CE_RTTI_CLASS(, BundleTests, WritingTestObj1,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
@@ -363,7 +363,7 @@ CE_RTTI_CLASS(, PackageTests, WritingTestObj1,
     CE_FUNCTION_LIST(
     )
 )
-CE_RTTI_CLASS(, PackageTests, WritingTestObj2,
+CE_RTTI_CLASS(, BundleTests, WritingTestObj2,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
@@ -434,7 +434,7 @@ CE_RTTI_CLASS(, CDITests, TestObject,
     CE_FUNCTION_LIST(
     )
 )
-CE_RTTI_STRUCT(, PackageTests, WritingTestStructBase,
+CE_RTTI_STRUCT(, BundleTests, WritingTestStructBase,
     CE_SUPER(),
     CE_ATTRIBS(),
     CE_FIELD_LIST(
@@ -444,7 +444,7 @@ CE_RTTI_STRUCT(, PackageTests, WritingTestStructBase,
     CE_FUNCTION_LIST(
     )
 )
-CE_RTTI_STRUCT(, PackageTests, WritingTestStruct1,
+CE_RTTI_STRUCT(, BundleTests, WritingTestStruct1,
     CE_SUPER(WritingTestStructBase),
     CE_ATTRIBS(),
     CE_FIELD_LIST(

@@ -271,7 +271,7 @@ void GameLoop::Shutdown()
 void GameLoop::LoadProject()
 {
 	// Load project (aka Setings)
-	Package* settingsPackage = GetSettingsPackage();
+	Bundle* settingsBundle = GetSettingsBundle();
 
 	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 	if (projectSettings != nullptr)

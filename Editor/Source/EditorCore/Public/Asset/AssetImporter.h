@@ -86,7 +86,7 @@ namespace CE::Editor
 
 		void Process() override;
 
-		virtual bool ProcessAsset(Package* package) = 0;
+		virtual bool ProcessAsset(Bundle* bundle) = 0;
 
 		inline bool Succeeded() const { return success; }
 		inline const String& GetErrorMessage() const { return errorMessage; }
@@ -106,7 +106,7 @@ namespace CE::Editor
 		PlatformName targetPlatform;
 
 		String sourceAssetRelativePath = "";
-		String packageName = "";
+		String bundleName = "";
 
 		b8 generateDistributionAsset = false;
 		b8 isGameAsset = false;

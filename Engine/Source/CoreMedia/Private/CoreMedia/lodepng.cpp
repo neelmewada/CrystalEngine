@@ -839,7 +839,7 @@ static unsigned HuffmanTree_makeFromLengths(HuffmanTree* tree, const unsigned* b
 /*BPM: Boundary Package Merge, see "A Fast and Space-Economical Algorithm for Length-Limited Coding",
 Jyrki Katajainen, Alistair Moffat, Andrew Turpin, 1995.*/
 
-/*chain node for boundary package merge*/
+/*chain node for boundary bundle merge*/
 typedef struct BPMNode {
   int weight; /*the sum of all weights in this chain*/
   unsigned index; /*index of this leaf node (called "count" in the paper)*/

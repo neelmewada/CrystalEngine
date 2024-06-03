@@ -5,7 +5,7 @@ namespace CE::RPI
 
 	RenderPipeline::RenderPipeline()
 	{
-		passTree = CreateObject<PassTree>(GetTransientPackage(MODULE_NAME), "PassTree");
+		passTree = CreateObject<PassTree>(GetTransient(MODULE_NAME), "PassTree");
 		passTree->rootPass->renderPipeline = this;
 	}
 

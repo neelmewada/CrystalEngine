@@ -539,11 +539,11 @@ namespace CE
 			auto nameString = GetName().GetLastComponent();
 
 			auto moduleName = GetOwnerModuleName().GetString();
-			Package* transientPackage = ModuleManager::Get().GetLoadedModuleTransientPackage(moduleName);
-			if (transientPackage == nullptr)
-				transientPackage = GetTransientPackage();
+			Bundle* transientBundle = ModuleManager::Get().GetLoadedModuleTransientBundle(moduleName);
+			if (transientBundle == nullptr)
+				transientBundle = GetGlobalTransient();
 			
-			defaultInstance = CreateObject<Object>(transientPackage, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
+			defaultInstance = CreateObject<Object>(transientBundle, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
 		}
 		
 		return defaultInstance;

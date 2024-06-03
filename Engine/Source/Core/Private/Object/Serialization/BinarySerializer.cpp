@@ -298,10 +298,10 @@ namespace CE
 						*stream << (u8)0; // NULL field type byte
 						return true;
 					}
-					auto package = object->GetPackage();
+					auto bundle = object->GetBundle();
 					*stream << typeIdToFieldTypeMap[TYPEID(Object)]; // ObjectRef field type byte
 					*stream << (u64)object->GetUuid();
-					*stream << ((package != nullptr) ? (u64)package->GetUuid() : 0);
+					*stream << ((bundle != nullptr) ? (u64)bundle->GetUuid() : 0);
 				}
 
 				auto curPos = stream->GetCurrentPosition();
@@ -321,8 +321,8 @@ namespace CE
 				return true;
 			}
 
-			auto package = object->GetPackage();
-			if (package != nullptr && package->IsTransient()) // Do NOT save Transient object references
+			auto bundle = object->GetBundle();
+			if (bundle != nullptr && bundle->IsTransient()) // Do NOT save Transient object references
 			{
 				*stream << (u8)0; // NULL field type byte
 				return true;
@@ -330,7 +330,7 @@ namespace CE
 
 			*stream << typeIdToFieldTypeMap[TYPEID(Object)]; // Field Type byte
 			*stream << (u64)object->GetUuid();
-			*stream << ((package != nullptr) ? (u64)package->GetUuid() : 0);
+			*stream << ((bundle != nullptr) ? (u64)bundle->GetUuid() : 0);
 			return true;
 		}
 		else if (fieldDeclType->IsStruct())
@@ -996,17 +996,17 @@ namespace CE
 		else if (isObjectRef)
 		{
 			u64 objectUuid = 0;
-			Uuid packageUuid = 0;
+			Uuid bundleUuid = 0;
 			*stream >> objectUuid;
-			*stream >> packageUuid;
+			*stream >> bundleUuid;
 			
 			// TODO: Better loading mechanism for external object references?
-			if (packageUuid != 0 && field->IsObjectField())
+			if (bundleUuid != 0 && field->IsObjectField())
 			{
-				Package* refPackage = Package::LoadPackageByUuid(packageUuid);
-				if (refPackage != nullptr)
+				Bundle* refBundle = Bundle::LoadBundleByUuid(bundleUuid);
+				if (refBundle != nullptr)
 				{
-					Object* object = refPackage->LoadObject(objectUuid);
+					Object* object = refBundle->LoadObject(objectUuid);
 					field->ForceSetFieldValue<Object*>(instance, object);
 					return true;
 				}
@@ -1060,16 +1060,16 @@ namespace CE
 					if (typeByte != typeIdToFieldTypeMap[TYPEID(Object)])
 						continue;
 
-					u64 uuid = 0; u64 packageUuid = 0;
+					u64 uuid = 0; u64 bundleUuid = 0;
 					*stream >> uuid;
-					*stream >> packageUuid;
+					*stream >> bundleUuid;
 
-					if (packageUuid != 0)
+					if (bundleUuid != 0)
 					{
-						Package* refPackage = Package::LoadPackageByUuid(packageUuid);
-						if (refPackage != nullptr)
+						Bundle* refBundle = Bundle::LoadBundleByUuid(bundleUuid);
+						if (refBundle != nullptr)
 						{
-							Object* object = refPackage->LoadObject(uuid);
+							Object* object = refBundle->LoadObject(uuid);
 							array.AddObject(object);
 						}
 					}
@@ -1171,7 +1171,7 @@ namespace CE
 		{
 			u64 obj = 0;
 			*stream >> obj; // Object Uuid
-			*stream >> obj; // Package Uuid
+			*stream >> obj; // Bundle Uuid
 		}
 			break;
 		case 0x10: // Map

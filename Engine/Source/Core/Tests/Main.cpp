@@ -5,15 +5,15 @@
 
 #pragma region Registration
 
-CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj1)
-CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj2)
+CE_RTTI_CLASS_IMPL(, BundleTests, WritingTestObj1)
+CE_RTTI_CLASS_IMPL(, BundleTests, WritingTestObj2)
 CE_RTTI_CLASS_IMPL(, ObjectTests, BaseClass)
 CE_RTTI_CLASS_IMPL(, ObjectTests, DerivedClassA)
 CE_RTTI_CLASS_IMPL(, CDITests, AnotherObject)
 CE_RTTI_CLASS_IMPL(, CDITests, BottomObject)
 CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
-CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStructBase)
-CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStruct1)
+CE_RTTI_STRUCT_IMPL(, BundleTests, WritingTestStructBase)
+CE_RTTI_STRUCT_IMPL(, BundleTests, WritingTestStruct1)
 CE_RTTI_STRUCT_IMPL(, CDITests, TestStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, InnerStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
@@ -21,15 +21,15 @@ CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
 static void CERegisterModuleTypes()
 {
     CE_REGISTER_TYPES(
-        PackageTests::WritingTestObj1,
-        PackageTests::WritingTestObj2,
+        BundleTests::WritingTestObj1,
+        BundleTests::WritingTestObj2,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
 		CDITests::BottomObject,
         CDITests::TestObject,
-        PackageTests::WritingTestStructBase,
-        PackageTests::WritingTestStruct1,
+        BundleTests::WritingTestStructBase,
+        BundleTests::WritingTestStruct1,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -38,15 +38,15 @@ static void CERegisterModuleTypes()
 static void CEDeregisterModuleTypes()
 {
     CE_DEREGISTER_TYPES(
-        PackageTests::WritingTestObj1,
-        PackageTests::WritingTestObj2,
+        BundleTests::WritingTestObj1,
+        BundleTests::WritingTestObj2,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
 		CDITests::BottomObject,
         CDITests::TestObject,
-        PackageTests::WritingTestStructBase,
-        PackageTests::WritingTestStruct1,
+        BundleTests::WritingTestStructBase,
+        BundleTests::WritingTestStruct1,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -121,70 +121,6 @@ TEST(Performance, Module_Load_10x)
 
 #pragma region Threading
 
-int ThreadingTestSingletonCounter = 0;
-int ThreadingTestSingletonDestroyCounter = 0;
-
-class ThreadingTestSingleton : public ThreadSingleton<ThreadingTestSingleton>
-{
-public:
-    ThreadingTestSingleton() : ThreadSingleton<ThreadingTestSingleton>()
-    {
-        ThreadingTestSingletonCounter++;
-    }
-
-    ~ThreadingTestSingleton()
-    {
-        ThreadingTestSingletonDestroyCounter++;
-    }
-
-};
-
-void Threading_Test_Func1()
-{
-    
-}
-
-TEST(Threading, ThreadSingleton)
-{
-    TEST_BEGIN;
-    ThreadingTestSingletonDestroyCounter = 0;
-
-    auto threadId = Thread::GetCurrentThreadId();
-    auto v1 = &ThreadingTestSingleton::Get();
-    auto v2 = &ThreadingTestSingleton::Get();
-    EXPECT_EQ(v1, v2);
-    Mutex mut{};
-
-    ThreadingTestSingletonCounter = 0;
-
-    Thread t1([&]
-    {
-        auto tId = Thread::GetCurrentThreadId();
-        auto newValue = &ThreadingTestSingleton::Get();
-        EXPECT_EQ(newValue, &ThreadingTestSingleton::Get());
-        ThreadingTestSingleton::Get();
-        ThreadingTestSingleton::Get();
-    });
-
-    Thread t2([&]
-    {
-        auto tId = Thread::GetCurrentThreadId();
-        ThreadingTestSingleton::Get();
-        ThreadingTestSingleton::Get();
-    });
-    
-    if (t1.IsJoinable())
-        t1.Join();
-    if (t2.IsJoinable())
-        t2.Join();
-    
-    EXPECT_EQ(ThreadingTestSingletonCounter, 2);
-    EXPECT_EQ(ThreadingTestSingletonDestroyCounter, 2);
-
-    ThreadingTestSingletonCounter = 0;
-    ThreadingTestSingletonDestroyCounter = 0;
-    TEST_END;
-}
 
 static String ThreadingAsyncFunc(const Array<String>& array)
 {
@@ -1538,7 +1474,7 @@ TEST(Object, Lifecycle)
     
     // 1. Basic object creation
 
-    auto instance = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
+    auto instance = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(), "MyObject", OF_Transient);
     EXPECT_EQ(instance->GetFlags(), OF_Transient);
     EXPECT_EQ(instance->GetName(), "MyObject");
 
@@ -1555,7 +1491,7 @@ TEST(Object, Lifecycle)
 		threads.EmplaceBack([&]
 		{
 			String name = String("Obj_") + i;
-			auto obj = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(),
+			auto obj = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(),
 				name, OF_Transient, ObjectLifecycleTestClass::Type(),
 				nullptr);
 			
@@ -1773,7 +1709,7 @@ TEST(Object, CDI2)
 		testCDI->subobject->myString = "modified from CDI";
 		testCDI->subobject->data.another = testCDI->subobject;
 
-		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
+		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientBundle("Core");
 	}
 	
 	// 2. Object instantiation
@@ -1787,7 +1723,7 @@ TEST(Object, CDI2)
 		EXPECT_EQ(test->subobject->data.stringArray[0], "test0");
 		EXPECT_EQ(test->subobject->data.stringArray[1], "test1");
 		EXPECT_EQ(test->transient, testCDI->transient);
-        EXPECT_EQ(test->transient, ModuleManager::Get().GetLoadedModuleTransientPackage("Core"));
+        EXPECT_EQ(test->transient, ModuleManager::Get().GetLoadedModuleTransientBundle("Core"));
 		EXPECT_EQ(test->subobject->data.another, test->subobject);
 		EXPECT_NE(test->another, nullptr);
 
@@ -2847,7 +2783,7 @@ TEST(Serialization, BasicBinarySerialization)
 		original = test->GetUuid();
 		test->dataList.Add({}); test->dataList.Add({});
 		MyData& data0 = test->dataList[0];
-		data0.clazz = Package::StaticType();
+		data0.clazz = Bundle::StaticType();
 		data0.vector = Vec4(1, 2.2f, 3.3f, 4.125f);
 		data0.string = "Data 0 String";
 		data0.array = { "item0", "item1", "item2" };
@@ -2881,7 +2817,7 @@ TEST(Serialization, BasicBinarySerialization)
 		EXPECT_EQ(test->dataList.GetSize(), 2);
 
 		MyData& data0 = test->dataList[0];
-		EXPECT_EQ(data0.clazz, Package::StaticType());
+		EXPECT_EQ(data0.clazz, Bundle::StaticType());
 		EXPECT_EQ(data0.vector, Vec4(1, 2.2f, 3.3f, 4.125f));
 		EXPECT_EQ(data0.string, "Data 0 String");
 		EXPECT_EQ(data0.array.GetSize(), 3);
@@ -3160,46 +3096,46 @@ TEST(Delegates, ModuleCallbacks)
 
 
 /**********************************************
-* Packages
+* Bundles
 */
 
-#pragma region Package
+#pragma region Bundle
 
 
-TEST(Package, WriteRead)
+TEST(Bundle, WriteRead)
 {
     TEST_BEGIN;
-    using namespace PackageTests;
+    using namespace BundleTests;
     CERegisterModuleTypes();
     
-    IO::Path packagePath = PlatformDirectories::GetLaunchDir() / "TestPackage.casset";
+    IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "TestBundle.casset";
 
-	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, packageUuid;
+	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, bundleUuid;
 
 	// Write
 	{
-		Package* writePackage = CreateObject<Package>(nullptr, "/TestPackage");
-		EXPECT_EQ(writePackage->GetName(), "/TestPackage");
+		Bundle* writeBundle = CreateObject<Bundle>(nullptr, "/TestBundle");
+		EXPECT_EQ(writeBundle->GetName(), "/TestBundle");
 
-		auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
-		auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
+		auto obj1 = CreateObject<WritingTestObj1>(writeBundle, TEXT("TestObj1"));
+		auto obj2 = CreateObject<WritingTestObj2>(writeBundle, TEXT("TestObj2"));
 		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
-        // Outside the package & transient
-		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1"));
+        // Outside the bundle & transient
+		auto obj1_1 = CreateObject<WritingTestObj1>(GetGlobalTransient(), TEXT("Child1_TestObj1"));
 
-		// When Package has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(writePackage->GetPrimaryObjectName() == "TestObj1" || writePackage->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(writePackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || writePackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
+		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
+		EXPECT_TRUE(writeBundle->GetPrimaryObjectName() == "TestObj1" || writeBundle->GetPrimaryObjectName() == "TestObj2");
+		EXPECT_TRUE(writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
 
-		packageUuid = writePackage->GetUuid();
+		bundleUuid = writeBundle->GetUuid();
 		obj1Uuid = obj1->GetUuid();
 		obj2Uuid = obj2->GetUuid();
 		obj1_0Uuid = obj1_0->GetUuid();
 		obj1_1Uuid = obj1_1->GetUuid();
 
-		EXPECT_EQ(obj1->GetPackage(), writePackage);
-		EXPECT_EQ(obj2->GetPackage(), writePackage);
-		EXPECT_EQ(writePackage->attachedObjects.GetObjectCount(), 2);
+		EXPECT_EQ(obj1->GetBundle(), writeBundle);
+		EXPECT_EQ(obj2->GetBundle(), writeBundle);
+		EXPECT_EQ(writeBundle->attachedObjects.GetObjectCount(), 2);
 
 		obj1->objPtr = obj2;
 		obj1->stringValue = "My String Value";
@@ -3215,40 +3151,39 @@ TEST(Package, WriteRead)
 		obj1_0->objPtr = obj1_1;
 
 		HashMap<CE::Uuid, Object*> references{};
-		writePackage->FetchObjectReferences(references);
+		writeBundle->FetchObjectReferences(references);
 		EXPECT_EQ(references.GetSize(), 5);
 
-		SavePackageArgs saveArgs{};
-		auto result = Package::SavePackage(writePackage, nullptr, packagePath, saveArgs);
+		auto result = Bundle::SaveBundleToDisk(writeBundle, nullptr, bundlePath);
 
 		obj1->RequestDestroy(); // Automatically destroys children
 		obj2->RequestDestroy();
-		writePackage->RequestDestroy();
+		writeBundle->RequestDestroy();
 	}
 
 	// Read
 	{
-		auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
-		EXPECT_NE(readPackage, nullptr);
-		EXPECT_EQ(readPackage->GetPackageName(), "/TestPackage");
-        EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 4);
+		auto readBundle = Bundle::LoadBundleFromDisk(nullptr, bundlePath, LOAD_Default);
+		EXPECT_NE(readBundle, nullptr);
+		EXPECT_EQ(readBundle->GetBundleName(), "/TestBundle");
+        EXPECT_EQ(readBundle->objectUuidToEntryMap.GetSize(), 4);
 
-		// When Package has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(readPackage->GetPrimaryObjectName() == "TestObj1" || readPackage->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(readPackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || readPackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
+		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
+		EXPECT_TRUE(readBundle->GetPrimaryObjectName() == "TestObj1" || readBundle->GetPrimaryObjectName() == "TestObj2");
+		EXPECT_TRUE(readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
 
-		readPackage->LoadFully();
+		readBundle->LoadFully();
 
-		EXPECT_EQ(readPackage->loadedObjects.GetSize(), 4);
-		EXPECT_EQ(readPackage->attachedObjects.GetObjectCount(), 2);
-		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj1Uuid));
-		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj2Uuid));
+		EXPECT_EQ(readBundle->loadedObjects.GetSize(), 4);
+		EXPECT_EQ(readBundle->attachedObjects.GetObjectCount(), 2);
+		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj1Uuid));
+		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj2Uuid));
 
 		// TestObj1
-		WritingTestObj1* obj1 = (WritingTestObj1*)readPackage->attachedObjects.FindObject(obj1Uuid);
+		WritingTestObj1* obj1 = (WritingTestObj1*)readBundle->attachedObjects.FindObject(obj1Uuid);
 		EXPECT_NE(obj1, nullptr);
 		EXPECT_EQ(obj1->GetName(), "TestObj1");
-		EXPECT_EQ(obj1->outer, readPackage);
+		EXPECT_EQ(obj1->outer, readBundle);
 		EXPECT_EQ(obj1->attachedObjects.GetObjectCount(), 1);
 		EXPECT_TRUE(obj1->attachedObjects.ObjectExists(obj1_0Uuid));
 
@@ -3262,16 +3197,16 @@ TEST(Package, WriteRead)
 		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
 
 		// Child0_TestObj1
-		WritingTestObj1* obj1_0 = (WritingTestObj1*)readPackage->LoadObject(obj1_0Uuid);
+		WritingTestObj1* obj1_0 = (WritingTestObj1*)readBundle->LoadObject(obj1_0Uuid);
 		EXPECT_NE(obj1_0, nullptr);
 		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
 		EXPECT_EQ(obj1_0->outer, obj1);
 
 		// TestObj2
-		WritingTestObj2* obj2 = (WritingTestObj2*)readPackage->attachedObjects.FindObject(obj2Uuid);
+		WritingTestObj2* obj2 = (WritingTestObj2*)readBundle->attachedObjects.FindObject(obj2Uuid);
 		EXPECT_NE(obj2, nullptr);
 		EXPECT_EQ(obj2->GetName(), "TestObj2");
-		EXPECT_EQ(obj2->outer, readPackage);
+		EXPECT_EQ(obj2->outer, readBundle);
 		EXPECT_EQ(obj2->attachedObjects.GetObjectCount(), 0);
 		EXPECT_EQ(obj2->objectArray.GetSize(), 1);
 		EXPECT_EQ(obj2->value, 4612);
@@ -3281,18 +3216,18 @@ TEST(Package, WriteRead)
 		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
 		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
 
-		EXPECT_EQ(readPackage->LoadObject(obj1_1Uuid), nullptr);
+		EXPECT_EQ(readBundle->LoadObject(obj1_1Uuid), nullptr);
 
-		EXPECT_TRUE(readPackage->loadedObjects.KeyExists(obj1_0Uuid));
+		EXPECT_TRUE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
 		obj1_0->RequestDestroy();
-		EXPECT_FALSE(readPackage->loadedObjects.KeyExists(obj1_0Uuid));
+		EXPECT_FALSE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
 
-		readPackage->RequestDestroy();
+		readBundle->RequestDestroy();
 	}
     
-    if (packagePath.Exists())
+    if (bundlePath.Exists())
     {
-        IO::Path::Remove(packagePath);
+        IO::Path::Remove(bundlePath);
     }
 	
     CEDeregisterModuleTypes();

@@ -28,14 +28,14 @@ namespace CE
 
         bool skipHeader = false;
 
-		friend class Package;
+		friend class Bundle;
     };
 
     class CORE_API FieldDeserializer
     {
     public:
-        FieldDeserializer(FieldType* fieldChain, void* instance, Package* currentPackage);
-        FieldDeserializer(Array<FieldType*> fieldList, void* instance, Package* currentPackage);
+        FieldDeserializer(FieldType* fieldChain, void* instance, Bundle* currentBundle);
+        FieldDeserializer(Array<FieldType*> fieldList, void* instance, Bundle* currentBundle);
         
         void SkipHeader(bool skip)
         {
@@ -50,18 +50,18 @@ namespace CE
         
     private:
 
-        Object* ResolveObjectReference(Uuid objectUuid, Uuid packageUuid, Name packageName, Name pathInPackage);
+        Object* ResolveObjectReference(Uuid objectUuid, Uuid bundleUuid, Name bundleName, Name pathInBundle);
 
-        Package* currentPackage = nullptr;
+        Bundle* currentBundle = nullptr;
 
         Array<FieldType*> fields{};
         void* rawInstance = nullptr;
         
         bool skipHeader = false;
 
-		u32 packageMajor = 0, packageMinor = 0;
+		u32 bundleMajor = 0, bundleMinor = 0;
 
-		friend class Package;
+		friend class Bundle;
     };
     
 }

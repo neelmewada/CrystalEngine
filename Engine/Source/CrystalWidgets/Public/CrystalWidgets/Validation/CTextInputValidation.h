@@ -13,7 +13,7 @@ namespace CE::Widgets
 
     CRYSTALWIDGETS_API bool CObjectNameInputValidator(const String& text);
 
-    CRYSTALWIDGETS_API bool CPackageNameInputValidator(const String& text);
+    CRYSTALWIDGETS_API bool CBundleNameInputValidator(const String& text);
 
     CRYSTALWIDGETS_API bool CTypeNameInputValidator(const String& text);
     

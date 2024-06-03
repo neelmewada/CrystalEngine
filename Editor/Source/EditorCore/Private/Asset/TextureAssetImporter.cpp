@@ -36,15 +36,15 @@ namespace CE::Editor
 		return dependencies;
 	}
 
-	bool TextureAssetImportJob::ProcessAsset(Package* package)
+	bool TextureAssetImportJob::ProcessAsset(Bundle* bundle)
 	{
-		if (package == nullptr)
+		if (bundle == nullptr)
 			return false;
 		if (!sourcePath.Exists())
 			return false;
 
-		// Clear the package of any subobjects/assets, we will build the asset from scratch
-		package->DestroyAllSubobjects();
+		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
+		bundle->DestroyAllSubobjects();
 		
 		String extension = sourcePath.GetFilename().GetExtension().GetString();
 		String fileName = sourcePath.GetFilename().RemoveExtension().GetString();
@@ -155,21 +155,21 @@ namespace CE::Editor
 
 		if (isCubeMap) // Process CubeMap
 		{
-			return ProcessCubeMap(fileName, package, image, pixelFormat, compressionFormat, targetSourceFormat);
+			return ProcessCubeMap(fileName, bundle, image, pixelFormat, compressionFormat, targetSourceFormat);
 		}
 		else
 		{
-			return ProcessTex2D(fileName, package, image, pixelFormat, compressionFormat, targetSourceFormat);
+			return ProcessTex2D(fileName, bundle, image, pixelFormat, compressionFormat, targetSourceFormat);
 		}
 
 		return true;
 	}
 
-	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Package* package, const CMImage& sourceImage, TextureFormat pixelFormat,
+	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Bundle* bundle, const CMImage& sourceImage, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
 		CMImageSourceFormat targetSourceFormat)
 	{
-		TextureCube* texture = CreateObject<TextureCube>(package, name);
+		TextureCube* texture = CreateObject<TextureCube>(bundle, name);
 
 		// Temporary code
 		//pixelFormat = TextureFormat::RGBAHalf;
@@ -251,11 +251,11 @@ namespace CE::Editor
 		return result;
 	}
 
-	bool TextureAssetImportJob::ProcessTex2D(const String& name, Package* package, const CMImage& image, TextureFormat pixelFormat,
+	bool TextureAssetImportJob::ProcessTex2D(const String& name, Bundle* bundle, const CMImage& image, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
 		CMImageSourceFormat targetSourceFormat)
 	{
-		Texture2D* texture = CreateObject<Texture2D>(package, name);
+		Texture2D* texture = CreateObject<Texture2D>(bundle, name);
 
 		texture->anisoLevel = anisotropy;
 		texture->width = image.GetWidth();

@@ -1941,7 +1941,7 @@ https://github.com/lvandeve/lodepng
    the limits of pure C90).
 *) 08 dec 2015: Made load_file function return error if file can't be opened.
 *) 24 okt 2015: Bugfix with decoding to palette output.
-*) 18 apr 2015: Boundary PM instead of just package-merge for faster encoding.
+*) 18 apr 2015: Boundary PM instead of just bundle-merge for faster encoding.
 *) 24 aug 2014: Moved to github
 *) 23 aug 2014: Reduced needless memory usage of decoder.
 *) 28 jun 2014: Removed fix_png setting, always support palette OOB for

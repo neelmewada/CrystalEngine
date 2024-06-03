@@ -54,7 +54,7 @@
 // Threading
 #include "Threading/Mutex.h"
 #include "Threading/Thread.h"
-#include "Threading/ThreadSingleton.h"
+#include "Threading/ThreadLocalContext.h"
 #include "Threading/Async.h"
 
 // ******************************************************
@@ -104,10 +104,7 @@
 #include "Object/ObjectManager.h"
 #include "Object/BasePrefs.h"
 #include "Object/Prefs.h"
-#include "Object/Package.h"
-
-// Asset types
-#include "Asset/SoftObjectPath.h"
+#include "Object/Bundle.h"
 
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"

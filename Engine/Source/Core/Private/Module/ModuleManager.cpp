@@ -57,9 +57,9 @@ namespace CE
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
 
-		// Create transient package if NOT Core module
+		// Create transient bundle if NOT Core module
 		if (moduleName != "Core")
-			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+			info->transientBundle = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		// Register manually reflected types
 		modulePtr->RegisterTypes();
@@ -71,7 +71,7 @@ namespace CE
 		modulePtr->StartupModule();
 
 		if (moduleName == "Core")
-			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+			info->transientBundle = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		// RTTI setup
 		ClassType::CacheTypesForCurrentModule();
@@ -105,11 +105,11 @@ namespace CE
 		// Deregister resources
 		info->unloadResourcesFuncPtr();
 
-		// Delete transient package
-		if (info->transientPackage != nullptr)
+		// Delete transient bundle
+		if (info->transientBundle != nullptr)
 		{
-			info->transientPackage->RequestDestroy();
-			info->transientPackage = nullptr;
+			info->transientBundle->RequestDestroy();
+			info->transientBundle = nullptr;
 		}
 
 		// This also deregisters all types that were registered in this module
@@ -178,13 +178,13 @@ namespace CE
 		return info->moduleImpl;
 	}
 
-	Package* ModuleManager::GetLoadedModuleTransientPackage(const String& moduleName)
+	Bundle* ModuleManager::GetLoadedModuleTransientBundle(const String& moduleName)
 	{
 		ModuleInfo* info = FindModuleInfo(moduleName);
 		if (info == nullptr || !info->isLoaded)
 			return nullptr;
 		
-		return info->transientPackage;
+		return info->transientBundle;
 	}
 
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)

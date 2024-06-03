@@ -113,9 +113,9 @@ namespace CE\
 				((Namespace::Class*)instance)->~Class();\
 			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
-			virtual String GetClassPackage() const override\
+			virtual String GetClassBundle() const override\
 			{\
-				return Namespace::Class::StaticPackage();\
+				return Namespace::Class::StaticBundle();\
 			}\
 			virtual String GetClassModule() const override\
 			{\
@@ -152,12 +152,12 @@ CE::ClassType* Namespace::Class::Type()\
 }\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Class>::FullTypeName()\
 {\
-	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Class);\
+	static CE::Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Class);\
 	return name;\
 }\
-CE::String MERGE_NAMESPACE(Namespace, Class)::StaticPackage()\
+CE::String MERGE_NAMESPACE(Namespace, Class)::StaticBundle()\
 {\
-	return PACKAGE_NAME;\
+	return BUNDLE_NAME;\
 }\
 CE::String MERGE_NAMESPACE(Namespace, Class)::StaticModule()\
 {\
@@ -186,7 +186,7 @@ public:\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
 	inline static CE::ClassType* StaticType() { return Self::Type(); }\
-	static CE::String StaticPackage();\
+	static CE::String StaticBundle();\
 	static CE::String StaticModule();\
 	constexpr static bool IsClass = true;\
 	constexpr static bool IsStruct = false;\
@@ -198,9 +198,9 @@ public:\
 	{\
 		return Type();\
 	}\
-	virtual CE::String GetClassPackage() const\
+	virtual CE::String GetClassBundle() const\
 	{\
-		return StaticPackage();\
+		return StaticBundle();\
 	}\
 	virtual CE::String GetClassModule() const\
 	{\
@@ -245,9 +245,9 @@ namespace CE\
 				((Namespace::Struct*)instance)->~Struct();\
 			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
-			virtual String GetStructPackage() const override\
+			virtual String GetStructBundle() const override\
 			{\
-				return Namespace::Struct::StaticPackage();\
+				return Namespace::Struct::StaticBundle();\
 			}\
 			virtual String GetStructModule() const override\
 			{\
@@ -296,12 +296,12 @@ CE::StructType* Namespace::Struct::Type()\
 }\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Struct>::FullTypeName()\
 {\
-	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Struct);\
+	static CE::Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Struct);\
 	return name;\
 }\
-CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticPackage()\
+CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticBundle()\
 {\
-	return PACKAGE_NAME;\
+	return BUNDLE_NAME;\
 }\
 CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticModule()\
 {\
@@ -324,7 +324,7 @@ public:\
 	inline static CE::StructType* StaticType() { return Self::Type(); }\
     constexpr static bool IsClass = false;\
     constexpr static bool IsStruct = true;\
-	static CE::String StaticPackage();\
+	static CE::String StaticBundle();\
 	static CE::String StaticModule();\
 	virtual ~Struct()\
 	{\
@@ -341,9 +341,9 @@ public:\
 	{\
 		return Type();\
 	}\
-	virtual CE::String GetStructPackage() const\
+	virtual CE::String GetStructBundle() const\
 	{\
-		return StaticPackage();\
+		return StaticBundle();\
 	}\
 	virtual CE::String GetStructModule() const\
 	{\

@@ -5,7 +5,7 @@ namespace CE::RPI
 
     void PassSystem::Initialize()
     {
-        Package* transient = GetTransientPackage(MODULE_NAME);
+        Bundle* transient = GetTransient(MODULE_NAME);
 
 		// - Pass Templates -
 
@@ -164,7 +164,7 @@ namespace CE::RPI
 
     Pass* PassSystem::CreatePass(Name templateName, Name newPassName)
     {
-        return CreatePass(GetTransientPackage(MODULE_NAME), templateName, newPassName);
+        return CreatePass(GetTransient(MODULE_NAME), templateName, newPassName);
     }
     
     Pass* PassSystem::CreatePass(Object* outer, Name templateName, Name newPassName)

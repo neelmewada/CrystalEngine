@@ -49,13 +49,13 @@ namespace CE::Editor
 
 		}
 
-		virtual bool ProcessAsset(Package* package) override;
+		virtual bool ProcessAsset(Bundle* bundle) override;
 
-		bool ProcessTex2D(const String& name, Package* package, const CMImage& image, TextureFormat pixelFormat, 
+		bool ProcessTex2D(const String& name, Bundle* bundle, const CMImage& image, TextureFormat pixelFormat, 
 			TextureSourceCompressionFormat compressionFormat,
 			CMImageSourceFormat targetSourceFormat);
 
-		bool ProcessCubeMap(const String& name, Package* package, const CMImage& sourceImage, TextureFormat pixelFormat,
+		bool ProcessCubeMap(const String& name, Bundle* bundle, const CMImage& sourceImage, TextureFormat pixelFormat,
 			TextureSourceCompressionFormat compressionFormat,
 			CMImageSourceFormat targetSourceFormat);
 

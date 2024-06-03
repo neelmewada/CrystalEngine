@@ -62,8 +62,8 @@ namespace CE
 		AssetRegistry* assetRegistry = nullptr;
 
 		SharedMutex loadedAssetsMutex{};
-		HashMap<Name, Package*> loadedAssetsByPath{};
-		HashMap<Uuid, Package*> loadedAssetsByUuid{};
+		HashMap<Name, Bundle*> loadedAssetsByPath{};
+		HashMap<Uuid, Bundle*> loadedAssetsByUuid{};
 
 		friend class Engine;
 	};

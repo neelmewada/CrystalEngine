@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Editor)
-set(CURRENT_PACKAGE_CATEGORY "Editor")
+set(CURRENT_BUNDLE_CATEGORY "Editor")
 
 # Assets
 add_subdirectory(Assets)

@@ -6,30 +6,30 @@ namespace CE
 	namespace Internal
 	{
 
-		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params)
+		CORE_API Object* CreateObjectInternal(const ObjectCreateParams& params)
 		{
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
 
 			const auto& objectName = params.name;
-			if (!IsValidObjectName(objectName) && !params.objectClass->IsSubclassOf<Package>())
+			if (!IsValidObjectName(objectName) && !params.objectClass->IsSubclassOf<Bundle>())
 			{
 				CE_LOG(Error, All, "Failed to create object. Invalid name passed: {}", objectName);
 				return nullptr;
 			}
-            
-			ObjectInitializer init = ObjectInitializer();
-			init.objectFlags = params.objectFlags | OF_InsideConstructor;
-			init.name = params.name;
-			init.uuid = params.uuid;
-            init.objectClass = params.objectClass;
+			
+			ObjectCreateParams createInfo = ObjectCreateParams();
+			createInfo.objectFlags = params.objectFlags | OF_InsideConstructor;
+			createInfo.name = params.name;
+			createInfo.uuid = params.uuid;
+			createInfo.objectClass = params.objectClass;
 
-			ObjectThreadContext::Get().PushInitializer(&init);
+			GetObjectCreationContext()->GetStorage().Push(&createInfo);
 
-			auto instance = params.objectClass->CreateInstance(); // The constructor automatically pops ObjectInitializer from stack
+			auto instance = params.objectClass->CreateInstance(); // The constructor automatically pops ObjectCreateParams from stack
 			if (instance == nullptr)
             {
-                ObjectThreadContext::Get().PopInitializer();
+				GetObjectCreationContext()->GetStorage().Pop();
                 return nullptr;
             }
 
@@ -54,8 +54,8 @@ namespace CE
 				params.outer->AttachSubobject(instance);
 			}
 
-			//if (!instance->HasAnyObjectFlags(OF_ClassDefaultInstance))
-				instance->OnAfterConstructInternal();
+			instance->OnAfterConstructInternal();
+
 			return instance;
 		}
 		
@@ -65,49 +65,48 @@ namespace CE
 	*	Globals
 	*/
 
-	//extern Package* gTransientPackage;
-    extern Package* gSettingsPackage;
+    extern Bundle* gSettingsBundle;
 	extern ResourceManager* gResourceManager;
 
-	CORE_API Package* GetTransientPackage()
+	CORE_API Bundle* GetGlobalTransient()
 	{
-		return ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
+		return ModuleManager::Get().GetLoadedModuleTransientBundle(MODULE_NAME);
 	}
 
-	CORE_API Package* GetTransientPackage(const String& moduleName)
+	CORE_API Bundle* GetTransient(const String& moduleName)
 	{
-		return ModuleManager::Get().GetLoadedModuleTransientPackage(moduleName);
+		return ModuleManager::Get().GetLoadedModuleTransientBundle(moduleName);
 	}
 
-	static Package* LoadSettingsPackage()
+	static Bundle* LoadSettingsBundle()
 	{
-		return Package::LoadPackage(nullptr, Name("/Game/Settings"), LOAD_Full);
+		return Bundle::LoadBundleFromDisk(nullptr, Name("/Game/Settings"), LOAD_Full);
 	}
 
-	CORE_API Package* GetSettingsPackage()
+	CORE_API Bundle* GetSettingsBundle()
     {
-		if (gSettingsPackage == nullptr)
-			gSettingsPackage = LoadSettingsPackage();
+		if (gSettingsBundle == nullptr)
+			gSettingsBundle = LoadSettingsBundle();
 
-		if (gSettingsPackage == nullptr)
-			gSettingsPackage = CreateObject<Package>(nullptr, TEXT("/Game/Settings"));
+		if (gSettingsBundle == nullptr)
+			gSettingsBundle = CreateObject<Bundle>(nullptr, TEXT("/Game/Settings"));
 
-        return gSettingsPackage;
+        return gSettingsBundle;
     }
 
 	CORE_API void UnloadSettings()
 	{
-		if (gSettingsPackage != nullptr)
+		if (gSettingsBundle != nullptr)
 		{
-			gSettingsPackage->Destroy();
-			gSettingsPackage = nullptr;
+			gSettingsBundle->Destroy();
+			gSettingsBundle = nullptr;
 		}
 	}
 
 	CORE_API ResourceManager* GetResourceManager()
 	{
 		if (gResourceManager == nullptr)
-			gResourceManager = CreateObject<ResourceManager>(GetTransientPackage(MODULE_NAME), TEXT("ResourceManager"), OF_Transient);
+			gResourceManager = CreateObject<ResourceManager>(GetTransient(MODULE_NAME), TEXT("ResourceManager"), OF_Transient);
 		return gResourceManager;
 	}
 
@@ -132,20 +131,6 @@ namespace CE
 		return name.Replace({ '\\', '/', ' ', '+', '=', ':', ';', '.', ',', '[', ']', '{', '}', '(', ')',
 			'!', '@', '#', '$', '%', '^', '&', '*', '`', '~', '|' },
 			'_');
-	}
-
-	/*
-	*	Object Initializer
-	*/
-
-	ObjectInitializer::ObjectInitializer()
-	{
-		
-	}
-
-	ObjectInitializer::ObjectInitializer(ObjectFlags flags) : objectFlags(flags)
-	{
-		
 	}
 
 	/* ***************************************

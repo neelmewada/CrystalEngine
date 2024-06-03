@@ -250,7 +250,7 @@ template <> struct fmt::formatter<Namespace::Enum> {\
 #define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)\
 const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Enum>::FullTypeName()\
 {\
-	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Enum);\
+	static CE::Name name = MAKE_NAME(BUNDLE_NAME, Namespace, Enum);\
 	return name;\
 }
 

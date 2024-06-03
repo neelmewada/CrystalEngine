@@ -15,28 +15,28 @@ namespace CE::Editor
 		return jobs;
 	}
 
-	bool ShaderAssetImportJob::ProcessAsset(Package* package)
+	bool ShaderAssetImportJob::ProcessAsset(Bundle* bundle)
 	{
-		if (package == nullptr)
+		if (bundle == nullptr)
 			return false;
 
 		if (!sourcePath.Exists())
 			return false;
 
-		// NOTE: The package might already have assets & objects stored in it if asset already existed
+		// NOTE: The bundle might already have assets & objects stored in it if asset already existed
 		// It is responsibility of the derived asset importer to clear the old objects or just modify them as per need.
 		
-		// Clear the package of any subobjects, we will build the asset from scratch
-		package->DestroyAllSubobjects();
+		// Clear the bundle of any subobjects, we will build the asset from scratch
+		bundle->DestroyAllSubobjects();
 
 		Array<IO::Path> includePaths = this->includePaths;
 		includePaths.Add(sourcePath.GetParentPath());
 
-		CE::Shader* shader = package->LoadObject<CE::Shader>();
+		CE::Shader* shader = bundle->LoadObject<CE::Shader>();
 
 		if (shader == nullptr) // Create new object from scratch
 		{
-			shader = CreateObject<CE::Shader>(package, TEXT("Shader"));
+			shader = CreateObject<CE::Shader>(bundle, TEXT("Shader"));
 		}
 
 		FileStream fileReader = FileStream(sourcePath, Stream::Permissions::ReadOnly);

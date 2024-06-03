@@ -15,7 +15,7 @@ registerFileType((fileExt, filePath, fileData) => {
 
 registerParser(() => {
     read(8);
-    addRow('Header', ".PACK..\n", "Package header entry")
+    addRow('Header', ".PACK..\n", "Bundle header entry")
     addDetails(() => {
         for (let i = 0; i < 8; i++) {
             read(1);
@@ -36,10 +36,10 @@ registerParser(() => {
     addRow('Data Start Offset', getNumberValue(), 'Data start offset from start of file');
 
     read(8);
-    addRow('Package UUID', getNumberValue(), "Package UUID");
+    addRow('Bundle UUID', getNumberValue(), "Bundle UUID");
 
     readUntil(0);
-    addRow('Package Name', getStringValue(), "Path of the package in project/engine");
+    addRow('Bundle Name', getStringValue(), "Path of the bundle in project/engine");
     read(1);
 
     read(4);
@@ -48,7 +48,7 @@ registerParser(() => {
 
     for (let i = 0; i < numDeps; i++) {
         readUntil(0);
-        addRow('Package Dep ' + i, getStringValue(), "External package dependency " + i);
+        addRow('Bundle Dep ' + i, getStringValue(), "External bundle dependency " + i);
     }
 
     read(1);
@@ -92,7 +92,7 @@ function parseObject() {
     addRow('Is Asset?', getNumberValue(), "True if value > 0")
 
     readUntil(0)
-    addRow('Path within package', getStringValue(), "Path to object within the package")
+    addRow('Path within bundle', getStringValue(), "Path to object within the bundle")
     read(1)
 
     readUntil(0)
@@ -234,7 +234,7 @@ function parseFieldValue() {
             read(8)
             addRow('Object UUID', getNumberValue())
             read(8)
-            addRow('Package UUID', getNumberValue())
+            addRow('Bundle UUID', getNumberValue())
             break;
         case 0x10:
             parseMap()

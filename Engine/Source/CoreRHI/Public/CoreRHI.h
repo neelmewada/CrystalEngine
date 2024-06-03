@@ -4,7 +4,6 @@
 #include "CoreApplication.h"
 #include "CoreMedia.h"
 
-#include "RHI/ThreadLocalContext.h"
 #include "RHI/Limits.h"
 #include "RHI/Handle.h"
 
