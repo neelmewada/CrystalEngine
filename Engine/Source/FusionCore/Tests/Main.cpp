@@ -218,6 +218,7 @@ TEST(FusionCore, Construction)
 TEST(FusionCore, Layout)
 {
 	TEST_BEGIN;
+	using namespace LayoutTests;
 
 	FusionApplication* app = FusionApplication::Get();
 

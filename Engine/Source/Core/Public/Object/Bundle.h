@@ -28,11 +28,6 @@ namespace CE
 		AssetNotInBundle,
 	};
 
-	struct SaveBundleArgs
-	{
-
-	};
-
 	struct IBundleResolver
 	{
 		virtual Name ResolveBundlePath(Uuid bundleUuid) = 0;

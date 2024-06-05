@@ -22,6 +22,8 @@ namespace CE
 
         virtual void Tick();
 
+        void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
+
     protected:
 
         FIELD()
@@ -39,6 +41,7 @@ namespace CE
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
+        Matrix4x4 rootTransform{};
 
         FUSION_FRIENDS;
     };
