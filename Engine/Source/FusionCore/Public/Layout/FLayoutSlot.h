@@ -5,14 +5,16 @@ namespace CE
     class FWidget;
 
     CLASS()
-    class FUSIONCORE_API FSlot : public Object
+    class FUSIONCORE_API FLayoutSlot : public Object
     {
-        CE_CLASS(FSlot, Object)
+        CE_CLASS(FLayoutSlot, Object)
     public:
 
-        FSlot() = default;
+        FLayoutSlot() = default;
 
-    protected:  // - Fields -
+    protected:  // - Fusion Fields -
+
+        // Fusion exposed fields are always prefixed with 'm_'
 
         FIELD()
         FWidget* m_Owner = nullptr;
@@ -24,27 +26,29 @@ namespace CE
         Vec4 m_Padding{};
 
         FIELD()
-        VAlign m_VAlign = VAlign::Top;
+        VAlign m_VAlign = VAlign::Fill;
 
         FIELD()
-        HAlign m_HAlign = HAlign::Left;
+        HAlign m_HAlign = HAlign::Fill;
 
         FIELD()
-        f32 m_MinDesiredWidth = 0.0f;
+        f32 m_MinWidth = 0.0f;
 
         FIELD()
-        f32 m_MinDesiredHeight = 0.0f;
+        f32 m_MinHeight = 0.0f;
 
         FIELD()
-        f32 m_MaxDesiredWidth = NumericLimits<f32>::Max();
+        f32 m_MaxWidth = NumericLimits<f32>::Max();
 
         FIELD()
-        f32 m_MaxDesiredHeight = NumericLimits<f32>::Max();
+        f32 m_MaxHeight = NumericLimits<f32>::Max();
 
 
         void OnBeforeDestroy() override;
 
-    public:  // - Properties -
+        virtual void OnFusionPropertyModified(const Name& propertyName) {}
+
+    public:  // - Fusion Properties -
 
         //! @brief Do NOT use this method directly!
         void SetOwner(FWidget* owner);
@@ -62,13 +66,13 @@ namespace CE
 
         FUSION_PROPERTY(HAlign);
 
-        FUSION_PROPERTY(MinDesiredWidth);
+        FUSION_PROPERTY(MinWidth);
 
-        FUSION_PROPERTY(MinDesiredHeight);
+        FUSION_PROPERTY(MinHeight);
 
-        FUSION_PROPERTY(MaxDesiredWidth);
+        FUSION_PROPERTY(MaxWidth);
 
-        FUSION_PROPERTY(MaxDesiredHeight);
+        FUSION_PROPERTY(MaxHeight);
 
         Self& Padding(f32 padding)
         {
@@ -100,4 +104,4 @@ namespace CE
     
 } // namespace CE
 
-#include "FSlot.rtti.h"
+#include "FLayoutSlot.rtti.h"

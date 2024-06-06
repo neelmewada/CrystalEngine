@@ -137,7 +137,7 @@ TEST(FusionCore, Construction)
 		EXPECT_EQ(widget->rootBox->GetDirection(), FStackBoxDirection::Vertical);
 		EXPECT_EQ(widget->m_ChildSlot->GetOwner(), widget);
 		EXPECT_EQ(widget->m_ChildSlot->GetChild(), widget->rootBox);
-		EXPECT_EQ(widget->m_ChildSlot, widget->rootBox->m_Parent);
+		EXPECT_EQ(widget->m_ChildSlot, widget->rootBox->parent);
 
 		EXPECT_EQ(widget->rootBox->GetSlotCount(), 1);
 		EXPECT_EQ(widget->rootBox->GetSlot(0)->GetOuter(), widget->rootBox);
@@ -148,7 +148,7 @@ TEST(FusionCore, Construction)
 		EXPECT_EQ(stack1->GetSlotCount(), 1);
 		EXPECT_EQ(stack1->GetSubObjectCount(), 1);
 
-		FSlot* stack1Slot0 = stack1->GetSlot(0);
+		FLayoutSlot* stack1Slot0 = stack1->GetSlot(0);
 
 		EXPECT_TRUE(stack1Slot0->GetChild()->IsOfType<FStackBox>());
 
@@ -159,7 +159,7 @@ TEST(FusionCore, Construction)
 
 		// Try Removing slots
 
-		bool removeResult = stack1->RemoveSlot(stack1Slot0);
+		bool removeResult = stack1->RemoveLayoutSlot(stack1Slot0);
 		EXPECT_TRUE(removeResult);
 		EXPECT_EQ(stack1->GetSlotCount(), 0);
 		EXPECT_EQ(stack1->GetSubObjectCount(), 0);
@@ -180,7 +180,7 @@ TEST(FusionCore, Construction)
 		// Add Stack2 back inside stack1 by creating a new slot
 		// And also add 1 extra item inside Stack2, amounting a total of 3 slots thereafter
 
-		stack1->AddSlot(FStackBox::Slot()
+		stack1->AddLayoutSlot(FStackBox::Slot()
 			(
 				FAssign(stack2)
 				.Direction(FStackBoxDirection::Horizontal)
@@ -225,17 +225,13 @@ TEST(FusionCore, Layout)
 	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
 	app->SetRootContext(rootContext);
 
-	int frameCount = 0;
-	constexpr int MaxNumFrames = 4;
+	LayoutTestWidget* rootWidget = nullptr;
 
+	FAssignNewOwned(rootWidget, rootContext, LayoutTestWidget);
+	rootContext->SetOwningWidget(rootWidget);
 
+	app->Tick();
 
-	while (frameCount < MaxNumFrames)
-	{
-		app->Tick();
-
-		frameCount++;
-	}
 
 	TEST_END;
 }

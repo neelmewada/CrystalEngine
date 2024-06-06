@@ -21,10 +21,11 @@ class FusionCore_Layout_Test;
 
 #define FUSION_FRIENDS FUSION_TESTS\
     friend class FWidget;\
+    friend class FWindow;\
     friend class FFusionContext;\
     friend class FNativeContext;\
     friend class FusionApplication;\
-    friend class FSlot;
+    friend class FLayoutSlot;
 
 #include "FusionMacros.h"
 #include "Exception/FusionException.h"
@@ -36,7 +37,7 @@ class FusionCore_Layout_Test;
 
 #include "Layout/LayoutTypes.h"
 #include "Layout/FLayoutManager.h"
-#include "Layout/FSlot.h"
+#include "Layout/FLayoutSlot.h"
 
 #include "Widget/FWidget.h"
 #include "Window/FWindow.h"

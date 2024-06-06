@@ -9,7 +9,7 @@ namespace CE
         m_ChildSlot->SetOwner(this);
     }
 
-    bool FCompoundWidget::RemoveSlot(FSlot* slot)
+    bool FCompoundWidget::RemoveLayoutSlot(FLayoutSlot* slot)
     {
         return false;
     }

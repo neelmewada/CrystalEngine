@@ -22,14 +22,14 @@ namespace CE
 		return m_Slots.GetSize();
 	}
 
-	FSlot* FStackBox::GetSlot(u32 index)
+	FLayoutSlot* FStackBox::GetSlot(u32 index)
 	{
 		if (index >= m_Slots.GetSize())
 			return nullptr;
 		return m_Slots[index];
 	}
 
-	FWidget& FStackBox::operator+(FSlot& slot)
+	FWidget& FStackBox::operator+(FLayoutSlot& slot)
 	{
 		if (!slot.IsOfType<FStackBoxSlot>())
 		{
@@ -44,12 +44,12 @@ namespace CE
 		return *this;
 	}
 
-	FWidget& FStackBox::operator+(const FSlot& slot)
+	FWidget& FStackBox::operator+(const FLayoutSlot& slot)
 	{
-		return operator+(const_cast<FSlot&>(slot));
+		return operator+(const_cast<FLayoutSlot&>(slot));
 	}
 
-	bool FStackBox::RemoveSlot(FSlot* slot)
+	bool FStackBox::RemoveLayoutSlot(FLayoutSlot* slot)
 	{
 		if (!slot->IsOfType<FStackBoxSlot>())
 			return false;
@@ -69,11 +69,39 @@ namespace CE
 		return true;
 	}
 
+	Vec2 FStackBox::PrecomputeLayoutSize()
+	{
+		precomputedSize = Vec2();
+		precomputedSize.width += m_Padding.left + m_Padding.right;
+		precomputedSize.height += m_Padding.top + m_Padding.bottom;
+
+		for (FStackBoxSlot* slot : m_Slots)
+		{
+			FWidget* child = slot->GetChild();
+			if (!child)
+				continue;
+
+			const Vec4& padding = slot->GetPadding();
+
+			Vec2 childSize = child->PrecomputeLayoutSize();
+
+			switch (m_Direction)
+			{
+			case FStackBoxDirection::Horizontal:
+				precomputedSize.height = Math::Max(precomputedSize.height, childSize.height + padding.top + padding.bottom);
+				break;
+			case FStackBoxDirection::Vertical:
+				precomputedSize.width = Math::Max(precomputedSize.width, childSize.width + padding.left + padding.right);
+				break;
+			}
+		}
+
+		return precomputedSize;
+	}
+
 	void FStackBox::Construct()
 	{
-		Super::Construct();
 
-		
 	}
 
 }

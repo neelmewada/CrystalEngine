@@ -14,24 +14,28 @@ namespace CE
 
         // - Public API -
 
-        virtual SubClass<FSlot> GetSlotClass() const { return nullptr; }
+        virtual SubClass<FLayoutSlot> GetSlotClass() const { return nullptr; }
 
         virtual u32 GetSlotCount() { return 0; }
 
-        virtual FSlot* GetSlot(u32 index) { return nullptr; }
+        virtual FLayoutSlot* GetSlot(u32 index) { return nullptr; }
 
-        virtual FWidget& operator+(const FSlot& slot);
-        virtual FWidget& operator+(FSlot& slot);
+        virtual FWidget& operator+(const FLayoutSlot& slot);
+        virtual FWidget& operator+(FLayoutSlot& slot);
 
-    	void AddSlot(const FSlot& slot);
+    	void AddLayoutSlot(const FLayoutSlot& slot);
 
-        virtual bool RemoveSlot(FSlot* slot);
+        virtual bool RemoveLayoutSlot(FLayoutSlot* slot);
 
-        void DestroySlot(FSlot* slot);
+        void DestroyLayoutSlot(FLayoutSlot* slot);
 
-        void SetContext(FFusionContext* context);
+        FFusionContext* GetContext();
+
+        virtual Vec2 PrecomputeLayoutSize();
 
     protected:
+
+        virtual void OnFusionPropertyModified(const Name& propertyName) {}
 
         void OnAfterConstruct() override;
 
@@ -39,14 +43,23 @@ namespace CE
 
         virtual void Construct();
 
+        FIELD()
+        Vec2 precomputedSize{};
+
     private:  // - Fields -
 
         FIELD()
-        FSlot* m_Parent = nullptr;
+        FLayoutSlot* parent = nullptr;
+
+        FIELD()
+        bool layoutDirty = true;
+
+        FIELD()
+        FFusionContext* context = nullptr;
 
     public:  // - Properties -
 
-        FSlot* GetParent() const { return m_Parent; }
+        FLayoutSlot* GetParent() const { return parent; }
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& As()

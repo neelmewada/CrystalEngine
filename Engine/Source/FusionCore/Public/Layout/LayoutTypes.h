@@ -5,19 +5,19 @@ namespace CE
     ENUM()
     enum class HAlign
     {
+        Fill,
 	    Left,
         Center,
-        Right,
-        Fill
+        Right
     };
 
     ENUM()
     enum class VAlign
     {
+        Fill,
         Top,
         Center,
-        Bottom,
-        Fill
+        Bottom
     };
     
 

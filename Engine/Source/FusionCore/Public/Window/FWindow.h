@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FWindowSlot : public FSlot
+    class FUSIONCORE_API FWindowSlot : public FLayoutSlot
     {
-        CE_CLASS(FWindowSlot, FSlot)
+        CE_CLASS(FWindowSlot, FLayoutSlot)
     public:
         FWindowSlot() = default;
 
@@ -25,7 +25,7 @@ namespace CE
 
         FWindow();
 
-        SubClass<FSlot> GetSlotClass() const override { return FWindowSlot::StaticType(); }
+        SubClass<FLayoutSlot> GetSlotClass() const override { return FWindowSlot::StaticType(); }
 
         void Construct() override;
 

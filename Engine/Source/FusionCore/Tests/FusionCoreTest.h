@@ -24,6 +24,29 @@ namespace ConstructTests
 namespace LayoutTests
 {
 	CLASS()
+	class TerminalWidget : public FWidget
+	{
+		CE_CLASS(TerminalWidget, FWidget)
+	public:
+
+		TerminalWidget();
+
+		void Construct() override;
+
+		Vec2 PrecomputeLayoutSize() override;
+
+	private:
+
+		FIELD()
+		Vec2 m_IntrinsicSize = Vec2();
+
+	public:
+
+		FUSION_PROPERTY(IntrinsicSize);
+
+	};
+
+	CLASS()
 	class LayoutTestWidget : public FCompoundWidget
 	{
 		CE_CLASS(LayoutTestWidget, FCompoundWidget)
@@ -33,6 +56,11 @@ namespace LayoutTests
 
 		void Construct() override;
 
+		FStackBox* rootBox = nullptr;
+
+		FStackBox* horizontalGroup1 = nullptr;
+		FStackBox* horizontalGroup2 = nullptr;
+		FStackBox* horizontalGroup3 = nullptr;
 
 	};
 

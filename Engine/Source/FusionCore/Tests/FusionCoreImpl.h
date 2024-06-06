@@ -51,6 +51,19 @@ namespace ConstructTests
 
 namespace LayoutTests
 {
+	inline TerminalWidget::TerminalWidget()
+	{
+	}
+
+	inline void TerminalWidget::Construct()
+	{
+		
+	}
+
+    inline Vec2 TerminalWidget::PrecomputeLayoutSize()
+	{
+        return m_IntrinsicSize;
+	}
 
     inline LayoutTestWidget::LayoutTestWidget()
     {
@@ -58,7 +71,78 @@ namespace LayoutTests
 
     inline void LayoutTestWidget::Construct()
     {
-        
+
+        ChildSlot(
+            FAssignNew(rootBox, FStackBox)
+            .Direction(FStackBoxDirection::Vertical) // RootStack
+            .Name("RootStack")
+
+            + FStackBox::Slot()         // RootStack / HorizontalGroup_1
+            .Padding(10.f, 5.f)
+            (
+                FAssignNew(horizontalGroup1, FStackBox)
+                .Direction(FStackBoxDirection::Horizontal) 
+                .Name("HorizontalGroup_1")
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(100, 50))
+                )
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(200, 50))
+                )
+            )
+
+            + FStackBox::Slot()         // RootStack / HorizontalGroup_2
+            .Padding(10.f, 5.f)
+            (
+                FAssignNew(horizontalGroup2, FStackBox)
+                .Direction(FStackBoxDirection::Horizontal)
+                .Name("HorizontalGroup_2")
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(150, 75))
+                )
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(250, 75))
+                )
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(50, 75))
+                )
+            )
+
+            + FStackBox::Slot()         // RootStack / HorizontalGroup_3
+            .Padding(10.f, 5.f)
+            (
+                FAssignNew(horizontalGroup3, FStackBox)
+                .Direction(FStackBoxDirection::Horizontal)
+                .Name("HorizontalGroup_3")
+
+                + FStackBox::Slot()
+                .Padding(5.0f)
+                (
+                    FNew(TerminalWidget)
+                    .IntrinsicSize(Vec2(300, 100))
+                )
+            )
+        );
     }
 
 }

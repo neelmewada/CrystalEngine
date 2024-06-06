@@ -24,6 +24,8 @@ namespace CE
 
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
 
+        void SetOwningWidget(FWidget* widget);
+
     protected:
 
         FIELD()

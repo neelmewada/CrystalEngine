@@ -15,4 +15,6 @@
 #define FUSION_PROPERTY(PropertyName)\
 	Self& PropertyName(const decltype(m_##PropertyName)& value) { this->m_##PropertyName = value; return *this; }\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }\
-	void Set##PropertyName(const decltype(m_##PropertyName)& value) { this->m_##PropertyName = value; }
+	void Set##PropertyName(const decltype(m_##PropertyName)& value) { \
+		this->m_##PropertyName = value; static const CE::Name nameValue = #PropertyName; OnFusionPropertyModified(nameValue);\
+	}

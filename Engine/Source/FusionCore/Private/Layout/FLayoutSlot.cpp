@@ -2,14 +2,14 @@
 
 namespace CE
 {
-	void FSlot::OnBeforeDestroy()
+	void FLayoutSlot::OnBeforeDestroy()
 	{
 		Super::OnBeforeDestroy();
 
         SetChild(nullptr);
 	}
 
-	void FSlot::SetOwner(FWidget* owner)
+	void FLayoutSlot::SetOwner(FWidget* owner)
 	{
         m_Owner = owner;
 
@@ -19,20 +19,20 @@ namespace CE
         }
 	}
 
-	void FSlot::SetChild(FWidget* newChild)
+	void FLayoutSlot::SetChild(FWidget* newChild)
 	{
         if (this->m_Child && newChild == nullptr)
         {
             // Remove this slot as parent from the child widget
-            this->m_Child->m_Parent = nullptr;
+            this->m_Child->parent = nullptr;
         }
         this->m_Child = newChild;
 	}
 
-	FSlot::Self& FSlot::Child(FWidget& child)
+	FLayoutSlot::Self& FLayoutSlot::Child(FWidget& child)
     {
         this->m_Child = &child;
-        child.m_Parent = this;
+        child.parent = this;
         return *this;
     }
 

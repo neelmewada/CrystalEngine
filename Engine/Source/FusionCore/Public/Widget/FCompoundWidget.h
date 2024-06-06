@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FCompoundWidgetSlot : public FSlot
+    class FUSIONCORE_API FCompoundWidgetSlot : public FLayoutSlot
     {
-        CE_CLASS(FCompoundWidgetSlot, FSlot)
+        CE_CLASS(FCompoundWidgetSlot, FLayoutSlot)
     public:
 
         FCompoundWidgetSlot() = default;
@@ -21,13 +21,13 @@ namespace CE
 
         FCompoundWidget();
 
-        SubClass<FSlot> GetSlotClass() const override { return FCompoundWidgetSlot::StaticType(); }
+        SubClass<FLayoutSlot> GetSlotClass() const override { return FCompoundWidgetSlot::StaticType(); }
 
         u32 GetSlotCount() override { return 1; }
 
-        FSlot* GetSlot(u32 index) override { return m_ChildSlot; }
+        FLayoutSlot* GetSlot(u32 index) override { return m_ChildSlot; }
 
-        bool RemoveSlot(FSlot* slot) override;
+        bool RemoveLayoutSlot(FLayoutSlot* slot) override;
 
     protected:
 
