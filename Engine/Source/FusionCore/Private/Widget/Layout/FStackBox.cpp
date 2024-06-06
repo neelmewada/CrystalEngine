@@ -75,6 +75,8 @@ namespace CE
 		precomputedSize.width += m_Padding.left + m_Padding.right;
 		precomputedSize.height += m_Padding.top + m_Padding.bottom;
 
+		Vec2 baseSize = Vec2();
+
 		for (FStackBoxSlot* slot : m_Slots)
 		{
 			FWidget* child = slot->GetChild();
@@ -88,13 +90,18 @@ namespace CE
 			switch (m_Direction)
 			{
 			case FStackBoxDirection::Horizontal:
-				precomputedSize.height = Math::Max(precomputedSize.height, childSize.height + padding.top + padding.bottom);
+				baseSize.width += childSize.width + padding.left + padding.right;
+				baseSize.height = Math::Max(baseSize.height, childSize.height + padding.top + padding.bottom);
 				break;
 			case FStackBoxDirection::Vertical:
-				precomputedSize.width = Math::Max(precomputedSize.width, childSize.width + padding.left + padding.right);
+				baseSize.height += childSize.height + padding.top + padding.bottom;
+				baseSize.width = Math::Max(baseSize.width, childSize.width + padding.left + padding.right);
 				break;
 			}
 		}
+
+		precomputedSize.width += baseSize.width;
+		precomputedSize.height += baseSize.height;
 
 		return precomputedSize;
 	}
