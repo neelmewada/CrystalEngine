@@ -15,16 +15,25 @@ namespace CE
     private: // - Fusion Fields -
 
         FIELD()
-        bool m_AutoSize = false;
+        bool m_AutoSize = true;
 
         FIELD()
         f32 m_FillRatio = 0.0f;
 
     public:
 
-        FUSION_PROPERTY(AutoSize);
+        Self& AutoSize()
+        {
+            m_AutoSize = true;
+            return *this;
+        }
 
-        FUSION_PROPERTY(FillRatio);
+        Self& FillRatio(f32 ratio)
+        {
+            m_AutoSize = false;
+            m_FillRatio = ratio;
+            return *this;
+        }
 
         FUSION_TESTS;
     };
@@ -63,7 +72,9 @@ namespace CE
 
         bool RemoveLayoutSlot(FLayoutSlot* slot) override;
 
-        Vec2 PrecomputeLayoutSize() override;
+        void PrecomputeLayoutSize() override;
+
+        void PerformLayout(Vec2 availableSize) override;
 
     protected:
 

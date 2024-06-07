@@ -33,7 +33,7 @@ namespace LayoutTests
 
 		void Construct() override;
 
-		Vec2 PrecomputeLayoutSize() override;
+		void PrecomputeLayoutSize() override;
 
 	private:
 

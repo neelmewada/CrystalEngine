@@ -53,6 +53,7 @@ namespace LayoutTests
 {
 	inline TerminalWidget::TerminalWidget()
 	{
+
 	}
 
 	inline void TerminalWidget::Construct()
@@ -60,10 +61,10 @@ namespace LayoutTests
 		
 	}
 
-    inline Vec2 TerminalWidget::PrecomputeLayoutSize()
-	{
-        return m_IntrinsicSize;
-	}
+    inline void TerminalWidget::PrecomputeLayoutSize()
+    {
+        precomputedSize = m_IntrinsicSize;
+    }
 
     inline LayoutTestWidget::LayoutTestWidget()
     {
@@ -78,6 +79,7 @@ namespace LayoutTests
             .Name("RootStack")
 
             + FStackBox::Slot()         // RootStack / HorizontalGroup_1
+            .AutoSize()
             .Padding(10.f, 5.f)
             (
                 FAssignNew(horizontalGroup1, FStackBox)
@@ -85,6 +87,7 @@ namespace LayoutTests
                 .Name("HorizontalGroup_1")
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)
@@ -92,6 +95,7 @@ namespace LayoutTests
                 )
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)
@@ -100,6 +104,7 @@ namespace LayoutTests
             )
 
             + FStackBox::Slot()         // RootStack / HorizontalGroup_2
+            .AutoSize()
             .Padding(10.f, 5.f)
             (
                 FAssignNew(horizontalGroup2, FStackBox)
@@ -107,6 +112,7 @@ namespace LayoutTests
                 .Name("HorizontalGroup_2")
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)
@@ -114,6 +120,7 @@ namespace LayoutTests
                 )
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)
@@ -121,6 +128,7 @@ namespace LayoutTests
                 )
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)
@@ -129,6 +137,7 @@ namespace LayoutTests
             )
 
             + FStackBox::Slot()         // RootStack / HorizontalGroup_3
+            .AutoSize()
             .Padding(10.f, 5.f)
             (
                 FAssignNew(horizontalGroup3, FStackBox)
@@ -136,6 +145,7 @@ namespace LayoutTests
                 .Name("HorizontalGroup_3")
 
                 + FStackBox::Slot()
+                .AutoSize()
                 .Padding(5.0f)
                 (
                     FNew(TerminalWidget)

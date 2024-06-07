@@ -69,11 +69,11 @@ namespace CE
 		return true;
 	}
 
-	Vec2 FStackBox::PrecomputeLayoutSize()
+	void FStackBox::PrecomputeLayoutSize()
 	{
 		precomputedSize = Vec2();
-		precomputedSize.width += m_Padding.left + m_Padding.right;
-		precomputedSize.height += m_Padding.top + m_Padding.bottom;
+		precomputedSize.width = m_Padding.left + m_Padding.right;
+		precomputedSize.height = m_Padding.top + m_Padding.bottom;
 
 		Vec2 baseSize = Vec2();
 
@@ -84,9 +84,16 @@ namespace CE
 				continue;
 
 			const Vec4& padding = slot->GetPadding();
+			
+			child->PrecomputeLayoutSize();
 
-			Vec2 childSize = child->PrecomputeLayoutSize();
+			Vec2 childSize = child->GetComputedLayoutSize();
 
+			childSize.width = Math::Clamp(childSize.width, slot->GetMinWidth(), slot->GetMaxWidth());
+			childSize.height = Math::Clamp(childSize.height, slot->GetMinHeight(), slot->GetMaxHeight());
+			
+			slot->computedSize = Vec2(childSize.width, childSize.height);
+			
 			switch (m_Direction)
 			{
 			case FStackBoxDirection::Horizontal:
@@ -102,8 +109,16 @@ namespace CE
 
 		precomputedSize.width += baseSize.width;
 		precomputedSize.height += baseSize.height;
+	}
 
-		return precomputedSize;
+	void FStackBox::PerformLayout(Vec2 availableSize)
+	{
+		
+
+		for (FStackBoxSlot* slot : m_Slots)
+		{
+			
+		}
 	}
 
 	void FStackBox::Construct()

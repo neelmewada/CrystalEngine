@@ -230,8 +230,9 @@ TEST(FusionCore, Layout)
 	FAssignNewOwned(rootWidget, rootContext, LayoutTestWidget);
 	rootContext->SetOwningWidget(rootWidget);
 
-	app->Tick();
+	rootWidget->PerformLayout(Vec2(500, 700));
 
+	
 
 	TEST_END;
 }

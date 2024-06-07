@@ -26,6 +26,10 @@ namespace CE
 
         void SetOwningWidget(FWidget* widget);
 
+        Vec2 GetAvailableSize() const { return availableSize; }
+
+        void SetAvailableSize(Vec2 value) { availableSize = value; }
+
     protected:
 
         FIELD()
@@ -40,6 +44,8 @@ namespace CE
 
         FIELD()
         FLayoutManager* layoutManager = nullptr;
+
+        Vec2 availableSize{};
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};

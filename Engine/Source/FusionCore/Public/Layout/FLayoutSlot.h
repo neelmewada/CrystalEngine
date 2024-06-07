@@ -43,12 +43,18 @@ namespace CE
         FIELD()
         f32 m_MaxHeight = NumericLimits<f32>::Max();
 
+        Vec2 computedPosition{};
+        Vec2 computedSize{};
 
         void OnBeforeDestroy() override;
 
         virtual void OnFusionPropertyModified(const Name& propertyName) {}
 
     public:  // - Fusion Properties -
+
+        void SetComputedPosition(Vec2 pos) { computedPosition = pos; }
+
+        void SetComputedSize(Vec2 size) { computedSize = size; }
 
         //! @brief Do NOT use this method directly!
         void SetOwner(FWidget* owner);

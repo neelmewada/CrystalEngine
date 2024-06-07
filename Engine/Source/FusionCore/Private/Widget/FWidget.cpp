@@ -53,9 +53,14 @@ namespace CE
         return context;
     }
 
-    Vec2 FWidget::PrecomputeLayoutSize()
+    void FWidget::PrecomputeLayoutSize()
     {
-        return Vec2();
+
+    }
+
+    void FWidget::PerformLayout(Vec2 availableSize)
+    {
+        
     }
 
     void FWidget::OnAfterConstruct()

@@ -23,7 +23,10 @@ namespace CE
 	{
 		ZoneScoped;
 
-		
+		if (owningWidget)
+		{
+			owningWidget->PerformLayoutPreprocess();
+		}
 	}
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)

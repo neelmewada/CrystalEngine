@@ -31,7 +31,11 @@ namespace CE
 
         FFusionContext* GetContext();
 
-        virtual Vec2 PrecomputeLayoutSize();
+        Vec2 GetComputedLayoutSize() const { return precomputedSize; }
+
+        virtual void PrecomputeLayoutSize();
+
+        virtual void PerformLayout(Vec2 availableSize);
 
     protected:
 
@@ -45,6 +49,8 @@ namespace CE
 
         FIELD()
         Vec2 precomputedSize{};
+
+
 
     private:  // - Fields -
 

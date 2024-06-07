@@ -21,6 +21,7 @@ class FusionCore_Layout_Test;
 
 #define FUSION_FRIENDS FUSION_TESTS\
     friend class FWidget;\
+    friend class FStackBox;\
     friend class FWindow;\
     friend class FFusionContext;\
     friend class FNativeContext;\
