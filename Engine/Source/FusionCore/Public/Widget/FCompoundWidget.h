@@ -2,16 +2,6 @@
 
 namespace CE
 {
-    CLASS()
-    class FUSIONCORE_API FCompoundWidgetSlot : public FLayoutSlot
-    {
-        CE_CLASS(FCompoundWidgetSlot, FLayoutSlot)
-    public:
-
-        FCompoundWidgetSlot() = default;
-
-
-    };
 
     CLASS()
     class FUSIONCORE_API FCompoundWidget : public FWidget
@@ -21,28 +11,31 @@ namespace CE
 
         FCompoundWidget();
 
-        SubClass<FLayoutSlot> GetSlotClass() const override { return FCompoundWidgetSlot::StaticType(); }
-
-        u32 GetSlotCount() override { return 1; }
-
-        FLayoutSlot* GetSlot(u32 index) override { return m_ChildSlot; }
-
-        bool RemoveLayoutSlot(FLayoutSlot* slot) override;
-
     protected:
 
-        void Construct() override;
+        // Never call this function directly! Use AddChild() instead
+        bool TryAddChild(FWidget* child) override;
 
-        Self& ChildSlot(FWidget& child)
+    private:  // - Fusion Fields -
+
+        FIELD()
+        FWidget* m_Child = nullptr;
+
+    public: // - Fusion Properties -
+
+        FWidget* GetChild() const { return m_Child; }
+
+        Self& Child(FWidget& childWidget)
         {
-            m_ChildSlot->Child(child);
+            AddChild(&childWidget);
             return *this;
         }
 
-    private:  // - Fields -
-
-        FIELD()
-        FCompoundWidgetSlot* m_ChildSlot = nullptr;
+        Self& operator()(FWidget& childWidget)
+        {
+            AddChild(&childWidget);
+            return *this;
+        }
 
         FUSION_TESTS;
     };

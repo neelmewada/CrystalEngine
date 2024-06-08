@@ -1,14 +1,14 @@
 #pragma once
 
-#define FNewOwned(Parent, WidgetClass)\
+#define FNewOwned(WidgetClass, Parent)\
 	(*CreateObject<WidgetClass>(Parent, #WidgetClass))
 
 #define FNew(WidgetClass)\
 	(*CreateObject<WidgetClass>(this, #WidgetClass))
 
-#define FAssignNew(VariableName, WidgetClass) FNew(WidgetClass).Assign(VariableName)
+#define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
 
-#define FAssignNewOwned(VariableName, Parent, WidgetClass) FNewOwned(Parent, WidgetClass).Assign(VariableName)
+#define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(Parent, WidgetClass).Assign(VariableName)
 
 #define FAssign(VariableName) (*VariableName)
 

@@ -360,5 +360,18 @@ namespace CE
 	struct TContainsType<T, First, Rest...> : TContainsType<T, Rest...>
 	{};
 
+	template<typename T, typename... List>
+	struct TMatchAllBaseClass : TFalseType
+	{};
+
+	template<typename T>
+	struct TMatchAllBaseClass<T> : TTrueType
+	{};
+
+	template<typename T, typename First, typename... Rest>
+	struct TMatchAllBaseClass<T, First, Rest...> : TBoolConst<TIsBaseClassOf<T, First>::Value and TMatchAllBaseClass<T, Rest...>::Value>
+	{};
+
+
 } // namespace CE::Traits
 

@@ -5,19 +5,18 @@ namespace CE
 
     FCompoundWidget::FCompoundWidget()
     {
-        m_ChildSlot = CreateDefaultSubobject<FCompoundWidgetSlot>("CompoundWidgetSlot");
-        m_ChildSlot->SetOwner(this);
+
     }
 
-    bool FCompoundWidget::RemoveLayoutSlot(FLayoutSlot* slot)
+    bool FCompoundWidget::TryAddChild(FWidget* child)
     {
-        return false;
+        if (!child)
+            return false;
+
+        m_Child = child;
+        child->parent = this;
+        return true;
     }
 
-    void FCompoundWidget::Construct()
-    {
-
-
-    }
 }
 

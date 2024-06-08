@@ -14,30 +14,30 @@ namespace CE
 
         // - Public API -
 
-        virtual SubClass<FLayoutSlot> GetSlotClass() const { return nullptr; }
-
-        virtual u32 GetSlotCount() { return 0; }
-
-        virtual FLayoutSlot* GetSlot(u32 index) { return nullptr; }
-
-        virtual FWidget& operator+(const FLayoutSlot& slot);
-        virtual FWidget& operator+(FLayoutSlot& slot);
-
-    	void AddLayoutSlot(const FLayoutSlot& slot);
-
-        virtual bool RemoveLayoutSlot(FLayoutSlot* slot);
-
-        void DestroyLayoutSlot(FLayoutSlot* slot);
-
         FFusionContext* GetContext();
 
-        Vec2 GetComputedLayoutSize() const { return precomputedSize; }
+        virtual void PrecomputeIntrinsicSize();
 
-        virtual void PrecomputeLayoutSize();
+        virtual void CalculateLayout(Vec2 availableSize);
 
-        virtual void PerformLayout(Vec2 availableSize);
+        virtual void OnChildWidgetDestroyed(FWidget* child) {}
+
+        void AddChild(FWidget* child);
+
+        template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
+        Self& operator()(TArgs&... childWidget)
+        {
+            std::initializer_list<FWidget*> list = { (FWidget*)&childWidget... };
+            for (FWidget* widget : list)
+            {
+                AddChild(widget);
+            }
+            return *this;
+        }
 
     protected:
+
+        virtual bool TryAddChild(FWidget* child) { return false; }
 
         virtual void OnFusionPropertyModified(const Name& propertyName) {}
 
@@ -47,25 +47,80 @@ namespace CE
 
         virtual void Construct();
 
-        FIELD()
-        Vec2 precomputedSize{};
+        //! @brief Computed position in parent widget's coordinate space
+        Vec2 computedPosition{};
 
+        Vec2 computedSize{};
 
+        //! @brief Computed position is the owner fusion context's coordinate space
+        Vec2 globalComputedPosition{};
 
     private:  // - Fields -
 
         FIELD()
-        FLayoutSlot* parent = nullptr;
-
-        FIELD()
-        bool layoutDirty = true;
-
-        FIELD()
         FFusionContext* context = nullptr;
 
-    public:  // - Properties -
+        FIELD()
+        FWidget* parent = nullptr;
 
-        FLayoutSlot* GetParent() const { return parent; }
+        // - Flags -
+
+        bool layoutDirty : 1 = true;
+
+    public: // - Fusion Fields -
+
+        FIELD()
+        Vec4 m_Padding = Vec4();
+
+        FIELD()
+        VAlign m_VAlign = VAlign::Fill;
+
+        FIELD()
+        HAlign m_HAlign = HAlign::Fill;
+
+        FIELD()
+        f32 m_MinWidth = 0;
+
+        FIELD()
+        f32 m_MaxWidth = NumericLimits<f32>::Infinity();
+
+        FIELD()
+        f32 m_MinHeight = 0;
+
+        FIELD()
+        f32 m_MaxHeight = NumericLimits<f32>::Infinity();
+
+    public:  // - Fusion Properties -
+
+        FUSION_PROPERTY(Padding);
+
+        FUSION_PROPERTY(VAlign);
+
+        FUSION_PROPERTY(HAlign);
+
+        FUSION_PROPERTY(MinWidth);
+        FUSION_PROPERTY(MaxWidth);
+
+        FUSION_PROPERTY(MinHeight);
+        FUSION_PROPERTY(MaxHeight);
+
+        Self& Padding(f32 padding)
+        {
+            m_Padding = Vec4(1, 1, 1, 1) * padding;
+            return *this;
+        }
+
+        Self& Padding(f32 left, f32 top, f32 right, f32 bottom)
+        {
+            m_Padding = Vec4(left, top, right, bottom);
+            return *this;
+        }
+
+        Self& Padding(f32 horizontal, f32 vertical)
+        {
+            m_Padding = Vec4(horizontal, vertical, horizontal, vertical);
+            return *this;
+        }
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& As()

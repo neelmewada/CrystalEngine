@@ -26,7 +26,7 @@ class FusionCore_Layout_Test;
     friend class FFusionContext;\
     friend class FNativeContext;\
     friend class FusionApplication;\
-    friend class FLayoutSlot;
+    friend class FCompoundWidget;
 
 #include "FusionMacros.h"
 #include "Exception/FusionException.h"
@@ -38,14 +38,15 @@ class FusionCore_Layout_Test;
 
 #include "Layout/LayoutTypes.h"
 #include "Layout/FLayoutManager.h"
-#include "Layout/FLayoutSlot.h"
 
 #include "Widget/FWidget.h"
+#include "Widget/FCompoundWidget.h"
+#include "Widget/FContainerWidget.h"
+
 #include "Window/FWindow.h"
 
 #include "Widget/FNullWidget.h"
 #include "Widget/Layout/FStackBox.h"
-#include "Widget/FCompoundWidget.h"
 
 
 namespace CE

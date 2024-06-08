@@ -13,54 +13,13 @@ namespace CE
         
     }
 
-    FWidget& FWidget::operator+(const FLayoutSlot& slot)
-    {
-        return operator+(const_cast<FLayoutSlot&>(slot));
-    }
-
-    FWidget& FWidget::operator+(FLayoutSlot& slot)
-    {
-        return *this;
-    }
-
-    void FWidget::AddLayoutSlot(const FLayoutSlot& slot)
-    {
-        operator+(slot);
-    }
-
-    bool FWidget::RemoveLayoutSlot(FLayoutSlot* slot)
-    {
-        return false;
-    }
-
-    void FWidget::DestroyLayoutSlot(FLayoutSlot* slot)
-    {
-        if (!slot)
-            return;
-
-        if (RemoveLayoutSlot(slot))
-        {
-            slot->Destroy();
-        }
-    }
-
     FFusionContext* FWidget::GetContext()
     {
-        if (!context && parent && parent->GetOwner())
+        if (!context && parent)
         {
-            context = parent->GetOwner()->GetContext();
+            context = parent->GetContext();
         }
         return context;
-    }
-
-    void FWidget::PrecomputeLayoutSize()
-    {
-
-    }
-
-    void FWidget::PerformLayout(Vec2 availableSize)
-    {
-        
     }
 
     void FWidget::OnAfterConstruct()
@@ -74,11 +33,27 @@ namespace CE
     {
 	    Super::OnBeforeDestroy();
 
-        if (parent != nullptr && parent->GetOwner() != nullptr)
+        if (parent)
         {
-            auto parentSlot = parent;
-            FWidget* ownerWidget = parentSlot->GetOwner();
-            ownerWidget->DestroyLayoutSlot(parentSlot);
+            parent->OnChildWidgetDestroyed(this);
+        }
+    }
+
+    void FWidget::PrecomputeIntrinsicSize()
+    {
+
+    }
+
+    void FWidget::CalculateLayout(Vec2 availableSize)
+    {
+        
+    }
+
+    void FWidget::AddChild(FWidget* child)
+    {
+        if (TryAddChild(child))
+        {
+            child->parent = this;
         }
     }
 

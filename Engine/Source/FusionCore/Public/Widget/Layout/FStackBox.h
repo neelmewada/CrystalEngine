@@ -1,42 +1,7 @@
 #pragma once
 
-
 namespace CE
 {
-
-    CLASS()
-    class FUSIONCORE_API FStackBoxSlot : public FLayoutSlot
-    {
-        CE_CLASS(FStackBoxSlot, FLayoutSlot)
-    public:
-
-        FStackBoxSlot();
-
-    private: // - Fusion Fields -
-
-        FIELD()
-        bool m_AutoSize = true;
-
-        FIELD()
-        f32 m_FillRatio = 0.0f;
-
-    public:
-
-        Self& AutoSize()
-        {
-            m_AutoSize = true;
-            return *this;
-        }
-
-        Self& FillRatio(f32 ratio)
-        {
-            m_AutoSize = false;
-            m_FillRatio = ratio;
-            return *this;
-        }
-
-        FUSION_TESTS;
-    };
 
     ENUM()
     enum class FStackBoxDirection
@@ -47,9 +12,9 @@ namespace CE
     ENUM_CLASS(FStackBoxDirection)
 
     CLASS()
-    class FUSIONCORE_API FStackBox : public FWidget
+    class FUSIONCORE_API FStackBox : public FContainerWidget
     {
-        CE_CLASS(FStackBox, FWidget)
+        CE_CLASS(FStackBox, FContainerWidget)
     public:
 
         FStackBox();
@@ -58,23 +23,6 @@ namespace CE
 
         // - Public API -
 
-        SubClass<FLayoutSlot> GetSlotClass() const override { return FStackBoxSlot::StaticType(); }
-
-        u32 GetSlotCount() override;
-
-        FLayoutSlot* GetSlot(u32 index) override;
-
-        static FStackBoxSlot& Slot() { return *CreateObject<FStackBoxSlot>(nullptr, "StackBoxSlot"); }
-
-        FWidget& operator+(FLayoutSlot& slot) override;
-
-        FWidget& operator+(const FLayoutSlot& slot) override;
-
-        bool RemoveLayoutSlot(FLayoutSlot* slot) override;
-
-        void PrecomputeLayoutSize() override;
-
-        void PerformLayout(Vec2 availableSize) override;
 
     protected:
 
@@ -83,37 +31,21 @@ namespace CE
     private:  // - Fusion Fields -
 
         FIELD()
-        Array<FStackBoxSlot*> m_Slots{};
-
-        FIELD()
         FStackBoxDirection m_Direction = FStackBoxDirection::Horizontal;
 
         FIELD()
-        Vec4 m_Padding{};
+        CE::HAlign m_ContentHAlign = HAlign::Fill;
+
+        FIELD()
+        CE::VAlign m_ContentVAlign = VAlign::Fill;
 
     public:  // - Fusion Properties -
 
         FUSION_PROPERTY(Direction);
 
-        FUSION_PROPERTY(Padding);
+        FUSION_PROPERTY(ContentHAlign);
 
-        Self& Padding(f32 padding)
-        {
-            m_Padding = Vec4(1, 1, 1, 1) * padding;
-            return *this;
-        }
-
-        Self& Padding(f32 left, f32 top, f32 right, f32 bottom)
-        {
-            m_Padding = Vec4(left, top, right, bottom);
-            return *this;
-        }
-
-        Self& Padding(f32 horizontal, f32 vertical)
-        {
-            m_Padding = Vec4(horizontal, vertical, horizontal, vertical);
-            return *this;
-        }
+        FUSION_PROPERTY(ContentVAlign);
 
         FUSION_TESTS;
     };

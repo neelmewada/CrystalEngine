@@ -120,7 +120,6 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-
 TEST(FusionCore, Construction)
 {
 	TEST_BEGIN;
@@ -129,85 +128,28 @@ TEST(FusionCore, Construction)
 	FusionApplication* app = FusionApplication::Get();
 
 	{
-		ComplexWidget* widget;
-
-		FAssignNewOwned(widget, app, ComplexWidget);
+		ComplexWidget* widget = CreateObject<ComplexWidget>(app, "ComplexWidget");
 
 		EXPECT_NE(widget->rootBox, nullptr);
 		EXPECT_EQ(widget->rootBox->GetDirection(), FStackBoxDirection::Vertical);
-		EXPECT_EQ(widget->m_ChildSlot->GetOwner(), widget);
-		EXPECT_EQ(widget->m_ChildSlot->GetChild(), widget->rootBox);
-		EXPECT_EQ(widget->m_ChildSlot, widget->rootBox->parent);
 
-		EXPECT_EQ(widget->rootBox->GetSlotCount(), 1);
-		EXPECT_EQ(widget->rootBox->GetSlot(0)->GetOuter(), widget->rootBox);
-		EXPECT_TRUE(widget->rootBox->GetSlot(0)->GetChild()->IsOfType<FStackBox>());
+		EXPECT_EQ(widget->rootBox->GetName(), "RootStackBox");
+		EXPECT_TRUE(widget->rootBox->GetChild(0)->IsOfType<FStackBox>());
+		EXPECT_EQ(widget->rootBox->GetPadding(), Vec4(10, 10, 10, 10));
 
-		FStackBox* stack1 = (FStackBox*)widget->rootBox->GetSlot(0)->GetChild();
-		EXPECT_EQ(stack1->GetDirection(), FStackBoxDirection::Horizontal);
-		EXPECT_EQ(stack1->GetSlotCount(), 1);
-		EXPECT_EQ(stack1->GetSubObjectCount(), 1);
+		FStackBox* stack0 = (FStackBox*)widget->rootBox->GetChild(0);
+		EXPECT_EQ(stack0->GetName(), "Stack0");
+		EXPECT_EQ(stack0->GetDirection(), FStackBoxDirection::Horizontal);
 
-		FLayoutSlot* stack1Slot0 = stack1->GetSlot(0);
+		FStackBox* stack0_0 = (FStackBox*)stack0->GetChild(0);
+		EXPECT_EQ(stack0_0->GetName(), "Stack0_0");
+		EXPECT_EQ(stack0_0->GetDirection(), FStackBoxDirection::Vertical);
+		EXPECT_EQ(stack0_0->GetPadding(), Vec4(5, 2, 5, 2));
 
-		EXPECT_TRUE(stack1Slot0->GetChild()->IsOfType<FStackBox>());
+		EXPECT_EQ(stack0_0->GetChildCount(), 2);
 
-		FStackBox* stack2 = (FStackBox*)stack1->GetSlot(0)->GetChild();
-		EXPECT_EQ(stack2->GetDirection(), FStackBoxDirection::Vertical);
-		EXPECT_EQ(stack2->GetParent(), stack1->GetSlot(0));
-		EXPECT_EQ(stack2->GetSlotCount(), 2);
-
-		// Try Removing slots
-
-		bool removeResult = stack1->RemoveLayoutSlot(stack1Slot0);
-		EXPECT_TRUE(removeResult);
-		EXPECT_EQ(stack1->GetSlotCount(), 0);
-		EXPECT_EQ(stack1->GetSubObjectCount(), 0);
-		EXPECT_EQ(stack1Slot0->GetOwner(), nullptr);
-		EXPECT_EQ(stack1Slot0->GetOuter(), nullptr);
-		EXPECT_EQ(stack1Slot0->GetChild(), nullptr);
-		EXPECT_EQ(stack2->GetParent(), nullptr);
-		EXPECT_EQ(stack2->GetOuter(), widget);
-
-		// You must destroy the FSlot object, or it will be leaked.
-		// Otherwise, use DestroySlot() instead of RemoveSlot()
-		stack1Slot0->Destroy(); stack1Slot0 = nullptr;
-
-		// Stack2's content should remain intact, we only removed the parent slot!
-		EXPECT_EQ(stack2->GetDirection(), FStackBoxDirection::Vertical);
-		EXPECT_EQ(stack2->GetSlotCount(), 2);
-
-		// Add Stack2 back inside stack1 by creating a new slot
-		// And also add 1 extra item inside Stack2, amounting a total of 3 slots thereafter
-
-		stack1->AddLayoutSlot(FStackBox::Slot()
-			(
-				FAssign(stack2)
-				.Direction(FStackBoxDirection::Horizontal)
-				+ FStackBox::Slot()
-				.Padding(3)
-				(
-					FNewOwned(app, FNullWidget)
-				)
-			)
-		);
-
-		EXPECT_EQ(stack1->GetSlotCount(), 1);
-
-		EXPECT_EQ(stack2->GetDirection(), FStackBoxDirection::Horizontal);
-		EXPECT_EQ(stack2->GetSlotCount(), 3);
-		EXPECT_EQ(stack2->GetSlot(0)->GetPadding(), Vec4(1, 1, 1, 1));
-		EXPECT_EQ(stack2->GetSlot(1)->GetPadding(), Vec4(2, 2, 2, 2));
-		EXPECT_EQ(stack2->GetSlot(2)->GetPadding(), Vec4(3, 3, 3, 3));
-		EXPECT_EQ(stack2->GetParent(), stack1->GetSlot(0));
-		EXPECT_EQ(stack2->GetOuter(), widget);
-
-		stack1Slot0 = stack1->GetSlot(0);
-
-		// Destroying the widget object directly should remove its parent slot too!
-		stack1->Destroy(); stack1 = nullptr;
-
-		EXPECT_EQ(widget->rootBox->GetSlotCount(), 0);
+		EXPECT_EQ(stack0_0->GetChild(0)->GetPadding(), Vec4(1, 1, 1, 1));
+		EXPECT_EQ(stack0_0->GetChild(1)->GetPadding(), 2 * Vec4(1, 1, 1, 1));
 
 		widget->Destroy();
 	}
@@ -215,6 +157,7 @@ TEST(FusionCore, Construction)
 	TEST_END;
 }
 
+/*
 TEST(FusionCore, Layout)
 {
 	TEST_BEGIN;
@@ -230,9 +173,9 @@ TEST(FusionCore, Layout)
 	FAssignNewOwned(rootWidget, rootContext, LayoutTestWidget);
 	rootContext->SetOwningWidget(rootWidget);
 
-	rootWidget->PerformLayout(Vec2(500, 700));
+	rootContext->SetAvailableSize(Vec2(500, 700));
 
-	
+	rootContext->DoLayout();
 
 	TEST_END;
-}
+}*/

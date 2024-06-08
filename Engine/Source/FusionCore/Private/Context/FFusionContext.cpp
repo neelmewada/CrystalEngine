@@ -23,9 +23,14 @@ namespace CE
 	{
 		ZoneScoped;
 
+		DoLayout();
+	}
+
+	void FFusionContext::DoLayout()
+	{
 		if (owningWidget)
 		{
-			owningWidget->PerformLayoutPreprocess();
+			
 		}
 	}
 
