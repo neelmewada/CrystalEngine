@@ -26,7 +26,30 @@ namespace ConstructTests
 
 namespace LayoutTests
 {
-	
+	CLASS()
+	class TerminalWidget : public FWidget
+	{
+		CE_CLASS(TerminalWidget, FWidget)
+	public:
+
+		TerminalWidget() = default;
+
+		void Construct() override;
+
+	};
+
+	CLASS()
+	class LayoutTestWidget : public FCompoundWidget
+	{
+		CE_CLASS(LayoutTestWidget)
+	public:
+
+		LayoutTestWidget() = default;
+
+		void Construct() override;
+
+	};
+
 }
 
 #include "FusionCoreTest.rtti.h"

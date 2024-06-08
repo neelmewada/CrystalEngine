@@ -40,3 +40,18 @@ namespace ConstructTests
 
 } // namespace ConstructTests
 
+namespace LayoutTests
+{
+
+    void TerminalWidget::Construct()
+    {
+	    
+    }
+
+    void LayoutTestWidget::Construct()
+    {
+	    
+    }
+
+
+}
