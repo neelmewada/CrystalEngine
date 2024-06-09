@@ -32,9 +32,9 @@ class FusionCore_Layout_Test;
 #include "Exception/FusionException.h"
 
 #include "Application/FusionApplication.h"
+#include "Rendering/FusionRenderer.h"
 #include "Context/FFusionContext.h"
 #include "Context/FNativeContext.h"
-#include "Rendering/FusionRenderer.h"
 
 #include "Layout/LayoutTypes.h"
 #include "Layout/FLayoutManager.h"

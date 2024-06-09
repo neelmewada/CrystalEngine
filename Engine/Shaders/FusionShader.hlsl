@@ -17,6 +17,9 @@ struct PSInput
     nointerpolation uint instanceId : TEXCOORD1;
 };
 
+///////////////////////////////////////////////////////////
+/// Data Structures
+
 enum DrawType
 {
 	DRAW_Rect
@@ -27,6 +30,14 @@ struct DrawItem2D
     DrawType drawType;
 };
 
+///////////////////////////////////////////////////////////
+/// Shader Resources
+
+
+
+///////////////////////////////////////////////////////////
+/// Vertex Shader
+
 PSInput VertMain(VSInput i)
 {
     PSInput o;
@@ -34,6 +45,19 @@ PSInput VertMain(VSInput i)
     o.position = float4(i.position, 1.0);
     o.uv = i.uv;
     return o;
+}
+
+///////////////////////////////////////////////////////////
+/// Fragment Shader
+
+struct RenderData
+{
+	
+};
+
+float4 RenderRect(in float4 p)
+{
+    return float4(0, 0, 0, 0);
 }
 
 float4 FragMain(PSInput input) : SV_TARGET

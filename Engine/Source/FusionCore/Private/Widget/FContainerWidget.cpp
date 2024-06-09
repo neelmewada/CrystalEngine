@@ -17,5 +17,11 @@ namespace CE
         return true;
     }
 
+    void FContainerWidget::OnChildWidgetDestroyed(FWidget* child)
+    {
+	    Super::OnChildWidgetDestroyed(child);
+
+        children.Remove(child);
+    }
 
 } // namespace CE

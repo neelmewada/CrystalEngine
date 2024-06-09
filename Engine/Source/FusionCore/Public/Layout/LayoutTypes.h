@@ -3,8 +3,9 @@
 namespace CE
 {
     ENUM()
-    enum class HAlign
+    enum class HAlign : u8
     {
+        Auto = 0,
         Fill,
 	    Left,
         Center,
@@ -12,8 +13,9 @@ namespace CE
     };
 
     ENUM()
-    enum class VAlign
+    enum class VAlign : u8
     {
+        Auto = 0,
         Fill,
         Top,
         Center,

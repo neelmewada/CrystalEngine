@@ -61,10 +61,45 @@ namespace CE
         rootContext = context;
     }
 
+    // - Application Callbacks -
+
+    void FusionApplication::OnWindowRestored(PlatformWindow* window)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowClosed(PlatformWindow* window)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowMinimized(PlatformWindow* window)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowCreated(PlatformWindow* window)
+    {
+	    
+    }
+
+    void FusionApplication::OnWindowExposed(PlatformWindow* window)
+    {
+	    
+    }
+
     void FusionApplication::InitializeShaders()
     {
-        String basePath = "/" MODULE_NAME "/Resources/Shaders/FusionShader";
-
         RawData vertexShader = GetFusionShaderVert();
         RawData fragmentShader = GetFusionShaderFrag();
 

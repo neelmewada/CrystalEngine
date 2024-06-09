@@ -37,14 +37,16 @@ namespace CE
         {
             parent->OnChildWidgetDestroyed(this);
         }
+        parent = nullptr;
     }
 
     void FWidget::PrecomputeIntrinsicSize()
     {
-
+        intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right, 
+            m_MinHeight + m_Padding.top + m_Padding.bottom);
     }
 
-    void FWidget::CalculateLayout(Vec2 availableSize)
+    void FWidget::PlaceSubWidgets()
     {
         
     }
@@ -54,6 +56,15 @@ namespace CE
         if (TryAddChild(child))
         {
             child->parent = this;
+        }
+    }
+
+    void FWidget::MarkLayoutDirty()
+    {
+        FFusionContext* context = GetContext();
+        if (context)
+        {
+            context->MarkLayoutDirty();
         }
     }
 

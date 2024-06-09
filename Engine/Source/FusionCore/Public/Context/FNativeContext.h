@@ -24,11 +24,14 @@ namespace CE
 
 	protected:
 
+		void Init();
+
 		PlatformWindow* platformWindow = nullptr;
 
 		RHI::SwapChain* swapChain = nullptr;
 		RHI::DrawListTag drawListTag = 0;
 
+		FusionRenderer* renderer = nullptr;
 
 		FUSION_FRIENDS;
 	};

@@ -11,10 +11,16 @@ namespace CE
 
         FCompoundWidget();
 
+        void PrecomputeIntrinsicSize() override;
+
+        void PlaceSubWidgets() override;
+
     protected:
 
         // Never call this function directly! Use AddChild() instead
         bool TryAddChild(FWidget* child) override;
+
+        void OnChildWidgetDestroyed(FWidget* child) override;
 
     private:  // - Fusion Fields -
 

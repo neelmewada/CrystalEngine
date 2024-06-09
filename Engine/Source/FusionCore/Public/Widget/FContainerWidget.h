@@ -16,6 +16,10 @@ namespace CE
 
         FWidget* GetChild(u32 index) const { return children[index]; }
 
+    protected:
+
+        void OnChildWidgetDestroyed(FWidget* child) override;
+
     protected: // - Fields -
 
         FIELD()

@@ -5,24 +5,6 @@
 
 using namespace CE;
 
-namespace ConstructTests
-{
-
-	CLASS()
-	class ComplexWidget : public FCompoundWidget
-	{
-		CE_CLASS(ComplexWidget, FCompoundWidget)
-	public:
-
-		ComplexWidget();
-
-		void Construct() override;
-
-		FStackBox* rootBox = nullptr;
-
-	};
-	
-}
 
 namespace LayoutTests
 {
@@ -36,18 +18,30 @@ namespace LayoutTests
 
 		void Construct() override;
 
+		// - Fusion Fields -
+
+
+		// - Fusion Properties -
+
+		
+
 	};
 
 	CLASS()
 	class LayoutTestWidget : public FCompoundWidget
 	{
-		CE_CLASS(LayoutTestWidget)
+		CE_CLASS(LayoutTestWidget, FCompoundWidget)
 	public:
 
 		LayoutTestWidget() = default;
 
 		void Construct() override;
 
+		FStackBox* rootBox = nullptr;
+
+		FStackBox* hStack1 = nullptr;
+		FStackBox* hStack2 = nullptr;
+		FStackBox* hStack3 = nullptr;
 	};
 
 }

@@ -32,6 +32,14 @@ namespace CE
 
         void SetAvailableSize(Vec2 value) { availableSize = value; }
 
+        bool IsLayoutDirty() const { return layoutDirty; }
+
+        void MarkLayoutDirty();
+
+        void AddChildContext(FFusionContext* context);
+
+        void RemoveChildContext(FFusionContext* context);
+
     protected:
 
         FIELD()
@@ -44,8 +52,7 @@ namespace CE
         FIELD()
         b8 isIsolatedContext = true;
 
-        FIELD()
-        FLayoutManager* layoutManager = nullptr;
+        bool layoutDirty = true;
 
         Vec2 availableSize{};
 

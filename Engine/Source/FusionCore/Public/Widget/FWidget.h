@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    
     CLASS(Abstract)
     class FUSIONCORE_API FWidget : public Object
     {
@@ -18,22 +19,38 @@ namespace CE
 
         virtual void PrecomputeIntrinsicSize();
 
-        virtual void CalculateLayout(Vec2 availableSize);
+        virtual void PlaceSubWidgets();
 
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
 
         void AddChild(FWidget* child);
 
         template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
-        Self& operator()(TArgs&... childWidget)
+        Self& operator()(const TArgs&... childWidget)
         {
-            std::initializer_list<FWidget*> list = { (FWidget*)&childWidget... };
-            for (FWidget* widget : list)
-            {
-                AddChild(widget);
-            }
+            using TupleType = std::tuple<const TArgs&...>;
+            TupleType args = { childWidget... };
+            
+            constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
+                {
+                    using ArgTypeBase = std::tuple_element<i(), TupleType>::type;
+                    using ArgType = std::remove_cvref_t<ArgTypeBase>;
+                    if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
+                    {
+                        this->AddChild(const_cast<ArgType*>(&std::get<i()>(args)));
+                    }
+                });
+            
             return *this;
         }
+
+        Vec2 GetIntrinsicSize() const { return intrinsicSize; }
+
+        void MarkLayoutDirty();
+
+        Vec2 GetComputedPosition() const { return computedPosition; }
+
+        Vec2 GetComputedSize() const { return computedSize; }
 
     protected:
 
@@ -52,8 +69,10 @@ namespace CE
 
         Vec2 computedSize{};
 
-        //! @brief Computed position is the owner fusion context's coordinate space
-        Vec2 globalComputedPosition{};
+        //! @brief Computed position in the fusion context's coordinate space
+        //Vec2 globalComputedPosition{};
+
+        Vec2 intrinsicSize{};
 
     private:  // - Fields -
 
@@ -65,7 +84,6 @@ namespace CE
 
         // - Flags -
 
-        bool layoutDirty : 1 = true;
 
     public: // - Fusion Fields -
 
@@ -73,10 +91,13 @@ namespace CE
         Vec4 m_Padding = Vec4();
 
         FIELD()
-        VAlign m_VAlign = VAlign::Fill;
+        Vec4 m_Margin = Vec4();
 
         FIELD()
-        HAlign m_HAlign = HAlign::Fill;
+        VAlign m_VAlign = VAlign::Auto;
+
+        FIELD()
+        HAlign m_HAlign = HAlign::Auto;
 
         FIELD()
         f32 m_MinWidth = 0;
@@ -90,19 +111,47 @@ namespace CE
         FIELD()
         f32 m_MaxHeight = NumericLimits<f32>::Infinity();
 
+        FIELD()
+        f32 m_FillWidth = 0.0f;
+
+        FIELD()
+        f32 m_FillHeight = 0.0f;
+
     public:  // - Fusion Properties -
 
-        FUSION_PROPERTY(Padding);
+        FUSION_LAYOUT_PROPERTY(Padding);
 
-        FUSION_PROPERTY(VAlign);
+        FUSION_LAYOUT_PROPERTY(VAlign);
+        FUSION_LAYOUT_PROPERTY(HAlign);
 
-        FUSION_PROPERTY(HAlign);
+        FUSION_LAYOUT_PROPERTY(MinWidth);
+        FUSION_LAYOUT_PROPERTY(MaxWidth);
 
-        FUSION_PROPERTY(MinWidth);
-        FUSION_PROPERTY(MaxWidth);
+        FUSION_LAYOUT_PROPERTY(MinHeight);
+        FUSION_LAYOUT_PROPERTY(MaxHeight);
 
-        FUSION_PROPERTY(MinHeight);
-        FUSION_PROPERTY(MaxHeight);
+        FUSION_LAYOUT_PROPERTY(FillWidth);
+        FUSION_LAYOUT_PROPERTY(FillHeight);
+
+        FUSION_LAYOUT_PROPERTY(Margin);
+
+        Self& Margin(f32 margin)
+        {
+            m_Margin = Vec4(margin, margin, margin, margin);
+            return *this;
+        }
+
+        Self& Margin(f32 left, f32 top, f32 right, f32 bottom)
+        {
+            m_Margin = Vec4(left, top, right, bottom);
+            return *this;
+        }
+
+        Self& Margin(f32 horizontal, f32 vertical)
+        {
+            m_Margin = Vec4(horizontal, vertical, horizontal, vertical);
+            return *this;
+        }
 
         Self& Padding(f32 padding)
         {

@@ -217,16 +217,16 @@ namespace CE::Widgets
 
         // - Events -
 
-        EVENT()
+        FIELD()
         CVoidEvent onFocused;
 
-        EVENT()
+        FIELD()
         CVoidEvent onUnfocused;
 
-        EVENT()
+        FIELD()
         CVoidEvent onMouseLeftPress;
 
-        EVENT()
+        FIELD()
         CVoidEvent onMouseLeftClick;
 
         virtual void OnFocusGained() {}
