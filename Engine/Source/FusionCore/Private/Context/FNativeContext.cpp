@@ -49,7 +49,7 @@ namespace CE
 
 		Super::Tick();
 
-		
+		// TODO: Rendering
 	}
 
 } // namespace CE

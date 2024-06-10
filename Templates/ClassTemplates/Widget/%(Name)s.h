@@ -14,6 +14,7 @@ namespace %(NameSpace)s
 
         void Construct() override;
 
+        FUSION_WIDGET;
     };
     
 }

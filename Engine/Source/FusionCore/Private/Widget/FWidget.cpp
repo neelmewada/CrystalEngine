@@ -56,6 +56,16 @@ namespace CE
         if (TryAddChild(child))
         {
             child->parent = this;
+            MarkLayoutDirty();
+        }
+    }
+
+    void FWidget::RemoveChild(FWidget* child)
+    {
+        if (TryRemoveChild(child))
+        {
+            child->parent = nullptr;
+            MarkLayoutDirty();
         }
     }
 
@@ -65,6 +75,15 @@ namespace CE
         if (context)
         {
             context->MarkLayoutDirty();
+        }
+    }
+
+    void FWidget::MarkDirty()
+    {
+        FFusionContext* context = GetContext();
+        if (context)
+        {
+            context->MarkDirty();
         }
     }
 

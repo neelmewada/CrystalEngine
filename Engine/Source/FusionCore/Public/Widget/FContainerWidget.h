@@ -10,15 +10,17 @@ namespace CE
 
         FContainerWidget();
 
-        bool TryAddChild(FWidget* child) override;
-
         u32 GetChildCount() const { return children.GetSize(); }
 
         FWidget* GetChild(u32 index) const { return children[index]; }
 
     protected:
 
-        void OnChildWidgetDestroyed(FWidget* child) override;
+        bool TryAddChild(FWidget* child) override;
+
+        bool TryRemoveChild(FWidget* child) override;
+
+    	void OnChildWidgetDestroyed(FWidget* child) override;
 
     protected: // - Fields -
 

@@ -28,6 +28,7 @@ enum DrawType
 struct DrawItem2D
 {
     DrawType drawType;
+    
 };
 
 ///////////////////////////////////////////////////////////

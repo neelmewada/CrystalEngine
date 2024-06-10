@@ -20,18 +20,24 @@ namespace CE
         // Never call this function directly! Use AddChild() instead
         bool TryAddChild(FWidget* child) override;
 
+        bool TryRemoveChild(FWidget* child) override;
+
         void OnChildWidgetDestroyed(FWidget* child) override;
 
-    private:  // - Fusion Fields -
+    private:  // - Private Fields -
 
         FIELD()
         FWidget* m_Child = nullptr;
 
+    protected:  // - Fusion Fields -
+
+
     public: // - Fusion Properties -
+
 
         FWidget* GetChild() const { return m_Child; }
 
-        Self& Child(FWidget& childWidget)
+        virtual Self& Child(FWidget& childWidget)
         {
             AddChild(&childWidget);
             return *this;
@@ -44,6 +50,7 @@ namespace CE
         }
 
         FUSION_TESTS;
+        FUSION_WIDGET;
     };
     
 }

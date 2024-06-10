@@ -17,10 +17,12 @@ namespace CE
             return;
 
         m_Child->PrecomputeIntrinsicSize();
-        Vec2 childSize = m_Child->GetIntrinsicSize();
 
-        intrinsicSize.width = Math::Max(intrinsicSize.width, childSize.width + m_Padding.left + m_Padding.right);
-        intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom);
+        Vec2 childSize = m_Child->GetIntrinsicSize();
+        const Vec4& childMargin = m_Child->GetMargin();
+
+        intrinsicSize.width = Math::Max(intrinsicSize.width, childSize.width + m_Padding.left + m_Padding.right + childMargin.left + childMargin.right);
+        intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
     }
 
     void FCompoundWidget::PlaceSubWidgets()
@@ -28,9 +30,12 @@ namespace CE
         if (!m_Child)
             return;
 
-        m_Child->computedPosition = Vec2(m_Padding.left, m_Padding.top);
+        Vec4 childMargin = m_Child->GetMargin();
+
+        m_Child->computedPosition = Vec2(m_Padding.left + childMargin.left, m_Padding.top + childMargin.top);
         m_Child->computedSize = computedSize - 
-            Vec2(m_Padding.left + m_Padding.right, m_Padding.top + m_Padding.bottom);
+            Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right, 
+                m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
         //m_Child->globalComputedPosition = globalComputedPosition + m_Child->computedPosition;
 
@@ -44,6 +49,18 @@ namespace CE
 
         m_Child = child;
         child->parent = this;
+        MarkLayoutDirty();
+        return true;
+    }
+
+    bool FCompoundWidget::TryRemoveChild(FWidget* child)
+    {
+	    if (!child || child != m_Child)
+            return false;
+
+        m_Child = nullptr;
+        child->parent = nullptr;
+        MarkLayoutDirty();
         return true;
     }
 
@@ -53,7 +70,7 @@ namespace CE
 
         if (child == m_Child)
         {
-            m_Child = nullptr;
+            TryRemoveChild(child);
         }
     }
 

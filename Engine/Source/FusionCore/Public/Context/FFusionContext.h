@@ -36,23 +36,36 @@ namespace CE
 
         void MarkLayoutDirty();
 
+        void MarkDirty();
+
         void AddChildContext(FFusionContext* context);
 
         void RemoveChildContext(FFusionContext* context);
+
+        void SetStyleManager(FStyleManager* styleManager);
+
+        FStyleManager* GetStyleManager();
 
     protected:
 
         FIELD()
         Array<FFusionContext*> childContexts{};
 
+        FIELD()
+        FFusionContext* parentContext = nullptr;
+
         //! @brief Widget can be owned by a FusionContext directly, or by a native window!
         FIELD()
         FWidget* owningWidget = nullptr;
 
         FIELD()
+        FStyleManager* styleManager = nullptr;
+
+        FIELD()
         b8 isIsolatedContext = true;
 
         bool layoutDirty = true;
+        bool dirty = true;
 
         Vec2 availableSize{};
 

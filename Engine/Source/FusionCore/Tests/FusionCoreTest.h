@@ -24,7 +24,7 @@ namespace LayoutTests
 		// - Fusion Properties -
 
 		
-
+		FUSION_WIDGET;
 	};
 
 	CLASS()
@@ -39,9 +39,30 @@ namespace LayoutTests
 
 		FStackBox* rootBox = nullptr;
 
-		FStackBox* hStack1 = nullptr;
-		FStackBox* hStack2 = nullptr;
-		FStackBox* hStack3 = nullptr;
+		FHorizontalStack* hStack1 = nullptr;
+		FHorizontalStack* hStack2 = nullptr;
+		FHorizontalStack* hStack3 = nullptr;
+
+		FUSION_WIDGET;
+	};
+
+}
+
+namespace RenderingTests
+{
+	CLASS()
+	class RenderingTestWidget : public FCompoundWidget
+	{
+		CE_CLASS(RenderingTestWidget, FCompoundWidget)
+	public:
+
+		RenderingTestWidget() = default;
+
+		void Construct() override;
+
+		FStackBox* rootBox;
+
+		FUSION_WIDGET;
 	};
 
 }

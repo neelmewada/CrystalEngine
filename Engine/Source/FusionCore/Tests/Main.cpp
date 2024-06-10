@@ -89,6 +89,7 @@ static void TestEnd(bool gui)
 
 	FusionApplication* fApp = FusionApplication::Get();
 
+	fApp->PreShutdown();
 	fApp->Shutdown();
 	delete fApp;
 
@@ -235,6 +236,7 @@ TEST(FusionCore, Layout)
 TEST(FusionCore, Rendering)
 {
 	TEST_BEGIN_GUI;
+	using namespace RenderingTests;
 
 	f32 deltaTime = 0;
 	clock_t previousTime = {};
@@ -244,9 +246,26 @@ TEST(FusionCore, Rendering)
 	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
 	app->SetRootContext(rootContext);
 
+	FStyleManager* rootStyle = CreateObject<FStyleManager>(rootContext, "RootStyleManager");
+	rootContext->SetStyleManager(rootStyle);
+
+	// - Styling -
+	{
+		{
+			auto primaryBtn = CreateObject<FPlainButtonStyle>(rootStyle, "PrimaryButton");
+			rootStyle->RegisterStyle("Button.Primary", primaryBtn);
+
+			primaryBtn->background = Color::RGBA(56, 56, 56);
+			primaryBtn->hoveredBackground = Color::RGBA(95, 95, 95);
+			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
+		}
+
+	}
+
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
+	rootContext->AddChildContext(nativeContext);
 
 	while (!IsEngineRequestingExit())
 	{

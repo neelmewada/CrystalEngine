@@ -25,6 +25,7 @@ namespace CE
         static FusionApplication* TryGet();
 
         void Initialize(const FusionInitInfo& initInfo);
+        void PreShutdown();
         void Shutdown();
 
         void Tick();

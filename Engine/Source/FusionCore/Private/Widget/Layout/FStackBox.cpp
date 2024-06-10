@@ -15,6 +15,8 @@ namespace CE
 
 	void FStackBox::PrecomputeIntrinsicSize()
 	{
+		ZoneScoped;
+
 		if (children.IsEmpty())
 		{
 			Super::PrecomputeIntrinsicSize();
@@ -59,6 +61,8 @@ namespace CE
 
 	void FStackBox::PlaceSubWidgets()
 	{
+		ZoneScoped;
+
 		if (children.IsEmpty())
 		{
 			Super::PlaceSubWidgets();
@@ -90,9 +94,9 @@ namespace CE
 			
 			if (m_Direction == FStackBoxDirection::Horizontal)
 			{
-				if (child->m_FillWidth > 0)
+				if (child->m_FillRatio > 0)
 				{
-					totalFillRatio += child->m_FillWidth;
+					totalFillRatio += child->m_FillRatio;
 				}
 				else
 				{
@@ -103,9 +107,9 @@ namespace CE
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
-				if (child->m_FillHeight > 0)
+				if (child->m_FillRatio > 0)
 				{
-					totalFillRatio += child->m_FillHeight;
+					totalFillRatio += child->m_FillRatio;
 				}
 				else
 				{
@@ -151,9 +155,9 @@ namespace CE
 					break;
 				}
 
-				if (child->m_FillWidth > 0)
+				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.width = remainingSize * child->m_FillWidth / totalFillRatio;
+					child->computedSize.width = remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{
@@ -183,9 +187,9 @@ namespace CE
 					break;
 				}
 
-				if (child->m_FillHeight > 0)
+				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.height = remainingSize * child->m_FillHeight / totalFillRatio;
+					child->computedSize.height = remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{

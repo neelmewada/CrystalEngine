@@ -24,6 +24,7 @@ namespace CE
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
 
         void AddChild(FWidget* child);
+        void RemoveChild(FWidget* child);
 
         template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
         Self& operator()(const TArgs&... childWidget)
@@ -48,13 +49,22 @@ namespace CE
 
         void MarkLayoutDirty();
 
+        //! @brief Mark the widget dirty for re-rendering
+        void MarkDirty();
+
         Vec2 GetComputedPosition() const { return computedPosition; }
 
         Vec2 GetComputedSize() const { return computedSize; }
 
+        void SetComputedPosition(Vec2 pos) { computedPosition = pos; }
+
+        void SetComputedSize(Vec2 size) { computedSize = size; }
+
     protected:
 
         virtual bool TryAddChild(FWidget* child) { return false; }
+
+        virtual bool TryRemoveChild(FWidget* child) { return false; }
 
         virtual void OnFusionPropertyModified(const Name& propertyName) {}
 
@@ -85,7 +95,7 @@ namespace CE
         // - Flags -
 
 
-    public: // - Fusion Fields -
+    protected: // - Fusion Fields -
 
         FIELD()
         Vec4 m_Padding = Vec4();
@@ -112,14 +122,21 @@ namespace CE
         f32 m_MaxHeight = NumericLimits<f32>::Infinity();
 
         FIELD()
-        f32 m_FillWidth = 0.0f;
+        f32 m_FillRatio = 0.0f;
 
         FIELD()
-        f32 m_FillHeight = 0.0f;
+        Vec2 m_Translation;
+
+        FIELD()
+        Vec2 m_Scale = Vec2(1, 1);
+
+        FIELD()
+        f32 m_Rotation = 0;
 
     public:  // - Fusion Properties -
 
         FUSION_LAYOUT_PROPERTY(Padding);
+        FUSION_LAYOUT_PROPERTY(Margin);
 
         FUSION_LAYOUT_PROPERTY(VAlign);
         FUSION_LAYOUT_PROPERTY(HAlign);
@@ -130,44 +147,69 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(MinHeight);
         FUSION_LAYOUT_PROPERTY(MaxHeight);
 
-        FUSION_LAYOUT_PROPERTY(FillWidth);
-        FUSION_LAYOUT_PROPERTY(FillHeight);
+        FUSION_LAYOUT_PROPERTY(FillRatio);
 
-        FUSION_LAYOUT_PROPERTY(Margin);
+        FUSION_PROPERTY(Translation);
+        FUSION_PROPERTY(Rotation);
+        FUSION_PROPERTY(Scale);
 
         Self& Margin(f32 margin)
         {
-            m_Margin = Vec4(margin, margin, margin, margin);
+            Vec4 newMargin = Vec4(margin, margin, margin, margin);
+            if (m_Margin == newMargin)
+                return *this;
+            m_Margin = newMargin;
+            MarkLayoutDirty();
             return *this;
         }
 
         Self& Margin(f32 left, f32 top, f32 right, f32 bottom)
         {
-            m_Margin = Vec4(left, top, right, bottom);
+            Vec4 newMargin = Vec4(left, top, right, bottom);
+            if (m_Margin == newMargin)
+                return *this;
+            m_Margin = newMargin;
+            MarkLayoutDirty();
             return *this;
         }
 
         Self& Margin(f32 horizontal, f32 vertical)
         {
-            m_Margin = Vec4(horizontal, vertical, horizontal, vertical);
+            Vec4 newMargin = Vec4(horizontal, vertical, horizontal, vertical);
+            if (m_Margin == newMargin)
+                return *this;
+            m_Margin = newMargin;
+            MarkLayoutDirty();
             return *this;
         }
 
         Self& Padding(f32 padding)
         {
-            m_Padding = Vec4(1, 1, 1, 1) * padding;
+            Vec4 newPadding = Vec4(1, 1, 1, 1) * padding;
+            if (m_Padding == newPadding)
+                return *this;
+            m_Padding = newPadding;
+            MarkLayoutDirty();
             return *this;
         }
 
         Self& Padding(f32 left, f32 top, f32 right, f32 bottom)
         {
-            m_Padding = Vec4(left, top, right, bottom);
+            Vec4 newPadding = Vec4(left, top, right, bottom);
+            if (m_Padding == newPadding)
+                return *this;
+            m_Padding = newPadding;
+            MarkLayoutDirty();
             return *this;
         }
 
         Self& Padding(f32 horizontal, f32 vertical)
         {
-            m_Padding = Vec4(horizontal, vertical, horizontal, vertical);
+            Vec4 newPadding = Vec4(horizontal, vertical, horizontal, vertical);
+            if (m_Padding == newPadding)
+                return *this;
+            m_Padding = newPadding;
+            MarkLayoutDirty();
             return *this;
         }
 
@@ -197,11 +239,26 @@ namespace CE
             return *out;
         }
 
+        template<typename T>
+        struct TValidate_If
+        {
+            using Traits = FunctionTraits<T>;
+            using ReturnType = typename Traits::ReturnType;
+            using Arg0 = typename Traits::template Arg<0>::Type;
+
+            static constexpr bool Value = (Traits::NumArgs == 1)
+                and TIsSameType<ReturnType, void>::Value
+        		and TIsBaseClassOf<FWidget, std::remove_cvref_t<Arg0>>::Value
+        		and std::is_reference_v<Arg0>;
+        };
+
     private:
 
 
         FUSION_FRIENDS;
+        FUSION_WIDGET;
     };
+
     
 } // namespace CE
 

@@ -51,6 +51,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(ContentVAlign);
 
         FUSION_TESTS;
+        FUSION_WIDGET;
     };
 
     CLASS()
@@ -64,6 +65,9 @@ namespace CE
             m_Direction = FStackBoxDirection::Vertical;
         }
 
+
+        FUSION_TESTS;
+        FUSION_WIDGET;
     };
 
     CLASS()
@@ -77,6 +81,9 @@ namespace CE
             m_Direction = FStackBoxDirection::Horizontal;
         }
 
+
+        FUSION_TESTS;
+        FUSION_WIDGET;
     };
 
 } // namespace CE

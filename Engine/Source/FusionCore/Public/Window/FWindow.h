@@ -20,6 +20,7 @@ namespace CE
 
 
         FUSION_TESTS;
+        FUSION_WIDGET;
     };
     
 }

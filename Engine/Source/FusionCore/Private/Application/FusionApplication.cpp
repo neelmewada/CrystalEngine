@@ -41,6 +41,12 @@ namespace CE
         InitializeShaders();
     }
 
+    void FusionApplication::PreShutdown()
+    {
+        // Pre-shutdown and cleanup resources before engine assets are unloaded
+
+    }
+
     void FusionApplication::Shutdown()
     {
         delete fusionShader; fusionShader = nullptr;
@@ -97,6 +103,8 @@ namespace CE
     {
 	    
     }
+
+    // - Shader Resources -
 
     void FusionApplication::InitializeShaders()
     {

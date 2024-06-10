@@ -26,7 +26,15 @@ class FusionCore_Layout_Test;
     friend class FFusionContext;\
     friend class FNativeContext;\
     friend class FusionApplication;\
-    friend class FCompoundWidget;
+    friend class FCompoundWidget;\
+    friend class FStyleManager;
+
+namespace CE
+{
+    // Forward Declarations
+    class FStyleManager;
+
+}
 
 #include "FusionMacros.h"
 #include "Exception/FusionException.h"
@@ -39,17 +47,20 @@ class FusionCore_Layout_Test;
 #include "Layout/LayoutTypes.h"
 #include "Layout/FLayoutManager.h"
 
+#include "Style/FShape.h"
+#include "Style/FBrush.h"
+#include "Style/FStyle.h"
+#include "Style/FButtonStyle.h"
+#include "Style/FStyleManager.h"
+
 #include "Widget/FWidget.h"
 #include "Widget/FCompoundWidget.h"
+#include "Widget/FStyledWidget.h"
 #include "Widget/FContainerWidget.h"
+#include "Widget/FButton.h"
 
 #include "Window/FWindow.h"
 
 #include "Widget/FNullWidget.h"
 #include "Widget/Layout/FStackBox.h"
 
-
-namespace CE
-{
-    
-}
