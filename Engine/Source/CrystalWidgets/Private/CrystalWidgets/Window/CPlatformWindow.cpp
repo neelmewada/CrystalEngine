@@ -74,7 +74,7 @@ namespace CE::Widgets
 	    	desc.imageCount = CApplication::Get()->numFramesInFlight;
 	    	desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 
-	    	platformWindow->GetWindowSize(&desc.preferredWidth, &desc.preferredHeight);
+	    	platformWindow->GetDrawableWindowSize(&desc.preferredWidth, &desc.preferredHeight);
 
 	    	swapChain = RHI::gDynamicRHI->CreateSwapChain(platformWindow, desc);
 	    }

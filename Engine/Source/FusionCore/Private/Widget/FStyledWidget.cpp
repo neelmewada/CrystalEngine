@@ -8,6 +8,17 @@ namespace CE
 
     }
 
+    FStyledWidget::Self& FStyledWidget::UseStyle(FStyle* style)
+    {
+        if (style && IsOfType(style->GetWidgetClass()))
+        {
+            m_Style = style;
+            m_Style->MakeStyle(*this);
+            MarkDirty();
+        }
+        return *this;
+    }
+
     FStyledWidget::Self& FStyledWidget::UseStyle(const CE::Name& styleKey)
     {
         if (!styleKey.IsValid())

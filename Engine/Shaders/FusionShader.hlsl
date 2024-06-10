@@ -17,6 +17,8 @@ struct PSInput
     nointerpolation uint instanceId : TEXCOORD1;
 };
 
+#define instanceIdx input.instanceId
+
 ///////////////////////////////////////////////////////////
 /// Data Structures
 
@@ -27,6 +29,7 @@ enum DrawType
 
 struct DrawItem2D
 {
+    float4x4 transform;
     DrawType drawType;
     
 };
@@ -34,7 +37,7 @@ struct DrawItem2D
 ///////////////////////////////////////////////////////////
 /// Shader Resources
 
-
+StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 
 ///////////////////////////////////////////////////////////
 /// Vertex Shader

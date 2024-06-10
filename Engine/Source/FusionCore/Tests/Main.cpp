@@ -56,6 +56,13 @@ static void TestBegin(bool gui)
 	gDynamicRHI->Initialize();
 	gDynamicRHI->PostInitialize();
 
+	if (gui)
+	{
+		RHI::FrameSchedulerDescriptor desc{};
+		desc.numFramesInFlight = 2;
+		FrameScheduler::Create(desc);
+	}
+
 	RPISystem::Get().Initialize();
 
 	FusionApplication* fApp = FusionApplication::Get();
@@ -92,6 +99,11 @@ static void TestEnd(bool gui)
 	fApp->PreShutdown();
 	fApp->Shutdown();
 	delete fApp;
+
+	if (gui)
+	{
+		delete FrameScheduler::Get();
+	}
 
 	RPISystem::Get().Shutdown();
 

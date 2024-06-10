@@ -49,17 +49,7 @@ namespace CE
 
         FUSION_PROPERTY(Opacity);
 
-
-        Self& UseStyle(FStyle* style)
-        {
-            if (style && IsOfType(style->GetWidgetClass()))
-            {
-                m_Style = style;
-                m_Style->MakeStyle(*this);
-                MarkDirty();
-            }
-            return *this;
-        }
+        Self& UseStyle(FStyle* style);
 
         Self& UseStyle(const CE::Name& styleKey);
 

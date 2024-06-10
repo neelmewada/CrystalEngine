@@ -28,6 +28,8 @@ namespace CE
 
         void SetOwningWidget(FWidget* widget);
 
+        void OnWidgetDestroyed(FWidget* widget);
+
         Vec2 GetAvailableSize() const { return availableSize; }
 
         void SetAvailableSize(Vec2 value) { availableSize = value; }
@@ -45,6 +47,10 @@ namespace CE
         void SetStyleManager(FStyleManager* styleManager);
 
         FStyleManager* GetStyleManager();
+
+        // - Rendering / FrameGraph -
+
+        virtual void EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase);
 
     protected:
 

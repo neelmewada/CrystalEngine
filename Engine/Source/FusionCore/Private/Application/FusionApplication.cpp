@@ -38,12 +38,17 @@ namespace CE
 
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
+        PlatformApplication::Get()->AddMessageHandler(this);
+
         InitializeShaders();
     }
 
     void FusionApplication::PreShutdown()
     {
+        PlatformApplication::Get()->RemoveMessageHandler(this);
+
         // Pre-shutdown and cleanup resources before engine assets are unloaded
+        RHI::FrameScheduler::Get()->WaitUntilIdle();
 
     }
 
@@ -56,10 +61,53 @@ namespace CE
     {
         ZoneScoped;
 
+        int submittedFrameIdx = -1;
+
+        if (rebuildFrameGraph)
+        {
+            rebuildFrameGraph = false;
+            recompileFrameGraph = true;
+
+            BuildFrameGraph();
+            submittedFrameIdx = curImageIndex;
+        }
+
+        if (recompileFrameGraph)
+        {
+            recompileFrameGraph = false;
+
+            CompileFrameGraph();
+        }
+
         if (rootContext)
         {
             rootContext->Tick();
         }
+    }
+
+    void FusionApplication::BuildFrameGraph()
+    {
+        FrameScheduler* scheduler = FrameScheduler::Get();
+
+        rebuildFrameGraph = false;
+        recompileFrameGraph = true;
+
+        FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+        scheduler->BeginFrameGraph();
+        {
+            rootContext->EmplaceFrameAttachments(attachmentDatabase);
+
+
+        }
+        scheduler->EndFrameGraph();
+    }
+
+    void FusionApplication::CompileFrameGraph()
+    {
+        FrameScheduler* scheduler = FrameScheduler::Get();
+
+
     }
 
     void FusionApplication::SetRootContext(FFusionContext* context)
@@ -67,41 +115,46 @@ namespace CE
         rootContext = context;
     }
 
+    void FusionApplication::RebuildFrameGraph()
+    {
+        rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
     // - Application Callbacks -
 
     void FusionApplication::OnWindowRestored(PlatformWindow* window)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowClosed(PlatformWindow* window)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowMinimized(PlatformWindow* window)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowCreated(PlatformWindow* window)
     {
-	    
+        RebuildFrameGraph();
     }
 
     void FusionApplication::OnWindowExposed(PlatformWindow* window)
     {
-	    
+        
     }
 
     // - Shader Resources -
@@ -145,6 +198,8 @@ namespace CE
 
         variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView)
             .TryAdd(perViewData);
+
+        perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");

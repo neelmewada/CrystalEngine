@@ -97,6 +97,17 @@ namespace CE::Vulkan
 	void FrameGraphExecuter::WaitUntilIdle()
 	{
 		vkDeviceWaitIdle(device->GetHandle());
+		return;
+
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+
+		for (int i = 0; i < compiler->graphExecutionFences.GetSize(); ++i)
+		{
+			vkWaitForFences(device->GetHandle(),
+				compiler->graphExecutionFences[i].GetSize(),
+				compiler->graphExecutionFences[i].GetData(),
+				VK_TRUE, u64Max);
+		}
 	}
 
 	u32 FrameGraphExecuter::BeginExecution(const FrameGraphExecuteRequest& executeRequest)

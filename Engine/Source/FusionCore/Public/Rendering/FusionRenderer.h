@@ -12,6 +12,10 @@ namespace CE
 
     protected:
 
+        struct alignas(16) DrawItem2D
+        {
+	        
+        };
 
     };
     

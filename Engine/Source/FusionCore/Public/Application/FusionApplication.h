@@ -32,6 +32,12 @@ namespace CE
 
         void SetRootContext(FFusionContext* context);
 
+        void RebuildFrameGraph();
+
+        RPI::Shader* GetFusionShader() const { return fusionShader; }
+
+        RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;
@@ -46,11 +52,18 @@ namespace CE
 
         void InitializeShaders();
 
+        void BuildFrameGraph();
+        void CompileFrameGraph();
+
+        bool rebuildFrameGraph = true;
+        bool recompileFrameGraph = true;
+        int curImageIndex = 0;
 
         FIELD()
         FFusionContext* rootContext = nullptr;
 
         RPI::Shader* fusionShader = nullptr;
+        RHI::ShaderResourceGroupLayout perViewSrgLayout{};
 
         FUSION_TESTS;
     };

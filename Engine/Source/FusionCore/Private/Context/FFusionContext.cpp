@@ -53,6 +53,14 @@ namespace CE
 		this->owningWidget->context = this;
 	}
 
+	void FFusionContext::OnWidgetDestroyed(FWidget* widget)
+	{
+		if (owningWidget == widget)
+		{
+			owningWidget = nullptr;
+		}
+	}
+
 	void FFusionContext::MarkLayoutDirty()
 	{
 		layoutDirty = true;
@@ -71,6 +79,8 @@ namespace CE
 
 		context->parentContext = this;
 		childContexts.Add(context);
+
+		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
 	void FFusionContext::RemoveChildContext(FFusionContext* context)
@@ -80,6 +90,8 @@ namespace CE
 
 		context->parentContext = nullptr;
 		childContexts.Remove(context);
+
+		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
 	void FFusionContext::SetStyleManager(FStyleManager* styleManager)
@@ -95,6 +107,11 @@ namespace CE
 			return parentContext->GetStyleManager();
 		}
 		return styleManager;
+	}
+
+	void FFusionContext::EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase)
+	{
+
 	}
 
 } // namespace CE

@@ -33,6 +33,11 @@ namespace CE
     {
 	    Super::OnBeforeDestroy();
 
+        if (GetContext())
+        {
+            GetContext()->OnWidgetDestroyed(this);
+        }
+
         if (parent)
         {
             parent->OnChildWidgetDestroyed(this);
