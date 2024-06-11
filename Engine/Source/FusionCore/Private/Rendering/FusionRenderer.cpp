@@ -14,7 +14,7 @@ namespace CE
 		fusionShader = initInfo.fusionShader;
 		multisampling = initInfo.multisampling;
 
-		numFrames = FrameScheduler::Get()->GetFramesInFlight();
+		numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 
@@ -26,12 +26,12 @@ namespace CE
 		{
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
 			viewConstantsBufferDesc.name = "ViewConstants";
-			viewConstantsBufferDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			viewConstantsBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 			viewConstantsBufferDesc.bufferSize = sizeof(RPI::PerViewConstants);
-			viewConstantsBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			viewConstantsBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			viewConstantsBufferDesc.structureByteStride = sizeof(RPI::PerViewConstants);
 
-			viewConstantsBuffer[i] = gDynamicRHI->CreateBuffer(viewConstantsBufferDesc);
+			viewConstantsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(viewConstantsBufferDesc);
 			viewConstantsUpdateRequired[i] = true;
 
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
@@ -86,7 +86,7 @@ namespace CE
 
 		{
 			FDrawItem2D drawItem;
-			drawItem.transform = Matrix4x4::Translation(Vec3(0, 0, 0)) * Matrix4x4::Scale(Vec3(200, 100));
+			drawItem.transform = Matrix4x4::Translation(Vec3(0, 0, 1)) * Matrix4x4::Scale(Vec3(50, 50));
 			drawItem.drawType = DRAW_Rect;
 
 			drawItemList.Resize(1);
@@ -96,12 +96,12 @@ namespace CE
 			drawItemCount++;
 		}
 
-		const auto& vertBuffers = RPISystem::Get().GetTextQuad();
-		RHI::DrawLinearArguments drawArgs = RPISystem::Get().GetTextQuadDrawArgs();
+		const auto& vertBuffers = RPI::RPISystem::Get().GetTextQuad();
+		RHI::DrawLinearArguments drawArgs = RPI::RPISystem::Get().GetTextQuadDrawArgs();
 
-		DrawPacket* drawPacket = nullptr;
+		RHI::DrawPacket* drawPacket = nullptr;
 
-		Array<DrawPacket*> oldPackets = this->drawPackets;
+		Array<RHI::DrawPacket*> oldPackets = this->drawPackets;
 		this->drawPackets.Clear();
 
 		for (int i = 0; i < drawBatches.GetSize(); ++i)
@@ -151,7 +151,7 @@ namespace CE
 		}
 	}
 
-	const Array<DrawPacket*>& FusionRenderer::FlushDrawPackets(u32 imageIndex)
+	const Array<RHI::DrawPacket*>& FusionRenderer::FlushDrawPackets(u32 imageIndex)
 	{
 		ZoneScoped;
 

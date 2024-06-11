@@ -116,14 +116,47 @@ namespace CE
 		UpdateViewConstants();
 	}
 
+	Matrix4x4 OrthographicProjection(float left_plane,
+		float right_plane,
+		float bottom_plane,
+		float top_plane,
+		float near_plane,
+		float far_plane) {
+		Matrix4x4 orthographic_projection_matrix = {
+		  2.0f / (right_plane - left_plane),
+		  0.0f,
+		  0.0f,
+		  0.0f,
+
+		  0.0f,
+		  2.0f / (bottom_plane - top_plane),
+		  0.0f,
+		  0.0f,
+
+		  0.0f,
+		  0.0f,
+		  1.0f / (near_plane - far_plane),
+		  0.0f,
+
+		  -(right_plane + left_plane) / (right_plane - left_plane),
+		  -(bottom_plane + top_plane) / (bottom_plane - top_plane),
+		  near_plane / (near_plane - far_plane),
+		  1.0f
+		};
+		return orthographic_projection_matrix;
+	}
+
 	void FNativeContext::UpdateViewConstants()
 	{
 		u32 screenWidth = 0; u32 screenHeight = 0;
 		platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
 		f32 aspectRatio = (f32)screenWidth / (f32)screenHeight;
 		
-		viewConstants.viewMatrix = Matrix4x4::Identity();
-		viewConstants.projectionMatrix = Matrix4x4::OrthographicProjection(aspectRatio, 0.01f, 1000.0f);
+		viewConstants.viewMatrix = Matrix4x4::Scale(Vec3(screenWidth * 0.00001f, screenHeight * 0.00001f, 1));
+		viewConstants.projectionMatrix = 
+			OrthographicProjection(-screenWidth, screenWidth,
+				-screenHeight, screenHeight, 0.001f, 1000.0f);
+		viewConstants.projectionMatrix = Matrix4x4::OrthographicProjection(aspectRatio, 0.001f, 1000);
 
 		viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
 		viewConstants.viewPosition = Vec4(0, 0, 0, 0);

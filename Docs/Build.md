@@ -10,7 +10,7 @@ Currently, both Windows and macOS are supported. But macOS is not the primary fo
 
 The following is required to be installed to your computer along with environment variables set up.
 
-- Git for windows (only on windows): This is required for using the bash shell that comes with it. Make sure the folder containing sh.exe is added to the PATH environment variable.
+- Git for windows: This is required for using the bash shell that comes with it. Make sure the folder containing sh.exe `C:\Program Files\Git\bin` is added to the PATH environment variable.s
 - Vulkan SDK: Recommended version is 1.3.275.
 - CMake: Use the one that comes with Visual Studio.
 - Visual Studio 2022 OR Xcode.

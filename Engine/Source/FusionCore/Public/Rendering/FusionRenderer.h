@@ -27,7 +27,7 @@ namespace CE
 
         void End();
 
-        const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
+        const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
         void SetViewConstants(const RPI::PerViewConstants& viewConstants);
 
@@ -88,7 +88,7 @@ namespace CE
 
         // - Drawing -
 
-        DynamicStructuredBuffer<FDrawItem2D> drawItemsBuffer;
+        RPI::DynamicStructuredBuffer<FDrawItem2D> drawItemsBuffer;
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
 
         Array<FDrawItem2D> drawItemList{};
@@ -102,7 +102,7 @@ namespace CE
         Array<RHI::DrawPacket*> drawPackets{};
         StaticArray<bool, MaxImageCount> resubmitDrawItems{};
         StaticArray<bool, MaxImageCount> viewConstantsUpdateRequired{};
-        RHI::DrawListTag drawListTag = DrawListTag::NullValue;
+        RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;
 
         // - Utils -
 
