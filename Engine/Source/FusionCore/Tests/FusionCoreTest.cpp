@@ -24,7 +24,7 @@ namespace LayoutTests
             .Name("RootBox")
             (
                 FAssignNew(FHorizontalStack, hStack1)
-                .If(true, [&](FHorizontalStack& self)
+                .IfTrue(true, [&](FHorizontalStack& self)
                     {
                         self
                             .Padding(5, 2.5f);
@@ -113,6 +113,16 @@ namespace RenderingTests
             .ContentHAlign(HAlign::Fill)
             .Padding(5)
             .Name("RootBox")
+            (
+                FNew(FHorizontalStack)
+                .ContentVAlign(VAlign::Fill)
+                .Name("HStack1")
+                (
+                    FNew(FStyledWidget)
+                    .MinWidth(10)
+                    .MinHeight(10)
+                )
+            )
         );
     }
 

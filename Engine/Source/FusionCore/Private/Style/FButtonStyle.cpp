@@ -33,7 +33,7 @@ namespace CE
             .Background(FBrush(bgColor))
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
-			.ClipShape(FRoundedRectangle(cornerRadius))
+			.CornerRadius(cornerRadius)
 			.Opacity(1.0f)
             .Padding(buttonPadding)
             ;

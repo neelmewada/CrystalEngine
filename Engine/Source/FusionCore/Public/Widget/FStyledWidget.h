@@ -43,6 +43,18 @@ namespace CE
 
         FUSION_PROPERTY(ClipShape);
 
+        Self& CornerRadius(const Vec4& cornerRadius)
+        {
+            m_ClipShape = FRoundedRectangle(cornerRadius);
+            return *this;
+        }
+
+        Self& CornerRadius(f32 cornerRadius)
+        {
+            m_ClipShape = FRoundedRectangle(cornerRadius);
+            return *this;
+        }
+
         FUSION_PROPERTY(BorderColor);
 
         FUSION_PROPERTY(BorderWidth);

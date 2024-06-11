@@ -212,10 +212,10 @@ namespace CE
 
 		// - Setup draw list mask
 
-		/*if (app)
+		if (app)
 		{
 			app->SetDrawListMasks(drawListMask);
-		}*/
+		}
 
 		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
@@ -247,10 +247,10 @@ namespace CE
 
 		drawList.Init(drawListMask);
 
-		/*if (app)
+		if (app)
 		{
 			app->FlushDrawPackets(drawList, curImageIndex);
-		}*/
+		}
 
 		if (isSceneWindowActive)
 	    {
@@ -276,10 +276,10 @@ namespace CE
 
 		// - Set scope draw lists
     
-		/*if (app) // CWidget Scopes & DrawLists
+		if (app) // CWidget Scopes & DrawLists
 		{
 			app->SubmitDrawPackets(drawList);
-		}*/
+		}
 
 		for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
 		{

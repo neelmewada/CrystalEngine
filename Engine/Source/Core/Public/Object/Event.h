@@ -3,8 +3,8 @@
 #define FUNCTION_BINDING(objectPtr, functionName, ...) \
 	CE::FunctionBinding(objectPtr,\
 		std::remove_cvref_t<decltype(*objectPtr)>::Type()\
-			->FindFunction<FunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ReturnType, \
-				FunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ClassType,\
+			->FindFunction<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ReturnType, \
+				TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ClassType,\
 				__VA_ARGS__>(#functionName,\
 					&std::remove_cvref_t<decltype(*objectPtr)>::functionName))
 

@@ -30,18 +30,20 @@ namespace CE
 
 		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
 		nativeContext->platformWindow = platformWindow;
-		nativeContext->Init();
-
 		if (parentContext)
 		{
 			parentContext->AddChildContext(nativeContext);
 		}
+		nativeContext->Init();
+
 		return nativeContext;
 	}
 
 	void FNativeContext::Init()
 	{
 		attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
+
+		drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(attachmentId);
 
 		RHI::SwapChainDescriptor desc{};
 		desc.imageCount = FrameScheduler::Get()->GetFramesInFlight();
@@ -55,6 +57,15 @@ namespace CE
 		renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
 
 		UpdateViewConstants();
+
+		FusionRendererInitInfo rendererInfo;
+		rendererInfo.fusionShader = FusionApplication::Get()->GetFusionShader();
+		rendererInfo.multisampling.sampleCount = 1;
+
+		renderer->SetScreenSize(Vec2i(desc.preferredWidth, desc.preferredHeight));
+		renderer->SetDrawListTag(drawListTag);
+
+		renderer->Init(rendererInfo);
 	}
 
 	void FNativeContext::OnBeforeDestroy()
@@ -64,7 +75,17 @@ namespace CE
 		if (IsDefaultInstance())
 			return;
 
+		if (drawListTag.IsValid())
+		{
+			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+		}
+
+		drawListTag = 0;
+
 		PlatformApplication::Get()->RemoveMessageHandler(this);
+
+		FusionApplication::Get()->QueueDestroy(renderer);
+		renderer = nullptr;
 
 		if (swapChain)
 		{
@@ -99,17 +120,19 @@ namespace CE
 	{
 		u32 screenWidth = 0; u32 screenHeight = 0;
 		platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-
+		f32 aspectRatio = (f32)screenWidth / (f32)screenHeight;
+		
 		viewConstants.viewMatrix = Matrix4x4::Identity();
-		viewConstants.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) *
-			Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) *
-			Quat::EulerDegrees(0, 0, 0).ToMatrix();
+		viewConstants.projectionMatrix = Matrix4x4::OrthographicProjection(aspectRatio, 0.01f, 1000.0f);
 
 		viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
 		viewConstants.viewPosition = Vec4(0, 0, 0, 0);
 		viewConstants.pixelResolution = Vec2(screenWidth, screenHeight);
 
-		
+		if (renderer)
+		{
+			renderer->SetViewConstants(viewConstants);
+		}
 	}
 
 	void FNativeContext::Tick()
@@ -119,13 +142,90 @@ namespace CE
 		Super::Tick();
 
 		// TODO: Rendering
+		if (renderer && dirty)
+		{
+			renderer->Begin();
+
+			renderer->End();
+
+			dirty = false;
+		}
 	}
 
-	void FNativeContext::EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase)
+	void FNativeContext::EmplaceFrameAttachments()
 	{
-		Super::EmplaceFrameAttachments(attachmentDatabase);
+		Super::EmplaceFrameAttachments();
+
+		FrameScheduler* scheduler = FrameScheduler::Get();
+
+		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
 		attachmentDatabase.EmplaceFrameAttachment(attachmentId, swapChain);
+	}
+
+	void FNativeContext::EnqueueScopes()
+	{
+		Super::EnqueueScopes();
+
+		FrameScheduler* scheduler = FrameScheduler::Get();
+
+		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+		if (platformWindow != nullptr && !platformWindow->IsMinimized() && platformWindow->IsShown())
+		{
+			scheduler->BeginScope(attachmentId);
+			{
+				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				swapChainAttachment.attachmentId = attachmentId;
+				if (clearScreen)
+				{
+					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				}
+				else
+				{
+					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				}
+				
+				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+
+				scheduler->PresentSwapChain(swapChain);
+			}
+			scheduler->EndScope();
+		}
+	}
+
+	void FNativeContext::SetDrawListMask(RHI::DrawListMask& outMask)
+	{
+		Super::SetDrawListMask(outMask);
+
+		if (drawListTag)
+		{
+			outMask.Set(drawListTag);
+		}
+	}
+
+	void FNativeContext::EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
+	{
+		Super::EnqueueDrawPackets(drawList, imageIndex);
+
+		const auto& drawPackets = renderer->FlushDrawPackets(imageIndex);
+
+		for (DrawPacket* drawPacket : drawPackets)
+		{
+			drawList.AddDrawPacket(drawPacket);
+		}
+	}
+
+	void FNativeContext::SetDrawPackets(RHI::DrawListContext& drawList)
+	{
+		Super::SetDrawPackets(drawList);
+
+		auto scheduler = FrameScheduler::Get();
+
+		scheduler->SetScopeDrawList(attachmentId, &drawList.GetDrawListForTag(drawListTag));
 	}
 
 } // namespace CE

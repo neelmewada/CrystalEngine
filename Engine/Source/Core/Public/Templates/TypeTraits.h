@@ -205,13 +205,13 @@ namespace CE
 	// Function
 
 	template <typename T>
-	struct FunctionTraits : public FunctionTraits<decltype(&T::operator())>
+	struct TFunctionTraits : public TFunctionTraits<decltype(&T::operator())>
 	{};
 
 	// For generic types, directly use the result of the signature of its 'operator()'
 
 	template <typename TClassType, typename TReturnType, typename... Args>
-	struct FunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to const member function
+	struct TFunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to const member function
 	{
 		enum { NumArgs = sizeof...(Args) };
 
@@ -230,7 +230,7 @@ namespace CE
 	};
 
 	template <typename TClassType, typename TReturnType, typename... Args>
-	struct FunctionTraits<TReturnType(TClassType::*)(Args...)> // we specialize for pointers to member function
+	struct TFunctionTraits<TReturnType(TClassType::*)(Args...)> // we specialize for pointers to member function
 	{
 		enum { NumArgs = sizeof...(Args) };
 
@@ -249,7 +249,7 @@ namespace CE
 	};
 
 	template <typename TReturnType, typename... Args>
-	struct FunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to global functions
+	struct TFunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to global functions
 	{
 		enum { NumArgs = sizeof...(Args) };
 

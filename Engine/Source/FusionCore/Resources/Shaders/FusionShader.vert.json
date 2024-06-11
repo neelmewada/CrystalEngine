@@ -41,6 +41,40 @@
                     "offset" : 208
                 }
             ]
+        },
+        "_11" : {
+            "name" : "DrawItem2D",
+            "members" : [
+                {
+                    "name" : "transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "drawType",
+                    "type" : "uint",
+                    "offset" : 64
+                }
+            ]
+        },
+        "_10" : {
+            "name" : "type.StructuredBuffer.DrawItem2D",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_11",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 80
+                }
+            ]
         }
     },
     "inputs" : [
@@ -63,8 +97,18 @@
         },
         {
             "type" : "uint",
-            "name" : "out.var.TEXCOORD1",
+            "name" : "out.var.TEXCOORD2",
             "location" : 1
+        }
+    ],
+    "ssbos" : [
+        {
+            "type" : "_10",
+            "name" : "_DrawList",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 6,
+            "binding" : 0
         }
     ],
     "ubos" : [

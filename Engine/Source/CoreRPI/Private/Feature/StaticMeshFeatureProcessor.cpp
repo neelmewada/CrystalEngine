@@ -56,7 +56,7 @@ namespace CE::RPI
 
 		for (auto& objectBuffer : objectBuffers)
 		{
-			RPISystem::Get().EnqueueDestroy(objectBuffer);
+			RPISystem::Get().QueueDestroy(objectBuffer);
 			objectBuffer = nullptr;
 		}
 

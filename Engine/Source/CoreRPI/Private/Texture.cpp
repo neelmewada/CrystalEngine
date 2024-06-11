@@ -121,13 +121,13 @@ namespace CE::RPI
     {
         if (texture)
         {
-            RPISystem::Get().EnqueueDestroy(texture);
+            RPISystem::Get().QueueDestroy(texture);
             texture = nullptr;
         }
 
         if (textureView)
         {
-            RPISystem::Get().EnqueueDestroy(textureView);
+            RPISystem::Get().QueueDestroy(textureView);
             textureView = nullptr;
         }
     }

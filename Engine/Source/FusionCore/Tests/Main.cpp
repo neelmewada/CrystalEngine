@@ -271,13 +271,17 @@ TEST(FusionCore, Rendering)
 			primaryBtn->hoveredBackground = Color::RGBA(95, 95, 95);
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 		}
-
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
+
+	RenderingTestWidget* mainWidget;
+	FAssignNewOwned(RenderingTestWidget, mainWidget, nativeContext);
+
+	nativeContext->SetOwningWidget(mainWidget);
 
 	while (!IsEngineRequestingExit())
 	{

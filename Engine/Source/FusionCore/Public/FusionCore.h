@@ -27,7 +27,8 @@ class FusionCore_Layout_Test;
     friend class FNativeContext;\
     friend class FusionApplication;\
     friend class FCompoundWidget;\
-    friend class FStyleManager;
+    friend class FStyleManager;\
+    friend class FusionRenderer;
 
 namespace CE
 {
@@ -41,6 +42,7 @@ namespace CE
 
 #include "Application/FusionApplication.h"
 #include "Rendering/FusionRenderer.h"
+#include "Rendering/FPainter.h"
 #include "Context/FFusionContext.h"
 #include "Context/FNativeContext.h"
 

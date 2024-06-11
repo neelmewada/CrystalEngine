@@ -240,9 +240,9 @@ namespace CE
         }
 
         template<typename T>
-        struct TValidate_If
+        struct TValidate_IfTrue
         {
-            using Traits = FunctionTraits<T>;
+            using Traits = TFunctionTraits<T>;
             using ReturnType = typename Traits::ReturnType;
             using Arg0 = typename Traits::template Arg<0>::Type;
 

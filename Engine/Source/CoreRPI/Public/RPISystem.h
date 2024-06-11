@@ -81,7 +81,9 @@ namespace CE::RPI
 		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
 		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
 
-		void EnqueueDestroy(RHI::RHIResource* rhiResource);
+		void QueueDestroy(RHI::RHIResource* rhiResource);
+
+		bool IsInitialized() const { return isInitialized; }
 
 	private:
 

@@ -28,6 +28,8 @@ namespace CE
 
         void SetOwningWidget(FWidget* widget);
 
+        FWidget* GetOwningWidget() const { return owningWidget; }
+
         void OnWidgetDestroyed(FWidget* widget);
 
         Vec2 GetAvailableSize() const { return availableSize; }
@@ -40,6 +42,8 @@ namespace CE
 
         void MarkDirty();
 
+        void QueueDestroy();
+
         void AddChildContext(FFusionContext* context);
 
         void RemoveChildContext(FFusionContext* context);
@@ -48,9 +52,21 @@ namespace CE
 
         FStyleManager* GetStyleManager();
 
+        bool ShouldClearScreen() const { return clearScreen; }
+
+        void SetClearScreen(bool set);
+
         // - Rendering / FrameGraph -
 
-        virtual void EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase);
+        virtual void EmplaceFrameAttachments();
+
+        virtual void EnqueueScopes();
+
+        virtual void SetDrawListMask(RHI::DrawListMask& outMask);
+
+        virtual void EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
+
+        virtual void SetDrawPackets(RHI::DrawListContext& drawList);
 
     protected:
 
@@ -70,8 +86,12 @@ namespace CE
         FIELD()
         b8 isIsolatedContext = true;
 
+        FIELD()
+        b8 clearScreen = true;
+
         bool layoutDirty = true;
         bool dirty = true;
+        bool isDestroyed = false;
 
         Vec2 availableSize{};
 

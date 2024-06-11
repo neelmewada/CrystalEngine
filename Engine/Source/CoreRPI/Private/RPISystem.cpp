@@ -309,8 +309,7 @@ namespace CE::RPI
                 auto& entry = rhiDestructionQueue[i];
 	            if (entry.frameCounter >= RHI::Limits::MaxSwapChainImageCount)
 	            {
-                    delete entry.resource;
-	            	    entry.resource = nullptr;
+                    delete entry.resource; entry.resource = nullptr;
                 
                     rhiDestructionQueue.RemoveAt(i);
                     continue;
@@ -403,7 +402,7 @@ namespace CE::RPI
         return sampler;
     }
 
-    void RPISystem::EnqueueDestroy(RHI::RHIResource* rhiResource)
+    void RPISystem::QueueDestroy(RHI::RHIResource* rhiResource)
     {
         LockGuard lock{ rhiDestructionQueueMutex };
 

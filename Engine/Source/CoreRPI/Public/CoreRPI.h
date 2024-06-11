@@ -39,7 +39,9 @@ namespace CE::RPI
 #include "RPILimits.h"
 #include "Shader/ShaderCollection.h"
 
+#include "RPISystem.h"
 #include "Buffer.h"
+#include "DynamicStructuredBuffer.h"
 
 // Passes
 #include "Pass/PassAttachmentDefines.h"
@@ -71,8 +73,6 @@ namespace CE::RPI
 #include "Feature/StaticMeshFeatureProcessor.h"
 
 #include "Scene.h"
-
-#include "RPISystem.h"
 
 #include "Texture.h"
 #include "CubeMap/CubeMap.h"

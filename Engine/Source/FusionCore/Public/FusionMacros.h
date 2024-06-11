@@ -29,8 +29,8 @@
 
 #define FUSION_WIDGET\
 	public:\
-		template<typename TLambda> requires TValidate_If<TLambda>::Value\
-		Self& If(bool condition, const TLambda& lambda)\
+		template<typename TLambda> requires TValidate_IfTrue<TLambda>::Value\
+		Self& IfTrue(bool condition, const TLambda& lambda)\
 		{\
 			if (condition) lambda(*this);\
 			return *this;\

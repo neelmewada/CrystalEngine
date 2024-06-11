@@ -47,9 +47,22 @@ namespace CE
     {
         PlatformApplication::Get()->RemoveMessageHandler(this);
 
-        // Pre-shutdown and cleanup resources before engine assets are unloaded
-        RHI::FrameScheduler::Get()->WaitUntilIdle();
+        FrameScheduler* scheduler = FrameScheduler::Get();
 
+        // Pre-shutdown and cleanup resources before engine assets are unloaded
+
+        if (scheduler)
+        {
+            scheduler->WaitUntilIdle();
+        }
+
+        for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
+        {
+            destructionQueue[i].object->Destroy();
+            destructionQueue.RemoveAt(i);
+        }
+
+        rootContext->Destroy();
     }
 
     void FusionApplication::Shutdown()
@@ -60,6 +73,18 @@ namespace CE
     void FusionApplication::Tick()
     {
         ZoneScoped;
+
+        for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
+        {
+	        if (destructionQueue[i].frameCounter > RHI::Limits::MaxSwapChainImageCount)
+	        {
+                destructionQueue[i].object->Destroy();
+                destructionQueue.RemoveAt(i);
+		        continue;
+	        }
+
+            destructionQueue[i].frameCounter++;
+        }
 
         int submittedFrameIdx = -1;
 
@@ -83,10 +108,30 @@ namespace CE
         {
             rootContext->Tick();
         }
+
+        auto scheduler = FrameScheduler::Get();
+
+        int imageIndex = scheduler->BeginExecution();
+
+        if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
+        {
+            rebuildFrameGraph = recompileFrameGraph = true;
+            return;
+        }
+
+        curImageIndex = imageIndex;
+
+        RPISystem::Get().SimulationTick(curImageIndex);
+
+        PrepareDrawList();
+
+        scheduler->EndExecution();
     }
 
     void FusionApplication::BuildFrameGraph()
     {
+        ZoneScoped;
+
         FrameScheduler* scheduler = FrameScheduler::Get();
 
         rebuildFrameGraph = false;
@@ -96,18 +141,51 @@ namespace CE
 
         scheduler->BeginFrameGraph();
         {
-            rootContext->EmplaceFrameAttachments(attachmentDatabase);
+            rootContext->EmplaceFrameAttachments();
 
-
+            rootContext->EnqueueScopes();
         }
         scheduler->EndFrameGraph();
     }
 
     void FusionApplication::CompileFrameGraph()
     {
+        ZoneScoped;
+
         FrameScheduler* scheduler = FrameScheduler::Get();
 
+        recompileFrameGraph = false;
 
+        scheduler->Compile();
+    }
+
+    void FusionApplication::PrepareDrawList()
+    {
+        drawList.Shutdown();
+
+        if (!rootContext)
+            return;
+
+        RHI::DrawListMask drawListMask{};
+        HashSet<RHI::DrawListTag> drawListTags{};
+
+        rootContext->SetDrawListMask(drawListMask);
+
+        for (int i = 0; i < drawListMask.GetSize(); ++i)
+        {
+            if (drawListMask.Test(i))
+            {
+                drawListTags.Add((u8)i);
+            }
+        }
+
+        drawList.Init(drawListMask);
+        {
+            rootContext->EnqueueDrawPackets(drawList, curImageIndex);
+        }
+        drawList.Finalize();
+
+        rootContext->SetDrawPackets(drawList);
     }
 
     void FusionApplication::SetRootContext(FFusionContext* context)
@@ -122,6 +200,11 @@ namespace CE
 
     // - Application Callbacks -
 
+    void FusionApplication::QueueDestroy(Object* object)
+    {
+        destructionQueue.Add({ .object = object, .frameCounter = 0 });
+    }
+
     void FusionApplication::OnWindowRestored(PlatformWindow* window)
     {
         RebuildFrameGraph();
@@ -130,6 +213,31 @@ namespace CE
     void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
     {
         RebuildFrameGraph();
+
+        for (int i = rootContext->childContexts.GetSize() - 1; i >= 0; i--)
+        {
+            FFusionContext* context = rootContext->childContexts[i];
+
+            if (!context->IsOfType<FNativeContext>())
+                continue;
+
+            FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
+
+            if (window->IsMainWindow() || nativeContext->GetPlatformWindow() == window)
+            {
+                if (nativeContext->owningWidget)
+                    nativeContext->owningWidget->Destroy();
+                nativeContext->owningWidget = nullptr;
+
+                if (!nativeContext->isDestroyed)
+                {
+                    nativeContext->platformWindow = nullptr;
+                    delete nativeContext;
+                }
+
+                rootContext->childContexts.RemoveAt(i);
+            }
+        }
     }
 
     void FusionApplication::OnWindowClosed(PlatformWindow* window)
@@ -200,6 +308,19 @@ namespace CE
             .TryAdd(perViewData);
 
         perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
+
+        {
+	        RHI::SRGVariableDescriptor drawListData{};
+            drawListData.name = "_DrawList";
+            drawListData.bindingSlot = (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue();
+            drawListData.shaderStages = ShaderStage::Vertex | ShaderStage::Fragment;
+            drawListData.type = ShaderResourceType::StructuredBuffer;
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw)
+                .TryAdd(drawListData);
+        }
+
+        perDrawSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw);
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");

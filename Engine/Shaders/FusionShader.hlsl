@@ -14,7 +14,7 @@ struct PSInput
 {
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD0;
-    nointerpolation uint instanceId : TEXCOORD1;
+    nointerpolation uint instanceId : TEXCOORD2;
 };
 
 #define instanceIdx input.instanceId
@@ -30,8 +30,7 @@ enum DrawType
 struct DrawItem2D
 {
     float4x4 transform;
-    DrawType drawType;
-    
+    uint drawType; // enum DrawType
 };
 
 ///////////////////////////////////////////////////////////
@@ -42,12 +41,12 @@ StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 ///////////////////////////////////////////////////////////
 /// Vertex Shader
 
-PSInput VertMain(VSInput i)
+PSInput VertMain(VSInput input)
 {
     PSInput o;
-    o.instanceId = i.instanceId;
-    o.position = float4(i.position, 1.0);
-    o.uv = i.uv;
+    o.instanceId = input.instanceId;
+    o.position = mul(mul(float4(input.position, 1.0), _DrawList[instanceIdx].transform), viewProjectionMatrix);
+    o.uv = input.uv;
     return o;
 }
 
@@ -59,12 +58,7 @@ struct RenderData
 	
 };
 
-float4 RenderRect(in float4 p)
-{
-    return float4(0, 0, 0, 0);
-}
-
 float4 FragMain(PSInput input) : SV_TARGET
 {
-    return float4(0, 0, 0, 0);
+    return float4(1, 1, 1, 1);
 }

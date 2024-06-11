@@ -84,7 +84,7 @@ namespace CE::Widgets
 	    {
             auto app = CApplication::Get();
             auto platformApp = PlatformApplication::Get();
-
+            
             Renderer2DDescriptor desc{};
             desc.drawShader = app->draw2dShader;
             desc.multisampling.sampleCount = 1;

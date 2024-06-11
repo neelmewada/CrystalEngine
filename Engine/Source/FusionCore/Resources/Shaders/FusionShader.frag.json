@@ -41,6 +41,40 @@
                     "offset" : 208
                 }
             ]
+        },
+        "_6" : {
+            "name" : "DrawItem2D",
+            "members" : [
+                {
+                    "name" : "transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "drawType",
+                    "type" : "uint",
+                    "offset" : 64
+                }
+            ]
+        },
+        "_5" : {
+            "name" : "type.StructuredBuffer.DrawItem2D",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_6",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 80
+                }
+            ]
         }
     },
     "outputs" : [
@@ -48,6 +82,16 @@
             "type" : "vec4",
             "name" : "out.var.SV_TARGET",
             "location" : 0
+        }
+    ],
+    "ssbos" : [
+        {
+            "type" : "_5",
+            "name" : "_DrawList",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 6,
+            "binding" : 0
         }
     ],
     "ubos" : [

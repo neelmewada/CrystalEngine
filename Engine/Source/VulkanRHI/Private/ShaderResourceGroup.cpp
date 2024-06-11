@@ -524,6 +524,14 @@ namespace CE::Vulkan
 		bufferWrite.offset = bufferView.GetByteOffset();
 		bufferWrite.range = size > 0 ? size : bufferView.GetBuffer()->GetBufferSize();
 
+		if (bufferInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
+			bufferInfosBoundBySlot[i][bindingSlot][0].buffer == bufferWrite.buffer &&
+			bufferInfosBoundBySlot[i][bindingSlot][0].offset == bufferWrite.offset &&
+			bufferInfosBoundBySlot[i][bindingSlot][0].range == bufferWrite.range)
+		{
+			return true;
+		}
+
 		bufferInfosBoundBySlot[i][bindingSlot].Clear();
 		bufferInfosBoundBySlot[i][bindingSlot].Add(bufferWrite);
 

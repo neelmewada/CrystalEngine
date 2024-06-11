@@ -44,6 +44,7 @@ namespace CE
 			owningWidget->PlaceSubWidgets();
 
 			layoutDirty = false;
+			dirty = true;
 		}
 	}
 
@@ -70,6 +71,15 @@ namespace CE
 	void FFusionContext::MarkDirty()
 	{
 		dirty = true;
+	}
+
+	void FFusionContext::QueueDestroy()
+	{
+		if (isDestroyed)
+			return;
+
+		FusionApplication::Get()->QueueDestroy(this);
+		isDestroyed = true;
 	}
 
 	void FFusionContext::AddChildContext(FFusionContext* context)
@@ -109,9 +119,54 @@ namespace CE
 		return styleManager;
 	}
 
-	void FFusionContext::EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase)
+	void FFusionContext::SetClearScreen(bool set)
 	{
+		if (clearScreen != set)
+		{
+			clearScreen = set;
 
+			FusionApplication::Get()->RebuildFrameGraph();
+		}
+	}
+
+	void FFusionContext::EmplaceFrameAttachments()
+	{
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->EmplaceFrameAttachments();
+		}
+	}
+
+	void FFusionContext::EnqueueScopes()
+	{
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->EnqueueScopes();
+		}
+	}
+
+	void FFusionContext::SetDrawListMask(RHI::DrawListMask& outMask)
+	{
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->SetDrawListMask(outMask);
+		}
+	}
+
+	void FFusionContext::EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
+	{
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->EnqueueDrawPackets(drawList, imageIndex);
+		}
+	}
+
+	void FFusionContext::SetDrawPackets(RHI::DrawListContext& drawList)
+	{
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->SetDrawPackets(drawList);
+		}
 	}
 
 } // namespace CE

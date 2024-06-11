@@ -18,7 +18,7 @@ namespace CE
 		template<class Functor, typename... Args>
 		explicit Future(Delegate<void(const ReturnType&)> callback, Functor func, Args... args) : isValid(true)
 		{
-			typedef FunctionTraits<Functor> Traits;
+			typedef TFunctionTraits<Functor> Traits;
 			typedef typename Traits::Tuple TupleType;
 			typedef typename Traits::ReturnType RetType;
 
@@ -90,16 +90,16 @@ namespace CE
 	};
 
 	template<class Functor, typename... Args>
-	inline Future<typename FunctionTraits<Functor>::ReturnType> Async(Functor func, Args&&... args)
+	inline Future<typename TFunctionTraits<Functor>::ReturnType> Async(Functor func, Args&&... args)
 	{
-		return Future<typename FunctionTraits<Functor>::ReturnType>(nullptr, func, args...);
+		return Future<typename TFunctionTraits<Functor>::ReturnType>(nullptr, func, args...);
 	}
 
 	template<class Functor, typename... Args>
-	inline Future<typename FunctionTraits<Functor>::ReturnType> AsyncCallback(Functor func, 
-		Delegate<void(const typename FunctionTraits<Functor>::ReturnType&)> callback, Args&&... args)
+	inline Future<typename TFunctionTraits<Functor>::ReturnType> AsyncCallback(Functor func, 
+		Delegate<void(const typename TFunctionTraits<Functor>::ReturnType&)> callback, Args&&... args)
 	{
-		return Future<typename FunctionTraits<Functor>::ReturnType>(callback, func, args...);
+		return Future<typename TFunctionTraits<Functor>::ReturnType>(callback, func, args...);
 	}
 
 } // namespace CE

@@ -21,9 +21,19 @@ namespace CE
 
 		static FNativeContext* Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext = nullptr);
 
+		PlatformWindow* GetPlatformWindow() const { return platformWindow; }
+
 		void Tick() override;
 
-		void EmplaceFrameAttachments(FrameAttachmentDatabase& attachmentDatabase) override;
+		void EmplaceFrameAttachments() override;
+
+		void EnqueueScopes() override;
+
+		void SetDrawListMask(RHI::DrawListMask& outMask) override;
+
+		void EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex) override;
+
+		void SetDrawPackets(RHI::DrawListContext& drawList) override;
 
 	protected:
 

@@ -38,6 +38,8 @@ namespace CE
 
         RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
 
+        void QueueDestroy(Object* object);
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;
@@ -55,6 +57,8 @@ namespace CE
         void BuildFrameGraph();
         void CompileFrameGraph();
 
+        void PrepareDrawList();
+
         bool rebuildFrameGraph = true;
         bool recompileFrameGraph = true;
         int curImageIndex = 0;
@@ -64,8 +68,18 @@ namespace CE
 
         RPI::Shader* fusionShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
+        RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
 
-        FUSION_TESTS;
+        RHI::DrawListContext drawList{};
+
+        struct DestroyItem
+        {
+            Object* object = nullptr;
+            int frameCounter = 0;
+        };
+        Array<DestroyItem> destructionQueue{};
+
+        FUSION_FRIENDS;
     };
     
 } // namespace CE
