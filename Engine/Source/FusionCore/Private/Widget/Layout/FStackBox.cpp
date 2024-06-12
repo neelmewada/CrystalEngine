@@ -63,9 +63,10 @@ namespace CE
 	{
 		ZoneScoped;
 
+		Super::PlaceSubWidgets();
+
 		if (children.IsEmpty())
 		{
-			Super::PlaceSubWidgets();
 			return;
 		}
 

@@ -54,7 +54,7 @@
                 },
                 {
                     "name" : "drawType",
-                    "type" : "uint",
+                    "type" : "int",
                     "offset" : 64
                 }
             ]

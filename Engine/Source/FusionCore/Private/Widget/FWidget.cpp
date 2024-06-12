@@ -53,7 +53,9 @@ namespace CE
 
     void FWidget::PlaceSubWidgets()
     {
-        
+        localTransform = Matrix4x4::Translation(computedPosition + m_Translation) * 
+            Quat::EulerDegrees(0, 0, m_Rotation).ToMatrix() * 
+            Matrix4x4::Scale(m_Scale);
     }
 
     void FWidget::AddChild(FWidget* child)

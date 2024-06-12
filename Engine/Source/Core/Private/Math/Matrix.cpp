@@ -51,6 +51,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::operator*(f32 rhs) const
 	{
+		ZoneScoped;
+
 		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
@@ -63,6 +65,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::operator/(f32 rhs) const
 	{
+		ZoneScoped;
+
 		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
@@ -75,6 +79,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Matrix4x4& rhs)
 	{
+		ZoneScoped;
+
 		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
@@ -95,6 +101,8 @@ namespace CE
 
     Vec4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Vec4& rhs)
     {
+		ZoneScoped;
+
         Vec4 result{};
         
         for (int i = 0; i < 4; i++)
@@ -114,6 +122,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::GetTranspose(const Matrix4x4& mat)
 	{
+		ZoneScoped;
+
 		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
@@ -129,6 +139,8 @@ namespace CE
 
 	void Matrix4x4::GetCofactor(const Matrix4x4& mat, Matrix4x4& cofactor, s32 p, s32 q, s32 n)
 	{
+		ZoneScoped;
+
 		s32 i = 0, j = 0;
 
 		for (int row = 0; row < n; row++) 
@@ -153,6 +165,8 @@ namespace CE
 
 	int Matrix4x4::GetDeterminant(const Matrix4x4& mat, s32 n)
 	{
+		ZoneScoped;
+
 		int determinant = 0;
 
 		if (n == 1)
@@ -178,6 +192,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::GetAdjoint(const Matrix4x4& mat)
 	{
+		ZoneScoped;
+
 		Matrix4x4 adj{};
 
 		// temp is used to store cofactors of mat[][]
@@ -207,6 +223,8 @@ namespace CE
 
 	Matrix4x4 Matrix4x4::GetInverse(const Matrix4x4& mat)
 	{
+		ZoneScoped;
+
 		Matrix4x4 inverse{};
 
 		// Find determinant of A[][]

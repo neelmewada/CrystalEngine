@@ -63,6 +63,5 @@ namespace CE
 
 #include "Window/FWindow.h"
 
-#include "Widget/FNullWidget.h"
 #include "Widget/Layout/FStackBox.h"
 

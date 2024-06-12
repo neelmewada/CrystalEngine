@@ -22,7 +22,7 @@ struct PSInput
 ///////////////////////////////////////////////////////////
 /// Data Structures
 
-enum DrawType
+enum DrawType : uint
 {
 	DRAW_Rect
 };
@@ -30,7 +30,7 @@ enum DrawType
 struct DrawItem2D
 {
     float4x4 transform;
-    uint drawType; // enum DrawType
+    DrawType drawType; // enum DrawType
 };
 
 ///////////////////////////////////////////////////////////

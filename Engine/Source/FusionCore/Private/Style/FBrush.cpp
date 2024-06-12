@@ -6,7 +6,7 @@ namespace CE
 		: brushStyle(FBrushStyle::None)
 		, tintColor(Color::Clear())
 		, texturePath(Name())
-		, textureTiling(FBrushTiling::None)
+		, tiling(FBrushTiling::None)
 	{
 		
 	}
@@ -44,6 +44,8 @@ namespace CE
 	{
 		if (brushStyle != rhs.brushStyle)
 			return false;
+		if (tiling != rhs.tiling)
+			return false;
 
 		switch (brushStyle)
 		{
@@ -52,7 +54,7 @@ namespace CE
 		case FBrushStyle::LinearGradient:
 			break;
 		case FBrushStyle::TexturePattern:
-			return tintColor == rhs.tintColor && texturePath == rhs.texturePath && textureTiling == rhs.textureTiling;
+			return tintColor == rhs.tintColor && texturePath == rhs.texturePath;
 		case FBrushStyle::None:
 			break;
 		}
@@ -92,7 +94,7 @@ namespace CE
 		case FBrushStyle::TexturePattern:
 			tintColor = from.tintColor;
 			texturePath = from.texturePath;
-			textureTiling = from.textureTiling;
+			tiling = from.tiling;
 			break;
 	    }
     }
@@ -104,7 +106,7 @@ namespace CE
 		move.brushStyle = FBrushStyle::None;
 		move.fillColor = {};
 		move.tintColor = {};
-		move.textureTiling = {};
+		move.tiling = {};
 		move.texturePath.~Name();
     }
 

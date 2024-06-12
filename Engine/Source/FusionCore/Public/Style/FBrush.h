@@ -39,12 +39,12 @@ namespace CE
         FBrush& operator=(FBrush&& move) noexcept;
 
         FBrushStyle GetBrushStyle() const { return brushStyle; }
+        FBrushTiling GetBrushTiling() const { return tiling; }
 
         const Color& GetFillColor() const { return fillColor; }
 
         const Color& GetTintColor() const { return tintColor; }
         const Name& GetTexturePath() const { return texturePath; }
-        FBrushTiling GetBrushTiling() const { return textureTiling; }
 
         bool operator==(const FBrush& rhs) const;
 
@@ -57,8 +57,6 @@ namespace CE
 
         void CopyFrom(const FBrush& from);
         void MoveFrom(FBrush& move);
-
-        FBrushStyle brushStyle = FBrushStyle::None;
 
         union 
         {
@@ -73,9 +71,11 @@ namespace CE
             {
                 Color tintColor;
                 Name texturePath;
-                FBrushTiling textureTiling;
             };
         };
+
+        FBrushTiling tiling = FBrushTiling::None;
+        FBrushStyle brushStyle = FBrushStyle::None;
     };
     
 } // namespace CE

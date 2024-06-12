@@ -84,6 +84,8 @@ namespace CE
 
         Vec2 intrinsicSize{};
 
+        Matrix4x4 localTransform;
+
     private:  // - Fields -
 
         FIELD()
@@ -130,6 +132,7 @@ namespace CE
         FIELD()
         Vec2 m_Scale = Vec2(1, 1);
 
+        //! @brief Rotation in Degrees
         FIELD()
         f32 m_Rotation = 0;
 
@@ -160,6 +163,8 @@ namespace CE
                 return *this;
             m_Margin = newMargin;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Margin";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 
@@ -170,6 +175,8 @@ namespace CE
                 return *this;
             m_Margin = newMargin;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Margin";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 
@@ -180,6 +187,8 @@ namespace CE
                 return *this;
             m_Margin = newMargin;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Margin";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 
@@ -190,6 +199,8 @@ namespace CE
                 return *this;
             m_Padding = newPadding;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Padding";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 
@@ -200,6 +211,8 @@ namespace CE
                 return *this;
             m_Padding = newPadding;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Padding";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 
@@ -210,6 +223,8 @@ namespace CE
                 return *this;
             m_Padding = newPadding;
             MarkLayoutDirty();
+            static const CE::Name propertyName = "Padding";
+            OnFusionPropertyModified(propertyName);
             return *this;
         }
 

@@ -27,6 +27,8 @@ namespace CE
 
     void FCompoundWidget::PlaceSubWidgets()
     {
+        Super::PlaceSubWidgets();
+
         if (!m_Child)
             return;
 

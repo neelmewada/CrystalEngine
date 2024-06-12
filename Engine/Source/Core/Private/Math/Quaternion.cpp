@@ -364,6 +364,8 @@ namespace CE
 
 	Matrix4x4 Quat::ToMatrix(const Quat& q)
 	{
+		ZoneScoped;
+
 		float sqw = q.w * q.w;
 		float sqx = q.x * q.x;
 		float sqy = q.y * q.y;

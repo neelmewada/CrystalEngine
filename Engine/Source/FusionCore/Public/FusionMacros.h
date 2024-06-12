@@ -12,7 +12,12 @@
 
 
 #define FUSION_LAYOUT_PROPERTY(PropertyName)\
-	Self& PropertyName(const decltype(m_##PropertyName)& value) { if (this->m_##PropertyName == value) return *this; this->m_##PropertyName = value; MarkLayoutDirty(); return *this; }\
+	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
+		if (this->m_##PropertyName == value) return *this; this->m_##PropertyName = value; MarkLayoutDirty();\
+		static const CE::Name nameValue = #PropertyName;\
+		OnFusionPropertyModified(nameValue);\
+		return *this;\
+	}\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }\
 	void Set##PropertyName(const decltype(m_##PropertyName)& value) { \
 		if (this->m_##PropertyName == value) return;\
@@ -20,7 +25,14 @@
 	}
 
 #define FUSION_PROPERTY(PropertyName)\
-	Self& PropertyName(const decltype(m_##PropertyName)& value) { if (this->m_##PropertyName == value) return *this; this->m_##PropertyName = value; MarkDirty(); return *this; }\
+	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
+		if (this->m_##PropertyName == value)\
+			return *this;\
+		this->m_##PropertyName = value; MarkDirty();\
+		static const CE::Name nameValue = #PropertyName;\
+		OnFusionPropertyModified(nameValue);\
+		return *this;\
+	}\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }\
 	void Set##PropertyName(const decltype(m_##PropertyName)& value) { \
 		if (this->m_##PropertyName == value) return;\
