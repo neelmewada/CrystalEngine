@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_3" : {
+        "_4" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_6" : {
+        "_7" : {
             "name" : "DrawItem2D",
             "members" : [
                 {
@@ -59,12 +59,12 @@
                 }
             ]
         },
-        "_5" : {
+        "_6" : {
             "name" : "type.StructuredBuffer.DrawItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_6",
+                    "type" : "_7",
                     "array" : [
                         0
                     ],
@@ -77,6 +77,13 @@
             ]
         }
     },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 0
+        }
+    ],
     "outputs" : [
         {
             "type" : "vec4",
@@ -86,7 +93,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_5",
+            "type" : "_6",
             "name" : "_DrawList",
             "readonly" : true,
             "block_size" : 0,
@@ -96,7 +103,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_3",
+            "type" : "_4",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

@@ -35,7 +35,6 @@ namespace CE
 			parentContext->AddChildContext(nativeContext);
 		}
 		nativeContext->Init();
-
 		return nativeContext;
 	}
 
@@ -66,6 +65,8 @@ namespace CE
 		renderer->SetDrawListTag(drawListTag);
 
 		renderer->Init(rendererInfo);
+
+		FusionApplication::Get()->nativeWindows.Add(this);
 	}
 
 	void FNativeContext::OnBeforeDestroy()
@@ -74,6 +75,8 @@ namespace CE
 
 		if (IsDefaultInstance())
 			return;
+
+		FusionApplication::Get()->nativeWindows.Remove(this);
 
 		if (drawListTag.IsValid())
 		{

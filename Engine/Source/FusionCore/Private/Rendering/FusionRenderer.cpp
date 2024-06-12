@@ -83,6 +83,7 @@ namespace CE
 	{
 		ZoneScoped;
 
+		if (true)
 		{
 			FDrawItem2D drawItem;
 			drawItem.transform = rootTransform * Matrix4x4::Translation(Vec3(1024 * 0.25f, 768 * 0.25f, 0)) * Matrix4x4::Scale(Vec3(1024.0f * 0.5f, 768 * 0.5f));

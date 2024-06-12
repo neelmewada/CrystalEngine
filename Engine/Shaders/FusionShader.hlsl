@@ -60,5 +60,7 @@ struct RenderData
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
-    return float4(1, 1, 1, 1);
+    const float2 uv = input.uv;
+
+    return float4(uv.x, uv.y, 0, 1);
 }

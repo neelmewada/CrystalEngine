@@ -5,6 +5,7 @@ namespace CE
     class FNativeContext;
     class FFusionContext;
     class FLayoutManager;
+    class FNativeContext;
 
     struct FusionInitInfo
     {
@@ -71,6 +72,8 @@ namespace CE
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
 
         RHI::DrawListContext drawList{};
+
+        Array<FNativeContext*> nativeWindows{};
 
         struct DestroyItem
         {

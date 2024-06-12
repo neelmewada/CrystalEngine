@@ -283,12 +283,12 @@ TEST(FusionCore, Rendering)
 
 	nativeContext->SetOwningWidget(mainWidget);
 
-	auto alternativeTick = []
+	auto exposedTick = []
 		{
 			FusionApplication::Get()->Tick();
 		};
 
-	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(alternativeTick);
+	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
 	while (!IsEngineRequestingExit())
 	{
