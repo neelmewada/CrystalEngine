@@ -66,11 +66,21 @@ namespace CE
 	{
 		layoutDirty = true;
 		dirty = true;
+
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->MarkLayoutDirty();
+		}
 	}
 
 	void FFusionContext::MarkDirty()
 	{
 		dirty = true;
+
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->MarkDirty();
+		}
 	}
 
 	void FFusionContext::QueueDestroy()

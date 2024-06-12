@@ -35,7 +35,6 @@ namespace CE
 			viewConstantsUpdateRequired[i] = true;
 
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
-
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
 		}
 
@@ -86,7 +85,7 @@ namespace CE
 
 		{
 			FDrawItem2D drawItem;
-			drawItem.transform = Matrix4x4::Translation(Vec3(0, 0, 1)) * Matrix4x4::Scale(Vec3(50, 50));
+			drawItem.transform = rootTransform * Matrix4x4::Translation(Vec3(1024 * 0.25f, 768 * 0.25f, 0)) * Matrix4x4::Scale(Vec3(1024.0f * 0.5f, 768 * 0.5f));
 			drawItem.drawType = DRAW_Rect;
 
 			drawItemList.Resize(1);

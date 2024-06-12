@@ -283,6 +283,13 @@ TEST(FusionCore, Rendering)
 
 	nativeContext->SetOwningWidget(mainWidget);
 
+	auto alternativeTick = []
+		{
+			FusionApplication::Get()->Tick();
+		};
+
+	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(alternativeTick);
+
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
@@ -296,6 +303,8 @@ TEST(FusionCore, Rendering)
 
 		previousTime = curTime;
 	}
+
+	PlatformApplication::Get()->RemoveTickHandler(handle);
 
 	TEST_END_GUI;
 }

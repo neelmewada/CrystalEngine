@@ -20,7 +20,7 @@ else
     exit 1
 fi
 
-DxCompiler=${DXC}
+DxCompiler=${VULKAN_SDK}/bin/dxc
 
 CompileShader() {
 

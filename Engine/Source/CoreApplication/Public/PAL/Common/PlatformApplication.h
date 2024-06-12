@@ -77,9 +77,10 @@ namespace CE
             this->messageHandlers.Remove(handler);
         }
 
-        virtual void AddTickHandler(const Delegate<void(void)> tickHandler)
+        virtual DelegateHandle AddTickHandler(const Delegate<void(void)> tickHandler)
         {
             this->tickHanders.Add(tickHandler);
+            return tickHandler.GetHandle();
         }
 
         virtual void RemoveTickHandler(DelegateHandle tickHandle)

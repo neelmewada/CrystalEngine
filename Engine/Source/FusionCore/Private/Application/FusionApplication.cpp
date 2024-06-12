@@ -213,6 +213,7 @@ namespace CE
     void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
     {
         RebuildFrameGraph();
+        rootContext->MarkLayoutDirty();
 
         for (int i = rootContext->childContexts.GetSize() - 1; i >= 0; i--)
         {
@@ -248,6 +249,7 @@ namespace CE
     void FusionApplication::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
         RebuildFrameGraph();
+        rootContext->MarkLayoutDirty();
     }
 
     void FusionApplication::OnWindowMinimized(PlatformWindow* window)
@@ -262,7 +264,8 @@ namespace CE
 
     void FusionApplication::OnWindowExposed(PlatformWindow* window)
     {
-        
+        RebuildFrameGraph();
+        rootContext->MarkLayoutDirty();
     }
 
     // - Shader Resources -
