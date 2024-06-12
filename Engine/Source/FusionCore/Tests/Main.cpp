@@ -44,6 +44,7 @@ static void TestBegin(bool gui)
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.resizable = true;
+		windowInfo.hidden = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
 		app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
@@ -274,6 +275,7 @@ TEST(FusionCore, Rendering)
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
+	mainWindow->Show();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
@@ -283,7 +285,7 @@ TEST(FusionCore, Rendering)
 
 	nativeContext->SetOwningWidget(mainWidget);
 
-	auto exposedTick = []
+	auto exposedTick = [&]
 		{
 			FusionApplication::Get()->Tick();
 		};
@@ -299,7 +301,7 @@ TEST(FusionCore, Rendering)
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
-		app->Tick();
+		exposedTick();
 
 		previousTime = curTime;
 	}

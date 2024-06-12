@@ -20,14 +20,14 @@ namespace LayoutTests
         Child(
             FAssignNew(FVerticalStack, rootBox)
             .ContentHAlign(HAlign::Fill)
-            .Padding(5)
+            .Padding(Vec4(5, 5, 5, 5))
             .Name("RootBox")
             (
                 FAssignNew(FHorizontalStack, hStack1)
                 .IfTrue(true, [&](FHorizontalStack& self)
                     {
                         self
-                            .Padding(5, 2.5f);
+                            .Padding(Vec4(5, 2.5f, 5, 2.5f));
                     })
                 .ContentVAlign(VAlign::Center)
                 .Name("HStack1")
@@ -63,7 +63,7 @@ namespace LayoutTests
 
                 FAssignNew(FHorizontalStack, hStack2)
                 .ContentVAlign(VAlign::Center)
-                .Padding(0)
+                .Padding(Vec4())
                 .Name("HStack2")
                 (
                     FNew(TerminalWidget)
@@ -111,7 +111,7 @@ namespace RenderingTests
         Child(
             FAssignNew(FVerticalStack, rootBox)
             .ContentHAlign(HAlign::Fill)
-            .Padding(5)
+            .Padding(Vec4(5, 5, 5, 5))
             .Name("RootBox")
             (
                 FNew(FHorizontalStack)

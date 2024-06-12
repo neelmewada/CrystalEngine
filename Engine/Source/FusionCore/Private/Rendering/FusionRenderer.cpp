@@ -91,8 +91,8 @@ namespace CE
 				Quat::EulerDegrees(0, 0, 23.5f).ToMatrix() *
 				Matrix4x4::Scale(Vec3(0.75f, 0.75f, 1));
 
-			DrawCustomItem(DRAW_Rect, Vec2(1024 * 0.f, 768 * 0.f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
-			DrawCustomItem(DRAW_Rect, Vec2(1024 * 0.5f, 768 * 0.5f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
+			DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.f, 768 * 0.f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
+			DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.5f, 768 * 0.5f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
 		}
 
 		const auto& vertBuffers = RPI::RPISystem::Get().GetTextQuad();
@@ -163,6 +163,8 @@ namespace CE
 
 	FusionRenderer::FDrawItem2D& FusionRenderer::DrawCustomItem(FDrawType drawType, Vec2 pos, Vec2 size)
 	{
+		ZoneScoped;
+
 		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
@@ -180,7 +182,7 @@ namespace CE
 
 		Vec3 translation1 = Vec3(-size.x / 2, -size.y / 2, 0);
 		Vec3 translation2 = Vec3(pos.x + size.x / 2, pos.y + size.y / 2, 0);
-	
+		
 		drawItem.transform = rootTransform *
 			Matrix4x4::Translation(translation2) *
 			transformOverlay *

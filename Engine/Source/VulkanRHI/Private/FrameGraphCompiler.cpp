@@ -63,7 +63,7 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileScopesInternal(const FrameGraphCompileRequest& compileRequest)
 	{
-		vkDeviceWaitIdle(device->GetHandle());
+		//vkDeviceWaitIdle(device->GetHandle());
 
 		// Queue allocation logic...
 
@@ -131,7 +131,7 @@ namespace CE::Vulkan
 		numFramesInFlight = compileRequest.numFramesInFlight;
 		imageCount = numFramesInFlight;
 
-		// If framegraph presents at least 1 swapchain
+		// If frame-graph presents at least 1 swap-chain
 		bool presentSwapChains = false;
 
 		if (frameGraph->presentSwapChains.NonEmpty())
@@ -252,8 +252,6 @@ namespace CE::Vulkan
 
     void FrameGraphCompiler::DestroySyncObjects()
     {
-		vkDeviceWaitIdle(device->GetHandle());
-
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			for (VkSemaphore semaphore : imageAcquiredSemaphores[i])

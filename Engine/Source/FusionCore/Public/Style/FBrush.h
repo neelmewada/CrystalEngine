@@ -7,8 +7,8 @@ namespace CE
     {
 	    None = 0,
         SolidFill,
-        LinearGradient,
-        TexturePattern
+        TexturePattern,
+        LinearGradient
     };
     ENUM_CLASS(FBrushStyle);
 
@@ -40,6 +40,12 @@ namespace CE
 
         FBrushStyle GetBrushStyle() const { return brushStyle; }
         FBrushTiling GetBrushTiling() const { return tiling; }
+
+        Vec2 GetScaling() const { return scaling; }
+        Vec2 GetOffset() const { return offset; }
+
+        void SetScaling(const Vec2& scaling) { this->scaling = scaling; }
+        void SetOffset(const Vec2& offset) { this->offset = offset; }
 
         const Color& GetFillColor() const { return fillColor; }
 
@@ -74,6 +80,8 @@ namespace CE
             };
         };
 
+        Vec2 scaling = Vec2(1, 1);
+        Vec2 offset = Vec2(0, 0);
         FBrushTiling tiling = FBrushTiling::None;
         FBrushStyle brushStyle = FBrushStyle::None;
     };

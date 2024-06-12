@@ -3,16 +3,16 @@
 namespace CE
 {
     template<typename T, SIZE_T GrowthIncrement = 128, bool CallDestructor = true>
-    class StableGrowthArray
+    class StableDynamicArray
     {
-        CE_NO_COPY(StableGrowthArray);
+        CE_NO_COPY(StableDynamicArray);
         static_assert(GrowthIncrement > 0);
     public:
 
-        StableGrowthArray()
+        StableDynamicArray()
         {}
 
-        ~StableGrowthArray()
+        ~StableDynamicArray()
         {
             Free();
         }
@@ -163,11 +163,7 @@ namespace CE
     public:
 
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
-#if PAL_TRAIT_BUILD_EDITOR
         static constexpr u32 DrawItemGrowIncrement = 512;
-#else
-        static constexpr u32 DrawItemGrowIncrement = 128;
-#endif
 
 
         FusionRenderer();
@@ -201,16 +197,16 @@ namespace CE
 
         enum FDrawType : u32
         {
-	        DRAW_Rect
+	        DRAW_Shape
         };
 
         struct alignas(16) FDrawItem2D
         {
             Matrix4x4 transform;
-            FDrawType drawType = DRAW_Rect;
+            FDrawType drawType = DRAW_Shape;
         };
 
-        using FDrawItemList = StableGrowthArray<FDrawItem2D, DrawItemGrowIncrement, false>;
+        using FDrawItemList = StableDynamicArray<FDrawItem2D, DrawItemGrowIncrement, false>;
 
         struct FDrawBatch
         {

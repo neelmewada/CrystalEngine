@@ -3,17 +3,17 @@
 namespace CE
 {
 	FBrush::FBrush()
-		: brushStyle(FBrushStyle::None)
-		, tintColor(Color::Clear())
+		: tintColor(Color::Clear())
 		, texturePath(Name())
 		, tiling(FBrushTiling::None)
+		, brushStyle(FBrushStyle::None)
 	{
 		
 	}
 
 	FBrush::FBrush(const Color& solidFill)
-		: brushStyle(FBrushStyle::SolidFill)
-		, fillColor(solidFill)
+		: fillColor(solidFill)
+		, brushStyle(FBrushStyle::SolidFill)
 	{
 
 	}
@@ -45,6 +45,10 @@ namespace CE
 		if (brushStyle != rhs.brushStyle)
 			return false;
 		if (tiling != rhs.tiling)
+			return false;
+		if (offset != rhs.offset)
+			return false;
+		if (scaling != rhs.scaling)
 			return false;
 
 		switch (brushStyle)
@@ -80,7 +84,10 @@ namespace CE
 		    }
 	    }
 
+		scaling = from.scaling;
+		offset = from.offset;
 		brushStyle = from.brushStyle;
+		tiling = from.tiling;
 
 	    switch (brushStyle)
 	    {
@@ -94,7 +101,6 @@ namespace CE
 		case FBrushStyle::TexturePattern:
 			tintColor = from.tintColor;
 			texturePath = from.texturePath;
-			tiling = from.tiling;
 			break;
 	    }
     }

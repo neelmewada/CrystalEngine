@@ -74,16 +74,14 @@ namespace CE
 
         virtual void Construct();
 
-        //! @brief Computed position in parent widget's coordinate space
+        //! @brief Computed position in parent widget's coordinate space.
         Vec2 computedPosition{};
 
         Vec2 computedSize{};
 
-        //! @brief Computed position in the fusion context's coordinate space
-        //Vec2 globalComputedPosition{};
-
         Vec2 intrinsicSize{};
 
+        //! @brief Transformation matrix in parent widget's coordinate space.
         Matrix4x4 localTransform;
 
     private:  // - Fields -
@@ -155,78 +153,6 @@ namespace CE
         FUSION_PROPERTY(Translation);
         FUSION_PROPERTY(Rotation);
         FUSION_PROPERTY(Scale);
-
-        Self& Margin(f32 margin)
-        {
-            Vec4 newMargin = Vec4(margin, margin, margin, margin);
-            if (m_Margin == newMargin)
-                return *this;
-            m_Margin = newMargin;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Margin";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
-
-        Self& Margin(f32 left, f32 top, f32 right, f32 bottom)
-        {
-            Vec4 newMargin = Vec4(left, top, right, bottom);
-            if (m_Margin == newMargin)
-                return *this;
-            m_Margin = newMargin;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Margin";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
-
-        Self& Margin(f32 horizontal, f32 vertical)
-        {
-            Vec4 newMargin = Vec4(horizontal, vertical, horizontal, vertical);
-            if (m_Margin == newMargin)
-                return *this;
-            m_Margin = newMargin;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Margin";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
-
-        Self& Padding(f32 padding)
-        {
-            Vec4 newPadding = Vec4(1, 1, 1, 1) * padding;
-            if (m_Padding == newPadding)
-                return *this;
-            m_Padding = newPadding;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Padding";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
-
-        Self& Padding(f32 left, f32 top, f32 right, f32 bottom)
-        {
-            Vec4 newPadding = Vec4(left, top, right, bottom);
-            if (m_Padding == newPadding)
-                return *this;
-            m_Padding = newPadding;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Padding";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
-
-        Self& Padding(f32 horizontal, f32 vertical)
-        {
-            Vec4 newPadding = Vec4(horizontal, vertical, horizontal, vertical);
-            if (m_Padding == newPadding)
-                return *this;
-            m_Padding = newPadding;
-            MarkLayoutDirty();
-            static const CE::Name propertyName = "Padding";
-            OnFusionPropertyModified(propertyName);
-            return *this;
-        }
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& As()

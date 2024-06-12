@@ -21,9 +21,6 @@ namespace CE
         FBrush m_Background;
 
         FIELD()
-        Color m_ForegroundColor;
-
-        FIELD()
         FShape m_ClipShape;
 
         FIELD()
@@ -39,20 +36,16 @@ namespace CE
 
         FUSION_PROPERTY(Background);
 
-        FUSION_PROPERTY(ForegroundColor);
-
         FUSION_PROPERTY(ClipShape);
 
         Self& CornerRadius(const Vec4& cornerRadius)
         {
-            m_ClipShape = FRoundedRectangle(cornerRadius);
-            return *this;
+            return ClipShape(FRoundedRectangle(cornerRadius));
         }
 
         Self& CornerRadius(f32 cornerRadius)
         {
-            m_ClipShape = FRoundedRectangle(cornerRadius);
-            return *this;
+            return ClipShape(FRoundedRectangle(cornerRadius));
         }
 
         FUSION_PROPERTY(BorderColor);
