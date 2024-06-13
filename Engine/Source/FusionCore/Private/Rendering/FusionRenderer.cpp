@@ -17,9 +17,9 @@ namespace CE
 		numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
+		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perDrawSrgLayout);
-
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perViewSrgLayout);
 
 		for (int i = 0; i < numFrames; ++i)
@@ -36,6 +36,7 @@ namespace CE
 
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
+			drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
 		}
 
 		perViewSrg->FlushBindings();
@@ -47,6 +48,7 @@ namespace CE
 		Super::OnBeforeDestroy();
 
 		drawItemsBuffer.Shutdown();
+		clipItemsBuffer.Shutdown();
 
 		for (int i = 0; i < numFrames; i++)
 		{
@@ -70,6 +72,7 @@ namespace CE
 
 		drawBatches.Clear();
 		drawItemList.RemoveAll();
+		clipItemList.RemoveAll();
 
 		createNewDrawBatch = true;
 
@@ -83,16 +86,25 @@ namespace CE
 	{
 		ZoneScoped;
 		
-		if (true)
+		if (true) // TODO: Testing
 		{
-			angleDegrees = 0;
-			scaling = Vec2(1, 1);
-			transformOverlay = Matrix4x4::Translation(Vec3(0, 0, 0)) * 
-				Quat::EulerDegrees(0, 0, 23.5f).ToMatrix() *
-				Matrix4x4::Scale(Vec3(0.75f, 0.75f, 1));
+			transformOverlay = Quat::EulerDegrees(0, 0, 20).ToMatrix();
 
-			DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.f, 768 * 0.f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
-			DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.5f, 768 * 0.5f), Vec2(1024.0f * 0.5f, 768 * 0.5f));
+			Matrix4x4 clipMatrix = Matrix4x4::Translation(Vec3(-100, -150, 0)) * 
+				Quat::EulerDegrees(0, 0, 10).ToMatrix() *
+				Matrix4x4::Scale(Vec3(1.f / 1, 1.f / 1, 1));
+			//clipMatrix.Invert();
+
+			clipItemList.Insert(FClipItem2D{
+				.transform = clipMatrix,
+				.cornerRadius = Vec4(10, 20, 30, 40),
+				.shapeType = FShapeType::RoundedRect
+			});
+			
+			auto& item0 = DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.f, 768 * 0.f), Vec2(1024.0f, 768 * 0.5f));
+			item0.clipIndex = 0;
+			auto& item1 = DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.5f, 768 * 0.5f), Vec2(1024.0f, 768 * 0.5f));
+			item1.clipIndex = 0;
 		}
 
 		const auto& vertBuffers = RPI::RPISystem::Get().GetTextQuad();
@@ -225,6 +237,17 @@ namespace CE
 				}
 
 				drawItemsBuffer.GetBuffer(imageIndex)->UploadData(drawItemList.GetData(), drawItemList.GetCount() * sizeof(FDrawItem2D));
+			}
+
+			if (clipItemList.GetCount() > 0)
+			{
+				if (clipItemsBuffer.GetElementCount() < clipItemList.GetCount())
+				{
+					u64 totalCount = (u64)((f32)clipItemsBuffer.GetElementCount() * (1.0f + clipItemGrowRatio));
+					clipItemsBuffer.GrowToFit(Math::Max<u64>(clipItemList.GetCount() + 32, totalCount));
+				}
+
+				clipItemsBuffer.GetBuffer(imageIndex)->UploadData(clipItemList.GetData(), clipItemList.GetCount() * sizeof(FClipItem2D));
 			}
 
 			resubmitDrawItems[imageIndex] = false;

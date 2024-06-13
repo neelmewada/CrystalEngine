@@ -63,6 +63,12 @@ namespace CE::RHI
 		CE_STRUCT(SRGVariableDescriptor)
 	public:
 
+		SRGVariableDescriptor() {}
+
+		SRGVariableDescriptor(const Name& name, u32 bindingSlot, ShaderResourceType type, ShaderStage shaderStages)
+			: name(name), bindingSlot(bindingSlot), type(type), shaderStages(shaderStages)
+		{}
+
 		/// @brief Name of the variable.
 		FIELD()
 		Name name{};

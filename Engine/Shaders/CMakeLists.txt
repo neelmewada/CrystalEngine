@@ -9,5 +9,7 @@ ce_add_shaders(${PROJECT_NAME}
         "${HLSL_FILES}"
     FOLDER
         "Engine/Shaders"
+    OUTPUT_DIRECTORY
+        "Engine/Shaders"
 )
 

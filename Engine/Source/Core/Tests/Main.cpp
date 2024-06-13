@@ -586,6 +586,10 @@ TEST(Containers, Matrix)
 		Matrix4x4 transform = translation * rotation * scale;
 		out = transform * point;
 		EXPECT_EQ(out, Vec3(10, 0, -2));
+
+		transform.Invert();
+		out = transform * out;
+		EXPECT_EQ(out, point);
     }
     
     TEST_END;

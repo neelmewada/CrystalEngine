@@ -2,15 +2,6 @@
 
 namespace CE
 {
-    ENUM()
-    enum class FShapeType
-    {
-	    None = 0,
-        Rect,
-        RoundedRect,
-        Circle
-    };
-    ENUM_CLASS(FShapeType);
 
     struct FUSIONCORE_API FShape final
     {

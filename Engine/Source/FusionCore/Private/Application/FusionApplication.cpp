@@ -313,14 +313,19 @@ namespace CE
         perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
 
         {
-	        RHI::SRGVariableDescriptor drawListData{};
-            drawListData.name = "_DrawList";
-            drawListData.bindingSlot = (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue();
-            drawListData.shaderStages = ShaderStage::Vertex | ShaderStage::Fragment;
-            drawListData.type = ShaderResourceType::StructuredBuffer;
-
             variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw)
-                .TryAdd(drawListData);
+                .TryAdd(SRGVariableDescriptor(
+					"_DrawList",
+                    (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+        		.TryAdd(SRGVariableDescriptor(
+                    "_ClipItems", 
+                    (u32)vertexReflection["ssbos"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ));
         }
 
         perDrawSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw);

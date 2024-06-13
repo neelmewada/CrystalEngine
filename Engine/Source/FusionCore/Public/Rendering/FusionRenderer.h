@@ -156,6 +156,16 @@ namespace CE
         RHI::MultisampleState multisampling{};
     };
 
+    ENUM()
+    enum class FShapeType : u32
+    {
+	    None = 0,
+        Rect,
+        RoundedRect,
+        Circle
+    };
+    ENUM_CLASS(FShapeType);
+
     CLASS(Config = Engine)
     class FUSIONCORE_API FusionRenderer : public Object
     {
@@ -163,7 +173,8 @@ namespace CE
     public:
 
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
-        static constexpr u32 DrawItemGrowIncrement = 512;
+        static constexpr u32 DrawItemIncrement = 512;
+        static constexpr u32 ClipItemIncrement = 128;
 
 
         FusionRenderer();
@@ -204,9 +215,19 @@ namespace CE
         {
             Matrix4x4 transform;
             FDrawType drawType = DRAW_Shape;
+            int clipIndex = -1;
         };
 
-        using FDrawItemList = StableDynamicArray<FDrawItem2D, DrawItemGrowIncrement, false>;
+        using FDrawItemList = StableDynamicArray<FDrawItem2D, DrawItemIncrement, false>;
+
+        struct alignas(16) FClipItem2D
+        {
+            Matrix4x4 transform;
+            Vec4 cornerRadius;
+            FShapeType shapeType = FShapeType::Rect;
+        };
+
+        using FClipItemList = StableDynamicArray<FClipItem2D, ClipItemIncrement, false>;
 
         struct FDrawBatch
         {
@@ -225,6 +246,12 @@ namespace CE
 
         FIELD(Config)
         f32 drawItemGrowRatio = 0.25f;
+
+        FIELD(Config)
+        u32 initialClipItemCapacity = 1000;
+
+        FIELD(Config)
+        f32 clipItemGrowRatio = 0.25f;
 
         // - State -
 
@@ -247,10 +274,11 @@ namespace CE
 
         // - Drawing -
 
-        RPI::DynamicStructuredBuffer<FDrawItem2D> drawItemsBuffer;
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
-
+        RPI::DynamicStructuredBuffer<FDrawItem2D> drawItemsBuffer;
         FDrawItemList drawItemList;
+        RPI::DynamicStructuredBuffer<FClipItem2D> clipItemsBuffer;
+        FClipItemList clipItemList;
 
         Array<FDrawBatch> drawBatches{};
         bool createNewDrawBatch = false;
