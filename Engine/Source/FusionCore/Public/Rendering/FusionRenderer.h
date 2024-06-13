@@ -224,6 +224,7 @@ namespace CE
         {
             Matrix4x4 transform;
             Vec4 cornerRadius;
+            Vec2 size;
             FShapeType shapeType = FShapeType::Rect;
         };
 

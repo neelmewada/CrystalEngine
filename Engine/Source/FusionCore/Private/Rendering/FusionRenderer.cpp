@@ -90,14 +90,14 @@ namespace CE
 		{
 			transformOverlay = Quat::EulerDegrees(0, 0, 20).ToMatrix();
 
-			Matrix4x4 clipMatrix = Matrix4x4::Translation(Vec3(-100, -150, 0)) * 
-				Quat::EulerDegrees(0, 0, 10).ToMatrix() *
-				Matrix4x4::Scale(Vec3(1.f / 1, 1.f / 1, 1));
-			//clipMatrix.Invert();
+			Matrix4x4 clipMatrix = Matrix4x4::Translation(Vec3(50, 0, 0)) * 
+				Quat::EulerDegrees(0, 0, 20).ToMatrix() *
+				Matrix4x4::Scale(Vec3(1, 1, 1));
 
 			clipItemList.Insert(FClipItem2D{
-				.transform = clipMatrix,
+				.transform = clipMatrix.GetInverse(),
 				.cornerRadius = Vec4(10, 20, 30, 40),
+				.size = Vec2(200, 125),
 				.shapeType = FShapeType::RoundedRect
 			});
 			

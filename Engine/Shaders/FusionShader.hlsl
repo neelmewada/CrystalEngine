@@ -94,6 +94,7 @@ struct ClipItem2D
 {
     float4x4 clipTransform;
     float4 cornerRadius;
+    float2 size;
     ShapeType shapeType;
 };
 
@@ -142,7 +143,7 @@ float SDFClipRect(in float2 p, in float2 shapePos, in float2 shapeSize)
 // r.y = roundness top-right
 // r.z = roundness bottom-left
 // r.w = roundness top-left
-float SDFClipRoundedBox(in float2 p, in float2 shapePos, in float2 shapeSize, in float4 r)
+float SDFClipRoundedRect(in float2 p, in float2 shapePos, in float2 shapeSize, in float4 r)
 {
     p -= float2(shapePos.x + shapeSize.x * 0.5, shapePos.y + shapeSize.y * 0.5);
 
@@ -171,10 +172,11 @@ float4 FragMain(PSInput input) : SV_TARGET
     const float2 pos = input.globalPos.xy;
     const float2 clipPos = input.clipPos.xy;
     //const float2 scaledUV = uv * _DrawList[InstanceIdx].quadSize;
+    const int clipIndex = _DrawList[InstanceIdx].clipIndex;
 
-    if (_DrawList[InstanceIdx].clipIndex >= 0)
+    if (clipIndex >= 0)
     {
-        float sd = SDFClipRoundedBox(clipPos, float2(0, 0), float2(200, 125), float4(10, 20, 30, 40));
+        float sd = SDFClipRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
 
         if (sd >= 0) // Outside clip rect
         {

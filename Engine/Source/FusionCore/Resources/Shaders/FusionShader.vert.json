@@ -97,9 +97,14 @@
                     "offset" : 64
                 },
                 {
+                    "name" : "size",
+                    "type" : "vec2",
+                    "offset" : 80
+                },
+                {
                     "name" : "shapeType",
                     "type" : "int",
-                    "offset" : 80
+                    "offset" : 88
                 }
             ]
         },
