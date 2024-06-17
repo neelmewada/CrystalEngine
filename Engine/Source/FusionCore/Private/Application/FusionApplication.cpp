@@ -325,6 +325,12 @@ namespace CE
                     (u32)vertexReflection["ssbos"][1]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+        		.TryAdd(SRGVariableDescriptor(
+                    "_ShapeDrawList",
+                    (u32)vertexReflection["ssbos"][2]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
                 ));
         }
 

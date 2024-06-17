@@ -60,7 +60,12 @@ namespace CE
 
         void SetComputedSize(Vec2 size) { computedSize = size; }
 
+        virtual void OnPaint(FPainter* painter) {}
+
     protected:
+
+        virtual void OnAttachedToParent(FWidget* parent) {}
+        virtual void OnDetachedFromParent(FWidget* parent) {}
 
         virtual bool TryAddChild(FWidget* child) { return false; }
 

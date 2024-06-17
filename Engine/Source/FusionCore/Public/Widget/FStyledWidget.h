@@ -10,7 +10,12 @@ namespace CE
 
         FStyledWidget();
 
-    protected:
+        // - Public API -
+
+
+        // - Events -
+
+        void OnPaint(FPainter* painter) override;
 
     protected: // - Fusion Fields -
 
@@ -19,6 +24,9 @@ namespace CE
 
         FIELD()
         FBrush m_Background;
+
+        FIELD()
+        FShape m_BackgroundShape;
 
         FIELD()
         FShape m_ClipShape;
@@ -35,12 +43,12 @@ namespace CE
     public:   // - Fusion Properties -
 
         FUSION_PROPERTY(Background);
-
+        FUSION_PROPERTY(BackgroundShape);
         FUSION_PROPERTY(ClipShape);
 
         Self& CornerRadius(const Vec4& cornerRadius)
         {
-            return ClipShape(FRoundedRectangle(cornerRadius));
+            return ClipShape(FShape::RoundedRect(cornerRadius));
         }
 
         Self& CornerRadius(f32 cornerRadius)
@@ -54,9 +62,9 @@ namespace CE
 
         FUSION_PROPERTY(Opacity);
 
-        Self& UseStyle(FStyle* style);
+        Self& Style(FStyle* style);
 
-        Self& UseStyle(const CE::Name& styleKey);
+        Self& Style(const CE::Name& styleKey);
 
         FUSION_FRIENDS;
         FUSION_WIDGET;

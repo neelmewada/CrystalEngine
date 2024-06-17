@@ -35,10 +35,15 @@ namespace CE
 
     protected:  // - Fusion Fields -
 
-
+        FIELD()
+        FVoidEvent m_OnPressed;
 
     public: // - Fusion Properties -
 
+        Self& OnPressed()
+        {
+            return *this;
+        }
 
         FUSION_TESTS;
         FUSION_WIDGET;

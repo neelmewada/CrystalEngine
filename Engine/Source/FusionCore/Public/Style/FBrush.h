@@ -1,4 +1,5 @@
 #pragma once
+#include "Layout/LayoutTypes.h"
 
 namespace CE
 {
@@ -23,14 +24,16 @@ namespace CE
     ENUM_CLASS_FLAGS(FBrushTiling);
 
     STRUCT()
-    struct FUSIONCORE_API FBrush
+    struct FUSIONCORE_API FBrush final
     {
         CE_STRUCT(FBrush)
     public:
 
         FBrush();
 
-        FBrush(const Color& solidFill);
+        FBrush(const Color& fillColor, FBrushStyle brushStyle = FBrushStyle::SolidFill);
+
+        ~FBrush();
 
         FBrush(const FBrush& copy);
         FBrush& operator=(const FBrush& copy);
@@ -41,16 +44,22 @@ namespace CE
         FBrushStyle GetBrushStyle() const { return brushStyle; }
         FBrushTiling GetBrushTiling() const { return tiling; }
 
-        Vec2 GetScaling() const { return scaling; }
-        Vec2 GetOffset() const { return offset; }
-
-        void SetScaling(const Vec2& scaling) { this->scaling = scaling; }
-        void SetOffset(const Vec2& offset) { this->offset = offset; }
+        void SetBrushStyle(FBrushStyle brushStyle) { this->brushStyle = brushStyle; }
+        void SetBrushTiling(FBrushTiling tiling) { this->tiling = tiling; }
 
         const Color& GetFillColor() const { return fillColor; }
 
         const Color& GetTintColor() const { return tintColor; }
         const Name& GetTexturePath() const { return texturePath; }
+
+        const Vec2& GetBrushSize() const { return brushSize; }
+        void SetBrushSize(Vec2 brushSize) { this->brushSize = brushSize; }
+
+        HAlign GetHAlign() const { return hAlign; }
+        VAlign GetVAlign() const { return vAlign; }
+
+        void SetHAlign(HAlign hAlign) { this->hAlign = hAlign; }
+        void SetVAlign(VAlign vAlign) { this->vAlign = vAlign; }
 
         bool operator==(const FBrush& rhs) const;
 
@@ -80,8 +89,9 @@ namespace CE
             };
         };
 
-        Vec2 scaling = Vec2(1, 1);
-        Vec2 offset = Vec2(0, 0);
+        Vec2 brushSize = Vec2(0, 0);
+        HAlign hAlign = HAlign::Auto;
+        VAlign vAlign = VAlign::Auto;
         FBrushTiling tiling = FBrushTiling::None;
         FBrushStyle brushStyle = FBrushStyle::None;
     };

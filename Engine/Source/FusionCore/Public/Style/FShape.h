@@ -2,6 +2,15 @@
 
 namespace CE
 {
+    ENUM()
+    enum class FShapeType : u32
+    {
+	    None = 0,
+        Rect,
+        RoundedRect,
+        Circle
+    };
+    ENUM_CLASS(FShapeType);
 
     struct FUSIONCORE_API FShape final
     {
@@ -36,8 +45,9 @@ namespace CE
 
     inline FShape FRectangle() { return FShape::Rect(); }
     inline FShape FCircle() { return FShape::Circle(); }
-    inline FShape FRoundedRectangle(const Vec4& cornerRadius) { return FShape::RoundedRect(cornerRadius); }
+    inline FShape FRoundedRectangle(f32 left, f32 top, f32 right, f32 bottom) { return FShape::RoundedRect(Vec4(left, top, right, bottom)); }
     inline FShape FRoundedRectangle(f32 cornerRadius) { return FShape::RoundedRect(Vec4(1, 1, 1, 1) * cornerRadius); }
+    inline FShape FRoundedRectangle(const Vec4& cornerRadius) { return FShape::RoundedRect(cornerRadius); }
     
 } // namespace CE
 

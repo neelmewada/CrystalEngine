@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_6" : {
+        "_7" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_9" : {
+        "_10" : {
             "name" : "DrawItem2D",
             "members" : [
                 {
@@ -53,23 +53,53 @@
                     "row_major" : true
                 },
                 {
+                    "name" : "penColor",
+                    "type" : "vec4",
+                    "offset" : 64
+                },
+                {
+                    "name" : "quadSize",
+                    "type" : "vec2",
+                    "offset" : 80
+                },
+                {
+                    "name" : "penThickness",
+                    "type" : "float",
+                    "offset" : 88
+                },
+                {
+                    "name" : "opacity",
+                    "type" : "float",
+                    "offset" : 92
+                },
+                {
                     "name" : "drawType",
                     "type" : "int",
-                    "offset" : 64
+                    "offset" : 96
+                },
+                {
+                    "name" : "shapeOrFontIndex",
+                    "type" : "uint",
+                    "offset" : 100
+                },
+                {
+                    "name" : "charIndex",
+                    "type" : "uint",
+                    "offset" : 104
                 },
                 {
                     "name" : "clipIndex",
                     "type" : "int",
-                    "offset" : 68
+                    "offset" : 108
                 }
             ]
         },
-        "_8" : {
+        "_9" : {
             "name" : "type.StructuredBuffer.DrawItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_9",
+                    "type" : "_10",
                     "array" : [
                         0
                     ],
@@ -77,11 +107,11 @@
                         true
                     ],
                     "offset" : 0,
-                    "array_stride" : 80
+                    "array_stride" : 112
                 }
             ]
         },
-        "_12" : {
+        "_13" : {
             "name" : "ClipItem2D",
             "members" : [
                 {
@@ -102,18 +132,18 @@
                     "offset" : 80
                 },
                 {
-                    "name" : "shapeType",
+                    "name" : "shape",
                     "type" : "int",
                     "offset" : 88
                 }
             ]
         },
-        "_11" : {
+        "_12" : {
             "name" : "type.StructuredBuffer.ClipItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_12",
+                    "type" : "_13",
                     "array" : [
                         0
                     ],
@@ -124,9 +154,61 @@
                     "array_stride" : 96
                 }
             ]
+        },
+        "_16" : {
+            "name" : "ShapeItem2D",
+            "members" : [
+                {
+                    "name" : "cornerRadius",
+                    "type" : "vec4",
+                    "offset" : 0
+                },
+                {
+                    "name" : "brushColor",
+                    "type" : "vec4",
+                    "offset" : 16
+                },
+                {
+                    "name" : "brushType",
+                    "type" : "int",
+                    "offset" : 32
+                },
+                {
+                    "name" : "shape",
+                    "type" : "int",
+                    "offset" : 36
+                },
+                {
+                    "name" : "penType",
+                    "type" : "int",
+                    "offset" : 40
+                }
+            ]
+        },
+        "_15" : {
+            "name" : "type.StructuredBuffer.ShapeItem2D",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_16",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 48
+                }
+            ]
         }
     },
     "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 0
+        },
         {
             "type" : "vec3",
             "name" : "in.var.TEXCOORD2",
@@ -147,7 +229,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_8",
+            "type" : "_9",
             "name" : "_DrawList",
             "readonly" : true,
             "block_size" : 0,
@@ -155,17 +237,25 @@
             "binding" : 0
         },
         {
-            "type" : "_11",
+            "type" : "_12",
             "name" : "_ClipItems",
             "readonly" : true,
             "block_size" : 0,
             "set" : 6,
             "binding" : 1
+        },
+        {
+            "type" : "_15",
+            "name" : "_ShapeDrawList",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 6,
+            "binding" : 2
         }
     ],
     "ubos" : [
         {
-            "type" : "_6",
+            "type" : "_7",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

@@ -64,6 +64,15 @@ namespace CE
             });
         }
 
+        //! @brief 2D angle in Z axis in degrees.
+        static Matrix4x4 Angle(f32 degrees);
+
+        //! @brief 3D euler angles in degrees 
+        static Matrix4x4 RotationDegrees(const Vec3& eulerDegrees);
+
+        //! @brief 3D euler angles in radians
+        static Matrix4x4 RotationRadians(const Vec3& eulerRadians);
+
         inline static Matrix4x4 Scale(const Vec3& scale)
         {
             return Matrix4x4({

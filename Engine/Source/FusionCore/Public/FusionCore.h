@@ -28,7 +28,8 @@ class FusionCore_Layout_Test;
     friend class FusionApplication;\
     friend class FCompoundWidget;\
     friend class FStyleManager;\
-    friend class FusionRenderer;
+    friend class FusionRenderer;\
+    friend class FPainter;
 
 namespace CE
 {
@@ -38,7 +39,12 @@ namespace CE
 }
 
 #include "FusionMacros.h"
+#include "FusionDefines.h"
 #include "Exception/FusionException.h"
+
+#include "Style/FShape.h"
+#include "Style/FPen.h"
+#include "Style/FBrush.h"
 
 #include "Application/FusionApplication.h"
 #include "Rendering/FusionRenderer.h"
@@ -49,8 +55,6 @@ namespace CE
 #include "Layout/LayoutTypes.h"
 #include "Layout/FLayoutManager.h"
 
-#include "Style/FShape.h"
-#include "Style/FBrush.h"
 #include "Style/FStyle.h"
 #include "Style/FButtonStyle.h"
 #include "Style/FStyleManager.h"
@@ -64,4 +68,5 @@ namespace CE
 #include "Window/FWindow.h"
 
 #include "Widget/Layout/FStackBox.h"
+#include "Widget/Layout/FOverlayStack.h"
 

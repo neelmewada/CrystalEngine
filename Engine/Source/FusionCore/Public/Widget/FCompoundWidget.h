@@ -15,6 +15,8 @@ namespace CE
 
         void PlaceSubWidgets() override;
 
+        void OnPaint(FPainter* painter) override;
+
     protected:
 
         // Never call this function directly! Use AddChild() instead

@@ -3,7 +3,7 @@
 namespace CE
 {
 
-	FShape::FShape(FShapeType shapeType)
+	FShape::FShape(FShapeType shapeType) : shapeType(shapeType)
 	{
 		
 	}

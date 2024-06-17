@@ -116,12 +116,20 @@ namespace RenderingTests
             (
                 FNew(FHorizontalStack)
                 .ContentVAlign(VAlign::Fill)
+                .Padding(Vec4(5, 2.5f, 5, 2.5f))
                 .Name("HStack1")
                 (
                     FNew(FStyledWidget)
-                    .MinWidth(10)
-                    .MinHeight(10)
-                )
+                    .Background(FBrush(Color::Green()))
+                    .BackgroundShape(FRectangle())
+                    .FillRatio(1.0f)
+                    .MinWidth(60)
+                    .MinHeight(30)
+                ),
+
+                FNew(FButton)
+                .Style("Button.Primary")
+                .MinHeight(30)
             )
         );
     }

@@ -99,12 +99,8 @@ namespace CE
 				{
 					totalFillRatio += child->m_FillRatio;
 				}
-				else
-				{
-					remainingSize -= childIntrinsicSize.width;
-				}
 
-				remainingSize -= child->GetMargin().left + child->GetMargin().right;
+				remainingSize -= childIntrinsicSize.width + child->GetMargin().left + child->GetMargin().right;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
@@ -112,12 +108,8 @@ namespace CE
 				{
 					totalFillRatio += child->m_FillRatio;
 				}
-				else
-				{
-					remainingSize -= childIntrinsicSize.height;
-				}
 
-				remainingSize -= child->GetMargin().top + child->GetMargin().bottom;
+				remainingSize -= childIntrinsicSize.height + child->GetMargin().top + child->GetMargin().bottom;
 			}
 		}
 
@@ -158,7 +150,7 @@ namespace CE
 
 				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.width = remainingSize * child->m_FillRatio / totalFillRatio;
+					child->computedSize.width = childIntrinsicSize.width + remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{
@@ -190,7 +182,7 @@ namespace CE
 
 				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.height = remainingSize * child->m_FillRatio / totalFillRatio;
+					child->computedSize.height = childIntrinsicSize.height + remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{
@@ -199,11 +191,26 @@ namespace CE
 
 				curPos.y += child->computedSize.height + child->m_Margin.bottom;
 			}
-
-			//child->globalComputedPosition = globalComputedPosition + child->computedPosition;
 			
 			child->PlaceSubWidgets();
 		}
+	}
+
+	void FStackBox::OnPaint(FPainter* painter)
+	{
+		Super::OnPaint(painter);
+
+		if (children.IsEmpty())
+			return;
+
+		painter->PushChildCoordinateSpace(localTransform);
+
+		for (FWidget* child : children)
+		{
+			child->OnPaint(painter);
+		}
+
+		painter->PopChildCoordinateSpace();
 	}
 
 	void FStackBox::Construct()

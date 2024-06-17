@@ -326,13 +326,6 @@ public:\
     constexpr static bool IsStruct = true;\
 	static CE::String StaticBundle();\
 	static CE::String StaticModule();\
-	virtual ~Struct()\
-	{\
-		if constexpr (TStructReleaseFunction<Struct>::Value)\
-		{\
-			TStructReleaseFunction<Struct>::Release(this);\
-		}\
-	}\
     virtual CE::TypeInfo* GetType() const\
     {\
         return Type();\

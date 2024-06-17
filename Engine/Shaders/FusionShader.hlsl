@@ -51,43 +51,24 @@ enum DrawType : uint
 
 enum class ShapeType: uint
 {
+    None = 0,
 	Rect,
     RoundedRect,
     Circle
 };
 
-enum class BrushType : uint
+enum BrushType : uint
 {
-    None,
-	Solid,
-    Gradient,
-    Texture
+    BRUSH_None = 0,
+    BRUSH_Solid,
+    BRUSH_Texture,
+    BRUSH_LinearGradient
 };
 
-struct ShapeItem2D
+enum PenType : uint
 {
-    float4 cornerRadius;
-    float4 brushColor;
-    float2 brushUVScaling;
-    float2 brushUVOffset;
-    uint gradientStartIdx;
-    uint gradientEndIdx;
-    BrushType brushType;
-    ShapeType shapeType;
-};
-
-// Could be a shape, font character, or any other draw item
-struct DrawItem2DNew
-{
-    float4x4 transform;
-    float4 penColor;
-    float2 quadSize;
-    float penThickness;
-    float opacity;
-    DrawType drawType;
-    uint shapeOrfontIndex;
-    uint charIndex;
-    int clipIndex;
+    PEN_None = 0,
+    PEN_SolidLine
 };
 
 struct ClipItem2D
@@ -95,13 +76,29 @@ struct ClipItem2D
     float4x4 clipTransform;
     float4 cornerRadius;
     float2 size;
-    ShapeType shapeType;
+    ShapeType shape;
 };
 
+struct ShapeItem2D
+{
+    float4 cornerRadius;
+    float4 brushColor;
+    BrushType brushType;
+    ShapeType shape;
+    PenType penType;
+};
+
+// Could be a shape, font character, or any other draw item
 struct DrawItem2D
 {
     float4x4 transform;
+    float4 penColor;
+    float2 quadSize;
+    float penThickness;
+    float opacity;
     DrawType drawType;
+    uint shapeOrFontIndex;
+    uint charIndex;
     int clipIndex;
 };
 
@@ -110,6 +107,7 @@ struct DrawItem2D
 
 StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
+StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
 
 ///////////////////////////////////////////////////////////
 /// Vertex Shader
@@ -119,7 +117,15 @@ PSInput VertMain(VSInput input)
     PSInput o;
     o.instanceId = input.instanceId;
     o.globalPos = mul(float4(input.position, 1.0), _DrawList[InstanceIdx].transform).xyz;
-    o.clipPos = mul(float4(o.globalPos, 1.0), _ClipItems[0].clipTransform).xyz;
+    const int clipIndex = _DrawList[InstanceIdx].clipIndex;
+    if (clipIndex >= 0)
+    {
+	    o.clipPos = mul(float4(o.globalPos, 1.0), _ClipItems[clipIndex].clipTransform).xyz;
+    }
+    else
+    {
+        o.clipPos = o.globalPos;
+    }
     o.position = mul(float4(o.globalPos, 1.0), viewProjectionMatrix);
     o.uv = input.uv;
     return o;
@@ -160,30 +166,86 @@ float SDFClipCircle(in float2 p, in float2 shapePos, in float2 shapeSize)
     return length(p) - r;
 }
 
-
-struct ShapeRenderData
+float SDFCircle(in float2 p, in float2 shapeSize)
 {
-	
-};
+    const float r = min(shapeSize.x, shapeSize.y) * 0.5;
+    return length(p) - r;
+}
+
+// Credit: https://www.ronja-tutorials.com/post/034-2d-sdf-basics/
+float SDFRect(in float2 p, in float2 shapeSize)
+{
+    const float2 componentWiseEdgeDistance = abs(p) - shapeSize * 0.5;
+    const float outsideDistance = length(max(componentWiseEdgeDistance, 0));
+    const float insideDistance = min(max(componentWiseEdgeDistance.x, componentWiseEdgeDistance.y), 0);
+    return outsideDistance + insideDistance;
+}
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
     const float2 uv = input.uv;
+    const float2 quadSize = _DrawList[InstanceIdx].quadSize;
+    const float2 sdfPos = (uv - float2(0.5, 0.5)) * quadSize;
     const float2 pos = input.globalPos.xy;
     const float2 clipPos = input.clipPos.xy;
-    //const float2 scaledUV = uv * _DrawList[InstanceIdx].quadSize;
     const int clipIndex = _DrawList[InstanceIdx].clipIndex;
+
+    float clipSdf = -1;
 
     if (clipIndex >= 0)
     {
-        float sd = SDFClipRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
+        clipSdf = 1;
+        const float4 r = _ClipItems[clipIndex].cornerRadius;
 
-        if (sd >= 0) // Outside clip rect
+	    switch (_ClipItems[clipIndex].shape)
+	    {
+	    case ShapeType::None:
+            clipSdf = -1;
+            break;
+	    case ShapeType::Rect:
+            clipSdf = SDFClipRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
+		    break;
+	    case ShapeType::RoundedRect:
+            clipSdf = SDFClipRoundedRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size, float4(r.z, r.y, r.w, r.x));
+		    break;
+	    case ShapeType::Circle:
+            clipSdf = SDFClipCircle(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
+		    break;
+	    }
+
+        if (clipSdf >= 0) // Outside clip rect
         {
-            return float4(0, 0.5, 0, 1);
+            discard;
         }
     }
 
-    return float4(1, 1, 1, 1);
-    return float4(pos.x / pixelResolution.x, pos.y / pixelResolution.y, 0, 1);
+    const float clipLerpFactor = clamp(-clipSdf, 0, 1);
+
+    float4 pixelColor = float4(1, 1, 1, 1);
+
+    if (_DrawList[InstanceIdx].drawType == DRAW_Shape)
+    {
+        const uint shapeIndex = _DrawList[InstanceIdx].shapeOrFontIndex;
+        const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
+
+        float sd = 1;
+
+        switch (shapeItem.shape)
+        {
+            case ShapeType::None:
+                discard;
+            case ShapeType::Rect:
+                sd = SDFRect(sdfPos, quadSize);
+                break;
+            case ShapeType::RoundedRect:
+                break;
+            case ShapeType::Circle:
+                sd = SDFCircle(sdfPos, quadSize);
+                break;
+        }
+
+        pixelColor = lerp(float4(shapeItem.brushColor.rgb, 0), shapeItem.brushColor, -sd);
+    }
+
+    return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);
 }

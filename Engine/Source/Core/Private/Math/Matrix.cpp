@@ -25,7 +25,22 @@ namespace CE
 		});
 	}
 
-    Matrix4x4 Matrix4x4::operator+(const Matrix4x4& rhs) const
+	Matrix4x4 Matrix4x4::Angle(f32 degrees)
+	{
+		return Quat::EulerDegrees(0, 0, degrees).ToMatrix();
+	}
+
+	Matrix4x4 Matrix4x4::RotationDegrees(const Vec3& eulerDegrees)
+	{
+		return Quat::EulerDegrees(eulerDegrees).ToMatrix();
+	}
+
+	Matrix4x4 Matrix4x4::RotationRadians(const Vec3& eulerRadians)
+	{
+		return Quat::EulerRadians(eulerRadians).ToMatrix();
+	}
+
+	Matrix4x4 Matrix4x4::operator+(const Matrix4x4& rhs) const
 	{
 		Matrix4x4 result{};
 		

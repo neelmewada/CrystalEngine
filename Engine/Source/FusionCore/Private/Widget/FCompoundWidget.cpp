@@ -44,6 +44,20 @@ namespace CE
         m_Child->PlaceSubWidgets();
     }
 
+    void FCompoundWidget::OnPaint(FPainter* painter)
+    {
+	    Super::OnPaint(painter);
+
+        if (m_Child)
+        {
+            painter->PushChildCoordinateSpace(localTransform);
+
+            m_Child->OnPaint(painter);
+
+            painter->PopChildCoordinateSpace();
+        }
+    }
+
     bool FCompoundWidget::TryAddChild(FWidget* child)
     {
         if (!child)

@@ -49,12 +49,20 @@ namespace CE
     {
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right, 
             m_MinHeight + m_Padding.top + m_Padding.bottom);
+
+        intrinsicSize.width = Math::Clamp(intrinsicSize.width,
+            m_MinWidth + m_Padding.left + m_Padding.right,
+            m_MaxWidth + m_Padding.left + m_Padding.right);
+
+        intrinsicSize.height = Math::Clamp(intrinsicSize.height,
+            m_MinHeight + m_Padding.top + m_Padding.bottom,
+            m_MaxHeight + m_Padding.top + m_Padding.bottom);
     }
 
     void FWidget::PlaceSubWidgets()
     {
         localTransform = Matrix4x4::Translation(computedPosition + m_Translation) * 
-            Quat::EulerDegrees(0, 0, m_Rotation).ToMatrix() * 
+            Matrix4x4::Angle(m_Rotation) * 
             Matrix4x4::Scale(m_Scale);
     }
 
@@ -63,6 +71,7 @@ namespace CE
         if (TryAddChild(child))
         {
             child->parent = this;
+            child->OnAttachedToParent(this);
             MarkLayoutDirty();
         }
     }
@@ -71,6 +80,7 @@ namespace CE
     {
         if (TryRemoveChild(child))
         {
+            child->OnDetachedFromParent(this);
             child->parent = nullptr;
             MarkLayoutDirty();
         }

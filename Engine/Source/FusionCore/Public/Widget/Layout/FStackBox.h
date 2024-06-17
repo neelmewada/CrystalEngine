@@ -27,6 +27,8 @@ namespace CE
 
         void PlaceSubWidgets() override;
 
+        void OnPaint(FPainter* painter) override;
+
     protected:
 
         void Construct() override;

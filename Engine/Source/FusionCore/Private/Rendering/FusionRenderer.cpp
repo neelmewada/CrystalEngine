@@ -18,10 +18,11 @@ namespace CE
 
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
+		shapeItemsBuffer.Init("ShapeItems_" + GetName().GetString(), initialShapeItemCapacity, numFrames);
 
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perDrawSrgLayout);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perViewSrgLayout);
-
+		
 		for (int i = 0; i < numFrames; ++i)
 		{
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
@@ -37,6 +38,7 @@ namespace CE
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
+			drawItemSrg->Bind(i, "_ShapeDrawList", shapeItemsBuffer.GetBuffer(i));
 		}
 
 		perViewSrg->FlushBindings();
@@ -49,6 +51,7 @@ namespace CE
 
 		drawItemsBuffer.Shutdown();
 		clipItemsBuffer.Shutdown();
+		shapeItemsBuffer.Shutdown();
 
 		for (int i = 0; i < numFrames; i++)
 		{
@@ -70,9 +73,16 @@ namespace CE
 	{
 		ZoneScoped;
 
+		currentBrush = FBrush();
+		currentPen = FPen();
+		itemTransform = Matrix4x4::Identity();
+
 		drawBatches.Clear();
 		drawItemList.RemoveAll();
 		clipItemList.RemoveAll();
+		clipItemStack.RemoveAll();
+		shapeItemList.RemoveAll();
+		coordinateSpaceStack.RemoveAll();
 
 		createNewDrawBatch = true;
 
@@ -80,32 +90,39 @@ namespace CE
 		{
 			resubmitDrawItems[i] = true;
 		}
+
+		PushChildCoordinateSpace(Matrix4x4::Identity());
 	}
 
 	void FusionRenderer::End()
 	{
 		ZoneScoped;
 		
-		if (true) // TODO: Testing
+		if (false) // TODO: Testing
 		{
-			transformOverlay = Quat::EulerDegrees(0, 0, 20).ToMatrix();
-
-			Matrix4x4 clipMatrix = Matrix4x4::Translation(Vec3(50, 0, 0)) * 
-				Quat::EulerDegrees(0, 0, 20).ToMatrix() *
+			PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(0, 0, 0)) *
+				Quat::EulerDegrees(0, 0, 0).ToMatrix() *
+				Matrix4x4::Scale(Vec3(1, 1, 1)));
+			
+			Matrix4x4 clipTransform =
+				Matrix4x4::Translation(Vec3(0, 0, 0)) * 
+				Quat::EulerDegrees(0, 0, 0).ToMatrix() *
 				Matrix4x4::Scale(Vec3(1, 1, 1));
 
-			clipItemList.Insert(FClipItem2D{
-				.transform = clipMatrix.GetInverse(),
-				.cornerRadius = Vec4(10, 20, 30, 40),
-				.size = Vec2(200, 125),
-				.shapeType = FShapeType::RoundedRect
-			});
-			
-			auto& item0 = DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.f, 768 * 0.f), Vec2(1024.0f, 768 * 0.5f));
-			item0.clipIndex = 0;
-			auto& item1 = DrawCustomItem(DRAW_Shape, Vec2(1024 * 0.5f, 768 * 0.5f), Vec2(1024.0f, 768 * 0.5f));
-			item1.clipIndex = 0;
+			PushClipShape(clipTransform, Vec2(500, 200), FRectangle());
+
+			currentBrush = FBrush(Color::Cyan());
+			currentBrush.SetBrushStyle(FBrushStyle::SolidFill);
+			currentBrush.SetBrushTiling(FBrushTiling::None);
+
+			DrawShape(FRectangle(), Vec2(100, 768 * 0.f), Vec2(150, 768 * 0.25f));
+
+			PopClipShape();
+
+			PopChildCoordinateSpace();
 		}
+
+		PopChildCoordinateSpace(); // Pop identity matrix
 
 		const auto& vertBuffers = RPI::RPISystem::Get().GetTextQuad();
 		RHI::DrawLinearArguments drawArgs = RPI::RPISystem::Get().GetTextQuadDrawArgs();
@@ -191,21 +208,83 @@ namespace CE
 
 		FDrawItem2D drawItem{};
 		drawItem.drawType = drawType;
+		drawItem.quadSize = size;
+		drawItem.opacity = opacityStack.IsEmpty() ? 1.0f : opacityStack.Last();
 
+		switch (currentPen.GetStyle())
+		{
+		case FPenStyle::None:
+			break;
+		case FPenStyle::SolidLine:
+			drawItem.penColor = currentPen.GetColor().ToVec4();
+			drawItem.penThickness = currentPen.GetThickness();
+			break;
+		}
+
+		// Translate to quad's center point first -> then apply item transform -> then translate back to top-left point of quad
 		Vec3 translation1 = Vec3(-size.x / 2, -size.y / 2, 0);
 		Vec3 translation2 = Vec3(pos.x + size.x / 2, pos.y + size.y / 2, 0);
 		
-		drawItem.transform = rootTransform *
+		drawItem.transform = coordinateSpaceStack.Last() *
 			Matrix4x4::Translation(translation2) *
-			transformOverlay *
+			itemTransform *
 			Matrix4x4::Translation(translation1) *
 			Matrix4x4::Scale(Vec3(size.x, size.y, 1));
+
+		drawItem.clipIndex = -1;
+		if (!clipItemStack.IsEmpty())
+		{
+			drawItem.clipIndex = clipItemStack.Last();
+		}
 		
 		drawItemList.Insert(drawItem);
 
 		drawBatches.Top().drawItemCount++;
 
 		return drawItemList.Last();
+	}
+
+	FusionRenderer::FDrawItem2D& FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 size)
+	{
+		ZoneScoped;
+
+		FDrawItem2D& drawItem = DrawCustomItem(DRAW_Shape, pos, size);
+
+		FShapeItem2D shapeItem;
+		shapeItem.shape = shape.GetShapeType();
+		shapeItem.cornerRadius = shape.GetCornerRadius();
+
+		switch (currentBrush.GetBrushStyle())
+		{
+		case FBrushStyle::None:
+			break;
+		case FBrushStyle::SolidFill:
+			shapeItem.brushType = BRUSH_Solid;
+			break;
+		case FBrushStyle::TexturePattern:
+			shapeItem.brushType = BRUSH_Texture;
+			break;
+		case FBrushStyle::LinearGradient:
+			shapeItem.brushType = BRUSH_LinearGradient;
+			break;
+		}
+
+		switch (currentPen.GetStyle())
+		{
+		case FPenStyle::None:
+			break;
+		case FPenStyle::SolidLine:
+			shapeItem.penType = PEN_SolidLine;
+			break;
+		}
+
+		shapeItem.brushColor = currentBrush.GetFillColor().ToVec4();
+
+		drawItem.shapeIndex = shapeItemList.GetCount();
+
+		shapeItemList.Insert(shapeItem);
+
+		return drawItem;
 	}
 
 	///////////////////////////////////////////////
@@ -218,6 +297,7 @@ namespace CE
 		curImageIndex = (int)imageIndex;
 
 		drawItemGrowRatio = Math::Clamp01(drawItemGrowRatio);
+		clipItemGrowRatio = Math::Clamp01(clipItemGrowRatio);
 
 		if (viewConstantsUpdateRequired[imageIndex])
 		{
@@ -233,7 +313,7 @@ namespace CE
 				if (drawItemsBuffer.GetElementCount() < drawItemList.GetCount())
 				{
 					u64 totalCount = (u64)((f32)drawItemsBuffer.GetElementCount() * (1.0f + drawItemGrowRatio));
-					drawItemsBuffer.GrowToFit(Math::Max<u64>(drawItemList.GetCount() + 50, totalCount));
+					drawItemsBuffer.GrowToFit(Math::Max<u64>(drawItemList.GetCount() + 64, totalCount));
 				}
 
 				drawItemsBuffer.GetBuffer(imageIndex)->UploadData(drawItemList.GetData(), drawItemList.GetCount() * sizeof(FDrawItem2D));
@@ -248,6 +328,17 @@ namespace CE
 				}
 
 				clipItemsBuffer.GetBuffer(imageIndex)->UploadData(clipItemList.GetData(), clipItemList.GetCount() * sizeof(FClipItem2D));
+			}
+
+			if (shapeItemList.GetCount() > 0)
+			{
+				if (shapeItemsBuffer.GetElementCount() < shapeItemList.GetCount())
+				{
+					u64 totalCount = (u64)((f32)shapeItemsBuffer.GetElementCount() * (1.0f + shapeItemGrowRatio));
+					shapeItemsBuffer.GrowToFit(Math::Max<u64>(shapeItemList.GetCount() + 64, totalCount));
+				}
+
+				shapeItemsBuffer.GetBuffer(imageIndex)->UploadData(shapeItemList.GetData(), shapeItemList.GetCount() * sizeof(FShapeItem2D));
 			}
 
 			resubmitDrawItems[imageIndex] = false;
@@ -266,14 +357,39 @@ namespace CE
 		}
 	}
 
-	void FusionRenderer::SetRootTransform(const Matrix4x4& transform)
+	void FusionRenderer::SetItemTransform(const Matrix4x4& transform)
 	{
-		rootTransform = transform;
+		this->itemTransform = transform;
 	}
 
-	void FusionRenderer::SetTransformOverlay(const Matrix4x4& transform)
+	void FusionRenderer::SetBrush(const FBrush& brush)
 	{
-		this->transformOverlay = transform;
+		currentBrush = brush;
+	}
+
+	void FusionRenderer::SetPen(const FPen& pen)
+	{
+		currentPen = pen;
+	}
+
+	void FusionRenderer::PushOpacity(f32 opacity)
+	{
+		if (opacityStack.IsEmpty())
+		{
+			opacityStack.Insert(opacity);
+		}
+		else
+		{
+			opacityStack.Insert(opacityStack.Last() * opacity);
+		}
+	}
+
+	void FusionRenderer::PopOpacity()
+	{
+		if (!opacityStack.IsEmpty())
+		{
+			opacityStack.RemoveLast();
+		}
 	}
 
 	void FusionRenderer::SetScreenSize(Vec2i screenSize)
@@ -284,6 +400,44 @@ namespace CE
 	void FusionRenderer::SetDrawListTag(RHI::DrawListTag drawListTag)
 	{
 		this->drawListTag = drawListTag;
+	}
+
+	void FusionRenderer::PushChildCoordinateSpace(const Matrix4x4& transform)
+	{
+		if (coordinateSpaceStack.IsEmpty())
+		{
+			coordinateSpaceStack.Insert(transform);
+		}
+		else
+		{
+			coordinateSpaceStack.Insert(coordinateSpaceStack.Last() * transform);
+		}
+	}
+
+	void FusionRenderer::PopChildCoordinateSpace()
+	{
+		if (!coordinateSpaceStack.IsEmpty())
+		{
+			coordinateSpaceStack.RemoveLast();
+		}
+	}
+
+	void FusionRenderer::PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& shape)
+	{
+		// Clipping is done via SDF functions, which require you 
+		clipItemList.Insert(FClipItem2D{
+				.clipTransform = (coordinateSpaceStack.Last() * clipTransform).GetInverse(),
+				.cornerRadius = shape.GetCornerRadius(),
+				.size = rectSize,
+				.shapeType = shape.GetShapeType()
+			});
+
+		clipItemStack.Insert(clipItemList.GetCount() - 1);
+	}
+
+	void FusionRenderer::PopClipShape()
+	{
+		clipItemStack.RemoveLast();
 	}
 
 } // namespace CE

@@ -18,6 +18,8 @@ namespace CE
 
 	FNativeContext* FNativeContext::Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext)
 	{
+		ZoneScoped;
+
 		Object* outer = parentContext;
 		if (outer == nullptr)
 		{
@@ -40,6 +42,8 @@ namespace CE
 
 	void FNativeContext::Init()
 	{
+		ZoneScoped;
+
 		attachmentId = String::Format("Window_{}", platformWindow->GetWindowId());
 
 		drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(attachmentId);
@@ -60,11 +64,14 @@ namespace CE
 		FusionRendererInitInfo rendererInfo;
 		rendererInfo.fusionShader = FusionApplication::Get()->GetFusionShader();
 		rendererInfo.multisampling.sampleCount = 1;
-
+		
 		renderer->SetScreenSize(Vec2i(desc.preferredWidth, desc.preferredHeight));
 		renderer->SetDrawListTag(drawListTag);
 
 		renderer->Init(rendererInfo);
+
+		painter = CreateObject<FPainter>(this, "FusionPainter");
+		painter->renderer = renderer;
 
 		FusionApplication::Get()->nativeWindows.Add(this);
 	}
@@ -142,9 +149,10 @@ namespace CE
 
 	void FNativeContext::UpdateViewConstants()
 	{
+		ZoneScoped;
+
 		u32 screenWidth = 0; u32 screenHeight = 0;
 		platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-		f32 aspectRatio = (f32)screenWidth / (f32)screenHeight;
 		
 		viewConstants.viewMatrix = Matrix4x4::Identity();
 
@@ -168,10 +176,32 @@ namespace CE
 
 		Super::Tick();
 
-		// TODO: Rendering
+		
+	}
+
+	void FNativeContext::DoLayout()
+	{
+		ZoneScoped;
+
+		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
+
+		Super::DoLayout();
+	}
+
+	void FNativeContext::DoPaint()
+	{
+		ZoneScoped;
+
+		Super::DoPaint();
+
 		if (renderer && dirty)
 		{
 			renderer->Begin();
+
+			if (painter && owningWidget)
+			{
+				owningWidget->OnPaint(painter);
+			}
 
 			renderer->End();
 
@@ -181,6 +211,8 @@ namespace CE
 
 	void FNativeContext::EmplaceFrameAttachments()
 	{
+		ZoneScoped;
+
 		Super::EmplaceFrameAttachments();
 
 		FrameScheduler* scheduler = FrameScheduler::Get();
@@ -192,6 +224,8 @@ namespace CE
 
 	void FNativeContext::EnqueueScopes()
 	{
+		ZoneScoped;
+
 		Super::EnqueueScopes();
 
 		FrameScheduler* scheduler = FrameScheduler::Get();
@@ -236,6 +270,8 @@ namespace CE
 
 	void FNativeContext::EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
 	{
+		ZoneScoped;
+
 		Super::EnqueueDrawPackets(drawList, imageIndex);
 
 		const auto& drawPackets = renderer->FlushDrawPackets(imageIndex);
@@ -248,6 +284,8 @@ namespace CE
 
 	void FNativeContext::SetDrawPackets(RHI::DrawListContext& drawList)
 	{
+		ZoneScoped;
+
 		Super::SetDrawPackets(drawList);
 
 		auto scheduler = FrameScheduler::Get();

@@ -24,6 +24,8 @@ namespace CE
 
         virtual void DoLayout();
 
+        virtual void DoPaint();
+
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
 
         void SetOwningWidget(FWidget* widget);

@@ -7,6 +7,7 @@ namespace CE
 	class FWidget;
 	class FusionRenderer;
 	class FFusionContext;
+	class FPainter;
 
 	//! @brief Represents a native platform window.
 	CLASS()
@@ -24,6 +25,10 @@ namespace CE
 		PlatformWindow* GetPlatformWindow() const { return platformWindow; }
 
 		void Tick() override;
+
+		void DoLayout() override;
+
+		void DoPaint() override;
 
 		void EmplaceFrameAttachments() override;
 
@@ -53,6 +58,7 @@ namespace CE
 		Name attachmentId;
 
 		FusionRenderer* renderer = nullptr;
+		FPainter* painter = nullptr;
 
 		FUSION_FRIENDS;
 	};

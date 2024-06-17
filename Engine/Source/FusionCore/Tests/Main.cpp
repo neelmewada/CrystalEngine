@@ -212,22 +212,25 @@ TEST(FusionCore, Layout)
 		TerminalWidget* child0 = (TerminalWidget*)hStack2->GetChild(0);
 		EXPECT_EQ(child0->GetComputedPosition(), Vec2(0, 10));
 
-		constexpr f32 fixedWidthPart = 10;
+		constexpr f32 fixedWidthPart = 30; // 10
 		constexpr f32 totalMargins = 5 + 5;
 		f32 remainingSize = stackSize.width - fixedWidthPart - totalMargins;
 
 		TerminalWidget* child1 = (TerminalWidget*)hStack2->GetChild(1);
-		EXPECT_EQ(child1->GetComputedPosition(), Vec2(15, 0));
-		EXPECT_EQ(child1->GetComputedSize(), Vec2(remainingSize * 0.25f, 30));
+		EXPECT_EQ(child1->GetComputedPosition().x, child0->GetComputedPosition().x + child0->GetComputedSize().x + child0->GetMargin().right);
+		EXPECT_EQ(child1->GetComputedPosition().y, 0);
+		EXPECT_EQ(child1->GetComputedSize(), Vec2(10 + remainingSize * 0.25f, 30));
 
 		TerminalWidget* child2 = (TerminalWidget*)hStack2->GetChild(2);
-		EXPECT_EQ(child2->GetComputedPosition(), Vec2(fixedWidthPart + totalMargins + remainingSize * 0.25f, 10));
-		EXPECT_EQ(child2->GetComputedSize(), Vec2(remainingSize * 0.75f, 10));
+		EXPECT_EQ(child2->GetComputedPosition().x, child1->GetComputedPosition().x + child1->GetComputedSize().x + child1->GetMargin().right);
+		EXPECT_EQ(child2->GetComputedSize(), Vec2(10 + remainingSize * 0.75f, 10));
 	}
 
 	// HStack3
 
 	{
+		auto hStack1 = rootWidget->hStack1;
+		auto hStack2 = rootWidget->hStack2;
 		auto hStack3 = rootWidget->hStack3;
 		Vec2 stackSize = hStack3->GetComputedSize();
 
@@ -271,6 +274,8 @@ TEST(FusionCore, Rendering)
 			primaryBtn->background = Color::RGBA(56, 56, 56);
 			primaryBtn->hoveredBackground = Color::RGBA(95, 95, 95);
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
+			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
+			primaryBtn->borderWidth = 1.0f;
 		}
 	}
 

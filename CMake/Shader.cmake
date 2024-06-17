@@ -29,8 +29,6 @@ function(ce_add_shaders NAME)
                 COMMAND ${CMAKE_COMMAND} -E tar "cfv" "${dest_shaderbin_file}" --format=zip "${dest_shaderbin_file_parent}/${hlsl_file_name}.vert.spv" "${dest_shaderbin_file_parent}/${hlsl_file_name}.frag.spv"
             )
 
-            message("OUT FILE: ${dest_shaderbin_file}")
-
             # add_custom_target(create_zip COMMAND
             #     ${CMAKE_COMMAND} -E tar "cfv" "archive.zip" --format=zip
             #     "${CMAKE_CURRENT_SOURCE_DIR}/testfile.txt"

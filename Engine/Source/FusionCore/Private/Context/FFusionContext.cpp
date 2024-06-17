@@ -28,6 +28,8 @@ namespace CE
 		{
 			childContext->Tick();
 		}
+
+		DoPaint();
 	}
 
 	void FFusionContext::DoLayout()
@@ -46,6 +48,11 @@ namespace CE
 			layoutDirty = false;
 			dirty = true;
 		}
+	}
+
+	void FFusionContext::DoPaint()
+	{
+
 	}
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)
