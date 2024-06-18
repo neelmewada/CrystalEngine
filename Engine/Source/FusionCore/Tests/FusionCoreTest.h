@@ -61,6 +61,7 @@ namespace RenderingTests
 		void Construct() override;
 
 		FStackBox* rootBox;
+		FButton* button;
 
 		FUSION_WIDGET;
 	};

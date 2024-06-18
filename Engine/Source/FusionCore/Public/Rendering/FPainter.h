@@ -23,6 +23,7 @@ namespace CE
         void SetItemTransform(const Matrix4x4& transform);
 
         void PushChildCoordinateSpace(const Matrix4x4& coordinateTransform);
+        const Matrix4x4& GetTopCoordinateSpace();
         void PopChildCoordinateSpace();
 
         void PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& clipShape = FRectangle());

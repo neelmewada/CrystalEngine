@@ -176,7 +176,166 @@ namespace CE
 
 		Super::Tick();
 
-		
+		if (!owningWidget)
+		{
+			return;
+		}
+
+		// - Event Handling -
+
+		Vec2 mousePos = (InputManager::GetGlobalMousePosition() - platformWindow->GetWindowPosition()).ToVec2();
+		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
+		Vec2 mouseWheelDelta = InputManager::GetMouseWheelDelta();
+		if (prevMousePos == Vec2())
+			prevMousePos = mousePos;
+
+		Rect windowRect = Rect::FromSize(Vec2(), platformWindow->GetDrawableWindowSize().ToVec2());
+
+		MouseButtonMask curButtonMask = MouseButtonMask::None;
+		if (InputManager::IsMouseButtonHeld(MouseButton::Left))
+		{
+			curButtonMask |= MouseButtonMask::Left;
+		}
+		if (InputManager::IsMouseButtonHeld(MouseButton::Right))
+		{
+			curButtonMask |= MouseButtonMask::Right;
+		}
+		if (InputManager::IsMouseButtonHeld(MouseButton::Middle))
+		{
+			curButtonMask |= MouseButtonMask::Middle;
+		}
+		if (InputManager::IsMouseButtonHeld(MouseButton::Button4))
+		{
+			curButtonMask |= MouseButtonMask::Button4;
+		}
+		if (InputManager::IsMouseButtonHeld(MouseButton::Button5))
+		{
+			curButtonMask |= MouseButtonMask::Button5;
+		}
+
+		FWidget* hoveredWidget = nullptr;
+
+		if (windowRect.Contains(mousePos))
+		{
+			hoveredWidget = owningWidget->HitTest(mousePos);
+		}
+
+		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
+			(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
+		{
+			FMouseEvent event{};
+			event.type = FEventType::MouseLeave;
+			event.mousePosition = mousePos;
+			event.prevMousePosition = prevMousePos;
+			event.mouseButtons = curButtonMask;
+			event.direction = FEventDirection::BottomToTop;
+			event.isInside = true;
+
+			while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
+			{
+				event.sender = hoveredWidgetStack.Top();
+				event.Reset();
+
+				//if (hoveredWidgetStack.Top()->receiveMouseEvents)
+				{
+					hoveredWidgetStack.Top()->HandleEvent(&event);
+				}
+				hoveredWidgetStack.Pop();
+			}
+		}
+
+		if (hoveredWidget != nullptr && 
+			(hoveredWidgetStack.IsEmpty() || hoveredWidgetStack.Top() != hoveredWidget) &&
+			(hoveredWidgetStack.IsEmpty() || !hoveredWidget->ChildExistsRecursive(hoveredWidgetStack.Top())))
+		{
+			FMouseEvent event{};
+			event.type = FEventType::MouseEnter;
+			event.mousePosition = mousePos;
+			event.prevMousePosition = prevMousePos;
+			event.mouseButtons = curButtonMask;
+			event.direction = FEventDirection::BottomToTop;
+			event.isInside = true;
+
+			int idx = hoveredWidgetStack.GetSize();
+			FWidget* basePrevWidget = nullptr;
+			if (hoveredWidgetStack.NonEmpty())
+				basePrevWidget = hoveredWidgetStack.Top();
+
+			auto widget = hoveredWidget;
+
+			while ((hoveredWidgetStack.IsEmpty() || widget != basePrevWidget) && widget != nullptr)
+			{
+				hoveredWidgetStack.InsertAt(idx, widget);
+				widget = widget->parent;
+			}
+
+			for (int i = idx; i < hoveredWidgetStack.GetSize(); ++i)
+			{
+				event.sender = hoveredWidgetStack[i];
+				event.Reset();
+
+				event.sender->HandleEvent(&event);
+			}
+		}
+
+		// - Mouse Click Events -
+
+		Enum* mouseButtonEnum = GetStaticEnum<MouseButton>();
+		for (int i = 0; i < mouseButtonEnum->GetConstantsCount(); ++i)
+		{
+			MouseButton mouseButton = (MouseButton)mouseButtonEnum->GetConstant(i)->GetValue();
+			if (InputManager::IsMouseButtonDown(mouseButton))
+			{
+				FMouseEvent event{};
+				event.type = FEventType::MousePress;
+				event.mousePosition = mousePos;
+				event.prevMousePosition = prevMousePos;
+				event.mouseButtons = (MouseButtonMask)BIT((int)mouseButton);
+				event.direction = FEventDirection::BottomToTop;
+
+				if (hoveredWidgetStack.NonEmpty())
+				{
+					event.sender = hoveredWidgetStack.Top();
+
+					event.sender->HandleEvent(&event);
+				}
+			}
+
+			if (InputManager::IsMouseButtonUp(mouseButton))
+			{
+				FMouseEvent event{};
+				event.type = FEventType::MouseRelease;
+				event.mousePosition = mousePos;
+				event.prevMousePosition = prevMousePos;
+				event.mouseButtons = (MouseButtonMask)BIT((int)mouseButton);
+				event.direction = FEventDirection::BottomToTop;
+
+				if (hoveredWidgetStack.NonEmpty())
+				{
+					event.sender = hoveredWidgetStack.Top();
+					event.sender->HandleEvent(&event);
+				}
+
+				if (widgetsPressedPerMouseButton[i] != nullptr && widgetsPressedPerMouseButton[i] != event.sender)
+				{
+					event.Reset();
+					event.isInside = false;
+					widgetsPressedPerMouseButton[i]->HandleEvent(&event);
+				}
+
+				widgetsPressedPerMouseButton[i] = nullptr;
+			}
+		}
+
+		if (hoveredWidget != prevHoveredWidget)
+		{
+			/*if (hoveredWidget != nullptr)
+				CE_LOG(Info, All, "Hover Changed: {}", hoveredWidget->GetName());
+			else
+				CE_LOG(Info, All, "Hover Changed: NULL");*/
+
+			prevHoveredWidget = hoveredWidget;
+		}
 	}
 
 	void FNativeContext::DoLayout()
@@ -291,6 +450,19 @@ namespace CE
 		auto scheduler = FrameScheduler::Get();
 
 		scheduler->SetScopeDrawList(attachmentId, &drawList.GetDrawListForTag(drawListTag));
+	}
+
+	void FNativeContext::OnWidgetDestroyed(FWidget* widget)
+	{
+		Super::OnWidgetDestroyed(widget);
+
+		for (int i = 0; i < widgetsPressedPerMouseButton.GetSize(); i++)
+		{
+			if (widgetsPressedPerMouseButton[i] == widget)
+			{
+				widgetsPressedPerMouseButton[i] = nullptr;
+			}
+		}
 	}
 
 } // namespace CE

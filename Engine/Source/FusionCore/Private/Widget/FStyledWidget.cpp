@@ -23,7 +23,15 @@ namespace CE
             painter->PushClipShape(localTransform, computedSize, m_ClipShape);
         }
 
-	    if (m_BackgroundShape.GetShapeType() != FShapeType::None)
+        bool transformChanged = false;
+
+        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 1)
+        {
+            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(m_Scale));
+            transformChanged = true;
+        }
+
+	    if (m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None)
 	    {
             painter->SetBrush(m_Background);
             if (m_BorderWidth > 0 && m_BorderColor.a > 0)
@@ -45,6 +53,11 @@ namespace CE
             }
 	    }
 
+        if (transformChanged)
+        {
+	        painter->SetItemTransform(Matrix4x4::Identity());
+        }
+
         // Paint children
 	    Super::OnPaint(painter);
 
@@ -59,32 +72,18 @@ namespace CE
         }
     }
 
-    FStyledWidget::Self& FStyledWidget::Style(FStyle* style)
+    void FStyledWidget::SetContextRecursively(FFusionContext* context)
     {
-        if (style && IsOfType(style->GetWidgetClass()))
-        {
-            m_Style = style;
-            m_Style->MakeStyle(*this);
-            MarkDirty();
-        }
-        return *this;
+	    Super::SetContextRecursively(context);
+
+        ApplyStyle();
     }
 
-    FStyledWidget::Self& FStyledWidget::Style(const CE::Name& styleKey)
+    void FStyledWidget::OnAttachedToParent(FWidget* parent)
     {
-        if (!styleKey.IsValid())
-            return *this;
+	    Super::OnAttachedToParent(parent);
 
-        FFusionContext* context = GetContext();
-        if (!context)
-            return *this;
-
-        FStyleManager* styleManager = context->GetStyleManager();
-        if (!styleManager)
-            return *this;
-
-        FStyle* style = styleManager->FindStyle(styleKey);
-        return Style(style);
+        ApplyStyle();
     }
 
 }

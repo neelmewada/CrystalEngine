@@ -311,6 +311,9 @@ TEST(FusionCore, Rendering)
 		previousTime = curTime;
 	}
 
+	Vec2 localPos = mainWidget->button->GetComputedPosition();
+	Vec2 globalPos = mainWidget->button->GetGlobalPosition();
+
 	PlatformApplication::Get()->RemoveTickHandler(handle);
 
 	TEST_END_GUI;

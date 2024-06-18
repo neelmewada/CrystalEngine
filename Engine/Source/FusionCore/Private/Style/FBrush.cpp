@@ -52,6 +52,23 @@ namespace CE
 		return *this;
 	}
 
+	bool FBrush::IsValidBrush()
+	{
+		switch (brushStyle)
+		{
+		case FBrushStyle::None:
+			return false;
+		case FBrushStyle::SolidFill:
+			return fillColor.a > 0;
+		case FBrushStyle::TexturePattern:
+			return tintColor.a > 0 && texturePath.IsValid();
+		case FBrushStyle::LinearGradient:
+			break;
+		}
+
+		return true;
+	}
+
 	bool FBrush::operator==(const FBrush& rhs) const
 	{
 		if (brushStyle != rhs.brushStyle)

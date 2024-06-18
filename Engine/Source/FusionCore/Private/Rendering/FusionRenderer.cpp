@@ -414,6 +414,17 @@ namespace CE
 		}
 	}
 
+	const Matrix4x4& FusionRenderer::GetTopCoordinateSpace()
+	{
+		if (coordinateSpaceStack.IsEmpty())
+		{
+			static Matrix4x4 identity = Matrix4x4::Identity();
+			return identity;
+		}
+
+		return coordinateSpaceStack.Last();
+	}
+
 	void FusionRenderer::PopChildCoordinateSpace()
 	{
 		if (!coordinateSpaceStack.IsEmpty())

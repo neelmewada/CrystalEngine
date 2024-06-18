@@ -17,6 +17,14 @@ namespace CE
 
         void OnPaint(FPainter* painter) override;
 
+        void SetContextRecursively(FFusionContext* context) override;
+
+        FWidget* HitTest(Vec2 localMousePos) override;
+
+        bool ChildExistsRecursive(FWidget* child) override;
+
+        void HandleEvent(FEvent* event) override;
+
     protected:
 
         // Never call this function directly! Use AddChild() instead

@@ -181,6 +181,19 @@ float SDFRect(in float2 p, in float2 shapeSize)
     return outsideDistance + insideDistance;
 }
 
+// Credit: https://iquilezles.org/articles/distfunctions2d/
+// r.x = roundness bottom-right  
+// r.y = roundness top-right
+// r.z = roundness bottom-left
+// r.w = roundness top-left
+float SDFRoundedRect(in float2 p, in float2 shapeSize, in float4 r)
+{
+    r.xy = (p.x > 0.0) ? r.xy : r.zw;
+    r.x = (p.y > 0.0) ? r.x : r.y;
+    float2 q = abs(p) - shapeSize * 0.5 + r.x;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
+}
+
 float4 FragMain(PSInput input) : SV_TARGET
 {
     const float2 uv = input.uv;
@@ -189,6 +202,8 @@ float4 FragMain(PSInput input) : SV_TARGET
     const float2 pos = input.globalPos.xy;
     const float2 clipPos = input.clipPos.xy;
     const int clipIndex = _DrawList[InstanceIdx].clipIndex;
+    const float4 penColor = _DrawList[InstanceIdx].penColor;
+    const float penThickness = _DrawList[InstanceIdx].penThickness;
 
     float clipSdf = -1;
 
@@ -227,6 +242,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     {
         const uint shapeIndex = _DrawList[InstanceIdx].shapeOrFontIndex;
         const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
+        const float4 r = shapeItem.cornerRadius;
 
         float sd = 1;
 
@@ -238,13 +254,35 @@ float4 FragMain(PSInput input) : SV_TARGET
                 sd = SDFRect(sdfPos, quadSize);
                 break;
             case ShapeType::RoundedRect:
+                sd = SDFRoundedRect(sdfPos, quadSize, float4(r.z, r.y, r.w, r.x));
                 break;
             case ShapeType::Circle:
                 sd = SDFCircle(sdfPos, quadSize);
                 break;
         }
 
-        pixelColor = lerp(float4(shapeItem.brushColor.rgb, 0), shapeItem.brushColor, -sd);
+        float4 fillColor = float4(0, 0, 0, 0);
+
+        switch (shapeItem.brushType)
+        {
+        case BRUSH_None:
+	        break;
+        case BRUSH_Solid:
+            fillColor = shapeItem.brushColor;
+	        break;
+        case BRUSH_Texture:
+	        break;
+        case BRUSH_LinearGradient:
+	        break;
+        }
+
+        if (penThickness > 0 && penColor.a > 0)
+        {
+	        
+        }
+
+        // Lerp fillColor with SDF for anti-aliased edges
+        pixelColor = lerp(float4(fillColor.rgb, 0), fillColor, -sd);
     }
 
     return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);

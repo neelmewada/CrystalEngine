@@ -3,7 +3,7 @@
 namespace CE
 {
     class FWidget;
-
+    class FStyledWidget;
 
     CLASS(Abstract)
     class FUSIONCORE_API FStyle : public Object

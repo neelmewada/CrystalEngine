@@ -58,7 +58,8 @@ namespace CE
 	void FFusionContext::SetOwningWidget(FWidget* widget)
 	{
 		this->owningWidget = widget;
-		this->owningWidget->context = this;
+
+		this->owningWidget->SetContextRecursively(this);
 	}
 
 	void FFusionContext::OnWidgetDestroyed(FWidget* widget)

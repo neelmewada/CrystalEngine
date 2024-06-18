@@ -58,6 +58,55 @@ namespace CE
         }
     }
 
+    void FCompoundWidget::SetContextRecursively(FFusionContext* context)
+    {
+	    Super::SetContextRecursively(context);
+
+        if (m_Child)
+        {
+            m_Child->SetContextRecursively(context);
+        }
+    }
+
+    FWidget* FCompoundWidget::HitTest(Vec2 localMousePos)
+    {
+	    FWidget* thisHitTest = Super::HitTest(localMousePos);
+        if (!thisHitTest)
+            return nullptr;
+        if (!m_Child)
+            return thisHitTest;
+
+        Vec2 transformedMousePos = (Matrix4x4::Translation(-computedPosition - m_Translation) *
+            Matrix4x4::Angle(m_Angle) *
+            Matrix4x4::Scale(m_Scale)) * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+
+        FWidget* result = m_Child->HitTest(transformedMousePos);
+        if (result)
+            return result;
+        return thisHitTest;
+    }
+
+    bool FCompoundWidget::ChildExistsRecursive(FWidget* child)
+    {
+	    if (this == child)
+            return true;
+
+        return m_Child != nullptr && m_Child->ChildExistsRecursive(child);
+    }
+
+    void FCompoundWidget::HandleEvent(FEvent* event)
+    {
+        if (event->stopPropagation)
+            return;
+
+        if (m_Child && event->direction == FEventDirection::TopToBottom)
+        {
+            m_Child->HandleEvent(event);
+        }
+
+	    Super::HandleEvent(event);
+    }
+
     bool FCompoundWidget::TryAddChild(FWidget* child)
     {
         if (!child)

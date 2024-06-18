@@ -38,6 +38,11 @@ namespace CE
 		renderer->PushChildCoordinateSpace(coordinateTransform);
 	}
 
+	const Matrix4x4& FPainter::GetTopCoordinateSpace()
+	{
+		return renderer->GetTopCoordinateSpace();
+	}
+
 	void FPainter::PopChildCoordinateSpace()
 	{
 		renderer->PopChildCoordinateSpace();

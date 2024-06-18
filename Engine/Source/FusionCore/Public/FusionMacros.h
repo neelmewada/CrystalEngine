@@ -18,11 +18,7 @@
 		OnFusionPropertyModified(nameValue);\
 		return *this;\
 	}\
-	const auto& Get##PropertyName() const { return this->m_##PropertyName; }\
-	void Set##PropertyName(const decltype(m_##PropertyName)& value) { \
-		if (this->m_##PropertyName == value) return;\
-		this->m_##PropertyName = value; static const CE::Name nameValue = #PropertyName; MarkLayoutDirty(); OnFusionPropertyModified(nameValue);\
-	}
+	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_PROPERTY(PropertyName)\
 	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
@@ -33,11 +29,7 @@
 		OnFusionPropertyModified(nameValue);\
 		return *this;\
 	}\
-	const auto& Get##PropertyName() const { return this->m_##PropertyName; }\
-	void Set##PropertyName(const decltype(m_##PropertyName)& value) { \
-		if (this->m_##PropertyName == value) return;\
-		this->m_##PropertyName = value; static const CE::Name nameValue = #PropertyName; MarkDirty(); OnFusionPropertyModified(nameValue);\
-	}
+	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_WIDGET\
 	public:\

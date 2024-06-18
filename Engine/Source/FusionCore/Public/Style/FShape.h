@@ -45,7 +45,10 @@ namespace CE
 
     inline FShape FRectangle() { return FShape::Rect(); }
     inline FShape FCircle() { return FShape::Circle(); }
-    inline FShape FRoundedRectangle(f32 left, f32 top, f32 right, f32 bottom) { return FShape::RoundedRect(Vec4(left, top, right, bottom)); }
+    inline FShape FRoundedRectangle(f32 topLeft, f32 topRight, f32 bottomRight, f32 bottomLeft)
+    {
+	    return FShape::RoundedRect(Vec4(topLeft, topRight, bottomRight, bottomLeft));
+    }
     inline FShape FRoundedRectangle(f32 cornerRadius) { return FShape::RoundedRect(Vec4(1, 1, 1, 1) * cornerRadius); }
     inline FShape FRoundedRectangle(const Vec4& cornerRadius) { return FShape::RoundedRect(cornerRadius); }
     

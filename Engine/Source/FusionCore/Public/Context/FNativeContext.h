@@ -40,6 +40,8 @@ namespace CE
 
 		void SetDrawPackets(RHI::DrawListContext& drawList) override;
 
+		void OnWidgetDestroyed(FWidget* widget) override;
+
 	protected:
 
 		void Init();
@@ -59,6 +61,12 @@ namespace CE
 
 		FusionRenderer* renderer = nullptr;
 		FPainter* painter = nullptr;
+
+		FWidget* prevHoveredWidget = nullptr;
+		StaticArray<FWidget*, 6> widgetsPressedPerMouseButton{};
+
+		// Previous mouse position in window space
+		Vec2 prevMousePos = Vec2();
 
 		FUSION_FRIENDS;
 	};

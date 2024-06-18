@@ -11,6 +11,7 @@
 #include "Containers/HashMap.h"
 #include "Containers/HashSet.h"
 #include "Containers/Queue.h"
+#include "Containers/StableDynamicArray.h"
 
 #include "Types/Name.h"
 #include "Types/DateTime.h"

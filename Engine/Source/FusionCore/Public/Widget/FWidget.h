@@ -21,10 +21,14 @@ namespace CE
 
         virtual void PlaceSubWidgets();
 
+        void UpdateLocalTransform();
+
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
 
         void AddChild(FWidget* child);
         void RemoveChild(FWidget* child);
+
+        void ApplyStyle();
 
         template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
         Self& operator()(const TArgs&... childWidget)
@@ -45,12 +49,16 @@ namespace CE
             return *this;
         }
 
+        virtual void SetContextRecursively(FFusionContext* context);
+
         Vec2 GetIntrinsicSize() const { return intrinsicSize; }
 
         void MarkLayoutDirty();
 
         //! @brief Mark the widget dirty for re-rendering
         void MarkDirty();
+
+        Vec2 GetGlobalPosition() const;
 
         Vec2 GetComputedPosition() const { return computedPosition; }
 
@@ -60,18 +68,25 @@ namespace CE
 
         void SetComputedSize(Vec2 size) { computedSize = size; }
 
-        virtual void OnPaint(FPainter* painter) {}
+        virtual void OnPaint(FPainter* painter);
+
+        virtual void HandleEvent(FEvent* event);
+
+        virtual FWidget* HitTest(Vec2 localMousePos);
+
+        virtual bool ChildExistsRecursive(FWidget* child) { return this == child; }
+
 
     protected:
 
-        virtual void OnAttachedToParent(FWidget* parent) {}
-        virtual void OnDetachedFromParent(FWidget* parent) {}
+        virtual void OnAttachedToParent(FWidget* parent);
+        virtual void OnDetachedFromParent(FWidget* parent);
 
         virtual bool TryAddChild(FWidget* child) { return false; }
 
         virtual bool TryRemoveChild(FWidget* child) { return false; }
 
-        virtual void OnFusionPropertyModified(const Name& propertyName) {}
+        virtual void OnFusionPropertyModified(const Name& propertyName);
 
         void OnAfterConstruct() override;
 
@@ -88,6 +103,11 @@ namespace CE
 
         //! @brief Transformation matrix in parent widget's coordinate space.
         Matrix4x4 localTransform;
+
+        Matrix4x4 globalTransform;
+
+        FIELD()
+        CE::Name styleKey;
 
     private:  // - Fields -
 
@@ -107,6 +127,9 @@ namespace CE
 
         FIELD()
         Vec4 m_Margin = Vec4();
+
+        FIELD()
+        FStyle* m_Style = nullptr;
 
         FIELD()
         VAlign m_VAlign = VAlign::Auto;
@@ -135,9 +158,9 @@ namespace CE
         FIELD()
         Vec2 m_Scale = Vec2(1, 1);
 
-        //! @brief Rotation in Degrees
+        //! @brief Rotation angle in Degrees
         FIELD()
-        f32 m_Rotation = 0;
+        f32 m_Angle = 0;
 
     public:  // - Fusion Properties -
 
@@ -156,8 +179,12 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(FillRatio);
 
         FUSION_PROPERTY(Translation);
-        FUSION_PROPERTY(Rotation);
+        FUSION_PROPERTY(Angle);
         FUSION_PROPERTY(Scale);
+
+        Self& Style(FStyle* style);
+
+        Self& Style(const CE::Name& styleKey);
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& As()

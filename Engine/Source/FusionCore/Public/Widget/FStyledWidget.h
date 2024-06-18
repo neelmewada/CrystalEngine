@@ -13,20 +13,24 @@ namespace CE
         // - Public API -
 
 
+
         // - Events -
 
         void OnPaint(FPainter* painter) override;
 
-    protected: // - Fusion Fields -
+    protected:
 
-        FIELD()
-        FStyle* m_Style = nullptr;
+        void SetContextRecursively(FFusionContext* context) override;
+
+        void OnAttachedToParent(FWidget* parent) override;
+
+    protected: // - Fusion Fields -
 
         FIELD()
         FBrush m_Background;
 
         FIELD()
-        FShape m_BackgroundShape;
+        FShape m_BackgroundShape = FRectangle();
 
         FIELD()
         FShape m_ClipShape;
@@ -61,10 +65,6 @@ namespace CE
         FUSION_PROPERTY(BorderWidth);
 
         FUSION_PROPERTY(Opacity);
-
-        Self& Style(FStyle* style);
-
-        Self& Style(const CE::Name& styleKey);
 
         FUSION_FRIENDS;
         FUSION_WIDGET;

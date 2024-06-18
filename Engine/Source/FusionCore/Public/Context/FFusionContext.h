@@ -32,7 +32,7 @@ namespace CE
 
         FWidget* GetOwningWidget() const { return owningWidget; }
 
-        void OnWidgetDestroyed(FWidget* widget);
+        virtual void OnWidgetDestroyed(FWidget* widget);
 
         Vec2 GetAvailableSize() const { return availableSize; }
 
@@ -100,6 +100,10 @@ namespace CE
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
         Matrix4x4 rootTransform{};
+
+        using FWidgetStack = StableDynamicArray<FWidget*, 128, false>;
+
+        Array<FWidget*> hoveredWidgetStack;
 
         FUSION_FRIENDS;
     };

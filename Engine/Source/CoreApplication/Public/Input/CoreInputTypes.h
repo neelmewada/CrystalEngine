@@ -171,6 +171,18 @@ namespace CE
         Button5 = 5
     };
     ENUM_CLASS(MouseButton);
+
+    ENUM(Flags)
+    enum class MouseButtonMask
+    {
+	    None = 0,
+        Left = BIT((int)MouseButton::Left),
+        Middle = BIT((int)MouseButton::Middle),
+        Right = BIT((int)MouseButton::Right),
+        Button4 = BIT((int)MouseButton::Button4),
+        Button5 = BIT((int)MouseButton::Button5)
+    };
+    ENUM_CLASS_FLAGS(MouseButtonMask);
     
 } // namespace CE
 

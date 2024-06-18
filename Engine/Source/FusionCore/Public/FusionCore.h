@@ -42,6 +42,8 @@ namespace CE
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
 
+#include "Event/FEvent.h"
+
 #include "Style/FShape.h"
 #include "Style/FPen.h"
 #include "Style/FBrush.h"

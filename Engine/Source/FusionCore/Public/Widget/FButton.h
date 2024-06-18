@@ -24,6 +24,8 @@ namespace CE
         bool IsHovered() const { return EnumHasFlag(buttonState, FButtonState::Hovered); }
         bool IsPressed() const { return EnumHasFlag(buttonState, FButtonState::Pressed); }
 
+        void HandleEvent(FEvent* event) override;
+
     protected: // - Internal Methods -
 
         void SetState(FButtonState newState);

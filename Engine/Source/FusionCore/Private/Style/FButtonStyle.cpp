@@ -31,12 +31,11 @@ namespace CE
 
         button
             .Background(FBrush(bgColor))
-			.BackgroundShape(FRectangle())
+			.BackgroundShape(FRoundedRectangle(cornerRadius))
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
-			//.CornerRadius(cornerRadius)
 			.Opacity(1.0f)
-            //.Padding(buttonPadding)
+            .Padding(buttonPadding)
             ;
         
         if (button.GetChild() == nullptr)

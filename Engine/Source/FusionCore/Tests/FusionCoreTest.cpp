@@ -109,27 +109,34 @@ namespace RenderingTests
     {
 
         Child(
-            FAssignNew(FVerticalStack, rootBox)
-            .ContentHAlign(HAlign::Fill)
-            .Padding(Vec4(5, 5, 5, 5))
-            .Name("RootBox")
+            FNew(FStyledWidget)
+            .Background(FBrush(Color::RGBA(36, 36, 36)))
+            .Name("RootStyle")
             (
-                FNew(FHorizontalStack)
-                .ContentVAlign(VAlign::Fill)
-                .Padding(Vec4(5, 2.5f, 5, 2.5f))
-                .Name("HStack1")
+                FAssignNew(FVerticalStack, rootBox)
+                .ContentHAlign(HAlign::Fill)
+                .Padding(Vec4(10, 10, 10, 10))
+                .Name("RootBox")
                 (
-                    FNew(FStyledWidget)
-                    .Background(FBrush(Color::Green()))
-                    .BackgroundShape(FRectangle())
-                    .FillRatio(1.0f)
-                    .MinWidth(60)
-                    .MinHeight(30)
-                ),
+                    FNew(FHorizontalStack)
+                    .ContentVAlign(VAlign::Fill)
+                    .Name("HStack1")
+                    (
+                        FNew(FStyledWidget)
+                        .Background(FBrush(Color::Green()))
+                        .BackgroundShape(FRectangle())
+                        .FillRatio(1.0f)
+                        .MinWidth(60)
+                        .MinHeight(30)
+                        .Name("GreenWidget")
+                    )
+                    .Margin(Vec4(0, 0, 0, 0)),
 
-                FNew(FButton)
-                .Style("Button.Primary")
-                .MinHeight(30)
+                    FAssignNew(FButton, button)
+                    .Style("Button.Primary")
+                    .MinHeight(30)
+                    .Name("Button")
+                )
             )
         );
     }

@@ -14,6 +14,14 @@ namespace CE
 
         FWidget* GetChild(u32 index) const { return children[index]; }
 
+        void SetContextRecursively(FFusionContext* context) override;
+
+        FWidget* HitTest(Vec2 localMousePos) override;
+
+        bool ChildExistsRecursive(FWidget* child) override;
+
+        void HandleEvent(FEvent* event) override;
+
     protected:
 
         bool TryAddChild(FWidget* child) override;

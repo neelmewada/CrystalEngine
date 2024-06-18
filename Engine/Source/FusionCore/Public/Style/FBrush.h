@@ -41,6 +41,8 @@ namespace CE
         FBrush(FBrush&& move) noexcept;
         FBrush& operator=(FBrush&& move) noexcept;
 
+        bool IsValidBrush();
+
         FBrushStyle GetBrushStyle() const { return brushStyle; }
         FBrushTiling GetBrushTiling() const { return tiling; }
 
