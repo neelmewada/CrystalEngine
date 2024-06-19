@@ -19,9 +19,6 @@ namespace CE::Editor
 
 namespace CE::RPI
 {
-	template<typename T>
-    using Ptr = RHI::Ptr<T>;
-
 	/// @brief Name tag used to identify each View inside a Render Pipeline.
 	using SceneViewTag = CE::Name;
 

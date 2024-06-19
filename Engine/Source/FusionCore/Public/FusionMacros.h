@@ -31,6 +31,25 @@
 	}\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
 
+#define FUSION_EVENT(PropertyName)\
+	Self& PropertyName(const FunctionBinding& binding)\
+	{\
+		m_##PropertyName.Bind(binding);\
+		return *this;\
+	}\
+	template<typename TLambda>\
+	Self& PropertyName(const TLambda& lambda)\
+	{\
+		m_##PropertyName.Bind(lambda);\
+		return *this;\
+	}\
+	template<typename TLambda>\
+	Self& PropertyName(DelegateHandle& outHandle, const TLambda& lambda)\
+	{\
+		outHandle = m_##PropertyName.Bind(lambda);\
+		return *this;\
+	}
+
 #define FUSION_WIDGET\
 	public:\
 		template<typename TLambda> requires TValidate_IfTrue<TLambda>::Value\

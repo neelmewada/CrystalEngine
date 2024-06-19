@@ -26,6 +26,11 @@ namespace CE
         return RawData{ (u8*)Shaders_FusionShader_frag_json_Data, Shaders_FusionShader_frag_json_Length };
     }
 
+    RawData GetRobotoFont()
+	{
+        return RawData{ (u8*)Fonts_Roboto_ttf_Data, Fonts_Roboto_ttf_Length };
+	}
+
     class FusionCoreModule : public CE::Module
     {
     public:

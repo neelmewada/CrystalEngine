@@ -27,6 +27,9 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::freetype
+            ThirdParty::stb
+            ThirdParty::miniz
         PUBLIC
             CE::Core
             CE::CoreMedia

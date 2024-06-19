@@ -38,6 +38,10 @@ namespace CE
             {
                 painter->SetPen(FPen(m_BorderColor, m_BorderWidth));
             }
+            else
+            {
+                painter->SetPen(FPen());
+            }
 
             switch (m_Background.GetBrushStyle())
             {

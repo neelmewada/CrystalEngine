@@ -296,6 +296,7 @@ namespace CE
 				if (hoveredWidgetStack.NonEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
+					widgetsPressedPerMouseButton[i] = event.sender;
 
 					event.sender->HandleEvent(&event);
 				}
@@ -309,6 +310,7 @@ namespace CE
 				event.prevMousePosition = prevMousePos;
 				event.mouseButtons = (MouseButtonMask)BIT((int)mouseButton);
 				event.direction = FEventDirection::BottomToTop;
+				event.isInside = true;
 
 				if (hoveredWidgetStack.NonEmpty())
 				{

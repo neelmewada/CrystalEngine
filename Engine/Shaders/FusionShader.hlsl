@@ -97,8 +97,7 @@ struct DrawItem2D
     float penThickness;
     float opacity;
     DrawType drawType;
-    uint shapeOrFontIndex;
-    uint charIndex;
+    uint shapeOrCharIndex;
     int clipIndex;
 };
 
@@ -108,6 +107,16 @@ struct DrawItem2D
 StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
 StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
+
+/*
+Texture2D<float4> _FontAtlas : SRG_PerMaterial(t0);
+Texture2D<float4> _TextureAtlas : SRG_PerMaterial(t1);
+
+SamplerState _SamplerNoTiling : SRG_PerMaterial(s2);
+SamplerState _SamplerTileX : SRG_PerMaterial(s3);
+SamplerState _SamplerTileY : SRG_PerMaterial(s4);
+SamplerState _SamplerTileXY : SRG_PerMaterial(s5);
+*/
 
 ///////////////////////////////////////////////////////////
 /// Vertex Shader
@@ -240,7 +249,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     if (_DrawList[InstanceIdx].drawType == DRAW_Shape)
     {
-        const uint shapeIndex = _DrawList[InstanceIdx].shapeOrFontIndex;
+        const uint shapeIndex = _DrawList[InstanceIdx].shapeOrCharIndex;
         const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
         const float4 r = shapeItem.cornerRadius;
 
@@ -261,14 +270,14 @@ float4 FragMain(PSInput input) : SV_TARGET
                 break;
         }
 
-        float4 fillColor = float4(0, 0, 0, 0);
+        float4 color = float4(0, 0, 0, 0);
 
         switch (shapeItem.brushType)
         {
         case BRUSH_None:
 	        break;
         case BRUSH_Solid:
-            fillColor = shapeItem.brushColor;
+            color = shapeItem.brushColor;
 	        break;
         case BRUSH_Texture:
 	        break;
@@ -278,11 +287,12 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         if (penThickness > 0 && penColor.a > 0)
         {
-	        
+            float borderSdf = abs(sd + penThickness) - penThickness;
+            color = lerp(color, penColor, clamp(-borderSdf * 2.5, 0, 1));
         }
 
         // Lerp fillColor with SDF for anti-aliased edges
-        pixelColor = lerp(float4(fillColor.rgb, 0), fillColor, -sd);
+        pixelColor = lerp(float4(color.rgb, 0), color, -sd * 5);
     }
 
     return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);

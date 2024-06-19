@@ -2,8 +2,6 @@
 
 namespace CE::RHI
 {
-	template<typename T>
-	using Ptr = IntrusivePtr<T>;
 
 	/// @brief Handle is a wrapper around an integral type, where -1 or max value for unsigned type are reserved for null values
 	/// @tparam T 

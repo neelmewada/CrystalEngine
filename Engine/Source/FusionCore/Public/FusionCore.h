@@ -41,6 +41,8 @@ namespace CE
 #include "FusionMacros.h"
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
+#include "Font/FFontAtlas.h"
+#include "Font/FFontManager.h"
 
 #include "Event/FEvent.h"
 

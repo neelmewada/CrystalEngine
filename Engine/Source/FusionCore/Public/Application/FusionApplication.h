@@ -67,6 +67,9 @@ namespace CE
         FIELD()
         FFusionContext* rootContext = nullptr;
 
+        FIELD()
+        FFontManager* fontManager = nullptr;
+
         RPI::Shader* fusionShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};

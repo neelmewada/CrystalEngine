@@ -114,9 +114,8 @@ namespace CE
             union
             {
                 uint shapeIndex;
-                uint fontIndex;
+                uint charIndex;
             };
-            uint charIndex;
             int clipIndex;
         };
 

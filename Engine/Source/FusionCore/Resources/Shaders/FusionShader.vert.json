@@ -78,19 +78,14 @@
                     "offset" : 96
                 },
                 {
-                    "name" : "shapeOrFontIndex",
+                    "name" : "shapeOrCharIndex",
                     "type" : "uint",
                     "offset" : 100
                 },
                 {
-                    "name" : "charIndex",
-                    "type" : "uint",
-                    "offset" : 104
-                },
-                {
                     "name" : "clipIndex",
                     "type" : "int",
-                    "offset" : 108
+                    "offset" : 104
                 }
             ]
         },

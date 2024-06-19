@@ -236,4 +236,7 @@ namespace CE
 
 	using IntrusiveBase = IntrusiveBaseRefCnt<std::atomic_uint>;
 
+	template<typename T>
+	using Ptr = IntrusivePtr<T>;
+
 } // namespace CE

@@ -8,10 +8,11 @@ namespace CE
     extern RawData GetFusionShaderFrag();
     extern RawData GetFusionShaderVertJson();
     extern RawData GetFusionShaderFragJson();
+    extern RawData GetRobotoFont();
 
     FusionApplication::FusionApplication()
     {
-
+        fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
     }
 
     FusionApplication::~FusionApplication()
@@ -41,6 +42,8 @@ namespace CE
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShaders();
+
+        fontManager->Init();
     }
 
     void FusionApplication::PreShutdown()
@@ -55,6 +58,8 @@ namespace CE
         {
             scheduler->WaitUntilIdle();
         }
+
+        fontManager->Shutdown();
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {

@@ -113,6 +113,8 @@ namespace CE
 			}
 		}
 
+		remainingSize = Math::Max(remainingSize, 0.0f);
+
 		for (FWidget* child : children)
 		{
 			Vec2 childIntrinsicSize = child->GetIntrinsicSize();

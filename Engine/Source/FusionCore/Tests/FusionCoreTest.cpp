@@ -130,12 +130,42 @@ namespace RenderingTests
                         .MinHeight(30)
                         .Name("GreenWidget")
                     )
-                    .Margin(Vec4(0, 0, 0, 0)),
+                    .Margin(Vec4(0, 0, 0, 5)),
 
                     FAssignNew(FButton, button)
+                    .OnPressed([&]
+		                {
+                            CE_LOG(Info, All, "Button clicked!");
+		                })
                     .Style("Button.Primary")
                     .MinHeight(30)
-                    .Name("Button")
+                    .Name("Button"),
+
+                    FNew(FHorizontalStack)
+                    .ContentVAlign(VAlign::Center)
+                    .Name("HStack2")
+                    (
+                        FNew(FStyledWidget)
+                        .Background(FBrush(Color::Green()))
+                        .BackgroundShape(FRectangle())
+                        .FillRatio(1.0f)
+                        .MinWidth(60)
+                        .MinHeight(15),
+
+                        FNew(FStyledWidget)
+                        .Background(FBrush(Color::Cyan()))
+                        .BackgroundShape(FRectangle())
+                        .FillRatio(2.0f)
+                        .MinWidth(60)
+                        .MinHeight(40),
+
+                        FNew(FStyledWidget)
+                        .Background(FBrush(Color::Yellow()))
+                        .BackgroundShape(FRectangle())
+                        .FillRatio(1.0f)
+                        .MinWidth(60)
+                        .MinHeight(25)
+                    )
                 )
             )
         );

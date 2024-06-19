@@ -41,7 +41,7 @@ namespace CE
 			{
 				charSet.Add(rangeInfo.charCode);
 			}
-			else if (rangeInfo.range.min <= rangeInfo.range.max);
+			else if (rangeInfo.range.min <= rangeInfo.range.max)
 			{
 				//int idx = charSet.GetSize();
 				//charSet.Resize(charSet.GetSize() + rangeInfo.range.max - rangeInfo.range.min + 1);
@@ -61,7 +61,7 @@ namespace CE
 		//FT_Set_Char_Size(face, 0, fontSize << 6, 96, 96);
 		FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-		int max_dim = (1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(numGlyphs));
+		int max_dim = (int)((f32)(1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(numGlyphs)));
 		int tex_width = 1;
 		while (tex_width < max_dim) tex_width <<= 1;
 		int tex_height = tex_width;

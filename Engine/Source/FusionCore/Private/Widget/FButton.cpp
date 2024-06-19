@@ -44,8 +44,13 @@ namespace CE
                 {
                     buttonState &= ~FButtonState::Pressed;
                     ApplyStyle();
+
+                    if (mouseEvent->isInside)
+                    {
+                        m_OnPressed.Broadcast();
+                    }
                 }
-            } // TODO: Check for release outside
+            }
 
             event->Consume(this);
         }

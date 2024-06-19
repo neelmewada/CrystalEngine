@@ -42,10 +42,7 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        Self& OnPressed()
-        {
-            return *this;
-        }
+        FUSION_EVENT(OnPressed);
 
         FUSION_TESTS;
         FUSION_WIDGET;
