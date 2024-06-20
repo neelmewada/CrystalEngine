@@ -243,11 +243,17 @@ namespace CE
 
         void Broadcast(const TArgs&... args) const
         {
+            if (invocationList.IsEmpty())
+                return;
+
             Broadcast(Array<Variant>{ args... });
         }
 
         void operator()(const TArgs&... args) const
         {
+            if (invocationList.IsEmpty())
+                return;
+
             Broadcast(Array<Variant>{ args... });
         }
 

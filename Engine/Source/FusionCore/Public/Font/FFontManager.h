@@ -13,7 +13,16 @@ namespace CE
 		void Init();
 		void Shutdown();
 
+		const Name& GetDefaultFontFamily() const;
+
 		bool RegisterFont(const Name& fontName, const Array<CharRange>& characterSets, MemoryStream* ttfFontFile);
+
+		bool DeregisterFont(const Name& fontName);
+
+		FFontAtlas* FindFont(const Name& fontName);
+
+		//! @brief Flushes all the changes to GPU
+		void Flush(u32 imageIndex);
 
 	private:
 

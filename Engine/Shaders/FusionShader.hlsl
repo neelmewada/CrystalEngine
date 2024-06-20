@@ -45,7 +45,7 @@ struct PSInput
 enum DrawType : uint
 {
 	DRAW_Shape,
-    DRAW_Texture,
+
     DRAW_Text
 };
 
@@ -101,6 +101,12 @@ struct DrawItem2D
     int clipIndex;
 };
 
+struct GlyphItem
+{
+    float4 atlasUV;
+    uint mipIndex;
+};
+
 ///////////////////////////////////////////////////////////
 /// Shader Resources
 
@@ -108,15 +114,13 @@ StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
 StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
 
-/*
-Texture2D<float4> _FontAtlas : SRG_PerMaterial(t0);
-Texture2D<float4> _TextureAtlas : SRG_PerMaterial(t1);
+#if FRAGMENT
 
-SamplerState _SamplerNoTiling : SRG_PerMaterial(s2);
-SamplerState _SamplerTileX : SRG_PerMaterial(s3);
-SamplerState _SamplerTileY : SRG_PerMaterial(s4);
-SamplerState _SamplerTileXY : SRG_PerMaterial(s5);
-*/
+Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
+StructuredBuffer<GlyphItem> _GlyphItems : SRG_PerMaterial(t1);
+SamplerState _FontAtlasSampler : SRG_PerMaterial(s2);
+
+#endif
 
 ///////////////////////////////////////////////////////////
 /// Vertex Shader
@@ -202,6 +206,8 @@ float SDFRoundedRect(in float2 p, in float2 shapeSize, in float4 r)
     float2 q = abs(p) - shapeSize * 0.5 + r.x;
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
+
+#if FRAGMENT
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
@@ -294,6 +300,20 @@ float4 FragMain(PSInput input) : SV_TARGET
         // Lerp fillColor with SDF for anti-aliased edges
         pixelColor = lerp(float4(color.rgb, 0), color, -sd * 5);
     }
+    else if (_DrawList[InstanceIdx].drawType == DRAW_Text)
+    {
+        const uint charIndex = _DrawList[InstanceIdx].shapeOrCharIndex;
+        const GlyphItem glyphItem = _GlyphItems[InstanceIdx];
+        const float2 uvMin = glyphItem.atlasUV.xy;
+        const float2 uvMax = glyphItem.atlasUV.zy;
+
+        float alpha = _FontAtlas.Sample(_FontAtlasSampler, uvMin + uvMax * uv);
+
+        pixelColor.rgb = penColor.rgb * alpha;
+        pixelColor.a = penColor.a * alpha;
+    }
 
     return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);
 }
+
+#endif

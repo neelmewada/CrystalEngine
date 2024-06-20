@@ -50,6 +50,8 @@ namespace CE
 
         void SetPen(const FPen& pen);
 
+        void SetFont(const FFont& font);
+
         void PushOpacity(f32 opacity);
         void PopOpacity();
 
@@ -74,7 +76,8 @@ namespace CE
 
         enum FDrawType : u32
         {
-	        DRAW_Shape
+	        DRAW_Shape,
+            DRAW_Text
         };
 
         enum FBrushType : u32
@@ -137,6 +140,7 @@ namespace CE
 
         struct FDrawBatch
         {
+            RHI::ShaderResourceGroup* fontSrg = nullptr;
             u32 firstDrawItemIndex = 0;
             u32 drawItemCount = 0;
         };
@@ -145,6 +149,7 @@ namespace CE
 
         FDrawItem2D& DrawCustomItem(FDrawType drawType, Vec2 pos, Vec2 size);
         FDrawItem2D& DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
+        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2());
 
         // - Config -
 
@@ -178,6 +183,7 @@ namespace CE
 
         FBrush currentBrush;
         FPen currentPen;
+        FFont currentFont;
         Matrix4x4 itemTransform = Matrix4x4::Identity();
 
         FCoordinateSpaceStack coordinateSpaceStack{};
@@ -203,7 +209,6 @@ namespace CE
 
         RPI::DynamicStructuredBuffer<FShapeItem2D> shapeItemsBuffer;
         FShapeItemList shapeItemList;
-
 
         Array<FDrawBatch> drawBatches{};
         bool createNewDrawBatch = false;

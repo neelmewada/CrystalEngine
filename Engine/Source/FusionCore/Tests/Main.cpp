@@ -44,7 +44,7 @@ static void TestBegin(bool gui)
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.resizable = true;
-		windowInfo.hidden = true;
+		windowInfo.hidden = false;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
 		app->InitMainWindow("MainWindow", 1024, 768, windowInfo);

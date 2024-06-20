@@ -18,6 +18,11 @@ namespace CE
 		renderer->SetBrush(brush);
 	}
 
+	void FPainter::SetFont(const FFont& font)
+	{
+		renderer->SetFont(font);
+	}
+
 	void FPainter::PushOpacity(f32 opacity)
 	{
 		renderer->PushOpacity(opacity);
@@ -76,6 +81,11 @@ namespace CE
 	void FPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
 	{
 		renderer->DrawShape(FRoundedRectangle(cornerRadius), rect.min, rect.GetSize());
+	}
+
+	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size)
+	{
+		return renderer->DrawText(text, pos, size);
 	}
 
 } // namespace CE

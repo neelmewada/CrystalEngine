@@ -34,7 +34,7 @@ namespace CE
 
         MemoryStream stream = MemoryStream(robotoFontFile.data, robotoFontFile.dataSize, Stream::Permissions::ReadOnly);
 
-        RegisterFont("Roboto", englishCharSets, &stream);
+        RegisterFont(GetDefaultFontFamily(), englishCharSets, &stream);
     }
 
     void FFontManager::Shutdown()
@@ -46,11 +46,6 @@ namespace CE
                 FT_Done_Face(atlas->face);
                 atlas->face = nullptr;
 	        }
-            if (atlas->faceItalic)
-            {
-                FT_Done_Face(atlas->faceItalic);
-                atlas->faceItalic = nullptr;
-            }
             atlas->ft = nullptr;
 
             atlas->Destroy();
@@ -60,6 +55,12 @@ namespace CE
         ft = nullptr;
 
         fontAtlases.Clear();
+    }
+
+    const Name& FFontManager::GetDefaultFontFamily() const
+    {
+        thread_local const CE::Name robotoFamily = "Roboto";
+        return robotoFamily;
     }
 
     bool FFontManager::RegisterFont(const Name& fontName, const Array<CharRange>& characterSets,
@@ -85,7 +86,6 @@ namespace CE
 
         fontAtlas->ft = ft;
         fontAtlas->face = face;
-        fontAtlas->faceItalic = nullptr;
 
         Array<u32> charSet{};
         charSet.Reserve(256);
@@ -104,9 +104,44 @@ namespace CE
             }
         }
 
-        fontAtlas->Init(charSet, 14);
+        fontAtlas->Init(charSet);
+
+        fontAtlases[fontName] = fontAtlas;
 
         return true;
+    }
+
+    bool FFontManager::DeregisterFont(const Name& fontName)
+    {
+        if (!fontAtlases.KeyExists(fontName))
+            return false;
+
+        FFontAtlas* font = fontAtlases[fontName];
+        fontAtlases.Remove(fontName);
+
+        if (font)
+        {
+            font->Destroy();
+            return true;
+        }
+
+        return false;
+    }
+
+    FFontAtlas* FFontManager::FindFont(const Name& fontName)
+    {
+        if (!fontAtlases.KeyExists(fontName))
+            return nullptr;
+
+        return fontAtlases[fontName];
+    }
+
+    void FFontManager::Flush(u32 imageIndex)
+    {
+        for (auto& [fontName, atlas] : fontAtlases)
+        {
+            atlas->Flush(imageIndex);
+        }
     }
 
 } // namespace CE

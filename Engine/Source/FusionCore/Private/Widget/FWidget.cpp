@@ -32,6 +32,8 @@ namespace CE
         if (event->stopPropagation)
             return;
 
+        m_OnEvent(event);
+
         if (event->IsMouseEvent() && (!event->consumed || event->consumer != this))
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);

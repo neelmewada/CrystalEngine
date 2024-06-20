@@ -26,6 +26,8 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
+        void OnPaint(FPainter* painter) override;
+
     protected: // - Internal Methods -
 
         void SetState(FButtonState newState);

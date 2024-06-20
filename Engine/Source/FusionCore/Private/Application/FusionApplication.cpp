@@ -190,6 +190,8 @@ namespace CE
         }
         drawList.Finalize();
 
+        fontManager->Flush(curImageIndex);
+
         rootContext->SetDrawPackets(drawList);
     }
 
@@ -336,6 +338,26 @@ namespace CE
                     (u32)vertexReflection["ssbos"][2]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
+                ));
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
+                .TryAdd(SRGVariableDescriptor(
+                    "_FontAtlas",
+                    (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2D,
+                    ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_FontAtlasSampler",
+                    (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_GlyphItems",
+                    (u32)fragmentReflection["ssbos"][3]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Fragment
                 ));
         }
 

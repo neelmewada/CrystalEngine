@@ -49,6 +49,7 @@ namespace CE
 #include "Style/FShape.h"
 #include "Style/FPen.h"
 #include "Style/FBrush.h"
+#include "Style/FFont.h"
 
 #include "Application/FusionApplication.h"
 #include "Rendering/FusionRenderer.h"

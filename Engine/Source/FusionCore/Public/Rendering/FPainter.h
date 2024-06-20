@@ -16,6 +16,7 @@ namespace CE
 
         void SetPen(const FPen& pen);
         void SetBrush(const FBrush& brush);
+        void SetFont(const FFont& font);
 
         void PushOpacity(f32 opacity);
         void PopOpacity();
@@ -38,6 +39,8 @@ namespace CE
         void DrawCircle(const Rect& rect);
 
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
+
+        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2());
 
     private:
 

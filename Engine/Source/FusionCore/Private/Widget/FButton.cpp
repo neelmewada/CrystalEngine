@@ -58,6 +58,18 @@ namespace CE
 	    Super::HandleEvent(event);
     }
 
+    void FButton::OnPaint(FPainter* painter)
+    {
+	    Super::OnPaint(painter);
+
+        Vec2 pos = GetComputedPosition();
+
+        painter->SetPen(FPen(Color::White()));
+        painter->SetFont(FFont("Roboto", 22));
+
+        painter->DrawText("Hello", pos);
+    }
+
     void FButton::SetState(FButtonState newState)
     {
         if (buttonState == newState)

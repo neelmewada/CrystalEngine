@@ -3,17 +3,10 @@
 namespace CE
 {
     class FWidget;
+    struct FEvent;
 
     typedef ScriptEvent<> FVoidEvent;
 
 
-    struct FUSIONCORE_API FRect
-    {
-    public:
-
-    private:
-
-
-    };
     
 } // namespace CE

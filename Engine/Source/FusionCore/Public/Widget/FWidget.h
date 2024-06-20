@@ -123,6 +123,9 @@ namespace CE
     protected: // - Fusion Fields -
 
         FIELD()
+        ScriptEvent<void(FEvent*)> m_OnEvent;
+
+        FIELD()
         Vec4 m_Padding = Vec4();
 
         FIELD()
@@ -163,6 +166,8 @@ namespace CE
         f32 m_Angle = 0;
 
     public:  // - Fusion Properties -
+
+        FUSION_EVENT(OnEvent);
 
         FUSION_LAYOUT_PROPERTY(Padding);
         FUSION_LAYOUT_PROPERTY(Margin);

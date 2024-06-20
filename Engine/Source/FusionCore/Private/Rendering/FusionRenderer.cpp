@@ -73,8 +73,11 @@ namespace CE
 	{
 		ZoneScoped;
 
+		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+
 		currentBrush = FBrush();
 		currentPen = FPen();
+		currentFont = FFont(fontManager->GetDefaultFontFamily(), 13);
 		itemTransform = Matrix4x4::Identity();
 
 		drawBatches.Clear();
@@ -97,30 +100,6 @@ namespace CE
 	void FusionRenderer::End()
 	{
 		ZoneScoped;
-		
-		if (false) // TODO: Testing
-		{
-			PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(0, 0, 0)) *
-				Quat::EulerDegrees(0, 0, 0).ToMatrix() *
-				Matrix4x4::Scale(Vec3(1, 1, 1)));
-			
-			Matrix4x4 clipTransform =
-				Matrix4x4::Translation(Vec3(0, 0, 0)) * 
-				Quat::EulerDegrees(0, 0, 0).ToMatrix() *
-				Matrix4x4::Scale(Vec3(1, 1, 1));
-
-			PushClipShape(clipTransform, Vec2(500, 200), FRectangle());
-
-			currentBrush = FBrush(Color::Cyan());
-			currentBrush.SetBrushStyle(FBrushStyle::SolidFill);
-			currentBrush.SetBrushTiling(FBrushTiling::None);
-
-			DrawShape(FRectangle(), Vec2(100, 768 * 0.f), Vec2(150, 768 * 0.25f));
-
-			PopClipShape();
-
-			PopChildCoordinateSpace();
-		}
 
 		PopChildCoordinateSpace(); // Pop identity matrix
 
@@ -146,6 +125,7 @@ namespace CE
 
 				drawPacket->shaderResourceGroups[0] = drawItemSrg;
 				drawPacket->shaderResourceGroups[1] = perViewSrg;
+				drawPacket->shaderResourceGroups[2] = drawBatch.fontSrg;
 
 				this->drawPackets.Add(drawPacket);
 			}
@@ -159,6 +139,7 @@ namespace CE
 
 				builder.AddShaderResourceGroup(drawItemSrg);
 				builder.AddShaderResourceGroup(perViewSrg);
+				builder.AddShaderResourceGroup(drawBatch.fontSrg);
 
 				// UI Item
 				{
@@ -194,6 +175,18 @@ namespace CE
 	{
 		ZoneScoped;
 
+		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+
+		Name fontFamily = currentFont.GetFamily();
+		int fontSize = currentFont.GetFontSize();
+
+		if (fontSize <= 0)
+			fontSize = 12;
+		if (!fontFamily.IsValid())
+			fontFamily = fontManager->GetDefaultFontFamily();
+
+		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+
 		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
@@ -204,6 +197,7 @@ namespace CE
 			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemList.GetCount();
+			drawBatches.Top().fontSrg = fontAtlas != nullptr ? fontAtlas->fontSrg : nullptr;
 		}
 
 		FDrawItem2D drawItem{};
@@ -242,6 +236,134 @@ namespace CE
 		drawBatches.Top().drawItemCount++;
 
 		return drawItemList.Last();
+	}
+
+	Vec2 FusionRenderer::DrawText(const String& text, Vec2 pos, Vec2 size)
+	{
+		if (text.IsEmpty())
+			return Vec2();
+
+		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+
+		Name fontFamily = currentFont.GetFamily();
+		int fontSize = currentFont.GetFontSize();
+
+		if (fontSize <= 0)
+			fontSize = 12;
+		if (!fontFamily.IsValid())
+			fontFamily = fontManager->GetDefaultFontFamily();
+
+		fontSize = Math::Max(fontSize, 6);
+
+		const bool isFixedWidth = size.x > 0;
+		const bool isFixedHeight = size.y > 0;
+
+		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+		if (fontAtlas == nullptr)
+			return Vec2();
+
+		const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+		const float startY = pos.y + metrics.ascender * (f32)fontSize;
+		const float startX = pos.x;
+
+		float maxX = startX;
+		float maxY = startY;
+
+		Vec3 curPos = Vec3(startX, startY, 0);
+
+		int totalCharactersDrawn = 0;
+		int firstDrawItemIndex = drawItemList.GetCount();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemList.GetCount();
+			drawBatches.Top().fontSrg = fontAtlas->fontSrg;
+		}
+
+		Vec2 finalSize;
+
+		int whitespaceIdx = -1;
+		int idx = 0;
+
+		for (int i = 0; i < text.GetLength(); ++i)
+		{
+			char c = text[i];
+
+			if (c == ' ')
+			{
+				whitespaceIdx = i;
+			}
+
+			if (c == '\n')
+			{
+				whitespaceIdx = -1;
+				curPos.x = startX;
+				curPos.y += metrics.lineHeight * fontSize;
+				continue;
+			}
+
+			drawItemList.Insert(FDrawItem2D());
+
+			FDrawItem2D& drawItem = drawItemList.Last();
+			drawItem.drawType = DRAW_Text;
+			drawItem.opacity = opacityStack.IsEmpty() ? 1.0f : opacityStack.Last();
+
+			switch (currentPen.GetStyle())
+			{
+			case FPenStyle::None:
+				break;
+			case FPenStyle::SolidLine:
+				drawItem.penColor = currentPen.GetColor().ToVec4();
+				drawItem.penThickness = currentPen.GetThickness();
+				break;
+			}
+
+			drawItem.clipIndex = -1;
+			if (!clipItemStack.IsEmpty())
+			{
+				drawItem.clipIndex = clipItemStack.Last();
+			}
+
+			FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize);
+
+			drawItem.charIndex = glyph.index;
+
+			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
+			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
+
+			drawItem.quadSize = Vec2(glyphWidth, glyphHeight);
+
+			curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize;
+
+			Vec2 quadPos = curPos;
+			quadPos.y -= (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize;
+
+			drawItem.transform = coordinateSpaceStack.Last() *
+				Matrix4x4::Translation(Vec3(quadPos.x, quadPos.y)) *
+				Matrix4x4::Scale(Vec3(drawItem.quadSize.width, drawItem.quadSize.height, 1));
+
+			curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize - (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize;
+
+			if (curPos.x > maxX)
+				maxX = curPos.x;
+			if (curPos.y + metrics.lineHeight * (f32)fontSize / (f32)glyph.fontSize > maxY)
+				maxY = curPos.y + metrics.lineHeight * (f32)fontSize / (f32)glyph.fontSize;
+
+			totalCharactersDrawn++;
+			idx++;
+		}
+
+		drawBatches.Top().drawItemCount += totalCharactersDrawn;
+
+		return finalSize;
 	}
 
 	FusionRenderer::FDrawItem2D& FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 size)
@@ -298,6 +420,7 @@ namespace CE
 
 		drawItemGrowRatio = Math::Clamp01(drawItemGrowRatio);
 		clipItemGrowRatio = Math::Clamp01(clipItemGrowRatio);
+		shapeItemGrowRatio = Math::Clamp01(shapeItemGrowRatio);
 
 		if (viewConstantsUpdateRequired[imageIndex])
 		{
@@ -370,6 +493,16 @@ namespace CE
 	void FusionRenderer::SetPen(const FPen& pen)
 	{
 		currentPen = pen;
+	}
+
+	void FusionRenderer::SetFont(const FFont& font)
+	{
+		if (currentFont.GetFamily() != font.GetFamily())
+		{
+			createNewDrawBatch = true;
+		}
+
+		currentFont = font;
 	}
 
 	void FusionRenderer::PushOpacity(f32 opacity)

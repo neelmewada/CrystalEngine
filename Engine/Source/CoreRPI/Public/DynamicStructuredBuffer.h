@@ -28,7 +28,7 @@ namespace CE::RPI
         u64 GetElementCount() const;
 
         //! @brief Grows the buffer to fit exactly 'totalElementCount' number of total elements.
-        void GrowToFit(int totalElementCount);
+        void GrowToFit(u32 totalElementCount);
 
         bool IsInitialized() const
         {
@@ -128,7 +128,7 @@ namespace CE::RPI
     }
 
     template <typename TStruct>
-    void DynamicStructuredBuffer<TStruct>::GrowToFit(int totalElementCount)
+    void DynamicStructuredBuffer<TStruct>::GrowToFit(u32 totalElementCount)
     {
         if (totalElementCount <= GetElementCount())
             return;

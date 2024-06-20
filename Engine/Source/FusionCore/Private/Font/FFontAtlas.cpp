@@ -10,66 +10,232 @@
 
 namespace CE
 {
-    static constexpr SIZE_T FontAtlasSize = 512;
+    static constexpr SIZE_T FontAtlasSize = 2048;
+    static constexpr u64 GlyphBufferInitialCount = 512;
+    static constexpr f32 GlyphBufferGrowRatio = 0.25f;
+    static constexpr u32 DefaultFontSize = 13;
+
+    static const Array<u32> gFontSizes = { 10, 13, 15, 18, 22, 28, 36, 64 };
+    //static const Array<int> tempFontSizes = { 8, 10, 12, 14, 18, 22, 26, 30, 36, 42, 50, 64, 76, 90, 112, 128, 150, 155 };
 
     FFontAtlas::FFontAtlas()
     {
         
     }
 
-    void FFontAtlas::Init(const Array<u32>& charSet, u32 defaultFontSize)
+    void FFontAtlas::Init(const Array<u32>& charSet)
     {
+        ZoneScoped;
+
         if (atlasImageMips.NonEmpty())
             return;
+        if (face == nullptr)
+            return;
 
-        //u8* mip0 = new u8[FontAtlasSize * FontAtlasSize]; // A 2k texture atlas
-        Ptr<AtlasImage> atlas = new AtlasImage;
+        int numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
+
+        glyphBuffer.Init("GlyphBuffer", GlyphBufferInitialCount, numFrames);
+
+        f32 unitsPerEM = face->units_per_EM;
+        f32 scaleFactor = (f32)1.0f / unitsPerEM; // 1.0f is used as a font size here
+
+        metrics.ascender = face->ascender * scaleFactor;
+        metrics.descender = face->descender * scaleFactor;
+        metrics.lineGap = (face->height - (face->ascender - face->descender)) * scaleFactor;
+        metrics.lineHeight = (face->ascender - face->descender + metrics.lineGap) * scaleFactor;
+
+        Ptr<FAtlasImage> atlas = new FAtlasImage;
         atlas->ptr = new u8[FontAtlasSize * FontAtlasSize];
         memset(atlas->ptr, 0, FontAtlasSize * FontAtlasSize);
         atlas->atlasSize = FontAtlasSize;
-        atlas->skyline.push_back({ 0, 0, FontAtlasSize });
 
         atlasImageMips.Add(atlas);
 
-        AddGlyphs(charSet, defaultFontSize);
+        AddGlyphs(charSet, DefaultFontSize);
 
-        CMImage image = CMImage::LoadRawImageFromMemory(atlas->ptr, FontAtlasSize, FontAtlasSize, CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+        Array<CMImage> images;
 
-        image.EncodeToPNG(PlatformDirectories::GetLaunchDir() / "Temp/FontAtlas.png");
+        int idx = 0;
+        for (FAtlasImage* atlasImageMip : atlasImageMips)
+        {
+            CMImage image = CMImage::LoadRawImageFromMemory(atlasImageMip->ptr, atlasImageMip->atlasSize, atlasImageMip->atlasSize,
+                CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+
+            image.EncodeToPNG(PlatformDirectories::GetLaunchDir() / String::Format("Temp/FontAtlas{}.png", idx++));
+
+            images.Add(image);
+        }
+
+        RHI::SamplerDescriptor fontSampler{};
+        fontSampler.addressModeU = fontSampler.addressModeV = fontSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+        fontSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+        fontSampler.enableAnisotropy = false;
+        fontSampler.samplerFilterMode = FilterMode::Cubic;
+
+        atlasTexture = new RPI::Texture(images, fontSampler);
+
+        RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
+
+        fontSrg = gDynamicRHI->CreateShaderResourceGroup(fusionShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
+
+        fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+        fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+
+        for (int i = 0; i < numFrames; ++i)
+        {
+            fontSrg->Bind(i, "_GlyphItems", glyphBuffer.GetBuffer(i));
+        }
+
+        fontSrg->FlushBindings();
+    }
+
+    FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize)
+    {
+        ZoneScoped;
+
+        u32 fontSizeInAtlas = fontSize;
+
+        static Array<u32> charSet{};
+        charSet.Resize(1);
+        charSet[0] = charCode;
+
+        // Find the closest matching font size
+
+        for (int i = 0; i < gFontSizes.GetSize(); ++i)
+        {
+	        if (gFontSizes[i] == fontSize || 
+                (i == 0 && fontSize <= gFontSizes[i]) || 
+                (i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
+	        {
+                fontSizeInAtlas = gFontSizes[i];
+                break;
+	        }
+
+            if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
+            {
+                int halfSize = (gFontSizes[i] + gFontSizes[i + 1]) / 2;
+                if (fontSize <= halfSize)
+                    fontSizeInAtlas = gFontSizes[i];
+                else
+                    fontSizeInAtlas = gFontSizes[i + 1];
+                break;
+            }
+        }
+
+        if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
+        {
+            AddGlyphs(charSet, fontSizeInAtlas);
+        }
+
+        int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
+        Ptr<FAtlasImage> atlasMip = atlasImageMips[mipIndex];
+
+        if (!atlasMip->glyphsByFontSize[fontSizeInAtlas].KeyExists(charCode))
+        {
+            AddGlyphs(charSet, fontSizeInAtlas);
+        }
+
+        return atlasMip->glyphsByFontSize[fontSizeInAtlas][charCode];
+    }
+
+    void FFontAtlas::Flush(u32 imageIndex)
+    {
+        ZoneScoped;
+
+        if (!flushRequiredPerImage[imageIndex])
+            return;
+
+        if (atlasUpdateRequired)
+        {
+            atlasUpdateRequired = false;
+
+            delete atlasTexture; atlasTexture = nullptr;
+
+            Array<CMImage> images;
+            images.Reserve(atlasImageMips.GetSize());
+
+            for (FAtlasImage* atlasImageMip : atlasImageMips)
+            {
+                CMImage image = CMImage::LoadRawImageFromMemory(atlasImageMip->ptr, atlasImageMip->atlasSize, atlasImageMip->atlasSize,
+                    CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+                images.Add(image);
+            }
+
+            RHI::SamplerDescriptor fontSampler{};
+            fontSampler.addressModeU = fontSampler.addressModeV = fontSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+            fontSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+            fontSampler.enableAnisotropy = false;
+            fontSampler.samplerFilterMode = FilterMode::Cubic;
+
+            atlasTexture = new RPI::Texture(images, fontSampler);
+
+            fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+            fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+        }
+
+        flushRequiredPerImage[imageIndex] = false;
+
+        int numGlyphs = glyphDataList.GetCount();
+
+        if (glyphBuffer.GetElementCount() < numGlyphs)
+        {
+            u64 totalCount = (u64)((f32)glyphBuffer.GetElementCount() * (1.0f + GlyphBufferGrowRatio));
+            glyphBuffer.GrowToFit(Math::Max((u64)(numGlyphs)+64, totalCount));
+
+            fontSrg->Bind(imageIndex, "_GlyphItems", glyphBuffer.GetBuffer(imageIndex));
+        }
+
+        glyphBuffer.GetBuffer(imageIndex)->UploadData(glyphDataList.GetData(), numGlyphs * sizeof(FGlyphData));
+
+        fontSrg->FlushBindings();
     }
 
     void FFontAtlas::OnBeforeDestroy()
     {
 	    Super::OnBeforeDestroy();
 
+        glyphBuffer.Shutdown();
+
         delete atlasTexture; atlasTexture = nullptr;
+        delete fontSrg; fontSrg = nullptr;
 
         atlasImageMips.Clear();
+        glyphDataList.Free();
     }
 
     void FFontAtlas::AddGlyphs(const Array<u32>& charSet, u32 fontSize)
     {
-        if (atlasTexture != nullptr)
-        {
-            delete atlasTexture; atlasTexture = nullptr;
-        }
+        ZoneScoped;
+
+        if (charSet.IsEmpty())
+            return;
+
+        static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
         FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-        f32 metricHeight = face->size->metrics.height >> 6;
-        f32 metricAdvance = face->size->metrics.max_advance >> 6;
-
-        Ptr<AtlasImage> atlasMip = atlasImageMips[currentMip];
+        FAtlasImage* atlasMip = atlasImageMips[currentMip];
 
         for (int i = 0; i < charSet.GetSize(); ++i)
         {
             FT_ULong charCode = charSet[i];
-            FT_Load_Char(face, charCode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+
+            if (atlasMip->glyphsByFontSize[fontSize].KeyExists(charCode))
+            {
+                continue;
+            }
+
+            FT_Error error = FT_Load_Char(face, charCode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+            if (error != 0)
+            {
+	            continue;
+            }
+
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             FFontGlyphInfo glyph{};
 
-            glyph.unicode = charCode;
+            glyph.charCode = charCode;
 
             int width = bmp->width;
             int height = bmp->rows;
@@ -81,7 +247,28 @@ namespace CE
             int posX, posY;
             int atlasSize = atlasMip->atlasSize;
 
-            if (atlasMip->FindInsertionPoint(Vec2i(width, height), posX, posY))
+            bool foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
+            if (!foundEmptySpot)
+            {
+                currentMip++;
+                atlasSize = FontAtlasSize / (SIZE_T)Math::Pow(2, currentMip);
+
+                atlasMip = new FAtlasImage;
+                atlasMip->ptr = new u8[atlasSize * atlasSize];
+                memset(atlasMip->ptr, 0, atlasSize * atlasSize);
+                atlasMip->atlasSize = (u32)atlasSize;
+
+                atlasImageMips.Add(atlasMip);
+                
+                foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
+            }
+
+            if (!foundEmptySpot)
+            {
+	            return;
+            }
+
+            if (foundEmptySpot)
             {
                 glyph.x0 = posX;
                 glyph.y0 = posY;
@@ -91,77 +278,96 @@ namespace CE
                 glyph.xOffset = xOffset;
                 glyph.yOffset = yOffset;
                 glyph.advance = advance;
+                glyph.fontSize = fontSize;
+                glyph.index = glyphDataList.GetCount();
 
-                for (int row = 0; row < bmp->rows; ++row) 
+                Vec2 uvMin = Vec2((f32)glyph.x0 / (f32)atlasSize, (f32)glyph.y0 / (f32)atlasSize);
+                Vec2 uvMax = Vec2((f32)glyph.x1 / (f32)atlasSize, (f32)glyph.y1 / (f32)atlasSize);
+
+                if (!nonDisplayCharacters.Exists(charCode))
                 {
-                    for (int col = 0; col < bmp->width; ++col) 
+                    glyphDataList.Insert({ .atlasUV = Vec4(uvMin, uvMax), .mipIndex = (u32)currentMip });
+
+                    for (int row = 0; row < bmp->rows; ++row)
                     {
-                        int x = posX + col;
-                        int y = posY + row;
-                        atlasMip->ptr[y * atlasSize + x] = bmp->buffer[row * bmp->pitch + col];
+                        for (int col = 0; col < bmp->width; ++col)
+                        {
+                            int x = posX + col;
+                            int y = posY + row;
+                            atlasMip->ptr[y * atlasSize + x] = bmp->buffer[row * bmp->pitch + col];
+                        }
                     }
+
+                    atlasUpdateRequired = true;
+                }
+                else
+                {
+                    glyphDataList.Insert({ .atlasUV = Vec4(-1, -1, -1, -1), .mipIndex = (u32)currentMip });
                 }
 
                 atlasMip->glyphsByFontSize[fontSize][charCode] = glyph;
-                mipIndicesByCharacter[charCode] = currentMip;
+                mipIndicesByCharacter[{ charCode, fontSize }] = currentMip;
 
-                atlasMip->UpdateSkyline(posX, posY, width, height);
+
+                for (int j = 0; j < flushRequiredPerImage.GetSize(); ++j)
+                {
+                    flushRequiredPerImage[j] = true;
+                }
             }
-
         }
     }
 
-    bool FFontAtlas::AtlasImage::FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY)
+    bool FFontAtlas::FAtlasImage::FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY)
     {
-        int bestX = -1, bestY = -1;
-        int bestHeight = atlasSize, bestWidth = atlasSize;
+        int bestRowIndex = -1;
+        int bestRowHeight = INT_MAX;
 
-        for (size_t i = 0; i < skyline.size(); ++i) {
-            int x = skyline[i].x;
-            int y = skyline[i].y;
+        if (rows.IsEmpty())
+        {
+            rows.Add({ .x = glyphSize.width, .y = 0, .height = glyphSize.height });
+            outX = 0;
+            outY = 0;
+            return true;
+        }
+
+        for (int i = 0; i < rows.GetSize(); ++i) 
+        {
+            int x = rows[i].x;
+            int y = rows[i].y;
 
             // Check if the glyph fits at this position
-            if (x + glyphSize.width <= atlasSize && y + glyphSize.height <= atlasSize) {
-                // Check if the placement improves the packing
-                if (y + glyphSize.height < bestHeight || (y + glyphSize.height == bestHeight && x < bestWidth)) {
-                    bestX = x;
-                    bestY = y;
-                    bestWidth = x + glyphSize.width;
-                    bestHeight = y + glyphSize.height;
+            if (x + glyphSize.width <= atlasSize && y + glyphSize.height <= atlasSize)
+            {
+                if (rows[i].height >= glyphSize.height && rows[i].height < bestRowHeight)
+                {
+                    bestRowHeight = rows[i].height;
+                    bestRowIndex = i;
                 }
             }
         }
 
-        if (bestX == -1 || bestY == -1) 
+        if (bestRowIndex == -1)
         {
-            return false;
+            RowSegment lastRow = rows.Top();
+            if (lastRow.y + lastRow.height + glyphSize.height > atlasSize)
+            {
+	            return false;
+            }
+
+            rows.Add({ .x = glyphSize.width, .y = lastRow.y + lastRow.height, .height = glyphSize.height });
+
+            outX = 0;
+            outY = rows.Top().y;
+
+	        return true;
         }
 
-        outX = bestX;
-        outY = bestY;
+        outX = rows[bestRowIndex].x;
+        outY = rows[bestRowIndex].y;
+
+        rows[bestRowIndex].x += glyphSize.width;
 
         return true;
-    }
-
-    void FFontAtlas::AtlasImage::UpdateSkyline(int x, int y, int width, int height)
-    {
-        return;
-
-        skyline.push_back({ x, y + height, width });
-
-        // Sort the skyline by x coordinate
-        std::sort(skyline.begin(), skyline.end(), [](const SkylineSegment& a, const SkylineSegment& b) {
-            return a.x < b.x;
-            });
-
-        // Merge skyline segments
-        for (size_t i = 0; i < skyline.size() - 1; ++i) {
-            if (skyline[i].x + skyline[i].width >= skyline[i + 1].x) {
-                skyline[i].width = std::max(skyline[i].x + skyline[i].width, skyline[i + 1].x + skyline[i + 1].width) - skyline[i].x;
-                skyline.erase(skyline.begin() + i + 1);
-                --i;
-            }
-        }
     }
 
 } // namespace CE
