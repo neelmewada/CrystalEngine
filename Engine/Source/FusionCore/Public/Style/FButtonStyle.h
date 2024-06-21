@@ -45,6 +45,9 @@ namespace CE
         FIELD()
         Color borderColor{};
 
+        //! @brief The amount of distance the content of button should move in +Y direction when pressed
+        FIELD()
+        f32 contentMoveY = 2.5f;
     };
     
 } // namespace CE

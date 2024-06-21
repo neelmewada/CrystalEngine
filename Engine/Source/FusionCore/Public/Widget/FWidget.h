@@ -21,6 +21,10 @@ namespace CE
 
         virtual void PlaceSubWidgets();
 
+        virtual void ApplyIntrinsicSizeConstraints();
+
+        virtual void ApplySizeConstraints();
+
         void UpdateLocalTransform();
 
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
@@ -95,16 +99,17 @@ namespace CE
         virtual void Construct();
 
         //! @brief Computed position in parent widget's coordinate space.
-        Vec2 computedPosition{};
+        Vec2 computedPosition;
 
-        Vec2 computedSize{};
+        Vec2 computedSize;
 
-        Vec2 intrinsicSize{};
+        Vec2 intrinsicSize;
+
+        //! @brief Global position of the widget, i.e. position in bottom-most context.
+        Vec2 globalPosition;
 
         //! @brief Transformation matrix in parent widget's coordinate space.
         Matrix4x4 localTransform;
-
-        Matrix4x4 globalTransform;
 
         FIELD()
         CE::Name styleKey;
@@ -237,6 +242,12 @@ namespace CE
         FUSION_WIDGET;
     };
 
+    template<typename TWidget> requires !TIsAbstract<TWidget>::Value && TIsBaseClassOf<FWidget, TWidget>::Value
+    TWidget& GetDefaultWidget()
+    {
+        CE_ASSERT(TWidget::Type()->CanBeInstantiated(), "The given widget class ({}) is an abstract class!", TWidget::Type()->GetName());
+        return *GetMutableDefaults<TWidget>();
+    }
     
 } // namespace CE
 

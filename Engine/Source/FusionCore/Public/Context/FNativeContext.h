@@ -42,6 +42,8 @@ namespace CE
 
 		void OnWidgetDestroyed(FWidget* widget) override;
 
+		FPainter* GetPainter() override;
+
 	protected:
 
 		void Init();

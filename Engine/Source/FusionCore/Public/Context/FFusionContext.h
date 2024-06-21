@@ -58,6 +58,10 @@ namespace CE
 
         void SetClearScreen(bool set);
 
+        void SetClearColor(const Color& color);
+
+        virtual FPainter* GetPainter();
+
         // - Rendering / FrameGraph -
 
         virtual void EmplaceFrameAttachments();
@@ -90,6 +94,9 @@ namespace CE
 
         FIELD()
         b8 clearScreen = true;
+
+        FIELD()
+        Color clearColor = Color::Clear();
 
         bool layoutDirty = true;
         bool dirty = true;

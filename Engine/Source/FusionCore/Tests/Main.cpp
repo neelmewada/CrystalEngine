@@ -265,6 +265,13 @@ TEST(FusionCore, Rendering)
 	FStyleManager* rootStyle = CreateObject<FStyleManager>(rootContext, "RootStyleManager");
 	rootContext->SetStyleManager(rootStyle);
 
+	// - Default Styling -
+	{
+		GetDefaultWidget<FButton>()
+			.Padding(Vec4(10, 5, 10, 5))
+			;
+	}
+
 	// - Styling -
 	{
 		{
@@ -311,8 +318,8 @@ TEST(FusionCore, Rendering)
 		previousTime = curTime;
 	}
 
-	Vec2 localPos = mainWidget->button->GetComputedPosition();
-	Vec2 globalPos = mainWidget->button->GetGlobalPosition();
+	Vec2 localPos = mainWidget->subWidget->GetComputedPosition();
+	Vec2 globalPos = mainWidget->subWidget->GetGlobalPosition();
 
 	PlatformApplication::Get()->RemoveTickHandler(handle);
 

@@ -33,13 +33,59 @@ namespace CE
             return;
 
         Vec4 childMargin = m_Child->GetMargin();
+        Vec2 childIntrinsicSize = m_Child->GetIntrinsicSize();
+        Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,
+            m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
         m_Child->computedPosition = Vec2(m_Padding.left + childMargin.left, m_Padding.top + childMargin.top);
-        m_Child->computedSize = computedSize - 
-            Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right, 
+        m_Child->computedSize = computedSize -
+            Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,
                 m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
-        //m_Child->globalComputedPosition = globalComputedPosition + m_Child->computedPosition;
+        CE::VAlign childVAlign = m_Child->GetVAlign();
+        CE::HAlign childHAlign = m_Child->GetHAlign();
+
+        switch (childVAlign)
+        {
+        case VAlign::Auto:
+        case VAlign::Fill:
+            m_Child->computedSize.height = computedSize.height - (m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
+            m_Child->computedPosition.y = m_Padding.top + childMargin.top;
+	        break;
+        case VAlign::Top:
+            m_Child->computedSize.height = childIntrinsicSize.height;
+            m_Child->computedPosition.y = m_Padding.top + childMargin.top;
+	        break;
+        case VAlign::Center:
+            m_Child->computedSize.height = childIntrinsicSize.height;
+            m_Child->computedPosition.y = m_Padding.top + childMargin.top + (availableSize.height - childIntrinsicSize.height) * 0.5f;
+	        break;
+        case VAlign::Bottom:
+            m_Child->computedSize.height = childIntrinsicSize.height;
+            m_Child->computedPosition.y = m_Padding.top + childMargin.top + (availableSize.height - childIntrinsicSize.height);
+	        break;
+        }
+
+        switch (childHAlign)
+        {
+        case HAlign::Auto:
+        case HAlign::Fill:
+            m_Child->computedSize.width = computedSize.width - (m_Padding.left + m_Padding.right + childMargin.left + childMargin.right);
+            m_Child->computedPosition.x = m_Padding.left + childMargin.left;
+            break;
+        case HAlign::Left:
+            m_Child->computedSize.width = childIntrinsicSize.width;
+            m_Child->computedPosition.x = m_Padding.left + childMargin.left;
+            break;
+        case HAlign::Center:
+            m_Child->computedSize.width = childIntrinsicSize.width;
+            m_Child->computedPosition.x = m_Padding.left + childMargin.left + (availableSize.width - childIntrinsicSize.width) * 0.5f;
+            break;
+        case HAlign::Right:
+            m_Child->computedSize.width = childIntrinsicSize.width;
+            m_Child->computedPosition.x = m_Padding.left + childMargin.left + (availableSize.width - childIntrinsicSize.width);
+            break;
+        }
 
         m_Child->PlaceSubWidgets();
     }

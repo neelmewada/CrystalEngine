@@ -46,7 +46,7 @@ namespace CE
 
         // - Public API -
 
-        FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize);
+        FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
 
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
@@ -55,7 +55,7 @@ namespace CE
 
         void OnBeforeDestroy() override;
 
-        void AddGlyphs(const Array<u32>& characterSet, u32 fontSize);
+        void AddGlyphs(const Array<u32>& characterSet, u32 fontSize, bool isBold = false, bool isItalic = false);
 
         RPI::Texture* fontAtlas = nullptr;
 
@@ -109,7 +109,10 @@ namespace CE
         FFontMetrics metrics{};
 
         FT_Library ft = nullptr;
-        FT_Face face = nullptr;
+        FT_Face regular = nullptr; u8* regularData = nullptr;
+        FT_Face italic = nullptr; u8* italicData = nullptr;
+        FT_Face bold = nullptr; u8* boldData = nullptr;
+        FT_Face boldItalic = nullptr; u8* boldItalicData = nullptr;
 
         friend class FFontManager;
         friend class FusionRenderer;

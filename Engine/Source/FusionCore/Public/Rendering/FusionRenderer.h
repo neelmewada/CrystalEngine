@@ -23,7 +23,6 @@ namespace CE
         static constexpr u32 CoordinateStackItemIncrement = 64;
         static constexpr u32 OpacityStackItemIncrement = 128;
 
-
         FusionRenderer();
 
         void Init(const FusionRendererInitInfo& initInfo);
@@ -55,6 +54,8 @@ namespace CE
         void PushOpacity(f32 opacity);
         void PopOpacity();
 
+        Vec2 CalculateTextSize(const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         // - Draw API -
 
         void PushChildCoordinateSpace(const Matrix4x4& transform);
@@ -64,6 +65,8 @@ namespace CE
         void PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& shape);
 
         void PopClipShape();
+
+        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
     protected:
 
@@ -149,7 +152,6 @@ namespace CE
 
         FDrawItem2D& DrawCustomItem(FDrawType drawType, Vec2 pos, Vec2 size);
         FDrawItem2D& DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
-        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2());
 
         // - Config -
 

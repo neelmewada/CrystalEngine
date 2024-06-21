@@ -24,7 +24,7 @@ namespace CE
 
     void FWidget::OnPaint(FPainter* painter)
     {
-        globalTransform = painter->GetTopCoordinateSpace();
+        globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
     }
 
     void FWidget::HandleEvent(FEvent* event)
@@ -117,6 +117,18 @@ namespace CE
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right, 
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
+        ApplyIntrinsicSizeConstraints();
+    }
+
+    void FWidget::PlaceSubWidgets()
+    {
+        ApplySizeConstraints();
+
+        UpdateLocalTransform();
+    }
+
+    void FWidget::ApplyIntrinsicSizeConstraints()
+    {
         intrinsicSize.width = Math::Clamp(intrinsicSize.width,
             m_MinWidth + m_Padding.left + m_Padding.right,
             m_MaxWidth + m_Padding.left + m_Padding.right);
@@ -126,9 +138,15 @@ namespace CE
             m_MaxHeight + m_Padding.top + m_Padding.bottom);
     }
 
-    void FWidget::PlaceSubWidgets()
+    void FWidget::ApplySizeConstraints()
     {
-        UpdateLocalTransform();
+        computedSize.width = Math::Clamp(computedSize.width, 
+            m_MinWidth + m_Padding.left + m_Padding.right,
+            m_MaxWidth + m_Padding.left + m_Padding.right);
+
+        computedSize.height = Math::Clamp(computedSize.height,
+            m_MinHeight + m_Padding.bottom + m_Padding.top,
+            m_MaxHeight + m_Padding.bottom + m_Padding.top);
     }
 
     void FWidget::UpdateLocalTransform()
@@ -202,7 +220,7 @@ namespace CE
 
     Vec2 FWidget::GetGlobalPosition() const
     {
-        return globalTransform * Vec4(computedPosition.x, computedPosition.y, 0, 1);
+        return globalPosition;
     }
 
     void FWidget::Construct()

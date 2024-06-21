@@ -111,6 +111,16 @@ namespace CE
 		return result;
 	}
 
+	bool StructType::HasEventFields()
+	{
+        if (!fieldsCached)
+        {
+            CacheAllFields();
+        }
+
+        return hasEventFields;
+	}
+
     FieldType* StructType::GetFirstField()
     {
         CacheAllFields();
@@ -294,6 +304,11 @@ namespace CE
         for (int i = 0; i < cachedFields.GetSize(); i++)
         {
             cachedFields[i].instanceOwner = this;
+
+            if (cachedFields[i].IsEventField())
+            {
+                hasEventFields = true;
+            }
 
             if (i == cachedFields.GetSize() - 1)
             {

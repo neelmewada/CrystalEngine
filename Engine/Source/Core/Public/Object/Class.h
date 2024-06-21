@@ -135,17 +135,17 @@ namespace CE
 			return 0;
 		}
 
-		CE_INLINE u32 GetLocalFieldCount() const
+		u32 GetLocalFieldCount() const
 		{
 			return localFields.GetSize();
 		}
 
-		CE_INLINE FieldType* GetLocalFieldAt(u32 index)
+		FieldType* GetLocalFieldAt(u32 index)
 		{
 			return &localFields[index];
 		}
 
-		CE_INLINE u32 GetFunctionCount()
+		u32 GetFunctionCount()
 		{
 			if (!functionsCached)
 			{
@@ -154,7 +154,7 @@ namespace CE
 			return cachedFunctions.GetSize();
 		}
 
-		CE_INLINE FunctionType* GetFunctionAt(u32 index)
+		FunctionType* GetFunctionAt(u32 index)
 		{
 			if (!functionsCached)
 			{
@@ -166,25 +166,27 @@ namespace CE
 		Array<FunctionType*> GetAllFunctions();
 		Array<FunctionType*> GetAllSignals();
 
-		CE_INLINE u32 GetLocalFunctionCount() const
+		u32 GetLocalFunctionCount() const
 		{
 			return localFunctions.GetSize();
 		}
 
-		CE_INLINE FunctionType* GetLocalFunctionAt(u32 index)
+		FunctionType* GetLocalFunctionAt(u32 index)
 		{
 			return &localFunctions[index];
 		}
 
-		CE_INLINE u32 GetSuperTypesCount() const
+		u32 GetSuperTypesCount() const
 		{
 			return superTypeIds.GetSize();
 		}
 
-		CE_INLINE TypeId GetSuperType(u32 index) const
+		TypeId GetSuperType(u32 index) const
 		{
 			return superTypeIds[index];
 		}
+
+		bool HasEventFields();
 
 		FieldType* GetFirstField();
 
@@ -315,7 +317,7 @@ namespace CE
 		virtual void CacheAllFunctions();
 
 		template<typename StructOrClass, typename Field>
-		CE_INLINE void AddField(const char* name, Field StructOrClass::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
+		void AddField(const char* name, Field StructOrClass::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
 		{
 			constexpr bool isPointer = std::is_pointer_v<Field>;
 			typedef RemovePointerFromType<Field> _Type0;
@@ -404,7 +406,7 @@ namespace CE
 		}
 
 		template<typename... SuperTypes>
-		CE_INLINE void AddSuper()
+		void AddSuper()
 		{
 			TypeId ids[] = { CE::GetTypeId<SuperTypes>()... };
 			constexpr int count = sizeof(ids) / sizeof(TypeId);
@@ -415,7 +417,7 @@ namespace CE
 		}
 
 		template<>
-		CE_INLINE void AddSuper<>() {}
+		void AddSuper<>() {}
 
 		// Inherited + Local fields
 		SharedMutex cachedFieldsMutex{};
@@ -436,6 +438,7 @@ namespace CE
 		Atomic<bool> functionsCached = false;
 		Atomic<bool> attributesCached = false;
 		u32 size = 0;
+		bool hasEventFields = false;
 
 		//RecursiveMutex rttiMutex{};
 
@@ -776,7 +779,7 @@ namespace CE
 	*/
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	FORCE_INLINE const TClass* GetDefaults()
+	const TClass* GetDefaults()
 	{
 		ClassType* classType = TClass::Type();
 		if (classType == nullptr)
@@ -785,7 +788,7 @@ namespace CE
 	}
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	FORCE_INLINE TClass* GetMutableDefaults()
+	TClass* GetMutableDefaults()
 	{
 		ClassType* classType = TClass::StaticType();
 		if (classType == nullptr)
@@ -798,7 +801,7 @@ namespace CE
 	 */
 
 	template<typename TCastTo, typename TCastFrom>
-    FORCE_INLINE TCastTo* DynamicCast(TCastFrom* from)
+    TCastTo* DynamicCast(TCastFrom* from)
 	{
 		if constexpr (std::is_void_v<TCastFrom>)
 		{

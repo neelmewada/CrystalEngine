@@ -147,6 +147,16 @@ namespace CE
 		}
 	}
 
+	void FFusionContext::SetClearColor(const Color& color)
+	{
+		clearColor = color;
+	}
+
+	FPainter* FFusionContext::GetPainter()
+	{
+		return nullptr;
+	}
+
 	void FFusionContext::EmplaceFrameAttachments()
 	{
 		for (FFusionContext* childContext : childContexts)

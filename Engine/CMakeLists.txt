@@ -9,8 +9,8 @@ add_subdirectory(Assets)
 # Shaders
 add_subdirectory(Shaders)
 
-# Styles
-add_subdirectory(Styles)
+# Resources
+add_subdirectory(Resources)
 
 ######################################
 # Core Modules

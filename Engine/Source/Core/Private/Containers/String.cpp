@@ -12,7 +12,7 @@ namespace CE
 
     String::String()
     {
-        Reserve(STRING_BUFFER_SIZE - 1);
+        
     }
 
     String::String(std::string string) : String(string.c_str())

@@ -35,16 +35,17 @@ namespace CE
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
 			.Opacity(1.0f)
-            .Padding(buttonPadding)
+            //.Padding(buttonPadding)
             ;
         
         if (button.GetChild() == nullptr)
             return;
 
         FWidget& child = *button.GetChild();
+        f32 childHeight = child.GetComputedSize().y;
 
         child
-            .Translation(Vec2(0, button.IsPressed() && button.IsHovered() ? 5 : 0))
+            .Translation(Vec2(0, button.IsPressed() && button.IsHovered() ? childHeight * 0.1f : 0))
             ;
     }
 

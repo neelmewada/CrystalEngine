@@ -1242,7 +1242,7 @@ public:
 
 	static int releaseCount;
 
-	void Release()
+	virtual ~ReflectionFieldElement()
 	{
 		releaseCount++;
 	}

@@ -25,6 +25,8 @@ namespace CE
         static FusionApplication* Get();
         static FusionApplication* TryGet();
 
+        FFontManager* GetFontManager() const { return fontManager; }
+
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();

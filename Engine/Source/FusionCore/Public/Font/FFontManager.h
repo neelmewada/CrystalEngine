@@ -15,7 +15,10 @@ namespace CE
 
 		const Name& GetDefaultFontFamily() const;
 
-		bool RegisterFont(const Name& fontName, const Array<CharRange>& characterSets, MemoryStream* ttfFontFile);
+		u32 GetDefaultFontSize() const;
+
+		bool RegisterFont(const Name& fontName, const Array<CharRange>& characterSets, 
+			Stream* regularFontFile, Stream* italicFontFile = nullptr, Stream* boldFontFile = nullptr, Stream* boldItalicFontFile = nullptr);
 
 		bool DeregisterFont(const Name& fontName);
 
@@ -25,6 +28,8 @@ namespace CE
 		void Flush(u32 imageIndex);
 
 	private:
+
+		bool LoadFontFace(Stream* ttfFile, FT_Face& outFace, u8** outData);
 
 		HashMap<Name, FFontAtlas*> fontAtlases;
 

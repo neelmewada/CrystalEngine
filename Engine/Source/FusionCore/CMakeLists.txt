@@ -36,6 +36,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreApplication
             CE::CoreRHI
             CE::CoreRPI
+        TARGETS EngineResources
     RUNTIME_DEPENDENCIES
 
 )

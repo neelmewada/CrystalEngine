@@ -8,15 +8,10 @@
 #include <ft2build.h>
 #include "freetype/freetype.h"
 
+#include "FontConstants.inl"
+
 namespace CE
 {
-    static constexpr SIZE_T FontAtlasSize = 2048;
-    static constexpr u64 GlyphBufferInitialCount = 512;
-    static constexpr f32 GlyphBufferGrowRatio = 0.25f;
-    static constexpr u32 DefaultFontSize = 13;
-
-    static const Array<u32> gFontSizes = { 10, 13, 15, 18, 22, 28, 36, 64 };
-    //static const Array<int> tempFontSizes = { 8, 10, 12, 14, 18, 22, 26, 30, 36, 42, 50, 64, 76, 90, 112, 128, 150, 155 };
 
     FFontAtlas::FFontAtlas()
     {
@@ -29,20 +24,20 @@ namespace CE
 
         if (atlasImageMips.NonEmpty())
             return;
-        if (face == nullptr)
+        if (regular == nullptr)
             return;
 
         int numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 
         glyphBuffer.Init("GlyphBuffer", GlyphBufferInitialCount, numFrames);
 
-        f32 unitsPerEM = face->units_per_EM;
+        f32 unitsPerEM = regular->units_per_EM;
         f32 scaleFactor = (f32)1.0f / unitsPerEM; // 1.0f is used as a font size here
 
-        metrics.ascender = face->ascender * scaleFactor;
-        metrics.descender = face->descender * scaleFactor;
-        metrics.lineGap = (face->height - (face->ascender - face->descender)) * scaleFactor;
-        metrics.lineHeight = (face->ascender - face->descender + metrics.lineGap) * scaleFactor;
+        metrics.ascender = regular->ascender * scaleFactor;
+        metrics.descender = regular->descender * scaleFactor;
+        metrics.lineGap = (regular->height - (regular->ascender - regular->descender)) * scaleFactor;
+        metrics.lineHeight = (regular->ascender - regular->descender + metrics.lineGap) * scaleFactor;
 
         Ptr<FAtlasImage> atlas = new FAtlasImage;
         atlas->ptr = new u8[FontAtlasSize * FontAtlasSize];
@@ -61,7 +56,9 @@ namespace CE
             CMImage image = CMImage::LoadRawImageFromMemory(atlasImageMip->ptr, atlasImageMip->atlasSize, atlasImageMip->atlasSize,
                 CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
 
+#if PAL_TRAIT_BUILD_EDITOR
             image.EncodeToPNG(PlatformDirectories::GetLaunchDir() / String::Format("Temp/FontAtlas{}.png", idx++));
+#endif
 
             images.Add(image);
         }
@@ -89,7 +86,7 @@ namespace CE
         fontSrg->FlushBindings();
     }
 
-    FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize)
+    FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
         ZoneScoped;
 
@@ -124,7 +121,7 @@ namespace CE
 
         if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
         {
-            AddGlyphs(charSet, fontSizeInAtlas);
+            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
         }
 
         int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
@@ -132,7 +129,7 @@ namespace CE
 
         if (!atlasMip->glyphsByFontSize[fontSizeInAtlas].KeyExists(charCode))
         {
-            AddGlyphs(charSet, fontSizeInAtlas);
+            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
         }
 
         return atlasMip->glyphsByFontSize[fontSizeInAtlas][charCode];
@@ -203,12 +200,32 @@ namespace CE
         glyphDataList.Free();
     }
 
-    void FFontAtlas::AddGlyphs(const Array<u32>& charSet, u32 fontSize)
+    void FFontAtlas::AddGlyphs(const Array<u32>& charSet, u32 fontSize, bool isBold, bool isItalic)
     {
         ZoneScoped;
 
         if (charSet.IsEmpty())
             return;
+
+        FT_Face face = regular;
+
+        if (isBold && isItalic)
+        {
+            if (boldItalic != nullptr)
+                face = boldItalic;
+            else if (bold != nullptr)
+                face = bold;
+        }
+        else if (isBold)
+        {
+            if (bold != nullptr)
+                face = bold;
+        }
+        else if (isItalic)
+        {
+            if (italic != nullptr)
+                face = italic;
+        }
 
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
@@ -219,13 +236,14 @@ namespace CE
         for (int i = 0; i < charSet.GetSize(); ++i)
         {
             FT_ULong charCode = charSet[i];
+            char c = charCode;
 
             if (atlasMip->glyphsByFontSize[fontSize].KeyExists(charCode))
             {
                 continue;
             }
 
-            FT_Error error = FT_Load_Char(face, charCode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+            FT_Error error = FT_Load_Char(face, charCode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL);
             if (error != 0)
             {
 	            continue;

@@ -1,16 +1,15 @@
 #include "FusionCore.h"
 
-#include "stb_image_write.h"
-
 #undef DLL_EXPORT
 #define FT_PUBLIC_FUNCTION_ATTRIBUTE
 
 #include <ft2build.h>
 #include "freetype/freetype.h"
 
+#include "FontConstants.inl"
+
 namespace CE
 {
-    extern RawData GetRobotoFont();
 
     FFontManager::FFontManager()
     {
@@ -21,8 +20,6 @@ namespace CE
     {
         FT_Init_FreeType(&ft);
 
-        RawData robotoFontFile = GetRobotoFont();
-
         Array<CharRange> englishCharSets{};
         englishCharSets.Add(CharRange('a', 'z'));
         englishCharSets.Add(CharRange('A', 'Z'));
@@ -32,20 +29,43 @@ namespace CE
         englishCharSets.Add(CharRange(91, 96));
         englishCharSets.Add(CharRange(123, 126));
 
-        MemoryStream stream = MemoryStream(robotoFontFile.data, robotoFontFile.dataSize, Stream::Permissions::ReadOnly);
+        IO::Path fontDirectory = PlatformDirectories::GetLaunchDir() / "Engine/Resources/Fonts";
+        IO::Path robotoRegular = fontDirectory / "Roboto-Regular.ttf";
+        IO::Path robotoItalic = fontDirectory / "Roboto-Italic.ttf";
+        IO::Path robotoBold = fontDirectory / "Roboto-Bold.ttf";
+        IO::Path robotoBoldItalic = fontDirectory / "Roboto-BoldItalic.ttf";
 
-        RegisterFont(GetDefaultFontFamily(), englishCharSets, &stream);
+        FileStream regular = FileStream(robotoRegular, Stream::Permissions::ReadOnly);
+        FileStream italic = FileStream(robotoItalic, Stream::Permissions::ReadOnly);
+        FileStream bold = FileStream(robotoBold, Stream::Permissions::ReadOnly);
+        FileStream boldItalic = FileStream(robotoBoldItalic, Stream::Permissions::ReadOnly);
+
+        RegisterFont(GetDefaultFontFamily(), englishCharSets, &regular, &italic, &bold, &boldItalic);
     }
 
     void FFontManager::Shutdown()
     {
+        auto deleteFace = [](FT_Face& face, u8*& data)
+            {
+                if (face != nullptr)
+                {
+                    FT_Done_Face(face);
+                    face = nullptr;
+                }
+	            if (data != nullptr)
+	            {
+                    delete[] data;
+                    data = nullptr;
+	            }
+            };
+
         for (auto& [fontName, atlas] : fontAtlases)
         {
-	        if (atlas->face)
-	        {
-                FT_Done_Face(atlas->face);
-                atlas->face = nullptr;
-	        }
+            deleteFace(atlas->regular, atlas->regularData);
+            deleteFace(atlas->italic, atlas->italicData);
+            deleteFace(atlas->bold, atlas->boldData);
+            deleteFace(atlas->boldItalic, atlas->boldItalicData);
+	        
             atlas->ft = nullptr;
 
             atlas->Destroy();
@@ -63,11 +83,35 @@ namespace CE
         return robotoFamily;
     }
 
-    bool FFontManager::RegisterFont(const Name& fontName, const Array<CharRange>& characterSets,
-                                    MemoryStream* ttfFontFile)
+    u32 FFontManager::GetDefaultFontSize() const
     {
-        if (!fontName.IsValid() || characterSets.IsEmpty() || ttfFontFile == nullptr ||
-            !ttfFontFile->CanRead() || ttfFontFile->GetLength() == 0)
+        return DefaultFontSize;
+    }
+
+    bool FFontManager::LoadFontFace(Stream* ttfFile, FT_Face& outFace, u8** outData)
+    {
+        if (ttfFile == nullptr || !ttfFile->CanRead() || ttfFile->GetLength() == 0)
+            return false;
+
+        *outData = new u8[ttfFile->GetLength()];
+
+        ttfFile->Read(*outData, ttfFile->GetLength());
+
+        if (FT_New_Memory_Face(ft, *outData, ttfFile->GetLength(), 0, &outFace))
+        {
+	        return false;
+        }
+
+        return true;
+    }
+
+    bool FFontManager::RegisterFont(const Name& fontName, const Array<CharRange>& characterSets,
+        Stream* regularFontFile, Stream* italicFontFile, Stream* boldFontFile, Stream* boldItalicFontFile)
+    {
+        ZoneScoped;
+
+        if (!fontName.IsValid() || characterSets.IsEmpty() || regularFontFile == nullptr ||
+            !regularFontFile->CanRead() || regularFontFile->GetLength() == 0)
             return false;
 
         if (fontAtlases.KeyExists(fontName) && fontAtlases[fontName] != nullptr)
@@ -75,17 +119,23 @@ namespace CE
             return true;
         }
 
-        FFontAtlas* fontAtlas = CreateObject<FFontAtlas>(this, fontName.GetString());
-
         FT_Face face;
+        u8* faceData = nullptr;
 
-        if (FT_New_Memory_Face(ft, (const FT_Byte*)ttfFontFile->GetRawDataPtr(), ttfFontFile->GetLength(), 0, &face))
+        if (!LoadFontFace(regularFontFile, face, &faceData))
         {
-            return false;
+	        return false;
         }
 
+        FFontAtlas* fontAtlas = CreateObject<FFontAtlas>(this, fontName.GetString());
+
+        LoadFontFace(italicFontFile, fontAtlas->italic, &fontAtlas->italicData);
+        LoadFontFace(boldFontFile, fontAtlas->bold, &fontAtlas->boldData);
+        LoadFontFace(boldItalicFontFile, fontAtlas->boldItalic, &fontAtlas->boldItalicData);
+
         fontAtlas->ft = ft;
-        fontAtlas->face = face;
+        fontAtlas->regular = face;
+        fontAtlas->regularData = faceData;
 
         Array<u32> charSet{};
         charSet.Reserve(256);
@@ -113,6 +163,8 @@ namespace CE
 
     bool FFontManager::DeregisterFont(const Name& fontName)
     {
+        ZoneScoped;
+
         if (!fontAtlases.KeyExists(fontName))
             return false;
 
@@ -138,6 +190,8 @@ namespace CE
 
     void FFontManager::Flush(u32 imageIndex)
     {
+        ZoneScoped;
+
         for (auto& [fontName, atlas] : fontAtlases)
         {
             atlas->Flush(imageIndex);

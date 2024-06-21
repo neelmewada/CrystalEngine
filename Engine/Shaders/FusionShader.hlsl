@@ -303,13 +303,13 @@ float4 FragMain(PSInput input) : SV_TARGET
     else if (_DrawList[InstanceIdx].drawType == DRAW_Text)
     {
         const uint charIndex = _DrawList[InstanceIdx].shapeOrCharIndex;
-        const GlyphItem glyphItem = _GlyphItems[InstanceIdx];
+        const GlyphItem glyphItem = _GlyphItems[charIndex];
         const float2 uvMin = glyphItem.atlasUV.xy;
-        const float2 uvMax = glyphItem.atlasUV.zy;
+        const float2 uvMax = glyphItem.atlasUV.zw;
 
-        float alpha = _FontAtlas.Sample(_FontAtlasSampler, uvMin + uvMax * uv);
+        float alpha = _FontAtlas.Sample(_FontAtlasSampler, uvMin + (uvMax - uvMin) * uv).r;
 
-        pixelColor.rgb = penColor.rgb * alpha;
+        pixelColor.rgb = penColor.rgb;
         pixelColor.a = penColor.a * alpha;
     }
 

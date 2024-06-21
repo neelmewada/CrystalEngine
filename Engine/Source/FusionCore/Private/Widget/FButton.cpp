@@ -64,10 +64,10 @@ namespace CE
 
         Vec2 pos = GetComputedPosition();
 
-        painter->SetPen(FPen(Color::White()));
-        painter->SetFont(FFont("Roboto", 22));
+        //painter->SetPen(FPen(Color::White()));
+        //painter->SetFont(FFont("Roboto", 18));
 
-        painter->DrawText("Hello", pos);
+        //Vec2 size = painter->DrawText("This is a sentence that is quite long!", pos, Vec2(150, 0));
     }
 
     void FButton::SetState(FButtonState newState)

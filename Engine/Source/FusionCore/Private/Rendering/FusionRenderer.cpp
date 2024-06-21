@@ -238,8 +238,114 @@ namespace CE
 		return drawItemList.Last();
 	}
 
-	Vec2 FusionRenderer::DrawText(const String& text, Vec2 pos, Vec2 size)
+	Vec2 FusionRenderer::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
+		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+
+		Name fontFamily = font.GetFamily();
+		int fontSize = font.GetFontSize();
+
+		if (fontSize <= 0)
+			fontSize = fontManager->GetDefaultFontSize();
+		if (!fontFamily.IsValid())
+			fontFamily = fontManager->GetDefaultFontFamily();
+
+		fontSize = Math::Max(fontSize, 6);
+
+		const bool isFixedWidth = width > 0;
+
+		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+		if (fontAtlas == nullptr)
+			return Vec2();
+
+		const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+		const float startY = metrics.ascender * (f32)fontSize;
+		constexpr float startX = 0;
+
+		float maxX = startX;
+		float maxY = startY;
+
+		Vec3 curPos = Vec3(startX, startY, 0);
+
+		Vec2 finalSize;
+
+		int totalCharacters = 0;
+		int breakCharIdx = -1;
+		int idx = 0;
+
+		for (int i = 0; i < text.GetLength(); ++i)
+		{
+			char c = text[i];
+
+			if (c == ' ' || c == '-' || c == '\\' || c == '/')
+			{
+				breakCharIdx = i;
+			}
+
+			if (c == '\n')
+			{
+				breakCharIdx = -1;
+				curPos.x = startX;
+				curPos.y += metrics.lineHeight * fontSize;
+				continue;
+			}
+
+			FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
+			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
+
+			if (isFixedWidth && curPos.x + glyphWidth * (f32)fontSize / (f32)glyph.fontSize > width)
+			{
+				curPos.x = startX;
+				curPos.y += metrics.lineHeight * (f32)fontSize;
+
+				// Go through previous characters and bring them to this new-line
+				if (breakCharIdx >= 0)
+				{
+					for (int j = breakCharIdx + 1; j < i; j++)
+					{
+						char prevChar = text[j];
+						FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+						f32 atlasFontSize = prevGlyph.fontSize;
+
+						curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize;
+
+					}
+					breakCharIdx = -1;
+
+					curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize;
+				}
+				else if (wordWrap == FWordWrap::BreakWord)
+				{
+					breakCharIdx = -1;
+					curPos.x = startX;
+					curPos.y += metrics.lineHeight * fontSize;
+				}
+			}
+
+			curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
+
+			if (curPos.x > maxX)
+				maxX = curPos.x;
+			if (curPos.y + metrics.lineHeight * (f32)fontSize > maxY)
+				maxY = curPos.y + metrics.lineHeight * (f32)fontSize;
+
+			totalCharacters++;
+		}
+
+		finalSize = Vec2(maxX - startX, maxY - startY);
+		if (isFixedWidth)
+			finalSize.width = width;
+		return finalSize;
+	}
+
+	Vec2 FusionRenderer::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
+	{
+		ZoneScoped;
+
 		if (text.IsEmpty())
 			return Vec2();
 
@@ -290,24 +396,68 @@ namespace CE
 
 		Vec2 finalSize;
 
-		int whitespaceIdx = -1;
+		int breakCharIdx = -1;
 		int idx = 0;
 
 		for (int i = 0; i < text.GetLength(); ++i)
 		{
 			char c = text[i];
 
-			if (c == ' ')
+			if (c == ' ' || c == '-' || c == '\\' || c == '/')
 			{
-				whitespaceIdx = i;
+				breakCharIdx = i;
 			}
 
 			if (c == '\n')
 			{
-				whitespaceIdx = -1;
+				breakCharIdx = -1;
 				curPos.x = startX;
 				curPos.y += metrics.lineHeight * fontSize;
 				continue;
+			}
+
+			FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
+			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
+
+			// We are beyond the width
+			if (isFixedWidth && curPos.x + glyphWidth > startX + size.width)
+			{
+				// Go through previous characters and bring them to this new-line
+				if (breakCharIdx >= 0)
+				{
+					curPos.x = startX;
+					curPos.y += metrics.lineHeight * fontSize;
+
+					for (int j = breakCharIdx + 1; j < i; j++)
+					{
+						char prevChar = text[j];
+
+						FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+						f32 atlasFontSize = prevGlyph.fontSize;
+
+						FDrawItem2D& prevDrawItem = drawItemList[firstDrawItemIndex + j];
+
+						curPos.x += (f32)prevGlyph.xOffset * fontSize / atlasFontSize;
+
+						Vec2 prevQuadPos = curPos;
+						prevQuadPos.y -= (f32)prevGlyph.yOffset * fontSize / atlasFontSize;
+
+						Vec3 prevTranslation = Vec3(prevQuadPos.x, prevQuadPos.y, 0);
+
+						prevDrawItem.transform = Matrix4x4::Translation(prevTranslation) * Matrix4x4::Scale(prevDrawItem.quadSize);
+
+						curPos.x += (f32)prevGlyph.advance * (f32)fontSize / atlasFontSize - (f32)prevGlyph.xOffset * (f32)fontSize / atlasFontSize;
+
+					}
+					breakCharIdx = -1;
+				}
+				else if (wordWrap == FWordWrap::BreakWord)
+				{
+					breakCharIdx = -1;
+					curPos.x = startX;
+					curPos.y += metrics.lineHeight * fontSize;
+				}
 			}
 
 			drawItemList.Insert(FDrawItem2D());
@@ -332,12 +482,8 @@ namespace CE
 				drawItem.clipIndex = clipItemStack.Last();
 			}
 
-			FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize);
 
 			drawItem.charIndex = glyph.index;
-
-			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
-			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
 
 			drawItem.quadSize = Vec2(glyphWidth, glyphHeight);
 
@@ -347,6 +493,7 @@ namespace CE
 			quadPos.y -= (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize;
 
 			drawItem.transform = coordinateSpaceStack.Last() *
+				itemTransform *
 				Matrix4x4::Translation(Vec3(quadPos.x, quadPos.y)) *
 				Matrix4x4::Scale(Vec3(drawItem.quadSize.width, drawItem.quadSize.height, 1));
 
@@ -354,14 +501,16 @@ namespace CE
 
 			if (curPos.x > maxX)
 				maxX = curPos.x;
-			if (curPos.y + metrics.lineHeight * (f32)fontSize / (f32)glyph.fontSize > maxY)
-				maxY = curPos.y + metrics.lineHeight * (f32)fontSize / (f32)glyph.fontSize;
+			if (curPos.y + metrics.lineHeight * (f32)fontSize > maxY)
+				maxY = curPos.y + metrics.lineHeight * (f32)fontSize;
 
 			totalCharactersDrawn++;
 			idx++;
 		}
 
 		drawBatches.Top().drawItemCount += totalCharactersDrawn;
+
+		finalSize = Vec2(maxX - startX, maxY - startY);
 
 		return finalSize;
 	}

@@ -59,7 +59,7 @@ namespace LayoutTests
                     .VAlign(VAlign::Bottom)
                     .MinHeight(15)
                     .FillRatio(1.0)
-                    ),
+                ),
 
                 FAssignNew(FHorizontalStack, hStack2)
                 .ContentVAlign(VAlign::Center)
@@ -107,6 +107,7 @@ namespace RenderingTests
 
     void RenderingTestWidget::Construct()
     {
+        Super::Construct();
 
         Child(
             FNew(FStyledWidget)
@@ -138,14 +139,18 @@ namespace RenderingTests
                             CE_LOG(Info, All, "Button clicked!");
 		                })
                     .Style("Button.Primary")
-                    .MinHeight(30)
-                    .Name("Button"),
+                    .Name("Button")
+                    (
+                        FNew(FLabel)
+                        .FontSize(20)
+                        .Text("This is a text label")
+                    ),
 
                     FNew(FHorizontalStack)
                     .ContentVAlign(VAlign::Center)
                     .Name("HStack2")
                     (
-                        FNew(FStyledWidget)
+                        FAssignNew(FStyledWidget, subWidget)
                         .Background(FBrush(Color::Green()))
                         .BackgroundShape(FRectangle())
                         .FillRatio(1.0f)

@@ -401,7 +401,7 @@ namespace CE
 				swapChainAttachment.attachmentId = attachmentId;
 				if (clearScreen)
 				{
-					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+					swapChainAttachment.loadStoreAction.clearValue = clearColor.ToVec4();
 					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				}
 				else
@@ -465,6 +465,11 @@ namespace CE
 				widgetsPressedPerMouseButton[i] = nullptr;
 			}
 		}
+	}
+
+	FPainter* FNativeContext::GetPainter()
+	{
+		return painter;
 	}
 
 } // namespace CE

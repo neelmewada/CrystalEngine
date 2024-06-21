@@ -63,6 +63,11 @@ namespace CE
 		renderer->PopClipShape();
 	}
 
+	Vec2 FPainter::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
+	{
+		return renderer->CalculateTextSize(text, font, width, wordWrap);
+	}
+
 	void FPainter::DrawShape(const Rect& rect, const FShape& shape)
 	{
 		renderer->DrawShape(shape, rect.min, rect.GetSize());
@@ -83,9 +88,9 @@ namespace CE
 		renderer->DrawShape(FRoundedRectangle(cornerRadius), rect.min, rect.GetSize());
 	}
 
-	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size)
+	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
-		return renderer->DrawText(text, pos, size);
+		return renderer->DrawText(text, pos, size, wordWrap);
 	}
 
 } // namespace CE

@@ -159,6 +159,8 @@ namespace CE
 					child->computedSize.width = childIntrinsicSize.width;
 				}
 
+				child->ApplySizeConstraints();
+
 				curPos.x += child->computedSize.width + child->m_Margin.right;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
@@ -190,6 +192,8 @@ namespace CE
 				{
 					child->computedSize.height = childIntrinsicSize.height;
 				}
+
+				child->ApplySizeConstraints();
 
 				curPos.y += child->computedSize.height + child->m_Margin.bottom;
 			}

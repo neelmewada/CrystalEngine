@@ -50,6 +50,7 @@ namespace LayoutTests
 
 namespace RenderingTests
 {
+
 	CLASS()
 	class RenderingTestWidget : public FCompoundWidget
 	{
@@ -62,6 +63,7 @@ namespace RenderingTests
 
 		FStackBox* rootBox;
 		FButton* button;
+		FStyledWidget* subWidget;
 
 		FUSION_WIDGET;
 	};

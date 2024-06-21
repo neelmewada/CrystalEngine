@@ -61,8 +61,14 @@ namespace CE
         }
 
         FUSION_PROPERTY(BorderColor);
-
         FUSION_PROPERTY(BorderWidth);
+
+        Self& Border(const Color& borderColor, f32 borderWidth = 1.0f)
+        {
+            return (*this)
+        		.BorderColor(borderColor)
+				.BorderWidth(borderWidth);
+        }
 
         FUSION_PROPERTY(Opacity);
 

@@ -34,13 +34,16 @@ namespace CE
 
 		Class* clazz = GetClass();
 
-		for (Field* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+		if (clazz->HasEventFields())
 		{
-			if (!field->IsEventField())
-				continue;
+			for (Field* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+			{
+				if (!field->IsEventField())
+					continue;
 
-			IScriptEvent* scriptEvent = field->GetFieldEventValue(this);
-			scriptEvent->UnbindAll();
+				IScriptEvent* scriptEvent = field->GetFieldEventValue(this);
+				scriptEvent->UnbindAll();
+			}
 		}
 	}
 
@@ -55,7 +58,7 @@ namespace CE
 
 		//if (!IsDefaultInstance())
 		{
-			UnbindAllEvents();
+			//UnbindAllEvents();
 		}
 
 		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))

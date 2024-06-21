@@ -36,6 +36,8 @@ namespace CE
             return fltInt16;
         }
 
+        static constexpr f32 Infinity() { return NumericLimits<f32>::Infinity(); }
+
         CE_INLINE static f32 ToDegrees(f32 radians) { return TO_DEGREES(radians); }
         CE_INLINE static f32 ToRadians(f32 degrees) { return TO_RADIANS(degrees); }
 

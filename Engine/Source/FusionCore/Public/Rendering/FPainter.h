@@ -30,6 +30,8 @@ namespace CE
         void PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& clipShape = FRectangle());
         void PopClipShape();
 
+        Vec2 CalculateTextSize(const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         // - Draw API -
 
         void DrawShape(const Rect& rect, const FShape& shape);
@@ -40,7 +42,7 @@ namespace CE
 
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
 
-        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2());
+        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
     private:
 
