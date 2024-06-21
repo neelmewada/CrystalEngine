@@ -10,7 +10,7 @@ namespace CE
 
         FLabel();
 
-        void PrecomputeIntrinsicSize() override;
+        void CalculateIntrinsicSize() override;
 
         void OnPaint(FPainter* painter) override;
 

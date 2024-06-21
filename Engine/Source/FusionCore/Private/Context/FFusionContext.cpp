@@ -38,7 +38,7 @@ namespace CE
 
 		if (owningWidget && layoutDirty)
 		{
-			owningWidget->PrecomputeIntrinsicSize();
+			owningWidget->CalculateIntrinsicSize();
 
 			owningWidget->computedPosition = Vec2();
 			owningWidget->computedSize = availableSize;

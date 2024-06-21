@@ -17,7 +17,7 @@ namespace CE
 
         FFusionContext* GetContext();
 
-        virtual void PrecomputeIntrinsicSize();
+        virtual void CalculateIntrinsicSize();
 
         virtual void PlaceSubWidgets();
 

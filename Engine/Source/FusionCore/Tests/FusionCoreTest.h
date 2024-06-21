@@ -63,7 +63,10 @@ namespace RenderingTests
 
 		FStackBox* rootBox;
 		FButton* button;
+		FLabel* buttonLabel;
 		FStyledWidget* subWidget;
+
+		int hitCounter = 0;
 
 		FUSION_WIDGET;
 	};

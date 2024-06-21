@@ -25,9 +25,6 @@ namespace CE
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Vec4 buttonPadding = Vec4(10, 5, 10, 5);
-
-        FIELD()
         Color background{};
 
         FIELD()

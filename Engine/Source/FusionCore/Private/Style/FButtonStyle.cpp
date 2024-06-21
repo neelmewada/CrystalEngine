@@ -35,7 +35,6 @@ namespace CE
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
 			.Opacity(1.0f)
-            //.Padding(buttonPadding)
             ;
         
         if (button.GetChild() == nullptr)

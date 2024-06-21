@@ -65,6 +65,8 @@ namespace CE
         // Paint children
 	    Super::OnPaint(painter);
 
+        OnPaintContent(painter);
+
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {
             painter->PopClipShape();

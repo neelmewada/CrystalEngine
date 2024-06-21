@@ -8,7 +8,6 @@ namespace CE
     extern RawData GetFusionShaderFrag();
     extern RawData GetFusionShaderVertJson();
     extern RawData GetFusionShaderFragJson();
-    extern RawData GetRobotoFont();
 
     FusionApplication::FusionApplication()
     {

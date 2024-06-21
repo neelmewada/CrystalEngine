@@ -112,7 +112,7 @@ namespace CE
         parent = nullptr;
     }
 
-    void FWidget::PrecomputeIntrinsicSize()
+    void FWidget::CalculateIntrinsicSize()
     {
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right, 
             m_MinHeight + m_Padding.top + m_Padding.bottom);

@@ -62,6 +62,7 @@ namespace CE
 
 #include "Style/FStyle.h"
 #include "Style/FButtonStyle.h"
+#include "Style/FTextInputStyle.h"
 #include "Style/FStyleManager.h"
 
 #include "Widget/FWidget.h"
@@ -70,6 +71,7 @@ namespace CE
 #include "Widget/FStyledWidget.h"
 #include "Widget/FContainerWidget.h"
 #include "Widget/FButton.h"
+#include "Widget/Input/FTextInput.h"
 
 #include "Window/FWindow.h"
 

@@ -7,7 +7,8 @@ namespace CE
     {
 	    Default = 0,
         Hovered = BIT(0),
-        Pressed = BIT(1)
+        Pressed = BIT(1),
+        Disabled = BIT(2)
     };
     ENUM_CLASS_FLAGS(FButtonState);
 

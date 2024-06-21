@@ -8,13 +8,13 @@ namespace CE
 
     }
 
-    void FOverlayStack::PrecomputeIntrinsicSize()
+    void FOverlayStack::CalculateIntrinsicSize()
     {
         ZoneScoped;
 
         if (children.IsEmpty())
         {
-            Super::PrecomputeIntrinsicSize();
+            Super::CalculateIntrinsicSize();
             return;
         }
 
@@ -25,7 +25,7 @@ namespace CE
 
         for (FWidget* child : children)
         {
-            child->PrecomputeIntrinsicSize();
+            child->CalculateIntrinsicSize();
 
             Vec2 childSize = child->GetIntrinsicSize();
             Vec4 childMargin = child->GetMargin();

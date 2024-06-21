@@ -134,16 +134,16 @@ namespace RenderingTests
                     .Margin(Vec4(0, 0, 0, 5)),
 
                     FAssignNew(FButton, button)
-                    .OnPressed([&]
+                    .OnPressed([this]
 		                {
-                            CE_LOG(Info, All, "Button clicked!");
+                            buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
 		                })
                     .Style("Button.Primary")
                     .Name("Button")
                     (
-                        FNew(FLabel)
+                        FAssignNew(FLabel, buttonLabel)
                         .FontSize(14)
-                        .Text("This is a text label")
+                        .Text("Click Count 0")
                     ),
 
                     FNew(FHorizontalStack)

@@ -20,6 +20,8 @@ namespace CE
 
     protected:
 
+        virtual void OnPaintContent(FPainter* painter) {}
+
         void SetContextRecursively(FFusionContext* context) override;
 
         void OnAttachedToParent(FWidget* parent) override;

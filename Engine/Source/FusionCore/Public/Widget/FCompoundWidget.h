@@ -11,7 +11,7 @@ namespace CE
 
         FCompoundWidget();
 
-        void PrecomputeIntrinsicSize() override;
+        void CalculateIntrinsicSize() override;
 
         void PlaceSubWidgets() override;
 
@@ -30,6 +30,7 @@ namespace CE
         // Never call this function directly! Use AddChild() instead
         bool TryAddChild(FWidget* child) override;
 
+        // Never call this function directly! Use RemoveChild() instead
         bool TryRemoveChild(FWidget* child) override;
 
         void OnChildWidgetDestroyed(FWidget* child) override;

@@ -12,7 +12,7 @@ namespace CE
 
         // - Public API -
 
-        void PrecomputeIntrinsicSize() override;
+        void CalculateIntrinsicSize() override;
 
         void PlaceSubWidgets() override;
 

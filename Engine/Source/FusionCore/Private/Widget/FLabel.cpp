@@ -8,19 +8,19 @@ namespace CE
 
     }
 
-    void FLabel::PrecomputeIntrinsicSize()
+    void FLabel::CalculateIntrinsicSize()
     {
 		FFusionContext* context = GetContext();
         if (!context)
         {
-            Super::PrecomputeIntrinsicSize();
+            Super::CalculateIntrinsicSize();
 	        return;
         }
 
         FPainter* painter = context->GetPainter();
         if (!painter)
         {
-            Super::PrecomputeIntrinsicSize();
+            Super::CalculateIntrinsicSize();
 	        return;
         }
 

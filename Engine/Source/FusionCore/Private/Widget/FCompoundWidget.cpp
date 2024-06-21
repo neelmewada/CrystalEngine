@@ -8,7 +8,7 @@ namespace CE
 
     }
 
-    void FCompoundWidget::PrecomputeIntrinsicSize()
+    void FCompoundWidget::CalculateIntrinsicSize()
     {
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right,
             m_MinHeight + m_Padding.top + m_Padding.bottom);
@@ -16,7 +16,7 @@ namespace CE
         if (!m_Child)
             return;
 
-        m_Child->PrecomputeIntrinsicSize();
+        m_Child->CalculateIntrinsicSize();
 
         Vec2 childSize = m_Child->GetIntrinsicSize();
         const Vec4& childMargin = m_Child->GetMargin();
