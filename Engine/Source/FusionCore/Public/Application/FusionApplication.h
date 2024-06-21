@@ -31,7 +31,7 @@ namespace CE
         void PreShutdown();
         void Shutdown();
 
-        void Tick();
+        void Tick(bool isExposed = false);
 
         void SetRootContext(FFusionContext* context);
 
@@ -65,6 +65,7 @@ namespace CE
         bool rebuildFrameGraph = true;
         bool recompileFrameGraph = true;
         int curImageIndex = 0;
+        bool isExposed = false;
 
         FIELD()
         FFusionContext* rootContext = nullptr;

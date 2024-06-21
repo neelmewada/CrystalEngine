@@ -299,7 +299,7 @@ TEST(FusionCore, Rendering)
 
 	auto exposedTick = [&]
 		{
-			FusionApplication::Get()->Tick();
+			FusionApplication::Get()->Tick(true);
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
@@ -313,7 +313,7 @@ TEST(FusionCore, Rendering)
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
-		exposedTick();
+		FusionApplication::Get()->Tick();
 
 		previousTime = curTime;
 	}

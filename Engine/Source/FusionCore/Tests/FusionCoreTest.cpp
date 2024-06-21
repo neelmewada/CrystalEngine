@@ -142,7 +142,7 @@ namespace RenderingTests
                     .Name("Button")
                     (
                         FNew(FLabel)
-                        .FontSize(20)
+                        .FontSize(14)
                         .Text("This is a text label")
                     ),
 

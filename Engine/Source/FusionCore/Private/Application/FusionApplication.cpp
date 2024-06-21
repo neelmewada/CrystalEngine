@@ -75,9 +75,11 @@ namespace CE
         delete fusionShader; fusionShader = nullptr;
     }
 
-    void FusionApplication::Tick()
+    void FusionApplication::Tick(bool isExposed)
     {
         ZoneScoped;
+
+        this->isExposed = isExposed;
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {

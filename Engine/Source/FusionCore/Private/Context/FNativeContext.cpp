@@ -176,7 +176,7 @@ namespace CE
 
 		Super::Tick();
 
-		if (!owningWidget)
+		if (!owningWidget || FusionApplication::Get()->isExposed)
 		{
 			return;
 		}
