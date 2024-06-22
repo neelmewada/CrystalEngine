@@ -152,4 +152,9 @@ float4x4 inverse(float4x4 m)
     return ret;
 }
 
+inline float clamp01(float value)
+{
+    return clamp(value, 0, 1);
+}
+
 #endif // __MACROS_HLSL__

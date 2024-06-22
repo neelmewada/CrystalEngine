@@ -88,6 +88,11 @@ namespace CE
 		renderer->DrawShape(FRoundedRectangle(cornerRadius), rect.min, rect.GetSize());
 	}
 
+	void FPainter::DrawLine(const Vec2& startPos, const Vec2& endPos)
+	{
+		renderer->DrawLine(startPos, endPos);
+	}
+
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
 		return renderer->DrawText(text, pos, size, wordWrap);

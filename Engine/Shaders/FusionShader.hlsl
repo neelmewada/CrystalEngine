@@ -45,7 +45,7 @@ struct PSInput
 enum DrawType : uint
 {
 	DRAW_Shape,
-
+    DRAW_Line,
     DRAW_Text
 };
 
@@ -68,7 +68,9 @@ enum BrushType : uint
 enum PenType : uint
 {
     PEN_None = 0,
-    PEN_SolidLine
+    PEN_SolidLine,
+    PEN_DashedLine,
+    PEN_DottedLine
 };
 
 struct ClipItem2D
@@ -85,7 +87,13 @@ struct ShapeItem2D
     float4 brushColor;
     BrushType brushType;
     ShapeType shape;
-    PenType penType;
+};
+
+struct LineItem2D
+{
+    float2 start;
+    float2 end;
+    float dashLength;
 };
 
 // Could be a shape, font character, or any other draw item
@@ -97,7 +105,8 @@ struct DrawItem2D
     float penThickness;
     float opacity;
     DrawType drawType;
-    uint shapeOrCharIndex;
+    PenType penType;
+    uint shapeOrCharOrLineIndex;
     int clipIndex;
 };
 
@@ -113,6 +122,7 @@ struct GlyphItem
 StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
 StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
+StructuredBuffer<LineItem2D> _LineItems : SRG_PerDraw(t3);
 
 #if FRAGMENT
 
@@ -133,7 +143,7 @@ PSInput VertMain(VSInput input)
     const int clipIndex = _DrawList[InstanceIdx].clipIndex;
     if (clipIndex >= 0)
     {
-	    o.clipPos = mul(float4(o.globalPos, 1.0), _ClipItems[clipIndex].clipTransform).xyz;
+        o.clipPos = mul(float4(o.globalPos.xy, 0, 1.0), _ClipItems[clipIndex].clipTransform).xyz;
     }
     else
     {
@@ -207,18 +217,43 @@ float SDFRoundedRect(in float2 p, in float2 shapeSize, in float4 r)
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
+// Credit: https://iquilezles.org/articles/distfunctions2d/
+float SDFSegment(in float2 p, in float2 a, in float2 b)
+{
+    float2 ba = b - a;
+    float2 pa = p - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - h * ba);
+}
+
+// Signed distance function for a dashed line segment
+float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength, float thickness)
+{
+    float2 ba = b - a;
+    float totalLength = length(ba);
+    ba = ba / totalLength;
+    float t = dot(p - a, ba) / totalLength;
+    float pattern = fmod(t, dashLength * 2.0);
+    float dashMask = step(pattern, dashLength);
+    float d = SDFSegment(p, a, b) - thickness;
+    return lerp(1.0, d, dashMask);
+}
+
+// -----------------------------------------------------------------------------------------
+
 #if FRAGMENT
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
     const float2 uv = input.uv;
-    const float2 quadSize = _DrawList[InstanceIdx].quadSize;
+    const DrawItem2D drawItem = _DrawList[InstanceIdx];
+    const float2 quadSize = drawItem.quadSize;
     const float2 sdfPos = (uv - float2(0.5, 0.5)) * quadSize;
     const float2 pos = input.globalPos.xy;
     const float2 clipPos = input.clipPos.xy;
-    const int clipIndex = _DrawList[InstanceIdx].clipIndex;
-    const float4 penColor = _DrawList[InstanceIdx].penColor;
-    const float penThickness = _DrawList[InstanceIdx].penThickness;
+    const int clipIndex = drawItem.clipIndex;
+    const float4 penColor = drawItem.penColor;
+    float penThickness = drawItem.penThickness;
 
     float clipSdf = -1;
 
@@ -253,9 +288,9 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     float4 pixelColor = float4(1, 1, 1, 1);
 
-    if (_DrawList[InstanceIdx].drawType == DRAW_Shape)
+    if (drawItem.drawType == DRAW_Shape)
     {
-        const uint shapeIndex = _DrawList[InstanceIdx].shapeOrCharIndex;
+        const uint shapeIndex = drawItem.shapeOrCharOrLineIndex;
         const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
         const float4 r = shapeItem.cornerRadius;
 
@@ -300,9 +335,36 @@ float4 FragMain(PSInput input) : SV_TARGET
         // Lerp fillColor with SDF for anti-aliased edges
         pixelColor = lerp(float4(color.rgb, 0), color, -sd * 5);
     }
-    else if (_DrawList[InstanceIdx].drawType == DRAW_Text)
+    else if (drawItem.drawType == DRAW_Line)
     {
-        const uint charIndex = _DrawList[InstanceIdx].shapeOrCharIndex;
+        const uint lineIndex = drawItem.shapeOrCharOrLineIndex;
+        const LineItem2D lineItem = _LineItems[lineIndex];
+        float dist = length(lineItem.end - lineItem.start);
+        const float2 endPos = lineItem.start;
+        const float2 startPos = lineItem.end;
+
+        float sd = 1;
+
+        switch (drawItem.penType)
+        {
+        case PEN_None:
+            discard;
+        case PEN_SolidLine:
+            sd = SDFSegment(sdfPos + quadSize * 0.5, startPos, endPos) - penThickness;
+	        break;
+        case PEN_DottedLine:
+            penThickness = 1.0;
+        case PEN_DashedLine:
+            //sd = SDFDashedLine(sdfPos, startPos, endPos, lineItem.dashLength / dist, penThickness);
+	        break;
+        }
+
+        pixelColor = lerp(float4(penColor.rgb, 0), penColor, -sd * 1.5);
+        //pixelColor = lerp(float4(0, 0, 0, 1.0), penColor, -sd * 2.0);
+    }
+    else if (drawItem.drawType == DRAW_Text)
+    {
+        const uint charIndex = drawItem.shapeOrCharOrLineIndex;
         const GlyphItem glyphItem = _GlyphItems[charIndex];
         const float2 uvMin = glyphItem.atlasUV.xy;
         const float2 uvMax = glyphItem.atlasUV.zw;

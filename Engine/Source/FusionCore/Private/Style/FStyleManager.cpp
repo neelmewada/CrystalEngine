@@ -13,22 +13,22 @@ namespace CE
         
     }
 
-    void FStyleManager::RegisterStyle(const Name& styleKey, FStyle* value)
+    void FStyleManager::RegisterStyleSet(const Name& name, FStyleSet* styleSet)
     {
-        registeredStyles[styleKey] = value;
+        registeredStyleSets.Add(name, styleSet);
     }
 
-    FStyle* FStyleManager::FindStyle(const Name& styleKey)
+    void FStyleManager::DeregisterStyleSet(const Name& name)
     {
-        if (registeredStyles.KeyExists(styleKey))
-            return registeredStyles[styleKey];
+        FStyleSet* styleSet = registeredStyleSets[name];
 
-        if (parent)
+        if (styleSet)
         {
-            return parent->FindStyle(styleKey);
+            FFusionContext* rootContext = FusionApplication::Get()->rootContext;
+            rootContext->OnStyleSetDeregistered(styleSet);
         }
 
-        return nullptr;
+        registeredStyleSets.Remove(name);
     }
 
 } // namespace CE

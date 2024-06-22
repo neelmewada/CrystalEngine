@@ -2,7 +2,8 @@
 
 namespace CE
 {
-	constexpr bool ForceDisableBatching = false;
+	constexpr bool ForceDisableBatching = true;
+	constexpr f32 StructuredBufferGrowRatio = 0.25f;
 
 	FusionRenderer::FusionRenderer()
 	{
@@ -19,6 +20,7 @@ namespace CE
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 		shapeItemsBuffer.Init("ShapeItems_" + GetName().GetString(), initialShapeItemCapacity, numFrames);
+		lineItemsBuffer.Init("LineItems_" + GetName().GetString(), initialLineItemCapacity, numFrames);
 
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perDrawSrgLayout);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->perViewSrgLayout);
@@ -39,6 +41,7 @@ namespace CE
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ShapeDrawList", shapeItemsBuffer.GetBuffer(i));
+			drawItemSrg->Bind(i, "_LineItems", lineItemsBuffer.GetBuffer(i));
 		}
 
 		perViewSrg->FlushBindings();
@@ -52,6 +55,7 @@ namespace CE
 		drawItemsBuffer.Shutdown();
 		clipItemsBuffer.Shutdown();
 		shapeItemsBuffer.Shutdown();
+		lineItemsBuffer.Shutdown();
 
 		for (int i = 0; i < numFrames; i++)
 		{
@@ -77,7 +81,7 @@ namespace CE
 
 		currentBrush = FBrush();
 		currentPen = FPen();
-		currentFont = FFont(fontManager->GetDefaultFontFamily(), 13);
+		currentFont = FFont(fontManager->GetDefaultFontFamily(), fontManager->GetDefaultFontSize());
 		itemTransform = Matrix4x4::Identity();
 
 		drawBatches.Clear();
@@ -85,6 +89,7 @@ namespace CE
 		clipItemList.RemoveAll();
 		clipItemStack.RemoveAll();
 		shapeItemList.RemoveAll();
+		lineItemList.RemoveAll();
 		coordinateSpaceStack.RemoveAll();
 
 		createNewDrawBatch = true;
@@ -186,7 +191,7 @@ namespace CE
 			fontFamily = fontManager->GetDefaultFontFamily();
 
 		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
-
+		
 		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
@@ -205,13 +210,22 @@ namespace CE
 		drawItem.quadSize = size;
 		drawItem.opacity = opacityStack.IsEmpty() ? 1.0f : opacityStack.Last();
 
+		drawItem.penColor = currentPen.GetColor().ToVec4();
+		drawItem.penThickness = currentPen.GetThickness();
+
 		switch (currentPen.GetStyle())
 		{
 		case FPenStyle::None:
+			drawItem.penType = PEN_None;
 			break;
 		case FPenStyle::SolidLine:
-			drawItem.penColor = currentPen.GetColor().ToVec4();
-			drawItem.penThickness = currentPen.GetThickness();
+			drawItem.penType = PEN_SolidLine;
+			break;
+		case FPenStyle::DashedLine:
+			drawItem.penType = PEN_DashedLine;
+			break;
+		case FPenStyle::DottedLine:
+			drawItem.penType = PEN_DottedLine;
 			break;
 		}
 
@@ -466,22 +480,14 @@ namespace CE
 			drawItem.drawType = DRAW_Text;
 			drawItem.opacity = opacityStack.IsEmpty() ? 1.0f : opacityStack.Last();
 
-			switch (currentPen.GetStyle())
-			{
-			case FPenStyle::None:
-				break;
-			case FPenStyle::SolidLine:
-				drawItem.penColor = currentPen.GetColor().ToVec4();
-				drawItem.penThickness = currentPen.GetThickness();
-				break;
-			}
+			drawItem.penColor = currentPen.GetColor().ToVec4();
+			drawItem.penThickness = currentPen.GetThickness();
 
 			drawItem.clipIndex = -1;
 			if (!clipItemStack.IsEmpty())
 			{
 				drawItem.clipIndex = clipItemStack.Last();
 			}
-
 
 			drawItem.charIndex = glyph.index;
 
@@ -515,6 +521,34 @@ namespace CE
 		return finalSize;
 	}
 
+	void FusionRenderer::DrawLine(const Vec2& from, const Vec2& to)
+	{
+		ZoneScoped;
+
+		f32 lineThickness = currentPen.GetThickness();
+
+		f32 minX = Math::Min(from.x, to.x);
+		f32 minY = Math::Min(from.y, to.y);
+		f32 maxX = Math::Max(from.x, to.x);
+		f32 maxY = Math::Max(from.y, to.y) + lineThickness;
+
+		Vec2 size = Vec2(maxX - minX, maxY - minY);
+
+		FDrawItem2D& drawItem = DrawCustomItem(DRAW_Line, Vec2(minX, minY), size);
+		drawItem.lineIndex = lineItemList.GetCount();
+
+		f32 dashLength = currentPen.GetDashLength();
+
+		if (currentPen.GetStyle() == FPenStyle::DottedLine)
+		{
+			dashLength = 1.0f;
+		}
+
+		FLineItem2D lineItem = { .lineStart = Vec2(0, 0), .lineEnd = size, .dashLength = dashLength };
+
+		lineItemList.Insert(lineItem);
+	}
+
 	FusionRenderer::FDrawItem2D& FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 size)
 	{
 		ZoneScoped;
@@ -528,6 +562,7 @@ namespace CE
 		switch (currentBrush.GetBrushStyle())
 		{
 		case FBrushStyle::None:
+			shapeItem.brushType = BRUSH_None;
 			break;
 		case FBrushStyle::SolidFill:
 			shapeItem.brushType = BRUSH_Solid;
@@ -543,9 +578,16 @@ namespace CE
 		switch (currentPen.GetStyle())
 		{
 		case FPenStyle::None:
+			drawItem.penType = PEN_None;
 			break;
 		case FPenStyle::SolidLine:
-			shapeItem.penType = PEN_SolidLine;
+			drawItem.penType = PEN_SolidLine;
+			break;
+		case FPenStyle::DashedLine:
+			drawItem.penType = PEN_DashedLine;
+			break;
+		case FPenStyle::DottedLine:
+			drawItem.penType = PEN_DottedLine;
 			break;
 		}
 
@@ -586,6 +628,11 @@ namespace CE
 				{
 					u64 totalCount = (u64)((f32)drawItemsBuffer.GetElementCount() * (1.0f + drawItemGrowRatio));
 					drawItemsBuffer.GrowToFit(Math::Max<u64>(drawItemList.GetCount() + 64, totalCount));
+
+					for (int i = 0; i < numFrames; ++i)
+					{
+						drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
+					}
 				}
 
 				drawItemsBuffer.GetBuffer(imageIndex)->UploadData(drawItemList.GetData(), drawItemList.GetCount() * sizeof(FDrawItem2D));
@@ -597,6 +644,11 @@ namespace CE
 				{
 					u64 totalCount = (u64)((f32)clipItemsBuffer.GetElementCount() * (1.0f + clipItemGrowRatio));
 					clipItemsBuffer.GrowToFit(Math::Max<u64>(clipItemList.GetCount() + 32, totalCount));
+
+					for (int i = 0; i < numFrames; ++i)
+					{
+						drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
+					}
 				}
 
 				clipItemsBuffer.GetBuffer(imageIndex)->UploadData(clipItemList.GetData(), clipItemList.GetCount() * sizeof(FClipItem2D));
@@ -608,13 +660,36 @@ namespace CE
 				{
 					u64 totalCount = (u64)((f32)shapeItemsBuffer.GetElementCount() * (1.0f + shapeItemGrowRatio));
 					shapeItemsBuffer.GrowToFit(Math::Max<u64>(shapeItemList.GetCount() + 64, totalCount));
+
+					for (int i = 0; i < numFrames; ++i)
+					{
+						drawItemSrg->Bind(i, "_ShapeDrawList", shapeItemsBuffer.GetBuffer(i));
+					}
 				}
 
 				shapeItemsBuffer.GetBuffer(imageIndex)->UploadData(shapeItemList.GetData(), shapeItemList.GetCount() * sizeof(FShapeItem2D));
 			}
 
+			if (lineItemList.GetCount() > 0)
+			{
+				if (lineItemsBuffer.GetElementCount() < lineItemList.GetCount())
+				{
+					u64 totalCount = (u64)((f32)lineItemsBuffer.GetElementCount() * (1.0f + StructuredBufferGrowRatio));
+					lineItemsBuffer.GrowToFit(Math::Max<u64>(lineItemList.GetCount() + 64, totalCount));
+
+					for (int i = 0; i < numFrames; ++i)
+					{
+						drawItemSrg->Bind(i, "_LineItems", lineItemsBuffer.GetBuffer(i));
+					}
+				}
+
+				lineItemsBuffer.GetBuffer(imageIndex)->UploadData(lineItemList.GetData(), lineItemList.GetCount() * sizeof(FLineItem2D));
+			}
+
 			resubmitDrawItems[imageIndex] = false;
 		}
+
+		drawItemSrg->FlushBindings();
 
 		return drawPackets;
 	}
@@ -646,7 +721,13 @@ namespace CE
 
 	void FusionRenderer::SetFont(const FFont& font)
 	{
-		if (currentFont.GetFamily() != font.GetFamily())
+		Name fontFamily = font.GetFamily();
+		if (!fontFamily.IsValid())
+		{
+			fontFamily = FusionApplication::Get()->GetFontManager()->GetDefaultFontFamily();
+		}
+
+		if (currentFont.GetFamily() != fontFamily)
 		{
 			createNewDrawBatch = true;
 		}
@@ -717,9 +798,11 @@ namespace CE
 
 	void FusionRenderer::PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& shape)
 	{
-		// Clipping is done via SDF functions, which require you 
+		Matrix4x4 inverse = (coordinateSpaceStack.Last() * clipTransform).GetInverse();
+
+		// Clipping is done via SDF functions, which require you to inverse the transformations applied
 		clipItemList.Insert(FClipItem2D{
-				.clipTransform = (coordinateSpaceStack.Last() * clipTransform).GetInverse(),
+				.clipTransform = inverse,
 				.cornerRadius = shape.GetCornerRadius(),
 				.size = rectSize,
 				.shapeType = shape.GetShapeType()

@@ -8,7 +8,7 @@ namespace CE
 	    Default = 0,
         Hovered = BIT(0),
         Pressed = BIT(1),
-        Disabled = BIT(2)
+        InteractionDisabled = BIT(2)
     };
     ENUM_CLASS_FLAGS(FButtonState);
 
@@ -24,10 +24,17 @@ namespace CE
 
         bool IsHovered() const { return EnumHasFlag(buttonState, FButtonState::Hovered); }
         bool IsPressed() const { return EnumHasFlag(buttonState, FButtonState::Pressed); }
+        bool IsInteractionDisabled() const { return EnumHasFlag(buttonState, FButtonState::InteractionDisabled); }
+
+        void SetInteractionEnabled(bool enabled);
 
         void HandleEvent(FEvent* event) override;
 
-        void OnPaint(FPainter* painter) override;
+        void OnPaintContent(FPainter* painter) override;
+
+        bool CanReceiveMouseEvents() const override { return true; }
+
+        bool CanReceiveKeyboardEvents() const override { return true; }
 
     protected: // - Internal Methods -
 

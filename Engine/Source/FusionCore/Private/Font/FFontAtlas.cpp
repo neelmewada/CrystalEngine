@@ -67,7 +67,7 @@ namespace CE
         fontSampler.addressModeU = fontSampler.addressModeV = fontSampler.addressModeW = SamplerAddressMode::ClampToBorder;
         fontSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
         fontSampler.enableAnisotropy = false;
-        fontSampler.samplerFilterMode = FilterMode::Cubic;
+        fontSampler.samplerFilterMode = FilterMode::Linear;
 
         atlasTexture = new RPI::Texture(images, fontSampler);
 

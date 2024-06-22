@@ -13,6 +13,8 @@ namespace CE
         if (m_Opacity < 0.0001f)
             return;
 
+        bool isButton = IsOfType<FButton>();
+
         if (m_Opacity < 1.0f)
         {
 	        painter->PushOpacity(m_Opacity);
@@ -25,7 +27,7 @@ namespace CE
 
         bool transformChanged = false;
 
-        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 1)
+        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 2)
         {
             painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(m_Scale));
             transformChanged = true;
@@ -48,13 +50,14 @@ namespace CE
             case FBrushStyle::None:
                 break;
             case FBrushStyle::SolidFill:
-                painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
                 break;
             case FBrushStyle::TexturePattern:
                 break;
             case FBrushStyle::LinearGradient:
                 break;
             }
+
+            painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
 	    }
 
         if (transformChanged)

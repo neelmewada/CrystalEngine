@@ -109,7 +109,8 @@ namespace RenderingTests
     {
         Super::Construct();
 
-        Child(
+        Child
+    	(
             FNew(FStyledWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
             .Name("RootStyle")
@@ -138,6 +139,7 @@ namespace RenderingTests
 		                {
                             buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
 		                })
+                    .ClipShape(FRectangle())
                     .Style("Button.Primary")
                     .Name("Button")
                     (
@@ -145,6 +147,10 @@ namespace RenderingTests
                         .FontSize(14)
                         .Text("Click Count 0")
                     ),
+
+                    FAssignNew(FTextInput, textInput)
+                    .Text("Type your input here...")
+                    .Style("TextInput.Primary"),
 
                     FNew(FHorizontalStack)
                     .ContentVAlign(VAlign::Center)

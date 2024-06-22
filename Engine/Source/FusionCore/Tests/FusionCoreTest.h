@@ -52,9 +52,9 @@ namespace RenderingTests
 {
 
 	CLASS()
-	class RenderingTestWidget : public FCompoundWidget
+	class RenderingTestWidget : public FWindow
 	{
-		CE_CLASS(RenderingTestWidget, FCompoundWidget)
+		CE_CLASS(RenderingTestWidget, FWindow)
 	public:
 
 		RenderingTestWidget() = default;
@@ -63,6 +63,7 @@ namespace RenderingTests
 
 		FStackBox* rootBox;
 		FButton* button;
+		FTextInput* textInput;
 		FLabel* buttonLabel;
 		FStyledWidget* subWidget;
 

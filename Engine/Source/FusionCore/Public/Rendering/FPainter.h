@@ -42,6 +42,8 @@ namespace CE
 
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
 
+        void DrawLine(const Vec2& startPos, const Vec2& endPos);
+
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
     private:

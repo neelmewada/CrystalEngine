@@ -6,6 +6,7 @@ namespace CE
     class FFusionContext;
     class FLayoutManager;
     class FNativeContext;
+    class FStyleManager;
 
     struct FusionInitInfo
     {
@@ -19,13 +20,14 @@ namespace CE
     public:
 
         FusionApplication();
-
         virtual ~FusionApplication();
 
         static FusionApplication* Get();
         static FusionApplication* TryGet();
 
         FFontManager* GetFontManager() const { return fontManager; }
+
+        FStyleManager* GetStyleManager() const { return styleManager; }
 
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
@@ -72,6 +74,9 @@ namespace CE
 
         FIELD()
         FFontManager* fontManager = nullptr;
+
+        FIELD()
+        FStyleManager* styleManager = nullptr;
 
         RPI::Shader* fusionShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};

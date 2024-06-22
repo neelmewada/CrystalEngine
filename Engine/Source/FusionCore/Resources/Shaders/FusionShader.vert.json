@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_10" : {
+        "_77" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_13" : {
+        "_80" : {
             "name" : "DrawItem2D",
             "members" : [
                 {
@@ -78,23 +78,28 @@
                     "offset" : 96
                 },
                 {
-                    "name" : "shapeOrCharIndex",
-                    "type" : "uint",
+                    "name" : "penType",
+                    "type" : "int",
                     "offset" : 100
+                },
+                {
+                    "name" : "shapeOrCharOrLineIndex",
+                    "type" : "uint",
+                    "offset" : 104
                 },
                 {
                     "name" : "clipIndex",
                     "type" : "int",
-                    "offset" : 104
+                    "offset" : 108
                 }
             ]
         },
-        "_12" : {
+        "_79" : {
             "name" : "type.StructuredBuffer.DrawItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_13",
+                    "type" : "_80",
                     "array" : [
                         0
                     ],
@@ -106,7 +111,7 @@
                 }
             ]
         },
-        "_16" : {
+        "_83" : {
             "name" : "ClipItem2D",
             "members" : [
                 {
@@ -133,12 +138,12 @@
                 }
             ]
         },
-        "_15" : {
+        "_82" : {
             "name" : "type.StructuredBuffer.ClipItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_16",
+                    "type" : "_83",
                     "array" : [
                         0
                     ],
@@ -150,7 +155,7 @@
                 }
             ]
         },
-        "_19" : {
+        "_86" : {
             "name" : "ShapeItem2D",
             "members" : [
                 {
@@ -172,20 +177,15 @@
                     "name" : "shape",
                     "type" : "int",
                     "offset" : 36
-                },
-                {
-                    "name" : "penType",
-                    "type" : "int",
-                    "offset" : 40
                 }
             ]
         },
-        "_18" : {
+        "_85" : {
             "name" : "type.StructuredBuffer.ShapeItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_19",
+                    "type" : "_86",
                     "array" : [
                         0
                     ],
@@ -194,6 +194,43 @@
                     ],
                     "offset" : 0,
                     "array_stride" : 48
+                }
+            ]
+        },
+        "_89" : {
+            "name" : "LineItem2D",
+            "members" : [
+                {
+                    "name" : "start",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "end",
+                    "type" : "vec2",
+                    "offset" : 8
+                },
+                {
+                    "name" : "dashLength",
+                    "type" : "float",
+                    "offset" : 16
+                }
+            ]
+        },
+        "_88" : {
+            "name" : "type.StructuredBuffer.LineItem2D",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_89",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 24
                 }
             ]
         }
@@ -234,33 +271,41 @@
     ],
     "ssbos" : [
         {
-            "type" : "_12",
-            "name" : "_DrawList",
+            "type" : "_79",
+            "name" : "type.StructuredBuffer.DrawItem2D",
             "readonly" : true,
             "block_size" : 0,
             "set" : 6,
             "binding" : 0
         },
         {
-            "type" : "_15",
-            "name" : "_ClipItems",
+            "type" : "_82",
+            "name" : "type.StructuredBuffer.ClipItem2D",
             "readonly" : true,
             "block_size" : 0,
             "set" : 6,
             "binding" : 1
         },
         {
-            "type" : "_18",
-            "name" : "_ShapeDrawList",
+            "type" : "_85",
+            "name" : "type.StructuredBuffer.ShapeItem2D",
             "readonly" : true,
             "block_size" : 0,
             "set" : 6,
             "binding" : 2
+        },
+        {
+            "type" : "_88",
+            "name" : "type.StructuredBuffer.LineItem2D",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 6,
+            "binding" : 3
         }
     ],
     "ubos" : [
         {
-            "type" : "_10",
+            "type" : "_77",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

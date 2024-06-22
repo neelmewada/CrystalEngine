@@ -36,10 +36,7 @@ namespace CE
 
         if (event->IsMouseEvent() && (!event->consumed || event->consumer != this))
         {
-            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-            //mouseEvent->Consume(this);
-
-            //CE_LOG(Info, All, "{} | {}", mouseEvent->type, GetName());
+            
         }
 
         if (parent != nullptr && event->direction == FEventDirection::BottomToTop)
@@ -77,6 +74,11 @@ namespace CE
 
     void FWidget::OnDetachedFromParent(FWidget* parent)
     {
+    }
+
+    void FWidget::ClearStyle()
+    {
+        m_Style = nullptr;
     }
 
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -151,9 +153,10 @@ namespace CE
 
     void FWidget::UpdateLocalTransform()
     {
-        localTransform = Matrix4x4::Translation(computedPosition + m_Translation) *
+        localTransform =
+            Matrix4x4::Translation(computedPosition + m_Translation) *
             Matrix4x4::Angle(m_Angle) *
-            Matrix4x4::Scale(m_Scale);
+            Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
     }
 
     void FWidget::AddChild(FWidget* child)
@@ -250,11 +253,23 @@ namespace CE
         if (!context)
             return *this;
 
-        FStyleManager* styleManager = context->GetStyleManager();
-        if (!styleManager)
+        FStyleSet* defaultStyleSet = context->GetDefaultStyleSet();
+        if (!defaultStyleSet)
             return *this;
 
-        FStyle* style = styleManager->FindStyle(styleKey);
+        FStyle* style = defaultStyleSet->FindStyle(styleKey);
+        return Style(style);
+    }
+
+    FWidget::Self& FWidget::Style(FStyleSet* styleSet, const CE::Name& styleKey)
+    {
+        if (!styleSet)
+            return *this;
+
+        FStyle* style = styleSet->FindStyle(styleKey);
+        if (!style)
+            return *this;
+
         return Style(style);
     }
 

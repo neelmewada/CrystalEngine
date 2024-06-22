@@ -13,12 +13,12 @@ namespace CE
         return FButton::StaticType();
     }
 
-    FPlainButtonStyle::FPlainButtonStyle()
+    FButtonPlainStyle::FButtonPlainStyle()
     {
 
     }
 
-    void FPlainButtonStyle::MakeStyle(FWidget& widget)
+    void FButtonPlainStyle::MakeStyle(FWidget& widget)
     {
         FButton& button = widget.As<FButton>();
 

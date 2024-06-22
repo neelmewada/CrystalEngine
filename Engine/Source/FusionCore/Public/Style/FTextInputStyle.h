@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS()
+    CLASS(Abstract)
     class FUSIONCORE_API FTextInputStyle : public FStyle
     {
         CE_CLASS(FTextInputStyle, FStyle)
@@ -39,10 +39,10 @@ namespace CE
         Color borderColor;
 
         FIELD()
-        Color borderColorHover;
+        Color hoverBorderColor;
 
         FIELD()
-        Color borderColorActive;
+        Color editingBorderColor;
     };
     
 } // namespace CE

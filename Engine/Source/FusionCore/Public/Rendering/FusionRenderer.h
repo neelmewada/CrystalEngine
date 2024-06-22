@@ -19,8 +19,9 @@ namespace CE
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
         static constexpr u32 DrawItemIncrement = 1_KB;
         static constexpr u32 ShapeItemIncrement = 256;
+        static constexpr u32 LineItemIncrement = 128;
         static constexpr u32 ClipItemIncrement = 128;
-        static constexpr u32 CoordinateStackItemIncrement = 64;
+        static constexpr u32 CoordinateStackItemIncrement = 128;
         static constexpr u32 OpacityStackItemIncrement = 128;
 
         FusionRenderer();
@@ -68,6 +69,8 @@ namespace CE
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
+        void DrawLine(const Vec2& from, const Vec2& to);
+
     protected:
 
         using float4 = Vec4;
@@ -80,6 +83,7 @@ namespace CE
         enum FDrawType : u32
         {
 	        DRAW_Shape,
+            DRAW_Line,
             DRAW_Text
         };
 
@@ -94,7 +98,9 @@ namespace CE
         enum FPenType : u32
         {
 	        PEN_None = 0,
-            PEN_SolidLine
+            PEN_SolidLine,
+            PEN_DashedLine,
+            PEN_DottedLine
         };
 
         struct alignas(16) FShapeItem2D
@@ -103,10 +109,18 @@ namespace CE
             float4 brushColor;
             FBrushType brushType = BRUSH_None;
             FShapeType shape = FShapeType::None;
-            FPenType penType = PEN_SolidLine;
         };
 
         using FShapeItemList = StableDynamicArray<FShapeItem2D, ShapeItemIncrement, false>;
+
+        struct alignas(8) FLineItem2D
+        {
+            float2 lineStart;
+            float2 lineEnd;
+            float dashLength = 5.0f;
+        };
+
+        using FLineItemList = StableDynamicArray<FLineItem2D, LineItemIncrement, false>;
 
         // Base draw item: Shape or text character
         struct alignas(16) FDrawItem2D
@@ -117,9 +131,11 @@ namespace CE
             float penThickness;
             float opacity;
             FDrawType drawType;
+            FPenType penType = PEN_SolidLine;
             union
             {
-                uint shapeIndex;
+                uint shapeIndex = 0;
+                uint lineIndex;
                 uint charIndex;
             };
             int clipIndex;
@@ -173,6 +189,9 @@ namespace CE
         FIELD(Config)
         f32 shapeItemGrowRatio = 0.25f;
 
+        FIELD(Config)
+        u32 initialLineItemCapacity = 500;
+
         // - Rendering Setup -
 
         u32 numFrames = 0;
@@ -211,6 +230,9 @@ namespace CE
 
         RPI::DynamicStructuredBuffer<FShapeItem2D> shapeItemsBuffer;
         FShapeItemList shapeItemList;
+
+        RPI::DynamicStructuredBuffer<FLineItem2D> lineItemsBuffer;
+        FLineItemList lineItemList;
 
         Array<FDrawBatch> drawBatches{};
         bool createNewDrawBatch = false;

@@ -153,6 +153,16 @@ namespace CE
 	    Super::HandleEvent(event);
     }
 
+    void FCompoundWidget::ClearStyle()
+    {
+	    Super::ClearStyle();
+
+        if (m_Child)
+        {
+            m_Child->ClearStyle();
+        }
+    }
+
     bool FCompoundWidget::TryAddChild(FWidget* child)
     {
         if (!child)

@@ -6,7 +6,9 @@ namespace CE
     enum class FPenStyle : u32
     {
 	    None,
-        SolidLine
+        SolidLine,
+        DashedLine,
+        DottedLine
     };
     ENUM_CLASS(FPenStyle);
 
@@ -30,10 +32,14 @@ namespace CE
         FPenStyle GetStyle() const { return style; }
         void SetStyle(FPenStyle penStyle) { this->style = penStyle; }
 
+        f32 GetDashLength() const { return dashLength; }
+        void SetDashLength(f32 dashLength) { this->dashLength = dashLength; }
+
     private:
 
         Color color;
         f32 thickness = 0.0f;
+        f32 dashLength = 5.0f;
         FPenStyle style = FPenStyle::None;
 
     };

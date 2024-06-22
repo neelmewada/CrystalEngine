@@ -258,12 +258,14 @@ TEST(FusionCore, Rendering)
 	clock_t previousTime = {};
 
 	FusionApplication* app = FusionApplication::Get();
+	FStyleManager* styleManager = app->GetStyleManager();
 
 	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
 	app->SetRootContext(rootContext);
 
-	FStyleManager* rootStyle = CreateObject<FStyleManager>(rootContext, "RootStyleManager");
-	rootContext->SetStyleManager(rootStyle);
+	FStyleSet* rootStyle = CreateObject<FStyleSet>(rootContext, "RootStyleSet");
+	styleManager->RegisterStyleSet(rootStyle->GetName(), rootStyle);
+	rootContext->SetDefaultStyleSet(rootStyle);
 
 	// - Default Styling -
 	{
@@ -275,14 +277,26 @@ TEST(FusionCore, Rendering)
 	// - Styling -
 	{
 		{
-			auto primaryBtn = CreateObject<FPlainButtonStyle>(rootStyle, "PrimaryButton");
-			rootStyle->RegisterStyle("Button.Primary", primaryBtn);
+			auto primaryBtn = CreateObject<FButtonPlainStyle>(rootStyle, "PrimaryButton");
+			rootStyle->Add("Button.Primary", primaryBtn);
 
 			primaryBtn->background = Color::RGBA(56, 56, 56);
 			primaryBtn->hoveredBackground = Color::RGBA(95, 95, 95);
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
 			primaryBtn->borderWidth = 1.0f;
+		}
+
+		{
+			auto primaryTextInput = CreateObject<FTextInputPlainStyle>(rootStyle, "PrimaryTextInput");
+			rootStyle->Add("TextInput.Primary", primaryTextInput);
+
+			primaryTextInput->background = Color::RGBA(15, 15, 15);
+			primaryTextInput->borderColor = Color::RGBA(60, 60, 60);
+			primaryTextInput->editingBorderColor = Color::RGBA(0, 112, 224);
+			primaryTextInput->hoverBorderColor = Color::RGBA(74, 74, 74);
+			primaryTextInput->borderWidth = 1.0f;
+			primaryTextInput->cornerRadius = Vec4(5, 5, 5, 5);
 		}
 	}
 
@@ -318,10 +332,9 @@ TEST(FusionCore, Rendering)
 		previousTime = curTime;
 	}
 
-	Vec2 localPos = mainWidget->subWidget->GetComputedPosition();
-	Vec2 globalPos = mainWidget->subWidget->GetGlobalPosition();
-
 	PlatformApplication::Get()->RemoveTickHandler(handle);
+
+	styleManager->DeregisterStyleSet(rootStyle->GetName());
 
 	TEST_END_GUI;
 }

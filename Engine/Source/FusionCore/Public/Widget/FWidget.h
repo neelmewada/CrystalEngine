@@ -80,6 +80,11 @@ namespace CE
 
         virtual bool ChildExistsRecursive(FWidget* child) { return this == child; }
 
+        virtual bool CanReceiveMouseEvents() const { return false; }
+
+        virtual bool CanReceiveKeyboardEvents() const { return false; }
+
+        virtual void ClearStyle();
 
     protected:
 
@@ -195,6 +200,7 @@ namespace CE
         Self& Style(FStyle* style);
 
         Self& Style(const CE::Name& styleKey);
+        Self& Style(FStyleSet* styleSet, const CE::Name& styleKey);
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& As()

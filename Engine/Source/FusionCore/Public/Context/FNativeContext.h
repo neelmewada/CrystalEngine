@@ -8,6 +8,7 @@ namespace CE
 	class FusionRenderer;
 	class FFusionContext;
 	class FPainter;
+	class FStyleSet;
 
 	//! @brief Represents a native platform window.
 	CLASS()

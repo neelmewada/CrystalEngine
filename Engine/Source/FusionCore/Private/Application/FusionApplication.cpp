@@ -12,6 +12,7 @@ namespace CE
     FusionApplication::FusionApplication()
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
+        styleManager = CreateDefaultSubobject<FStyleManager>("StyleManager");
     }
 
     FusionApplication::~FusionApplication()
@@ -231,7 +232,7 @@ namespace CE
                 continue;
 
             FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
-
+            
             if (window->IsMainWindow() || nativeContext->GetPlatformWindow() == window)
             {
                 if (nativeContext->owningWidget)
@@ -339,6 +340,12 @@ namespace CE
                     (u32)vertexReflection["ssbos"][2]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+        		.TryAdd(SRGVariableDescriptor(
+                    "_LineItems",
+                    (u32)vertexReflection["ssbos"][3]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
                 ));
 
             variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
@@ -356,7 +363,7 @@ namespace CE
                 ))
                 .TryAdd(SRGVariableDescriptor(
                     "_GlyphItems",
-                    (u32)fragmentReflection["ssbos"][3]["binding"].GetNumberValue(),
+                    (u32)fragmentReflection["ssbos"][4]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Fragment
                 ));

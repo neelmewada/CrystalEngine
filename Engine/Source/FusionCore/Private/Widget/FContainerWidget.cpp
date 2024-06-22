@@ -81,6 +81,16 @@ namespace CE
         Super::HandleEvent(event);
     }
 
+    void FContainerWidget::ClearStyle()
+    {
+	    Super::ClearStyle();
+
+        for (FWidget* child : children)
+        {
+            child->ClearStyle();
+        }
+    }
+
     bool FContainerWidget::TryAddChild(FWidget* child)
     {
         if (children.Exists(child))

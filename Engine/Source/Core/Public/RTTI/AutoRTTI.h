@@ -24,7 +24,13 @@ enum AttributeSpecifiers
 	ReadOnly,
 
 	//! @brief This will exclude the field from serialization.
-	NonSerialized
+	NonSerialized,
+
+	//! @brief Mark the property as fusion property
+	FusionProperty,
+
+	//! @brief Mark the property as fusion layout property.
+	FusionLayoutProperty
 };
 
 /*

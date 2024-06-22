@@ -236,9 +236,9 @@ namespace CE
 				event.sender = hoveredWidgetStack.Top();
 				event.Reset();
 
-				//if (hoveredWidgetStack.Top()->receiveMouseEvents)
+				if (event.sender->CanReceiveMouseEvents())
 				{
-					hoveredWidgetStack.Top()->HandleEvent(&event);
+					event.sender->HandleEvent(&event);
 				}
 				hoveredWidgetStack.Pop();
 			}
@@ -296,9 +296,17 @@ namespace CE
 				if (hoveredWidgetStack.NonEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
-					widgetsPressedPerMouseButton[i] = event.sender;
+					while (event.sender != nullptr && !event.sender->CanReceiveMouseEvents())
+					{
+						event.sender = event.sender->parent;
+					}
 
-					event.sender->HandleEvent(&event);
+					if (event.sender != nullptr)
+					{
+						widgetsPressedPerMouseButton[i] = event.sender;
+
+						event.sender->HandleEvent(&event);
+					}
 				}
 			}
 
@@ -315,7 +323,15 @@ namespace CE
 				if (hoveredWidgetStack.NonEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
-					event.sender->HandleEvent(&event);
+					while (event.sender != nullptr && !event.sender->CanReceiveMouseEvents())
+					{
+						event.sender = event.sender->parent;
+					}
+
+					if (event.sender != nullptr)
+					{
+						event.sender->HandleEvent(&event);
+					}
 				}
 
 				if (widgetsPressedPerMouseButton[i] != nullptr && widgetsPressedPerMouseButton[i] != event.sender)

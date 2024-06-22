@@ -19,10 +19,16 @@ namespace CE
     {
         FTextInput& input = (FTextInput&)widget;
 
+        Color border = borderColor;
+        if (input.IsEditing())
+            border = editingBorderColor;
+        else if (input.IsHovered())
+            border = hoverBorderColor;
+
         input
             .Background(FBrush(background))
             .BackgroundShape(FRoundedRectangle(cornerRadius))
-            .Border(borderColor, borderWidth)
+            .Border(border, borderWidth)
             ;
     }
 

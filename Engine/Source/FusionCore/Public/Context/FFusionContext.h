@@ -2,7 +2,8 @@
 
 namespace CE
 {
-    class FusionRenderer;
+	class FStyleSet;
+	class FusionRenderer;
     class FWidget;
     class FWindow;
 
@@ -32,6 +33,8 @@ namespace CE
 
         FWidget* GetOwningWidget() const { return owningWidget; }
 
+        FStyleSet* GetDefaultStyleSet();
+
         virtual void OnWidgetDestroyed(FWidget* widget);
 
         Vec2 GetAvailableSize() const { return availableSize; }
@@ -50,9 +53,7 @@ namespace CE
 
         void RemoveChildContext(FFusionContext* context);
 
-        void SetStyleManager(FStyleManager* styleManager);
-
-        FStyleManager* GetStyleManager();
+        void SetDefaultStyleSet(FStyleSet* styleSet);
 
         bool ShouldClearScreen() const { return clearScreen; }
 
@@ -76,6 +77,8 @@ namespace CE
 
     protected:
 
+        virtual void OnStyleSetDeregistered(FStyleSet* styleSet);
+
         FIELD()
         Array<FFusionContext*> childContexts{};
 
@@ -87,7 +90,7 @@ namespace CE
         FWidget* owningWidget = nullptr;
 
         FIELD()
-        FStyleManager* styleManager = nullptr;
+        FStyleSet* defaultStyleSet = nullptr;
 
         FIELD()
         b8 isIsolatedContext = true;

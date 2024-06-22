@@ -2,53 +2,100 @@
 
 namespace CE
 {
+    FTextInputLabel::FTextInputLabel()
+    {
+	    
+    }
 
     FTextInput::FTextInput()
     {
-
-    }
-
-    void FTextInput::CalculateIntrinsicSize()
-    {
-        FFusionContext* context = GetContext();
-        if (!context)
-        {
-            Super::CalculateIntrinsicSize();
-            return;
-        }
-
-        FPainter* painter = context->GetPainter();
-        if (!painter)
-        {
-            Super::CalculateIntrinsicSize();
-            return;
-        }
-
-        intrinsicSize = painter->CalculateTextSize(m_Text, m_Font);
-        intrinsicSize.width += m_Padding.left + m_Padding.right;
-        intrinsicSize.height += m_Padding.top + m_Padding.bottom;
+        m_Padding = Vec4(7.5f, 5, 7.5f, 5);
     }
 
     void FTextInput::OnPaintContent(FPainter* painter)
     {
-        Super::OnPaintContent(painter);
+	    Super::OnPaintContent(painter);
 
-        painter->SetPen(FPen(m_Foreground));
-        painter->SetFont(m_Font);
 
-        
+    }
+
+    void FTextInput::HandleEvent(FEvent* event)
+    {
+        if (event->IsMouseEvent() && event->sender == this)
+        {
+            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+
+            if (mouseEvent->type == FEventType::MousePress)
+            {
+                
+            }
+        }
+
+	    Super::HandleEvent(event);
+    }
+
+    void FTextInput::Construct()
+    {
+	    Super::Construct();
+
+        Child(
+            FNew(FHorizontalStack)
+            .ContentVAlign(VAlign::Center)
+            (
+                FAssignNew(FCompoundWidget, leftSlot),
+
+                FNew(FStyledWidget)
+                .ClipShape(FRectangle())
+                (
+                    FAssignNew(FTextInputLabel, inputLabel)
+                    .Text("")
+                    .FontSize(13)
+                    .Foreground(Color::White())
+                    .Name("TextInputLabel")
+                )
+            )
+        );
     }
 
     void FTextInput::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         Super::OnFusionPropertyModified(propertyName);
 
-        static const CE::Name textName = "Text";
+        static const CE::Name TextName = "Text";
 
-        if (propertyName == textName)
+        if (propertyName == TextName)
         {
-
+            
         }
+    }
+
+    void FTextInput::SetEditing(bool edit)
+    {
+        if (IsEditing() == edit)
+            return;
+
+        if (edit)
+        {
+            state |= FTextInputState::Editing;
+        }
+        else
+        {
+            state &= ~FTextInputState::Editing;
+        }
+
+        ApplyStyle();
+    }
+
+    FTextInput& FTextInput::Text(const String& value)
+    {
+        inputLabel->Text(value);
+        return *this;
+    }
+
+    FTextInput& FTextInput::Foreground(const Color& value)
+    {
+        inputLabel->Foreground(value);
+        return *this;
     }
 
     FTextInput& FTextInput::FontFamily(const CE::Name& fontFamily)
@@ -77,6 +124,12 @@ namespace CE
         FFont copy = m_Font;
         copy.SetItalic(italic);
         return Font(copy);
+    }
+
+    FTextInput& FTextInput::LeftSlot(FWidget& content)
+    {
+        leftSlot->Child(content);
+        return *this;
     }
 
 } // namespace CE

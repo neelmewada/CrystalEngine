@@ -15,12 +15,12 @@ namespace CE
     };
 
     CLASS()
-    class FUSIONCORE_API FPlainButtonStyle : public FButtonStyle
+    class FUSIONCORE_API FButtonPlainStyle : public FButtonStyle
     {
-        CE_CLASS(FPlainButtonStyle, FButtonStyle)
+        CE_CLASS(FButtonPlainStyle, FButtonStyle)
     public:
 
-        FPlainButtonStyle();
+        FButtonPlainStyle();
 
         void MakeStyle(FWidget& widget) override;
 

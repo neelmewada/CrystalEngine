@@ -24,6 +24,8 @@ namespace CE
 
     protected:
 
+        void ClearStyle() override;
+
         bool TryAddChild(FWidget* child) override;
 
         bool TryRemoveChild(FWidget* child) override;

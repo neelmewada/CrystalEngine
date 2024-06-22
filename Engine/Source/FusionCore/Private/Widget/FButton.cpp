@@ -8,27 +8,46 @@ namespace CE
 
     }
 
+    void FButton::SetInteractionEnabled(bool enabled)
+    {
+        if (IsInteractionDisabled() == !enabled)
+            return;
+
+        if (enabled)
+        {
+            buttonState &= ~FButtonState::InteractionDisabled;
+        }
+        else
+        {
+            buttonState |= FButtonState::InteractionDisabled;
+        }
+
+        ApplyStyle();
+    }
+
     void FButton::HandleEvent(FEvent* event)
     {
         if (event->IsMouseEvent())
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 
-            if (mouseEvent->type == FEventType::MouseEnter)
+            if (mouseEvent->type == FEventType::MouseEnter && event->sender == this)
             {
 	            if (!EnumHasFlag(buttonState, FButtonState::Hovered))
 	            {
                     buttonState |= FButtonState::Hovered;
                     ApplyStyle();
 	            }
+                event->Consume(this);
             }
-            else if (mouseEvent->type == FEventType::MouseLeave)
+            else if (mouseEvent->type == FEventType::MouseLeave && event->sender == this)
             {
 	            if (EnumHasFlag(buttonState, FButtonState::Hovered))
 	            {
                     buttonState &= ~FButtonState::Hovered;
                     ApplyStyle();
 	            }
+                event->Consume(this);
             }
             else if (mouseEvent->type == FEventType::MousePress && mouseEvent->mouseButtons == MouseButtonMask::Left)
             {
@@ -37,6 +56,7 @@ namespace CE
                     buttonState |= FButtonState::Pressed;
                     ApplyStyle();
 	            }
+                event->Consume(this);
             }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->mouseButtons == MouseButtonMask::Left)
             {
@@ -47,27 +67,24 @@ namespace CE
 
                     if (mouseEvent->isInside)
                     {
-                        m_OnPressed.Broadcast();
+                        m_OnPressed();
                     }
                 }
+                event->Consume(this);
             }
-
-            event->Consume(this);
         }
 
 	    Super::HandleEvent(event);
     }
 
-    void FButton::OnPaint(FPainter* painter)
+    void FButton::OnPaintContent(FPainter* painter)
     {
-	    Super::OnPaint(painter);
+	    Super::OnPaintContent(painter);
 
         Vec2 pos = GetComputedPosition();
 
-        //painter->SetPen(FPen(Color::White()));
-        //painter->SetFont(FFont("Roboto", 18));
-
-        //Vec2 size = painter->DrawText("This is a sentence that is quite long!", pos, Vec2(150, 0));
+        //painter->SetPen(FPen(Color::White(), 1.0f, FPenStyle::SolidLine));
+        //painter->DrawLine(pos + Vec2(0, 0), pos + Vec2(250, 300));
     }
 
     void FButton::SetState(FButtonState newState)

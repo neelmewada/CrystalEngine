@@ -18,6 +18,11 @@ namespace CE
 
         virtual void MakeStyle(FWidget& widget) = 0;
 
+    protected:
+
+        FIELD()
+        Name styleName = "";
+
     };
     
 } // namespace CE

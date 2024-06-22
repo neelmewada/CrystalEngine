@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FStyleSet;
+
     CLASS()
     class FUSIONCORE_API FStyleManager : public Object
     {
@@ -12,24 +14,13 @@ namespace CE
 
         virtual ~FStyleManager();
 
-        void SetParent(FStyleManager* parent)
-        {
-            if (parent != this)
-				this->parent = parent;
-        }
-
-        FStyleManager* GetParent() const { return parent; }
-
-        void RegisterStyle(const Name& styleKey, FStyle* value);
-
-        FStyle* FindStyle(const Name& styleKey);
+        void RegisterStyleSet(const Name& name, FStyleSet* styleSet);
+        void DeregisterStyleSet(const Name& name);
 
     protected:
 
-        FIELD()
-        FStyleManager* parent = nullptr;
+        HashMap<Name, FStyleSet*> registeredStyleSets;
 
-        HashMap<Name, FStyle*> registeredStyles{};
     };
     
 } // namespace CE

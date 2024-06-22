@@ -62,6 +62,15 @@ namespace CE
 		this->owningWidget->SetContextRecursively(this);
 	}
 
+	FStyleSet* FFusionContext::GetDefaultStyleSet()
+	{
+		if (!defaultStyleSet && parentContext)
+		{
+			return parentContext->GetDefaultStyleSet();
+		}
+		return defaultStyleSet;
+	}
+
 	void FFusionContext::OnWidgetDestroyed(FWidget* widget)
 	{
 		if (owningWidget == widget)
@@ -122,19 +131,10 @@ namespace CE
 		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
-	void FFusionContext::SetStyleManager(FStyleManager* styleManager)
+	void FFusionContext::SetDefaultStyleSet(FStyleSet* styleSet)
 	{
-		this->styleManager = styleManager;
-		MarkDirty();
-	}
-
-	FStyleManager* FFusionContext::GetStyleManager()
-	{
-		if (styleManager == nullptr && parentContext)
-		{
-			return parentContext->GetStyleManager();
-		}
-		return styleManager;
+		defaultStyleSet = styleSet;
+		MarkLayoutDirty();
 	}
 
 	void FFusionContext::SetClearScreen(bool set)
@@ -194,6 +194,19 @@ namespace CE
 		for (FFusionContext* childContext : childContexts)
 		{
 			childContext->SetDrawPackets(drawList);
+		}
+	}
+
+	void FFusionContext::OnStyleSetDeregistered(FStyleSet* styleSet)
+	{
+		if (owningWidget != nullptr)
+		{
+			owningWidget->ClearStyle();
+		}
+
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->OnStyleSetDeregistered(styleSet);
 		}
 	}
 

@@ -25,6 +25,8 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
+        void ClearStyle() override;
+
     protected:
 
         // Never call this function directly! Use AddChild() instead
