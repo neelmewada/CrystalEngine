@@ -134,6 +134,7 @@ namespace CE
         if (event->IsMouseEvent() && event->sender == this)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+            Vec2 mouseDelta = mouseEvent->mousePosition - mouseEvent->prevMousePosition;
             Vec2 labelSpacePos = mouseEvent->mousePosition - inputLabel->globalPosition - 
                 Vec2(inputLabel->m_Padding.left, inputLabel->m_Padding.top) + Vec2(scrollOffset, 0);
 
@@ -199,25 +200,55 @@ namespace CE
                 selectionDistance += dragEvent->mousePosition.x - dragEvent->prevMousePosition.x;
                 int endIndex = -1;
 
-                f32 cursorPosX = cursorPos < characterOffsets.GetSize() ? characterOffsets[cursorPos].min.x : characterOffsets[cursorPos - 1].max.x;
+                selectionDistance += mouseDelta.x;
+                int selectionIndex = -1;
+
+                RangeInt range = RangeInt(-1, -1);
+                f32 prevCenterPoint = -NumericLimits<f32>::Infinity();
 
                 for (int i = 0; i < characterOffsets.GetSize(); ++i)
                 {
-                    if ((i > 0 && labelSpacePos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && labelSpacePos.x > characterOffsets[i].max.x))
-                        continue;
+                    Rect characterRect = characterOffsets[i].Translate(padding.min - Vec2(scrollOffset, 0));
+                    Rect cursorCharacterRect = characterOffsets[cursorPos].Translate(padding.min - Vec2(textScrollOffset, 0));
+                    f32 centerPoint = (characterRect.min.x + characterRect.max.x) / 2.0f;
 
-                    f32 halfWayPos = (characterOffsets[i].min.x + characterOffsets[i].max.x) / 2.0f;
-                    if (labelSpacePos.x <= halfWayPos)
-                        endIndex = i;
-                    else
-                        endIndex = i + 1;
+                    if (selectionDistance > 0)
+                    {
+                        if (cursorCharacterRect.min.x + selectionDistance > (characterRect.min.x + characterRect.max.x) * 0.5f)
+                        {
+                            selectionIndex = i;
+                            range.max = i;
+                        }
+                    }
+                    else if (selectionDistance < 0)
+                    {
+                        if (cursorCharacterRect.min.x + selectionDistance > prevCenterPoint)
+                        {
+                            selectionIndex = i;
+                            range.min = i;
+                        }
+                    }
 
-                    break;
+                    prevCenterPoint = centerPoint;
                 }
 
-                if (endIndex >= 0)
+                if (localMousePos.x > contentRect.max.x + padding.left + padding.right)
                 {
-                    //SelectRange(selectionStart, endIndex);
+                    SelectRange(cursorPos, characterOffsets.GetSize() - 1);
+                    ScrollTo(characterOffsets.GetSize());
+                }
+                else if (localMousePos.x < contentRect.min.x + padding.left + padding.right)
+                {
+                    SelectRange(0, cursorPos);
+                    ScrollTo(0);
+                }
+                else if (selectionDistance > 0)
+                {
+                    SelectRange(cursorPos, selectionIndex);
+                }
+                else if (selectionDistance < 0)
+                {
+                    SelectRange(selectionIndex, cursorPos - 1);
                 }
 
                 dragEvent->draggedWidget = this;
