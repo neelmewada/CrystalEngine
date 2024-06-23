@@ -13,6 +13,8 @@ namespace CE
 
         void Construct() override;
 
+        bool SupportsMouseEvents() const override { return true; }
+
     public:
 
 

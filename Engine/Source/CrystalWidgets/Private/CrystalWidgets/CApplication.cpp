@@ -4,8 +4,6 @@ namespace CE::Widgets
 {
 	static CApplication* instance = nullptr;
 
-	static Array<bool> keyPressStates{};
-
 	CApplication::CApplication()
 	{
 		if (IsDefaultInstance())
@@ -496,11 +494,6 @@ namespace CE::Widgets
 					keyEventWidget->HandleEvent(&keyEvent);
 				}
 			}
-		}
-
-		if (curFocusedWidget != nullptr && InputManager::IsKeyDown(KeyCode::Tab))
-		{
-			
 		}
 
 		// Per window events inside Tick()

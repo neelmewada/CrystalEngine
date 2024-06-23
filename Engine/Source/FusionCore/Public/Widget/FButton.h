@@ -30,11 +30,11 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-        void OnPaintContent(FPainter* painter) override;
+        void OnPaintContentOverlay(FPainter* painter) override;
 
-        bool CanReceiveMouseEvents() const override { return true; }
+        bool SupportsMouseEvents() const override { return true; }
 
-        bool CanReceiveKeyboardEvents() const override { return true; }
+        bool SupportsKeyboardEvents() const override { return true; }
 
     protected: // - Internal Methods -
 

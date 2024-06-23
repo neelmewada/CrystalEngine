@@ -33,6 +33,9 @@ namespace CE
         void PreShutdown();
         void Shutdown();
 
+        void PushCursor(SystemCursor cursor);
+        void PopCursor();
+
         void Tick(bool isExposed = false);
 
         void SetRootContext(FFusionContext* context);
@@ -78,6 +81,10 @@ namespace CE
         FIELD()
         FStyleManager* styleManager = nullptr;
 
+        StableDynamicArray<SystemCursor, 32, false> cursorStack;
+
+        Array<FTimer*> timers;
+
         RPI::Shader* fusionShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
@@ -94,6 +101,7 @@ namespace CE
         Array<DestroyItem> destructionQueue{};
 
         FUSION_FRIENDS;
+        friend class FTimer;
     };
     
 } // namespace CE

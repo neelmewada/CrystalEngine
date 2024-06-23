@@ -340,8 +340,8 @@ float4 FragMain(PSInput input) : SV_TARGET
         const uint lineIndex = drawItem.shapeOrCharOrLineIndex;
         const LineItem2D lineItem = _LineItems[lineIndex];
         float dist = length(lineItem.end - lineItem.start);
-        const float2 endPos = lineItem.start;
-        const float2 startPos = lineItem.end;
+        const float2 endPos = lineItem.end;
+        const float2 startPos = lineItem.start;
 
         float sd = 1;
 
@@ -350,17 +350,16 @@ float4 FragMain(PSInput input) : SV_TARGET
         case PEN_None:
             discard;
         case PEN_SolidLine:
-            sd = SDFSegment(sdfPos + quadSize * 0.5, startPos, endPos) - penThickness;
+            sd = SDFSegment(uv * quadSize, startPos, endPos) - penThickness;
 	        break;
         case PEN_DottedLine:
             penThickness = 1.0;
         case PEN_DashedLine:
-            //sd = SDFDashedLine(sdfPos, startPos, endPos, lineItem.dashLength / dist, penThickness);
+            sd = SDFDashedLine(sdfPos + quadSize * 0.5, startPos, endPos, lineItem.dashLength / dist, penThickness);
 	        break;
         }
 
-        pixelColor = lerp(float4(penColor.rgb, 0), penColor, -sd * 1.5);
-        //pixelColor = lerp(float4(0, 0, 0, 1.0), penColor, -sd * 2.0);
+        pixelColor = lerp(float4(penColor.rgb, 0), penColor, -sd * 2.0);
     }
     else if (drawItem.drawType == DRAW_Text)
     {

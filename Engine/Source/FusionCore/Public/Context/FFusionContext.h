@@ -43,6 +43,8 @@ namespace CE
 
         bool IsLayoutDirty() const { return layoutDirty; }
 
+        virtual bool IsFocused() const;
+
         void MarkLayoutDirty();
 
         void MarkDirty();
@@ -104,6 +106,9 @@ namespace CE
         bool layoutDirty = true;
         bool dirty = true;
         bool isDestroyed = false;
+
+        FWidget* curFocusWidget = nullptr;
+        FWidget* widgetToFocus = nullptr;
 
         Vec2 availableSize{};
 

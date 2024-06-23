@@ -20,6 +20,21 @@ namespace CE
 
         FTextInputLabel();
 
+        void CalculateIntrinsicSize() override;
+
+    protected:
+
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
+    protected: // - Fusion Fields -
+
+        FIELD()
+        FVoidEvent m_OnTextPropertyUpdated;
+
+    public: // - Fusion Properties -
+
+        FUSION_EVENT(OnTextPropertyUpdated);
+
     private:
 
         friend class FTextInput;
@@ -39,11 +54,19 @@ namespace CE
         bool IsEditing() const { return EnumHasFlag(state, FTextInputState::Editing); }
         bool IsInteractionDisabled() const { return EnumHasFlag(state, FTextInputState::InteractionDisabled); }
 
-        bool CanReceiveMouseEvents() const override { return true; }
+        bool SupportsMouseEvents() const override { return true; }
 
-        bool CanReceiveKeyboardEvents() const override { return true; }
+        bool SupportsKeyboardEvents() const override { return true; }
+
+        bool SupportsFocusEvents() const override { return true; }
+
+        bool IsSelectionActive() const { return isSelectionActive; }
+
+        const String& GetText() const;
 
     protected:
+
+        void OnLostFocus() override;
 
         void OnPaintContent(FPainter* painter) override;
 
@@ -53,7 +76,28 @@ namespace CE
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
+        // - Internal API -
+
+        FUNCTION()
+        void RecalculateCharacterOffsets();
+
+        void TryRecalculateCharacterOffsets();
+
+        FUNCTION()
+        void OnTimeOut();
+
         void SetEditing(bool edit);
+
+        void SetCursorPos(int cursorPos);
+
+        void ScrollTo(int cursorPos);
+
+        void InsertAt(const String& string, int insertPos);
+
+        void RemoveRange(int startIndex, int count);
+
+        void SelectRange(int startIndex, int endIndex);
+        void DeselectAll();
 
         FIELD()
         FTextInputState state = FTextInputState::None;
@@ -64,29 +108,33 @@ namespace CE
         FIELD()
         FTextInputLabel* inputLabel = nullptr;
 
+        FIELD()
+        FTimer* cursorTimer = nullptr;
+
     protected: // - Fusion Fields -
 
-        FIELD(FusionLayoutProperty)
-        FFont m_Font;
-
+        FIELD(FusionProperty)
+        Color m_SelectionColor = Color::RGBA(0, 112, 224);
 
     public: // - Fusion Properties -
 
-        FUSION_LAYOUT_PROPERTY(Font);
+        FUSION_PROPERTY(SelectionColor);
 
         Self& Text(const String& value);
         Self& Foreground(const Color& value);
-
-        Self& FontFamily(const CE::Name& fontFamily);
-        Self& FontSize(int fontSize);
-        Self& Bold(bool bold);
-        Self& Italic(bool italic);
 
         Self& LeftSlot(FWidget& content);
 
     private: // - Internal Data -
 
+        Array<Rect> characterOffsets;
+        Vec2 textSize;
+        bool cursorState : 1 = false;
+        bool isSelectionActive : 1 = false;
         int cursorPos = 0;
+        int selectionStart = -1;
+        int selectionEnd = -1;
+        f32 scrollOffset = 0;
 
         FUSION_FRIENDS;
         FUSION_WIDGET;

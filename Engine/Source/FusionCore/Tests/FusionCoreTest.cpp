@@ -148,9 +148,19 @@ namespace RenderingTests
                         .Text("Click Count 0")
                     ),
 
-                    FAssignNew(FTextInput, textInput)
-                    .Text("Type your input here...")
-                    .Style("TextInput.Primary"),
+                    FNew(FHorizontalStack)
+                    .ContentVAlign(VAlign::Fill)
+                    .Name("HStackInput")
+                    (
+                        FAssignNew(FTextInput, textInput)
+                        .Text("Type your text")
+                        .Style("TextInput.Primary")
+                        .MinWidth(150),
+
+                        FNew(FStyledWidget)
+                        .Background(Color::Clear())
+                        .FillRatio(1.0)
+                    ),
 
                     FNew(FHorizontalStack)
                     .ContentVAlign(VAlign::Center)

@@ -25,6 +25,8 @@ namespace CE
 
 		PlatformWindow* GetPlatformWindow() const { return platformWindow; }
 
+		bool IsFocused() const override;
+
 		void Tick() override;
 
 		void DoLayout() override;
@@ -65,6 +67,10 @@ namespace CE
 		FusionRenderer* renderer = nullptr;
 		FPainter* painter = nullptr;
 
+		KeyModifier keyModifierStates{};
+		BitSet<128> keyPressStates{};
+
+		FWidget* draggedWidget = nullptr;
 		FWidget* prevHoveredWidget = nullptr;
 		StaticArray<FWidget*, 6> widgetsPressedPerMouseButton{};
 

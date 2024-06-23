@@ -170,13 +170,18 @@ namespace CE
 		}
 	}
 
+	bool FNativeContext::IsFocused() const
+	{
+		return platformWindow->IsFocused();
+	}
+
 	void FNativeContext::Tick()
 	{
 		ZoneScoped;
 
 		Super::Tick();
 
-		if (!owningWidget || FusionApplication::Get()->isExposed)
+		if (!owningWidget || FusionApplication::Get()->isExposed || !platformWindow->IsShown())
 		{
 			return;
 		}
@@ -185,7 +190,7 @@ namespace CE
 
 		Vec2 mousePos = (InputManager::GetGlobalMousePosition() - platformWindow->GetWindowPosition()).ToVec2();
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
-		Vec2 mouseWheelDelta = InputManager::GetMouseWheelDelta();
+		Vec2 wheelDelta = InputManager::GetMouseWheelDelta();
 		if (prevMousePos == Vec2())
 			prevMousePos = mousePos;
 
@@ -213,11 +218,30 @@ namespace CE
 			curButtonMask |= MouseButtonMask::Button5;
 		}
 
+		Enum* keyCodeEnum = GetStaticEnum<KeyCode>();
+		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
+
+		keyModifierStates = KeyModifier::None;
+		keyPressStates.Reset();
+
+		for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
+		{
+			if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))
+			{
+				keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
+			}
+		}
+
 		FWidget* hoveredWidget = nullptr;
 
 		if (windowRect.Contains(mousePos))
 		{
 			hoveredWidget = owningWidget->HitTest(mousePos);
+		}
+
+		if (!platformWindow->IsFocused())
+		{
+			hoveredWidget = nullptr;
 		}
 
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
@@ -227,16 +251,17 @@ namespace CE
 			event.type = FEventType::MouseLeave;
 			event.mousePosition = mousePos;
 			event.prevMousePosition = prevMousePos;
-			event.mouseButtons = curButtonMask;
+			event.buttons = curButtonMask;
 			event.direction = FEventDirection::BottomToTop;
 			event.isInside = true;
+			event.keyModifiers = keyModifierStates;
 
 			while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
 			{
 				event.sender = hoveredWidgetStack.Top();
 				event.Reset();
 
-				if (event.sender->CanReceiveMouseEvents())
+				if (event.sender->SupportsMouseEvents())
 				{
 					event.sender->HandleEvent(&event);
 				}
@@ -252,9 +277,10 @@ namespace CE
 			event.type = FEventType::MouseEnter;
 			event.mousePosition = mousePos;
 			event.prevMousePosition = prevMousePos;
-			event.mouseButtons = curButtonMask;
+			event.buttons = curButtonMask;
 			event.direction = FEventDirection::BottomToTop;
 			event.isInside = true;
+			event.keyModifiers = keyModifierStates;
 
 			int idx = hoveredWidgetStack.GetSize();
 			FWidget* basePrevWidget = nullptr;
@@ -280,6 +306,54 @@ namespace CE
 
 		// - Mouse Click Events -
 
+		if (abs(mouseDelta.x) >= FLT_EPSILON || abs(mouseDelta.y) >= FLT_EPSILON)
+		{
+			FMouseEvent mouseEvent{};
+			mouseEvent.type = FEventType::MouseMove;
+			mouseEvent.buttons = curButtonMask;
+			mouseEvent.mousePosition = mousePos;
+			mouseEvent.prevMousePosition = prevMousePos;
+			mouseEvent.direction = FEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = wheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
+
+			if (hoveredWidgetStack.NonEmpty())
+			{
+				mouseEvent.sender = hoveredWidgetStack.Top();
+				hoveredWidgetStack.Top()->HandleEvent(&mouseEvent);
+			}
+
+			if (draggedWidget != nullptr && curButtonMask != MouseButtonMask::None)
+			{
+				FDragEvent dragEvent{};
+				dragEvent.type = FEventType::DragMove;
+				dragEvent.buttons = curButtonMask;
+				dragEvent.mousePosition = mousePos;
+				dragEvent.prevMousePosition = prevMousePos;
+				dragEvent.direction = FEventDirection::BottomToTop;
+				dragEvent.wheelDelta = wheelDelta;
+				dragEvent.isInside = true;
+				dragEvent.keyModifiers = keyModifierStates;
+
+				dragEvent.sender = nullptr;
+				if (hoveredWidgetStack.NonEmpty())
+					dragEvent.sender = hoveredWidgetStack.Top();
+				dragEvent.draggedWidget = draggedWidget;
+
+				draggedWidget->HandleEvent(&dragEvent);
+
+				// Cancel dragging if any of the FDragEvent's are not consumed by the dragged widget
+				if (!dragEvent.isConsumed)
+				{
+					draggedWidget = nullptr;
+				}
+				else
+				{
+					draggedWidget = dragEvent.draggedWidget;
+				}
+			}
+		}
+
 		Enum* mouseButtonEnum = GetStaticEnum<MouseButton>();
 		for (int i = 0; i < mouseButtonEnum->GetConstantsCount(); ++i)
 		{
@@ -290,13 +364,17 @@ namespace CE
 				event.type = FEventType::MousePress;
 				event.mousePosition = mousePos;
 				event.prevMousePosition = prevMousePos;
-				event.mouseButtons = (MouseButtonMask)BIT((int)mouseButton);
+				event.buttons = (MouseButtonMask)BIT((int)mouseButton);
 				event.direction = FEventDirection::BottomToTop;
+				event.keyModifiers = keyModifierStates;
+				event.isDoubleClick = InputManager::GetMouseButtonClicks(mouseButton) == 2;
 
 				if (hoveredWidgetStack.NonEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
-					while (event.sender != nullptr && !event.sender->CanReceiveMouseEvents())
+					widgetToFocus = event.sender;
+
+					while (event.sender != nullptr && !event.sender->SupportsMouseEvents())
 					{
 						event.sender = event.sender->parent;
 					}
@@ -307,6 +385,36 @@ namespace CE
 
 						event.sender->HandleEvent(&event);
 					}
+
+					FWidget* dragEventWidget = hoveredWidgetStack.Top();
+
+					while (dragEventWidget != nullptr)
+					{
+						if (dragEventWidget->SupportsFocusEvents())
+						{
+							FDragEvent dragEvent{};
+							dragEvent.type = FEventType::DragBegin;
+							dragEvent.mousePosition = mousePos;
+							dragEvent.prevMousePosition = prevMousePos;
+							dragEvent.buttons = (MouseButtonMask)BIT((int)mouseButton);
+							dragEvent.direction = FEventDirection::BottomToTop;
+							dragEvent.keyModifiers = keyModifierStates;
+							dragEvent.isDoubleClick = InputManager::GetMouseButtonClicks(mouseButton) == 2;
+
+							dragEvent.sender = dragEventWidget;
+							dragEvent.draggedWidget = dragEventWidget;
+							dragEvent.sender->HandleEvent(&dragEvent);
+
+							if (dragEvent.isConsumed)
+							{
+								draggedWidget = dragEvent.draggedWidget;
+							}
+
+							break;
+						}
+
+						dragEventWidget = dragEventWidget->parent;
+					}
 				}
 			}
 
@@ -316,14 +424,15 @@ namespace CE
 				event.type = FEventType::MouseRelease;
 				event.mousePosition = mousePos;
 				event.prevMousePosition = prevMousePos;
-				event.mouseButtons = (MouseButtonMask)BIT((int)mouseButton);
+				event.buttons = (MouseButtonMask)BIT((int)mouseButton);
 				event.direction = FEventDirection::BottomToTop;
 				event.isInside = true;
+				event.keyModifiers = keyModifierStates;
 
 				if (hoveredWidgetStack.NonEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
-					while (event.sender != nullptr && !event.sender->CanReceiveMouseEvents())
+					while (event.sender != nullptr && !event.sender->SupportsMouseEvents())
 					{
 						event.sender = event.sender->parent;
 					}
@@ -344,7 +453,7 @@ namespace CE
 				widgetsPressedPerMouseButton[i] = nullptr;
 			}
 		}
-
+		
 		if (hoveredWidget != prevHoveredWidget)
 		{
 			/*if (hoveredWidget != nullptr)
@@ -353,6 +462,140 @@ namespace CE
 				CE_LOG(Info, All, "Hover Changed: NULL");*/
 
 			prevHoveredWidget = hoveredWidget;
+		}
+
+		// - Focus Events -
+
+		if (owningWidget && IsFocused() && !owningWidget->IsFocused())
+		{
+			FFocusEvent focusEvent{};
+			focusEvent.gotFocus = true;
+			focusEvent.type = FEventType::FocusChanged;
+			focusEvent.sender = owningWidget;
+			focusEvent.focusedWidget = owningWidget;
+			focusEvent.direction = FEventDirection::BottomToTop;
+
+			owningWidget->HandleEvent(&focusEvent);
+		}
+		else if (owningWidget && !IsFocused() && owningWidget->IsFocused())
+		{
+			FFocusEvent focusEvent{};
+			focusEvent.gotFocus = false;
+			focusEvent.type = FEventType::FocusChanged;
+			focusEvent.sender = owningWidget;
+			focusEvent.focusedWidget = nullptr;
+			focusEvent.direction = FEventDirection::TopToBottom;
+
+			owningWidget->HandleEvent(&focusEvent);
+
+			curFocusWidget = widgetToFocus = nullptr;
+		}
+
+		if (curFocusWidget != nullptr && !curFocusWidget->IsFocused() && curFocusWidget == widgetToFocus)
+		{
+			curFocusWidget = nullptr;
+			widgetToFocus = nullptr;
+		}
+
+		if (widgetToFocus != curFocusWidget)
+		{
+			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->ParentExistsRecursive(curFocusWidget)))
+			{
+				FWidget* base = curFocusWidget;
+
+				while (base != nullptr)
+				{
+					if (base->parent != nullptr && widgetToFocus->ParentExistsRecursive(base->parent))
+					{
+						break;
+					}
+					base = base->parent;
+				}
+
+				if (base != nullptr)
+				{
+					FFocusEvent focusEvent{};
+					focusEvent.type = FEventType::FocusChanged;
+					focusEvent.sender = base;
+					focusEvent.focusedWidget = widgetToFocus;
+					focusEvent.gotFocus = false;
+					focusEvent.direction = FEventDirection::TopToBottom;
+
+					base->HandleEvent(&focusEvent);
+				}
+				else
+				{
+					FFocusEvent focusEvent{};
+					focusEvent.type = FEventType::FocusChanged;
+					focusEvent.sender = curFocusWidget;
+					focusEvent.focusedWidget = nullptr;
+					focusEvent.gotFocus = false;
+					focusEvent.direction = FEventDirection::BottomToTop;
+
+					curFocusWidget->HandleEvent(&focusEvent);
+				}
+			}
+			
+			if (widgetToFocus != nullptr)
+			{
+				FFocusEvent focusEvent{};
+				focusEvent.type = FEventType::FocusChanged;
+				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus;
+				focusEvent.gotFocus = true;
+				focusEvent.direction = FEventDirection::BottomToTop;
+
+				widgetToFocus->HandleEvent(&focusEvent);
+			}
+
+			curFocusWidget = widgetToFocus;
+		}
+
+		FWidget* keyEventWidget = curFocusWidget;
+		while (keyEventWidget != nullptr && !keyEventWidget->SupportsKeyboardEvents())
+		{
+			keyEventWidget = keyEventWidget->parent;
+		}
+
+		if (keyEventWidget != nullptr)
+		{
+			for (int i = 0; i < keyCodeEnum->GetConstantsCount(); ++i)
+			{
+				KeyCode keyCode = (KeyCode)keyCodeEnum->GetConstant(i)->GetValue();
+
+				bool isDown = InputManager::IsKeyDown(keyCode);
+				bool isUp = InputManager::IsKeyUp(keyCode);
+
+				bool isHeldDelayed = InputManager::IsKeyHeldDelayed(keyCode);
+
+				FKeyEvent keyEvent{};
+				keyEvent.modifiers = keyModifierStates;
+				keyEvent.key = keyCode;
+				keyEvent.sender = keyEventWidget;
+
+				if (isDown && !keyPressStates.Test(i))
+				{
+					keyEvent.type = FEventType::KeyPress;
+
+					keyPressStates.Set(i, true);
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+				else if (isUp && keyPressStates.Test(i))
+				{
+					keyEvent.type = FEventType::KeyRelease;
+
+					keyPressStates.Set(i, false);
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+
+				if (isHeldDelayed)
+				{
+					keyEvent.type = FEventType::KeyHeld;
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+			}
 		}
 	}
 

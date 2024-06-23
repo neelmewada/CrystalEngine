@@ -14,6 +14,16 @@ namespace CE
         MouseLeave,
         MousePress,
         MouseRelease,
+
+        DragBegin,
+        DragMove,
+        DragEnd,
+
+        FocusChanged,
+
+        KeyPress,
+        KeyHeld,
+        KeyRelease,
     };
     ENUM_CLASS(FEventType);
 
@@ -45,20 +55,23 @@ namespace CE
         FIELD()
         FWidget* consumer = nullptr;
 
-        bool consumed = false;
+        bool isConsumed : 1 = false;
 
-        bool stopPropagation = false;
+        bool stopPropagation : 1 = false;
 
         void Reset()
         {
             consumer = nullptr;
-            consumed = stopPropagation = false;
+            isConsumed = stopPropagation = false;
         }
 
         void Consume(FWidget* comsumer)
         {
+            if (isConsumed)
+                return;
+
             this->consumer = consumer;
-            consumed = true;
+            isConsumed = true;
         }
 
         void ConsumeAndStopPropagation(FWidget* consumer)
@@ -76,6 +89,35 @@ namespace CE
             case FEventType::MouseLeave:
             case FEventType::MousePress:
             case FEventType::MouseRelease:
+            case FEventType::DragBegin:
+            case FEventType::DragMove:
+            case FEventType::DragEnd:
+                return true;
+            default:
+                return false;
+	        }
+        }
+
+        bool IsDragEvent() const
+        {
+	        switch (type)
+	        {
+            case FEventType::DragBegin:
+            case FEventType::DragMove:
+            case FEventType::DragEnd:
+                return true;
+            default:
+                return false;
+	        }
+        }
+
+        bool IsKeyEvent() const
+        {
+	        switch (type)
+	        {
+	        case FEventType::KeyPress:
+	        case FEventType::KeyHeld:
+	        case FEventType::KeyRelease:
                 return true;
             default:
                 return false;
@@ -97,10 +139,65 @@ namespace CE
         Vec2 prevMousePosition;
 
         FIELD()
-        MouseButtonMask mouseButtons = MouseButtonMask::None;
+        Vec2 wheelDelta;
+
+        FIELD()
+        MouseButtonMask buttons = MouseButtonMask::None;
 
         FIELD()
         b8 isInside = false;
+
+        FIELD()
+		b8 isDoubleClick = false;
+
+        FIELD()
+        KeyModifier keyModifiers = KeyModifier::None;
+
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FDragEvent : FMouseEvent
+    {
+        CE_STRUCT(FDragEvent, FMouseEvent)
+    public:
+
+        FIELD()
+        FWidget* draggedWidget = nullptr;
+
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FFocusEvent : FEvent
+    {
+        CE_STRUCT(FFocusEvent, FEvent)
+    public:
+
+        FFocusEvent() {}
+
+        bool GotFocus() const { return gotFocus; }
+        bool LostFocus() const { return !gotFocus; }
+
+        FIELD()
+        bool gotFocus = false;
+
+        FIELD()
+        FWidget* focusedWidget = nullptr;
+
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FKeyEvent : FEvent
+    {
+        CE_STRUCT(FKeyEvent, FEvent)
+    public:
+
+        FKeyEvent() {}
+
+        FIELD()
+        KeyCode key = KeyCode::Unknown;
+
+        FIELD()
+        KeyModifier modifiers = KeyModifier::None;
 
     };
     

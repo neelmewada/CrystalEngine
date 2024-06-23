@@ -254,6 +254,14 @@ namespace CE
 
 	Vec2 FusionRenderer::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
+		static Array<Rect> offsets{};
+		return CalculateCharacterOffsets(offsets, text, font, width, wordWrap);
+	}
+
+	Vec2 FusionRenderer::CalculateCharacterOffsets(Array<Rect>& outRects, const String& text, 
+		const FFont& font,
+		f32 width, FWordWrap wordWrap)
+	{
 		ZoneScoped;
 
 		FFontManager* fontManager = FusionApplication::Get()->fontManager;
@@ -290,6 +298,8 @@ namespace CE
 		int breakCharIdx = -1;
 		int idx = 0;
 
+		outRects.Resize(text.GetLength());
+
 		for (int i = 0; i < text.GetLength(); ++i)
 		{
 			char c = text[i];
@@ -311,7 +321,7 @@ namespace CE
 			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
 			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
 
-			if (isFixedWidth && curPos.x + glyphWidth * (f32)fontSize / (f32)glyph.fontSize > width)
+			if (isFixedWidth && curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize > width && wordWrap != FWordWrap::NoWrap)
 			{
 				curPos.x = startX;
 				curPos.y += metrics.lineHeight * (f32)fontSize;
@@ -325,8 +335,11 @@ namespace CE
 						FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
 						f32 atlasFontSize = prevGlyph.fontSize;
 
-						curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize;
+						outRects[j] = Rect::FromSize(curPos.x, curPos.y, 
+							(f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize,
+							(f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize);
 
+						curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize;
 					}
 					breakCharIdx = -1;
 
@@ -339,6 +352,8 @@ namespace CE
 					curPos.y += metrics.lineHeight * fontSize;
 				}
 			}
+
+			outRects[i] = Rect::FromSize(curPos.x, curPos.y, (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize, glyphHeight);
 
 			curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
 
@@ -354,6 +369,27 @@ namespace CE
 		if (isFixedWidth)
 			finalSize.width = width;
 		return finalSize;
+	}
+
+	FFontMetrics FusionRenderer::GetFontMetrics(const FFont& font)
+	{
+		ZoneScoped;
+
+		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+
+		Name fontFamily = currentFont.GetFamily();
+		int fontSize = currentFont.GetFontSize();
+
+		if (fontSize <= 0)
+			fontSize = 12;
+		if (!fontFamily.IsValid())
+			fontFamily = fontManager->GetDefaultFontFamily();
+
+		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+		if (fontAtlas == nullptr)
+			return {};
+
+		return fontAtlas->GetMetrics();
 	}
 
 	Vec2 FusionRenderer::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
@@ -435,13 +471,13 @@ namespace CE
 			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
 
 			// We are beyond the width
-			if (isFixedWidth && curPos.x + glyphWidth > startX + size.width)
+			if (isFixedWidth && curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize > startX + size.width && wordWrap != FWordWrap::NoWrap)
 			{
 				// Go through previous characters and bring them to this new-line
 				if (breakCharIdx >= 0)
 				{
 					curPos.x = startX;
-					curPos.y += metrics.lineHeight * fontSize;
+					curPos.y += metrics.lineHeight * (f32)fontSize;
 
 					for (int j = breakCharIdx + 1; j < i; j++)
 					{
@@ -529,7 +565,7 @@ namespace CE
 
 		f32 minX = Math::Min(from.x, to.x);
 		f32 minY = Math::Min(from.y, to.y);
-		f32 maxX = Math::Max(from.x, to.x);
+		f32 maxX = Math::Max(from.x, to.x) + lineThickness;
 		f32 maxY = Math::Max(from.y, to.y) + lineThickness;
 
 		Vec2 size = Vec2(maxX - minX, maxY - minY);

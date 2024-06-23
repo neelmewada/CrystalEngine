@@ -79,6 +79,23 @@ namespace CE
 		}
 	}
 
+	bool FFusionContext::IsFocused() const
+	{
+		if (IsDefaultInstance())
+			return false;
+
+		if (parentContext == nullptr) // Root context
+			return true;
+
+		for (FFusionContext* childContext : childContexts)
+		{
+			if (childContext->IsFocused())
+				return true;
+		}
+
+		return false;
+	}
+
 	void FFusionContext::MarkLayoutDirty()
 	{
 		layoutDirty = true;

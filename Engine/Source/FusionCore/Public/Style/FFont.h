@@ -3,10 +3,11 @@
 namespace CE
 {
     ENUM()
-    enum class FWordWrap
+    enum class FWordWrap : u8
     {
         Normal = 0,
-        BreakWord
+        BreakWord,
+        NoWrap
     };
     ENUM_CLASS_FLAGS(FWordWrap);
 

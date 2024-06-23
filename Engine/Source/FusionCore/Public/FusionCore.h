@@ -51,6 +51,7 @@ namespace CE
 #include "Style/FBrush.h"
 #include "Style/FFont.h"
 
+#include "Application/FTimer.h"
 #include "Application/FusionApplication.h"
 #include "Rendering/FusionRenderer.h"
 #include "Rendering/FPainter.h"

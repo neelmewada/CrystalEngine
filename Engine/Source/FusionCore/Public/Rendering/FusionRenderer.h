@@ -57,6 +57,10 @@ namespace CE
 
         Vec2 CalculateTextSize(const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
+        Vec2 CalculateCharacterOffsets(Array<Rect>& outRects, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
+        FFontMetrics GetFontMetrics(const FFont& font);
+
         // - Draw API -
 
         void PushChildCoordinateSpace(const Matrix4x4& transform);

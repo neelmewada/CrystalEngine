@@ -34,7 +34,25 @@ namespace CE
 
         m_OnEvent(event);
 
-        if (event->IsMouseEvent() && (!event->consumed || event->consumer != this))
+        if (event->type == FEventType::FocusChanged)
+        {
+            FFocusEvent* focusEvent = static_cast<FFocusEvent*>(event);
+
+            if (isFocused != focusEvent->gotFocus)
+            {
+                isFocused = focusEvent->gotFocus;
+
+                if (SupportsFocusEvents())
+                {
+                    if (isFocused)
+                        OnGotFocus();
+                    else
+                        OnLostFocus();
+                }
+            }
+        }
+
+        if (event->IsMouseEvent() && (!event->isConsumed || event->consumer != this))
         {
             
         }
@@ -65,6 +83,16 @@ namespace CE
         Rect rect = Rect::FromSize(rectPos, rectSize);
 
         return rect.Contains(localMousePos) ? this : nullptr;
+    }
+
+    bool FWidget::ParentExistsRecursive(FWidget* parent)
+    {
+        if (this->parent == nullptr)
+            return false;
+        if (this->parent == parent || this == parent)
+            return true;
+
+        return this->parent->ParentExistsRecursive(parent);
     }
 
     void FWidget::OnAttachedToParent(FWidget* parent)

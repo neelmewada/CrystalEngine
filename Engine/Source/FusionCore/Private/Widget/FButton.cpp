@@ -49,7 +49,7 @@ namespace CE
 	            }
                 event->Consume(this);
             }
-            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->mouseButtons == MouseButtonMask::Left)
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
             {
 	            if (!EnumHasFlag(buttonState, FButtonState::Pressed))
 	            {
@@ -58,7 +58,7 @@ namespace CE
 	            }
                 event->Consume(this);
             }
-            else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->mouseButtons == MouseButtonMask::Left)
+            else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {
                 if (EnumHasFlag(buttonState, FButtonState::Pressed))
                 {
@@ -77,9 +77,9 @@ namespace CE
 	    Super::HandleEvent(event);
     }
 
-    void FButton::OnPaintContent(FPainter* painter)
+    void FButton::OnPaintContentOverlay(FPainter* painter)
     {
-	    Super::OnPaintContent(painter);
+	    Super::OnPaintContentOverlay(painter);
 
         Vec2 pos = GetComputedPosition();
 

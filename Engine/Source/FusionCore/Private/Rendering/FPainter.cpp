@@ -68,6 +68,17 @@ namespace CE
 		return renderer->CalculateTextSize(text, font, width, wordWrap);
 	}
 
+	Vec2 FPainter::CalculateCharacterOffsets(Array<Rect>& outRects, const String& text, 
+		const FFont& font, f32 width, FWordWrap wordWrap)
+	{
+		return renderer->CalculateCharacterOffsets(outRects, text, font, width, wordWrap);
+	}
+
+	FFontMetrics FPainter::GetFontMetrics(const FFont& font)
+	{
+		return renderer->GetFontMetrics(font);
+	}
+
 	void FPainter::DrawShape(const Rect& rect, const FShape& shape)
 	{
 		renderer->DrawShape(shape, rect.min, rect.GetSize());

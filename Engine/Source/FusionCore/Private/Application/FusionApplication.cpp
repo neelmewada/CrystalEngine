@@ -75,11 +75,39 @@ namespace CE
         delete fusionShader; fusionShader = nullptr;
     }
 
+    void FusionApplication::PushCursor(SystemCursor cursor)
+    {
+        cursorStack.Insert(cursor);
+        PlatformApplication::Get()->SetSystemCursor(cursorStack.Last());
+    }
+
+    void FusionApplication::PopCursor()
+    {
+        if (cursorStack.IsEmpty())
+            return;
+
+        cursorStack.RemoveLast();
+
+        if (cursorStack.IsEmpty())
+        {
+            PlatformApplication::Get()->SetSystemCursor(SystemCursor::Default);
+        }
+        else
+        {
+            PlatformApplication::Get()->SetSystemCursor(cursorStack.Last());
+        }
+    }
+
     void FusionApplication::Tick(bool isExposed)
     {
         ZoneScoped;
 
         this->isExposed = isExposed;
+
+        for (int i = timers.GetSize() - 1; i >= 0; --i)
+        {
+            timers[i]->Tick();
+        }
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {

@@ -24,9 +24,9 @@ namespace CE
             border = editingBorderColor;
         else if (input.IsHovered())
             border = hoverBorderColor;
-
+        
         input
-            .Background(FBrush(background))
+            .Background(background)
             .BackgroundShape(FRoundedRectangle(cornerRadius))
             .Border(border, borderWidth)
             ;

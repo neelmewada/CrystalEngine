@@ -80,13 +80,24 @@ namespace CE
 
         virtual bool ChildExistsRecursive(FWidget* child) { return this == child; }
 
-        virtual bool CanReceiveMouseEvents() const { return false; }
+        virtual bool ParentExistsRecursive(FWidget* parent);
 
-        virtual bool CanReceiveKeyboardEvents() const { return false; }
+        virtual bool SupportsMouseEvents() const { return false; }
+
+        virtual bool SupportsKeyboardEvents() const { return false; }
+
+    	virtual bool SupportsDragEvents() const { return false; }
+
+        virtual bool SupportsFocusEvents() const { return false; }
 
         virtual void ClearStyle();
 
+        bool IsFocused() const { return isFocused; }
+
     protected:
+
+        virtual void OnGotFocus() {}
+        virtual void OnLostFocus() {}
 
         virtual void OnAttachedToParent(FWidget* parent);
         virtual void OnDetachedFromParent(FWidget* parent);
@@ -129,8 +140,16 @@ namespace CE
 
         // - Flags -
 
+        FIELD()
+        bool isFocused = false;
 
     protected: // - Fusion Fields -
+
+        FIELD()
+        VAlign m_VAlign = VAlign::Auto;
+
+        FIELD()
+        HAlign m_HAlign = HAlign::Auto;
 
         FIELD()
         ScriptEvent<void(FEvent*)> m_OnEvent;
@@ -143,12 +162,6 @@ namespace CE
 
         FIELD()
         FStyle* m_Style = nullptr;
-
-        FIELD()
-        VAlign m_VAlign = VAlign::Auto;
-
-        FIELD()
-        HAlign m_HAlign = HAlign::Auto;
 
         FIELD()
         f32 m_MinWidth = 0;

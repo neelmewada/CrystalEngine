@@ -65,10 +65,12 @@ namespace CE
 	        painter->SetItemTransform(Matrix4x4::Identity());
         }
 
-        // Paint children
+        OnPaintContent(painter);
+
+        // Paint child widgets
 	    Super::OnPaint(painter);
 
-        OnPaintContent(painter);
+        OnPaintContentOverlay(painter);
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {

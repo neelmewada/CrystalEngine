@@ -22,6 +22,8 @@ namespace CE
 
         virtual void OnPaintContent(FPainter* painter) {}
 
+        virtual void OnPaintContentOverlay(FPainter* painter) {}
+
         void SetContextRecursively(FFusionContext* context) override;
 
         void OnAttachedToParent(FWidget* parent) override;
