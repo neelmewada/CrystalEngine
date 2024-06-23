@@ -135,7 +135,7 @@ namespace CE
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
             Vec2 labelSpacePos = mouseEvent->mousePosition - inputLabel->globalPosition - 
-                Vec2(inputLabel->m_Padding.left, inputLabel->m_Padding.top);
+                Vec2(inputLabel->m_Padding.left, inputLabel->m_Padding.top) + Vec2(scrollOffset, 0);
 
             auto app = FusionApplication::Get();
 
@@ -188,13 +188,40 @@ namespace CE
 
                 dragEvent->draggedWidget = this;
                 dragEvent->Consume(this);
-                
+
+                selectionDistance = 0;
+
             }
             else if (mouseEvent->type == FEventType::DragMove)
             {
                 FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
 
+                selectionDistance += dragEvent->mousePosition.x - dragEvent->prevMousePosition.x;
+                int endIndex = -1;
 
+                f32 cursorPosX = cursorPos < characterOffsets.GetSize() ? characterOffsets[cursorPos].min.x : characterOffsets[cursorPos - 1].max.x;
+
+                for (int i = 0; i < characterOffsets.GetSize(); ++i)
+                {
+                    if ((i > 0 && labelSpacePos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && labelSpacePos.x > characterOffsets[i].max.x))
+                        continue;
+
+                    f32 halfWayPos = (characterOffsets[i].min.x + characterOffsets[i].max.x) / 2.0f;
+                    if (labelSpacePos.x <= halfWayPos)
+                        endIndex = i;
+                    else
+                        endIndex = i + 1;
+
+                    break;
+                }
+
+                if (endIndex >= 0)
+                {
+                    //SelectRange(selectionStart, endIndex);
+                }
+
+                dragEvent->draggedWidget = this;
+                dragEvent->Consume(this);
             }
             else if (mouseEvent->type == FEventType::DragEnd)
             {

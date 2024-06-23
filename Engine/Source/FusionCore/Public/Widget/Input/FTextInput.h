@@ -60,6 +60,8 @@ namespace CE
 
         bool SupportsFocusEvents() const override { return true; }
 
+        bool SupportsDragEvents() const override { return true; }
+
         bool IsSelectionActive() const { return isSelectionActive; }
 
         const String& GetText() const;
@@ -135,6 +137,7 @@ namespace CE
         int selectionStart = -1;
         int selectionEnd = -1;
         f32 scrollOffset = 0;
+        f32 selectionDistance = 0;
 
         FUSION_FRIENDS;
         FUSION_WIDGET;
