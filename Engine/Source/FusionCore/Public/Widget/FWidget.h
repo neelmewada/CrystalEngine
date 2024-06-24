@@ -94,6 +94,12 @@ namespace CE
 
         bool IsFocused() const { return isFocused; }
 
+        virtual bool IsSizeDependendentOnContent() const { return true; }
+        virtual bool IsSizeDependendentOnParent() const { return true; }
+
+        void Focus();
+        void Unfocus();
+
     protected:
 
         virtual void OnGotFocus() {}

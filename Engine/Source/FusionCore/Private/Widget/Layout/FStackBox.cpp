@@ -70,6 +70,8 @@ namespace CE
 			return;
 		}
 
+		bool isTextStack = GetName() == "TextInputHStack";
+
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
 		f32 crossAxisSize = 0;
 		f32 remainingSize = 0;
@@ -113,7 +115,7 @@ namespace CE
 			}
 		}
 
-		remainingSize = Math::Max(remainingSize, 0.0f);
+		//remainingSize = Math::Max(remainingSize, 0.0f);
 
 		for (FWidget* child : children)
 		{

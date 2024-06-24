@@ -174,6 +174,11 @@ namespace CE
 		return nullptr;
 	}
 
+	void FFusionContext::SetFocusWidget(FWidget* focusWidget)
+	{
+		widgetToFocus = focusWidget;
+	}
+
 	void FFusionContext::EmplaceFrameAttachments()
 	{
 		for (FFusionContext* childContext : childContexts)

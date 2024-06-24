@@ -318,7 +318,7 @@ namespace CE::Widgets
         bool success = SetTextInternal(newText);
         if (!success)
             return;
-
+        
         SetCursorPos(insertPos + string.GetLength());
     }
 

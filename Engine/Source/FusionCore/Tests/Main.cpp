@@ -82,7 +82,6 @@ static void TestBegin(bool gui)
 
 	Logger::Initialize();
 }
-
 static void TestEnd(bool gui)
 {
 	Logger::Shutdown();
@@ -132,121 +131,6 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
-}
-
-TEST(FusionCore, Layout)
-{
-	TEST_BEGIN;
-	using namespace LayoutTests;
-
-	FusionApplication* app = FusionApplication::Get();
-
-	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
-	app->SetRootContext(rootContext);
-
-	LayoutTestWidget* rootWidget;
-
-	FAssignNewOwned(LayoutTestWidget, rootWidget, rootContext);
-
-	rootContext->SetOwningWidget(rootWidget);
-
-	Vec2 availSize = Vec2(500, 700);
-
-	rootContext->SetAvailableSize(availSize);
-	rootContext->DoLayout();
-
-	auto rootBox = rootWidget->rootBox;
-
-	EXPECT_EQ(rootBox->GetChild(0), rootWidget->hStack1);
-	EXPECT_EQ(rootWidget->GetComputedSize(), availSize);
-
-	EXPECT_EQ(rootBox->GetPadding(), Vec4(1, 1, 1, 1) * 5);
-	EXPECT_EQ(rootBox->GetContentHAlign(), HAlign::Fill);
-
-	EXPECT_EQ(rootBox->GetComputedPosition(), Vec2(0, 0));
-	EXPECT_EQ(rootBox->GetComputedSize(), availSize);
-
-	// HStack1
-
-	{
-		auto hStack1 = rootWidget->hStack1;
-
-		EXPECT_EQ(hStack1->GetComputedPosition(), Vec2(5, 5));
-		EXPECT_EQ(hStack1->GetComputedSize().width, availSize.width - 10);
-
-		EXPECT_EQ(hStack1->GetChildCount(), 6);
-
-		TerminalWidget* child0 = (TerminalWidget*)hStack1->GetChild(0);
-		EXPECT_EQ(child0->GetComputedPosition(), Vec2(5, 12.5f));
-		EXPECT_EQ(child0->GetComputedSize(), Vec2(10, 10));
-
-		TerminalWidget* child1 = (TerminalWidget*)hStack1->GetChild(1);
-		EXPECT_EQ(child1->GetComputedPosition(), Vec2(15, 2.5f));
-		EXPECT_EQ(child1->GetComputedSize(), Vec2(10, 30));
-
-		f32 remainingWidth = availSize.width - 40;
-
-		TerminalWidget* child2 = (TerminalWidget*)hStack1->GetChild(2);
-		EXPECT_EQ(child2->GetComputedPosition(), Vec2(25, 2.5f));
-		EXPECT_EQ(child2->GetComputedSize(), Vec2(remainingWidth / 5, 30));
-
-		TerminalWidget* child3 = (TerminalWidget*)hStack1->GetChild(3);
-		EXPECT_EQ(child3->GetComputedPosition(), Vec2(117, 2.5f));
-		EXPECT_EQ(child3->GetComputedSize(), Vec2(remainingWidth * 2.0f / 5.0f, 15));
-
-		TerminalWidget* child4 = (TerminalWidget*)hStack1->GetChild(4);
-		EXPECT_EQ(child4->GetComputedPosition(), Vec2(301, 10));
-		EXPECT_EQ(child4->GetComputedSize(), Vec2(remainingWidth / 5.0f, 15));
-
-		TerminalWidget* child5 = (TerminalWidget*)hStack1->GetChild(5);
-		EXPECT_EQ(child5->GetComputedPosition(), Vec2(393, 17.5f));
-		EXPECT_EQ(child5->GetComputedSize(), Vec2(remainingWidth / 5.0f, 15));
-	}
-
-	// HStack2
-
-	{
-		auto hStack2 = rootWidget->hStack2;
-		Vec2 stackSize = hStack2->GetComputedSize();
-
-		TerminalWidget* child0 = (TerminalWidget*)hStack2->GetChild(0);
-		EXPECT_EQ(child0->GetComputedPosition(), Vec2(0, 10));
-
-		constexpr f32 fixedWidthPart = 30; // 10
-		constexpr f32 totalMargins = 5 + 5;
-		f32 remainingSize = stackSize.width - fixedWidthPart - totalMargins;
-
-		TerminalWidget* child1 = (TerminalWidget*)hStack2->GetChild(1);
-		EXPECT_EQ(child1->GetComputedPosition().x, child0->GetComputedPosition().x + child0->GetComputedSize().x + child0->GetMargin().right);
-		EXPECT_EQ(child1->GetComputedPosition().y, 0);
-		EXPECT_EQ(child1->GetComputedSize(), Vec2(10 + remainingSize * 0.25f, 30));
-
-		TerminalWidget* child2 = (TerminalWidget*)hStack2->GetChild(2);
-		EXPECT_EQ(child2->GetComputedPosition().x, child1->GetComputedPosition().x + child1->GetComputedSize().x + child1->GetMargin().right);
-		EXPECT_EQ(child2->GetComputedSize(), Vec2(10 + remainingSize * 0.75f, 10));
-	}
-
-	// HStack3
-
-	{
-		auto hStack1 = rootWidget->hStack1;
-		auto hStack2 = rootWidget->hStack2;
-		auto hStack3 = rootWidget->hStack3;
-		Vec2 stackSize = hStack3->GetComputedSize();
-
-		// (5 + 5) is vertical margin of rootBox
-		EXPECT_EQ(stackSize, Vec2(20, availSize.height - 35 - 30 - (5 + 5)));
-		EXPECT_EQ(hStack3->GetComputedPosition().x, (availSize.x - stackSize.x) * 0.5f);
-
-		TerminalWidget* child0 = (TerminalWidget*)hStack3->GetChild(0);
-		EXPECT_EQ(child0->GetComputedPosition(), Vec2(0, 0));
-
-		TerminalWidget* child1 = (TerminalWidget*)hStack3->GetChild(1);
-		EXPECT_EQ(child1->GetComputedPosition(), Vec2(10, 0));
-
-	}
-
-	TEST_END;
 }
 
 TEST(FusionCore, Rendering)

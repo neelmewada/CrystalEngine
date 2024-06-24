@@ -109,6 +109,24 @@ namespace CE
         m_Style = nullptr;
     }
 
+    void FWidget::Focus()
+    {
+        FFusionContext* context = GetContext();
+        if (context)
+        {
+            context->SetFocusWidget(this);
+        }
+    }
+
+    void FWidget::Unfocus()
+    {
+        FFusionContext* context = GetContext();
+        if (IsFocused() && context)
+        {
+            context->SetFocusWidget(parent);
+        }
+    }
+
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         static const HashSet<CE::Name> transformProperties = { "Translation", "Angle", "Scale" };

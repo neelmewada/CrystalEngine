@@ -65,6 +65,8 @@ namespace CE
 
         virtual FPainter* GetPainter();
 
+        void SetFocusWidget(FWidget* focusWidget);
+
         // - Rendering / FrameGraph -
 
         virtual void EmplaceFrameAttachments();

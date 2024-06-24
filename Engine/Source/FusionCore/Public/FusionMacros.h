@@ -31,6 +31,13 @@
 	}\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
 
+#define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
+	Self& PropertyName(const auto& value) {\
+		WrappingVariable->PropertyName(value);\
+		return *this;\
+	}\
+	const auto& Get##PropertyName() const { return WrappingVariable->Get##PropertyName(); }
+
 #define FUSION_EVENT(PropertyName)\
 	Self& PropertyName(const FunctionBinding& binding)\
 	{\

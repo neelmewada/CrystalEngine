@@ -4,12 +4,14 @@ namespace CE
 {
     FTextInputLabel::FTextInputLabel()
     {
-	    
+        cursorTimer = CreateDefaultSubobject<FTimer>("Timer");
+        cursorTimer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
     }
 
     void FTextInputLabel::CalculateIntrinsicSize()
     {
 	    Super::CalculateIntrinsicSize();
+
     }
 
     void FTextInputLabel::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -20,262 +22,334 @@ namespace CE
 
         if (propertyName == TextName)
         {
-            m_OnTextPropertyUpdated();
+            RecalculateCharacterOffsets();
         }
     }
 
-    FTextInput::FTextInput()
+    void FTextInputLabel::OnPaint(FPainter* painter)
     {
-        m_Padding = Vec4(7.5f, 5, 7.5f, 5);
-
-        cursorTimer = CreateDefaultSubobject<FTimer>("CursorTimer");
-    }
-
-    const String& FTextInput::GetText() const
-    {
-        return inputLabel->GetText();
-    }
-
-    void FTextInput::OnLostFocus()
-    {
-	    Super::OnLostFocus();
-
-        SetEditing(false);
-    }
-
-    void FTextInput::Construct()
-    {
-	    Super::Construct();
-
-        cursorTimer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
-        
-        Child(
-            FNew(FHorizontalStack)
-            .ContentVAlign(VAlign::Center)
-            (
-                FAssignNew(FCompoundWidget, leftSlot),
-
-                FNew(FStyledWidget)
-                .ClipShape(FRectangle())
-                .Name("InputHolder")
-                (
-                    FAssignNew(FTextInputLabel, inputLabel)
-                    .OnTextPropertyUpdated(FUNCTION_BINDING(this, RecalculateCharacterOffsets))
-                    .Text("")
-                    .WordWrap(FWordWrap::NoWrap)
-                    .FontSize(13)
-                    .Foreground(Color::White())
-                    .Name("TextInputLabel")
-                )
-            )
-        );
-    }
-
-    void FTextInput::OnFusionPropertyModified(const CE::Name& propertyName)
-    {
-        Super::OnFusionPropertyModified(propertyName);
-
-        
-    }
-
-    void FTextInput::OnPaintContent(FPainter* painter)
-    {
-        Super::OnPaintContent(painter);
-
-        if (characterOffsets.GetSize() != GetText().GetLength())
+        if (characterOffsets.GetSize() != m_Text.GetLength())
         {
             RecalculateCharacterOffsets();
         }
 
-        if (IsEditing())
+        painter->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(-textScrollOffset, 0, 0)));
+
+        if (IsEditing() && IsTextSelected() && selectionStart <= selectionEnd)
         {
-            cursorPos = Math::Clamp<int>(cursorPos, 0, GetText().GetLength());
+            painter->SetPen(FPen());
+            painter->SetBrush(m_SelectionColor);
 
-            if (IsSelectionActive() && selectionStart <= selectionEnd && selectionStart < characterOffsets.GetSize())
-            {
-                painter->SetBrush(m_SelectionColor);
-                painter->SetPen(FPen());
+            Range start = GetCharacterMinMax(selectionStart);
+            Range end = GetCharacterMinMax(selectionEnd);
 
-                f32 startX = 0, endX = 0;
-                
-                startX = characterOffsets[selectionStart].min.x;
-                if (selectionEnd < characterOffsets.GetSize())
-                    endX = characterOffsets[selectionEnd].min.x;
-                else
-                    endX = characterOffsets[selectionEnd - 1].max.x;
+            Rect rect = Rect(start.min, 0, end.max, GetComputedSize().height);
 
-                painter->DrawRect(Rect::FromSize(computedPosition + m_Padding.min + Vec2(startX, 0),
-                    Vec2(endX - startX, computedSize.height - m_Padding.bottom - m_Padding.top)));
-            }
-
-            if (cursorState)
-            {
-                painter->SetPen(FPen(Color::White(), 1.5f));
-
-                FFontMetrics metrics = painter->GetFontMetrics(inputLabel->GetFont());
-
-                f32 posX = 0;
-                if (cursorPos < characterOffsets.GetSize())
-                    posX = characterOffsets[cursorPos].min.x;
-                else
-                    posX = characterOffsets[cursorPos - 1].max.x;
-
-                Vec2 lineStart = computedPosition + m_Padding.min + Vec2(posX, 0);
-                Vec2 lineEnd = lineStart;
-                lineEnd.y += computedSize.height - m_Padding.bottom - m_Padding.top;
-
-                painter->DrawLine(lineStart, lineEnd);
-            }
+            painter->DrawRect(rect);
         }
+
+	    Super::OnPaint(painter);
+
+        f32 posX = GetCharacterMinMax(cursorPos).min;
+
+        if (IsEditing() && cursorState)
+        {
+            painter->SetPen(FPen(Color::White(), 1.2f));
+            painter->SetBrush(FBrush());
+
+            Vec2 lineStart = Vec2(posX, 0);
+            Vec2 lineEnd = lineStart + Vec2(0, GetComputedSize().height - m_Padding.bottom - m_Padding.top);
+
+            painter->DrawLine(lineStart, lineEnd);
+        }
+
+        painter->PopChildCoordinateSpace();
     }
 
-    void FTextInput::HandleEvent(FEvent* event)
+    void FTextInputLabel::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent() && event->sender == this)
+        if (event->IsMouseEvent())
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-            Vec2 mouseDelta = mouseEvent->mousePosition - mouseEvent->prevMousePosition;
-            Vec2 labelSpacePos = mouseEvent->mousePosition - inputLabel->globalPosition - 
-                Vec2(inputLabel->m_Padding.left, inputLabel->m_Padding.top) + Vec2(scrollOffset, 0);
-
             auto app = FusionApplication::Get();
 
-            if (characterOffsets.GetSize() != inputLabel->GetText().GetLength())
-            {
-                RecalculateCharacterOffsets();
-            }
+            Vec2 mousePos = mouseEvent->mousePosition;
+            Vec2 localMousePos = mousePos - globalPosition;
 
-            if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
-            {
-	            for (int i = 0; i < characterOffsets.GetSize(); ++i)
-	            {
-		            if ((i > 0 && labelSpacePos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && labelSpacePos.x > characterOffsets[i].max.x))
-						continue;
-
-                    f32 halfWayPos = (characterOffsets[i].min.x + characterOffsets[i].max.x) / 2.0f;
-                    if (labelSpacePos.x <= halfWayPos)
-                        cursorPos = i;
-                    else
-                        cursorPos = i + 1;
-
-                    if (mouseEvent->isDoubleClick && characterOffsets.NonEmpty())
-                    {
-                        SelectRange(0, characterOffsets.GetSize());
-                    }
-                    else
-                    {
-                        DeselectAll();
-
-                        SetEditing(true);
-                        SetCursorPos(cursorPos);
-                    }
-
-                    cursorState = true;
-
-                    break;
-	            }
-            }
-            else if (mouseEvent->type == FEventType::MouseEnter && mouseEvent->sender == this)
+            if (event->type == FEventType::MouseEnter)
             {
                 app->PushCursor(SystemCursor::IBeam);
             }
-            else if (mouseEvent->type == FEventType::MouseLeave && mouseEvent->sender == this)
+            else if (event->type == FEventType::MouseLeave)
             {
                 app->PopCursor();
             }
-            else if (mouseEvent->type == FEventType::DragBegin)
+            else if (event->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
             {
-                FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
-
-                dragEvent->draggedWidget = this;
-                dragEvent->Consume(this);
-
-                selectionDistance = 0;
-
-            }
-            else if (mouseEvent->type == FEventType::DragMove)
-            {
-                FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
-
-                selectionDistance += dragEvent->mousePosition.x - dragEvent->prevMousePosition.x;
-                int endIndex = -1;
-
-                selectionDistance += mouseDelta.x;
-                int selectionIndex = -1;
-
-                RangeInt range = RangeInt(-1, -1);
-                f32 prevCenterPoint = -NumericLimits<f32>::Infinity();
-
-                for (int i = 0; i < characterOffsets.GetSize(); ++i)
-                {
-                    Rect characterRect = characterOffsets[i].Translate(padding.min - Vec2(scrollOffset, 0));
-                    Rect cursorCharacterRect = characterOffsets[cursorPos].Translate(padding.min - Vec2(textScrollOffset, 0));
-                    f32 centerPoint = (characterRect.min.x + characterRect.max.x) / 2.0f;
-
-                    if (selectionDistance > 0)
-                    {
-                        if (cursorCharacterRect.min.x + selectionDistance > (characterRect.min.x + characterRect.max.x) * 0.5f)
-                        {
-                            selectionIndex = i;
-                            range.max = i;
-                        }
-                    }
-                    else if (selectionDistance < 0)
-                    {
-                        if (cursorCharacterRect.min.x + selectionDistance > prevCenterPoint)
-                        {
-                            selectionIndex = i;
-                            range.min = i;
-                        }
-                    }
-
-                    prevCenterPoint = centerPoint;
-                }
-
-                if (localMousePos.x > contentRect.max.x + padding.left + padding.right)
-                {
-                    SelectRange(cursorPos, characterOffsets.GetSize() - 1);
-                    ScrollTo(characterOffsets.GetSize());
-                }
-                else if (localMousePos.x < contentRect.min.x + padding.left + padding.right)
-                {
-                    SelectRange(0, cursorPos);
-                    ScrollTo(0);
-                }
-                else if (selectionDistance > 0)
-                {
-                    SelectRange(cursorPos, selectionIndex);
-                }
-                else if (selectionDistance < 0)
-                {
-                    SelectRange(selectionIndex, cursorPos - 1);
-                }
-
-                dragEvent->draggedWidget = this;
-                dragEvent->Consume(this);
-            }
-            else if (mouseEvent->type == FEventType::DragEnd)
-            {
-                FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
-
+                OnMouseClick(localMousePos, mouseEvent->isDoubleClick);
             }
         }
-        else if (event->IsKeyEvent() && event->sender == this && IsEditing())
+        else if (!event->isConsumed && (event->type == FEventType::KeyHeld || event->type == FEventType::KeyPress))
         {
             FKeyEvent* keyEvent = static_cast<FKeyEvent*>(event);
 
-            if (keyEvent->type == FEventType::KeyPress)
-            {
-                
-            }
+            event->Consume(this);
 
-            keyEvent->Consume(this);
+            bool shiftPressed = EnumHasAnyFlags(keyEvent->modifiers, KeyModifier::LShift | KeyModifier::RShift);
+            bool capslock = EnumHasAnyFlags(keyEvent->modifiers, KeyModifier::Caps);
+            bool ctrl = EnumHasFlag(keyEvent->modifiers, KeyModifier::Ctrl);
+
+            bool isUpperCase = shiftPressed != capslock;
+            char c = 0;
+
+            if ((int)keyEvent->key >= (int)KeyCode::Space && (int)keyEvent->key <= (int)KeyCode::Z && IsEditing())
+            {
+                c = (char)keyEvent->key;
+
+                if (isUpperCase && c >= 'a' && c <= 'z')
+                {
+                    c += ('A' - 'a');
+                }
+
+                if (shiftPressed)
+                {
+                    switch (keyEvent->key)
+                    {
+                    case KeyCode::N0:
+                        c = ')';
+                        break;
+                    case KeyCode::N1:
+                        c = '!';
+                        break;
+                    case KeyCode::N2:
+                        c = '@';
+                        break;
+                    case KeyCode::N3:
+                        c = '#';
+                        break;
+                    case KeyCode::N4:
+                        c = '$';
+                        break;
+                    case KeyCode::N5:
+                        c = '%';
+                        break;
+                    case KeyCode::N6:
+                        c = '^';
+                        break;
+                    case KeyCode::N7:
+                        c = '&';
+                        break;
+                    case KeyCode::N8:
+                        c = '*';
+                        break;
+                    case KeyCode::N9:
+                        c = '(';
+                        break;
+                    case KeyCode::Semicolon:
+                        c = ':';
+                        break;
+                    case KeyCode::LeftBracket:
+                        c = '{';
+                        break;
+                    case KeyCode::RightBracket:
+                        c = '}';
+                        break;
+                    case KeyCode::Equals:
+                        c = '+';
+                        break;
+                    case KeyCode::Minus:
+                        c = '_';
+                        break;
+                    case KeyCode::Backquote:
+                        c = '~';
+                        break;
+                    case KeyCode::Comma:
+                        c = '<';
+                        break;
+                    case KeyCode::Period:
+                        c = '>';
+                        break;
+                    case KeyCode::Slash:
+                        c = '?';
+                        break;
+                    case KeyCode::Quote:
+                        c = '\"';
+                        break;
+                    }
+                }
+
+                bool isCommand = false;
+
+                if (!isCommand)
+                {
+                    String str = "";
+                    str.Append(c);
+
+                    InsertAt(str, cursorPos);
+                }
+            }
+            else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&
+                keyEvent->key != KeyCode::KeypadEnter &&
+                EnumHasFlag(keyEvent->modifiers, KeyModifier::Num))
+            {
+                switch (keyEvent->key)
+                {
+                case KeyCode::KeypadDivide:
+                    c = '/';
+                    break;
+                case KeyCode::KeypadPlus:
+                    c = '+';
+                    break;
+                case KeyCode::KeypadMinus:
+                    c = '-';
+                    break;
+                case KeyCode::KeypadMultiply:
+                    c = '*';
+                    break;
+                case KeyCode::Keypad0:
+                    c = '0';
+                    break;
+                case KeyCode::Keypad1:
+                    c = '1';
+                    break;
+                case KeyCode::Keypad2:
+                    c = '2';
+                    break;
+                case KeyCode::Keypad3:
+                    c = '3';
+                    break;
+                case KeyCode::Keypad4:
+                    c = '4';
+                    break;
+                case KeyCode::Keypad5:
+                    c = '5';
+                    break;
+                case KeyCode::Keypad6:
+                    c = '6';
+                    break;
+                case KeyCode::Keypad7:
+                    c = '7';
+                    break;
+                case KeyCode::Keypad8:
+                    c = '8';
+                    break;
+                case KeyCode::Keypad9:
+                    c = '9';
+                    break;
+                case KeyCode::KeypadPeriod:
+                    c = '.';
+                    break;
+                }
+
+                if (c != 0)
+                {
+                    String str = "";
+                    str.Append(c);
+
+                    InsertAt(str, cursorPos);
+                }
+            }
+            else if (IsTextSelected() && (keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete))
+            {
+                RemoveSelectedRange();
+            }
+            else if (keyEvent->key == KeyCode::Backspace)
+            {
+                RemoveRange(cursorPos - 1, 1);
+            }
+            else if (keyEvent->key == KeyCode::Delete)
+            {
+                RemoveRange(cursorPos, 1);
+            }
+            else if (keyEvent->key == KeyCode::Left)
+            {
+                int newCursorPos = cursorPos - 1;
+
+                if (shiftPressed)
+                {
+                    int startIdx = selectionStart;
+                    int endIdx = selectionEnd;
+                    if (!IsTextSelected())
+                    {
+                        startIdx = cursorPos;
+                        endIdx = cursorPos - 1;
+                    }
+
+                    SelectRange(startIdx - 1, endIdx);
+                    ScrollTo(startIdx - 1);
+                }
+                else
+                {
+	                if (IsTextSelected())
+	                {
+                        newCursorPos = selectionStart - 1;
+                        DeselectAll();
+	                }
+
+                    ScrollTo(newCursorPos);
+                }
+
+                cursorState = true;
+                cursorTimer->Reset();
+
+                SetCursorPos(newCursorPos);
+            }
+            else if (keyEvent->key == KeyCode::Right)
+            {
+                int newCursorPos = cursorPos + 1;
+
+                if (shiftPressed)
+                {
+                    int startIdx = selectionStart;
+                    int endIdx = selectionEnd;
+                    if (!IsTextSelected())
+                    {
+                        startIdx = cursorPos;
+                        endIdx = cursorPos - 1;
+                    }
+
+                    SelectRange(startIdx, endIdx + 1);
+                    ScrollTo(endIdx + 1);
+                }
+                else
+                {
+                    if (IsTextSelected())
+                    {
+                        DeselectAll();
+                    }
+
+                    ScrollTo(newCursorPos);
+                }
+
+                cursorState = true;
+                cursorTimer->Reset();
+
+                SetCursorPos(newCursorPos);
+            }
+            else if (keyEvent->key == KeyCode::Return || keyEvent->key == KeyCode::KeypadEnter)
+            {
+                Unfocus();
+            }
+            else if (keyEvent->key == KeyCode::Escape)
+            {
+                StopEditing(true);
+                Unfocus();
+            }
+        }
+        else if (event->type == FEventType::FocusChanged)
+        {
+            FFocusEvent* focusEvent = static_cast<FFocusEvent*>(event);
+
+            if (focusEvent->LostFocus())
+            {
+                StopEditing();
+            }
         }
 
-        Super::HandleEvent(event);
+	    Super::HandleEvent(event);
     }
 
-    void FTextInput::RecalculateCharacterOffsets()
+    void FTextInputLabel::RecalculateCharacterOffsets()
     {
         FFusionContext* context = GetContext();
         if (!context)
@@ -285,113 +359,277 @@ namespace CE
         if (!painter)
             return;
 
-        textSize = painter->CalculateCharacterOffsets(characterOffsets, inputLabel->GetText(), inputLabel->GetFont());
+        textSize = painter->CalculateCharacterOffsets(characterOffsets, GetText(), GetFont());
     }
 
-    void FTextInput::TryRecalculateCharacterOffsets()
-    {
-        if (characterOffsets.GetSize() != GetText().GetLength())
-        {
-            RecalculateCharacterOffsets();
-        }
-    }
-
-    void FTextInput::OnTimeOut()
+    void FTextInputLabel::OnTimeOut()
     {
         cursorState = !cursorState;
         MarkDirty();
     }
 
-    void FTextInput::SetEditing(bool edit)
+    void FTextInputLabel::OnMouseClick(Vec2 localPos, bool isDoubleClick)
     {
-        if (IsEditing() == edit)
+	    for (int i = 0; i < characterOffsets.GetSize(); ++i)
+	    {
+            if ((i > 0 && localPos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && localPos.x > characterOffsets[i].max.x))
+                continue;
+
+            f32 halfWayPos = (characterOffsets[i].min.x + characterOffsets[i].max.x) / 2.0f;
+            if (localPos.x <= halfWayPos)
+                cursorPos = i;
+            else
+                cursorPos = i + 1;
+
+            cursorState = true;
+
+            if (!IsEditing())
+            {
+                StartEditing();
+            }
+            else
+            {
+                MarkDirty();
+            }
+
+            if (isDoubleClick)
+            {
+                SelectAll();
+                ScrollTo(characterOffsets.GetSize());
+            }
+            
+            break;
+	    }
+    }
+
+    Range FTextInputLabel::GetCharacterMinMax(int characterIndex)
+    {
+        if (characterIndex < characterOffsets.GetSize())
+        {
+            return Range(characterOffsets[characterIndex].min.x, characterOffsets[characterIndex].max.x);
+        }
+
+        return Range(characterOffsets.Top().max.x, characterOffsets.Top().GetSize().width);
+    }
+
+    bool FTextInputLabel::IsEditing()
+    {
+        return textInput->IsEditing();
+    }
+
+    void FTextInputLabel::StartEditing()
+    {
+        originalText = m_Text;
+
+        cursorTimer->Reset();
+        cursorState = true;
+        cursorTimer->Start(500);
+
+        textInput->SetEditingInternal(true);
+        MarkDirty();
+    }
+
+    void FTextInputLabel::StopEditing(bool restoreOriginal)
+    {
+        if (restoreOriginal)
+        {
+            m_Text = originalText;
+        }
+
+        cursorTimer->Stop();
+        cursorState = false;
+        
+        textInput->SetEditingInternal(false);
+        ScrollTo(0);
+
+        MarkLayoutDirty();
+    }
+
+    void FTextInputLabel::SetCursorPos(int newCursorPos)
+    {
+        cursorPos = newCursorPos;
+        cursorPos = Math::Clamp<int>(cursorPos, 0, characterOffsets.GetSize());
+
+        MarkDirty();
+    }
+
+    void FTextInputLabel::ScrollTo(int charIndex)
+    {
+        charIndex = Math::Clamp<int>(charIndex, 0, characterOffsets.GetSize());
+
+        Range charRange = GetCharacterMinMax(charIndex);
+
+        if (charRange.min - textScrollOffset < 0)
+        {
+            textScrollOffset = charRange.min;
+
+            MarkDirty();
+        }
+        else if (charRange.max - textScrollOffset > computedSize.width)
+        {
+            textScrollOffset = charRange.max - computedSize.width;
+
+            MarkDirty();
+        }
+    }
+
+    void FTextInputLabel::InsertAt(const String& string, int insertPos)
+    {
+        if (insertPos < 0 || insertPos > m_Text.GetLength())
             return;
 
-        if (edit)
+        String newText = m_Text;
+        newText.Reserve(newText.GetLength() + string.GetLength());
+        for (int i = 0; i < string.GetLength(); ++i)
         {
-            cursorTimer->Reset();
-            cursorTimer->Start(500);
-            cursorState = true;
+            newText.InsertAt(string[i], insertPos + i);
+        }
+
+        m_Text = newText;
+        cursorPos = insertPos + string.GetLength();
+
+        MarkLayoutDirty();
+    }
+
+    void FTextInputLabel::InsertAt(char character, int insertPos)
+    {
+        if (insertPos < 0 || insertPos > m_Text.GetLength())
+            return;
+
+        String newText = m_Text;
+        newText.Reserve(newText.GetLength() + 1);
+        newText.InsertAt(character, insertPos);
+
+        m_Text = newText;
+        cursorPos = insertPos + 1;
+
+        MarkLayoutDirty();
+    }
+
+    void FTextInputLabel::RemoveRange(int startIndex, int count)
+    {
+        if (startIndex < 0 || startIndex > m_Text.GetLength())
+            return;
+
+        count = Math::Min<int>(count, m_Text.GetLength() - startIndex);
+
+        String newText = m_Text;
+        newText.Remove(startIndex, count);
+
+        m_Text = newText;
+
+        SetCursorPos(startIndex);
+
+        MarkLayoutDirty();
+    }
+
+    void FTextInputLabel::RemoveSelectedRange()
+    {
+        if (IsTextSelected() && selectionStart <= selectionEnd)
+        {
+            RemoveRange(selectionStart, selectionEnd - selectionStart + 1);
+            DeselectAll();
+
+            ScrollTo(selectionStart);
+        }
+    }
+
+    void FTextInputLabel::SelectAll()
+    {
+        SelectRange(0, characterOffsets.GetSize());
+    }
+
+    void FTextInputLabel::SelectRange(int startIndex, int endIndex)
+    {
+        isSelectionActive = true;
+
+        selectionStart = Math::Max(0, startIndex);
+        selectionEnd = Math::Min<int>(endIndex, characterOffsets.GetSize());
+    }
+
+    void FTextInputLabel::DeselectAll()
+    {
+        isSelectionActive = false;
+    }
+
+    FTextInput::FTextInput()
+    {
+        m_Padding = Vec4(7.5f, 5, 7.5f, 5);
+    }
+
+    void FTextInput::OnLostFocus()
+    {
+	    Super::OnLostFocus();
+
+        inputLabel->StopEditing();
+    }
+
+    void FTextInput::Construct()
+    {
+	    Super::Construct();
+        
+        Child(
+            FNew(FHorizontalStack)
+            .ContentVAlign(VAlign::Center)
+            .Name("TextInputHStack")
+            (
+                FAssignNew(FCompoundWidget, leftSlot),
+
+                FNew(FStyledWidget)
+                .ClipShape(FRectangle())
+                .FillRatio(1.0f)
+                .Name("InputHolder")
+                (
+                    FAssignNew(FTextInputLabel, inputLabel)
+                    .Text("")
+                    .WordWrap(FWordWrap::NoWrap)
+                    .FontSize(13)
+                    .Foreground(Color::White())
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill)
+                    .Name("TextInputLabel")
+                )
+            )
+        );
+
+        inputLabel->textInput = this;
+    }
+
+    void FTextInput::HandleEvent(FEvent* event)
+    {
+        if (event->IsMouseEvent() && event->sender == this)
+        {
+            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+            auto app = FusionApplication::Get();
+
+            if (mouseEvent->type == FEventType::MouseEnter)
+            {
+                app->PushCursor(SystemCursor::IBeam);
+            }
+            else if (mouseEvent->type == FEventType::MouseLeave)
+            {
+                app->PopCursor();
+            }
+        }
+
+	    Super::HandleEvent(event);
+    }
+
+    void FTextInput::SetEditingInternal(bool editing)
+    {
+        if (IsEditing() == editing)
+            return;
+
+        if (editing)
+        {
             state |= FTextInputState::Editing;
         }
         else
         {
-            cursorTimer->Reset();
-            cursorTimer->Stop();
             state &= ~FTextInputState::Editing;
         }
 
-        MarkDirty();
         ApplyStyle();
-    }
-
-    void FTextInput::SetCursorPos(int cursorPos)
-    {
-        cursorPos = Math::Clamp<int>(cursorPos, 0, characterOffsets.GetSize());
-
-        this->cursorPos = cursorPos;
-        ScrollTo(cursorPos);
-    }
-
-    void FTextInput::ScrollTo(int cursorPos)
-    {
-        cursorPos = Math::Clamp<int>(cursorPos, 0, characterOffsets.GetSize());
-        f32 characterStartX = cursorPos < characterOffsets.GetSize() ? characterOffsets[cursorPos].min.x : characterOffsets[cursorPos - 1].max.x;
-        f32 characterEndX = cursorPos < characterOffsets.GetSize() ? characterOffsets[cursorPos].max.x : characterOffsets[cursorPos - 1].max.x;
-
-        f32 contentWidth = GetComputedSize().width - m_Padding.left - m_Padding.right;
-        if (characterStartX - scrollOffset < 0)
-        {
-            scrollOffset = characterStartX;
-        }
-        else if (characterEndX - scrollOffset > contentWidth)
-        {
-            scrollOffset = characterEndX - contentWidth;
-        }
-
-        inputLabel->Translation(Vec2(-scrollOffset, 0));
-
-        MarkDirty();
-    }
-
-    void FTextInput::InsertAt(const String& string, int insertPos)
-    {
-
-    }
-
-    void FTextInput::RemoveRange(int startIndex, int count)
-    {
-
-    }
-
-    void FTextInput::SelectRange(int startIndex, int endIndex)
-    {
-        isSelectionActive = true;
-
-        selectionStart = Math::Min(startIndex, endIndex);
-        selectionEnd = Math::Max(startIndex, endIndex);
-
-        MarkDirty();
-    }
-
-    void FTextInput::DeselectAll()
-    {
-        if (!isSelectionActive)
-            return;
-
-        isSelectionActive = false;
-
-        MarkDirty();
-    }
-
-    FTextInput& FTextInput::Text(const String& value)
-    {
-        if (inputLabel->GetText() == value)
-            return *this;
-
-        RecalculateCharacterOffsets();
-        inputLabel->Text(value);
-        return *this;
     }
 
     FTextInput& FTextInput::Foreground(const Color& value)
