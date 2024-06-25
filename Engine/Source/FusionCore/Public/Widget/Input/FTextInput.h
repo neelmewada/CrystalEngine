@@ -3,6 +3,7 @@
 namespace CE
 {
     class FTextInput;
+    class FStackBox;
 
 
     ENUM(Flags)
@@ -69,6 +70,8 @@ namespace CE
 
         void RemoveRange(int startIndex, int count);
         void RemoveSelectedRange();
+
+        String GetSelectedText();
 
         void SelectAll();
         void SelectRange(int startIndex, int endIndex);
@@ -140,7 +143,7 @@ namespace CE
         FTextInputState state = FTextInputState::None;
 
         FIELD()
-        FCompoundWidget* leftSlot = nullptr;
+        FStackBox* stack = nullptr;
 
         FIELD()
         FTextInputLabel* inputLabel = nullptr;

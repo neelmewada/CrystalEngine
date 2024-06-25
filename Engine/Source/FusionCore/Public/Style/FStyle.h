@@ -5,6 +5,27 @@ namespace CE
     class FWidget;
     class FStyledWidget;
 
+    ENUM()
+    enum class FCursor
+    {
+        Default = 0,
+        Arrow = 0,
+        IBeam,
+        Wait,
+        CrossHair,
+        WaitArrow,
+        SizeTopLeft,
+        SizeBottomRight = SizeTopLeft,
+        SizeTopRight,
+        SizeBottomLeft = SizeTopRight,
+        SizeHorizontal,
+        SizeVertical,
+        SizeAll,
+        No,
+        Hand,
+    };
+    ENUM_CLASS(FCursor);
+
     CLASS(Abstract)
     class FUSIONCORE_API FStyle : public Object
     {

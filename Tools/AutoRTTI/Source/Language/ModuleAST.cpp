@@ -33,7 +33,7 @@ namespace CE
 			apiName = "";
 		}
 
-		if (headerPath.GetFilename() == "CWidget.h")
+		if (headerPath.GetFileName() == "CWidget.h")
 		{
 			String::IsAlphabet('a');
 		}

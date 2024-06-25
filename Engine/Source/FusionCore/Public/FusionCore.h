@@ -71,6 +71,7 @@ namespace CE
 #include "Widget/FLabel.h"
 #include "Widget/FCompoundWidget.h"
 #include "Widget/FStyledWidget.h"
+#include "Widget/FImage.h"
 #include "Widget/FContainerWidget.h"
 #include "Widget/FButton.h"
 #include "Widget/Input/FTextInput.h"

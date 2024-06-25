@@ -24,7 +24,15 @@ namespace CE
 	        return;
         }
 
-        intrinsicSize = painter->CalculateTextSize(m_Text, m_Font);
+        if (m_Text.IsEmpty())
+        {
+            intrinsicSize = painter->CalculateTextSize(" ", m_Font);
+        }
+        else
+        {
+            intrinsicSize = painter->CalculateTextSize(m_Text, m_Font);
+        }
+
         intrinsicSize.width += m_Padding.left + m_Padding.right;
         intrinsicSize.height += m_Padding.top + m_Padding.bottom;
 

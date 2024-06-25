@@ -36,6 +36,12 @@ namespace CE
         void PushCursor(SystemCursor cursor);
         void PopCursor();
 
+        int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
+        int RegisterImage(const Name& imageName, RHI::Texture* image);
+        void DeregisterImage(const Name& imageName);
+        void DeregisterImage(RHI::Texture* image);
+        RHI::Texture* FindImage(const Name& imageName);
+
         void Tick(bool isExposed = false);
 
         void SetRootContext(FFusionContext* context);
@@ -45,6 +51,7 @@ namespace CE
         RPI::Shader* GetFusionShader() const { return fusionShader; }
 
         RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
+        RHI::ShaderResourceGroupLayout GetPerObjectSrgLayout() const { return perObjectSrgLayout; }
 
         void QueueDestroy(Object* object);
 
@@ -83,11 +90,23 @@ namespace CE
 
         StableDynamicArray<SystemCursor, 32, false> cursorStack;
 
+        using FImageArray = StableDynamicArray<RHI::Texture*, 64, false>;
+        using FTextureArray = StableDynamicArray<RPI::Texture*, 64, false>;
+
+        FImageArray registeredImages;
+        FTextureArray loadedTextures;
+        HashMap<Name, int> registeredImagesByName;
+        HashMap<RHI::Texture*, int> registeredImageIndices;
+        HashMap<RHI::Texture*, Name> registeredImageNames;
+        bool imageRegistryUpdated = true;
+
         Array<FTimer*> timers;
 
         RPI::Shader* fusionShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
+        RHI::ShaderResourceGroupLayout perObjectSrgLayout{};
+        RHI::ShaderResourceGroup* textureSrg = nullptr;
 
         RHI::DrawListContext drawList{};
 

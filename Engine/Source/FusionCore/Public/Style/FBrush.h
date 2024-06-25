@@ -13,15 +13,15 @@ namespace CE
     };
     ENUM_CLASS(FBrushStyle);
 
-    ENUM(Flags)
+    ENUM()
     enum class FBrushTiling : u8
     {
 	    None = 0,
-        TileX = BIT(0),
-        TileY = BIT(1),
-        TileXY = TileX | TileY
+        TileX,
+        TileY,
+        TileXY
     };
-    ENUM_CLASS_FLAGS(FBrushTiling);
+    ENUM_CLASS(FBrushTiling);
 
     STRUCT()
     struct FUSIONCORE_API FBrush final
@@ -32,6 +32,8 @@ namespace CE
         FBrush();
 
         FBrush(const Color& fillColor, FBrushStyle brushStyle = FBrushStyle::SolidFill);
+
+        FBrush(const Name& texturePath, const Color& tintColor = Color::White());
 
         ~FBrush();
 
@@ -92,8 +94,8 @@ namespace CE
         };
 
         Vec2 brushSize = Vec2(0, 0);
-        HAlign hAlign = HAlign::Auto;
-        VAlign vAlign = VAlign::Auto;
+        HAlign hAlign = HAlign::Fill;
+        VAlign vAlign = VAlign::Fill;
         FBrushTiling tiling = FBrushTiling::None;
         FBrushStyle brushStyle = FBrushStyle::None;
     };

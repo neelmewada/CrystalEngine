@@ -52,7 +52,7 @@ namespace RenderingTests
                     .Name("HStackInput")
                     (
                         FAssignNew(FTextInput, textInput)
-                        .Text("This is a very long text box. This is second sentence.")
+                        .Text("This is a very long text box")
                         .Style("TextInput.Primary")
                         .MaxWidth(120),
 

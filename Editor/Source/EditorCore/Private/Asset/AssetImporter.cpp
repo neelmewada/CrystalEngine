@@ -152,7 +152,7 @@ namespace CE::Editor
 				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
 		}
 
-		String assetName = productPath.GetFilename().RemoveExtension().GetString();
+		String assetName = productPath.GetFileName().RemoveExtension().GetString();
 		if (!IsValidObjectName(assetName)) // Fix asset name
 		{
 			assetName = FixObjectName(assetName);

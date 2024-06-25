@@ -49,7 +49,7 @@ namespace CE::Editor
 
                 CLabel* titleLabel = CreateObject<CLabel>(item, "Title");
                 titleLabel->AddStyleClass("Title");
-                titleLabel->SetText(path.GetFilename().RemoveExtension().GetString());
+                titleLabel->SetText(path.GetFileName().RemoveExtension().GetString());
                 
                 CLabel* descLabel = CreateObject<CLabel>(item, "DescLabel");
                 descLabel->SetText(path.GetString().Replace({'\\'}, '/'));

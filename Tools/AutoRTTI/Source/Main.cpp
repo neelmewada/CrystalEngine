@@ -91,7 +91,7 @@ int main(int argc, char** argv)
         {
             if (!header.headerPath.Exists())
                 continue;
-            IO::Path stampFilePath = outPath / (header.headerPath.GetFilename().GetString() + ".stamp");
+            IO::Path stampFilePath = outPath / (header.headerPath.GetFileName().GetString() + ".stamp");
             if (stampFilePath.Exists())
                 IO::Path::Remove(stampFilePath);
             FileStream fileStream{stampFilePath, Stream::Permissions::WriteOnly};

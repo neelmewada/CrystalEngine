@@ -72,7 +72,7 @@ namespace CE
 
 		CComPtr<IDxcBlobEncoding> source = nullptr;
 		std::wstring str = ToWString(hlslPath.GetString());
-		std::wstring fileNameStr = ToWString(hlslPath.GetFilename().GetString());
+		std::wstring fileNameStr = ToWString(hlslPath.GetFileName().GetString());
 
 		status = impl->utils->LoadFile(str.data(), nullptr, &source);
 		

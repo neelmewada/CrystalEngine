@@ -132,7 +132,7 @@ namespace CE
 				{
 					if (path.IsDirectory())
 						return;
-					String fileName = path.GetFilename().GetString();
+					String fileName = path.GetFileName().GetString();
 					String extension = path.GetExtension().GetString();
 					if (extension == ".cmake" || fileName == "CMakeLists.txt")
 						return;

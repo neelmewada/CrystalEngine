@@ -60,7 +60,7 @@ void EditorLoop::PreInit(int argc, char** argv)
 		{
 			// TODO: Open editor
 			gProjectPath = projectPath.GetParentPath();
-			gProjectName = projectPath.GetFilename().RemoveExtension().GetString();
+			gProjectName = projectPath.GetFileName().RemoveExtension().GetString();
 		}
 	}
 	catch (const std::exception& exc)

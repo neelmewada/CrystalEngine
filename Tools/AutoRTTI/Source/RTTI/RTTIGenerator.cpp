@@ -12,7 +12,7 @@ namespace CE
 		fs::path modulePath = moduleHeaderRootPath;
 		bool isUnitTest = false;
 
-		if (moduleHeaderRootPath.GetFilename() == "Tests")
+		if (moduleHeaderRootPath.GetFileName() == "Tests")
 		{
 			isUnitTest = true;
 		}
@@ -60,7 +60,7 @@ namespace CE
 			// Do NOT delete this output header file
 			filesToRemove.RemoveAll([headerGeneratedPath](const IO::Path& p) -> bool
 			{
-				return p.GetFilename() == IO::Path(headerGeneratedPath).GetFilename();
+				return p.GetFileName() == IO::Path(headerGeneratedPath).GetFileName();
 			});
 
 			fs::path headerRelPathFinal{};

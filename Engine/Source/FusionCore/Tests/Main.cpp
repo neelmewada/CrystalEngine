@@ -151,13 +151,6 @@ TEST(FusionCore, Rendering)
 	styleManager->RegisterStyleSet(rootStyle->GetName(), rootStyle);
 	rootContext->SetDefaultStyleSet(rootStyle);
 
-	// - Default Styling -
-	{
-		GetDefaultWidget<FButton>()
-			.Padding(Vec4(10, 5, 10, 5))
-			;
-	}
-
 	// - Styling -
 	{
 		{
@@ -169,6 +162,11 @@ TEST(FusionCore, Rendering)
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
 			primaryBtn->borderWidth = 1.0f;
+
+			GetDefaultWidget<FButton>()
+				.Padding(Vec4(10, 5, 10, 5))
+				.Style(rootStyle, "Button.Primary")
+				;
 		}
 
 		{

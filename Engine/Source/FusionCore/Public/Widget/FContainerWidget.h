@@ -22,6 +22,8 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
+        void InsertChild(int index, FWidget* child);
+
     protected:
 
         void ClearStyle() override;

@@ -46,8 +46,8 @@ namespace CE::Editor
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
 		bundle->DestroyAllSubobjects();
 		
-		String extension = sourcePath.GetFilename().GetExtension().GetString();
-		String fileName = sourcePath.GetFilename().RemoveExtension().GetString();
+		String extension = sourcePath.GetFileName().GetExtension().GetString();
+		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
 		fileName = FixObjectName(fileName);
 

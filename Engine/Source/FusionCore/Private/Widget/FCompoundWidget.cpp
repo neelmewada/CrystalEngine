@@ -23,6 +23,8 @@ namespace CE
 
         intrinsicSize.width = Math::Max(intrinsicSize.width, childSize.width + m_Padding.left + m_Padding.right + childMargin.left + childMargin.right);
         intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
+
+        ApplyIntrinsicSizeConstraints();
     }
 
     void FCompoundWidget::PlaceSubWidgets()

@@ -12,7 +12,7 @@ namespace CE
 
         // - Public API -
 
-
+        void CalculateIntrinsicSize() override;
 
         // - Events -
 

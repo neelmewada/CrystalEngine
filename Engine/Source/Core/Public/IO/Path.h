@@ -119,7 +119,7 @@ namespace CE::IO
             return Path(impl.parent_path());
         }
 
-        inline Path GetFilename() const
+        inline Path GetFileName() const
         {
             return impl.filename();
         }

@@ -14,6 +14,12 @@ namespace %(NameSpace)s
 
         void Construct() override;
 
+    protected: // - Fusion Fields -
+
+
+    public: // - Fusion Properties - 
+
+
         FUSION_WIDGET;
     };
     

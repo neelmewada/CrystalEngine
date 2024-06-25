@@ -12,6 +12,7 @@ namespace CE
     {
 	    Super::CalculateIntrinsicSize();
 
+
     }
 
     void FTextInputLabel::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -50,13 +51,12 @@ namespace CE
 
 	    Super::OnPaint(painter);
 
-        f32 posX = GetCharacterMinMax(cursorPos).min;
-
         if (IsEditing() && cursorState)
         {
             painter->SetPen(FPen(Color::White(), 1.2f));
             painter->SetBrush(FBrush());
 
+            f32 posX = GetCharacterMinMax(cursorPos).min;
             Vec2 lineStart = Vec2(posX, 0);
             Vec2 lineEnd = lineStart + Vec2(0, GetComputedSize().height - m_Padding.bottom - m_Padding.top);
 
@@ -180,6 +180,52 @@ namespace CE
 
                 bool isCommand = false;
 
+                if (ctrl) // Check for commands
+                {
+                    if (keyEvent->key == KeyCode::X && IsTextSelected()) // Cut
+                    {
+                        String selected = GetSelectedText();
+                        PlatformApplication::Get()->SetClipboardText(selected);
+                        RemoveSelectedRange();
+
+                        isCommand = true;
+                    }
+                    else if (keyEvent->key == KeyCode::C && IsTextSelected()) // Copy
+                    {
+                        String selected = GetSelectedText();
+                        PlatformApplication::Get()->SetClipboardText(selected);
+
+                        isCommand = true;
+                    }
+                    else if (keyEvent->key == KeyCode::V)
+                    {
+                        String textToPaste = "";
+                        if (PlatformApplication::Get()->HasClipboardText())
+                        {
+                            textToPaste = PlatformApplication::Get()->GetClipboardText();
+                            if (IsTextSelected())
+                                RemoveSelectedRange();
+                            InsertAt(textToPaste, cursorPos);
+                        }
+
+                        isCommand = true;
+                    }
+                    else if (keyEvent->key == KeyCode::A)
+                    {
+                        SelectAll();
+
+                        isCommand = true;
+                    }
+                    else if (IsTextSelected())
+                    {
+                        RemoveSelectedRange();
+                    }
+                }
+                else if (IsTextSelected())
+                {
+                    RemoveSelectedRange();
+                }
+
                 if (!isCommand)
                 {
                     String str = "";
@@ -275,8 +321,18 @@ namespace CE
                         endIdx = cursorPos - 1;
                     }
 
-                    SelectRange(startIdx - 1, endIdx);
-                    ScrollTo(startIdx - 1);
+                    if (IsTextSelected() && cursorPos > startIdx)
+                    {
+                        SelectRange(startIdx, endIdx - 1);
+                        ScrollTo(endIdx - 1);
+                    }
+                    else
+                    {
+                        SelectRange(startIdx - 1, endIdx);
+                        ScrollTo(startIdx - 1);
+
+                        cursorPos = endIdx;
+                    }
                 }
                 else
                 {
@@ -308,8 +364,18 @@ namespace CE
                         endIdx = cursorPos - 1;
                     }
 
-                    SelectRange(startIdx, endIdx + 1);
-                    ScrollTo(endIdx + 1);
+                    if (IsTextSelected() && cursorPos <= endIdx && endIdx < characterOffsets.GetSize())
+                    {
+                        SelectRange(startIdx + 1, endIdx);
+                        ScrollTo(startIdx + 1);
+                    }
+                    else
+                    {
+                        SelectRange(startIdx, endIdx + 1);
+                        ScrollTo(endIdx + 1);
+                    }
+
+                    SetCursorPos(selectionEnd);
                 }
                 else
                 {
@@ -404,12 +470,17 @@ namespace CE
 
     Range FTextInputLabel::GetCharacterMinMax(int characterIndex)
     {
+        if (characterOffsets.IsEmpty())
+        {
+            return Range(0, 0);
+        }
+
         if (characterIndex < characterOffsets.GetSize())
         {
             return Range(characterOffsets[characterIndex].min.x, characterOffsets[characterIndex].max.x);
         }
 
-        return Range(characterOffsets.Top().max.x, characterOffsets.Top().GetSize().width);
+        return Range(characterOffsets.Top().max.x, characterOffsets.Top().max.x + characterOffsets.Top().GetSize().width);
     }
 
     bool FTextInputLabel::IsEditing()
@@ -441,6 +512,7 @@ namespace CE
         
         textInput->SetEditingInternal(false);
         ScrollTo(0);
+        DeselectAll();
 
         MarkLayoutDirty();
     }
@@ -534,6 +606,16 @@ namespace CE
         }
     }
 
+    String FTextInputLabel::GetSelectedText()
+    {
+        if (!IsTextSelected())
+        {
+            return "";
+        }
+
+        return m_Text.GetSubstring(selectionStart, selectionEnd - selectionStart + 1);
+    }
+
     void FTextInputLabel::SelectAll()
     {
         SelectRange(0, characterOffsets.GetSize());
@@ -545,11 +627,13 @@ namespace CE
 
         selectionStart = Math::Max(0, startIndex);
         selectionEnd = Math::Min<int>(endIndex, characterOffsets.GetSize());
+        MarkDirty();
     }
 
     void FTextInputLabel::DeselectAll()
     {
         isSelectionActive = false;
+        MarkDirty();
     }
 
     FTextInput::FTextInput()
@@ -569,12 +653,10 @@ namespace CE
 	    Super::Construct();
         
         Child(
-            FNew(FHorizontalStack)
+            FAssignNew(FHorizontalStack, stack)
             .ContentVAlign(VAlign::Center)
             .Name("TextInputHStack")
             (
-                FAssignNew(FCompoundWidget, leftSlot),
-
                 FNew(FStyledWidget)
                 .ClipShape(FRectangle())
                 .FillRatio(1.0f)
@@ -610,6 +692,11 @@ namespace CE
             {
                 app->PopCursor();
             }
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
+            {
+                Vec2 localPos = mouseEvent->mousePosition - inputLabel->globalPosition;
+                inputLabel->OnMouseClick(localPos, mouseEvent->isDoubleClick);
+            }
         }
 
 	    Super::HandleEvent(event);
@@ -640,7 +727,7 @@ namespace CE
 
     FTextInput& FTextInput::LeftSlot(FWidget& content)
     {
-        leftSlot->Child(content);
+        stack->InsertChild(0, &content);
         return *this;
     }
 

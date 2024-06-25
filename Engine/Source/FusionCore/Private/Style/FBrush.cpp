@@ -2,13 +2,15 @@
 
 namespace CE
 {
+	
+
 	FBrush::FBrush()
 		: tintColor(Color::Clear())
 		, texturePath(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
 	{
-		
+
 	}
 
 	FBrush::FBrush(const Color& fillColor, FBrushStyle brushStyle)
@@ -16,6 +18,15 @@ namespace CE
 		, brushStyle(brushStyle)
 	{
 
+	}
+
+	FBrush::FBrush(const Name& texturePath, const Color& tintColor)
+		: tintColor(tintColor)
+		, texturePath(texturePath)
+		, tiling(FBrushTiling::None)
+		, brushStyle(FBrushStyle::TexturePattern)
+	{
+		
 	}
 
 	FBrush::~FBrush()

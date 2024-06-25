@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 
 		for (const auto& srcFileRelative : resourceFilesRelative)
 		{
-			String fileName = srcFileRelative.GetFilename().GetString();
+			String fileName = srcFileRelative.GetFileName().GetString();
 			auto fullPath = resourceDirPath / srcFileRelative;
 			if (!fullPath.Exists())
 				continue;

@@ -42,8 +42,22 @@ namespace CE
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShaders();
-
+        
         fontManager->Init();
+
+        IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
+        engineResourceDir.RecursivelyIterateChildren([this](const IO::Path& path)
+            {
+                if (path.IsDirectory())
+                    return;
+
+				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg")
+				{
+                    LoadImageResource(path, path.GetFileName().RemoveExtension().GetString());
+				}
+            });
+
+        imageRegistryUpdated = true;
     }
 
     void FusionApplication::PreShutdown()
@@ -59,6 +73,13 @@ namespace CE
             scheduler->WaitUntilIdle();
         }
 
+        for (int i = 0; i < loadedTextures.GetCount(); ++i)
+        {
+            delete loadedTextures[i];
+        }
+        loadedTextures.RemoveAll();
+
+        delete textureSrg; textureSrg = nullptr;
         fontManager->Shutdown();
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
@@ -96,6 +117,87 @@ namespace CE
         {
             PlatformApplication::Get()->SetSystemCursor(cursorStack.Last());
         }
+    }
+
+    int FusionApplication::LoadImageResource(const IO::Path& resourcePath, const Name& imageName)
+    {
+        if (resourcePath.IsEmpty())
+            return -1;
+        
+        if (resourcePath.Exists() && !resourcePath.IsDirectory())
+        {
+            CMImage image = CMImage::LoadFromFile(resourcePath);
+            if (image.IsValid())
+            {
+                RPI::Texture* texture = new RPI::Texture(image);
+                image.Free();
+
+                if (texture->GetRhiTexture() != nullptr)
+                {
+                    loadedTextures.Insert(texture);
+                    return RegisterImage(imageName, texture->GetRhiTexture());
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    int FusionApplication::RegisterImage(const Name& imageName, RHI::Texture* image)
+    {
+        if (image == nullptr || !imageName.IsValid())
+            return -1;
+        if (registeredImagesByName.KeyExists(imageName))
+            return registeredImagesByName[imageName];
+
+        int index = registeredImages.GetCount();
+        registeredImagesByName[imageName] = index;
+        registeredImageIndices[image] = index;
+        registeredImageNames[image] = imageName;
+
+        registeredImages.Insert(image);
+
+        imageRegistryUpdated = true;
+
+        return index;
+    }
+
+    void FusionApplication::DeregisterImage(const Name& imageName)
+    {
+        if (registeredImagesByName.KeyExists(imageName))
+        {
+            int index = registeredImagesByName[imageName];
+            registeredImageIndices.Remove(registeredImages[index]);
+            registeredImages[index] = nullptr;
+            registeredImagesByName.Remove(imageName);
+        }
+
+        imageRegistryUpdated = true;
+    }
+
+    void FusionApplication::DeregisterImage(RHI::Texture* image)
+    {
+        if (registeredImageIndices.KeyExists(image))
+        {
+            int index = registeredImageIndices[image];
+            Name imageName = registeredImageNames[image];
+
+            registeredImagesByName.Remove(imageName);
+            registeredImageIndices.Remove(image);
+            registeredImageNames.Remove(image);
+            registeredImages[index] = nullptr;
+        }
+        imageRegistryUpdated = true;
+    }
+
+    RHI::Texture* FusionApplication::FindImage(const Name& imageName)
+    {
+        if (!registeredImagesByName.KeyExists(imageName))
+            return nullptr;
+        int index = registeredImagesByName[imageName];
+        if (index >= registeredImages.GetCount() || index < 0)
+            return nullptr;
+        return registeredImages[index];
     }
 
     void FusionApplication::Tick(bool isExposed)
@@ -222,6 +324,13 @@ namespace CE
 
         fontManager->Flush(curImageIndex);
 
+        if (imageRegistryUpdated)
+        {
+            textureSrg->Bind("_Textures", registeredImages.GetCount(), registeredImages.GetData());
+        }
+
+        textureSrg->FlushBindings();
+        
         rootContext->SetDrawPackets(drawList);
     }
 
@@ -395,9 +504,37 @@ namespace CE
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Fragment
                 ));
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerObject)
+                .TryAdd(SRGVariableDescriptor(
+                    "_Textures",
+                    (u32)fragmentReflection["separate_images"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2D,
+                    ShaderStage::Fragment,
+                    (u32)fragmentReflection["separate_images"][1]["array"][0].GetNumberValue()
+                ))
+        		.TryAdd(SRGVariableDescriptor(
+                    "_TextureSamplers",
+                    (u32)fragmentReflection["separate_samplers"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment,
+                    (u32)fragmentReflection["separate_samplers"][1]["array"][0].GetNumberValue()
+                ));
         }
 
         perDrawSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw);
+        perObjectSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerObject);
+
+        textureSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgLayout);
+
+        Array samplers = {
+            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::ClampToEdge, .addressModeV = SamplerAddressMode::ClampToEdge, .samplerFilterMode = FilterMode::Linear }),
+            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::ClampToEdge, .samplerFilterMode = FilterMode::Linear }),
+            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::ClampToEdge, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear }),
+            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear })
+        };
+
+        textureSrg->Bind("_TextureSamplers", samplers.GetSize(), samplers.GetData());
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");

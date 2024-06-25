@@ -205,7 +205,7 @@ namespace CE
             Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
     }
 
-    void FWidget::AddChild(FWidget* child)
+    bool FWidget::AddChild(FWidget* child)
     {
         if (TryAddChild(child))
         {
@@ -217,7 +217,11 @@ namespace CE
             child->parent = this;
             child->OnAttachedToParent(this);
             MarkLayoutDirty();
+
+            return true;
         }
+
+        return false;
     }
 
     void FWidget::RemoveChild(FWidget* child)

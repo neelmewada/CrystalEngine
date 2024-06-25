@@ -65,8 +65,8 @@ namespace CE::RHI
 
 		SRGVariableDescriptor() {}
 
-		SRGVariableDescriptor(const Name& name, u32 bindingSlot, ShaderResourceType type, ShaderStage shaderStages)
-			: name(name), bindingSlot(bindingSlot), type(type), shaderStages(shaderStages)
+		SRGVariableDescriptor(const Name& name, u32 bindingSlot, ShaderResourceType type, ShaderStage shaderStages, u32 arrayCount = 1)
+			: name(name), bindingSlot(bindingSlot), type(type), shaderStages(shaderStages), arrayCount(arrayCount)
 		{}
 
 		/// @brief Name of the variable.

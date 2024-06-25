@@ -130,6 +130,11 @@ Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
 StructuredBuffer<GlyphItem> _GlyphItems : SRG_PerMaterial(t1);
 SamplerState _FontAtlasSampler : SRG_PerMaterial(s2);
 
+#define MAX_TEXTURE_COUNT 100000
+
+Texture2D _Textures[MAX_TEXTURE_COUNT] : SRG_PerObject(t0);
+SamplerState _TextureSamplers[4] : SRG_PerObject(s1); // Order: NoTile, TileX, TileY, TileXY
+
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -371,7 +376,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         float alpha = _FontAtlas.Sample(_FontAtlasSampler, uvMin + (uvMax - uvMin) * uv).r;
 
         pixelColor.rgb = penColor.rgb;
-        pixelColor.a = penColor.a * alpha;
+        pixelColor.a = penColor.a * alpha * 1.1;
     }
 
     return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);

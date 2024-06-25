@@ -8,6 +8,11 @@ namespace CE
 
     }
 
+    void FStyledWidget::CalculateIntrinsicSize()
+    {
+	    Super::CalculateIntrinsicSize();
+    }
+
     void FStyledWidget::OnPaint(FPainter* painter)
     {
         if (m_Opacity < 0.0001f)

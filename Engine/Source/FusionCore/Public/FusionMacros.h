@@ -10,26 +10,25 @@
 
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
 
-
-#define FUSION_LAYOUT_PROPERTY(PropertyName)\
+#define __FUSION_PROPERTY(PropertyName, DirtyFunc)\
 	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
-		if (this->m_##PropertyName == value) return *this; this->m_##PropertyName = value; MarkLayoutDirty();\
-		static const CE::Name nameValue = #PropertyName;\
+		if constexpr (TEquitable<decltype(m_##PropertyName)>::Value)\
+		{\
+			if (TEquitable<decltype(m_##PropertyName)>::AreEqual(this->m_##PropertyName, value))\
+				return *this;\
+		}\
+		this->m_##PropertyName = value; DirtyFunc;\
+		thread_local const CE::Name nameValue = #PropertyName;\
 		OnFusionPropertyModified(nameValue);\
 		return *this;\
 	}\
 	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
 
-#define FUSION_PROPERTY(PropertyName)\
-	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
-		if (this->m_##PropertyName == value)\
-			return *this;\
-		this->m_##PropertyName = value; MarkDirty();\
-		static const CE::Name nameValue = #PropertyName;\
-		OnFusionPropertyModified(nameValue);\
-		return *this;\
-	}\
-	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
+#define FUSION_LAYOUT_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkLayoutDirty())
+
+#define FUSION_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkDirty())
+
+#define FUSION_DATA_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, )
 
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& PropertyName(const auto& value) {\

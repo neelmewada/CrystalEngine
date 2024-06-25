@@ -372,6 +372,14 @@ namespace CE
 	struct TMatchAllBaseClass<T, First, Rest...> : TBoolConst<TIsBaseClassOf<T, First>::Value and TMatchAllBaseClass<T, Rest...>::Value>
 	{};
 
+	template <typename T>
+	struct TEquitable : TBoolConst<std::equality_comparable<T>>
+	{
+		static bool AreEqual(const T& lhs, const T& rhs)
+		{
+			return lhs == rhs;
+		}
+	};
 
 } // namespace CE::Traits
 

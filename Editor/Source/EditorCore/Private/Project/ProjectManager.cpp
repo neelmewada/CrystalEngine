@@ -61,7 +61,7 @@ namespace CE::Editor
 
 		// Set global project vars
 		gProjectPath = projectFilePath.GetParentPath();
-		gProjectName = projectFilePath.GetFilename().RemoveExtension().GetString();
+		gProjectName = projectFilePath.GetFileName().RemoveExtension().GetString();
 
 		// Load settings bundle
 		Bundle* settingsBundle = GetSettingsBundle();

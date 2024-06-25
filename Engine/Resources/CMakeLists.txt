@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(EngineResources)
 
-file(GLOB_RECURSE RESOURCE_FILES "*.ttf")
+file(GLOB_RECURSE RESOURCE_FILES "*.ttf" "*.png")
 
 ce_add_resources(${PROJECT_NAME}
     RESOURCES

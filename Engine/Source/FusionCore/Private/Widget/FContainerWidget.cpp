@@ -81,6 +81,15 @@ namespace CE
         Super::HandleEvent(event);
     }
 
+    void FContainerWidget::InsertChild(int index, FWidget* child)
+    {
+        if (AddChild(child))
+        {
+            children.Remove(child);
+            children.InsertAt(index, child);
+        }
+    }
+
     void FContainerWidget::ClearStyle()
     {
 	    Super::ClearStyle();

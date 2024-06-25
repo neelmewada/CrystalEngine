@@ -29,7 +29,7 @@ namespace CE
 
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
 
-        void AddChild(FWidget* child);
+        bool AddChild(FWidget* child);
         void RemoveChild(FWidget* child);
 
         void ApplyStyle();
