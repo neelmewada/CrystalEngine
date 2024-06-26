@@ -337,7 +337,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             color = shapeItem.brushColor;
 	        break;
         case BRUSH_Texture:
-            color = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], textureUV).rgba;
+            color = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], textureUV).rgba * shapeItem.brushColor;
 	        break;
         case BRUSH_LinearGradient:
 	        break;

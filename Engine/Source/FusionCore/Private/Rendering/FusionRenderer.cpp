@@ -475,7 +475,7 @@ namespace CE
 			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
 
 			// We are beyond the width
-			if (isFixedWidth && curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize > startX + size.width && wordWrap != FWordWrap::NoWrap)
+			if (isFixedWidth && curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize > startX + size.width + 1 && wordWrap != FWordWrap::NoWrap)
 			{
 				// Go through previous characters and bring them to this new-line
 				if (breakCharIdx >= 0)
@@ -499,7 +499,7 @@ namespace CE
 
 						Vec3 prevTranslation = Vec3(prevQuadPos.x, prevQuadPos.y, 0);
 
-						prevDrawItem.transform = Matrix4x4::Translation(prevTranslation) * Matrix4x4::Scale(prevDrawItem.quadSize);
+						prevDrawItem.transform = Matrix4x4::Translation(prevTranslation) * Matrix4x4::Scale(Vec3(prevDrawItem.quadSize.x, prevDrawItem.quadSize.y, 1));
 
 						curPos.x += (f32)prevGlyph.advance * (f32)fontSize / atlasFontSize - (f32)prevGlyph.xOffset * (f32)fontSize / atlasFontSize;
 

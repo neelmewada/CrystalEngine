@@ -39,11 +39,17 @@ namespace CE
         FIELD()
         Array<FWidget*> children{};
 
-    public:
+    protected: // - Fusion Fields -
 
-        
+        FIELD()
+        bool m_ClipChildren = false;
 
-        FUSION_TESTS;
+    public: // - Fusion Properties -
+
+        FUSION_PROPERTY(ClipChildren);
+
+
+        FUSION_WIDGET;
     };
 
 } // namespace CE

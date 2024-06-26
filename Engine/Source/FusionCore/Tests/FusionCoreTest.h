@@ -24,6 +24,7 @@ namespace RenderingTests
 		FTextInput* textInput;
 		FLabel* buttonLabel;
 		FStyledWidget* subWidget;
+		FPopup* btnPopup;
 
 		int hitCounter = 0;
 

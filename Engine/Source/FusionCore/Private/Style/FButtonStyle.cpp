@@ -32,6 +32,7 @@ namespace CE
         button
             .Background(FBrush(bgColor))
 			.BackgroundShape(FRoundedRectangle(cornerRadius))
+			.ClipShape(FRectangle())
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
 			.Opacity(1.0f)

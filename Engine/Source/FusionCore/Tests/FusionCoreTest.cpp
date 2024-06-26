@@ -14,6 +14,39 @@ namespace RenderingTests
         //transparentPattern.SetBrushSize(Vec2(36, 36));
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
 
+        FButton* openPopupBtn = nullptr;
+
+        FAssignNew(FPopup, btnPopup)
+        .BlockInteraction(false)
+        .AutoClose(true)
+        .Background(Color::RGBA(10, 10, 10))
+        .Child(
+            FNew(FVerticalStack)
+            .ContentHAlign(HAlign::Center)
+            .Padding(Vec4(1, 1, 1, 1) * 20)
+            (
+                FNew(FButton)
+                .OnPressed([this]
+                {
+                    GetContext()->ClosePopup(btnPopup);
+                })
+                .Name("Button")
+                (
+                    FAssignNew(FLabel, buttonLabel)
+                    .FontSize(14)
+                    .Text("Click to Close!")
+                ),
+
+                FNew(FStyledWidget)
+                .Background(Color::Blue())
+                .MinHeight(26)
+                (
+                    FNew(FLabel)
+                    .FontSize(20)
+                    .Text("This is a long label")
+                )
+            )
+        );
 
         Child
     	(
@@ -31,27 +64,36 @@ namespace RenderingTests
                     .Name("HStack1")
                     (
                         FNew(FStyledWidget)
-                        .Background(FBrush(Color::Green()))
-                        .BackgroundShape(FRectangle())
+                        .Background(transparentPattern)
+                        .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
                         .FillRatio(1.0f)
                         .MinWidth(60)
                         .MinHeight(30)
-                        .Name("GreenWidget")
                     )
                     .Margin(Vec4(0, 0, 0, 5)),
 
                     FAssignNew(FButton, button)
                     .OnPressed([this]
-		                {
-                            buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
-		                })
-                    .ClipShape(FRectangle())
-                    .Style("Button.Primary")
+	                {
+                        buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+	                })
                     .Name("Button")
                     (
                         FAssignNew(FLabel, buttonLabel)
                         .FontSize(14)
                         .Text("Click Count 0")
+                    ),
+
+                    FAssignNew(FButton, openPopupBtn)
+                    .OnPressed([this, openPopupBtn]
+                    {
+	                    GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
+                    })
+                    .Name("PopupButton")
+                    (
+                        FNew(FLabel)
+                        .FontSize(14)
+                        .Text("Open Popup")
                     ),
 
                     FNew(FHorizontalStack)
@@ -80,8 +122,7 @@ namespace RenderingTests
                         .MinHeight(15),
 
                         FNew(FStyledWidget)
-                        //.Background(FBrush(Color::Cyan()))
-                        .Background(transparentPattern)
+                        .Background(FBrush(Color::Cyan()))
                         .BackgroundShape(FRectangle())
                         .FillRatio(2.0f)
                         .MinWidth(60)

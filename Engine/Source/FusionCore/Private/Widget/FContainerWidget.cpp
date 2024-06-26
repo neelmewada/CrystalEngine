@@ -129,7 +129,7 @@ namespace CE
     void FContainerWidget::OnChildWidgetDestroyed(FWidget* child)
     {
 	    Super::OnChildWidgetDestroyed(child);
-
+        
         TryRemoveChild(child);
     }
 

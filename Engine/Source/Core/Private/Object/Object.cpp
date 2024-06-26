@@ -128,6 +128,14 @@ namespace CE
 		}
     }
 
+    void Object::SetName(const Name& newName)
+    {
+		if (IsValidObjectName(newName.GetString()))
+		{
+			this->name = newName;
+		}
+    }
+
     void Object::AttachSubobject(Object* subobject)
     {
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))

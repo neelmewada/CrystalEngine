@@ -118,6 +118,8 @@ namespace CE
 		if (platformWindow != window)
 			return;
 
+		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
+
 		if (swapChain)
 		{
 			swapChain->Rebuild();
@@ -136,6 +138,8 @@ namespace CE
 			return;
 		if (platformWindow != window)
 			return;
+
+		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
 
 		if (swapChain)
 		{
@@ -175,11 +179,11 @@ namespace CE
 		return platformWindow->IsFocused();
 	}
 
-	void FNativeContext::Tick()
+	void FNativeContext::TickInput()
 	{
 		ZoneScoped;
 
-		Super::Tick();
+		Super::TickInput();
 
 		if (!owningWidget || FusionApplication::Get()->isExposed || !platformWindow->IsShown())
 		{
@@ -232,17 +236,7 @@ namespace CE
 			}
 		}
 
-		FWidget* hoveredWidget = nullptr;
-
-		if (windowRect.Contains(mousePos))
-		{
-			hoveredWidget = owningWidget->HitTest(mousePos);
-		}
-
-		if (!platformWindow->IsFocused())
-		{
-			hoveredWidget = nullptr;
-		}
+		FWidget* hoveredWidget = HitTest(mousePos);
 
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
@@ -351,6 +345,27 @@ namespace CE
 				{
 					draggedWidget = dragEvent.draggedWidget;
 				}
+			}
+		}
+
+		if (InputManager::IsMouseButtonDown(MouseButton::Left))
+		{
+			Array<FPopup*> popupsToClose{};
+
+			for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
+			{
+				if (!localPopupStack[i]->AutoClose())
+					continue;
+
+				if (hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(localPopupStack[i]))
+				{
+					popupsToClose.Add(localPopupStack[i]);
+				}
+			}
+
+			for (FPopup* popup : popupsToClose)
+			{
+				ClosePopup(popup);
 			}
 		}
 
@@ -621,6 +636,11 @@ namespace CE
 			if (painter && owningWidget)
 			{
 				owningWidget->OnPaint(painter);
+			}
+
+			for (int i = 0; i < localPopupStack.GetSize(); ++i)
+			{
+				localPopupStack[i]->OnPaint(painter);
 			}
 
 			renderer->End();

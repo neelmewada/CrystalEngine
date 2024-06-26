@@ -66,10 +66,7 @@ namespace CE
             return name;
         }
 
-        virtual void SetName(const Name& newName)
-        {
-            this->name = newName;
-        }
+        virtual void SetName(const Name& newName);
         
         INLINE Uuid GetUuid() const
         {

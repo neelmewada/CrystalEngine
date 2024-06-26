@@ -22,20 +22,18 @@
 		OnFusionPropertyModified(nameValue);\
 		return *this;\
 	}\
-	const auto& Get##PropertyName() const { return this->m_##PropertyName; }
+	const auto& PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_LAYOUT_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkLayoutDirty())
 
 #define FUSION_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkDirty())
-
-#define FUSION_DATA_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, )
 
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& PropertyName(const auto& value) {\
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& Get##PropertyName() const { return WrappingVariable->Get##PropertyName(); }
+	const auto& PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_EVENT(PropertyName)\
 	Self& PropertyName(const FunctionBinding& binding)\
@@ -63,4 +61,5 @@
 		{\
 			if (condition) lambda(*this);\
 			return *this;\
-		}
+		}\
+		FUSION_FRIENDS

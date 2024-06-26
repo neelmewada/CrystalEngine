@@ -426,7 +426,7 @@ namespace CE
         if (!painter)
             return;
 
-        textSize = painter->CalculateCharacterOffsets(characterOffsets, GetText(), GetFont());
+        textSize = painter->CalculateCharacterOffsets(characterOffsets, Text(), Font());
     }
 
     void FTextInputLabel::OnTimeOut()
@@ -463,6 +463,10 @@ namespace CE
             {
                 SelectAll();
                 ScrollTo(characterOffsets.GetSize());
+            }
+            else if (IsTextSelected())
+            {
+                DeselectAll();
             }
             
             break;

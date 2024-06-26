@@ -34,7 +34,7 @@ namespace CE
 
         if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 2)
         {
-            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(m_Scale));
+            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1)));
             transformChanged = true;
         }
 

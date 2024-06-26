@@ -33,7 +33,7 @@ namespace CE
 			child->CalculateIntrinsicSize();
 
 			Vec2 childSize = child->GetIntrinsicSize();
-			Vec4 childMargin = child->GetMargin();
+			Vec4 childMargin = child->Margin();
 
 			if (m_Direction == FStackBoxDirection::Horizontal)
 			{
@@ -102,7 +102,7 @@ namespace CE
 					totalFillRatio += child->m_FillRatio;
 				}
 
-				remainingSize -= childIntrinsicSize.width + child->GetMargin().left + child->GetMargin().right;
+				remainingSize -= childIntrinsicSize.width + child->Margin().left + child->Margin().right;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
@@ -111,7 +111,7 @@ namespace CE
 					totalFillRatio += child->m_FillRatio;
 				}
 
-				remainingSize -= childIntrinsicSize.height + child->GetMargin().top + child->GetMargin().bottom;
+				remainingSize -= childIntrinsicSize.height + child->Margin().top + child->Margin().bottom;
 			}
 		}
 
@@ -212,12 +212,20 @@ namespace CE
 			return;
 
 		painter->PushChildCoordinateSpace(localTransform);
+		if (m_ClipChildren)
+		{
+			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+		}
 
 		for (FWidget* child : children)
 		{
 			child->OnPaint(painter);
 		}
 
+		if (m_ClipChildren)
+		{
+			painter->PopClipShape();
+		}
 		painter->PopChildCoordinateSpace();
 	}
 

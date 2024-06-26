@@ -68,17 +68,7 @@ namespace CE
         Vec2 rectPos = computedPosition;
         Vec2 rectSize = computedSize;
 
-        /*if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || abs(m_Scale.GetSqrMagnitude() - 2.0f) > 0.0f)
-        {
-            Vec2 invScale = Vec2(1 / m_Scale.x, 1 / m_Scale.y);
-
-            localMousePos = Matrix4x4::Translation(rectSize / 2) *
-                Matrix4x4::Translation(-m_Translation) *
-                Matrix4x4::Angle(-m_Angle) *
-                Matrix4x4::Scale(invScale) *
-                Matrix4x4::Translation(-rectSize / 2) *
-                Vec4(localMousePos.x, localMousePos.y, 0, 1);
-        }*/
+        // TODO: Implement matrix transformation support for input handling
 
         Rect rect = Rect::FromSize(rectPos, rectSize);
 

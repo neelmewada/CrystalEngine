@@ -6,6 +6,7 @@ namespace CE
 	class FusionRenderer;
     class FWidget;
     class FWindow;
+    class FPopup;
 
     CLASS()
     class FUSIONCORE_API FFusionContext : public Object
@@ -27,6 +28,8 @@ namespace CE
 
         virtual void DoPaint();
 
+        virtual void TickInput();
+
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
 
         void SetOwningWidget(FWidget* widget);
@@ -45,6 +48,8 @@ namespace CE
 
         virtual bool IsFocused() const;
 
+        bool IsRootContext() const;
+
         void MarkLayoutDirty();
 
         void MarkDirty();
@@ -54,6 +59,9 @@ namespace CE
         void AddChildContext(FFusionContext* context);
 
         void RemoveChildContext(FFusionContext* context);
+
+        void PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2());
+        bool ClosePopup(FPopup* popup);
 
         void SetDefaultStyleSet(FStyleSet* styleSet);
 
@@ -66,6 +74,8 @@ namespace CE
         virtual FPainter* GetPainter();
 
         void SetFocusWidget(FWidget* focusWidget);
+
+        virtual FWidget* HitTest(Vec2 mousePosition);
 
         // - Rendering / FrameGraph -
 
@@ -108,6 +118,7 @@ namespace CE
         bool layoutDirty = true;
         bool dirty = true;
         bool isDestroyed = false;
+        bool isRootContext = false;
 
         FWidget* curFocusWidget = nullptr;
         FWidget* widgetToFocus = nullptr;
@@ -116,11 +127,13 @@ namespace CE
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
-        Matrix4x4 rootTransform{};
 
         using FWidgetStack = StableDynamicArray<FWidget*, 128, false>;
 
         Array<FWidget*> hoveredWidgetStack;
+
+        // Non-native popups that are rendered inside a native window
+        Array<FPopup*> localPopupStack;
 
         FUSION_FRIENDS;
     };

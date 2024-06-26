@@ -370,6 +370,10 @@ namespace CE
     void FusionApplication::SetRootContext(FFusionContext* context)
     {
         rootContext = context;
+        if (rootContext)
+        {
+            rootContext->isRootContext = true;
+        }
     }
 
     void FusionApplication::RebuildFrameGraph()

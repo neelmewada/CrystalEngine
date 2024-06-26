@@ -28,7 +28,7 @@ namespace CE
             child->CalculateIntrinsicSize();
 
             Vec2 childSize = child->GetIntrinsicSize();
-            Vec4 childMargin = child->GetMargin();
+            Vec4 childMargin = child->Margin();
 
             contentSize.width = Math::Max(contentSize.width, childSize.width + childMargin.left + childMargin.right);
             contentSize.height = Math::Max(contentSize.height, childSize.height + childMargin.top + childMargin.bottom);
@@ -67,8 +67,8 @@ namespace CE
             if (!child)
                 continue;
 
-            CE::VAlign childVAlign = child->GetVAlign();
-            CE::HAlign childHAlign = child->GetHAlign();
+            CE::VAlign childVAlign = child->VAlign();
+            CE::HAlign childHAlign = child->HAlign();
 
             if (childVAlign == VAlign::Auto)
                 childVAlign = m_ContentVAlign;

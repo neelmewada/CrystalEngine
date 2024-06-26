@@ -27,7 +27,7 @@ namespace CE
 
 		bool IsFocused() const override;
 
-		void Tick() override;
+		void TickInput() override;
 
 		void DoLayout() override;
 

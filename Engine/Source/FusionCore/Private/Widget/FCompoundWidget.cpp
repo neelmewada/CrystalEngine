@@ -19,7 +19,7 @@ namespace CE
         m_Child->CalculateIntrinsicSize();
 
         Vec2 childSize = m_Child->GetIntrinsicSize();
-        const Vec4& childMargin = m_Child->GetMargin();
+        const Vec4& childMargin = m_Child->Margin();
 
         intrinsicSize.width = Math::Max(intrinsicSize.width, childSize.width + m_Padding.left + m_Padding.right + childMargin.left + childMargin.right);
         intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
@@ -34,7 +34,7 @@ namespace CE
         if (!m_Child)
             return;
 
-        Vec4 childMargin = m_Child->GetMargin();
+        Vec4 childMargin = m_Child->Margin();
         Vec2 childIntrinsicSize = m_Child->GetIntrinsicSize();
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,
             m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
@@ -44,8 +44,8 @@ namespace CE
             Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,
                 m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
-        CE::VAlign childVAlign = m_Child->GetVAlign();
-        CE::HAlign childHAlign = m_Child->GetHAlign();
+        CE::VAlign childVAlign = m_Child->VAlign();
+        CE::HAlign childHAlign = m_Child->HAlign();
 
         switch (childVAlign)
         {

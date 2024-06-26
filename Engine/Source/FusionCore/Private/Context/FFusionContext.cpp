@@ -30,6 +30,8 @@ namespace CE
 		}
 
 		DoPaint();
+
+		TickInput();
 	}
 
 	void FFusionContext::DoLayout()
@@ -45,12 +47,33 @@ namespace CE
 			
 			owningWidget->PlaceSubWidgets();
 
+			for (FPopup* popup : localPopupStack)
+			{
+				popup->CalculateIntrinsicSize();
+
+				Vec2 size = popup->initialSize;
+				if (size.x <= 0 || size.y <= 0)
+				{
+					size = popup->intrinsicSize;
+				}
+
+				popup->computedPosition = popup->initialPos;
+				popup->computedSize = size;
+
+				popup->PlaceSubWidgets();
+			}
+
 			layoutDirty = false;
 			dirty = true;
 		}
 	}
 
 	void FFusionContext::DoPaint()
+	{
+
+	}
+
+	void FFusionContext::TickInput()
 	{
 
 	}
@@ -94,6 +117,11 @@ namespace CE
 		}
 
 		return false;
+	}
+
+	bool FFusionContext::IsRootContext() const
+	{
+		return isRootContext;
 	}
 
 	void FFusionContext::MarkLayoutDirty()
@@ -148,6 +176,50 @@ namespace CE
 		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
+	void FFusionContext::PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
+	{
+		if (!popup)
+			return;
+		if (localPopupStack.Exists(popup))
+			return;
+
+		localPopupStack.Push(popup);
+		popup->context = this;
+		popup->initialPos = globalPosition;
+		popup->initialSize = size;
+
+		SetFocusWidget(popup);
+		MarkLayoutDirty();
+	}
+
+	bool FFusionContext::ClosePopup(FPopup* popup)
+	{
+		if (!popup)
+			return true;
+
+		int index = localPopupStack.IndexOf(popup);
+		if (index < 0)
+			return false;
+
+		localPopupStack.RemoveAt(index);
+
+		if (curFocusWidget != nullptr && curFocusWidget->ParentExistsRecursive(popup))
+		{
+			if (localPopupStack.NonEmpty())
+			{
+				SetFocusWidget(localPopupStack.Top());
+			}
+			else if (owningWidget)
+			{
+				SetFocusWidget(owningWidget);
+			}
+		}
+
+		MarkLayoutDirty();
+
+		return true;
+	}
+
 	void FFusionContext::SetDefaultStyleSet(FStyleSet* styleSet)
 	{
 		defaultStyleSet = styleSet;
@@ -177,6 +249,30 @@ namespace CE
 	void FFusionContext::SetFocusWidget(FWidget* focusWidget)
 	{
 		widgetToFocus = focusWidget;
+	}
+
+	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
+	{
+		FWidget* hoveredWidget;
+
+		Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
+		if (!windowRect.Contains(mousePosition))
+			return nullptr;
+
+		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
+		{
+			hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
+			if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+			{
+				return hoveredWidget;
+			}
+		}
+
+		if (!owningWidget)
+			return nullptr;
+
+		hoveredWidget = owningWidget->HitTest(mousePosition);
+		return hoveredWidget;
 	}
 
 	void FFusionContext::EmplaceFrameAttachments()
