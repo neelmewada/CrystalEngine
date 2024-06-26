@@ -210,6 +210,9 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(MinHeight);
         FUSION_LAYOUT_PROPERTY(MaxHeight);
 
+        Self& Width(f32 width);
+        Self& Height(f32 height);
+
         FUSION_LAYOUT_PROPERTY(FillRatio);
 
         FUSION_PROPERTY(Translation);

@@ -197,7 +197,7 @@ namespace CE
 
                         isCommand = true;
                     }
-                    else if (keyEvent->key == KeyCode::V)
+                    else if (keyEvent->key == KeyCode::V) // Paste
                     {
                         String textToPaste = "";
                         if (PlatformApplication::Get()->HasClipboardText())
@@ -232,6 +232,7 @@ namespace CE
                     str.Append(c);
 
                     InsertAt(str, cursorPos);
+                    ScrollTo(cursorPos);
                 }
             }
             else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&

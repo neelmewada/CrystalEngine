@@ -85,8 +85,12 @@ struct ShapeItem2D
 {
     float4 cornerRadius;
     float4 brushColor;
+    float2 uvMin;
+    float2 uvMax;
     BrushType brushType;
     ShapeType shape;
+    uint textureOrGradientIndex;
+    uint samplerIndex;
 };
 
 struct LineItem2D
@@ -131,9 +135,10 @@ StructuredBuffer<GlyphItem> _GlyphItems : SRG_PerMaterial(t1);
 SamplerState _FontAtlasSampler : SRG_PerMaterial(s2);
 
 #define MAX_TEXTURE_COUNT 100000
+#define MAX_SAMPLER_COUNT 128
 
 Texture2D _Textures[MAX_TEXTURE_COUNT] : SRG_PerObject(t0);
-SamplerState _TextureSamplers[4] : SRG_PerObject(s1); // Order: NoTile, TileX, TileY, TileXY
+SamplerState _TextureSamplers[MAX_SAMPLER_COUNT] : SRG_PerObject(s1);
 
 #endif
 
@@ -297,7 +302,13 @@ float4 FragMain(PSInput input) : SV_TARGET
     {
         const uint shapeIndex = drawItem.shapeOrCharOrLineIndex;
         const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
+        const uint samplerIndex = shapeItem.samplerIndex;
+        const uint textureIndex = shapeItem.textureOrGradientIndex;
+        const uint gradientIndex = textureIndex;
         const float4 r = shapeItem.cornerRadius;
+        const float2 uvMin = shapeItem.uvMin;
+        const float2 uvMax = shapeItem.uvMax;
+        const float2 textureUV = float2((uv.x - uvMin.x) / (uvMax.x - uvMin.x), (uv.y - uvMin.y) / (uvMax.y - uvMin.y));
 
         float sd = 1;
 
@@ -326,6 +337,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             color = shapeItem.brushColor;
 	        break;
         case BRUSH_Texture:
+            color = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], textureUV).rgba;
 	        break;
         case BRUSH_LinearGradient:
 	        break;

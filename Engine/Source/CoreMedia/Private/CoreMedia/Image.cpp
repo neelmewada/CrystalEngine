@@ -341,15 +341,20 @@ namespace CE
 
 			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, desiredChannels);
 
+#if PLATFORM_WINDOWS
 			// To check allocated size only on windows
-			//auto size = _msize(imageData);
+			auto size = _msize(imageData);
+#endif
 
 			if (channels == 1)
 				image.format = CMImageFormat::R8;
 			else if (channels == 2)
 				image.format = CMImageFormat::RG8;
 			else if (channels == 3)
-				image.format = CMImageFormat::RGB8;
+			{
+				image.format = CMImageFormat::RGBA8;
+				channels = 4;
+			}
 			else if (channels == 4)
 				image.format = CMImageFormat::RGBA8;
 

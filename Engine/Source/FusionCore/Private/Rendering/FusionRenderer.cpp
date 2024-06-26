@@ -108,6 +108,8 @@ namespace CE
 
 		PopChildCoordinateSpace(); // Pop identity matrix
 
+		auto app = FusionApplication::Get();
+
 		const auto& vertBuffers = RPI::RPISystem::Get().GetTextQuad();
 		RHI::DrawLinearArguments drawArgs = RPI::RPISystem::Get().GetTextQuadDrawArgs();
 
@@ -131,6 +133,7 @@ namespace CE
 				drawPacket->shaderResourceGroups[0] = drawItemSrg;
 				drawPacket->shaderResourceGroups[1] = perViewSrg;
 				drawPacket->shaderResourceGroups[2] = drawBatch.fontSrg;
+				drawPacket->shaderResourceGroups[3] = app->textureSrg;
 
 				this->drawPackets.Add(drawPacket);
 			}
@@ -145,6 +148,7 @@ namespace CE
 				builder.AddShaderResourceGroup(drawItemSrg);
 				builder.AddShaderResourceGroup(perViewSrg);
 				builder.AddShaderResourceGroup(drawBatch.fontSrg);
+				builder.AddShaderResourceGroup(app->textureSrg);
 
 				// UI Item
 				{
@@ -585,30 +589,147 @@ namespace CE
 		lineItemList.Insert(lineItem);
 	}
 
-	FusionRenderer::FDrawItem2D& FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 size)
+	void FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 quadSize)
 	{
 		ZoneScoped;
+		if (quadSize.x <= 0 || quadSize.y <= 0)
+			return;
 
-		FDrawItem2D& drawItem = DrawCustomItem(DRAW_Shape, pos, size);
+		FDrawItem2D& drawItem = DrawCustomItem(DRAW_Shape, pos, quadSize);
+		auto app = FusionApplication::Get();
 
 		FShapeItem2D shapeItem;
 		shapeItem.shape = shape.GetShapeType();
 		shapeItem.cornerRadius = shape.GetCornerRadius();
 
-		switch (currentBrush.GetBrushStyle())
+		shapeItem.brushType = BRUSH_None;
+
+		if (currentBrush.GetBrushStyle() == FBrushStyle::SolidFill)
 		{
-		case FBrushStyle::None:
-			shapeItem.brushType = BRUSH_None;
-			break;
-		case FBrushStyle::SolidFill:
 			shapeItem.brushType = BRUSH_Solid;
-			break;
-		case FBrushStyle::TexturePattern:
-			shapeItem.brushType = BRUSH_Texture;
-			break;
-		case FBrushStyle::LinearGradient:
+			shapeItem.brushColor = currentBrush.GetFillColor().ToVec4();
+		}
+		else if (currentBrush.GetBrushStyle() == FBrushStyle::Texture)
+		{
+			const Name& imageName = currentBrush.GetImageName();
+			if (imageName.IsValid())
+			{
+				shapeItem.brushColor = currentBrush.GetTintColor().ToVec4();
+
+				RHI::Texture* image = app->FindImage(imageName);
+				int imageIndex = app->FindImageIndex(imageName);
+				if (image && imageIndex >= 0)
+				{
+					shapeItem.brushType = BRUSH_Texture;
+					shapeItem.textureOrGradientIndex = imageIndex;
+
+					Vec2 imageSize = Vec2(image->GetWidth(), image->GetHeight());
+					Vec2 brushSize = currentBrush.GetBrushSize();
+					HAlign hAlign = currentBrush.GetHAlign();
+					VAlign vAlign = currentBrush.GetVAlign();
+					FBrushTiling tiling = currentBrush.GetBrushTiling();
+					if (hAlign == HAlign::Auto)
+						hAlign = HAlign::Center;
+					if (vAlign == VAlign::Auto)
+						vAlign = VAlign::Center;
+					f32 imageAspect = imageSize.width / imageSize.height;
+					bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
+					bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+
+					if (brushSize.y < 0)
+						brushSize.y = imageSize.height;
+					if (brushSize.x < 0)
+						brushSize.x = imageSize.width;
+
+					if (tiledY)
+					{
+						vAlign = VAlign::Fill;
+					}
+					if (tiledX)
+					{
+						hAlign = HAlign::Fill;
+					}
+
+					shapeItem.uvMin.y = 0;
+					shapeItem.uvMin.x = 0;
+
+					switch (vAlign)
+					{
+					case VAlign::Auto:
+						break;
+					case VAlign::Fill:
+						shapeItem.uvMax.y = 1.0f;
+						if (tiledY)
+						{
+							shapeItem.uvMax.y = Math::Max(brushSize.y, 0.001f) / quadSize.y;
+						}
+						break;
+					case VAlign::Top:
+						shapeItem.uvMax.y = brushSize.y / quadSize.y;
+						break;
+					case VAlign::Center:
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * 0.5f / quadSize.y;
+						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
+						break;
+					case VAlign::Bottom:
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * 1.0f / quadSize.y;
+						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
+						break;
+					}
+
+					switch (hAlign)
+					{
+					case HAlign::Auto:
+						break;
+					case HAlign::Fill:
+						shapeItem.uvMax.x = 1.0f;
+						if (tiledX)
+						{
+							shapeItem.uvMax.x = Math::Max(brushSize.x, 0.001f) / quadSize.x;
+						}
+						break;
+					case HAlign::Left:
+						shapeItem.uvMax.x = brushSize.x / quadSize.x;
+						break;
+					case HAlign::Center:
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * 0.5f / quadSize.x;
+						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
+						break;
+					case HAlign::Right:
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * 1.0f / quadSize.x;
+						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
+						break;
+					}
+
+					RHI::SamplerDescriptor sampler{};
+					sampler.addressModeU = sampler.addressModeV = SamplerAddressMode::ClampToBorder;
+					sampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+					sampler.enableAnisotropy = false;
+					sampler.samplerFilterMode = FilterMode::Linear;
+
+					switch (tiling)
+					{
+					case FBrushTiling::None:
+						break;
+					case FBrushTiling::TileX:
+						sampler.addressModeU = SamplerAddressMode::Repeat;
+						break;
+					case FBrushTiling::TileY:
+						sampler.addressModeV = SamplerAddressMode::Repeat;
+						break;
+					case FBrushTiling::TileXY:
+						sampler.addressModeU = SamplerAddressMode::Repeat;
+						sampler.addressModeV = SamplerAddressMode::Repeat;
+						break;
+					}
+
+					shapeItem.samplerIndex = app->FindOrCreateSampler(sampler);
+				}
+			}
+		}
+		else if (currentBrush.GetBrushStyle() == FBrushStyle::LinearGradient)
+		{
 			shapeItem.brushType = BRUSH_LinearGradient;
-			break;
 		}
 
 		switch (currentPen.GetStyle())
@@ -627,13 +748,9 @@ namespace CE
 			break;
 		}
 
-		shapeItem.brushColor = currentBrush.GetFillColor().ToVec4();
-
 		drawItem.shapeIndex = shapeItemList.GetCount();
 
 		shapeItemList.Insert(shapeItem);
-
-		return drawItem;
 	}
 
 	///////////////////////////////////////////////

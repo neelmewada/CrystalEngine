@@ -281,7 +281,21 @@ namespace CE
         
     }
 
-    FWidget::Self& FWidget::Style(FStyle* style)
+    FWidget& FWidget::Width(f32 width)
+    {
+        return (*this)
+            .MinWidth(width)
+            .MaxWidth(width);
+    }
+
+    FWidget& FWidget::Height(f32 height)
+    {
+        return (*this)
+            .MinHeight(height)
+            .MaxHeight(height);
+    }
+
+    FWidget& FWidget::Style(FStyle* style)
     {
         if (style && IsOfType(style->GetWidgetClass()))
         {
@@ -292,7 +306,7 @@ namespace CE
         return *this;
     }
 
-    FWidget::Self& FWidget::Style(const CE::Name& styleKey)
+    FWidget& FWidget::Style(const CE::Name& styleKey)
     {
         if (!styleKey.IsValid())
             return *this;
@@ -311,7 +325,7 @@ namespace CE
         return Style(style);
     }
 
-    FWidget::Self& FWidget::Style(FStyleSet* styleSet, const CE::Name& styleKey)
+    FWidget& FWidget::Style(FStyleSet* styleSet, const CE::Name& styleKey)
     {
         if (!styleSet)
             return *this;

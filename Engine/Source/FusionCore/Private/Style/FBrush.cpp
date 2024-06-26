@@ -6,7 +6,7 @@ namespace CE
 
 	FBrush::FBrush()
 		: tintColor(Color::Clear())
-		, texturePath(Name())
+		, imageName(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
 	{
@@ -20,11 +20,11 @@ namespace CE
 
 	}
 
-	FBrush::FBrush(const Name& texturePath, const Color& tintColor)
+	FBrush::FBrush(const Name& imageName, const Color& tintColor)
 		: tintColor(tintColor)
-		, texturePath(texturePath)
+		, imageName(imageName)
 		, tiling(FBrushTiling::None)
-		, brushStyle(FBrushStyle::TexturePattern)
+		, brushStyle(FBrushStyle::Texture)
 	{
 		
 	}
@@ -33,8 +33,8 @@ namespace CE
 	{
 		switch (brushStyle)
 		{
-		case FBrushStyle::TexturePattern:
-			texturePath.~Name();
+		case FBrushStyle::Texture:
+			imageName.~Name();
 			break;
 		default:
 			break;
@@ -71,8 +71,8 @@ namespace CE
 			return false;
 		case FBrushStyle::SolidFill:
 			return fillColor.a > 0;
-		case FBrushStyle::TexturePattern:
-			return tintColor.a > 0 && texturePath.IsValid();
+		case FBrushStyle::Texture:
+			return tintColor.a > 0 && imageName.IsValid();
 		case FBrushStyle::LinearGradient:
 			break;
 		}
@@ -99,8 +99,8 @@ namespace CE
 			return fillColor == rhs.fillColor;
 		case FBrushStyle::LinearGradient:
 			break;
-		case FBrushStyle::TexturePattern:
-			return tintColor == rhs.tintColor && texturePath == rhs.texturePath;
+		case FBrushStyle::Texture:
+			return tintColor == rhs.tintColor && imageName == rhs.imageName;
 		case FBrushStyle::None:
 			break;
 		}
@@ -120,8 +120,8 @@ namespace CE
 			    break;
 		    case FBrushStyle::LinearGradient:
 			    break;
-		    case FBrushStyle::TexturePattern:
-				texturePath.~Name();
+		    case FBrushStyle::Texture:
+				imageName.~Name();
 			    break;
 		    }
 	    }
@@ -141,9 +141,9 @@ namespace CE
 			break;
 		case FBrushStyle::LinearGradient:
 			break;
-		case FBrushStyle::TexturePattern:
+		case FBrushStyle::Texture:
 			tintColor = from.tintColor;
-			texturePath = from.texturePath;
+			imageName = from.imageName;
 			break;
 	    }
     }
@@ -156,7 +156,7 @@ namespace CE
 		move.fillColor = {};
 		move.tintColor = {};
 		move.tiling = {};
-		move.texturePath.~Name();
+		move.imageName.~Name();
     }
 
     

@@ -8,6 +8,13 @@ namespace RenderingTests
     {
         Super::Construct();
 
+        FBrush transparentPattern = FBrush("TransparentPattern", Color::White());
+        transparentPattern.SetVAlign(VAlign::Center);
+        transparentPattern.SetHAlign(HAlign::Center);
+        //transparentPattern.SetBrushSize(Vec2(36, 36));
+        transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
+
+
         Child
     	(
             FNew(FStyledWidget)
@@ -73,7 +80,8 @@ namespace RenderingTests
                         .MinHeight(15),
 
                         FNew(FStyledWidget)
-                        .Background(FBrush(Color::Cyan()))
+                        //.Background(FBrush(Color::Cyan()))
+                        .Background(transparentPattern)
                         .BackgroundShape(FRectangle())
                         .FillRatio(2.0f)
                         .MinWidth(60)

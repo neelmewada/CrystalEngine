@@ -8,7 +8,7 @@ namespace CE
     {
 	    None = 0,
         SolidFill,
-        TexturePattern,
+        Texture,
         LinearGradient
     };
     ENUM_CLASS(FBrushStyle);
@@ -33,7 +33,7 @@ namespace CE
 
         FBrush(const Color& fillColor, FBrushStyle brushStyle = FBrushStyle::SolidFill);
 
-        FBrush(const Name& texturePath, const Color& tintColor = Color::White());
+        FBrush(const Name& imageName, const Color& tintColor = Color::White());
 
         ~FBrush();
 
@@ -54,7 +54,7 @@ namespace CE
         const Color& GetFillColor() const { return fillColor; }
 
         const Color& GetTintColor() const { return tintColor; }
-        const Name& GetTexturePath() const { return texturePath; }
+        const Name& GetImageName() const { return imageName; }
 
         const Vec2& GetBrushSize() const { return brushSize; }
         void SetBrushSize(Vec2 brushSize) { this->brushSize = brushSize; }
@@ -89,15 +89,18 @@ namespace CE
             struct
             {
                 Color tintColor;
-                Name texturePath;
+                Name imageName;
             };
         };
 
-        Vec2 brushSize = Vec2(0, 0);
+        Vec2 brushSize = Vec2(-1, -1); // -1 means auto size
         HAlign hAlign = HAlign::Fill;
         VAlign vAlign = VAlign::Fill;
         FBrushTiling tiling = FBrushTiling::None;
         FBrushStyle brushStyle = FBrushStyle::None;
+
+        friend class FPainter;
+        friend class FusionRenderer;
     };
     
 } // namespace CE

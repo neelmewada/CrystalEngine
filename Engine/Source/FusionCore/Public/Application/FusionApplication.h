@@ -41,6 +41,9 @@ namespace CE
         void DeregisterImage(const Name& imageName);
         void DeregisterImage(RHI::Texture* image);
         RHI::Texture* FindImage(const Name& imageName);
+        int FindImageIndex(const Name& imageName);
+
+        int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
         void Tick(bool isExposed = false);
 
@@ -92,6 +95,7 @@ namespace CE
 
         using FImageArray = StableDynamicArray<RHI::Texture*, 64, false>;
         using FTextureArray = StableDynamicArray<RPI::Texture*, 64, false>;
+        using FSamplerArray = StableDynamicArray<RHI::Sampler*, 32, false>;
 
         FImageArray registeredImages;
         FTextureArray loadedTextures;
@@ -99,6 +103,10 @@ namespace CE
         HashMap<RHI::Texture*, int> registeredImageIndices;
         HashMap<RHI::Texture*, Name> registeredImageNames;
         bool imageRegistryUpdated = true;
+
+        FSamplerArray samplerArray;
+        HashMap<RHI::Sampler*, int> samplerIndices;
+        bool samplersUpdated = true;
 
         Array<FTimer*> timers;
 

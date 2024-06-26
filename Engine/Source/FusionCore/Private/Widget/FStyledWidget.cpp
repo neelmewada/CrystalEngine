@@ -56,7 +56,7 @@ namespace CE
                 break;
             case FBrushStyle::SolidFill:
                 break;
-            case FBrushStyle::TexturePattern:
+            case FBrushStyle::Texture:
                 break;
             case FBrushStyle::LinearGradient:
                 break;

@@ -145,6 +145,8 @@ namespace CE
 
     int FusionApplication::RegisterImage(const Name& imageName, RHI::Texture* image)
     {
+        ZoneScoped;
+
         if (image == nullptr || !imageName.IsValid())
             return -1;
         if (registeredImagesByName.KeyExists(imageName))
@@ -198,6 +200,30 @@ namespace CE
         if (index >= registeredImages.GetCount() || index < 0)
             return nullptr;
         return registeredImages[index];
+    }
+
+    int FusionApplication::FindImageIndex(const Name& imageName)
+    {
+        if (!registeredImagesByName.KeyExists(imageName))
+            return -1;
+        return registeredImagesByName[imageName];
+    }
+
+    int FusionApplication::FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc)
+    {
+        ZoneScoped;
+
+        RHI::Sampler* sampler = RPISystem::Get().FindOrCreateSampler(samplerDesc);
+        if (samplerIndices.KeyExists(sampler))
+        {
+            return samplerIndices[sampler];
+        }
+
+        int index = samplerArray.GetCount();
+        samplerIndices[sampler] = index;
+        samplerArray.Insert(sampler);
+        samplersUpdated = true;
+        return index;
     }
 
     void FusionApplication::Tick(bool isExposed)
@@ -327,6 +353,13 @@ namespace CE
         if (imageRegistryUpdated)
         {
             textureSrg->Bind("_Textures", registeredImages.GetCount(), registeredImages.GetData());
+            imageRegistryUpdated = false;
+        }
+
+        if (samplersUpdated)
+        {
+            textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
+            samplersUpdated = false;
         }
 
         textureSrg->FlushBindings();
@@ -527,14 +560,19 @@ namespace CE
 
         textureSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgLayout);
 
-        Array samplers = {
-            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::ClampToEdge, .addressModeV = SamplerAddressMode::ClampToEdge, .samplerFilterMode = FilterMode::Linear }),
-            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::ClampToEdge, .samplerFilterMode = FilterMode::Linear }),
-            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::ClampToEdge, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear }),
-            RPISystem::Get().FindOrCreateSampler({ .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear })
+        Array<SamplerDescriptor> samplers = {
+            { .addressModeU = SamplerAddressMode::ClampToBorder, .addressModeV = SamplerAddressMode::ClampToBorder, .samplerFilterMode = FilterMode::Linear, .borderColor = SamplerBorderColor::FloatTransparentBlack },
+            { .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::ClampToBorder, .samplerFilterMode = FilterMode::Linear, .borderColor = SamplerBorderColor::FloatTransparentBlack  },
+            { .addressModeU = SamplerAddressMode::ClampToBorder, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear, .borderColor = SamplerBorderColor::FloatTransparentBlack  },
+            { .addressModeU = SamplerAddressMode::Repeat, .addressModeV = SamplerAddressMode::Repeat, .samplerFilterMode = FilterMode::Linear, .borderColor = SamplerBorderColor::FloatTransparentBlack  }
         };
 
-        textureSrg->Bind("_TextureSamplers", samplers.GetSize(), samplers.GetData());
+        for (const RHI::SamplerDescriptor& samplerDesc : samplers)
+        {
+            FindOrCreateSampler(samplerDesc);
+        }
+
+        textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");

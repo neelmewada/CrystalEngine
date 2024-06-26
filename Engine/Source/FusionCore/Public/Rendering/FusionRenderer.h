@@ -111,8 +111,12 @@ namespace CE
         {
             float4 cornerRadius;
             float4 brushColor;
+            float2 uvMin;
+            float2 uvMax;
             FBrushType brushType = BRUSH_None;
             FShapeType shape = FShapeType::None;
+            uint textureOrGradientIndex = 0;
+            uint samplerIndex = 0;
         };
 
         using FShapeItemList = StableDynamicArray<FShapeItem2D, ShapeItemIncrement, false>;
@@ -171,7 +175,7 @@ namespace CE
         // - Internal Methods -
 
         FDrawItem2D& DrawCustomItem(FDrawType drawType, Vec2 pos, Vec2 size);
-        FDrawItem2D& DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
+        void DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
 
         // - Config -
 

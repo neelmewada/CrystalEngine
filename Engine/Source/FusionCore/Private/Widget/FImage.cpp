@@ -17,10 +17,24 @@ namespace CE
             return;
         }
 
-        const CE::Name& texturePath = m_Background.GetTexturePath();
+        auto app = FusionApplication::Get();
+
+        const CE::Name& imageName = m_Background.GetImageName();
         Vec2 brushSize = m_Background.GetBrushSize();
-        
-        intrinsicSize = brushSize;
+
+        if (imageName.IsValid())
+        {
+            auto image = app->FindImage(imageName);
+            if (image)
+            {
+                if (brushSize.x < 0)
+                    brushSize.x = image->GetWidth();
+                if (brushSize.y < 0)
+                    brushSize.y = image->GetHeight();
+            }
+        }
+
+        intrinsicSize = Vec2(Math::Max(brushSize.x, 0.0f), Math::Max(brushSize.y, 0.0f));
         ApplyIntrinsicSizeConstraints();
     }
 
