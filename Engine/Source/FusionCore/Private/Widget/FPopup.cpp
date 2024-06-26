@@ -8,6 +8,15 @@ namespace CE
 
     }
 
+    void FPopup::ClosePopup()
+    {
+        FFusionContext* context = GetContext();
+        if (context)
+        {
+            context->ClosePopup(this);
+        }
+    }
+
     void FPopup::HandleEvent(FEvent* event)
     {
         if (event->type == FEventType::FocusChanged)

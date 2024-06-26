@@ -14,6 +14,8 @@ namespace CE
 
         void SetInitialSize(Vec2 size) { initialSize = size; }
 
+        void ClosePopup();
+
     protected:
 
         void HandleEvent(FEvent* event) override;

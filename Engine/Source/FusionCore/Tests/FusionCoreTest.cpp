@@ -28,7 +28,7 @@ namespace RenderingTests
                 FNew(FButton)
                 .OnPressed([this]
                 {
-                    GetContext()->ClosePopup(btnPopup);
+                    btnPopup->ClosePopup();
                 })
                 .Name("Button")
                 (
@@ -48,8 +48,7 @@ namespace RenderingTests
             )
         );
 
-        Child
-    	(
+        Child(
             FNew(FStyledWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
             .Name("RootStyle")

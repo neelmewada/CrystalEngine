@@ -201,6 +201,7 @@ namespace CE
 		if (index < 0)
 			return false;
 
+		popup->context = nullptr;
 		localPopupStack.RemoveAt(index);
 
 		if (curFocusWidget != nullptr && curFocusWidget->ParentExistsRecursive(popup))
