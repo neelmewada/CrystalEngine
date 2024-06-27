@@ -24,14 +24,16 @@ namespace CE
 
 		DoLayout();
 
+		DoPaint();
+
+		// TODO: Better integration of child contexts and native popups
+
+		TickInput();
+
 		for (FFusionContext* childContext : childContexts)
 		{
 			childContext->Tick();
 		}
-
-		DoPaint();
-
-		TickInput();
 	}
 
 	void FFusionContext::DoLayout()
