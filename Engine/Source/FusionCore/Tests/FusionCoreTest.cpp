@@ -49,6 +49,8 @@ namespace RenderingTests
             )
         );
 
+        
+
         Child(
             FNew(FStyledWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
@@ -98,6 +100,10 @@ namespace RenderingTests
 
                     FAssignNew(FTextButton, nativePopupBtn)
                     .Text("Open Native Popup")
+                    .OnPressed([this, nativePopupBtn]
+                    {
+                        GetContext()->PushNativePopup(btnPopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
+                    })
                     .Name("NativePopupButton"),
 
                     FNew(FHorizontalStack)

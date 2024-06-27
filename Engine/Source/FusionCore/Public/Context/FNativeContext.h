@@ -33,6 +33,8 @@ namespace CE
 
 		void DoPaint() override;
 
+		void PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2()) override;
+
 		void EmplaceFrameAttachments() override;
 
 		void EnqueueScopes() override;

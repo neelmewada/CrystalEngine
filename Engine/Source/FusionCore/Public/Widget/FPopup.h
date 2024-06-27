@@ -39,6 +39,7 @@ namespace CE
         Vec2 initialPos;
         Vec2 initialSize;
         bool isNativePopup = false;
+        bool isShown = false;
 
         FUSION_WIDGET;
     };

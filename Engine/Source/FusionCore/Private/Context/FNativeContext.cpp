@@ -649,6 +649,45 @@ namespace CE
 		}
 	}
 
+	void FNativeContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
+	{
+		if (!popup)
+			return;
+
+		for (FFusionContext* context : childContexts)
+		{
+			if (context->owningWidget == popup)
+				return;
+		}
+
+		PlatformWindowInfo windowInfo{};
+		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
+		windowInfo.windowFlags = PlatformWindowFlags::PopupMenu | PlatformWindowFlags::DestroyOnClose;
+
+		if (size.x <= 0 || size.y <= 0)
+		{
+			popup->CalculateIntrinsicSize();
+
+			size = popup->GetIntrinsicSize();
+		}
+
+		PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(popup->GetName().GetString(), size.x, size.y, windowInfo);
+		Vec2i windowPos = this->platformWindow->GetWindowPosition() - globalPosition.ToVec2i();
+		window->SetWindowPosition(windowPos);
+		window->SetBorderless(true);
+
+		FNativeContext* popupContext = FNativeContext::Create(window, popup->GetName().GetString(), this);
+		popupContext->SetOwningWidget(popup);
+
+		popup->isShown = true;
+		popup->isNativePopup = true;
+
+		AddChildContext(popupContext);
+
+		SetFocusWidget(popup);
+		popupContext->MarkLayoutDirty();
+	}
+
 	void FNativeContext::EmplaceFrameAttachments()
 	{
 		ZoneScoped;

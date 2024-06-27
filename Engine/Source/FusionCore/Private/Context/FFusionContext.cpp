@@ -187,9 +187,16 @@ namespace CE
 		popup->context = this;
 		popup->initialPos = globalPosition;
 		popup->initialSize = size;
-
+		popup->isShown = true;
+		popup->isNativePopup = false;
+		
 		SetFocusWidget(popup);
 		MarkLayoutDirty();
+	}
+
+	void FFusionContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
+	{
+		
 	}
 
 	bool FFusionContext::ClosePopup(FPopup* popup)
@@ -201,6 +208,7 @@ namespace CE
 		if (index < 0)
 			return false;
 
+		popup->isShown = false;
 		popup->context = nullptr;
 		localPopupStack.RemoveAt(index);
 
