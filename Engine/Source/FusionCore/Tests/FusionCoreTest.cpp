@@ -15,6 +15,7 @@ namespace RenderingTests
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
 
         FButton* openPopupBtn = nullptr;
+        FButton* nativePopupBtn = nullptr;
 
         FAssignNew(FPopup, btnPopup)
         .BlockInteraction(false)
@@ -93,6 +94,12 @@ namespace RenderingTests
                         FNew(FLabel)
                         .FontSize(14)
                         .Text("Open Popup")
+                    ),
+
+                    FAssignNew(FTextButton, nativePopupBtn)
+                    .Name("NativePopupButton")
+                    (
+
                     ),
 
                     FNew(FHorizontalStack)
