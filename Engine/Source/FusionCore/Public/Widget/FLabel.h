@@ -39,6 +39,12 @@ namespace CE
         Self& Bold(bool bold);
         Self& Italic(bool italic);
 
+        const CE::Name& FontFamily();
+        int FontSize();
+        bool Bold();
+        bool Italic();
+        
+
         FUSION_PROPERTY(Foreground);
 
         FUSION_WIDGET;

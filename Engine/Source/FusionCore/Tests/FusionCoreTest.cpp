@@ -15,7 +15,7 @@ namespace RenderingTests
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
 
         FButton* openPopupBtn = nullptr;
-        FButton* nativePopupBtn = nullptr;
+        FTextButton* nativePopupBtn = nullptr;
 
         FAssignNew(FPopup, btnPopup)
         .BlockInteraction(false)
@@ -80,7 +80,7 @@ namespace RenderingTests
                     .Name("Button")
                     (
                         FAssignNew(FLabel, buttonLabel)
-                        .FontSize(14)
+                        .FontSize(13)
                         .Text("Click Count 0")
                     ),
 
@@ -92,15 +92,13 @@ namespace RenderingTests
                     .Name("PopupButton")
                     (
                         FNew(FLabel)
-                        .FontSize(14)
+                        .FontSize(13)
                         .Text("Open Popup")
                     ),
 
                     FAssignNew(FTextButton, nativePopupBtn)
-                    .Name("NativePopupButton")
-                    (
-
-                    ),
+                    .Text("Open Native Popup")
+                    .Name("NativePopupButton"),
 
                     FNew(FHorizontalStack)
                     .ContentVAlign(VAlign::Fill)

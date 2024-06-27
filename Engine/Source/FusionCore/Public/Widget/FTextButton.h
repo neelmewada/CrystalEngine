@@ -26,13 +26,12 @@ namespace CE
 
         FUSION_PROPERTY_WRAPPER(Text, label);
         FUSION_PROPERTY_WRAPPER(Font, label);
+        FUSION_PROPERTY_WRAPPER(FontFamily, label);
+        FUSION_PROPERTY_WRAPPER(FontSize, label);
+        FUSION_PROPERTY_WRAPPER(Bold, label);
+        FUSION_PROPERTY_WRAPPER(Italic, label);
         FUSION_PROPERTY_WRAPPER(WordWrap, label);
         FUSION_PROPERTY_WRAPPER(Foreground, label);
-
-        Self& FontFamily(const CE::Name& fontFamily);
-        Self& FontSize(int fontSize);
-        Self& Bold(bool bold);
-        Self& Italic(bool italic);
 
         FUSION_WIDGET;
     };

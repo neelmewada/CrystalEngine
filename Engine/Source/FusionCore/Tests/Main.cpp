@@ -167,6 +167,10 @@ TEST(FusionCore, Rendering)
 				.Padding(Vec4(10, 5, 10, 5))
 				.Style(rootStyle, "Button.Primary")
 				;
+			GetDefaultWidget<FTextButton>()
+				.Padding(Vec4(10, 5, 10, 5))
+				.Style(rootStyle, "Button.Primary")
+				;
 		}
 
 		{
