@@ -17,6 +17,8 @@ namespace RenderingTests
 
 		RenderingTestWidget() = default;
 
+		void BuildPopup(FPopup*& outPopup);
+
 		void Construct() override;
 
 		FStackBox* rootBox;
@@ -25,6 +27,7 @@ namespace RenderingTests
 		FLabel* buttonLabel;
 		FStyledWidget* subWidget;
 		FPopup* btnPopup;
+		FPopup* nativePopup;
 
 		int hitCounter = 0;
 

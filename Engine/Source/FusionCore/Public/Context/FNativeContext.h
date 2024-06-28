@@ -51,6 +51,8 @@ namespace CE
 
 	protected:
 
+		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);
+
 		void Init();
 
 		void OnBeforeDestroy() override;

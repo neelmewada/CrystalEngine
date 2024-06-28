@@ -3,6 +3,40 @@
 
 namespace RenderingTests
 {
+	void RenderingTestWidget::BuildPopup(FPopup*& outPopup)
+	{
+        FAssignNew(FPopup, outPopup)
+            .BlockInteraction(false)
+            .AutoClose(true)
+            .Background(Color::RGBA(10, 10, 10))
+            .Child(
+                FNew(FVerticalStack)
+                .ContentHAlign(HAlign::Center)
+                .Padding(Vec4(1, 1, 1, 1) * 20)
+                (
+                    FNew(FButton)
+                    .OnPressed([this]
+                        {
+                            btnPopup->ClosePopup();
+                        })
+                    .Name("Button")
+                    (
+                        FAssignNew(FLabel, buttonLabel)
+                        .FontSize(14)
+                        .Text("Click to Close!")
+                        ),
+
+                    FNew(FStyledWidget)
+                    .Background(Color::Blue())
+                    .MinHeight(26)
+                    (
+                        FNew(FLabel)
+                        .FontSize(20)
+                        .Text("This is a long label")
+                        )
+                    )
+            );
+	}
 
     void RenderingTestWidget::Construct()
     {
@@ -17,39 +51,13 @@ namespace RenderingTests
         FButton* openPopupBtn = nullptr;
         FTextButton* nativePopupBtn = nullptr;
 
-        FAssignNew(FPopup, btnPopup)
-        .BlockInteraction(false)
-        .AutoClose(true)
-        .Background(Color::RGBA(10, 10, 10))
-        .Child(
-            FNew(FVerticalStack)
-            .ContentHAlign(HAlign::Center)
-            .Padding(Vec4(1, 1, 1, 1) * 20)
-            (
-                FNew(FButton)
-                .OnPressed([this]
-                {
-                    btnPopup->ClosePopup();
-                })
-                .Name("Button")
-                (
-                    FAssignNew(FLabel, buttonLabel)
-                    .FontSize(14)
-                    .Text("Click to Close!")
-                ),
+        BuildPopup(btnPopup);
+        BuildPopup(nativePopup);
 
-                FNew(FStyledWidget)
-                .Background(Color::Blue())
-                .MinHeight(26)
-                (
-                    FNew(FLabel)
-                    .FontSize(20)
-                    .Text("This is a long label")
-                )
-            )
-        );
-
-        
+        btnPopup->CalculateIntrinsicSize();
+        Vec2 size1 = btnPopup->GetIntrinsicSize();
+        nativePopup->CalculateIntrinsicSize();
+        Vec2 size2 = nativePopup->GetIntrinsicSize();
 
         Child(
             FNew(FStyledWidget)
@@ -102,7 +110,7 @@ namespace RenderingTests
                     .Text("Open Native Popup")
                     .OnPressed([this, nativePopupBtn]
                     {
-                        GetContext()->PushNativePopup(btnPopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
+                        GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
                     })
                     .Name("NativePopupButton"),
 

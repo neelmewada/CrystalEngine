@@ -651,6 +651,8 @@ namespace CE
 
 	void FNativeContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
 	{
+		ZoneScoped;
+
 		if (!popup)
 			return;
 
@@ -660,9 +662,20 @@ namespace CE
 				return;
 		}
 
-		PlatformWindowInfo windowInfo{};
+		PlatformWindowInfo windowInfo;
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
-		windowInfo.windowFlags = PlatformWindowFlags::PopupMenu | PlatformWindowFlags::DestroyOnClose;
+		windowInfo.windowFlags = PlatformWindowFlags::PopupMenu | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar;
+
+		PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(popup->GetName().GetString(), size.x, size.y, windowInfo);
+		Vec2i windowPos = this->platformWindow->GetWindowPosition() + globalPosition.ToVec2i();
+		window->SetWindowPosition(windowPos);
+		window->SetBorderless(true);
+		window->SetAlwaysOnTop(true);
+		WindowDragHitTestDelegate;
+
+		FNativeContext* popupContext = Create(window, popup->GetName().GetString(), this);
+		// Always set the Context in widgets before calculating layout
+		popupContext->SetOwningWidget(popup);
 
 		if (size.x <= 0 || size.y <= 0)
 		{
@@ -671,13 +684,11 @@ namespace CE
 			size = popup->GetIntrinsicSize();
 		}
 
-		PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(popup->GetName().GetString(), size.x, size.y, windowInfo);
-		Vec2i windowPos = this->platformWindow->GetWindowPosition() - globalPosition.ToVec2i();
-		window->SetWindowPosition(windowPos);
-		window->SetBorderless(true);
+		popup->computedPosition = Vec2();
+		popup->computedSize = size;
+		popup->PlaceSubWidgets();
 
-		FNativeContext* popupContext = FNativeContext::Create(window, popup->GetName().GetString(), this);
-		popupContext->SetOwningWidget(popup);
+		window->SetWindowSize(Vec2i((int)size.x, (int)size.y));
 
 		popup->isShown = true;
 		popup->isNativePopup = true;
@@ -788,6 +799,16 @@ namespace CE
 	FPainter* FNativeContext::GetPainter()
 	{
 		return painter;
+	}
+
+	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)
+	{
+		if (!window->IsBorderless() || IsPopupWindow())
+			return false;
+
+		FWidget* hitWidget = HitTest(position);
+
+		return false;
 	}
 
 } // namespace CE

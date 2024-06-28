@@ -76,6 +76,10 @@ namespace CE
 
         void SetFocusWidget(FWidget* focusWidget);
 
+        bool IsPopupWindow() const;
+
+        //! @brief Performs a hit-test and returns the bottom-most widget that is under the mouse position.
+        //! @param mousePosition The position of mouse in context-space coordinates. i.e. native window space coords for FNativeContext
         virtual FWidget* HitTest(Vec2 mousePosition);
 
         // - Rendering / FrameGraph -

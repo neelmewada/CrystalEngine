@@ -68,6 +68,11 @@ namespace CE
 			layoutDirty = false;
 			dirty = true;
 		}
+
+		for (FFusionContext* childContext : childContexts)
+		{
+			childContext->DoLayout();
+		}
 	}
 
 	void FFusionContext::DoPaint()
@@ -260,6 +265,11 @@ namespace CE
 	void FFusionContext::SetFocusWidget(FWidget* focusWidget)
 	{
 		widgetToFocus = focusWidget;
+	}
+
+	bool FFusionContext::IsPopupWindow() const
+	{
+		return owningWidget != nullptr && owningWidget->IsOfType<FPopup>();
 	}
 
 	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
