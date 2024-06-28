@@ -78,6 +78,7 @@ namespace CE
 #include "Widget/FTextButton.h"
 #include "Widget/Input/FTextInput.h"
 
+#include "Window/FTitleBar.h"
 #include "Window/FWindow.h"
 
 #include "Widget/Layout/FStackBox.h"
