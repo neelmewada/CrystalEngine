@@ -232,21 +232,21 @@ namespace CE
 
         this->isExposed = isExposed;
 
+        for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
+        {
+            if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+            {
+                destructionQueue[i].object->Destroy();
+                destructionQueue.RemoveAt(i);
+                continue;
+            }
+
+            destructionQueue[i].frameCounter++;
+        }
+
         for (int i = timers.GetSize() - 1; i >= 0; --i)
         {
             timers[i]->Tick();
-        }
-
-        for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
-        {
-	        if (destructionQueue[i].frameCounter > RHI::Limits::MaxSwapChainImageCount)
-	        {
-                destructionQueue[i].object->Destroy();
-                destructionQueue.RemoveAt(i);
-		        continue;
-	        }
-
-            destructionQueue[i].frameCounter++;
         }
 
         int submittedFrameIdx = -1;

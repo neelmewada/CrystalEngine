@@ -49,11 +49,16 @@ namespace CE
 
 		FPainter* GetPainter() override;
 
+		Vec2 GlobalToScreenSpacePosition(Vec2 pos) override;
+		Vec2 ScreenToGlobalSpacePosition(Vec2 pos) override;
+
 	protected:
 
 		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);
 
 		void Init();
+
+		void OnQueuedDestroy() override;
 
 		void OnBeforeDestroy() override;
 

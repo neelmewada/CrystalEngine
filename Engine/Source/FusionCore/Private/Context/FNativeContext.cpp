@@ -76,12 +76,12 @@ namespace CE
 		FusionApplication::Get()->nativeWindows.Add(this);
 	}
 
-	void FNativeContext::OnBeforeDestroy()
+	void FNativeContext::OnQueuedDestroy()
 	{
-		Super::OnBeforeDestroy();
-
 		if (IsDefaultInstance())
 			return;
+
+		Super::OnQueuedDestroy();
 
 		FusionApplication::Get()->nativeWindows.Remove(this);
 
@@ -94,8 +94,15 @@ namespace CE
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 
-		FusionApplication::Get()->QueueDestroy(renderer);
-		renderer = nullptr;
+		if (platformWindow)
+		{
+			platformWindow->Hide();
+		}
+	}
+
+	void FNativeContext::OnBeforeDestroy()
+	{
+		Super::OnBeforeDestroy();
 
 		if (swapChain)
 		{
@@ -671,7 +678,7 @@ namespace CE
 		window->SetWindowPosition(windowPos);
 		window->SetBorderless(true);
 		window->SetAlwaysOnTop(true);
-		WindowDragHitTestDelegate;
+		window->SetHitTestDelegate(MemberDelegate(&Self::WindowDragHitTest, this));
 
 		FNativeContext* popupContext = Create(window, popup->GetName().GetString(), this);
 		// Always set the Context in widgets before calculating layout
@@ -801,12 +808,24 @@ namespace CE
 		return painter;
 	}
 
+	Vec2 FNativeContext::GlobalToScreenSpacePosition(Vec2 pos)
+	{
+		return platformWindow->GetWindowPosition().ToVec2() + pos;
+	}
+
+	Vec2 FNativeContext::ScreenToGlobalSpacePosition(Vec2 pos)
+	{
+		return pos - platformWindow->GetWindowPosition().ToVec2();
+	}
+
 	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)
 	{
 		if (!window->IsBorderless() || IsPopupWindow())
 			return false;
 
 		FWidget* hitWidget = HitTest(position);
+		if (hitWidget != nullptr && hitWidget->IsOfType<FTitleBar>())
+			return true;
 
 		return false;
 	}

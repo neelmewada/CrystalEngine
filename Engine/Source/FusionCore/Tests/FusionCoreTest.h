@@ -17,7 +17,7 @@ namespace RenderingTests
 
 		RenderingTestWidget() = default;
 
-		void BuildPopup(FPopup*& outPopup);
+		void BuildPopup(FPopup*& outPopup, int index);
 
 		void Construct() override;
 

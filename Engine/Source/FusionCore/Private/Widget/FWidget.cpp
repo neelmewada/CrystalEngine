@@ -205,6 +205,7 @@ namespace CE
             }
 
             child->parent = this;
+            AttachSubobject(child);
             child->OnAttachedToParent(this);
             MarkLayoutDirty();
 
@@ -219,6 +220,7 @@ namespace CE
         if (TryRemoveChild(child))
         {
             child->OnDetachedFromParent(this);
+            DetachSubobject(child);
             child->parent = nullptr;
             MarkLayoutDirty();
         }

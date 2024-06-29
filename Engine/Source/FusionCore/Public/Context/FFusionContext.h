@@ -78,6 +78,11 @@ namespace CE
 
         bool IsPopupWindow() const;
 
+        virtual Vec2 GlobalToScreenSpacePosition(Vec2 pos);
+        virtual Vec2 ScreenToGlobalSpacePosition(Vec2 pos);
+
+        virtual void OnQueuedDestroy();
+
         //! @brief Performs a hit-test and returns the bottom-most widget that is under the mouse position.
         //! @param mousePosition The position of mouse in context-space coordinates. i.e. native window space coords for FNativeContext
         virtual FWidget* HitTest(Vec2 mousePosition);
@@ -132,8 +137,6 @@ namespace CE
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
-
-        using FWidgetStack = StableDynamicArray<FWidget*, 128, false>;
 
         Array<FWidget*> hoveredWidgetStack;
 

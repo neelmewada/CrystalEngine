@@ -49,6 +49,11 @@ namespace CE
 
 	void Object::RequestDestroy()
 	{
+		if (GetName() == "NativePopup")
+		{
+			String::IsAlphabet('a');
+		}
+
 		OnBeforeDestroy();
 
 		{

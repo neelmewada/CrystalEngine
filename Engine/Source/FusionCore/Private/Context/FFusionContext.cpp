@@ -87,9 +87,12 @@ namespace CE
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)
 	{
-		this->owningWidget = widget;
+		owningWidget = widget;
 
-		this->owningWidget->SetContextRecursively(this);
+		if (owningWidget)
+		{
+			owningWidget->SetContextRecursively(this);
+		}
 	}
 
 	FStyleSet* FFusionContext::GetDefaultStyleSet()
@@ -157,8 +160,27 @@ namespace CE
 		if (isDestroyed)
 			return;
 
-		FusionApplication::Get()->QueueDestroy(this);
+		if (parentContext)
+		{
+			parentContext->RemoveChildContext(this);
+		}
+
+		if (owningWidget)
+		{
+			owningWidget->SetContextRecursively(nullptr);
+		}
+
+		SetOwningWidget(nullptr);
+
+		FusionApplication::Get()->destructionQueue.Add({ this, 1 });
 		isDestroyed = true;
+
+		OnQueuedDestroy();
+	}
+
+	void FFusionContext::OnQueuedDestroy()
+	{
+		
 	}
 
 	void FFusionContext::AddChildContext(FFusionContext* context)
@@ -211,6 +233,17 @@ namespace CE
 		if (!popup)
 			return true;
 
+		if (popup->isNativePopup)
+		{
+			FFusionContext* popupContext = popup->GetContext();
+			if (popupContext)
+			{
+				popupContext->QueueDestroy();
+			}
+
+			return true;
+		}
+		
 		int index = localPopupStack.IndexOf(popup);
 		if (index < 0)
 			return false;
@@ -272,9 +305,35 @@ namespace CE
 		return owningWidget != nullptr && owningWidget->IsOfType<FPopup>();
 	}
 
+	Vec2 FFusionContext::GlobalToScreenSpacePosition(Vec2 pos)
+	{
+		return pos;
+	}
+
+	Vec2 FFusionContext::ScreenToGlobalSpacePosition(Vec2 pos)
+	{
+		return pos;
+	}
+
 	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
 	{
 		FWidget* hoveredWidget;
+
+		Vec2 screenPos = GlobalToScreenSpacePosition(mousePosition);
+
+		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
+		{
+			FFusionContext* context = childContexts[i];
+			Vec2 contextSpacePos = context->ScreenToGlobalSpacePosition(screenPos);
+			if (!context->IsFocused())
+				continue;
+
+			hoveredWidget = context->HitTest(screenPos);
+			if (hoveredWidget)
+			{
+				return hoveredWidget;
+			}
+		}
 
 		Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
 		if (!windowRect.Contains(mousePosition))
