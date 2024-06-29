@@ -47,7 +47,8 @@ static void TestBegin(bool gui)
 		windowInfo.hidden = false;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
-		app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+		PlatformWindow* window = app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+		window->SetBorderless(true);
 
 		InputManager::Get().Initialize(app);
 	}
@@ -170,6 +171,19 @@ TEST(FusionCore, Rendering)
 				.Padding(Vec4(10, 5, 10, 5))
 				.Style(rootStyle, "Button.Primary")
 				;
+		}
+
+		{
+			auto windowCloseBtn = CreateObject<FButtonPlainStyle>(rootContext, "WindowWindowClose");
+			rootStyle->Add("Button.WindowClose", windowCloseBtn);
+
+			windowCloseBtn->background = Color::Clear();
+			windowCloseBtn->hoveredBackground = Color::RGBA(161, 57, 57);
+			windowCloseBtn->pressedBackground = Color::Clear();
+			windowCloseBtn->borderColor = Color::Clear();
+			windowCloseBtn->borderWidth = 0.0f;
+			windowCloseBtn->cornerRadius = Vec4();
+			windowCloseBtn->contentMoveY = 0;
 		}
 
 		{

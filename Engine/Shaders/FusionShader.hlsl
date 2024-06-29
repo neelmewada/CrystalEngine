@@ -391,7 +391,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         pixelColor.a = penColor.a * alpha * 1.1;
     }
 
-    return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor);
+    return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor * drawItem.opacity);
 }
 
 #endif

@@ -228,7 +228,7 @@ namespace CE
 
     void FWidget::ApplyStyle()
     {
-        if (styleKey.IsValid() && m_Style == nullptr)
+        if (styleKey.IsValid())
         {
             Style(styleKey);
         }
@@ -302,6 +302,11 @@ namespace CE
     {
         if (!styleKey.IsValid())
             return *this;
+
+        if (GetName() == "WindowCloseButton")
+        {
+            String::IsAlphabet('a');
+        }
 
         this->styleKey = styleKey;
 

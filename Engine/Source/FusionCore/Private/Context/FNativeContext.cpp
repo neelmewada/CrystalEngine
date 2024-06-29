@@ -60,6 +60,8 @@ namespace CE
 
 		drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(attachmentId);
 
+		platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowDragHitTest, this));
+
 		RHI::SwapChainDescriptor desc{};
 		desc.imageCount = FrameScheduler::Get()->GetFramesInFlight();
 		desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
@@ -445,10 +447,18 @@ namespace CE
 			return false;
 
 		FWidget* hitWidget = HitTest(position);
-		if (hitWidget != nullptr && hitWidget->IsOfType<FTitleBar>())
-			return true;
 
-		return false;
+		while (hitWidget != nullptr && !hitWidget->SupportsMouseEvents())
+		{
+			if (hitWidget->IsOfType<FTitleBar>())
+			{
+				return true;
+			}
+
+			hitWidget = hitWidget->parent;
+		}
+
+		return hitWidget != nullptr && hitWidget->IsOfType<FTitleBar>();
 	}
 
 } // namespace CE

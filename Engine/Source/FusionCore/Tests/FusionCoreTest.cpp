@@ -66,92 +66,140 @@ namespace RenderingTests
         Child(
             FNew(FStyledWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
+            .BorderWidth(1.0f)
+            .BorderColor(Color::RGBA(15, 15, 15))
+            .Padding(Vec4(1, 1, 1, 1))
             .Name("RootStyle")
             (
                 FAssignNew(FVerticalStack, rootBox)
                 .ContentHAlign(HAlign::Fill)
-                .Padding(Vec4(10, 10, 10, 10))
                 .Name("RootBox")
                 (
-                    FNew(FHorizontalStack)
-                    .ContentVAlign(VAlign::Fill)
-                    .Name("HStack1")
+                    FNew(FTitleBar)
+                    .Background(Color::RGBA(26, 26, 26))
+                    .Height(40)
+                    .HAlign(HAlign::Fill)
                     (
-                        FNew(FStyledWidget)
-                        .Background(transparentPattern)
-                        .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
-                        .FillRatio(1.0f)
-                        .MinWidth(60)
-                        .MinHeight(30)
-                    )
-                    .Margin(Vec4(0, 0, 0, 5)),
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Center)
+                        (
+                            FNew(FTerminalWidget)
+                            .FillRatio(1.0f),
 
-                    FAssignNew(FButton, button)
-                    .OnPressed([this]
-	                {
-                        buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
-	                })
-                    .Name("Button")
-                    (
-                        FAssignNew(FLabel, buttonLabel)
-                        .FontSize(13)
-                        .Text("Click Count 0")
+                            FNew(FLabel)
+                            .FontSize(15)
+                            .Text("Window Title")
+                            .HAlign(HAlign::Center)
+                            .VAlign(VAlign::Center),
+
+                            FNew(FTerminalWidget)
+                            .FillRatio(1.0f),
+
+                            FNew(FButton)
+                            .OnPressed([]
+                            {
+                                RequestEngineExit("USER_QUIT");
+                            })
+                            .Padding(Vec4(20, 10, 20, 10))
+                            .Name("WindowCloseButton")
+                            .Style("Button.WindowClose")
+                            .VAlign(VAlign::Top)
+                            (
+                                FNew(FImage)
+                                .Background(FBrush("CrossIcon"))
+                                .Width(10)
+                                .Height(10)
+                                .HAlign(HAlign::Center)
+                                .VAlign(VAlign::Center)
+                            )
+                        )
                     ),
 
-                    FAssignNew(FButton, openPopupBtn)
-                    .OnPressed([this, openPopupBtn]
-                    {
-	                    GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
-                    })
-                    .Name("PopupButton")
+                    FNew(FVerticalStack)
+                    .Padding(Vec4(10, 10, 10, 10))
                     (
-                        FNew(FLabel)
-                        .FontSize(13)
-                        .Text("Open Popup")
-                    ),
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Fill)
+                        .Name("HStack1")
+                        (
+                            FNew(FStyledWidget)
+                            .Background(transparentPattern)
+                            .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(30)
+                        )
+                        .Margin(Vec4(0, 0, 0, 5)),
 
-                    FAssignNew(FTextButton, nativePopupBtn)
-                    .Text("Open Native Popup")
-                    .OnPressed([this, nativePopupBtn]
-                    {
-                        GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
-                    })
-                    .Name("NativePopupButton"),
+                        FAssignNew(FButton, button)
+                        .OnPressed([this]
+                        {
+                            buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+                        })
+                        .Name("Button")
+                        (
+                            FAssignNew(FLabel, buttonLabel)
+                            .FontSize(13)
+                            .Text("Click Count 0")
+                        ),
 
-                    FAssignNew(FTextInput, textInput)
-                    .Text("This is a very long text box")
-                    .Style("TextInput.Primary")
-                    .MaxWidth(120)
-                    .HAlign(HAlign::Center),
+                        FAssignNew(FButton, openPopupBtn)
+                        .OnPressed([this, openPopupBtn]
+                        {
+                            GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
+                        })
+                        .Name("PopupButton")
+                        (
+                            FNew(FLabel)
+                            .FontSize(13)
+                            .Text("Open Popup")
+                        ),
 
-                    FAssignNew(FComboBox, comboBox)
-                    .MaxWidth(120)
-                    .HAlign(HAlign::Center),
+                        FAssignNew(FTextButton, nativePopupBtn)
+                        .Text("Open Native Popup")
+                        .OnPressed([this, nativePopupBtn]
+                        {
+                            GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
+                        })
+                        .Name("NativePopupButton"),
 
-                    FNew(FHorizontalStack)
-                    .ContentVAlign(VAlign::Center)
-                    .Name("HStack2")
-                    (
-                        FAssignNew(FStyledWidget, subWidget)
-                        .Background(FBrush(Color::Green()))
-                        .BackgroundShape(FRectangle())
-                        .FillRatio(1.0f)
-                        .MinWidth(60)
-                        .MinHeight(15),
+                        FAssignNew(FTextInput, textInput)
+                        .Text("This is a very long text box")
+                        .Style("TextInput.Primary")
+                        .MaxWidth(120)
+                        .HAlign(HAlign::Left)
+                        .Margin(Vec4(0, 0, 0, 5)),
 
-                        FNew(FStyledWidget)
-                        .Background(FBrush(Color::Cyan()))
-                        .BackgroundShape(FRectangle())
-                        .FillRatio(2.0f)
-                        .MinWidth(60)
-                        .MinHeight(40),
+                        FAssignNew(FComboBox, comboBox)
+                        .MaxWidth(120)
+                        .HAlign(HAlign::Left)
+                        .Margin(Vec4(0, 0, 0, 5)),
 
-                        FNew(FStyledWidget)
-                        .Background(FBrush(Color::Yellow()))
-                        .BackgroundShape(FRectangle())
-                        .FillRatio(1.0f)
-                        .MinWidth(60)
-                        .MinHeight(25)
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Center)
+                        .Name("HStack2")
+                        (
+                            FAssignNew(FStyledWidget, subWidget)
+                            .Background(FBrush(Color::Green()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(15),
+
+                            FNew(FStyledWidget)
+                            .Background(FBrush(Color::Cyan()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(2.0f)
+                            .MinWidth(60)
+                            .MinHeight(40),
+
+                            FNew(FStyledWidget)
+                            .Background(FBrush(Color::Yellow()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(25)
+                        )
                     )
                 )
             )

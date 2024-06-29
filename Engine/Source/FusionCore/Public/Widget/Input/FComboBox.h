@@ -32,6 +32,8 @@ namespace CE
 
         void Construct() override;
 
+        void HandleEvent(FEvent* event) override;
+
         FIELD()
         FLabel* selectionText = nullptr;
 

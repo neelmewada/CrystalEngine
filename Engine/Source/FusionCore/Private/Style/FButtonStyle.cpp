@@ -38,7 +38,7 @@ namespace CE
 			.Opacity(1.0f)
             ;
         
-        if (button.GetChild() == nullptr)
+        if (button.GetChild() == nullptr || abs(contentMoveY) < 0.001f)
             return;
 
         FWidget& child = *button.GetChild();

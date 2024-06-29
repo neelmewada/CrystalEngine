@@ -71,6 +71,7 @@ namespace CE
 #include "Style/FStyleManager.h"
 
 #include "Widget/FWidget.h"
+#include "Widget/FTerminalWidget.h"
 #include "Widget/FLabel.h"
 #include "Widget/FCompoundWidget.h"
 #include "Widget/FStyledWidget.h"
