@@ -8,8 +8,8 @@ namespace RenderingTests
         FPopup* popup = nullptr;
 
         FAssignNew(FPopup, popup)
-        .BlockInteraction(true)
-        .AutoClose(false)
+        .BlockInteraction(false)
+        .AutoClose(true)
         .Background(Color::RGBA(10, 10, 10))
         .Child(
             FNew(FVerticalStack)
@@ -118,19 +118,15 @@ namespace RenderingTests
                     })
                     .Name("NativePopupButton"),
 
-                    FNew(FHorizontalStack)
-                    .ContentVAlign(VAlign::Fill)
-                    .Name("HStackInput")
-                    (
-                        FAssignNew(FTextInput, textInput)
-                        .Text("This is a very long text box")
-                        .Style("TextInput.Primary")
-                        .MaxWidth(120),
+                    FAssignNew(FTextInput, textInput)
+                    .Text("This is a very long text box")
+                    .Style("TextInput.Primary")
+                    .MaxWidth(120)
+                    .HAlign(HAlign::Center),
 
-                        FNew(FStyledWidget)
-                        .Background(Color::Clear())
-                        .FillRatio(1.0)
-                    ),
+                    FAssignNew(FComboBox, comboBox)
+                    .MaxWidth(120)
+                    .HAlign(HAlign::Center),
 
                     FNew(FHorizontalStack)
                     .ContentVAlign(VAlign::Center)

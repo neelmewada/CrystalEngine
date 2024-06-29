@@ -30,6 +30,7 @@
 
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& PropertyName(const auto& value) {\
+		if (WrappingVariable == nullptr) return *this;\
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\

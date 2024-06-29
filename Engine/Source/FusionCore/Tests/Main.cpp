@@ -182,6 +182,25 @@ TEST(FusionCore, Rendering)
 			primaryTextInput->hoverBorderColor = Color::RGBA(74, 74, 74);
 			primaryTextInput->borderWidth = 1.0f;
 			primaryTextInput->cornerRadius = Vec4(5, 5, 5, 5);
+
+			GetDefaultWidget<FTextInput>()
+				.Style(rootStyle, "TextInput.Primary")
+				;
+		}
+
+		{
+			auto primaryComboBox = CreateObject<FComboBoxPlainStyle>(rootStyle, "PrimaryComboBoxStyle");
+			rootStyle->Add("ComboBox.Primary", primaryComboBox);
+
+			primaryComboBox->background = Color::RGBA(15, 15, 15);
+			primaryComboBox->borderColor = Color::RGBA(60, 60, 60);
+			primaryComboBox->pressedBorderColor = primaryComboBox->hoverBorderColor = Color::RGBA(74, 74, 74);
+			primaryComboBox->borderWidth = 1.0f;
+			primaryComboBox->cornerRadius = Vec4(5, 5, 5, 5);
+
+			GetDefaultWidget<FComboBox>()
+				.Style(rootStyle, "ComboBox.Primary")
+				;
 		}
 	}
 
@@ -202,6 +221,8 @@ TEST(FusionCore, Rendering)
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
+
+	mainWidget->comboBox->ApplyStyle();
 
 	while (!IsEngineRequestingExit())
 	{

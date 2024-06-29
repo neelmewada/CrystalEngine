@@ -24,6 +24,7 @@ namespace RenderingTests
 		FStackBox* rootBox;
 		FButton* button;
 		FTextInput* textInput;
+		FComboBox* comboBox;
 		FLabel* buttonLabel;
 		FStyledWidget* subWidget;
 		FPopup* btnPopup;
