@@ -27,6 +27,8 @@ namespace CE
 
 		bool IsFocused() const override;
 
+		bool IsShown() const override;
+
 		void TickInput() override;
 
 		void DoLayout() override;
@@ -64,6 +66,7 @@ namespace CE
 
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 		void OnWindowExposed(PlatformWindow* window) override;
+		void OnWindowDestroyed(PlatformWindow* window) override;
 
 		void UpdateViewConstants();
 
@@ -75,16 +78,7 @@ namespace CE
 
 		FusionRenderer* renderer = nullptr;
 		FPainter* painter = nullptr;
-
-		KeyModifier keyModifierStates{};
-		BitSet<128> keyPressStates{};
-
-		FWidget* draggedWidget = nullptr;
-		FWidget* prevHoveredWidget = nullptr;
-		StaticArray<FWidget*, 6> widgetsPressedPerMouseButton{};
-
-		// Previous mouse position in window space
-		Vec2 prevMousePos = Vec2();
+		int windowId = -1;
 
 		FUSION_FRIENDS;
 	};

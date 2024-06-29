@@ -33,7 +33,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& PropertyName() const { return WrappingVariable->PropertyName(); }
+	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_EVENT(PropertyName)\
 	Self& PropertyName(const FunctionBinding& binding)\

@@ -48,7 +48,7 @@ namespace CE::RHI
 			constexpr u32 MaxSubPassCount = 8;
 
 			/// @brief Max number of DrawList Tags
-			constexpr u32 DrawListTagCount = 64;
+			constexpr u32 DrawListTagCount = 128;
 
 			/// @brief Max number of shader resource groups that can be bound
 			constexpr u32 MaxShaderResourceGroupCount = 8;

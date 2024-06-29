@@ -82,7 +82,13 @@ namespace CE
 
 	void FFusionContext::TickInput()
 	{
+		ZoneScoped;
 
+	}
+
+	FFusionContext* FFusionContext::GetRootContext() const
+	{
+		return FusionApplication::Get()->rootContext;
 	}
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)
@@ -129,9 +135,17 @@ namespace CE
 		return false;
 	}
 
+	bool FFusionContext::IsShown() const
+	{
+		if (parentContext == nullptr)
+			return true;
+
+		return true;
+	}
+
 	bool FFusionContext::IsRootContext() const
 	{
-		return isRootContext;
+		return IsOfType<FRootContext>();
 	}
 
 	void FFusionContext::MarkLayoutDirty()
@@ -218,8 +232,8 @@ namespace CE
 		popup->initialSize = size;
 		popup->isShown = true;
 		popup->isNativePopup = false;
-		
-		SetFocusWidget(popup);
+
+		GetRootContext()->SetFocusWidget(popup);
 		MarkLayoutDirty();
 	}
 
@@ -231,6 +245,8 @@ namespace CE
 	bool FFusionContext::ClosePopup(FPopup* popup)
 	{
 		if (!popup)
+			return true;
+		if (!popup->isShown)
 			return true;
 
 		if (popup->isNativePopup)
@@ -324,11 +340,27 @@ namespace CE
 		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
 		{
 			FFusionContext* context = childContexts[i];
-			Vec2 contextSpacePos = context->ScreenToGlobalSpacePosition(screenPos);
+
+			if (context->IsNativeContext())
+			{
+				FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
+				
+			}
+
+			hoveredWidget = context->HitTest(context->ScreenToGlobalSpacePosition(screenPos));
+
+			if (context->IsPopupWindow())
+			{
+				FPopup* popup = static_cast<FPopup*>(context->owningWidget);
+				if (popup->BlockInteraction())
+				{
+					return hoveredWidget;
+				}
+			}
+
 			if (!context->IsFocused())
 				continue;
 
-			hoveredWidget = context->HitTest(screenPos);
 			if (hoveredWidget)
 			{
 				return hoveredWidget;

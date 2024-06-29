@@ -144,8 +144,7 @@ TEST(FusionCore, Rendering)
 	FusionApplication* app = FusionApplication::Get();
 	FStyleManager* styleManager = app->GetStyleManager();
 
-	FFusionContext* rootContext = CreateObject<FFusionContext>(app, "RootContext");
-	app->SetRootContext(rootContext);
+	FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
 
 	FStyleSet* rootStyle = CreateObject<FStyleSet>(rootContext, "RootStyleSet");
 	styleManager->RegisterStyleSet(rootStyle->GetName(), rootStyle);

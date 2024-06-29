@@ -395,6 +395,7 @@ namespace CE
             }
             else if (keyEvent->key == KeyCode::Return || keyEvent->key == KeyCode::KeypadEnter)
             {
+                StopEditing(false);
                 Unfocus();
             }
             else if (keyEvent->key == KeyCode::Escape)

@@ -13,6 +13,7 @@ namespace CE
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
         styleManager = CreateDefaultSubobject<FStyleManager>("StyleManager");
+        rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
     }
 
     FusionApplication::~FusionApplication()
@@ -367,15 +368,6 @@ namespace CE
         rootContext->SetDrawPackets(drawList);
     }
 
-    void FusionApplication::SetRootContext(FFusionContext* context)
-    {
-        rootContext = context;
-        if (rootContext)
-        {
-            rootContext->isRootContext = true;
-        }
-    }
-
     void FusionApplication::RebuildFrameGraph()
     {
         rebuildFrameGraph = recompileFrameGraph = true;
@@ -416,10 +408,8 @@ namespace CE
                 if (!nativeContext->isDestroyed)
                 {
                     nativeContext->platformWindow = nullptr;
-                    delete nativeContext;
+                    nativeContext->QueueDestroy();
                 }
-
-                rootContext->childContexts.RemoveAt(i);
             }
         }
     }

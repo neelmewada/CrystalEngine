@@ -25,7 +25,25 @@ namespace CE
 
             if (focusEvent->GotFocus() != IsFocused())
             {
-                
+                if (focusEvent->GotFocus())
+                {
+					//CE_LOG(Info, All, "Focus Got!");
+                }
+                else
+                {
+                    if (AutoClose())
+                    {
+                        ClosePopup();
+                    }
+
+                    String name = "NULL";
+                    if (focusEvent->focusedWidget != nullptr)
+                    {
+                        name = focusEvent->focusedWidget->GetName().GetString();
+                    }
+                    
+					//CE_LOG(Info, All, "Focus Lost to {}", name);
+                }
             }
         }
 

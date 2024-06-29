@@ -24,6 +24,7 @@ class FusionCore_Layout_Test;
     friend class FStackBox;\
     friend class FWindow;\
     friend class FFusionContext;\
+    friend class FRootContext;\
     friend class FNativeContext;\
     friend class FusionApplication;\
     friend class FCompoundWidget;\
@@ -56,6 +57,7 @@ namespace CE
 #include "Rendering/FusionRenderer.h"
 #include "Rendering/FPainter.h"
 #include "Context/FFusionContext.h"
+#include "Context/FRootContext.h"
 #include "Context/FNativeContext.h"
 
 #include "Layout/LayoutTypes.h"

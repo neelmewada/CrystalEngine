@@ -357,7 +357,7 @@ namespace CE
 			{
 				if (event.window.windowID == window->GetWindowId())
 				{
-					if (window->GetInitialFlags() & PlatformWindowFlags::DestroyOnClose != 0)
+					if ((window->GetInitialFlags() & PlatformWindowFlags::DestroyOnClose) != 0)
 					{
 						DestroyWindow(window);
 					}

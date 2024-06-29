@@ -30,6 +30,8 @@ namespace CE
 
         virtual void TickInput();
 
+        FFusionContext* GetRootContext() const;
+
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
 
         void SetOwningWidget(FWidget* widget);
@@ -47,6 +49,7 @@ namespace CE
         bool IsLayoutDirty() const { return layoutDirty; }
 
         virtual bool IsFocused() const;
+        virtual bool IsShown() const;
 
         bool IsRootContext() const;
 
@@ -139,6 +142,16 @@ namespace CE
         RPI::PerViewConstants viewConstants{};
 
         Array<FWidget*> hoveredWidgetStack;
+
+        KeyModifier keyModifierStates{};
+        BitSet<128> keyPressStates{};
+
+        FWidget* draggedWidget = nullptr;
+        FWidget* prevHoveredWidget = nullptr;
+        StaticArray<FWidget*, 6> widgetsPressedPerMouseButton{};
+
+        // Previous mouse position in window space
+        Vec2 prevMousePos = Vec2();
 
         // Non-native popups that are rendered inside a native window
         Array<FPopup*> localPopupStack;

@@ -6,6 +6,7 @@ namespace CE
     class FFusionContext;
     class FLayoutManager;
     class FNativeContext;
+    class FRootContext;
     class FStyleManager;
 
     struct FusionInitInfo
@@ -29,6 +30,8 @@ namespace CE
 
         FStyleManager* GetStyleManager() const { return styleManager; }
 
+        FRootContext* GetRootContext() const { return rootContext; }
+
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();
@@ -46,8 +49,6 @@ namespace CE
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
         void Tick(bool isExposed = false);
-
-        void SetRootContext(FFusionContext* context);
 
         void RebuildFrameGraph();
 
@@ -83,7 +84,7 @@ namespace CE
         bool isExposed = false;
 
         FIELD()
-        FFusionContext* rootContext = nullptr;
+        FRootContext* rootContext = nullptr;
 
         FIELD()
         FFontManager* fontManager = nullptr;

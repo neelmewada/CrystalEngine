@@ -8,8 +8,8 @@ namespace RenderingTests
         FPopup* popup = nullptr;
 
         FAssignNew(FPopup, popup)
-        .BlockInteraction(false)
-        .AutoClose(true)
+        .BlockInteraction(true)
+        .AutoClose(false)
         .Background(Color::RGBA(10, 10, 10))
         .Child(
             FNew(FVerticalStack)
