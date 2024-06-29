@@ -28,10 +28,10 @@ namespace CE
         FIELD()
         bool m_AutoClose = true;
 
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(BlockInteraction);
-
         FUSION_PROPERTY(AutoClose);
 
     private:

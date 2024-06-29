@@ -66,6 +66,7 @@ namespace CE
 
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 		void OnWindowExposed(PlatformWindow* window) override;
+		void OnWindowMoved(PlatformWindow* window, int x, int y) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;
 
 		void UpdateViewConstants();

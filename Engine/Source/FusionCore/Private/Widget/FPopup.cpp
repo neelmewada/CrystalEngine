@@ -10,6 +10,9 @@ namespace CE
 
     void FPopup::ClosePopup()
     {
+        if (!isShown)
+            return;
+
         FFusionContext* context = GetContext();
         if (context)
         {
@@ -44,6 +47,17 @@ namespace CE
                     
 					//CE_LOG(Info, All, "Focus Lost to {}", name);
                 }
+            }
+        }
+        else if (event->type == FEventType::NativeWindowExposed && m_AutoClose)
+        {
+            FNativeEvent* nativeEvent = static_cast<FNativeEvent*>(event);
+            FFusionContext* context = GetContext();
+
+            if ((isNativePopup && context != nullptr && context->ParentContextExistsRecursive(nativeEvent->nativeContext))||
+                (!isNativePopup && context == nativeEvent->nativeContext))
+            {
+                ClosePopup();
             }
         }
 

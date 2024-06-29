@@ -351,6 +351,21 @@ namespace CE
                 }
             }
 		}
+		else if (event.window.event == SDL_WINDOWEVENT_MOVED)
+		{
+			for (PlatformWindow* window : windowList)
+			{
+				if (event.window.windowID == window->GetWindowId())
+				{
+					for (auto handler : messageHandlers)
+					{
+						handler->OnWindowMoved(window, event.window.data1, event.window.data2);
+					}
+
+					break;
+				}
+			}
+		}
 		else if (event.window.event == SDL_WINDOWEVENT_CLOSE) // Close a specific window
 		{
 			for (PlatformWindow* window : windowList)
@@ -431,13 +446,23 @@ namespace CE
 		}
 	}
 
+	void SDLApplication::ProcessWindowMoveEvent(SDLPlatformWindow* window)
+	{
+		
+	}
+
 	int SDLWindowEventWatch(void* data, SDL_Event* event)
 	{
 #if PLATFORM_WINDOWS
 		if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
 		{
 			auto app = SDLApplication::Get();
-			
+
+			for (const auto& tickHandler : app->tickHanders)
+			{
+				tickHandler.InvokeIfValid();
+			}
+
 			for (SDLPlatformWindow* window : app->windowList)
 			{
 				if (window->GetWindowId() == event->window.windowID)
@@ -449,11 +474,6 @@ namespace CE
 
 					break;
 				}
-			}
-			
-			for (const auto& tickHandler : app->tickHanders)
-			{
-				tickHandler.InvokeIfValid();
 			}
 		}
 		

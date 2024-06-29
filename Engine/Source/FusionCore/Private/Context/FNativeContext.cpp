@@ -145,16 +145,12 @@ namespace CE
 		if (swapChain)
 		{
 			swapChain->Rebuild();
-
-			if (parentContext->IsRootContext())
-			{
-				CE_LOG(Info, All, "SwapChain Rebuild!");
-			}
 		}
 
 		UpdateViewConstants();
-
 		MarkLayoutDirty();
+
+		NotifyWindowEvent(FEventType::NativeWindowResized, this);
 	}
 
 	void FNativeContext::OnWindowExposed(PlatformWindow* window)
@@ -166,11 +162,34 @@ namespace CE
 		if (platformWindow != window)
 			return;
 
-		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
+		const Vec2 newSize = platformWindow->GetDrawableWindowSize().ToVec2();
+
+		if (newSize != availableSize || childContexts.IsEmpty())
+		{
+			availableSize = newSize;
+
+			if (swapChain)
+			{
+				swapChain->Rebuild();
+			}
+		}
 		
 		UpdateViewConstants();
-
 		MarkLayoutDirty();
+
+		NotifyWindowEvent(FEventType::NativeWindowExposed, this);
+	}
+
+	void FNativeContext::OnWindowMoved(PlatformWindow* window, int x, int y)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer)
+			return;
+		if (platformWindow != window)
+			return;
+
+		NotifyWindowEvent(FEventType::NativeWindowMoved, this);
 	}
 
 	void FNativeContext::OnWindowDestroyed(PlatformWindow* window)

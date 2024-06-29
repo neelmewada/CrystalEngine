@@ -74,6 +74,8 @@ namespace CE
 
         void ProcessWindowResizeEvent(SDLPlatformWindow* window);
 
+        void ProcessWindowMoveEvent(SDLPlatformWindow* window);
+
         SDLApplication();
 
         SDLPlatformWindow* mainWindow = nullptr;

@@ -48,6 +48,10 @@ namespace CE
 
         bool IsLayoutDirty() const { return layoutDirty; }
 
+        FFusionContext* GetParentContext() const { return parentContext; }
+
+        bool ParentContextExistsRecursive(FFusionContext* parent) const;
+
         virtual bool IsFocused() const;
         virtual bool IsShown() const;
 
@@ -105,6 +109,8 @@ namespace CE
     protected:
 
         virtual void OnStyleSetDeregistered(FStyleSet* styleSet);
+
+        virtual void NotifyWindowEvent(FEventType eventType, FNativeContext* nativeContext);
 
         FIELD()
         Array<FFusionContext*> childContexts{};

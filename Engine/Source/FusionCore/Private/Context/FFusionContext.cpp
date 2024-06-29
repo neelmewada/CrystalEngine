@@ -118,6 +118,17 @@ namespace CE
 		}
 	}
 
+	bool FFusionContext::ParentContextExistsRecursive(FFusionContext* parent) const
+	{
+		if (parent == parentContext)
+			return true;
+
+		if (!parentContext)
+			return false;
+
+		return parentContext->ParentContextExistsRecursive(parent);
+	}
+
 	bool FFusionContext::IsFocused() const
 	{
 		if (IsDefaultInstance())
@@ -437,6 +448,39 @@ namespace CE
 		for (FFusionContext* childContext : childContexts)
 		{
 			childContext->OnStyleSetDeregistered(styleSet);
+		}
+	}
+
+	void FFusionContext::NotifyWindowEvent(FEventType eventType, FNativeContext* nativeContext)
+	{
+		if (!owningWidget)
+			return;
+
+		FNativeEvent exposedEvent{};
+		exposedEvent.type = eventType;
+		exposedEvent.direction = FEventDirection::TopToBottom;
+		exposedEvent.nativeContext = nativeContext;
+		exposedEvent.sender = owningWidget;
+
+		owningWidget->HandleEvent(&exposedEvent);
+
+		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
+		{
+			exposedEvent.Reset();
+			exposedEvent.sender = owningWidget;
+
+			localPopupStack[i]->HandleEvent(&exposedEvent);
+		}
+
+		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
+		{
+			exposedEvent.Reset();
+
+			exposedEvent.sender = childContexts[i]->owningWidget;
+			if (exposedEvent.sender == nullptr)
+				continue;
+
+			exposedEvent.sender->HandleEvent(&exposedEvent);
 		}
 	}
 

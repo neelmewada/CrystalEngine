@@ -1,13 +1,20 @@
 #pragma once
 
+
 namespace CE
 {
     class FWidget;
+    class FFusionContext;
+    class FNativeContext;
 
     ENUM()
     enum class FEventType
     {
 	    None = 0,
+
+        NativeWindowExposed,
+        NativeWindowMoved,
+        NativeWindowResized,
 
         MouseEnter,
         MouseMove,
@@ -198,6 +205,20 @@ namespace CE
 
         FIELD()
         KeyModifier modifiers = KeyModifier::None;
+
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FNativeEvent : FEvent
+    {
+        CE_STRUCT(FNativeEvent, FEvent)
+    public:
+
+        FNativeEvent() {}
+
+        FIELD()
+        FNativeContext* nativeContext = nullptr;
+
 
     };
     

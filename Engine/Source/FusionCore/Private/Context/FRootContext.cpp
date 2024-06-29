@@ -89,15 +89,6 @@ namespace CE
 
 		FWidget* hoveredWidget = nativeContext->HitTest(mousePos);
 
-		if (hoveredWidget)
-		{
-			CE_LOG(Info, All, "Hovered: {}", hoveredWidget->GetName());
-		}
-		else
-		{
-			CE_LOG(Info, All, "Hovered: NULL");
-		}
-
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
 		{
