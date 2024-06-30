@@ -278,7 +278,7 @@ namespace RenderingTests
 							FAssignNew(FTextInput, modelTextInput)
                             .Bind_Text(nullptr, nullptr)
                             .FontSize(13)
-                            .Text("[None]")
+                            .Text("[TextBox]")
                             .Width(180)
                             .Margin(Vec4(0, 0, 10, 0)),
 

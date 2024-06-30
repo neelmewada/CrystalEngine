@@ -120,6 +120,11 @@ namespace CE
 
         TRetType Invoke(const TArgs&... args) const;
 
+        TRetType operator()(const TArgs&... args) const
+        {
+            return Invoke(args...);
+        }
+
         bool IsBound() const override
         {
             return isBound;

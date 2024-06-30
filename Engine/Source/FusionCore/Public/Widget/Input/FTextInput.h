@@ -115,16 +115,42 @@ namespace CE
         FIELD()
         Color m_SelectionColor = Color::RGBA(0, 112, 224);
 
-        FPropertyBinding<String> m_TextBinding;
-
     public: // - Fusion Properties -
 
         FUSION_PROPERTY(SelectionColor);
 
-        Self& Bind_Text(const ScriptDelegate<String()>& read, const ScriptDelegate<void(const String&)>& write = nullptr)
+        // - Property Bindings -
+
+    protected:
+
+        FPropertyBinding<decltype(m_Text)> m_TextBinding;
+
+    public:
+
+        void Update_Text()
+        {
+            if (m_TextBinding.read.IsBound())
+            {
+	            Text(m_TextBinding.read());
+            }
+        }
+
+        Self& Bind_Text(const ScriptDelegate<decltype(m_Text)()>& read, const ScriptDelegate<void(const decltype(m_Text)&)>& write = nullptr)
         {
             m_TextBinding.write = write;
             m_TextBinding.read = read;
+            Update_Text();
+            return *this;
+        }
+
+#define MODEL_PROPERTY(modelPtr, propertyName) { modelPtr }
+
+        template<class TModel> requires TIsBaseClassOf<FDataModel, TModel>::Value
+        Self& Bind_Text(std::tuple<TModel*, const ScriptDelegate<decltype(m_Text)()>&, const ScriptDelegate<void(const decltype(m_Text)&)>&> value)
+        {
+            m_TextBinding.read = std::get<0>(value);
+            m_TextBinding.write = std::get<1>(value);
+            Update_Text();
             return *this;
         }
 
@@ -147,7 +173,6 @@ namespace CE
         f32 selectionDistance = 0;
 
         friend class FTextInput;
-        FUSION_FRIENDS;
         FUSION_WIDGET;
     };
 

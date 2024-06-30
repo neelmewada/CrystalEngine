@@ -197,7 +197,7 @@ TEST(FusionCore, Rendering)
 			windowControlBtn->cornerRadius = Vec4();
 			windowControlBtn->contentMoveY = 0;
 		}
-
+		
 		{
 			auto primaryTextInput = CreateObject<FTextInputPlainStyle>(rootStyle, "PrimaryTextInput");
 			rootStyle->Add("TextInput.Primary", primaryTextInput);
