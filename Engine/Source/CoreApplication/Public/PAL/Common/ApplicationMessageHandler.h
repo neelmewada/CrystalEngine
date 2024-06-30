@@ -26,6 +26,7 @@ namespace CE
 
         }
 
+        virtual void OnWindowMaximized(PlatformWindow* window) {}
         virtual void OnWindowRestored(PlatformWindow* window) {}
         virtual void OnWindowDestroyed(PlatformWindow* window) {}
         virtual void OnWindowClosed(PlatformWindow* window) {}

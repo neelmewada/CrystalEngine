@@ -64,7 +64,7 @@ namespace RenderingTests
         Vec2 size2 = nativePopup->GetIntrinsicSize();
 
         Child(
-            FNew(FStyledWidget)
+            FAssignNew(FStyledWidget, borderWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
             .BorderWidth(1.0f)
             .BorderColor(Color::RGBA(15, 15, 15))
@@ -112,9 +112,9 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnPressed([this]
                                     {
-
+                                        static_cast<FNativeContext*>(GetContext())->Minimize();
                                     })
-                                .Padding(Vec4(20, 8, 20, 8))
+                                .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMinimizeButton")
                                 .Style("Button.WindowControl")
                                 .VAlign(VAlign::Top)
@@ -130,14 +130,22 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnPressed([this]
                                     {
-
+                                        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+                                        if (nativeContext->IsMaximized())
+                                        {
+	                                        nativeContext->Restore();
+                                        }
+                                        else
+                                        {
+	                                        nativeContext->Maximize();
+                                        }
                                     })
-                                .Padding(Vec4(20, 8, 20, 8))
+                                .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMaximizeButton")
                                 .Style("Button.WindowControl")
                                 .VAlign(VAlign::Top)
                                 (
-                                    FNew(FImage)
+                                    FAssignNew(FImage, maximizeIcon)
                                     .Background(FBrush("MaximizeIcon"))
                                     .Width(11)
                                     .Height(11)
@@ -261,6 +269,37 @@ namespace RenderingTests
                 )
             )
         );
+
+        PlatformApplication::Get()->AddMessageHandler(this);
+    }
+
+    void RenderingTestWidget::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        PlatformApplication::Get()->RemoveMessageHandler(this);
+    }
+
+    void RenderingTestWidget::OnWindowRestored(PlatformWindow* window)
+    {
+        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+
+        if (nativeContext->GetPlatformWindow() == window)
+        {
+            maximizeIcon->Background(FBrush("MaximizeIcon"));
+            this->Padding(Vec4());
+        }
+    }
+
+    void RenderingTestWidget::OnWindowMaximized(PlatformWindow* window)
+    {
+        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+
+        if (nativeContext->GetPlatformWindow() == window)
+        {
+            maximizeIcon->Background(FBrush("RestoreIcon"));
+            this->Padding(Vec4(1, 1, 1, 1) * 2.0f);
+        }
     }
 
 }

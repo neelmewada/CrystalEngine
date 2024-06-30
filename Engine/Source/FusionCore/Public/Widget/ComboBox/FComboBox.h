@@ -39,6 +39,9 @@ namespace CE
 
         FComboBoxPopup& GetPopupMenu() const { return *popupMenu; }
 
+        void SelectItem(FComboBoxItem* item);
+        void SelectItem(int index);
+
     protected:
 
         void AddItem(FComboBoxItem& item);
@@ -59,6 +62,9 @@ namespace CE
 
         FIELD()
         FVerticalStack* popupContent = nullptr;
+
+        FIELD()
+        FComboBoxItem* selectedItem = nullptr;
 
     protected: // - Fusion Fields -
 
@@ -104,6 +110,7 @@ namespace CE
         }
 
         FUSION_WIDGET;
+        friend class FComboBoxItem;
     };
     
 }

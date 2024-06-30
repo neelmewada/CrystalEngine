@@ -15,8 +15,49 @@ namespace CE
         ItemStyle(m_ItemStyle);
     }
 
+    void FComboBox::SelectItem(FComboBoxItem* item)
+    {
+        selectedItem = item;
+        selectionText->Text(selectedItem->Text());
+
+        for (int i = 0; i < popupContent->GetChildCount(); ++i)
+        {
+            FWidget* child = popupContent->GetChild(i);
+            if (!child->IsOfType<FComboBoxItem>())
+                continue;
+
+            FComboBoxItem* childItem = static_cast<FComboBoxItem*>(child);
+            if (childItem == item)
+            {
+                childItem->state |= FComboBoxItemState::Selected;
+            }
+            else
+            {
+                childItem->state &= ~FComboBoxItemState::Selected;
+            }
+        }
+
+        popupMenu->ClosePopup();
+
+        ApplyStyle();
+    }
+
+    void FComboBox::SelectItem(int index)
+    {
+        if (index < 0 || index >= popupContent->GetChildCount())
+            return;
+
+        FWidget* child = popupContent->GetChild(index);
+        if (!child->IsOfType<FComboBox>())
+            return;
+
+        SelectItem(static_cast<FComboBoxItem*>(child));
+    }
+
     void FComboBox::AddItem(FComboBoxItem& item)
     {
+        item.comboBox = this;
+
         if (m_ItemStyle)
         {
 	        item.Style(m_ItemStyle);
@@ -27,7 +68,7 @@ namespace CE
 
     void FComboBox::AddItem(const String& text)
     {
-        FComboBoxItem& item = FNew(FComboBoxItem);
+        FComboBoxItem& item = FNewOwned(FComboBoxItem, popupContent);
         AddItem(item);
         item.Text(text);
     }
@@ -43,6 +84,8 @@ namespace CE
     		.AutoClose(true)
     		.MinWidth(60)
     		.MinHeight(30);
+
+        popupContent = popupMenu->GetContentStack();
 
         Child(
             FNew(FHorizontalStack)
@@ -105,6 +148,7 @@ namespace CE
                     {
                         Vec2 popupPosition = globalPosition;
                         popupPosition.y += computedSize.height;
+                        popupMenu->MinWidth(GetComputedSize().width);
 
                         GetContext()->PushLocalPopup(popupMenu, popupPosition);
                     }

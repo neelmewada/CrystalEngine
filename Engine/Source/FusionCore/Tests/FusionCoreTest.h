@@ -10,7 +10,7 @@ namespace RenderingTests
 {
 
 	CLASS()
-	class RenderingTestWidget : public FWindow
+	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
 	{
 		CE_CLASS(RenderingTestWidget, FWindow)
 	public:
@@ -21,6 +21,11 @@ namespace RenderingTests
 
 		void Construct() override;
 
+		void OnBeforeDestroy() override;
+
+		void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowMaximized(PlatformWindow* window) override;
+
 		FStackBox* rootBox;
 		FButton* button;
 		FTextInput* textInput;
@@ -29,6 +34,9 @@ namespace RenderingTests
 		FStyledWidget* subWidget;
 		FPopup* btnPopup;
 		FPopup* nativePopup;
+
+		FImage* maximizeIcon;
+		FStyledWidget* borderWidget;
 
 		int hitCounter = 0;
 

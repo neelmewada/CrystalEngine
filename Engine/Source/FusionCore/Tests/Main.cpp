@@ -230,7 +230,7 @@ TEST(FusionCore, Rendering)
 			primaryComboBoxItem->selectedBackground = Color::Clear();
 			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
-			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBorderColor;
+			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground;
 			primaryComboBoxItem->borderWidth = 1.0f;
 
 			GetDefaultWidget<FComboBox>()
@@ -268,12 +268,17 @@ TEST(FusionCore, Rendering)
 
 	mainWidget->comboBox->ApplyStyle();
 
-	CE_LOG(Info, All, "Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
+	int frameCounter = 0;
 
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+		if (frameCounter == 2)
+		{
+			CE_LOG(Info, All, "Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
+		}
 
 		// App & Input Tick
 		PlatformApplication::Get()->Tick();
@@ -282,6 +287,7 @@ TEST(FusionCore, Rendering)
 		FusionApplication::Get()->Tick();
 
 		previousTime = curTime;
+		frameCounter++;
 	}
 
 	PlatformApplication::Get()->RemoveTickHandler(handle);

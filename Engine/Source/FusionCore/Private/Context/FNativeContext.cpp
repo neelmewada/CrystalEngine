@@ -441,6 +441,46 @@ namespace CE
 		return pos - platformWindow->GetWindowPosition().ToVec2();
 	}
 
+	void FNativeContext::Maximize()
+	{
+		if (isDestroyed)
+			return;
+
+		platformWindow->Maximize();
+	}
+
+	void FNativeContext::Minimize()
+	{
+		if (isDestroyed)
+			return;
+
+		platformWindow->Minimize();
+	}
+
+	void FNativeContext::Restore()
+	{
+		if (isDestroyed)
+			return;
+
+		platformWindow->Restore();
+	}
+
+	bool FNativeContext::IsMaximized()
+	{
+		if (isDestroyed)
+			return false;
+
+		return platformWindow->IsMaximized();
+	}
+
+	bool FNativeContext::IsMinimized()
+	{
+		if (isDestroyed)
+			return false;
+
+		return platformWindow->IsMinimized();
+	}
+
 	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)
 	{
 		if (!window->IsBorderless() || IsPopupWindow())

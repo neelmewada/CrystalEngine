@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FComboBox;
+
     ENUM(Flags)
     enum class FComboBoxItemState : u8
     {
@@ -24,9 +26,15 @@ namespace CE
         bool IsHovered() const { return EnumHasFlag(state, FComboBoxItemState::Hovered); }
         bool IsSelected() const { return EnumHasFlag(state, FComboBoxItemState::Selected); }
 
+        bool SupportsMouseEvents() const override { return true; }
+
+        bool SupportsFocusEvents() const override { return true; }
+
     protected:
 
         void Construct() override final;
+
+        void HandleEvent(FEvent* event) override;
 
         FIELD()
         FHorizontalStack* contentBox = nullptr;
@@ -36,6 +44,9 @@ namespace CE
 
         FIELD()
         FLabel* label = nullptr;
+
+        FIELD()
+        FComboBox* comboBox = nullptr;
 
     protected: // - Fusion Fields -
 
@@ -50,6 +61,7 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(FontSize, label);
 
         FUSION_WIDGET;
+        friend class FComboBox;
     };
     
 }

@@ -15,7 +15,7 @@ namespace CE
 
         Child(
             FAssignNew(FVerticalStack, content)
-            .ContentHAlign(HAlign::Left)
+            .ContentHAlign(HAlign::Fill)
             .ContentVAlign(VAlign::Center)
         );
     }

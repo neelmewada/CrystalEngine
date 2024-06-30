@@ -54,6 +54,13 @@ namespace CE
 		Vec2 GlobalToScreenSpacePosition(Vec2 pos) override;
 		Vec2 ScreenToGlobalSpacePosition(Vec2 pos) override;
 
+		void Maximize();
+		void Minimize();
+		void Restore();
+
+		bool IsMaximized();
+		bool IsMinimized();
+
 	protected:
 
 		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);

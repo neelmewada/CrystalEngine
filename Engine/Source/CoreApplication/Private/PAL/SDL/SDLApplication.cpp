@@ -415,6 +415,20 @@ namespace CE
 				}
 			}
 		}
+		else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the maximized window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowMaximized(window);
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	void SDLApplication::ProcessInputEvents(SDL_Event& event)
