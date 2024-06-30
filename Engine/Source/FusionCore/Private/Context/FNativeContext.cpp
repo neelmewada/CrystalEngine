@@ -300,7 +300,10 @@ namespace CE
 		Vec2i windowPos = this->platformWindow->GetWindowPosition() + globalPosition.ToVec2i();
 		window->SetWindowPosition(windowPos);
 		window->SetBorderless(true);
-		window->SetAlwaysOnTop(true);
+		if (!popup->AutoClose())
+		{
+			window->SetAlwaysOnTop(true);
+		}
 		window->SetHitTestDelegate(MemberDelegate(&Self::WindowDragHitTest, this));
 
 		FNativeContext* popupContext = Create(window, popup->GetName().GetString(), this);

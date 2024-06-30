@@ -108,6 +108,23 @@ namespace CE
 		return nullptr;
 	}
 
+	template <class TRetType, class ... TArgs>
+	TRetType ScriptDelegate<TRetType(TArgs...)>::Invoke(const TArgs&... args) const
+	{
+		if constexpr (TIsSameType<TRetType, void>::Value)
+		{
+			if (!isBound)
+				return;
+			Invoke(Array<Variant>{ args... });
+		}
+		else
+		{
+			if (!isBound)
+				return {};
+			return Invoke(Array<Variant>{ args... }).GetValue<TRetType>();
+		}
+	}
+
 	struct CORE_API CoreObjectDelegates
 	{
 		CoreObjectDelegates() = delete;

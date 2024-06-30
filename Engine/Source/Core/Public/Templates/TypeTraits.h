@@ -248,6 +248,12 @@ namespace CE
 		typedef T Type;
 	};
 
+	template<typename T, template <typename> class U>
+	struct TGetUnderlyingType<U<T>, false, false> : TTrueType // SubClassType<T>
+	{
+		typedef T Type;
+	};
+
 	class ObjectMap;
     
 	template<typename T>

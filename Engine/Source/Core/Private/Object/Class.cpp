@@ -166,8 +166,10 @@ namespace CE
     FieldType* StructType::FindField(const Name& name)
     {
         CacheAllFields();
+
+        LockGuard lock{ cachedFieldsMutex };
         
-        if (cachedFieldsMap[name] != nullptr)
+        if (cachedFieldsMap.KeyExists(name) && cachedFieldsMap[name] != nullptr)
 		{
             return cachedFieldsMap[name];
 		}
@@ -275,7 +277,7 @@ namespace CE
 
         fieldsCached = true;
 
-        LockGuard<SharedMutex> lock{ cachedFieldsMutex };
+        LockGuard lock{ cachedFieldsMutex };
         cachedFields.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)

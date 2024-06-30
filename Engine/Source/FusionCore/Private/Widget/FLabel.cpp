@@ -5,7 +5,7 @@ namespace CE
 
     FLabel::FLabel()
     {
-
+        
     }
 
     void FLabel::CalculateIntrinsicSize()

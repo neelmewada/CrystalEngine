@@ -5,6 +5,38 @@ namespace CE
     class FTextInput;
     class FStackBox;
 
+    struct IPropertyBinding
+    {
+        virtual ~IPropertyBinding() = default;
+
+        virtual IScriptDelegate* GetWrite() = 0;
+        virtual IScriptDelegate* GetRead() = 0;
+        virtual bool IsBound() const = 0;
+    };
+
+    template<typename T>
+    struct FPropertyBinding : IPropertyBinding
+    {
+        FPropertyBinding() {}
+
+        ScriptDelegate<void(const T&)> write;
+        ScriptDelegate<T()> read;
+
+        bool IsBound() const override
+        {
+            return read.IsBound();
+        }
+
+        IScriptDelegate* GetWrite() override
+        {
+            return &write;
+        }
+
+        IScriptDelegate* GetRead() override
+        {
+            return &read;
+        }
+    };
 
     ENUM(Flags)
     enum class FTextInputState : u8
@@ -77,14 +109,24 @@ namespace CE
         void SelectRange(int startIndex, int endIndex);
         void DeselectAll();
 
+
     protected: // - Fusion Fields -
 
-        FIELD(FusionProperty)
+        FIELD()
         Color m_SelectionColor = Color::RGBA(0, 112, 224);
+
+        FPropertyBinding<String> m_TextBinding;
 
     public: // - Fusion Properties -
 
         FUSION_PROPERTY(SelectionColor);
+
+        Self& Bind_Text(const ScriptDelegate<String()>& read, const ScriptDelegate<void(const String&)>& write = nullptr)
+        {
+            m_TextBinding.write = write;
+            m_TextBinding.read = read;
+            return *this;
+        }
 
     private:
 
@@ -154,11 +196,16 @@ namespace CE
     public: // - Fusion Properties -
 
         FUSION_PROPERTY_WRAPPER(SelectionColor, inputLabel);
-
         FUSION_PROPERTY_WRAPPER(Text, inputLabel);
+        FUSION_PROPERTY_WRAPPER(Foreground, inputLabel);
+        FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
+        FUSION_PROPERTY_WRAPPER(FontFamily, inputLabel);
 
-        //Self& Text(const String& value);
-        Self& Foreground(const Color& value);
+        Self& Bind_Text(const ScriptDelegate<String()>& read, const ScriptDelegate<void(const String&)>& write = nullptr)
+        {
+            inputLabel->Bind_Text(read, write);
+            return *this;
+        }
 
         Self& LeftSlot(FWidget& content);
 

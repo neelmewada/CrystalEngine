@@ -51,7 +51,7 @@ namespace CE
             }
             else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left && event->sender == this)
             {
-                comboBox->SelectItem(this);
+                comboBox->SelectItemInternal(this);
                 ApplyStyle();
                 event->Consume(this);
             }

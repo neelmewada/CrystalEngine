@@ -54,6 +54,49 @@ namespace CE
         SelectItem(static_cast<FComboBoxItem*>(child));
     }
 
+    int FComboBox::GetItemCount() const
+    {
+        return popupContent->GetChildCount();
+    }
+
+    FComboBoxItem* FComboBox::GetItem(int index)
+    {
+        if (index < 0 || index >= popupContent->GetChildCount())
+            return nullptr;
+        if (!popupContent->GetChild(index)->IsOfType<FComboBoxItem>())
+            return nullptr;
+
+        return static_cast<FComboBoxItem*>(popupContent->GetChild(index));
+    }
+
+    int FComboBox::GetSelectedItemIndex()
+    {
+        if (selectedItem == nullptr)
+            return -1;
+
+        for (int i = 0; i < popupContent->GetChildCount(); ++i)
+        {
+            if (popupContent->GetChild(i) == selectedItem)
+                return i;
+        }
+
+        return -1;
+    }
+
+    void FComboBox::SelectItemInternal(FComboBoxItem* item)
+    {
+        SelectItem(item);
+
+        for (int i = 0; i < popupContent->GetChildCount(); ++i)
+        {
+	        if (popupContent->GetChild(i) == item)
+	        {
+                m_OnSelectionChanged(i);
+		        break;
+	        }
+        }
+    }
+
     void FComboBox::AddItem(FComboBoxItem& item)
     {
         item.comboBox = this;

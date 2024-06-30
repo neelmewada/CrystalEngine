@@ -521,6 +521,11 @@ namespace CE
         DeselectAll();
 
         MarkLayoutDirty();
+
+        if (!restoreOriginal && m_TextBinding.write.IsBound())
+        {
+            m_TextBinding.write.Invoke(m_Text);
+        }
     }
 
     void FTextInputLabel::SetCursorPos(int newCursorPos)
@@ -723,12 +728,6 @@ namespace CE
         }
 
         ApplyStyle();
-    }
-
-    FTextInput& FTextInput::Foreground(const Color& value)
-    {
-        inputLabel->Foreground(value);
-        return *this;
     }
 
     FTextInput& FTextInput::LeftSlot(FWidget& content)

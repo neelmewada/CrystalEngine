@@ -9,6 +9,8 @@ namespace CE
     class FComboBoxItemStyle;
     class FComboBoxStyle;
 
+    typedef ScriptEvent<void(int)> FComboBoxSelectionEvent;
+
     ENUM(Flags)
     enum class FComboBoxState
     {
@@ -42,7 +44,13 @@ namespace CE
         void SelectItem(FComboBoxItem* item);
         void SelectItem(int index);
 
+        int GetItemCount() const;
+        FComboBoxItem* GetItem(int index);
+        int GetSelectedItemIndex();
+
     protected:
+
+        void SelectItemInternal(FComboBoxItem* item);
 
         void AddItem(FComboBoxItem& item);
         void AddItem(const String& item);
@@ -71,7 +79,12 @@ namespace CE
         FIELD()
         FComboBoxItemStyle* m_ItemStyle = nullptr;
 
-    public: // - Fusion Properties - 
+        FIELD()
+        FComboBoxSelectionEvent m_OnSelectionChanged;
+
+    public: // - Fusion Properties -
+
+        FUSION_EVENT(OnSelectionChanged);
 
         FUSION_PROPERTY_WRAPPER(Font, selectionText);
         FUSION_PROPERTY_WRAPPER(FontSize, selectionText);

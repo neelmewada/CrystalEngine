@@ -10,6 +10,8 @@
 
 #define DECLARE_SCRIPT_EVENT(EventName, ...) \
     typedef CE::ScriptEvent<void(__VA_ARGS__)> EventName;
+#define DECLARE_SCRIPT_DELEGATE(EventName, ReturnType, ...) \
+    typedef CE::ScriptDelegate<ReturnType(__VA_ARGS__)> EventName;
 
 namespace CE
 {
@@ -47,6 +49,8 @@ namespace CE
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
         virtual bool IsLambda() const = 0;
+
+        virtual DelegateHandle GetLambdaHandle() const = 0;
 
         virtual void Invalidate() = 0;
 
@@ -114,6 +118,8 @@ namespace CE
 
         Variant Invoke(const Array<Variant>& args) const override;
 
+        TRetType Invoke(const TArgs&... args) const;
+
         bool IsBound() const override
         {
             return isBound;
@@ -132,6 +138,15 @@ namespace CE
         void Invalidate() override
         {
             isBound = false;
+        }
+
+        DelegateHandle GetLambdaHandle() const override
+        {
+	        if (lambda.IsValid())
+	        {
+                return lambda.GetHandle();
+	        }
+            return 0;
         }
 
     private:
@@ -294,10 +309,18 @@ namespace CE
             invocationList.EmplaceBack(lambda);
         }
 
-        template<typename TLambda>
+        template<typename TLambda> requires !TIsSameType<TLambda, DelegateType>::Value
         DelegateHandle Bind(const TLambda& lambda)
         {
             return BindInternal(lambda, std::make_index_sequence<sizeof...(TArgs)>());
+        }
+
+        void Bind(const DelegateType& delegate)
+        {
+	        if (delegate.IsBound())
+	        {
+                invocationList.Add(delegate);
+	        }
         }
 
         void Unbind(Object* object, FunctionType* function) override

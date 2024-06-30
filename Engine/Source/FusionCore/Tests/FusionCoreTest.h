@@ -8,6 +8,40 @@ using namespace CE;
 
 namespace RenderingTests
 {
+	CLASS()
+	class TextInputModel : public FDataModel
+	{
+		CE_CLASS(TextInputModel, FDataModel)
+	public:
+
+	private:
+
+		FIELD()
+		String m_Text;
+
+		FTextEvent m_TextModified;
+
+	public:
+
+		const auto& GetText() const { return m_Text; }
+
+		void SetTextNoNotify(const String& value)
+		{
+			m_Text = value;
+		}
+
+		void SetText(const String& value)
+		{
+			SetTextNoNotify(value);
+			m_TextModified(m_Text);
+		}
+
+		void ModifyTextInCode()
+		{
+			SetText(String::Format("Text from code {}", Random::Range(0, 100)));
+		}
+
+	};
 
 	CLASS()
 	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
@@ -37,6 +71,9 @@ namespace RenderingTests
 
 		FImage* maximizeIcon;
 		FStyledWidget* borderWidget;
+
+		FTextInput* modelTextInput;
+		TextInputModel* model = nullptr;
 
 		int hitCounter = 0;
 

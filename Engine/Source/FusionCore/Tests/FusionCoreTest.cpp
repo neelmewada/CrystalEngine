@@ -57,6 +57,8 @@ namespace RenderingTests
         BuildPopup(btnPopup, 0);
         BuildPopup(nativePopup, 1);
 
+        model = CreateObject<TextInputModel>(this, "DataModel");
+
         btnPopup->CalculateIntrinsicSize();
         Vec2 size1 = btnPopup->GetIntrinsicSize();
         nativePopup->CalculateIntrinsicSize();
@@ -94,7 +96,7 @@ namespace RenderingTests
 
                                 FNew(FLabel)
                                 .FontSize(15)
-                                .Text("Window Title")
+                                .Text("Widget Demo")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
 
@@ -234,7 +236,11 @@ namespace RenderingTests
                             "Items 0",
                             "Items 1",
                             "Items 2",
-                            "Items 3"
+                            "Items 3",
+                            FNew(FComboBoxItem)
+                            .Text("Items 4"),
+                            FNew(FComboBoxItem)
+                            .Text("Items 5")
                         )
                         .MaxWidth(120)
                         .HAlign(HAlign::Left)
@@ -264,6 +270,25 @@ namespace RenderingTests
                             .FillRatio(1.0f)
                             .MinWidth(60)
                             .MinHeight(25)
+                        ),
+
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Center)
+                        (
+							FAssignNew(FTextInput, modelTextInput)
+                            .Bind_Text(nullptr, nullptr)
+                            .FontSize(13)
+                            .Text("[None]")
+                            .Width(180)
+                            .Margin(Vec4(0, 0, 10, 0)),
+
+                            FNew(FTextButton)
+                            .FontSize(13)
+                            .Text("Randomize")
+                            .OnPressed([this]
+                            {
+                                model->ModifyTextInCode();
+                            })
                         )
                     )
                 )

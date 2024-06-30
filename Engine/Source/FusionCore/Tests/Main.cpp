@@ -179,7 +179,8 @@ TEST(FusionCore, Rendering)
 
 			windowCloseBtn->background = Color::Clear();
 			windowCloseBtn->hoveredBackground = Color::RGBA(161, 57, 57);
-			windowCloseBtn->pressedBackground = Color::Clear();
+			windowCloseBtn->hoveredBackground = Color::RGBA(196, 43, 28);
+			windowCloseBtn->pressedBackground = Color::RGBA(178, 43, 30);
 			windowCloseBtn->borderColor = Color::Clear();
 			windowCloseBtn->borderWidth = 0.0f;
 			windowCloseBtn->cornerRadius = Vec4();
@@ -190,7 +191,7 @@ TEST(FusionCore, Rendering)
 
 			windowControlBtn->background = Color::Clear();
 			windowControlBtn->hoveredBackground = Color::RGBA(58, 58, 58);
-			windowControlBtn->pressedBackground = Color::Clear();
+			windowControlBtn->pressedBackground = Color::RGBA(48, 48, 48);
 			windowControlBtn->borderColor = Color::Clear();
 			windowControlBtn->borderWidth = 0.0f;
 			windowControlBtn->cornerRadius = Vec4();
