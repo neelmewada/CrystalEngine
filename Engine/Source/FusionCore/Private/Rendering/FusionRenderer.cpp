@@ -918,6 +918,20 @@ namespace CE
 		this->drawListTag = drawListTag;
 	}
 
+	u64 FusionRenderer::ComputeMemoryFootprint()
+	{
+		u64 memory = Super::ComputeMemoryFootprint();
+
+		memory += shapeItemList.GetCapacity() * sizeof(FShapeItem2D);
+		memory += drawItemList.GetCapacity() * sizeof(FDrawItem2D);
+		memory += clipItemList.GetCapacity() * sizeof(FClipItem2D);
+		memory += coordinateSpaceStack.GetCapacity() * sizeof(Matrix4x4);
+		memory += opacityStack.GetCapacity() * sizeof(f32);
+		memory += lineItemList.GetCapacity() * sizeof(FLineItem2D);
+
+		return memory;
+	}
+
 	void FusionRenderer::PushChildCoordinateSpace(const Matrix4x4& transform)
 	{
 		if (coordinateSpaceStack.IsEmpty())

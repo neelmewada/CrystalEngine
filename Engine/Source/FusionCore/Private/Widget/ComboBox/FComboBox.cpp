@@ -8,11 +8,41 @@ namespace CE
         m_Padding = Vec4(7.5f, 5, 10, 5);
     }
 
+    void FComboBox::ApplyStyle()
+    {
+	    Super::ApplyStyle();
+
+        ItemStyle(m_ItemStyle);
+    }
+
+    void FComboBox::AddItem(FComboBoxItem& item)
+    {
+        if (m_ItemStyle)
+        {
+	        item.Style(m_ItemStyle);
+        }
+
+        popupMenu->Content(item);
+    }
+
+    void FComboBox::AddItem(const String& text)
+    {
+        FComboBoxItem& item = FNew(FComboBoxItem);
+        AddItem(item);
+        item.Text(text);
+    }
+
     void FComboBox::Construct()
     {
         Super::Construct();
 
         FBrush downwardArrow = FBrush("DownwardArrow");
+
+        FAssignNew(FComboBoxPopup, popupMenu)
+    		.BlockInteraction(false)
+    		.AutoClose(true)
+    		.MinWidth(60)
+    		.MinHeight(30);
 
         Child(
             FNew(FHorizontalStack)
@@ -70,12 +100,16 @@ namespace CE
                 if (EnumHasFlag(state, FComboBoxState::Pressed))
                 {
                     state &= ~FComboBoxState::Pressed;
-                    ApplyStyle();
 
                     if (mouseEvent->isInside)
                     {
-                        
+                        Vec2 popupPosition = globalPosition;
+                        popupPosition.y += computedSize.height;
+
+                        GetContext()->PushLocalPopup(popupMenu, popupPosition);
                     }
+
+                    ApplyStyle();
                 }
                 event->Consume(this);
             }
@@ -83,5 +117,33 @@ namespace CE
 
 	    Super::HandleEvent(event);
     }
+
+    FComboBox& FComboBox::ItemStyle(FComboBoxItemStyle* value)
+    {
+        m_ItemStyle = value;
+        if (!popupContent)
+            return *this;
+
+        for (int i = 0; i < popupContent->GetChildCount(); ++i)
+        {
+            FWidget* child = popupContent->GetChild(i);
+            child->Style(m_ItemStyle);
+        }
+
+        return *this;
+    }
+
+    FComboBox& FComboBox::ItemStyle(FStyleSet* styleSet, const CE::Name& styleKey)
+    {
+        if (!styleSet)
+            return *this;
+
+        FStyle* style = styleSet->FindStyle(styleKey);
+        if (!style || !style->IsOfType<FComboBoxItemStyle>())
+            return *this;
+
+        return ItemStyle(static_cast<FComboBoxItemStyle*>(style));
+    }
+
 }
 

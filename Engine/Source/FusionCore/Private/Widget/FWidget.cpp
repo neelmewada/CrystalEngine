@@ -228,7 +228,7 @@ namespace CE
 
     void FWidget::ApplyStyle()
     {
-        if (styleKey.IsValid())
+        if (styleKey.IsValid() && m_Style == nullptr)
         {
             Style(styleKey);
         }
@@ -289,6 +289,12 @@ namespace CE
 
     FWidget& FWidget::Style(FStyle* style)
     {
+        if (style == nullptr)
+        {
+            m_Style = nullptr;
+            MarkDirty();
+        }
+
         if (style && IsOfType(style->GetWidgetClass()))
         {
             m_Style = style;
@@ -303,11 +309,7 @@ namespace CE
         if (!styleKey.IsValid())
             return *this;
 
-        if (GetName() == "WindowCloseButton")
-        {
-            String::IsAlphabet('a');
-        }
-
+        m_Style = nullptr;
         this->styleKey = styleKey;
 
         FFusionContext* context = GetContext();

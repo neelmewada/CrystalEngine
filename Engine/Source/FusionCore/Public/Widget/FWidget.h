@@ -32,7 +32,7 @@ namespace CE
         bool AddChild(FWidget* child);
         void RemoveChild(FWidget* child);
 
-        void ApplyStyle();
+        virtual void ApplyStyle();
 
         template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
         Self& operator()(const TArgs&... childWidget)
@@ -42,7 +42,7 @@ namespace CE
             
             constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
                 {
-                    using ArgTypeBase = std::tuple_element<i(), TupleType>::type;
+                    using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
                     using ArgType = std::remove_cvref_t<ArgTypeBase>;
                     if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
                     {
@@ -158,6 +158,9 @@ namespace CE
         HAlign m_HAlign = HAlign::Auto;
 
         FIELD()
+        b8 m_Enabled = true;
+
+        FIELD()
         ScriptEvent<void(FEvent*)> m_OnEvent;
 
         FIELD()
@@ -203,6 +206,8 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(VAlign);
         FUSION_LAYOUT_PROPERTY(HAlign);
+
+        FUSION_LAYOUT_PROPERTY(Enabled);
 
         FUSION_LAYOUT_PROPERTY(MinWidth);
         FUSION_LAYOUT_PROPERTY(MaxWidth);

@@ -380,6 +380,17 @@ namespace CE
         destructionQueue.Add({ .object = object, .frameCounter = 0 });
     }
 
+    u64 FusionApplication::ComputeMemoryFootprint()
+    {
+        u64 memory = Super::ComputeMemoryFootprint();
+
+        memory += sizeof(RPI::Shader);
+        memory += registeredImages.GetCapacity() * sizeof(void*);
+        memory += loadedTextures.GetCapacity() * sizeof(void*);
+
+        return memory;
+    }
+
     void FusionApplication::OnWindowRestored(PlatformWindow* window)
     {
         RebuildFrameGraph();

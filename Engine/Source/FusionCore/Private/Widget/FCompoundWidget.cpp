@@ -13,7 +13,7 @@ namespace CE
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right,
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
-        if (!m_Child)
+        if (!m_Child || !m_Child->Enabled())
             return;
 
         m_Child->CalculateIntrinsicSize();
@@ -31,7 +31,7 @@ namespace CE
     {
         Super::PlaceSubWidgets();
 
-        if (!m_Child)
+        if (!m_Child || !m_Child->Enabled())
             return;
 
         Vec4 childMargin = m_Child->Margin();
@@ -96,7 +96,7 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (m_Child)
+        if (m_Child && m_Child->Enabled())
         {
             painter->PushChildCoordinateSpace(localTransform);
 
@@ -121,7 +121,7 @@ namespace CE
 	    FWidget* thisHitTest = Super::HitTest(localMousePos);
         if (!thisHitTest)
             return nullptr;
-        if (!m_Child)
+        if (!m_Child || !m_Child->Enabled())
             return thisHitTest;
 
         Vec2 transformedMousePos = (Matrix4x4::Translation(-computedPosition - m_Translation) *
@@ -147,7 +147,7 @@ namespace CE
         if (event->stopPropagation)
             return;
 
-        if (m_Child && event->direction == FEventDirection::TopToBottom)
+        if (m_Child && m_Child->Enabled() && event->direction == FEventDirection::TopToBottom)
         {
             m_Child->HandleEvent(event);
         }

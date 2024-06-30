@@ -59,6 +59,8 @@ namespace CE
 
         void QueueDestroy(Object* object);
 
+        u64 ComputeMemoryFootprint() override;
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;

@@ -36,6 +36,9 @@ namespace CE
 	    for (int i = children.GetSize() - 1; i >= 0; --i)
 	    {
             FWidget* child = children[i];
+            if (!child->Enabled())
+                continue;
+
             FWidget* result = child->HitTest(transformedMousePos);
             if (result)
             {
@@ -69,6 +72,9 @@ namespace CE
         {
             for (FWidget* child : children)
             {
+                if (!child->Enabled())
+                    continue;
+
                 child->HandleEvent(event);
 
                 if (event->stopPropagation)

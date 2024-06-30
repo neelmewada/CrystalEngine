@@ -174,7 +174,7 @@ TEST(FusionCore, Rendering)
 		}
 
 		{
-			auto windowCloseBtn = CreateObject<FButtonPlainStyle>(rootContext, "WindowWindowClose");
+			auto windowCloseBtn = CreateObject<FButtonPlainStyle>(rootStyle, "WindowWindowClose");
 			rootStyle->Add("Button.WindowClose", windowCloseBtn);
 
 			windowCloseBtn->background = Color::Clear();
@@ -184,6 +184,17 @@ TEST(FusionCore, Rendering)
 			windowCloseBtn->borderWidth = 0.0f;
 			windowCloseBtn->cornerRadius = Vec4();
 			windowCloseBtn->contentMoveY = 0;
+
+			auto windowControlBtn = CreateObject<FButtonPlainStyle>(rootStyle, "WindowControlButton");
+			rootStyle->Add("Button.WindowControl", windowControlBtn);
+
+			windowControlBtn->background = Color::Clear();
+			windowControlBtn->hoveredBackground = Color::RGBA(58, 58, 58);
+			windowControlBtn->pressedBackground = Color::Clear();
+			windowControlBtn->borderColor = Color::Clear();
+			windowControlBtn->borderWidth = 0.0f;
+			windowControlBtn->cornerRadius = Vec4();
+			windowControlBtn->contentMoveY = 0;
 		}
 
 		{
@@ -198,8 +209,7 @@ TEST(FusionCore, Rendering)
 			primaryTextInput->cornerRadius = Vec4(5, 5, 5, 5);
 
 			GetDefaultWidget<FTextInput>()
-				.Style(rootStyle, "TextInput.Primary")
-				;
+				.Style(rootStyle, "TextInput.Primary");
 		}
 
 		{
@@ -212,9 +222,29 @@ TEST(FusionCore, Rendering)
 			primaryComboBox->borderWidth = 1.0f;
 			primaryComboBox->cornerRadius = Vec4(5, 5, 5, 5);
 
+			auto primaryComboBoxItem = CreateObject<FComboBoxItemPlainStyle>(rootStyle, "PrimaryComboBoxItemStyle");
+			rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
+
+			primaryComboBoxItem->background = Color::Clear();
+			primaryComboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
+			primaryComboBoxItem->selectedBackground = Color::Clear();
+			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
+			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
+			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBorderColor;
+			primaryComboBoxItem->borderWidth = 1.0f;
+
 			GetDefaultWidget<FComboBox>()
-				.Style(rootStyle, "ComboBox.Primary")
-				;
+				.ItemStyle(primaryComboBoxItem)
+				.Style(rootStyle, "ComboBox.Primary");
+
+			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
+			rootStyle->Add("ComboBoxPopup.Primary", primaryComboBoxPopup);
+
+			primaryComboBoxPopup->background = Color::RGBA(26, 26, 26);
+			primaryComboBoxPopup->borderWidth = 0.0f;
+
+			GetDefaultWidget<FComboBoxPopup>()
+				.Style(rootStyle, "ComboBoxPopup.Primary");
 		}
 	}
 
@@ -237,6 +267,8 @@ TEST(FusionCore, Rendering)
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
 	mainWidget->comboBox->ApplyStyle();
+
+	CE_LOG(Info, All, "Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
 
 	while (!IsEngineRequestingExit())
 	{

@@ -30,6 +30,9 @@ namespace CE
 
 		for (FWidget* child : children)
 		{
+			if (!child->Enabled())
+				continue;
+
 			child->CalculateIntrinsicSize();
 
 			Vec2 childSize = child->GetIntrinsicSize();
@@ -70,8 +73,6 @@ namespace CE
 			return;
 		}
 
-		bool isTextStack = GetName() == "TextInputHStack";
-
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
 		f32 crossAxisSize = 0;
 		f32 remainingSize = 0;
@@ -93,6 +94,9 @@ namespace CE
 
 		for (FWidget* child : children)
 		{
+			if (!child->Enabled())
+				continue;
+
 			Vec2 childIntrinsicSize = child->GetIntrinsicSize();
 			
 			if (m_Direction == FStackBoxDirection::Horizontal)
@@ -119,6 +123,9 @@ namespace CE
 
 		for (FWidget* child : children)
 		{
+			if (!child->Enabled())
+				continue;
+
 			Vec2 childIntrinsicSize = child->GetIntrinsicSize();
 
 			child->computedPosition = curPos + Vec2(child->m_Margin.left, child->m_Margin.top);
@@ -219,6 +226,9 @@ namespace CE
 
 		for (FWidget* child : children)
 		{
+			if (!child->Enabled())
+				continue;
+
 			child->OnPaint(painter);
 		}
 

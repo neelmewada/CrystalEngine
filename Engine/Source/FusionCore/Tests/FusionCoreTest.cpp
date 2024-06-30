@@ -80,37 +80,88 @@ namespace RenderingTests
                     .Height(40)
                     .HAlign(HAlign::Fill)
                     (
-                        FNew(FHorizontalStack)
-                        .ContentVAlign(VAlign::Center)
+                        FNew(FOverlayStack)
+                        .VAlign(VAlign::Fill)
+                        .HAlign(HAlign::Fill)
                         (
-                            FNew(FTerminalWidget)
-                            .FillRatio(1.0f),
-
-                            FNew(FLabel)
-                            .FontSize(15)
-                            .Text("Window Title")
-                            .HAlign(HAlign::Center)
-                            .VAlign(VAlign::Center),
-
-                            FNew(FTerminalWidget)
-                            .FillRatio(1.0f),
-
-                            FNew(FButton)
-                            .OnPressed([]
-                            {
-                                RequestEngineExit("USER_QUIT");
-                            })
-                            .Padding(Vec4(20, 10, 20, 10))
-                            .Name("WindowCloseButton")
-                            .Style("Button.WindowClose")
-                            .VAlign(VAlign::Top)
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill)
                             (
-                                FNew(FImage)
-                                .Background(FBrush("CrossIcon"))
-                                .Width(10)
-                                .Height(10)
+                                FNew(FTerminalWidget)
+                                .FillRatio(1.0f),
+
+                                FNew(FLabel)
+                                .FontSize(15)
+                                .Text("Window Title")
                                 .HAlign(HAlign::Center)
-                                .VAlign(VAlign::Center)
+                                .VAlign(VAlign::Center),
+
+                                FNew(FTerminalWidget)
+                                .FillRatio(1.0f)
+                            ),
+
+                            FNew(FHorizontalStack)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill)
+                            (
+                                FNew(FTerminalWidget)
+                                .FillRatio(1.0f),
+
+                                FNew(FButton)
+                                .OnPressed([this]
+                                    {
+
+                                    })
+                                .Padding(Vec4(20, 8, 20, 8))
+                                .Name("WindowMinimizeButton")
+                                .Style("Button.WindowControl")
+                                .VAlign(VAlign::Top)
+                                (
+                                    FNew(FImage)
+                                    .Background(FBrush("MinimizeIcon"))
+                                    .Width(11)
+                                    .Height(11)
+                                    .HAlign(HAlign::Center)
+                                    .VAlign(VAlign::Center)
+                                ),
+
+                                FNew(FButton)
+                                .OnPressed([this]
+                                    {
+
+                                    })
+                                .Padding(Vec4(20, 8, 20, 8))
+                                .Name("WindowMaximizeButton")
+                                .Style("Button.WindowControl")
+                                .VAlign(VAlign::Top)
+                                (
+                                    FNew(FImage)
+                                    .Background(FBrush("MaximizeIcon"))
+                                    .Width(11)
+                                    .Height(11)
+                                    .HAlign(HAlign::Center)
+                                    .VAlign(VAlign::Center)
+                                ),
+
+                                FNew(FButton)
+                                .OnPressed([this]
+                                    {
+                                        GetContext()->QueueDestroy();
+                                    })
+                                .Padding(Vec4(18, 8, 18, 8))
+                                .Name("WindowCloseButton")
+                                .Style("Button.WindowClose")
+                                .VAlign(VAlign::Top)
+                                (
+                                    FNew(FImage)
+                                    .Background(FBrush("CrossIcon"))
+                                    .Width(10)
+                                    .Height(10)
+                                    .HAlign(HAlign::Center)
+                                    .VAlign(VAlign::Center)
+                                )
                             )
                         )
                     ),
@@ -171,6 +222,12 @@ namespace RenderingTests
                         .Margin(Vec4(0, 0, 0, 5)),
 
                         FAssignNew(FComboBox, comboBox)
+                        .Items(
+                            "Items 0",
+                            "Items 1",
+                            "Items 2",
+                            "Items 3"
+                        )
                         .MaxWidth(120)
                         .HAlign(HAlign::Left)
                         .Margin(Vec4(0, 0, 0, 5)),

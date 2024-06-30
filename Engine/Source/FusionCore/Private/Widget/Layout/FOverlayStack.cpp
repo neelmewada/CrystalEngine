@@ -25,6 +25,9 @@ namespace CE
 
         for (FWidget* child : children)
         {
+            if (!child->Enabled())
+                continue;
+
             child->CalculateIntrinsicSize();
 
             Vec2 childSize = child->GetIntrinsicSize();
@@ -64,7 +67,7 @@ namespace CE
 
         for (FWidget* child : children)
         {
-            if (!child)
+            if (!child->Enabled())
                 continue;
 
             CE::VAlign childVAlign = child->VAlign();
@@ -135,6 +138,28 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
+        if (children.IsEmpty())
+            return;
+
+        painter->PushChildCoordinateSpace(localTransform);
+        if (m_ClipChildren)
+        {
+            painter->PushClipShape(Matrix4x4::Identity(), computedSize, FRectangle());
+        }
+
+        for (FWidget* child : children)
+        {
+            if (!child->Enabled())
+                continue;
+
+            child->OnPaint(painter);
+        }
+
+        if (m_ClipChildren)
+        {
+            painter->PopClipShape();
+        }
+        painter->PopChildCoordinateSpace();
     }
 
     void FOverlayStack::Construct()

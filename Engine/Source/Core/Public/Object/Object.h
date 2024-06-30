@@ -167,7 +167,7 @@ namespace CE
 			return (TClass*)instance;
 		}
 
-        u64 ComputeMemoryFootprint();
+        virtual u64 ComputeMemoryFootprint();
 
 		Name GetPathInBundle();
         

@@ -1,0 +1,111 @@
+#pragma once
+
+namespace CE
+{
+    class FPopup;
+    class FVerticalStack;
+    class FComboBoxPopup;
+    class FComboBoxItem;
+    class FComboBoxItemStyle;
+    class FComboBoxStyle;
+
+    ENUM(Flags)
+    enum class FComboBoxState
+    {
+	    Default = 0,
+        Hovered = BIT(0),
+        Pressed = BIT(1),
+        Expanded = BIT(2)
+    };
+    ENUM_CLASS_FLAGS(FComboBoxState);
+
+    CLASS()
+    class FUSIONCORE_API FComboBox : public FStyledWidget
+    {
+        CE_CLASS(FComboBox, FStyledWidget)
+    public:
+
+        FComboBox();
+
+        bool IsHovered() const { return EnumHasFlag(state, FComboBoxState::Hovered); }
+        bool IsPressed() const { return EnumHasFlag(state, FComboBoxState::Pressed); }
+        bool IsExpanded() const { return EnumHasFlag(state, FComboBoxState::Expanded); }
+
+        bool SupportsMouseEvents() const override { return true; }
+
+        bool SupportsFocusEvents() const override { return true; }
+
+        void ApplyStyle() override;
+
+        FComboBoxPopup& GetPopupMenu() const { return *popupMenu; }
+
+    protected:
+
+        void AddItem(FComboBoxItem& item);
+        void AddItem(const String& item);
+
+        void Construct() override;
+
+        void HandleEvent(FEvent* event) override;
+
+        FIELD()
+        FLabel* selectionText = nullptr;
+
+        FIELD()
+        FComboBoxState state = FComboBoxState::Default;
+
+        FIELD()
+        FComboBoxPopup* popupMenu = nullptr;
+
+        FIELD()
+        FVerticalStack* popupContent = nullptr;
+
+    protected: // - Fusion Fields -
+
+        FIELD()
+        FComboBoxItemStyle* m_ItemStyle = nullptr;
+
+    public: // - Fusion Properties - 
+
+        FUSION_PROPERTY_WRAPPER(Font, selectionText);
+        FUSION_PROPERTY_WRAPPER(FontSize, selectionText);
+        FUSION_PROPERTY_WRAPPER(FontFamily, selectionText);
+        FUSION_PROPERTY_WRAPPER(Bold, selectionText);
+        FUSION_PROPERTY_WRAPPER(Italic, selectionText);
+
+        Self& ItemStyle(FComboBoxItemStyle* value);
+        Self& ItemStyle(FStyleSet* styleSet, const CE::Name& styleKey);
+
+        template<typename... TArgs>
+        Self& Items(const TArgs&... items)
+        {
+            using TupleType = std::tuple<const TArgs&...>;
+            TupleType args = { items... };
+
+            constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
+                {
+                    using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
+                    using ArgType = std::remove_cvref_t<ArgTypeBase>;
+					if constexpr (TIsString<ArgType>::Value)
+					{
+                        this->AddItem(std::get<i()>(args));
+					}
+                    else if constexpr (TIsBaseClassOf<FComboBoxItem, ArgType>::Value)
+                    {
+                        this->AddItem(*const_cast<ArgType*>(&std::get<i()>(args)));
+                    }
+                    else
+                    {
+                        static_assert(Internal::AlwaysFalse<void>, "Invalid argument in Items(...)");
+                    }
+                });
+
+            return *this;
+        }
+
+        FUSION_WIDGET;
+    };
+    
+}
+
+#include "FComboBox.rtti.h"

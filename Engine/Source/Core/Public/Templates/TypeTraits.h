@@ -92,6 +92,75 @@ namespace CE
 	template<typename T>
 	class ScriptEvent;
 
+	class String;
+	class Name;
+
+	template<typename T>
+	struct TIsString : TFalseType
+	{
+		
+	};
+
+	template<>
+	struct TIsString<char*> : TTrueType
+	{
+
+	};
+
+	template<>
+	struct TIsString<const char*> : TTrueType
+	{
+
+	};
+
+	template<SIZE_T N>
+	struct TIsString<const char[N]> : TTrueType
+	{
+
+	};
+
+	template<SIZE_T N>
+	struct TIsString<const char(&)[N]> : TTrueType
+	{
+
+	};
+
+	template<SIZE_T N>
+	struct TIsString<char[N]> : TTrueType
+	{
+
+	};
+
+	template<SIZE_T N>
+	struct TIsString<char(&)[N]> : TTrueType
+	{
+
+	};
+
+	template<typename T>
+	struct TIsString<const T&> : TIsString<T>
+	{
+
+	};
+
+	template<typename T>
+	struct TIsString<const T> : TIsString<T>
+	{
+
+	};
+
+	template<typename T>
+	struct TIsString<T&> : TIsString<T>
+	{
+
+	};
+
+	template<>
+	struct TIsString<String> : TTrueType
+	{
+
+	};
+
 	template<typename T>
 	struct TIsArray : TFalseType
 	{

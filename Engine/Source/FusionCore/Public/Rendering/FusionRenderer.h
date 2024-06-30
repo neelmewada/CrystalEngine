@@ -42,6 +42,8 @@ namespace CE
 
         void SetDrawListTag(RHI::DrawListTag drawListTag);
 
+        u64 ComputeMemoryFootprint() override;
+
         // - State API -
 
         void SetItemTransform(const Matrix4x4& transform);
