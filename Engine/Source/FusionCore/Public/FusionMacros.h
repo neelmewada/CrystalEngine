@@ -37,6 +37,7 @@
 	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_EVENT(PropertyName)\
+	auto& PropertyName() { return m_##PropertyName; }\
 	Self& PropertyName(const FunctionBinding& binding)\
 	{\
 		m_##PropertyName.Bind(binding);\

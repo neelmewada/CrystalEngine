@@ -13,31 +13,30 @@ namespace CE
         return FButton::StaticType();
     }
 
-    FButtonPlainStyle::FButtonPlainStyle()
+    FButtonCustomStyle::FButtonCustomStyle()
     {
 
     }
 
-    void FButtonPlainStyle::MakeStyle(FWidget& widget)
+    void FButtonCustomStyle::MakeStyle(FWidget& widget)
     {
         FButton& button = widget.As<FButton>();
 
-        Color bgColor = background;
+        FBrush bg = background;
 
         if (button.IsPressed() && button.IsHovered())
-            bgColor = pressedBackground;
+            bg = pressedBackground;
         else if (button.IsHovered())
-            bgColor = hoveredBackground;
+            bg = hoveredBackground;
 
         button
-            .Background(FBrush(bgColor))
-			.BackgroundShape(FRoundedRectangle(cornerRadius))
-			.ClipShape(FRectangle())
-			.BorderWidth(borderWidth)
-			.BorderColor(borderColor)
-			.Opacity(1.0f)
+            .Background(bg)
+            .BackgroundShape(FRoundedRectangle(cornerRadius))
+            .ClipShape(FRectangle())
+            .BorderWidth(borderWidth)
+            .BorderColor(borderColor)
             ;
-        
+
         if (button.GetChild() == nullptr || abs(contentMoveY) < 0.001f)
             return;
 

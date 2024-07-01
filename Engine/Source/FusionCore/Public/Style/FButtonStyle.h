@@ -15,23 +15,23 @@ namespace CE
     };
 
     CLASS()
-    class FUSIONCORE_API FButtonPlainStyle : public FButtonStyle
+    class FUSIONCORE_API FButtonCustomStyle : public FButtonStyle
     {
-        CE_CLASS(FButtonPlainStyle, FButtonStyle)
+        CE_CLASS(FButtonCustomStyle, FButtonStyle)
     public:
 
-        FButtonPlainStyle();
+        FButtonCustomStyle();
 
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Color background{};
+        FBrush background{};
 
         FIELD()
-        Color hoveredBackground{};
+        FBrush hoveredBackground{};
 
         FIELD()
-        Color pressedBackground{};
+        FBrush pressedBackground{};
 
         FIELD()
         Vec4 cornerRadius = Vec4(5, 5, 5, 5);

@@ -54,6 +54,13 @@ namespace CE
 
             }
 
+            template<typename ReturnType, typename ClassOrStruct, typename... Args>
+            DelegateBase(ReturnType(ClassOrStruct::* function)(Args...) const, ClassOrStruct* instance)
+                : DelegateBase(function, instance, std::make_index_sequence<sizeof...(Args)>())
+            {
+
+            }
+
             DelegateBase(const DelegateBase<TRetType(TArgs...)>& copy)
             {
                 this->impl = copy.impl;
@@ -95,6 +102,12 @@ namespace CE
 
             template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
             DelegateBase(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance, std::index_sequence<Is...>) : handle(GenerateRandomU64())
+            {
+                impl = std::bind(function, instance, std::_Ph<Is + 1>()...);
+            }
+
+            template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
+            DelegateBase(ReturnType(ClassOrStruct::* function)(Args...) const, ClassOrStruct* instance, std::index_sequence<Is...>) : handle(GenerateRandomU64())
             {
                 impl = std::bind(function, instance, std::_Ph<Is + 1>()...);
             }

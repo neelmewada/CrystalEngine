@@ -332,123 +332,7 @@ namespace CE
                     curAttrib = "";
                 }
             }
-            else if (token.type == TK_CE_SIGNAL && curClass != nullptr)
-            {
-                FunctionInfo curFunction{};
-                int signalScope = 0;
-                i++;
-
-                curFunction.isSignal = true;
-                curFunction.attribs.Add("Signal");
-                curFunction.isEvent = false;
-
-                while (i < size)
-                {
-                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
-                    {
-                        signalScope++;
-                    }
-                    else if (tokens->tokens[i].type == TK_PAREN_CLOSE)
-                    {
-                        signalScope--;
-                        if (signalScope == 0)
-                        {
-                            curFunction.signature += ")";
-                            i++;
-                            if (curFunction.name.IsValid())
-                            {
-                                curClass->functions.Add(curFunction);
-                            }
-                            break;
-                        }
-                    }
-                    else if (tokens->tokens[i].type == TK_IDENTIFIER)
-                    {
-                        if (!curFunction.name.IsValid())
-                        {
-                            curFunction.name = String(tokens->tokens[i].lexeme);
-                            curFunction.signature += "(";
-                            i++;
-                            if (tokens->tokens[i].type == TK_PAREN_CLOSE && signalScope == 1)
-                                continue;
-                        }
-                        else
-                        {
-                            curFunction.signature += String(tokens->tokens[i].lexeme);
-                        }
-                    }
-                    else if (curFunction.name.IsValid() && signalScope > 0)
-                    {
-                        if (tokens->tokens[i].type == TK_COMMA)
-                            curFunction.signature += ",";
-                        else if (tokens->tokens[i].type == TK_SCOPE_OPERATOR)
-                            curFunction.signature += "::";
-                        else
-                            curFunction.signature += String(tokens->tokens[i].lexeme);
-                    }
-
-                    i++;
-                }
-            }
-			else if (token.type == TK_CE_SIGNAL && curStruct != nullptr)
-			{
-				FunctionInfo curFunction{};
-				int signalScope = 0;
-				i++;
-
-				curFunction.isSignal = true;
-				curFunction.attribs.Add("Signal");
-				curFunction.isEvent = false;
-
-				while (i < size)
-				{
-					if (tokens->tokens[i].type == TK_PAREN_OPEN)
-					{
-						signalScope++;
-					}
-					else if (tokens->tokens[i].type == TK_PAREN_CLOSE)
-					{
-						signalScope--;
-						if (signalScope == 0)
-						{
-							curFunction.signature += ")";
-							i++;
-							if (curFunction.name.IsValid())
-							{
-								curStruct->functions.Add(curFunction);
-							}
-							break;
-						}
-					}
-					else if (tokens->tokens[i].type == TK_IDENTIFIER)
-					{
-						if (!curFunction.name.IsValid())
-						{
-							curFunction.name = String(tokens->tokens[i].lexeme);
-							curFunction.signature += "(";
-							i++;
-							if (tokens->tokens[i].type == TK_PAREN_CLOSE && signalScope == 1)
-								continue;
-						}
-						else
-						{
-							curFunction.signature += String(tokens->tokens[i].lexeme);
-						}
-					}
-					else if (curFunction.name.IsValid() && signalScope > 0)
-					{
-						if (tokens->tokens[i].type == TK_COMMA)
-							curFunction.signature += ",";
-						else if (tokens->tokens[i].type == TK_SCOPE_OPERATOR)
-							curFunction.signature += "::";
-						else
-							curFunction.signature += String(tokens->tokens[i].lexeme);
-					}
-
-					i++;
-				}
-				}
-            else if ((token.type == TK_CE_FUNCTION || token.type == TK_CE_EVENT) && curClass != nullptr)
+            else if (token.type == TK_CE_FUNCTION && curClass != nullptr)
             {
                 FunctionInfo curFunction{};
                 int attribScope = 0;
@@ -617,7 +501,7 @@ namespace CE
 
                 curClass->functions.Add(curFunction);
             }
-			else if ((token.type == TK_CE_FUNCTION || token.type == TK_CE_EVENT) && curStruct != nullptr)
+			else if (token.type == TK_CE_FUNCTION && curStruct != nullptr)
 			{
 				FunctionInfo curFunction{};
 				int attribScope = 0;

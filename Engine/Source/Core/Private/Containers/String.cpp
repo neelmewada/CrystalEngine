@@ -10,7 +10,7 @@ using namespace CE;
 namespace CE
 {
 
-    String::String()
+    String::String() : String("")
     {
         
     }

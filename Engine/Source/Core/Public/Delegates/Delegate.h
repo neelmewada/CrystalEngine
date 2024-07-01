@@ -31,6 +31,11 @@ namespace CE
 			: Internal::DelegateBase<T>(function, instance)
         {}
 
+        template<class ReturnType, class ClassOrStruct, typename... Args>
+        Delegate(ReturnType(ClassOrStruct::* function)(Args...) const, ClassOrStruct* instance)
+            : Internal::DelegateBase<T>(function, instance)
+        {}
+
         TypeId GetTargetType() const 
         {
             if (Internal::DelegateBase<T>::impl == nullptr)
@@ -65,7 +70,13 @@ namespace CE
     };
 
     template<typename ReturnType, typename ClassOrStruct, typename... Args>
-    inline Delegate<ReturnType(Args...)> MemberDelegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance)
+    Delegate<ReturnType(Args...)> MemberDelegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance)
+    {
+        return Delegate<ReturnType(Args...)>(function, instance);
+    }
+
+    template<typename ReturnType, typename ClassOrStruct, typename... Args>
+    Delegate<ReturnType(Args...)> MemberDelegate(ReturnType(ClassOrStruct::* function)(Args...) const, ClassOrStruct* instance)
     {
         return Delegate<ReturnType(Args...)>(function, instance);
     }

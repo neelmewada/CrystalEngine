@@ -5,39 +5,6 @@ namespace CE
     class FTextInput;
     class FStackBox;
 
-    struct IPropertyBinding
-    {
-        virtual ~IPropertyBinding() = default;
-
-        virtual IScriptDelegate* GetWrite() = 0;
-        virtual IScriptDelegate* GetRead() = 0;
-        virtual bool IsBound() const = 0;
-    };
-
-    template<typename T>
-    struct FPropertyBinding : IPropertyBinding
-    {
-        FPropertyBinding() {}
-
-        ScriptDelegate<void(const T&)> write;
-        ScriptDelegate<T()> read;
-
-        bool IsBound() const override
-        {
-            return read.IsBound();
-        }
-
-        IScriptDelegate* GetWrite() override
-        {
-            return &write;
-        }
-
-        IScriptDelegate* GetRead() override
-        {
-            return &read;
-        }
-    };
-
     ENUM(Flags)
     enum class FTextInputState : u8
     {
@@ -127,6 +94,7 @@ namespace CE
 
     public:
 
+        FUNCTION()
         void Update_Text()
         {
             if (m_TextBinding.read.IsBound())
@@ -134,23 +102,15 @@ namespace CE
 	            Text(m_TextBinding.read());
             }
         }
-
-        Self& Bind_Text(const ScriptDelegate<decltype(m_Text)()>& read, const ScriptDelegate<void(const decltype(m_Text)&)>& write = nullptr)
+        
+        Self& Bind_Text(const ScriptDelegate<decltype(m_Text)()>& read, 
+            const ScriptDelegate<void(const decltype(m_Text)&)>& write,
+            FVoidEvent& onModifiedExternally)
         {
-            m_TextBinding.write = write;
             m_TextBinding.read = read;
+            m_TextBinding.write = write;
             Update_Text();
-            return *this;
-        }
-
-#define MODEL_PROPERTY(modelPtr, propertyName) { modelPtr }
-
-        template<class TModel> requires TIsBaseClassOf<FDataModel, TModel>::Value
-        Self& Bind_Text(std::tuple<TModel*, const ScriptDelegate<decltype(m_Text)()>&, const ScriptDelegate<void(const decltype(m_Text)&)>&> value)
-        {
-            m_TextBinding.read = std::get<0>(value);
-            m_TextBinding.write = std::get<1>(value);
-            Update_Text();
+            onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_Text));
             return *this;
         }
 
@@ -226,9 +186,12 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontFamily, inputLabel);
 
-        Self& Bind_Text(const ScriptDelegate<String()>& read, const ScriptDelegate<void(const String&)>& write = nullptr)
+        
+        Self& Bind_Text(const ScriptDelegate<decltype(inputLabel->m_Text)()>& read, 
+            const ScriptDelegate<void(const decltype(inputLabel->m_Text)&)>& write,
+            FVoidEvent& onModifiedExternally)
         {
-            inputLabel->Bind_Text(read, write);
+            inputLabel->Bind_Text(read, write, onModifiedExternally);
             return *this;
         }
 

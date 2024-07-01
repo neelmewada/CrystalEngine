@@ -154,12 +154,13 @@ TEST(FusionCore, Rendering)
 	// - Styling -
 	{
 		{
-			auto primaryBtn = CreateObject<FButtonPlainStyle>(rootStyle, "PrimaryButton");
+			auto primaryBtn = CreateObject<FButtonCustomStyle>(rootStyle, "PrimaryButton");
 			rootStyle->Add("Button.Primary", primaryBtn);
 
 			primaryBtn->background = Color::RGBA(56, 56, 56);
 			primaryBtn->hoveredBackground = Color::RGBA(95, 95, 95);
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
+			primaryBtn->cornerRadius = Vec4(1, 1, 1, 1) * 5;
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
 			primaryBtn->borderWidth = 1.0f;
 
@@ -174,7 +175,7 @@ TEST(FusionCore, Rendering)
 		}
 
 		{
-			auto windowCloseBtn = CreateObject<FButtonPlainStyle>(rootStyle, "WindowWindowClose");
+			auto windowCloseBtn = CreateObject<FButtonCustomStyle>(rootStyle, "WindowWindowClose");
 			rootStyle->Add("Button.WindowClose", windowCloseBtn);
 
 			windowCloseBtn->background = Color::Clear();
@@ -186,7 +187,7 @@ TEST(FusionCore, Rendering)
 			windowCloseBtn->cornerRadius = Vec4();
 			windowCloseBtn->contentMoveY = 0;
 
-			auto windowControlBtn = CreateObject<FButtonPlainStyle>(rootStyle, "WindowControlButton");
+			auto windowControlBtn = CreateObject<FButtonCustomStyle>(rootStyle, "WindowControlButton");
 			rootStyle->Add("Button.WindowControl", windowControlBtn);
 
 			windowControlBtn->background = Color::Clear();

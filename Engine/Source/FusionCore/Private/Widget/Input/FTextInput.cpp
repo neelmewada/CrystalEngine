@@ -508,6 +508,9 @@ namespace CE
 
     void FTextInputLabel::StopEditing(bool restoreOriginal)
     {
+        if (!textInput->IsEditing())
+            return;
+
         if (restoreOriginal)
         {
             m_Text = originalText;

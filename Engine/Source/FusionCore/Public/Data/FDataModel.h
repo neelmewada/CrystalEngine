@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FWidget;
+
     CLASS()
     class FUSIONCORE_API FDataModel : public Object
     {
@@ -14,6 +16,8 @@ namespace CE
 
         virtual void OnDataPropertyModified(const Name& propertyName);
 
+
+        friend class FWidget;
     };
     
 } // namespace CE

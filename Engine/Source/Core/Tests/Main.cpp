@@ -1759,6 +1759,19 @@ TEST(Object, Events)
 	);
 
 	{
+		int value = 0;
+
+		ScriptDelegate<void(const String& string)> test = [&](const String& string)
+			{
+				String::TryParse(string, value);
+			};
+
+		test("412");
+
+		EXPECT_EQ(value, 412);
+	}
+
+	{
 		using namespace EventTests;
 
 		SenderClass* sender = CreateObject<SenderClass>(nullptr, "Sender");

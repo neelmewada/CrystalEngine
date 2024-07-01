@@ -19,11 +19,17 @@ namespace RenderingTests
 		FIELD()
 		String m_Text;
 
+		FIELD()
+		Array<String> m_ComboItems;
+
 		// - Macro Start -
 
 	protected:
-		ScriptEvent<void(const String&)> m_TextModified;
-		ScriptEvent<void(const String&)> m_TextEdited;
+		FVoidEvent m_OnTextModified;
+		FVoidEvent m_OnTextEdited;
+
+		FVoidEvent m_OnComboItemsModified;
+		FVoidEvent m_OnComboItemsEdited;
 
 	public:
 
@@ -37,24 +43,73 @@ namespace RenderingTests
 		void SetText_UI(const String& value)
 		{
 			SetText_Raw(value);
-			m_TextEdited(m_Text);
+			m_OnTextEdited();
 		}
 
 		void SetText(const String& value)
 		{
 			SetText_Raw(value);
-			m_TextModified(m_Text);
+			m_OnTextModified();
 		}
+
+		auto& OnTextModified() { return m_OnTextModified; }
+		auto& OnTextEdited() { return m_OnTextEdited; }
+
+		Self& OnTextModified(const FunctionBinding& binding)
+		{
+			m_OnTextModified.Bind(binding);
+			return *this;
+		}
+
+		template <typename TLambda>
+		Self& OnTextModified(const TLambda& lambda)
+		{
+			m_OnTextModified.Bind(lambda);
+			return *this;
+		}
+
+		template <typename TLambda>
+		Self& OnTextModified(DelegateHandle& outHandle, const TLambda& lambda)
+		{
+			outHandle = m_OnTextModified.Bind(lambda);
+			return *this;
+		}
+
+		const auto& GetComboItems() const { return m_ComboItems; }
+
+		void SetComboItems_Raw(const Array<String>& value)
+		{
+			m_ComboItems = value;
+		}
+
+		void SetComboItems_UI(const Array<String>& value)
+		{
+			SetComboItems_Raw(value);
+			m_OnComboItemsEdited();
+		}
+
+		void SetComboItems(const Array<String>& value)
+		{
+			SetComboItems_Raw(value);
+			m_OnComboItemsModified();
+		}
+
+		auto& OnComboItemsModified() { return m_OnComboItemsModified; }
+		auto& OnComboItemsEdited() { return m_OnComboItemsEdited; }
+
+
 
 		// - Macro End -
 
 	public:
+
 		void ModifyTextInCode()
 		{
 			SetText(String::Format("Text from code {}", Random::Range(0, 100)));
 		}
 
 	};
+
 
 	CLASS()
 	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
@@ -72,6 +127,7 @@ namespace RenderingTests
 
 		void OnWindowRestored(PlatformWindow* window) override;
 		void OnWindowMaximized(PlatformWindow* window) override;
+		void OnWindowExposed(PlatformWindow* window) override;
 
 		FStackBox* rootBox;
 		FButton* button;

@@ -48,7 +48,7 @@ namespace CE
             return;
 
         FWidget* child = popupContent->GetChild(index);
-        if (!child->IsOfType<FComboBox>())
+        if (!child->IsOfType<FComboBoxItem>())
             return;
 
         SelectItem(static_cast<FComboBoxItem*>(child));
@@ -81,6 +81,30 @@ namespace CE
         }
 
         return -1;
+    }
+
+    void FComboBox::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const CE::Name ItemsName = "Items";
+
+        if (propertyName == ItemsName)
+        {
+            int selectedIndex = GetSelectedItemIndex();
+
+            DestroyAllItems();
+
+            for (const String& item : m_Items)
+            {
+                AddItem(item);
+            }
+
+            if (selectedIndex >= 0 && selectedIndex < m_Items.GetSize())
+            {
+                SelectItem(selectedIndex);
+            }
+        }
     }
 
     void FComboBox::SelectItemInternal(FComboBoxItem* item)
@@ -230,6 +254,26 @@ namespace CE
             return *this;
 
         return ItemStyle(static_cast<FComboBoxItemStyle*>(style));
+    }
+
+    void FComboBox::DestroyAllItems()
+    {
+        Array<FWidget*> itemsToDestroy{};
+        itemsToDestroy.Reserve(popupContent->GetChildCount());
+
+        for (int i = 0; i < popupContent->GetChildCount(); ++i)
+        {
+            FWidget* child = popupContent->GetChild(i);
+            if (!child->IsOfType<FComboBoxItem>())
+                continue;
+
+            itemsToDestroy.Add(child);
+        }
+
+        for (FWidget* widget : itemsToDestroy)
+        {
+            widget->Destroy();
+        }
     }
 
 }

@@ -50,6 +50,8 @@ namespace CE
 
     protected:
 
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
         void SelectItemInternal(FComboBoxItem* item);
 
         void AddItem(FComboBoxItem& item);
@@ -82,6 +84,9 @@ namespace CE
         FIELD()
         FComboBoxSelectionEvent m_OnSelectionChanged;
 
+        FIELD()
+        Array<String> m_Items;
+
     public: // - Fusion Properties -
 
         FUSION_EVENT(OnSelectionChanged);
@@ -95,11 +100,38 @@ namespace CE
         Self& ItemStyle(FComboBoxItemStyle* value);
         Self& ItemStyle(FStyleSet* styleSet, const CE::Name& styleKey);
 
+        FUSION_PROPERTY(Items);
+        FPropertyBinding<Array<String>> m_ItemsBinding;
+
+        void DestroyAllItems();
+
+        FUNCTION()
+        void Update_Items()
+        {
+	        if (m_ItemsBinding.read.IsBound())
+	        {
+                Items(m_ItemsBinding.read());
+	        }
+        }
+
+        Self& Bind_Items(const ScriptDelegate<decltype(m_Items)()>& read,
+            const ScriptDelegate<void(const decltype(m_Items)&)>& write,
+            FVoidEvent& onModifiedExternally)
+        {
+            m_ItemsBinding.read = read;
+            m_ItemsBinding.write = write;
+            onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_Items));
+            Update_Items();
+            return *this;
+        }
+
         template<typename... TArgs>
         Self& Items(const TArgs&... items)
         {
             using TupleType = std::tuple<const TArgs&...>;
             TupleType args = { items... };
+
+            DestroyAllItems();
 
             constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
                 {

@@ -81,11 +81,36 @@ namespace CE
             isBound = dstObject && dstFunction;
         }
 
-        template<typename F>
-        ScriptDelegate(const F& lambda)
+    private:
+
+        template<typename F, std::size_t... Is>
+        ScriptDelegate(const F& lambda, std::index_sequence<Is...>)
         {
-            this->lambda = lambda;
+            using Traits = TFunctionTraits<F>;
+            using TraitsRetType = typename Traits::ReturnType;
+            
+            this->lambda = [lambda](const Array<Variant>& params) -> Variant
+                {
+                    if constexpr (TIsSameType<TraitsRetType, void>::Value)
+                    {
+                        lambda((params.begin() + Is)->GetValue<typename Traits::template Arg<Is>::Type>()...);
+                        return Variant();
+                    }
+                    else
+                    {
+                        return lambda((params.begin() + Is)->GetValue<typename Traits::template Arg<Is>::Type>()...);
+                    }
+                };
+
             isBound = this->lambda.IsValid();
+        }
+
+    public:
+
+        template<typename F>
+        ScriptDelegate(const F& lambda) : ScriptDelegate(lambda, std::make_index_sequence<TFunctionTraits<F>::NumArgs>())
+        {
+            
         }
 
         ScriptDelegate(const Delegate<Variant(const Array<Variant>&)>& lambda)

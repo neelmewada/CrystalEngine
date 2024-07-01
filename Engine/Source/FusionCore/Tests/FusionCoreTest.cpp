@@ -58,12 +58,24 @@ namespace RenderingTests
         BuildPopup(nativePopup, 1);
 
         model = CreateObject<TextInputModel>(this, "DataModel");
+        model->ModifyTextInCode();
 
         btnPopup->CalculateIntrinsicSize();
         Vec2 size1 = btnPopup->GetIntrinsicSize();
         nativePopup->CalculateIntrinsicSize();
         nativePopup->SetName("NativePopup");
         Vec2 size2 = nativePopup->GetIntrinsicSize();
+
+        model->OnTextEdited().Bind([this]
+            {
+                CE_LOG(Info, All, "Text Edited via UI: {}", model->GetText());
+            });
+        model->OnTextModified().Bind([this]
+            {
+                CE_LOG(Info, All, "Text Modified via Code: {}", model->GetText());
+            });
+
+        model->SetComboItems({ "Combo Item 0", "Combo Item 1", "Combo Item 2" });
 
         Child(
             FAssignNew(FStyledWidget, borderWidget)
@@ -231,20 +243,35 @@ namespace RenderingTests
                         .HAlign(HAlign::Left)
                         .Margin(Vec4(0, 0, 0, 5)),
 
-                        FAssignNew(FComboBox, comboBox)
-                        .Items(
-                            "Items 0",
-                            "Items 1",
-                            "Items 2",
-                            "Items 3",
-                            FNew(FComboBoxItem)
-                            .Text("Items 4"),
-                            FNew(FComboBoxItem)
-                            .Text("Items 5")
-                        )
-                        .MaxWidth(120)
-                        .HAlign(HAlign::Left)
-                        .Margin(Vec4(0, 0, 0, 5)),
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Center)
+                        .ContentHAlign(HAlign::Center)
+                        (
+	                        FAssignNew(FComboBox, comboBox)
+	                        /*.Items(
+	                            "Items 0",
+	                            "Items 1",
+	                            "Items 2",
+	                            "Items 3",
+	                            FNew(FComboBoxItem)
+	                            .Text("Items 4"),
+	                            FNew(FComboBoxItem)
+	                            .Text("Items 5")
+	                        )*/
+                            .Bind_Items(BIND_PROPERTY_RW(model, ComboItems))
+	                        .MaxWidth(120)
+	                        .HAlign(HAlign::Left)
+	                        .Margin(Vec4(0, 0, 0, 5)),
+
+                            FNew(FTextButton)
+                            .Text("Add Item")
+                            .OnPressed([this]
+                            {
+                                auto items = model->GetComboItems();
+                                items.Add({ String::Format("Combo Item {}", items.GetSize()) });
+                                model->SetComboItems(items);
+                            })
+                        ),
 
                         FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Center)
@@ -276,9 +303,9 @@ namespace RenderingTests
                         .ContentVAlign(VAlign::Center)
                         (
 							FAssignNew(FTextInput, modelTextInput)
-                            .Bind_Text(nullptr, nullptr)
+                            .Bind_Text(MemberDelegate(&TextInputModel::GetText, model), 
+                                MemberDelegate(&TextInputModel::SetText_UI, model), model->OnTextModified())
                             .FontSize(13)
-                            .Text("[TextBox]")
                             .Width(180)
                             .Margin(Vec4(0, 0, 10, 0)),
 
@@ -323,7 +350,17 @@ namespace RenderingTests
         if (nativeContext->GetPlatformWindow() == window)
         {
             maximizeIcon->Background(FBrush("RestoreIcon"));
-            this->Padding(Vec4(1, 1, 1, 1) * 2.0f);
+            this->Padding(Vec4(1, 1, 1, 1) * 4.0f);
+        }
+    }
+
+    void RenderingTestWidget::OnWindowExposed(PlatformWindow* window)
+    {
+        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+
+        if (nativeContext->GetPlatformWindow() == window && !window->IsMaximized())
+        {
+            OnWindowRestored(window);
         }
     }
 
