@@ -10,23 +10,39 @@
 
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
 
-#define __FUSION_PROPERTY(PropertyName, DirtyFunc)\
-	Self& PropertyName(const decltype(m_##PropertyName)& value) {\
-		if constexpr (TEquitable<decltype(m_##PropertyName)>::Value)\
-		{\
-			if (TEquitable<decltype(m_##PropertyName)>::AreEqual(this->m_##PropertyName, value))\
-				return *this;\
+#define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
+	protected:\
+		PropertyType m_##PropertyName = {};\
+	public:\
+		Self& PropertyName(const PropertyType& value) {\
+			if constexpr (TEquitable<PropertyType>::Value)\
+			{\
+				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
+					return *this;\
+			}\
+			this->m_##PropertyName = value; DirtyFunc;\
+			thread_local const CE::Name nameValue = #PropertyName;\
+			OnFusionPropertyModified(nameValue);\
+			return *this;\
 		}\
-		this->m_##PropertyName = value; DirtyFunc;\
-		thread_local const CE::Name nameValue = #PropertyName;\
-		OnFusionPropertyModified(nameValue);\
-		return *this;\
+		const auto& PropertyName() const { return this->m_##PropertyName; }
+
+#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
+
+#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkDirty())
+
+#define FUSION_DATA_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkDirty())\
+	PropertyBinding<PropertyType> m_##PropertyName##Binding{};\
+	void Update_##PropertyName() {\
+		if (m_##PropertyName##Binding.read.IsBound()) PropertyName(m_##PropertyName##Binding.read());\
 	}\
-	const auto& PropertyName() const { return this->m_##PropertyName; }
-
-#define FUSION_LAYOUT_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkLayoutDirty())
-
-#define FUSION_PROPERTY(PropertyName) __FUSION_PROPERTY(PropertyName, MarkDirty())
+	Self& Bind_##PropertyName(const ScriptDelegate<PropertyType()>& read, const ScriptDelegate<void(const PropertyType&)>& write, FVoidEvent& onModifiedExternally) {\
+		m_##PropertyName##Binding.read = read;\
+		m_##PropertyName##Binding.write = write;\
+		onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_##PropertyName));\
+		Update_##PropertyName();\
+		return *this;\
+	}
 
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& PropertyName(const auto& value) {\
@@ -36,25 +52,28 @@
 	}\
 	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
-#define FUSION_EVENT(PropertyName)\
-	auto& PropertyName() { return m_##PropertyName; }\
-	Self& PropertyName(const FunctionBinding& binding)\
-	{\
-		m_##PropertyName.Bind(binding);\
-		return *this;\
-	}\
-	template<typename TLambda>\
-	Self& PropertyName(const TLambda& lambda)\
-	{\
-		m_##PropertyName.Bind(lambda);\
-		return *this;\
-	}\
-	template<typename TLambda>\
-	Self& PropertyName(DelegateHandle& outHandle, const TLambda& lambda)\
-	{\
-		outHandle = m_##PropertyName.Bind(lambda);\
-		return *this;\
-	}
+#define FUSION_EVENT(EventType, PropertyName, ...)\
+	protected:\
+		EventType m_##PropertyName;\
+	public:\
+		auto& PropertyName() { return m_##PropertyName; }\
+		Self& PropertyName(const FunctionBinding& binding)\
+		{\
+			m_##PropertyName.Bind(binding);\
+			return *this;\
+		}\
+		template<typename TLambda>\
+		Self& PropertyName(const TLambda& lambda)\
+		{\
+			m_##PropertyName.Bind(lambda);\
+			return *this;\
+		}\
+		template<typename TLambda>\
+		Self& PropertyName(DelegateHandle& outHandle, const TLambda& lambda)\
+		{\
+			outHandle = m_##PropertyName.Bind(lambda);\
+			return *this;\
+		}
 
 #define FUSION_WIDGET\
 	public:\
@@ -65,3 +84,14 @@
 			return *this;\
 		}\
 		FUSION_FRIENDS
+
+#define BIND_PROPERTY_RW(modelPtr, propertyName)\
+	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
+	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Set##propertyName##_UI, modelPtr), \
+	modelPtr->On##propertyName##Modified()
+
+#define BIND_PROPERTY_R(modelPtr, propertyName)\
+	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
+	nullptr, \
+	modelPtr->On##propertyName##Modified()
+

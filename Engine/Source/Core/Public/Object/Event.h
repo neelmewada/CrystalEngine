@@ -487,4 +487,5 @@ namespace CE
     
 } // namespace CE
 
+CE_RTTI_POD_TEMPLATE(CORE_API, CE, ScriptDelegate, void(void))
 CE_RTTI_POD_TEMPLATE(CORE_API, CE, ScriptEvent, void(void))

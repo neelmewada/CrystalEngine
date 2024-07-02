@@ -45,14 +45,9 @@ namespace CE
         FIELD(NonSerialized)
         FButtonState buttonState = FButtonState::Default;
 
-    protected:  // - Fusion Fields -
-
-        FIELD()
-        FVoidEvent m_OnPressed;
-
     public: // - Fusion Properties -
 
-        FUSION_EVENT(OnPressed);
+        FUSION_EVENT(FVoidEvent, OnPressed);
 
         FUSION_TESTS;
         FUSION_WIDGET;

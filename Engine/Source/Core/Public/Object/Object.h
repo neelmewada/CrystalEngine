@@ -18,6 +18,7 @@
 #include "ObjectMap.h"
 
 #include "Event.h"
+#include "Binding.h"
 
 #if PAL_TRAIT_BUILD_TESTS
 class Bundle_WriteRead_Test;

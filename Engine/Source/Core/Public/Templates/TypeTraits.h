@@ -96,6 +96,21 @@ namespace CE
 	class Name;
 
 	template<typename T>
+	struct PropertyBinding;
+
+	template<typename T>
+	struct TIsPropertyBinding : TFalseType
+	{
+		
+	};
+
+	template<typename T>
+	struct TIsPropertyBinding<PropertyBinding<T>> : TTrueType
+	{
+
+	};
+
+	template<typename T>
 	struct TIsString : TFalseType
 	{
 		

@@ -1,18 +1,8 @@
 #pragma once
 
-#define BIND_PROPERTY_RW(modelPtr, propertyName)\
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Set##propertyName##_UI, modelPtr), \
-	modelPtr->On##propertyName##Modified()
-
-#define BIND_PROPERTY_R(modelPtr, propertyName)\
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
-	nullptr, \
-	modelPtr->On##propertyName##Modified()
-
 namespace CE
 {
-
+    
     struct IPropertyBinding
     {
         virtual ~IPropertyBinding() = default;
@@ -20,12 +10,15 @@ namespace CE
         virtual IScriptDelegate* GetWrite() = 0;
         virtual IScriptDelegate* GetRead() = 0;
         virtual bool IsBound() const = 0;
+        virtual DelegateHandle GetModifyHandle() = 0;
     };
 
-    template<typename T>
-    struct FPropertyBinding : IPropertyBinding
+    template<typename T = CE::Variant>
+    struct PropertyBinding : IPropertyBinding
     {
-        FPropertyBinding() {}
+        PropertyBinding() {}
+
+        virtual ~PropertyBinding() = default;
 
         ScriptDelegate<void(const T&)> write;
         ScriptDelegate<T()> read;
@@ -45,6 +38,13 @@ namespace CE
         {
             return &read;
         }
+
+        DelegateHandle GetModifyHandle() override
+        {
+            return modifyDelegate;
+        }
     };
-    
+
 } // namespace CE
+
+CE_RTTI_POD_TEMPLATE(CORE_API, CE, PropertyBinding, CE::Variant)

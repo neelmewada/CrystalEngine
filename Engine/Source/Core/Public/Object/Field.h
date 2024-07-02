@@ -24,6 +24,9 @@ namespace CE
 		FIELD_Internal = BIT(5),
         FIELD_EditAnywhere = BIT(6),
         FIELD_VisibleAnywhere = BIT(7),
+        FIELD_FusionProperty = BIT(8),
+        FIELD_FusionPropertyLayout = BIT(9),
+        FIELD_FusionPropertyData = BIT(10)
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -79,6 +82,8 @@ namespace CE
 		bool IsEnumFlagsField();
 
         bool IsEventField() const;
+        bool IsDelegateField() const;
+        bool IsPropertyBindingField() const;
 
         bool IsNumericField() const { return IsIntegerField() || IsDecimalField(); }
 
@@ -99,6 +104,11 @@ namespace CE
         bool IsHidden() const;
         bool IsReadOnly() const;
 		bool IsInternal() const;
+
+        bool IsFusionProperty();
+        bool IsFusionBasicProperty();
+        bool IsFusionDataProperty();
+        bool IsFusionLayoutProperty();
 
         bool IsEditAnywhere() const;
         bool IsVisibleAnywhere() const;

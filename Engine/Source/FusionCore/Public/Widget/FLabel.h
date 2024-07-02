@@ -14,25 +14,13 @@ namespace CE
 
         void OnPaint(FPainter* painter) override;
 
-    protected: // - Fusion Fields -
-
-        FIELD()
-        String m_Text;
-
-        FIELD()
-        FFont m_Font;
-
-        FIELD()
-        Color m_Foreground = Color::White();
-
-        FIELD()
-        FWordWrap m_WordWrap = FWordWrap::Normal;
-
     public: // - Fusion Properties -
 
-        FUSION_LAYOUT_PROPERTY(Text);
-        FUSION_LAYOUT_PROPERTY(Font);
-        FUSION_LAYOUT_PROPERTY(WordWrap);
+        FUSION_LAYOUT_PROPERTY(String, Text);
+        FUSION_LAYOUT_PROPERTY(FFont, Font);
+        FUSION_LAYOUT_PROPERTY(FWordWrap, WordWrap);
+
+    	FUSION_PROPERTY(Color, Foreground);
 
         Self& FontFamily(const CE::Name& fontFamily);
         Self& FontSize(int fontSize);
@@ -43,9 +31,6 @@ namespace CE
         int FontSize();
         bool Bold();
         bool Italic();
-        
-
-        FUSION_PROPERTY(Foreground);
 
         FUSION_WIDGET;
     };

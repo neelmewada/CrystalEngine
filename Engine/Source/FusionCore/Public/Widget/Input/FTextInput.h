@@ -76,21 +76,15 @@ namespace CE
         void SelectRange(int startIndex, int endIndex);
         void DeselectAll();
 
-
-    protected: // - Fusion Fields -
-
-        FIELD()
-        Color m_SelectionColor = Color::RGBA(0, 112, 224);
-
     public: // - Fusion Properties -
 
-        FUSION_PROPERTY(SelectionColor);
+        FUSION_PROPERTY(Color, SelectionColor);
 
         // - Property Bindings -
 
     protected:
 
-        FPropertyBinding<decltype(m_Text)> m_TextBinding;
+        PropertyBinding<decltype(m_Text)> m_TextBinding;
 
     public:
 

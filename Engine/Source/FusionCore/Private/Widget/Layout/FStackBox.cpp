@@ -5,7 +5,9 @@ namespace CE
 
 	FStackBox::FStackBox()
 	{
-		
+		m_Direction = FStackBoxDirection::Horizontal;
+		m_HAlign = HAlign::Fill;
+		m_VAlign = VAlign::Fill;
 	}
 
 	FStackBox::~FStackBox()

@@ -5,7 +5,8 @@ namespace CE
 
     FStyledWidget::FStyledWidget()
     {
-
+        m_BackgroundShape = FRectangle();
+        m_Opacity = 1.0f;
     }
 
     void FStyledWidget::CalculateIntrinsicSize()

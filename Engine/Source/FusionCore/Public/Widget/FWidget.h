@@ -151,78 +151,35 @@ namespace CE
 
     protected: // - Fusion Fields -
 
-        FIELD()
-        VAlign m_VAlign = VAlign::Auto;
-
-        FIELD()
-        HAlign m_HAlign = HAlign::Auto;
-
-        FIELD()
-        b8 m_Enabled = true;
-
-        FIELD()
-        ScriptEvent<void(FEvent*)> m_OnEvent;
-
-        FIELD()
-        Vec4 m_Padding = Vec4();
-
-        FIELD()
-        Vec4 m_Margin = Vec4();
-
-        FIELD()
+        FIELD(FusionProperty)
         FStyle* m_Style = nullptr;
-
-        FIELD()
-        f32 m_MinWidth = 0;
-
-        FIELD()
-        f32 m_MaxWidth = NumericLimits<f32>::Infinity();
-
-        FIELD()
-        f32 m_MinHeight = 0;
-
-        FIELD()
-        f32 m_MaxHeight = NumericLimits<f32>::Infinity();
-
-        FIELD()
-        f32 m_FillRatio = 0.0f;
-
-        FIELD()
-        Vec2 m_Translation;
-
-        FIELD()
-        Vec2 m_Scale = Vec2(1, 1);
-
-        //! @brief Rotation angle in Degrees
-        FIELD()
-        f32 m_Angle = 0;
 
     public:  // - Fusion Properties -
 
-        FUSION_EVENT(OnEvent);
+        FUSION_EVENT(ScriptEvent<void(FEvent*)>, OnEvent);
 
-        FUSION_LAYOUT_PROPERTY(Padding);
-        FUSION_LAYOUT_PROPERTY(Margin);
+        FUSION_LAYOUT_PROPERTY(Vec4, Padding);
+        FUSION_LAYOUT_PROPERTY(Vec4, Margin);
 
-        FUSION_LAYOUT_PROPERTY(VAlign);
-        FUSION_LAYOUT_PROPERTY(HAlign);
+        FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
+        FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
 
-        FUSION_LAYOUT_PROPERTY(Enabled);
+        FUSION_LAYOUT_PROPERTY(bool, Enabled);
 
-        FUSION_LAYOUT_PROPERTY(MinWidth);
-        FUSION_LAYOUT_PROPERTY(MaxWidth);
+        FUSION_LAYOUT_PROPERTY(f32, MinWidth);
+        FUSION_LAYOUT_PROPERTY(f32, MaxWidth);
 
-        FUSION_LAYOUT_PROPERTY(MinHeight);
-        FUSION_LAYOUT_PROPERTY(MaxHeight);
+        FUSION_LAYOUT_PROPERTY(f32, MinHeight);
+        FUSION_LAYOUT_PROPERTY(f32, MaxHeight);
 
         Self& Width(f32 width);
         Self& Height(f32 height);
 
-        FUSION_LAYOUT_PROPERTY(FillRatio);
+        FUSION_LAYOUT_PROPERTY(f32, FillRatio);
 
-        FUSION_PROPERTY(Translation);
-        FUSION_PROPERTY(Angle);
-        FUSION_PROPERTY(Scale);
+        FUSION_PROPERTY(Vec2, Translation);
+        FUSION_PROPERTY(f32, Angle);
+        FUSION_PROPERTY(Vec2, Scale);
 
         Self& Style(FStyle* style);
 

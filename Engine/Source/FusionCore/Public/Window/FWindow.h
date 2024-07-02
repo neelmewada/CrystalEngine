@@ -21,7 +21,6 @@ namespace CE
     private: // - Fields -
 
 
-        FUSION_TESTS;
         FUSION_WIDGET;
     };
     

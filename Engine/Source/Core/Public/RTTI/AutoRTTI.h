@@ -26,11 +26,20 @@ enum AttributeSpecifiers
 	//! @brief This will exclude the field from serialization.
 	NonSerialized,
 
-	//! @brief Mark the property as fusion property
+	//! @brief Mark the property as a 'regular' fusion widget property
 	FusionProperty,
 
-	//! @brief Mark the property as fusion layout property.
-	FusionLayoutProperty
+	//! @brief Mark the property as fusion widget layout property.
+	FusionLayoutProperty,
+
+	//! @brief Mark the property as fusion widget data property
+	FusionDataProperty,
+
+	//! @brief Internal use only! Used to mark FPropertyBinding fields.
+	FusionDataBinding,
+
+	//! @brief Internal use only! Used to mark methods like Update_Text() which triggers a read.
+	FusionDataUpdate,
 };
 
 /*

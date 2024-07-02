@@ -22,19 +22,11 @@ namespace CE
 
         void Construct() override;
 
-    protected:  // - Fusion Fields -
-
-        FIELD()
-        CE::HAlign m_ContentHAlign = HAlign::Fill;
-
-        FIELD()
-        CE::VAlign m_ContentVAlign = VAlign::Fill;
-
     public:  // - Fusion Properties -
 
-        FUSION_LAYOUT_PROPERTY(ContentHAlign);
+        FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
 
-        FUSION_LAYOUT_PROPERTY(ContentVAlign);
+        FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
 
 
         FUSION_TESTS;

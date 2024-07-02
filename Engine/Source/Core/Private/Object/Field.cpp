@@ -23,6 +23,12 @@ namespace CE
 			fieldFlags |= FIELD_VisibleAnywhere;
 		if (HasAttribute("EditAnywhere"))
 			fieldFlags |= FIELD_EditAnywhere;
+		if (HasAttribute("FusionProperty"))
+			fieldFlags |= FIELD_FusionProperty;
+		if (HasAttribute("FusionDataProperty"))
+			fieldFlags |= FIELD_FusionPropertyData;
+		if (HasAttribute("FusionLayoutProperty"))
+			fieldFlags |= FIELD_FusionPropertyLayout;
     }
 
 	void FieldType::InitializeDefaults(void* instance)
@@ -113,6 +119,26 @@ namespace CE
         return fieldFlags & FIELD_Internal;
     }
 
+    bool FieldType::IsFusionProperty()
+    {
+		return IsFusionBasicProperty() || IsFusionDataProperty() || IsFusionLayoutProperty();
+    }
+
+    bool FieldType::IsFusionBasicProperty()
+    {
+		return EnumHasFlag(fieldFlags, FIELD_FusionProperty);
+    }
+
+    bool FieldType::IsFusionDataProperty()
+    {
+		return EnumHasFlag(fieldFlags, FIELD_FusionPropertyData);
+    }
+
+    bool FieldType::IsFusionLayoutProperty()
+    {
+		return EnumHasFlag(fieldFlags, FIELD_FusionPropertyLayout);
+    }
+
     bool FieldType::IsEditAnywhere() const
     {
 		return fieldFlags & FIELD_EditAnywhere;
@@ -187,6 +213,16 @@ namespace CE
 	bool FieldType::IsEventField() const
 	{
 		return GetDeclarationTypeId() == Internal::GetScriptEventTypeId();
+	}
+
+	bool FieldType::IsDelegateField() const
+	{
+		return GetDeclarationTypeId() == Internal::GetScriptDelegateTypeId();
+	}
+
+	bool FieldType::IsPropertyBindingField() const
+	{
+		return GetDeclarationTypeId() == Internal::GetPropertyBindingTypeId();
 	}
 
 	bool FieldType::IsObjectField() const

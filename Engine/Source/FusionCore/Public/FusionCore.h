@@ -70,7 +70,6 @@ namespace CE
 #include "Style/FStyleSet.h"
 #include "Style/FStyleManager.h"
 
-#include "Data/FPropertyBinding.h"
 #include "Data/FDataModel.h"
 
 #include "Widget/FWidget.h"

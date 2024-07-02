@@ -33,26 +33,12 @@ namespace CE
 
         void Construct() override;
 
-    protected:  // - Fusion Fields -
-
-        FIELD()
-        FStackBoxDirection m_Direction = FStackBoxDirection::Horizontal;
-
-        FIELD()
-        CE::HAlign m_ContentHAlign = HAlign::Fill;
-
-        FIELD()
-        CE::VAlign m_ContentVAlign = VAlign::Fill;
-
     public:  // - Fusion Properties -
 
-        FUSION_LAYOUT_PROPERTY(Direction);
+        FUSION_LAYOUT_PROPERTY(FStackBoxDirection, Direction);
+        FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
+        FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
 
-        FUSION_LAYOUT_PROPERTY(ContentHAlign);
-
-        FUSION_LAYOUT_PROPERTY(ContentVAlign);
-
-        FUSION_TESTS;
         FUSION_WIDGET;
     };
 
@@ -68,7 +54,6 @@ namespace CE
         }
 
 
-        FUSION_TESTS;
         FUSION_WIDGET;
     };
 
@@ -84,7 +69,6 @@ namespace CE
         }
 
 
-        FUSION_TESTS;
         FUSION_WIDGET;
     };
 

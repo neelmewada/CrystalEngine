@@ -5,7 +5,11 @@ namespace CE
 
     FWidget::FWidget()
     {
-        
+        m_Scale = Vec2(1, 1);
+        m_MaxHeight = NumericLimits<f32>::Infinity();
+        m_MaxWidth = NumericLimits<f32>::Infinity();
+
+        m_Enabled = true;
     }
 
     FWidget::~FWidget()
@@ -294,7 +298,7 @@ namespace CE
             m_Style = nullptr;
             MarkDirty();
         }
-
+        
         if (style && IsOfType(style->GetWidgetClass()))
         {
             m_Style = style;

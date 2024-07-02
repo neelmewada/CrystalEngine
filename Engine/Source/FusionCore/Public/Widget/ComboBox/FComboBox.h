@@ -81,15 +81,9 @@ namespace CE
         FIELD()
         FComboBoxItemStyle* m_ItemStyle = nullptr;
 
-        FIELD()
-        FComboBoxSelectionEvent m_OnSelectionChanged;
-
-        FIELD()
-        Array<String> m_Items;
-
     public: // - Fusion Properties -
 
-        FUSION_EVENT(OnSelectionChanged);
+        FUSION_EVENT(FComboBoxSelectionEvent, OnSelectionChanged);
 
         FUSION_PROPERTY_WRAPPER(Font, selectionText);
         FUSION_PROPERTY_WRAPPER(FontSize, selectionText);
@@ -100,30 +94,9 @@ namespace CE
         Self& ItemStyle(FComboBoxItemStyle* value);
         Self& ItemStyle(FStyleSet* styleSet, const CE::Name& styleKey);
 
-        FUSION_PROPERTY(Items);
-        FPropertyBinding<Array<String>> m_ItemsBinding;
-
         void DestroyAllItems();
 
-        FUNCTION()
-        void Update_Items()
-        {
-	        if (m_ItemsBinding.read.IsBound())
-	        {
-                Items(m_ItemsBinding.read());
-	        }
-        }
-
-        Self& Bind_Items(const ScriptDelegate<decltype(m_Items)()>& read,
-            const ScriptDelegate<void(const decltype(m_Items)&)>& write,
-            FVoidEvent& onModifiedExternally)
-        {
-            m_ItemsBinding.read = read;
-            m_ItemsBinding.write = write;
-            onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_Items));
-            Update_Items();
-            return *this;
-        }
+        FUSION_DATA_PROPERTY(Array<String>, Items);
 
         template<typename... TArgs>
         Self& Items(const TArgs&... items)

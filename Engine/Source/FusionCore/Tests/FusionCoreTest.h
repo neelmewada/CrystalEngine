@@ -9,9 +9,9 @@ using namespace CE;
 namespace RenderingTests
 {
 	CLASS()
-	class TextInputModel : public FDataModel
+	class TextInputModel : public Object
 	{
-		CE_CLASS(TextInputModel, FDataModel)
+		CE_CLASS(TextInputModel, Object)
 	public:
 
 	private:

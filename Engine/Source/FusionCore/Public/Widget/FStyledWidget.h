@@ -30,29 +30,11 @@ namespace CE
 
     protected: // - Fusion Fields -
 
-        FIELD()
-        FBrush m_Background;
-
-        FIELD()
-        FShape m_BackgroundShape = FRectangle();
-
-        FIELD()
-        FShape m_ClipShape;
-
-        FIELD()
-        Color m_BorderColor;
-
-        FIELD()
-        f32 m_BorderWidth = 0.0f;
-
-        FIELD()
-        f32 m_Opacity = 1.0f;
-
     public:   // - Fusion Properties -
 
-        FUSION_PROPERTY(Background);
-        FUSION_PROPERTY(BackgroundShape);
-        FUSION_PROPERTY(ClipShape);
+        FUSION_PROPERTY(FBrush, Background);
+        FUSION_PROPERTY(FShape, BackgroundShape);
+        FUSION_PROPERTY(FShape, ClipShape);
 
         Self& CornerRadius(const Vec4& cornerRadius)
         {
@@ -64,8 +46,8 @@ namespace CE
             return ClipShape(FRoundedRectangle(cornerRadius));
         }
 
-        FUSION_PROPERTY(BorderColor);
-        FUSION_PROPERTY(BorderWidth);
+        FUSION_PROPERTY(Color, BorderColor);
+        FUSION_PROPERTY(f32, BorderWidth);
 
         Self& Border(const Color& borderColor, f32 borderWidth = 1.0f)
         {
@@ -74,7 +56,7 @@ namespace CE
 				.BorderWidth(borderWidth);
         }
 
-        FUSION_PROPERTY(Opacity);
+        FUSION_PROPERTY(f32, Opacity);
 
         FUSION_FRIENDS;
         FUSION_WIDGET;

@@ -5,7 +5,7 @@ namespace CE
 
     FContainerWidget::FContainerWidget()
     {
-	    
+        m_ClipChildren = false;
     }
 
     void FContainerWidget::SetContextRecursively(FFusionContext* context)

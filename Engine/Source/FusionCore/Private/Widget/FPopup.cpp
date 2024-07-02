@@ -5,7 +5,8 @@ namespace CE
 
     FPopup::FPopup()
     {
-
+        m_BlockInteraction = false;
+        m_AutoClose = true;
     }
 
     void FPopup::ClosePopup()

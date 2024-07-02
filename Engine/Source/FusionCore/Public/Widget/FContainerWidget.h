@@ -39,14 +39,9 @@ namespace CE
         FIELD()
         Array<FWidget*> children{};
 
-    protected: // - Fusion Fields -
-
-        FIELD()
-        bool m_ClipChildren = false;
-
     public: // - Fusion Properties -
 
-        FUSION_PROPERTY(ClipChildren);
+        FUSION_PROPERTY(bool, ClipChildren);
 
 
         FUSION_WIDGET;

@@ -4,6 +4,8 @@ namespace CE
 {
     FTextInputLabel::FTextInputLabel()
     {
+        m_SelectionColor = Color::RGBA(0, 112, 224);
+
         cursorTimer = CreateDefaultSubobject<FTimer>("Timer");
         cursorTimer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
     }

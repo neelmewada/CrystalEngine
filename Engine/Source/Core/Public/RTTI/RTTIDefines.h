@@ -236,8 +236,10 @@ namespace CE
         CORE_API TypeId GetObjectStoreTypeId();
 		CORE_API TypeId GetSubClassTypeTypeId();
 
+		CORE_API TypeId GetPropertyBindingTypeId();
 		CORE_API TypeId GetScriptDelegateTypeId();
 		CORE_API TypeId GetScriptEventTypeId();
+
 	}
 
 	template<typename Type>
@@ -250,6 +252,7 @@ namespace CE
 		constexpr bool isSubClassType = TIsSubClassType<Type>::Value;
 		constexpr bool isScriptDelegate = TIsScriptDelegate<Type>::Value;
 		constexpr bool isScriptEvent = TIsScriptEvent<Type>::Value;
+		constexpr bool isPropertyBinding = TIsPropertyBinding<Type>::Value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
@@ -269,6 +272,10 @@ namespace CE
 		else if constexpr (isSubClassType) // SubClassType<SomeClass>
 		{
 			return Internal::GetSubClassTypeTypeId();
+		}
+		else if constexpr (isPropertyBinding) // PropertyBinding<SomeType>
+		{
+			return Internal::GetPropertyBindingTypeId();
 		}
 		else if constexpr (isPointer) // a pointer type
 		{

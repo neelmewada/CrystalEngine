@@ -20,19 +20,10 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-    protected: // - Fusion Fields -
-
-        FIELD()
-        bool m_BlockInteraction = false;
-
-        FIELD()
-        bool m_AutoClose = true;
-
-
     public: // - Fusion Properties - 
 
-        FUSION_PROPERTY(BlockInteraction);
-        FUSION_PROPERTY(AutoClose);
+        FUSION_PROPERTY(bool, BlockInteraction);
+        FUSION_PROPERTY(bool, AutoClose);
 
     private:
 

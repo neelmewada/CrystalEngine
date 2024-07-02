@@ -5,7 +5,7 @@ namespace CE
 
     FLabel::FLabel()
     {
-        
+        m_Foreground = Color::White();
     }
 
     void FLabel::CalculateIntrinsicSize()

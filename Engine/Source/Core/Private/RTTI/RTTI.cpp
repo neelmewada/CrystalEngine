@@ -23,6 +23,11 @@ namespace CE
 			return (TypeId)typeid(CE::SubClassType<Object>).hash_code();
         }
 
+        CORE_API TypeId GetPropertyBindingTypeId()
+        {
+            return typeid(CE::PropertyBinding<>).hash_code();
+        }
+
         CORE_API TypeId GetScriptDelegateTypeId()
         {
             return (TypeId)typeid(CE::ScriptDelegate<void(void)>).hash_code();

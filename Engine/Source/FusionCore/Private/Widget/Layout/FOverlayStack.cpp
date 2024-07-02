@@ -5,7 +5,8 @@ namespace CE
 
     FOverlayStack::FOverlayStack()
     {
-
+        m_ContentHAlign = HAlign::Fill;
+        m_ContentVAlign = VAlign::Fill;
     }
 
     void FOverlayStack::CalculateIntrinsicSize()

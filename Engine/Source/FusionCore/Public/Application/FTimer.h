@@ -31,14 +31,11 @@ namespace CE
 
     private:
 
-        FIELD()
-        FVoidEvent m_OnTimeOut{};
-
         void Tick();
 
     public:
 
-        FUSION_EVENT(OnTimeOut);
+        FUSION_EVENT(FVoidEvent, OnTimeOut);
 
     private:
 

@@ -62,7 +62,6 @@ namespace CE
             return *this;
         }
 
-        FUSION_TESTS;
         FUSION_WIDGET;
     };
     

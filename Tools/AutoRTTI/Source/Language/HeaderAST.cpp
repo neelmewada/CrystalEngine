@@ -332,187 +332,12 @@ namespace CE
                     curAttrib = "";
                 }
             }
-            else if (token.type == TK_CE_FUNCTION && curClass != nullptr)
-            {
-                FunctionInfo curFunction{};
-                int attribScope = 0;
-                String curAttrib = "";
-                i++;
-
-                if (token.type == TK_CE_EVENT)
-                {
-                    curFunction.isEvent = true;
-                    curFunction.attribs.Add("Event");
-                }
-
-                while (i < size)
-                {
-                    if (tokens->tokens[i].type == TK_PAREN_CLOSE && attribScope <= 1)
-                    {
-                        i++;
-                        break;
-                    }
-                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
-                    {
-                        attribScope++;
-                        if (attribScope > 1)
-                            curAttrib += "(";
-                    }
-                    if (tokens->tokens[i].type == TK_PAREN_CLOSE)
-                    {
-                        if (attribScope > 1)
-                            curAttrib += ")";
-                        attribScope--;
-                    }
-                    if (attribScope == 1 && tokens->tokens[i].type == TK_COMMA)
-                    {
-                        if (!curAttrib.IsEmpty())
-                            curFunction.attribs.Add(curAttrib);
-                        curAttrib = "";
-                    }
-                    else if (attribScope > 1 && tokens->tokens[i].type == TK_COMMA)
-                    {
-                        curAttrib += ",";
-                    }
-                    else if (attribScope >= 1)
-                    {
-                        if (tokens->tokens[i].type == TK_LITERAL_STRING)
-                            curAttrib += "\"";
-                        if (tokens->tokens[i].type == TK_LITERAL_CHAR)
-                            curAttrib += "\'";
-                        curAttrib += String(tokens->tokens[i].lexeme);
-                        if (tokens->tokens[i].type == TK_LITERAL_CHAR)
-                            curAttrib += "\'";
-                        if (tokens->tokens[i].type == TK_LITERAL_STRING)
-                            curAttrib += "\"";
-                    }
-                    i++;
-                }
-
-                if (!curAttrib.IsEmpty())
-                {
-                    curFunction.attribs.Add(curAttrib);
-                    curAttrib = "";
-                }
-
-                attribScope = 0;
-                int parenScope = 0;
-                int funcBodyScope = 0;
-
-                while (i < size)
-                {
-                    if (tokens->tokens[i].type == TK_SCOPE_OPEN)
-                    {
-                        funcBodyScope++;
-                    }
-                    else if (tokens->tokens[i].type == TK_SCOPE_CLOSE)
-                    {
-                        funcBodyScope--;
-                        if (funcBodyScope <= 0)
-                            break;
-                    }
-
-                    if (funcBodyScope > 0)
-                    {
-                        i++;
-                        continue;
-                    }
-
-                    if (parenScope == 0 && tokens->tokens[i].type == TK_KW_CONST)
-                    {
-                        curFunction.signature += " const";
-                        curFunction.attribs.Add("Constant");
-                    }
-
-                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
-                    {
-                        if (parenScope == 0)
-                            curFunction.signature += "(";
-                        parenScope++;
-                        if (!curFunction.name.IsValid())
-                        {
-	                        curFunction.name = String(tokens->tokens[i - 1].lexeme);
-
-                            String returnType{};
-
-                            // Find return type
-                            int backIdx = i - 2;
-                            while (backIdx > 1 && tokens->tokens[backIdx].type != TK_SCOPE_CLOSE &&
-                                tokens->tokens[backIdx].type != TK_SEMICOLON &&
-                                tokens->tokens[backIdx].type != TK_NEWLINE)
-                            {
-                                if (tokens->tokens[backIdx].type == TK_KW_VOID ||
-                                    tokens->tokens[backIdx].type == TK_KW_INLINE ||
-                                    tokens->tokens[backIdx].type == TK_KW_VIRTUAL)
-                                {
-                                    returnType = "void";
-                                    break;
-                                }
-
-                                if (tokens->tokens[backIdx].type == TK_ASTERISK)
-                                    returnType = "*" + returnType;
-                                else if (tokens->tokens[backIdx].type == TK_LEFTANGLE)
-                                    returnType = "<" + returnType;
-                                else if (tokens->tokens[backIdx].type == TK_RIGHTANGLE)
-                                    returnType = ">" + returnType;
-                                else if (tokens->tokens[backIdx].type == TK_SCOPE_OPERATOR)
-                                    returnType = "::" + returnType;
-                                else if ((tokens->tokens[backIdx].type == TK_IDENTIFIER && tokens->tokens[backIdx].lexeme != curFunction.name.GetCString()) ||
-                                    (tokens->tokens[backIdx].type >= TK_KW_INT && tokens->tokens[backIdx].type <= TK_KW_VEC4))
-                                {
-	                                returnType = String(tokens->tokens[backIdx].lexeme) + returnType;
-                                    if (tokens->tokens[backIdx - 1].type != TK_SCOPE_OPERATOR &&
-                                        tokens->tokens[backIdx - 1].type != TK_LEFTANGLE &&
-                                        tokens->tokens[backIdx - 1].type != TK_RIGHTANGLE)
-                                        break;
-                                }
-                                else if (tokens->tokens[backIdx].type == TK_AMPERSAND)
-                                    returnType = "&" + returnType;
-                                else if (tokens->tokens[backIdx].type == TK_KW_ARRAY)
-                                    returnType = "Array" + returnType;
-
-                                backIdx--;
-                            }
-
-                            if (!returnType.IsEmpty())
-                                curFunction.returnType = returnType;
-                        }
-                    }
-                    else if (tokens->tokens[i].type == TK_PAREN_CLOSE)
-                    {
-                        parenScope--;
-                        if (parenScope == 0)
-                            curFunction.signature += ")";
-                    }
-                    else if (tokens->tokens[i].type == TK_SEMICOLON)
-                    {
-                        break;
-                    }
-                    else if (parenScope > 0)
-                    {
-                        if (tokens->tokens[i].type == TK_COMMA)
-                            curFunction.signature += ",";
-                        else
-                            curFunction.signature += String(tokens->tokens[i].lexeme) + " ";
-                    }
-                    
-                    i++;
-                }
-
-                curClass->functions.Add(curFunction);
-            }
 			else if (token.type == TK_CE_FUNCTION && curStruct != nullptr)
 			{
 				FunctionInfo curFunction{};
 				int attribScope = 0;
 				String curAttrib = "";
 				i++;
-
-				if (token.type == TK_CE_EVENT)
-				{
-					curFunction.isEvent = true;
-					curFunction.attribs.Add("Event");
-				}
 
 				while (i < size)
 				{
@@ -670,6 +495,234 @@ namespace CE
 
 				curStruct->functions.Add(curFunction);
 			}
+            else if (token.type == TK_CE_FUNCTION && curClass != nullptr)
+            {
+                FunctionInfo curFunction{};
+                int attribScope = 0;
+                String curAttrib = "";
+                i++;
+
+                while (i < size)
+                {
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE && attribScope <= 1)
+                    {
+                        i++;
+                        break;
+                    }
+                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
+                    {
+                        attribScope++;
+                        if (attribScope > 1)
+                            curAttrib += "(";
+                    }
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE)
+                    {
+                        if (attribScope > 1)
+                            curAttrib += ")";
+                        attribScope--;
+                    }
+                    if (attribScope == 1 && tokens->tokens[i].type == TK_COMMA)
+                    {
+                        if (!curAttrib.IsEmpty())
+                            curFunction.attribs.Add(curAttrib);
+                        curAttrib = "";
+                    }
+                    else if (attribScope > 1 && tokens->tokens[i].type == TK_COMMA)
+                    {
+                        curAttrib += ",";
+                    }
+                    else if (attribScope >= 1)
+                    {
+                        if (tokens->tokens[i].type == TK_LITERAL_STRING)
+                            curAttrib += "\"";
+                        if (tokens->tokens[i].type == TK_LITERAL_CHAR)
+                            curAttrib += "\'";
+                        curAttrib += String(tokens->tokens[i].lexeme);
+                        if (tokens->tokens[i].type == TK_LITERAL_CHAR)
+                            curAttrib += "\'";
+                        if (tokens->tokens[i].type == TK_LITERAL_STRING)
+                            curAttrib += "\"";
+                    }
+                    i++;
+                }
+
+                if (!curAttrib.IsEmpty())
+                {
+                    curFunction.attribs.Add(curAttrib);
+                    curAttrib = "";
+                }
+
+                attribScope = 0;
+                int parenScope = 0;
+                int funcBodyScope = 0;
+
+                while (i < size)
+                {
+                    if (tokens->tokens[i].type == TK_SCOPE_OPEN)
+                    {
+                        funcBodyScope++;
+                    }
+                    else if (tokens->tokens[i].type == TK_SCOPE_CLOSE)
+                    {
+                        funcBodyScope--;
+                        if (funcBodyScope <= 0)
+                            break;
+                    }
+
+                    if (funcBodyScope > 0)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    if (parenScope == 0 && tokens->tokens[i].type == TK_KW_CONST)
+                    {
+                        curFunction.signature += " const";
+                        curFunction.attribs.Add("Constant");
+                    }
+
+                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
+                    {
+                        if (parenScope == 0)
+                            curFunction.signature += "(";
+                        parenScope++;
+                        if (!curFunction.name.IsValid())
+                        {
+	                        curFunction.name = String(tokens->tokens[i - 1].lexeme);
+
+                            String returnType{};
+
+                            // Find return type
+                            int backIdx = i - 2;
+                            while (backIdx > 1 && tokens->tokens[backIdx].type != TK_SCOPE_CLOSE &&
+                                tokens->tokens[backIdx].type != TK_SEMICOLON &&
+                                tokens->tokens[backIdx].type != TK_NEWLINE)
+                            {
+                                if (tokens->tokens[backIdx].type == TK_KW_VOID ||
+                                    tokens->tokens[backIdx].type == TK_KW_INLINE ||
+                                    tokens->tokens[backIdx].type == TK_KW_VIRTUAL)
+                                {
+                                    returnType = "void";
+                                    break;
+                                }
+
+                                if (tokens->tokens[backIdx].type == TK_ASTERISK)
+                                    returnType = "*" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_LEFTANGLE)
+                                    returnType = "<" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_RIGHTANGLE)
+                                    returnType = ">" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_SCOPE_OPERATOR)
+                                    returnType = "::" + returnType;
+                                else if ((tokens->tokens[backIdx].type == TK_IDENTIFIER && tokens->tokens[backIdx].lexeme != curFunction.name.GetCString()) ||
+                                    (tokens->tokens[backIdx].type >= TK_KW_INT && tokens->tokens[backIdx].type <= TK_KW_VEC4))
+                                {
+	                                returnType = String(tokens->tokens[backIdx].lexeme) + returnType;
+                                    if (tokens->tokens[backIdx - 1].type != TK_SCOPE_OPERATOR &&
+                                        tokens->tokens[backIdx - 1].type != TK_LEFTANGLE &&
+                                        tokens->tokens[backIdx - 1].type != TK_RIGHTANGLE)
+                                        break;
+                                }
+                                else if (tokens->tokens[backIdx].type == TK_AMPERSAND)
+                                    returnType = "&" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_KW_ARRAY)
+                                    returnType = "Array" + returnType;
+
+                                backIdx--;
+                            }
+
+                            if (!returnType.IsEmpty())
+                                curFunction.returnType = returnType;
+                        }
+                    }
+                    else if (tokens->tokens[i].type == TK_PAREN_CLOSE)
+                    {
+                        parenScope--;
+                        if (parenScope == 0)
+                            curFunction.signature += ")";
+                    }
+                    else if (tokens->tokens[i].type == TK_SEMICOLON)
+                    {
+                        break;
+                    }
+                    else if (parenScope > 0)
+                    {
+                        if (tokens->tokens[i].type == TK_COMMA)
+                            curFunction.signature += ",";
+                        else
+                            curFunction.signature += String(tokens->tokens[i].lexeme) + " ";
+                    }
+                    
+                    i++;
+                }
+
+                curClass->functions.Add(curFunction);
+            }
+            else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || token.type == TK_FUSION_LAYOUT_PROPERTY) && 
+                curClass != nullptr)
+            {
+                i++;
+                String name = "";
+                int parenScope = 0;
+                int paramIndex = 0;
+
+                while (i < size)
+                {
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE && parenScope <= 1)
+                        break;
+                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
+                    {
+                        parenScope++;
+                    }
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE)
+                    {
+                        parenScope--;
+                    }
+
+                    if (parenScope == 1 && paramIndex == 1)
+                    {
+                        const String& lexeme = tokens->tokens[i].lexeme;
+	                    if (name.IsEmpty() && lexeme.NonEmpty() && String::IsUpper(lexeme[0]))
+	                    {
+                            name = tokens->tokens[i].lexeme;
+	                    }
+                    }
+
+                    if (parenScope == 1 && tokens->tokens[i].type == TK_COMMA)
+                    {
+                        paramIndex++;
+                    }
+                    i++;
+                }
+
+                if (name.NonEmpty())
+                {
+                    String fieldName = "m_" + name;
+
+                    FieldInfo field{};
+                    field.name = fieldName;
+                    switch (token.type)
+                    {
+                    case TK_FUSION_PROPERTY:
+                        field.attribs.Add("FusionProperty");
+                        break;
+                    case TK_FUSION_DATA_PROPERTY:
+                        field.attribs.Add("FusionDataProperty");
+                        break;
+                    case TK_FUSION_LAYOUT_PROPERTY:
+                        field.attribs.Add("FusionLayoutProperty");
+                        break;
+                    }
+
+                    curClass->fields.Add(field);
+
+                    if (token.type == TK_FUSION_DATA_PROPERTY)
+                    {
+                        curClass->fields.Add({ .name = fieldName + "Binding", .attribs = { "FusionDataBinding" } });
+                        curClass->functions.Add({ .name = "Update_" + name, .signature = "()", .returnType = "void", .attribs = { "FusionDataUpdate" } });
+                    }
+                }
+            }
             else if (token.type == TK_CE_FIELD && (curClass != nullptr || curStruct != nullptr))
             {
                 auto structPtr = curStruct;
