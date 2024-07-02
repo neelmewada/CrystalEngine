@@ -58,22 +58,10 @@ namespace RenderingTests
         BuildPopup(nativePopup, 1);
 
         model = CreateObject<TextInputModel>(this, "DataModel");
-        model->ModifyTextInCode();
 
         btnPopup->CalculateIntrinsicSize();
-        Vec2 size1 = btnPopup->GetIntrinsicSize();
         nativePopup->CalculateIntrinsicSize();
         nativePopup->SetName("NativePopup");
-        Vec2 size2 = nativePopup->GetIntrinsicSize();
-
-        model->OnTextEdited().Bind([this]
-            {
-                CE_LOG(Info, All, "Text Edited via UI: {}", model->GetText());
-            });
-        model->OnTextModified().Bind([this]
-            {
-                CE_LOG(Info, All, "Text Modified via Code: {}", model->GetText());
-            });
 
         model->SetComboItems({ "Combo Item 0", "Combo Item 1", "Combo Item 2" });
 
@@ -298,7 +286,7 @@ namespace RenderingTests
                         .ContentVAlign(VAlign::Center)
                         (
 							FAssignNew(FTextInput, modelTextInput)
-                            .Bind_Text(BIND_PROPERTY_RW(model, Text))
+							.Bind_Text(BIND_PROPERTY_RW(model, Text))
                             .FontSize(13)
                             .Width(180)
                             .Margin(Vec4(0, 0, 10, 0)),
@@ -319,7 +307,7 @@ namespace RenderingTests
                 )
             )
         );
-
+        
         PlatformApplication::Get()->AddMessageHandler(this);
     }
 

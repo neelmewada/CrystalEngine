@@ -13,11 +13,14 @@ namespace RenderingTests
 		CE_CLASS(TextInputModel, Object)
 	public:
 
-		virtual void OnModelPropertyModified(const CE::Name& propertyName) {}
-		virtual void OnModelPropertyEdited(const CE::Name& propertyName) {}
+		TextInputModel()
+		{
+			m_Text = "[Text]";
+		}
 
-		MODEL_PROPERTY_EDITABLE(String, Text);
-		
+		virtual void OnModelPropertyUpdated(const CE::Name& propertyName, Object* modifyingObject) {}
+
+		MODEL_PROPERTY(String, Text);
 		MODEL_PROPERTY(Array<String>, ComboItems);
 
 	public:

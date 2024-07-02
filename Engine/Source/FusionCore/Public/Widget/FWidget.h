@@ -228,7 +228,6 @@ namespace CE
     private:
 
 
-        FUSION_FRIENDS;
         FUSION_WIDGET;
     };
 

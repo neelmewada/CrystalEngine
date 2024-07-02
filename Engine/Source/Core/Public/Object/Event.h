@@ -476,7 +476,14 @@ namespace CE
         {
             Delegate<Variant(const Array<Variant>&)> delegate = [lambda](const Array<Variant>& variantArgs) -> Variant
                 {
-                    lambda((variantArgs.begin() + Is)->GetValue<TArgs>()...);
+					if constexpr (TFunctionTraits<TLambda>::NumArgs == 0)
+					{
+                        lambda();
+					}
+                    else
+                    {
+						lambda((variantArgs.begin() + Is)->GetValue<TArgs>()...);
+                    }
                     return nullptr;
                 };
             Bind(delegate);

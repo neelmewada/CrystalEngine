@@ -16,7 +16,7 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        FUSION_DATA_PROPERTY(String, Text);
+        FUSION_DATA_LAYOUT_PROPERTY(String, Text);
 
         FUSION_LAYOUT_PROPERTY(FFont, Font);
         FUSION_LAYOUT_PROPERTY(FWordWrap, WordWrap);

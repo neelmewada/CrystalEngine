@@ -31,26 +31,61 @@
 
 #define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkDirty())
 
-#define FUSION_DATA_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkDirty())\
+#define __FUSION_DATA_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
+	__FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	PropertyBinding<PropertyType> m_##PropertyName##Binding{};\
-	void Update_##PropertyName() {\
-		if (m_##PropertyName##Binding.read.IsBound()) PropertyName(m_##PropertyName##Binding.read());\
+	void Update_##PropertyName(CE::Object* modifyingObject = nullptr) {\
+		if (m_##PropertyName##Binding.read.IsBound() && this != modifyingObject) PropertyName(m_##PropertyName##Binding.read());\
 	}\
-	Self& Bind_##PropertyName(const ScriptDelegate<PropertyType()>& read, const ScriptDelegate<void(const PropertyType&)>& write, FVoidEvent& onModifiedExternally) {\
-		m_##PropertyName##Binding.read = read;\
-		m_##PropertyName##Binding.write = write;\
-		onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_##PropertyName));\
-		Update_##PropertyName();\
+	Self& Bind_##PropertyName(const PropertyBindingRequest<PropertyType>& request) {\
+		m_##PropertyName##Binding.read = request.read;\
+		m_##PropertyName##Binding.write = request.write;\
+		request.onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_##PropertyName));\
+		Update_##PropertyName(nullptr);\
 		return *this;\
 	}
 
+#define FUSION_DATA_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkDirty())
+
+#define FUSION_DATA_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
+
+#define BIND_PROPERTY_RW(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
+	FUNCTION_BINDING(model, Get##propertyName),\
+	FUNCTION_BINDING(model, Set##propertyName##),\
+	modelPtr->On##propertyName##Updated())
+
+#define BIND_PROPERTY_R(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
+	FUNCTION_BINDING(model, Get##propertyName),\
+	nullptr,\
+	modelPtr->On##propertyName##Updated())
+
+#define MODEL_PROPERTY(PropertyType, PropertyName, ...) \
+	protected:\
+		PropertyType m_##PropertyName = {};\
+		FUSION_EVENT(ScriptEvent<void(Object*)>, On##PropertyName##Updated)\
+	public:\
+		const auto& Get##PropertyName() const { return m_##PropertyName; }\
+		void Set##PropertyName(const PropertyType& value, Object* modifyingObject = nullptr) {\
+			m_##PropertyName = value; m_On##PropertyName##Updated(modifyingObject);\
+			thread_local const CE::Name propName = #PropertyName;\
+			THasOnModelPropertyUpdated<Self>::OnModelPropertyUpdated(this, propName, modifyingObject);\
+		}
+
+#define __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable) std::remove_cvref_t<decltype(std::declval<std::remove_cvref_t<decltype(*WrappingVariable)>>().PropertyName())>
+
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
-	Self& PropertyName(const std::remove_cvref_t<decltype(std::declval<std::remove_cvref_t<decltype(*WrappingVariable)>>().PropertyName())>& value) {\
+	Self& PropertyName(const __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)& value) {\
 		if (WrappingVariable == nullptr) return *this;\
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
 	auto PropertyName() const { return WrappingVariable->PropertyName(); }
+
+#define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
+	Self& Bind_##PropertyName(const CE::PropertyBindingRequest<__WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)>& request) {\
+		WrappingVariable->Bind_##PropertyName(request);\
+		return *this;\
+	}
 
 #define FUSION_EVENT(EventType, PropertyName, ...)\
 	protected:\
@@ -85,78 +120,32 @@
 		}\
 		FUSION_FRIENDS
 
-#define BIND_PROPERTY_RW(modelPtr, propertyName)\
-	FUNCTION_BINDING(model, Get##propertyName),\
-	FUNCTION_BINDING(model, Set##propertyName##_UI),\
-	modelPtr->On##propertyName##Modified()
-
-#define BIND_PROPERTY_R(modelPtr, propertyName)\
-	FUNCTION_BINDING(model, Get##propertyName),\
-	nullptr,\
-	modelPtr->On##propertyName##Modified()
-
-#define MODEL_PROPERTY(PropertyType, PropertyName, ...) \
-	protected:\
-		PropertyType m_##PropertyName = {};\
-		FUSION_EVENT(FVoidEvent, On##PropertyName##Modified)\
-	public:\
-		const auto& Get##PropertyName() const { return m_##PropertyName; }\
-		void Set##PropertyName##_Raw(const PropertyType& value) { m_##PropertyName = value; }\
-		void Set##PropertyName(const PropertyType& value) {\
-			m_##PropertyName = value; m_On##PropertyName##Modified();\
-			thread_local const CE::Name propName = #PropertyName;\
-			THasOnModelPropertyModified<Self>::OnModelPropertyModified(this, propName);\
-		}\
-
-#define MODEL_PROPERTY_EDITABLE(PropertyType, PropertyName, ...) \
-	protected:\
-		PropertyType m_##PropertyName = {};\
-		FUSION_EVENT(FVoidEvent, On##PropertyName##Modified)\
-		FUSION_EVENT(FVoidEvent, On##PropertyName##Edited)\
-	public:\
-		const auto& Get##PropertyName() const { return m_##PropertyName; }\
-		void Set##PropertyName##_Raw(const PropertyType& value) { m_##PropertyName = value; }\
-		void Set##PropertyName(const PropertyType& value) {\
-			m_##PropertyName = value; m_On##PropertyName##Modified();\
-			thread_local const CE::Name propName = #PropertyName;\
-			THasOnModelPropertyModified<Self>::OnModelPropertyModified(this, propName);\
-		}\
-		void Set##PropertyName##_UI(const PropertyType& value) {\
-			m_##PropertyName = value; m_On##PropertyName##Edited();\
-			thread_local const CE::Name propName = #PropertyName;\
-			THasOnModelPropertyEdited<Self>::OnModelPropertyEdited(this, propName);\
-		}\
-
 namespace CE
 {
 	template<typename T, typename = void>
-	struct THasOnModelPropertyModified : TFalseType
+	struct THasOnModelPropertyUpdated : TFalseType
 	{
-		static void OnModelPropertyModified(T* instance, const CE::Name& propertyName) {} // Do nothing
+		static void OnModelPropertyUpdated(T* instance, const CE::Name& propertyName, Object* modifyingObject) {} // Do nothing
 	};
 
 	template<typename T>
-	struct THasOnModelPropertyModified<T, std::void_t<decltype(std::declval<T>().OnModelPropertyModified(CE::Name()))>> : TTrueType
+	struct THasOnModelPropertyUpdated<T, std::void_t<decltype(std::declval<T>().OnModelPropertyUpdated(CE::Name()))>> : TTrueType
 	{
-		static void OnModelPropertyModified(T* instance, const CE::Name& propertyName) { return instance->OnModelPropertyModified(propertyName); }
-	};
-
-	template<typename T, typename = void>
-	struct THasOnModelPropertyEdited : TFalseType
-	{
-		static void OnModelPropertyEdited(T* instance, const CE::Name& propertyName) {} // Do nothing
+		static void OnModelPropertyUpdated(T* instance, const CE::Name& propertyName, Object* modifyingObject) { return instance->OnModelPropertyUpdated(propertyName, modifyingObject); }
 	};
 
 	template<typename T>
-	struct THasOnModelPropertyEdited<T, std::void_t<decltype(std::declval<T>().OnModelPropertyEdited(CE::Name()))>> : TTrueType
+	struct PropertyBindingRequest
 	{
-		static void OnModelPropertyEdited(T* instance, const CE::Name& propertyName) { return instance->OnModelPropertyEdited(propertyName); }
-	};
+		PropertyBindingRequest(const ScriptDelegate<T()>& read, const ScriptDelegate<void(const T&, Object*)>& write, ScriptEvent<void(Object*)>& onModifiedExternally)
+			: read(read), write(write), onModifiedExternally(onModifiedExternally)
+		{
+			
+		}
 
-	template<typename T>
-	struct TGetReturnType
-	{
-		using Type = std::remove_cvref_t<typename TFunctionTraits<T>::ReturnType>;
+		const ScriptDelegate<T()>& read;
+		const ScriptDelegate<void(const T&, Object*)>& write;
+		ScriptEvent<void(Object*)>& onModifiedExternally;
 	};
 
 }

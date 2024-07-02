@@ -1794,7 +1794,15 @@ TEST(Object, Events)
 				fileAction = newFileAction;
 			};
 
+		int lambda2Called = 0;
+
+		auto lambda2 = [&]
+			{
+				lambda2Called++;
+			};
+
 		DelegateHandle fileActionHandle = sender->fileActionEvent + lambda;
+		DelegateHandle lambda2Handle = sender->fileActionEvent + lambda2;
 
 		// - Broadcasts -
 
@@ -1807,8 +1815,10 @@ TEST(Object, Events)
 		onObjectEvent->Broadcast({ sender });
 		EXPECT_EQ(receiver->object, sender);
 
+		EXPECT_EQ(lambda2Called, 0);
 		sender->fileActionEvent.Broadcast(IO::FileAction::Modified);
 		EXPECT_EQ(fileAction, IO::FileAction::Modified);
+		EXPECT_EQ(lambda2Called, 1);
 
 		sender->onTextChanged -= FUNCTION_BINDING(receiver, OnTextChangedCallback);
 		sender->onTextChanged.Broadcast("New Text");
@@ -1828,9 +1838,14 @@ TEST(Object, Events)
 
 		// - Unbinding -
 
+		EXPECT_EQ(lambda2Called, 2);
+
+		sender->fileActionEvent -= lambda2Handle;
 		sender->fileActionEvent -= fileActionHandle;
 		sender->fileActionEvent.Broadcast(IO::FileAction::Moved);
+
 		EXPECT_EQ(fileAction, IO::FileAction::Delete);
+		EXPECT_EQ(lambda2Called, 2);
 
 		sender->Destroy();
 	}

@@ -217,7 +217,7 @@ namespace CE
 	{
 		Super::OnPaint(painter);
 
-		if (children.IsEmpty())
+		if (children.IsEmpty() || !Enabled())
 			return;
 
 		painter->PushChildCoordinateSpace(localTransform);

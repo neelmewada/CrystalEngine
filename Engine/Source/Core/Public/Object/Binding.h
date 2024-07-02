@@ -20,7 +20,7 @@ namespace CE
 
         virtual ~PropertyBinding() = default;
 
-        ScriptDelegate<void(const T&)> write;
+        ScriptDelegate<void(const T& value, Object* modifyingObject)> write;
         ScriptDelegate<T()> read;
         DelegateHandle modifyDelegate = 0;
 

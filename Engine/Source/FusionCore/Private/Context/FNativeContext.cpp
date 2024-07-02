@@ -300,7 +300,7 @@ namespace CE
 		Vec2i windowPos = this->platformWindow->GetWindowPosition() + globalPosition.ToVec2i();
 		window->SetWindowPosition(windowPos);
 		window->SetBorderless(true);
-		if (!popup->AutoClose())
+		if (!popup->AutoClose() || popup->BlockInteraction())
 		{
 			window->SetAlwaysOnTop(true);
 		}

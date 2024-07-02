@@ -528,7 +528,7 @@ namespace CE
 
         if (!restoreOriginal && m_TextBinding.write.IsBound())
         {
-            m_TextBinding.write.Invoke(m_Text);
+            m_TextBinding.write.Invoke(m_Text, this);
         }
     }
 

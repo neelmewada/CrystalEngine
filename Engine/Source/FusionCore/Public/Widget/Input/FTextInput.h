@@ -156,14 +156,7 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontFamily, inputLabel);
 
-        
-        Self& Bind_Text(const ScriptDelegate<decltype(inputLabel->m_Text)()>& read, 
-            const ScriptDelegate<void(const decltype(inputLabel->m_Text)&)>& write,
-            FVoidEvent& onModifiedExternally)
-        {
-            inputLabel->Bind_Text(read, write, onModifiedExternally);
-            return *this;
-        }
+        FUSION_DATA_PROPERTY_WRAPPER(Text, inputLabel);
 
         Self& LeftSlot(FWidget& content);
 
