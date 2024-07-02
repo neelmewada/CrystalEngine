@@ -658,6 +658,87 @@ namespace CE
 
                 curClass->functions.Add(curFunction);
             }
+            else if ((token.type == TK_MODEL_PROPERTY || token.type == TK_MODEL_PROPERTY_EDITABLE) && curClass != nullptr)
+            {
+                i++;
+                String name = "";
+                int parenScope = 0;
+                int paramIndex = 0;
+
+                while (i < size)
+                {
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE && parenScope <= 1)
+                        break;
+                    if (tokens->tokens[i].type == TK_PAREN_OPEN)
+                    {
+                        parenScope++;
+                    }
+                    if (tokens->tokens[i].type == TK_PAREN_CLOSE)
+                    {
+                        parenScope--;
+                    }
+
+                    if (parenScope == 1 && paramIndex == 1)
+                    {
+                        const String& lexeme = tokens->tokens[i].lexeme;
+                        if (name.IsEmpty() && lexeme.NonEmpty() && String::IsUpper(lexeme[0]))
+                        {
+                            name = tokens->tokens[i].lexeme;
+                        }
+                    }
+
+                    if (parenScope == 1 && tokens->tokens[i].type == TK_COMMA)
+                    {
+                        paramIndex++;
+                    }
+                    i++;
+                }
+
+                if (name.NonEmpty())
+                {
+                    String fieldName = "m_" + name;
+
+                    FieldInfo field{};
+                    field.name = fieldName;
+                    switch (token.type)
+                    {
+                    case TK_MODEL_PROPERTY:
+                        field.attribs.Add("ModelProperty");
+                        break;
+                    case TK_MODEL_PROPERTY_EDITABLE:
+                        field.attribs.Add("ModelPropertyEditable");
+                        break;
+                    }
+
+                    curClass->fields.Add(field);
+                    curClass->fields.Add({ .name = "m_On" + name + "Modified" });
+
+                    String fieldPath = curClass->nameSpace.GetString() + "::" + curClass->name.GetString() + "::" + fieldName;
+
+                    curClass->functions.Add({
+                        .name = "Get" + name,
+                        .signature = "() const",
+                        .returnType = "const decltype(" + fieldPath + ")&",
+                        .isSignal = false,
+                        .isEvent = false,
+                        .attribs = {}
+                    });
+
+                    if (token.type == TK_MODEL_PROPERTY_EDITABLE)
+                    {
+                        curClass->fields.Add({ .name = "m_On" + name + "Edited" });
+
+                        curClass->functions.Add({
+                        	.name = "Set" + name + "_UI",
+                        	.signature = "(const decltype(" + fieldPath + ")&)",
+                        	.returnType = "void",
+                        	.isSignal = false,
+                        	.isEvent = false,
+                        	.attribs = {}
+                        });
+                    }
+                }
+            }
             else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || token.type == TK_FUSION_LAYOUT_PROPERTY) && 
                 curClass != nullptr)
             {

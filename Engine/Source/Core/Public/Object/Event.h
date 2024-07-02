@@ -81,6 +81,11 @@ namespace CE
             isBound = dstObject && dstFunction;
         }
 
+        ScriptDelegate(const FunctionBinding& binding) : ScriptDelegate(binding.object, binding.function)
+        {
+
+        }
+
     private:
 
         template<typename F, std::size_t... Is>

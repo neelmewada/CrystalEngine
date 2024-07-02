@@ -45,7 +45,7 @@
 	}
 
 #define FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
-	Self& PropertyName(const auto& value) {\
+	Self& PropertyName(const std::remove_cvref_t<decltype(std::declval<std::remove_cvref_t<decltype(*WrappingVariable)>>().PropertyName())>& value) {\
 		if (WrappingVariable == nullptr) return *this;\
 		WrappingVariable->PropertyName(value);\
 		return *this;\
@@ -86,12 +86,77 @@
 		FUSION_FRIENDS
 
 #define BIND_PROPERTY_RW(modelPtr, propertyName)\
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Set##propertyName##_UI, modelPtr), \
+	FUNCTION_BINDING(model, Get##propertyName),\
+	FUNCTION_BINDING(model, Set##propertyName##_UI),\
 	modelPtr->On##propertyName##Modified()
 
 #define BIND_PROPERTY_R(modelPtr, propertyName)\
-	CE::MemberDelegate(&std::remove_cvref_t<decltype(*model)>::Get##propertyName, modelPtr), \
-	nullptr, \
+	FUNCTION_BINDING(model, Get##propertyName),\
+	nullptr,\
 	modelPtr->On##propertyName##Modified()
 
+#define MODEL_PROPERTY(PropertyType, PropertyName, ...) \
+	protected:\
+		PropertyType m_##PropertyName = {};\
+		FUSION_EVENT(FVoidEvent, On##PropertyName##Modified)\
+	public:\
+		const auto& Get##PropertyName() const { return m_##PropertyName; }\
+		void Set##PropertyName##_Raw(const PropertyType& value) { m_##PropertyName = value; }\
+		void Set##PropertyName(const PropertyType& value) {\
+			m_##PropertyName = value; m_On##PropertyName##Modified();\
+			thread_local const CE::Name propName = #PropertyName;\
+			THasOnModelPropertyModified<Self>::OnModelPropertyModified(this, propName);\
+		}\
+
+#define MODEL_PROPERTY_EDITABLE(PropertyType, PropertyName, ...) \
+	protected:\
+		PropertyType m_##PropertyName = {};\
+		FUSION_EVENT(FVoidEvent, On##PropertyName##Modified)\
+		FUSION_EVENT(FVoidEvent, On##PropertyName##Edited)\
+	public:\
+		const auto& Get##PropertyName() const { return m_##PropertyName; }\
+		void Set##PropertyName##_Raw(const PropertyType& value) { m_##PropertyName = value; }\
+		void Set##PropertyName(const PropertyType& value) {\
+			m_##PropertyName = value; m_On##PropertyName##Modified();\
+			thread_local const CE::Name propName = #PropertyName;\
+			THasOnModelPropertyModified<Self>::OnModelPropertyModified(this, propName);\
+		}\
+		void Set##PropertyName##_UI(const PropertyType& value) {\
+			m_##PropertyName = value; m_On##PropertyName##Edited();\
+			thread_local const CE::Name propName = #PropertyName;\
+			THasOnModelPropertyEdited<Self>::OnModelPropertyEdited(this, propName);\
+		}\
+
+namespace CE
+{
+	template<typename T, typename = void>
+	struct THasOnModelPropertyModified : TFalseType
+	{
+		static void OnModelPropertyModified(T* instance, const CE::Name& propertyName) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasOnModelPropertyModified<T, std::void_t<decltype(std::declval<T>().OnModelPropertyModified(CE::Name()))>> : TTrueType
+	{
+		static void OnModelPropertyModified(T* instance, const CE::Name& propertyName) { return instance->OnModelPropertyModified(propertyName); }
+	};
+
+	template<typename T, typename = void>
+	struct THasOnModelPropertyEdited : TFalseType
+	{
+		static void OnModelPropertyEdited(T* instance, const CE::Name& propertyName) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasOnModelPropertyEdited<T, std::void_t<decltype(std::declval<T>().OnModelPropertyEdited(CE::Name()))>> : TTrueType
+	{
+		static void OnModelPropertyEdited(T* instance, const CE::Name& propertyName) { return instance->OnModelPropertyEdited(propertyName); }
+	};
+
+	template<typename T>
+	struct TGetReturnType
+	{
+		using Type = std::remove_cvref_t<typename TFunctionTraits<T>::ReturnType>;
+	};
+
+}

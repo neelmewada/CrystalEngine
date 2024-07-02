@@ -82,32 +82,6 @@ namespace CE
 
         // - Property Bindings -
 
-    protected:
-
-        PropertyBinding<decltype(m_Text)> m_TextBinding;
-
-    public:
-
-        FUNCTION()
-        void Update_Text()
-        {
-            if (m_TextBinding.read.IsBound())
-            {
-	            Text(m_TextBinding.read());
-            }
-        }
-        
-        Self& Bind_Text(const ScriptDelegate<decltype(m_Text)()>& read, 
-            const ScriptDelegate<void(const decltype(m_Text)&)>& write,
-            FVoidEvent& onModifiedExternally)
-        {
-            m_TextBinding.read = read;
-            m_TextBinding.write = write;
-            Update_Text();
-            onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_Text));
-            return *this;
-        }
-
     private:
 
         FIELD()
@@ -173,6 +147,8 @@ namespace CE
 
 
     public: // - Fusion Properties -
+
+        String DoThis() { return ""; }
 
         FUSION_PROPERTY_WRAPPER(SelectionColor, inputLabel);
         FUSION_PROPERTY_WRAPPER(Text, inputLabel);

@@ -30,6 +30,8 @@ namespace CE
         { "FUSION_DATA_PROPERTY", TK_FUSION_DATA_PROPERTY },
         { "FUSION_LAYOUT_PROPERTY", TK_FUSION_LAYOUT_PROPERTY },
         { "FUSION_EVENT", TK_FUSION_EVENT },
+        { "MODEL_PROPERTY", TK_MODEL_PROPERTY },
+        { "MODEL_PROPERTY_EDITABLE", TK_MODEL_PROPERTY_EDITABLE },
         { "true", TK_KW_TRUE },
         { "false", TK_KW_FALSE },
         { "nullptr", TK_KW_NULLPTR },

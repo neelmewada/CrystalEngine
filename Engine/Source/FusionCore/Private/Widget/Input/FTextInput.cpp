@@ -14,7 +14,6 @@ namespace CE
     {
 	    Super::CalculateIntrinsicSize();
 
-
     }
 
     void FTextInputLabel::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -733,6 +732,7 @@ namespace CE
         }
 
         ApplyStyle();
+
     }
 
     FTextInput& FTextInput::LeftSlot(FWidget& content)

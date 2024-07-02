@@ -8,9 +8,6 @@ namespace CE
 		
 	}
 
-	void FDataModel::OnDataPropertyModified(const Name& propertyName)
-	{
-
-	}
+	
 
 } // namespace CE

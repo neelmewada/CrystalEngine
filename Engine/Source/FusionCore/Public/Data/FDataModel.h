@@ -12,9 +12,10 @@ namespace CE
 
         FDataModel();
 
-    protected:
+        virtual void OnModelPropertyModified(const CE::Name& propertyName) {}
+        virtual void OnModelPropertyEdited(const CE::Name& propertyName) {}
 
-        virtual void OnDataPropertyModified(const Name& propertyName);
+    protected:
 
 
         friend class FWidget;

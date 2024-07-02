@@ -245,20 +245,41 @@ namespace RenderingTests
 
                         FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Center)
+                        .Name("HStack2")
+                        (
+	                        FAssignNew(FStyledWidget, subWidget)
+	                        .Background(FBrush(Color::Green()))
+	                        .BackgroundShape(FRectangle())
+	                        .FillRatio(1.0f)
+	                        .MinWidth(60)
+	                        .MinHeight(15),
+
+	                        FNew(FStyledWidget)
+	                        .Background(FBrush(Color::Cyan()))
+	                        .BackgroundShape(FRectangle())
+	                        .FillRatio(2.0f)
+	                        .MinWidth(60)
+	                        .MinHeight(40),
+
+	                        FNew(FStyledWidget)
+	                        .Background(FBrush(Color::Yellow()))
+	                        .BackgroundShape(FRectangle())
+	                        .FillRatio(1.0f)
+	                        .MinWidth(60)
+	                        .MinHeight(25)
+                        ),
+
+                        FNew(FLabel)
+                        .FontSize(18)
+                        .Text("Bindings Demo")
+                        .HAlign(HAlign::Left),
+
+                        FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Center)
                         .ContentHAlign(HAlign::Center)
                         (
 	                        FAssignNew(FComboBox, comboBox)
-	                        /*.Items(
-	                            "Items 0",
-	                            "Items 1",
-	                            "Items 2",
-	                            "Items 3",
-	                            FNew(FComboBoxItem)
-	                            .Text("Items 4"),
-	                            FNew(FComboBoxItem)
-	                            .Text("Items 5")
-	                        )*/
-                            .Bind_Items(BIND_PROPERTY_RW(model, ComboItems))
+                            .Bind_Items(BIND_PROPERTY_R(model, ComboItems))
 	                        .MaxWidth(120)
 	                        .HAlign(HAlign::Left)
 	                        .Margin(Vec4(0, 0, 0, 5)),
@@ -275,36 +296,9 @@ namespace RenderingTests
 
                         FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Center)
-                        .Name("HStack2")
-                        (
-                            FAssignNew(FStyledWidget, subWidget)
-                            .Background(FBrush(Color::Green()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(1.0f)
-                            .MinWidth(60)
-                            .MinHeight(15),
-
-                            FNew(FStyledWidget)
-                            .Background(FBrush(Color::Cyan()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(2.0f)
-                            .MinWidth(60)
-                            .MinHeight(40),
-
-                            FNew(FStyledWidget)
-                            .Background(FBrush(Color::Yellow()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(1.0f)
-                            .MinWidth(60)
-                            .MinHeight(25)
-                        ),
-
-                        FNew(FHorizontalStack)
-                        .ContentVAlign(VAlign::Center)
                         (
 							FAssignNew(FTextInput, modelTextInput)
-                            .Bind_Text(MemberDelegate(&TextInputModel::GetText, model), 
-                                MemberDelegate(&TextInputModel::SetText_UI, model), model->OnTextModified())
+                            .Bind_Text(BIND_PROPERTY_RW(model, Text))
                             .FontSize(13)
                             .Width(180)
                             .Margin(Vec4(0, 0, 10, 0)),

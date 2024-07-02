@@ -40,6 +40,10 @@ enum AttributeSpecifiers
 
 	//! @brief Internal use only! Used to mark methods like Update_Text() which triggers a read.
 	FusionDataUpdate,
+
+	ModelProperty,
+
+	ModelPropertyEditable
 };
 
 /*
