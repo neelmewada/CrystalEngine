@@ -22,6 +22,7 @@ class FusionCore_Layout_Test;
 #define FUSION_FRIENDS FUSION_TESTS\
     friend class FWidget;\
     friend class FStackBox;\
+    friend class FSplitBox;\
     friend class FWindow;\
     friend class FFusionContext;\
     friend class FRootContext;\
@@ -81,6 +82,7 @@ namespace CE
 
 #include "Widget/Layout/FStackBox.h"
 #include "Widget/Layout/FOverlayStack.h"
+#include "Widget/Layout/FSplitBox.h"
 
 #include "Widget/FPopup.h"
 #include "Widget/FImage.h"

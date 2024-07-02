@@ -302,6 +302,24 @@ namespace RenderingTests
                             FAssignNew(FLabel, modelDisplayLabel)
                             .FontSize(13)
                             .Bind_Text(BIND_PROPERTY_R(model, Text))
+                        ),
+
+                        FNew(FSplitBox)
+                        .Direction(FSplitDirection::Horizontal)
+                        .HAlign(HAlign::Fill)
+                        .Height(50)
+                        (
+							FNew(FStyledWidget)
+                            .Background(Color::Green())
+                            .FillRatio(0.25f),
+
+                            FNew(FStyledWidget)
+                            .Background(Color::Yellow())
+                            .FillRatio(0.25f),
+
+                            FNew(FStyledWidget)
+                            .Background(Color::Cyan())
+                            .FillRatio(0.5f)
                         )
                     )
                 )
