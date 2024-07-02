@@ -61,6 +61,7 @@ namespace RenderingTests
 		FStyledWidget* borderWidget;
 
 		FTextInput* modelTextInput;
+		FLabel* modelDisplayLabel;
 		TextInputModel* model = nullptr;
 
 		int hitCounter = 0;

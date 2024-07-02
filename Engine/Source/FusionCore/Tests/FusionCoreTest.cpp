@@ -309,7 +309,11 @@ namespace RenderingTests
                             .OnPressed([this]
                             {
                                 model->ModifyTextInCode();
-                            })
+                            }),
+
+                            FAssignNew(FLabel, modelDisplayLabel)
+                            .FontSize(13)
+                            .Bind_Text(BIND_PROPERTY_R(model, Text))
                         )
                     )
                 )
