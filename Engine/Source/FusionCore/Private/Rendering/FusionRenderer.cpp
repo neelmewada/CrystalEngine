@@ -879,8 +879,13 @@ namespace CE
 		{
 			fontFamily = FusionApplication::Get()->GetFontManager()->GetDefaultFontFamily();
 		}
+		Name curFontFamily = currentFont.GetFamily();
+		if (!curFontFamily.IsValid())
+		{
+			curFontFamily = FusionApplication::Get()->GetFontManager()->GetDefaultFontFamily();
+		}
 
-		if (currentFont.GetFamily() != fontFamily)
+		if (curFontFamily != fontFamily)
 		{
 			createNewDrawBatch = true;
 		}
