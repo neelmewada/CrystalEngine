@@ -22,12 +22,21 @@ namespace RenderingTests
 
 		MODEL_PROPERTY(String, Text);
 		MODEL_PROPERTY(Array<String>, ComboItems);
+		MODEL_PROPERTY(String, MemoryFootprint)
 
 	public:
 
 		void ModifyTextInCode()
 		{
 			SetText(String::Format("Text from code {}", Random::Range(0, 100)));
+		}
+
+		void UpdateMemoryFootprint()
+		{
+			auto app = FusionApplication::Get();
+			String footprint = String::Format("Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
+			CE_LOG(Info, All, footprint);
+			SetMemoryFootprint(footprint);
 		}
 
 	};

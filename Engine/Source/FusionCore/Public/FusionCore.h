@@ -83,6 +83,7 @@ namespace CE
 #include "Widget/Layout/FStackBox.h"
 #include "Widget/Layout/FOverlayStack.h"
 #include "Widget/Layout/FSplitBox.h"
+#include "Widget/Layout/FScrollBox.h"
 
 #include "Widget/FPopup.h"
 #include "Widget/FImage.h"

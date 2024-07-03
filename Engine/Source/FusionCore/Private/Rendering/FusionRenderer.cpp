@@ -930,9 +930,12 @@ namespace CE
 		memory += shapeItemList.GetCapacity() * sizeof(FShapeItem2D);
 		memory += drawItemList.GetCapacity() * sizeof(FDrawItem2D);
 		memory += clipItemList.GetCapacity() * sizeof(FClipItem2D);
+		memory += clipItemStack.GetCapacity() * sizeof(int);
 		memory += coordinateSpaceStack.GetCapacity() * sizeof(Matrix4x4);
 		memory += opacityStack.GetCapacity() * sizeof(f32);
 		memory += lineItemList.GetCapacity() * sizeof(FLineItem2D);
+		memory += drawBatches.GetSize() * sizeof(FDrawBatch);
+		memory += drawPackets.GetSize() * sizeof(DrawPacket);
 
 		return memory;
 	}

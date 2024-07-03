@@ -279,7 +279,18 @@ namespace RenderingTests
                                 auto items = model->GetComboItems();
                                 items.Add({ String::Format("Combo Item {}", items.GetSize()) });
                                 model->SetComboItems(items);
-                            })
+                            }),
+
+                            FNew(FTextButton)
+                            .Text("Print Memory Footprint")
+                            .OnPressed([this]
+                            {
+                                model->UpdateMemoryFootprint();
+                            }),
+
+                            FNew(FLabel)
+                            .Bind_Text(BIND_PROPERTY_R(model, MemoryFootprint))
+                            .FontSize(14)
                         ),
 
                         FNew(FHorizontalStack)

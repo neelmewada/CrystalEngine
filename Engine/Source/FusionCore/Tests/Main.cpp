@@ -277,9 +277,9 @@ TEST(FusionCore, Rendering)
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
-		if (frameCounter == 2)
+		if (frameCounter == 1)
 		{
-			CE_LOG(Info, All, "Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
+			mainWidget->model->UpdateMemoryFootprint();
 		}
 
 		// App & Input Tick
