@@ -350,7 +350,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         }
 
         // Lerp fillColor with SDF for anti-aliased edges
-        pixelColor = lerp(float4(color.rgb, 0), color, -sd * 5);
+        pixelColor = lerp(float4(color.rgb, 0), color, clamp01(-sd * 5));
     }
     else if (drawItem.drawType == DRAW_Line)
     {
@@ -376,7 +376,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 	        break;
         }
 
-        pixelColor = lerp(float4(penColor.rgb, 0), penColor, -sd * 2.0);
+        pixelColor = lerp(float4(penColor.rgb, 0), penColor, clamp01(-sd * 2.0));
     }
     else if (drawItem.drawType == DRAW_Text)
     {

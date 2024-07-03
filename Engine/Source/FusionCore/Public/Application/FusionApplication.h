@@ -37,6 +37,7 @@ namespace CE
         void Shutdown();
 
         void PushCursor(SystemCursor cursor);
+        SystemCursor GetCursor();
         void PopCursor();
 
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);

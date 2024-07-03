@@ -22,11 +22,17 @@ namespace CE
 
         void PlaceSubWidgets() override;
 
+        bool SupportsDragEvents() const override { return true; }
+
+        bool SupportsMouseEvents() const override { return true; }
+
     protected:
 
         void Construct() override;
 
         void OnPaint(FPainter* painter) override;
+
+        void HandleEvent(FEvent* event) override;
 
     public: // - Fusion Properties - 
 
@@ -34,6 +40,15 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
         FUSION_LAYOUT_PROPERTY(f32, SplitterSize);
+
+    private:
+
+        int draggedSplitIndex = -1;
+        int hoveredSplitIndex = -1;
+        Vec2 dragStartMousePos;
+        f32 leftFillRatio = 0;
+        f32 rightFillRatio = 0;
+        bool isCursorPushed = false;
 
         FUSION_WIDGET;
     };

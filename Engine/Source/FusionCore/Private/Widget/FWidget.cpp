@@ -124,10 +124,16 @@ namespace CE
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         static const HashSet<CE::Name> transformProperties = { "Translation", "Angle", "Scale" };
+        static const CE::Name fillRatioName = "FillRatio";
 
         if (transformProperties.Exists(propertyName))
         {
 	        UpdateLocalTransform();
+        }
+
+        if (propertyName == fillRatioName)
+        {
+            m_FillRatio = Math::Max(m_FillRatio, 0.0f);
         }
     }
 

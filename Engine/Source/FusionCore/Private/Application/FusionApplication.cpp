@@ -103,6 +103,13 @@ namespace CE
         PlatformApplication::Get()->SetSystemCursor(cursorStack.Last());
     }
 
+    SystemCursor FusionApplication::GetCursor()
+    {
+        if (cursorStack.IsEmpty())
+            return SystemCursor::Default;
+        return cursorStack.Last();
+    }
+
     void FusionApplication::PopCursor()
     {
         if (cursorStack.IsEmpty())

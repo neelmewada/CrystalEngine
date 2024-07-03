@@ -5,7 +5,7 @@ namespace CE
 
     FSplitBox::FSplitBox()
     {
-		m_SplitterSize = 2.5f;
+		m_SplitterSize = 5.0f;
     }
 
     void FSplitBox::CalculateIntrinsicSize()
@@ -153,6 +153,22 @@ namespace CE
 			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
 		}
 
+		Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
+			m_Padding.top + m_Padding.bottom);
+
+		if (hoveredSplitIndex >= 0 && isCursorPushed)
+		{
+			FWidget* left = children[hoveredSplitIndex];
+			Vec2 splitterPos = left->GetComputedPosition() + (m_Direction == FSplitDirection::Horizontal ? Vec2(left->computedSize.width, 0) : Vec2(0, left->computedSize.height));
+			Vec2 splitterSize = m_Direction == FSplitDirection::Horizontal
+				? Vec2(m_SplitterSize, availableSize.y)
+				: Vec2(availableSize.x, m_SplitterSize);
+
+			painter->SetBrush(Color::RGBA(255, 255, 255, 120));
+			painter->SetPen(FPen());
+			painter->DrawRect(Rect::FromSize(splitterPos, splitterSize));
+		}
+
 		for (FWidget* child : children)
 		{
 			if (!child->Enabled())
@@ -166,6 +182,161 @@ namespace CE
 			painter->PopClipShape();
 		}
 		painter->PopChildCoordinateSpace();
+    }
+
+    void FSplitBox::HandleEvent(FEvent* event)
+    {
+		if (children.GetSize() <= 1)
+		{
+			Super::HandleEvent(event);
+			return;
+		}
+
+		auto app = FusionApplication::Get();
+
+		if (event->IsMouseEvent())
+		{
+			FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+			Vec2 localMousePos = mouseEvent->mousePosition - globalPosition;
+
+			if (draggedSplitIndex == -1 && 
+				(mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseLeave))
+			{
+				bool isInside = false;
+
+				for (int i = 0; mouseEvent->type != FEventType::MouseLeave && i < children.GetSize() - 1; ++i)
+				{
+					FWidget* child = children[i];
+					FWidget* nextChild = children[i + 1];
+
+					if (m_Direction == FSplitDirection::Horizontal)
+					{
+						if (localMousePos.x >= child->computedPosition.x + child->computedSize.x &&
+							localMousePos.x <= nextChild->computedPosition.x)
+						{
+							isInside = true;
+							if (!isCursorPushed)
+							{
+								hoveredSplitIndex = i;
+								MarkDirty();
+								app->PushCursor(SystemCursor::SizeHorizontal);
+								isCursorPushed = true;
+							}
+							break;
+						}
+					}
+					else if (m_Direction == FSplitDirection::Vertical)
+					{
+						if (localMousePos.y >= child->computedPosition.y + child->computedSize.y &&
+							localMousePos.y <= nextChild->computedPosition.y)
+						{
+							isInside = true;
+							if (!isCursorPushed)
+							{
+								hoveredSplitIndex = i;
+								MarkDirty();
+								app->PushCursor(SystemCursor::SizeVertical);
+								isCursorPushed = true;
+							}
+							break;
+						}
+					}
+				}
+
+				if (!isInside && isCursorPushed)
+				{
+					hoveredSplitIndex = -1;
+					MarkDirty();
+					isCursorPushed = false;
+					app->PopCursor();
+				}
+			}
+
+			if (mouseEvent->type == FEventType::DragBegin && mouseEvent->sender == this)
+			{
+				FDragEvent* dragEvent = static_cast<FDragEvent*>(mouseEvent);
+				dragStartMousePos = localMousePos;
+
+				for (int i = 0; i < children.GetSize() - 1; ++i)
+				{
+					FWidget* child = children[i];
+					FWidget* nextChild = children[i + 1];
+
+					leftFillRatio = child->FillRatio();
+					rightFillRatio = nextChild->FillRatio();
+
+					if (m_Direction == FSplitDirection::Horizontal)
+					{
+						if (localMousePos.x >= child->computedPosition.x + child->computedSize.x &&
+							localMousePos.x <= nextChild->computedPosition.x)
+						{
+							draggedSplitIndex = hoveredSplitIndex  = i;
+							dragEvent->draggedWidget = this;
+							dragEvent->Consume(this);
+							break;
+						}
+					}
+					else if (m_Direction == FSplitDirection::Vertical)
+					{
+						if (localMousePos.y >= child->computedPosition.y + child->computedSize.y &&
+							localMousePos.y <= nextChild->computedPosition.y)
+						{
+							draggedSplitIndex = hoveredSplitIndex = i;
+							dragEvent->draggedWidget = this;
+							dragEvent->Consume(this);
+							break;
+						}
+					}
+				}
+			}
+			else if (mouseEvent->type == FEventType::DragMove)
+			{
+				FDragEvent* dragEvent = static_cast<FDragEvent*>(mouseEvent);
+
+				float mouseDelta = m_Direction == FSplitDirection::Horizontal
+					? localMousePos.x - dragStartMousePos.x
+					: localMousePos.y - dragStartMousePos.y;
+				float totalSize = m_Direction == FSplitDirection::Horizontal
+					? (computedSize.width - m_Padding.left - m_Padding.right)
+					: (computedSize.height - m_Padding.top - m_Padding.bottom);
+				totalSize -= m_SplitterSize * children.GetSize();
+
+				if (draggedSplitIndex >= 0 && draggedSplitIndex < children.GetSize() - 1)
+				{
+					FWidget* left = children[draggedSplitIndex];
+					FWidget* right = children[draggedSplitIndex + 1];
+
+					f32 leftRatio = leftFillRatio + mouseDelta / totalSize;
+					f32 rightRatio = rightFillRatio - mouseDelta / totalSize;
+
+					if (leftRatio > 0.0001f && rightRatio > 0.0001f)
+					{
+						left->FillRatio(leftRatio);
+						right->FillRatio(rightRatio);
+					}
+
+					dragEvent->draggedWidget = this;
+					dragEvent->Consume(this);
+				}
+				else
+				{
+					draggedSplitIndex = -1;
+				}
+			}
+			else if (mouseEvent->type == FEventType::DragEnd)
+			{
+				draggedSplitIndex = hoveredSplitIndex = -1;
+
+				if (isCursorPushed)
+				{
+					MarkDirty();
+					app->PopCursor();
+					isCursorPushed = false;
+				}
+			}
+		}
+
+	    Super::HandleEvent(event);
     }
 
 }

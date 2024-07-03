@@ -52,6 +52,15 @@ namespace CE
 			}
 		}
 
+		if (m_Direction == FStackBoxDirection::Horizontal)
+		{
+			contentSize.width += m_Gap * (children.GetSize() - 1);
+		}
+		else if (m_Direction == FStackBoxDirection::Vertical)
+		{
+			contentSize.height += m_Gap * (children.GetSize() - 1);
+		}
+
 		intrinsicSize.width += contentSize.width;
 		intrinsicSize.height += contentSize.height;
 
@@ -83,11 +92,15 @@ namespace CE
 
 		if (m_Direction == FStackBoxDirection::Horizontal)
 		{
+			availableSize.width -= m_Gap * (children.GetSize() - 1);
+
 			crossAxisSize = availableSize.height;
 			remainingSize = availableSize.width;
 		}
 		else if (m_Direction == FStackBoxDirection::Vertical)
 		{
+			availableSize.height -= m_Gap * (children.GetSize() - 1);
+
 			crossAxisSize = availableSize.width;
 			remainingSize = availableSize.height;
 		}
@@ -172,7 +185,7 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
-				curPos.x += child->computedSize.width + child->m_Margin.right;
+				curPos.x += child->computedSize.width + child->m_Margin.right + m_Gap;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
@@ -206,7 +219,7 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
-				curPos.y += child->computedSize.height + child->m_Margin.bottom;
+				curPos.y += child->computedSize.height + child->m_Margin.bottom + m_Gap;
 			}
 			
 			child->PlaceSubWidgets();

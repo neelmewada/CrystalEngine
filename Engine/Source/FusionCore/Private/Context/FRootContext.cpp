@@ -48,7 +48,7 @@ namespace CE
 		Vec2 mousePos = nativeContext->ScreenToGlobalSpacePosition(InputManager::GetGlobalMousePosition().ToVec2());
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
 		Vec2 wheelDelta = InputManager::GetMouseWheelDelta();
-		if (prevMousePos == Vec2())
+		if (prevMousePos.GetSqrMagnitude() == 0)
 			prevMousePos = mousePos;
 
 		MouseButtonMask curButtonMask = MouseButtonMask::None;
@@ -256,7 +256,7 @@ namespace CE
 
 					while (dragEventWidget != nullptr)
 					{
-						if (dragEventWidget->SupportsFocusEvents())
+						if (dragEventWidget->SupportsDragEvents())
 						{
 							FDragEvent dragEvent{};
 							dragEvent.type = FEventType::DragBegin;
@@ -314,6 +314,23 @@ namespace CE
 					event.Reset();
 					event.isInside = false;
 					widgetsPressedPerMouseButton[i]->HandleEvent(&event);
+				}
+
+				if (mouseButton == MouseButton::Left && draggedWidget != nullptr)
+				{
+					FDragEvent dragEvent{};
+					dragEvent.type = FEventType::DragEnd;
+					dragEvent.mousePosition = mousePos;
+					dragEvent.prevMousePosition = prevMousePos;
+					dragEvent.buttons = (MouseButtonMask)BIT((int)mouseButton);
+					dragEvent.keyModifiers = keyModifierStates;
+
+					dragEvent.sender = draggedWidget;
+					dragEvent.draggedWidget = draggedWidget;
+
+					dragEvent.sender->HandleEvent(&dragEvent);
+
+					draggedWidget = nullptr;
 				}
 
 				widgetsPressedPerMouseButton[i] = nullptr;
@@ -464,6 +481,8 @@ namespace CE
 				}
 			}
 		}
+
+		prevMousePos = mousePos;
 	}
     
 } // namespace CE
