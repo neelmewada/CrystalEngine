@@ -100,7 +100,6 @@ namespace CE
     {
 	    Super::OnAttachedToParent(parent);
 
-        ApplyStyle();
     }
 
 }
