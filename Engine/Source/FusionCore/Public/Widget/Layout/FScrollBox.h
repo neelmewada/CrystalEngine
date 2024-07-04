@@ -20,6 +20,8 @@ namespace CE
 
         void OnPaint(FPainter* painter) override;
 
+        void HandleEvent(FEvent* event) override;
+
     public: // - Fusion Properties - 
 
         FUSION_LAYOUT_PROPERTY(bool, VerticalScroll);

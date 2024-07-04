@@ -10,13 +10,8 @@ namespace CE
         m_ClipChildren = true;
 
         m_ScrollBarShape = FRoundedRectangle(1.5f);
-        m_ScrollBarWidth = 3;
-        m_ScrollBarMargin = 1;
-
-        if (!IsDefaultInstance())
-        {
-            String::IsAlphabet('a');
-        }
+        m_ScrollBarWidth = 10;
+        m_ScrollBarMargin = 2;
     }
 
     void FScrollBox::CalculateIntrinsicSize()
@@ -162,8 +157,7 @@ namespace CE
                 painter->SetBrush(m_ScrollBarBackground);
                 painter->SetPen(m_ScrollBarBackgroundPen);
 
-                Vec2 pos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth,
-                    computedPosition.y + m_Padding.top + m_Child->m_Margin.top);
+                Vec2 pos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth, computedPosition.y);
                 Vec2 size = Vec2(m_ScrollBarMargin * 2 + m_ScrollBarWidth, computedSize.y);
 
                 painter->DrawRect(Rect::FromSize(pos, size));
@@ -177,6 +171,37 @@ namespace CE
 
             }
         }
+
+        if (isHorizontalScrollVisible)
+        {
+            if (m_ScrollBarBackground.IsValidBrush() || m_ScrollBarBackgroundPen.IsValidPen())
+            {
+                painter->SetBrush(m_ScrollBarBackground);
+                painter->SetPen(m_ScrollBarBackgroundPen);
+
+                f32 horiOffset = 0;
+                if (isVerticalScrollVisible)
+                    horiOffset = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+
+                Vec2 pos = Vec2(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth);
+                Vec2 size = Vec2(computedSize.x - horiOffset, m_ScrollBarMargin * 2 + m_ScrollBarWidth);
+
+                painter->DrawRect(Rect::FromSize(pos, size));
+            }
+
+            if (m_ScrollBarBrush.IsValidBrush())
+            {
+                painter->SetBrush(m_ScrollBarBrush);
+                painter->SetPen(m_ScrollBarPen);
+
+
+            }
+        }
+    }
+
+    void FScrollBox::HandleEvent(FEvent* event)
+    {
+	    Super::HandleEvent(event);
     }
 
 }

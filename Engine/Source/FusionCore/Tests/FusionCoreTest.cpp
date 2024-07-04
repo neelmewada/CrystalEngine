@@ -289,7 +289,8 @@ namespace RenderingTests
                                 }),
 
                             FNew(FLabel)
-                            .Bind_Text({ [this]() -> String { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr, model->OnMemoryFootprintUpdated() })
+                            //.Bind_Text({ [this]() -> String { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr, model->OnMemoryFootprintUpdated() })
+                            .Bind_Text(BIND_PROPERTY(model, MemoryFootprint, [this] { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr))
                             .FontSize(14)
                         ),
 
@@ -335,7 +336,9 @@ namespace RenderingTests
 
                         FNew(FScrollBox)
                         .ScrollBarBrush(Color::RGBA(255, 255, 255, 100))
-                        .Height(100)
+                        .VerticalScroll(true)
+                        .HorizontalScroll(true)
+                        .Height(128)
                         (
 	                        FNew(FStyledWidget)
 	                        .Background(transparentPattern)
