@@ -59,6 +59,7 @@ namespace CE
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
 			virtual void CallDestructor(void* instance) const = 0;
+			virtual void CopyConstructor(void* srcInstance, void* dstInstance) = 0;
 
 			virtual const CE::Name& GetTypeName() const = 0;
 
@@ -251,6 +252,13 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->CallDestructor(instance);
+		}
+
+		void CopyConstructor(void* source, void* destination) override
+		{
+			if (Impl == nullptr || source == nullptr || destination == nullptr)
+				return;
+			Impl->CopyConstructor(source, destination);
 		}
 
 		/// To be called only on struct types

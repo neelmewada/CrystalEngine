@@ -200,6 +200,8 @@ namespace CDITests
 
 		FIELD()
 		AnotherObject* another = nullptr;
+
+		int nonSerializedValue = 0;
 	};
 
 	CLASS()

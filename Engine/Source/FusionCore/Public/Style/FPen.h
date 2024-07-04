@@ -35,6 +35,11 @@ namespace CE
         f32 GetDashLength() const { return dashLength; }
         void SetDashLength(f32 dashLength) { this->dashLength = dashLength; }
 
+        bool IsValidPen() const
+        {
+            return color.a > 0 && thickness > 0;
+        }
+
     private:
 
         Color color;

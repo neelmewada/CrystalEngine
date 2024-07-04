@@ -937,6 +937,11 @@ namespace CE
 		memory += drawBatches.GetSize() * sizeof(FDrawBatch);
 		memory += drawPackets.GetSize() * sizeof(DrawPacket);
 
+		memory += drawItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
+		memory += clipItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
+		memory += shapeItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
+		memory += lineItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
+
 		return memory;
 	}
 

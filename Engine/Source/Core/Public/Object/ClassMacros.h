@@ -244,6 +244,10 @@ namespace CE\
 			{\
 				((Namespace::Struct*)instance)->~Struct();\
 			}\
+			virtual void CopyConstructor(void* srcInstance, void* dstInstance) override\
+			{\
+				*(Namespace::Struct*)dstInstance = *(Namespace::Struct*)srcInstance;\
+			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 			virtual String GetStructBundle() const override\
 			{\

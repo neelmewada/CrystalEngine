@@ -961,13 +961,13 @@ namespace CE
 				{
 					Array<FieldType> srcElements = srcField->GetArrayFieldList(srcInstance);
 					Array<FieldType> destElements = dstField->GetArrayFieldList(dstInstance);
-					void* srcInstance = (void*)&srcArray[0];
-					void* destInstance = (void*)&destArray[0];
+					void* sourceInstance = (void*)&srcArray[0];
+					void* destinationInstance = (void*)&destArray[0];
 
 					for (int i = 0; i < arraySize; i++)
 					{
-						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], srcInstance,
-							&destElements[i], destInstance);
+						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], sourceInstance,
+							&destElements[i], destinationInstance);
 					}
 				}
 			}
@@ -981,12 +981,29 @@ namespace CE
 				const BinaryBlob& blob = srcField->GetFieldValue<BinaryBlob>(srcInstance);
 				dstField->SetFieldValue(dstInstance, blob);
 			}
+			else if (srcField->IsEventField() && dstField->IsEventField())
+			{
+				IScriptEvent* srcEvent = srcField->GetFieldEventValue(srcInstance);
+				IScriptEvent* dstEvent = dstField->GetFieldEventValue(dstInstance);
+
+				dstEvent->UnbindAll();
+				dstEvent->CopyFrom(srcEvent);
+			}
+			else if (srcField->IsDelegateField() && dstField->IsDelegateField())
+			{
+				IScriptDelegate* srcDelegate = srcField->GetFieldDelegateValue(srcInstance);
+				IScriptDelegate* dstDelegate = dstField->GetFieldDelegateValue(dstInstance);
+
+				dstDelegate->CopyFrom(srcDelegate);
+			}
 		}
 		else if (fieldDeclType->IsStruct())
 		{
 			auto structType = (StructType*)srcField->GetDeclarationType();
 			void* srcStructInstance = srcField->GetFieldInstance(srcInstance);
 			void* dstStructInstance = dstField->GetFieldInstance(dstInstance);
+
+			structType->CopyConstructor(srcStructInstance, dstStructInstance);
 
 			for (auto field = structType->GetFirstField(); field != nullptr; field = field->GetNext())
 			{

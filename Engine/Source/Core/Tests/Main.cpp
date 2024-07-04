@@ -1712,6 +1712,7 @@ TEST(Object, CDI2)
 
 		testCDI->subobject->myString = "modified from CDI";
 		testCDI->subobject->data.another = testCDI->subobject;
+		testCDI->subobject->data.nonSerializedValue = 123;
 
 		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientBundle("Core");
 	}
@@ -1723,6 +1724,7 @@ TEST(Object, CDI2)
 		TestObject* test = CreateObject<TestObject>(nullptr, "TestObject");
 		EXPECT_EQ(test->GetOuter(), nullptr);
 		EXPECT_EQ(test->subobject->myString, "modified from CDI");
+		EXPECT_EQ(test->subobject->data.nonSerializedValue, 123);
 		EXPECT_EQ(test->subobject->data.stringArray.GetSize(), 2);
 		EXPECT_EQ(test->subobject->data.stringArray[0], "test0");
 		EXPECT_EQ(test->subobject->data.stringArray[1], "test1");

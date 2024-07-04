@@ -153,6 +153,11 @@ namespace CE
 		{
 			return (IScriptEvent*)((SIZE_T)instance + offset);
 		}
+
+        IScriptDelegate* GetFieldDelegateValue(void* instance) const
+		{
+			return (IScriptDelegate*)((SIZE_T)instance + offset);
+		}
         
         template<typename T>
         void SetFieldValue(void* instance, const T& value)

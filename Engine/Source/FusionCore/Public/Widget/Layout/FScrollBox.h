@@ -18,6 +18,7 @@ namespace CE
 
         FWidget* HitTest(Vec2 mousePosition) override;
 
+        void OnPaint(FPainter* painter) override;
 
     public: // - Fusion Properties - 
 
@@ -28,10 +29,20 @@ namespace CE
         FUSION_PROPERTY(Color, BorderColor);
         FUSION_PROPERTY(f32, BorderWidth);
 
+        FUSION_PROPERTY(FBrush, ScrollBarBackground);
+        FUSION_PROPERTY(FPen, ScrollBarBackgroundPen);
         FUSION_PROPERTY(FBrush, ScrollBarBrush);
         FUSION_PROPERTY(FBrush, ScrollBarHoverBrush);
+        FUSION_PROPERTY(FPen, ScrollBarPen);
+        FUSION_PROPERTY(FPen, ScrollBarHoverPen);
         FUSION_PROPERTY(FShape, ScrollBarShape);
-        FUSION_PROPERTY(float, ScrollBarWidth);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
+
+    private:
+
+        bool isVerticalScrollVisible = false;
+        bool isHorizontalScrollVisible = false;
 
         FUSION_WIDGET;
     };

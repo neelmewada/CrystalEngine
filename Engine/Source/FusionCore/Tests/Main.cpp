@@ -172,6 +172,11 @@ TEST(FusionCore, Rendering)
 				.Padding(Vec4(10, 5, 10, 5))
 				.Style(rootStyle, "Button.Primary")
 				;
+
+			GetDefaultWidget<FScrollBox>()
+				.ScrollBarBackground(Color::RGBA(50, 50, 50))
+				.ScrollBarBrush(Color::RGBA(60, 60, 60))
+				;
 		}
 
 		{

@@ -99,9 +99,17 @@ namespace CE
         if (m_Child && m_Child->Enabled())
         {
             painter->PushChildCoordinateSpace(localTransform);
+            if (m_ClipChildren)
+            {
+                painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+            }
 
             m_Child->OnPaint(painter);
 
+            if (m_ClipChildren)
+            {
+                painter->PopClipShape();
+            }
             painter->PopChildCoordinateSpace();
         }
     }

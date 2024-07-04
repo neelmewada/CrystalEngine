@@ -42,6 +42,9 @@ namespace CE
 
 		if (owningWidget && layoutDirty)
 		{
+			layoutDirty = false;
+			dirty = true;
+
 			owningWidget->CalculateIntrinsicSize();
 
 			owningWidget->computedPosition = Vec2();
@@ -64,9 +67,6 @@ namespace CE
 
 				popup->PlaceSubWidgets();
 			}
-
-			layoutDirty = false;
-			dirty = true;
 		}
 
 		for (FFusionContext* childContext : childContexts)

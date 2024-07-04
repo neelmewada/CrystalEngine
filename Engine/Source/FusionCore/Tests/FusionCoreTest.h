@@ -22,7 +22,7 @@ namespace RenderingTests
 
 		MODEL_PROPERTY(String, Text);
 		MODEL_PROPERTY(Array<String>, ComboItems);
-		MODEL_PROPERTY(String, MemoryFootprint)
+		MODEL_PROPERTY(u64, MemoryFootprint)
 
 	public:
 
@@ -34,9 +34,9 @@ namespace RenderingTests
 		void UpdateMemoryFootprint()
 		{
 			auto app = FusionApplication::Get();
-			String footprint = String::Format("Fusion Memory: {} KB", app->ComputeMemoryFootprint() / 1024.0f);
+			SetMemoryFootprint(app->ComputeMemoryFootprint());
+			String footprint = String::Format("Fusion Memory: {:.2f} MB", GetMemoryFootprint() / 1024.0f / 1024.0f);
 			CE_LOG(Info, All, footprint);
-			SetMemoryFootprint(footprint);
 		}
 
 	};

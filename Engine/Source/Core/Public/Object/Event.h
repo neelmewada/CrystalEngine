@@ -46,6 +46,11 @@ namespace CE
 
         virtual Variant Invoke(const Array<Variant>& args) const = 0;
 
+        virtual SIZE_T GetSignature() const = 0;
+        virtual Array<TypeId> GetParamterTypes() = 0;
+
+        virtual void CopyFrom(IScriptDelegate* other) = 0;
+
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
         virtual bool IsLambda() const = 0;
@@ -155,6 +160,26 @@ namespace CE
             return Invoke(args...);
         }
 
+        SIZE_T GetSignature() const override
+        {
+            return CE::GetCombinedHash(CE::GetFunctionSignature<TArgs...>(), CE::GetTypeId<TRetType>());
+        }
+
+        Array<TypeId> GetParamterTypes() override
+        {
+            return { CE::GetTypeId<TArgs>()... };
+        }
+
+        void CopyFrom(IScriptDelegate* other) override
+        {
+	        if (other == nullptr || other->GetSignature() != GetSignature())
+                return;
+
+            ScriptDelegate* otherDelegate = (ScriptDelegate*)other;
+
+            *this = *otherDelegate;
+        }
+
         bool IsBound() const override
         {
             return isBound;
@@ -235,6 +260,8 @@ namespace CE
         virtual SIZE_T GetSignature() const = 0;
 
         virtual Array<TypeId> GetParamterTypes() = 0;
+
+        virtual void CopyFrom(IScriptEvent* other) = 0;
 
         virtual void Bind(Object* object, FunctionType* function) = 0;
         virtual void Bind(const FunctionBinding& binding) = 0;
@@ -320,6 +347,8 @@ namespace CE
         {
             return { CE::GetTypeId<TArgs>()... };
         }
+
+        void CopyFrom(IScriptEvent* other) override;
 
         void Bind(Object* object, FunctionType* function) override
         {
@@ -496,6 +525,20 @@ namespace CE
 
         friend class Object;
     };
+
+    template <class ... TArgs>
+    void ScriptEvent<void(TArgs...)>::CopyFrom(IScriptEvent* other)
+    {
+        if (other->GetSignature() != GetSignature())
+            return;
+
+        ScriptEvent* otherEvent = (ScriptEvent*)other;
+
+        for (const DelegateType& delegate : otherEvent->invocationList)
+        {
+            Bind(delegate);
+        }
+    }
     
 } // namespace CE
 

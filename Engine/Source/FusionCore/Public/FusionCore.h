@@ -31,7 +31,8 @@ class FusionCore_Layout_Test;
     friend class FCompoundWidget;\
     friend class FStyleManager;\
     friend class FusionRenderer;\
-    friend class FPainter;
+    friend class FPainter;\
+    friend class FScrollBox;
 
 namespace CE
 {

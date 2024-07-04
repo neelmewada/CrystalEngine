@@ -102,7 +102,7 @@ namespace RenderingTests
 
                                 FNew(FTerminalWidget)
                                 .FillRatio(1.0f)
-                            ),
+                                ),
 
                             FNew(FHorizontalStack)
                             .HAlign(HAlign::Fill)
@@ -127,7 +127,7 @@ namespace RenderingTests
                                     .Height(11)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
-                                ),
+                                    ),
 
                                 FNew(FButton)
                                 .OnPressed([this]
@@ -135,11 +135,11 @@ namespace RenderingTests
                                         FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
                                         if (nativeContext->IsMaximized())
                                         {
-	                                        nativeContext->Restore();
+                                            nativeContext->Restore();
                                         }
                                         else
                                         {
-	                                        nativeContext->Maximize();
+                                            nativeContext->Maximize();
                                         }
                                     })
                                 .Padding(Vec4(17, 8, 17, 8))
@@ -153,7 +153,7 @@ namespace RenderingTests
                                     .Height(11)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
-                                ),
+                                    ),
 
                                 FNew(FButton)
                                 .OnPressed([this]
@@ -171,10 +171,10 @@ namespace RenderingTests
                                     .Height(10)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
+                                    )
                                 )
                             )
-                        )
-                    ),
+                        ),
 
                     FNew(FVerticalStack)
                     .Padding(Vec4(10, 10, 10, 10))
@@ -194,9 +194,9 @@ namespace RenderingTests
 
                         FAssignNew(FButton, button)
                         .OnPressed([this]
-                        {
-                            buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
-                        })
+                            {
+                                buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+                            })
                         .Name("Button")
                         (
                             FAssignNew(FLabel, buttonLabel)
@@ -206,9 +206,9 @@ namespace RenderingTests
 
                         FAssignNew(FButton, openPopupBtn)
                         .OnPressed([this, openPopupBtn]
-                        {
-                            GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
-                        })
+                            {
+                                GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
+                            })
                         .Name("PopupButton")
                         (
                             FNew(FLabel)
@@ -219,9 +219,9 @@ namespace RenderingTests
                         FAssignNew(FTextButton, nativePopupBtn)
                         .Text("Open Native Popup")
                         .OnPressed([this, nativePopupBtn]
-                        {
-                            GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
-                        })
+                            {
+                                GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
+                            })
                         .Name("NativePopupButton"),
 
                         FAssignNew(FTextInput, textInput)
@@ -235,26 +235,26 @@ namespace RenderingTests
                         .ContentVAlign(VAlign::Center)
                         .Name("HStack2")
                         (
-	                        FAssignNew(FStyledWidget, subWidget)
-	                        .Background(FBrush(Color::Green()))
-	                        .BackgroundShape(FRectangle())
-	                        .FillRatio(1.0f)
-	                        .MinWidth(60)
-	                        .MinHeight(15),
+                            FAssignNew(FStyledWidget, subWidget)
+                            .Background(FBrush(Color::Green()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(15),
 
-	                        FNew(FStyledWidget)
-	                        .Background(FBrush(Color::Cyan()))
-	                        .BackgroundShape(FRectangle())
-	                        .FillRatio(2.0f)
-	                        .MinWidth(60)
-	                        .MinHeight(40),
+                            FNew(FStyledWidget)
+                            .Background(FBrush(Color::Cyan()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(2.0f)
+                            .MinWidth(60)
+                            .MinHeight(40),
 
-	                        FNew(FStyledWidget)
-	                        .Background(FBrush(Color::Yellow()))
-	                        .BackgroundShape(FRectangle())
-	                        .FillRatio(1.0f)
-	                        .MinWidth(60)
-	                        .MinHeight(25)
+                            FNew(FStyledWidget)
+                            .Background(FBrush(Color::Yellow()))
+                            .BackgroundShape(FRectangle())
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(25)
                         ),
 
                         FNew(FLabel)
@@ -266,30 +266,30 @@ namespace RenderingTests
                         .ContentVAlign(VAlign::Center)
                         .ContentHAlign(HAlign::Center)
                         (
-	                        FAssignNew(FComboBox, comboBox)
+                            FAssignNew(FComboBox, comboBox)
                             .Bind_Items(BIND_PROPERTY_R(model, ComboItems))
-	                        .MaxWidth(120)
-	                        .HAlign(HAlign::Left)
-	                        .Margin(Vec4(0, 0, 0, 5)),
+                            .MaxWidth(120)
+                            .HAlign(HAlign::Left)
+                            .Margin(Vec4(0, 0, 0, 5)),
 
                             FNew(FTextButton)
                             .Text("Add Item")
                             .OnPressed([this]
-                            {
-                                auto items = model->GetComboItems();
-                                items.Add({ String::Format("Combo Item {}", items.GetSize()) });
-                                model->SetComboItems(items);
-                            }),
+                                {
+                                    auto items = model->GetComboItems();
+                                    items.Add({ String::Format("Combo Item {}", items.GetSize()) });
+                                    model->SetComboItems(items);
+                                }),
 
                             FNew(FTextButton)
                             .Text("Print Memory Footprint")
                             .OnPressed([this]
-                            {
-                                model->UpdateMemoryFootprint();
-                            }),
+                                {
+                                    model->UpdateMemoryFootprint();
+                                }),
 
                             FNew(FLabel)
-                            .Bind_Text(BIND_PROPERTY_R(model, MemoryFootprint))
+                            .Bind_Text({ [this]() -> String { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr, model->OnMemoryFootprintUpdated() })
                             .FontSize(14)
                         ),
 
@@ -318,7 +318,7 @@ namespace RenderingTests
                         FNew(FSplitBox)
                         .Direction(FSplitDirection::Horizontal)
                         .HAlign(HAlign::Fill)
-                        .Height(50)
+                        .Height(40)
                         (
 							FNew(FStyledWidget)
                             .Background(Color::Green())
@@ -331,6 +331,17 @@ namespace RenderingTests
                             FNew(FStyledWidget)
                             .Background(Color::Cyan())
                             .FillRatio(0.5f)
+                        ),
+
+                        FNew(FScrollBox)
+                        .ScrollBarBrush(Color::RGBA(255, 255, 255, 100))
+                        .Height(100)
+                        (
+	                        FNew(FStyledWidget)
+	                        .Background(transparentPattern)
+	                        .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
+                            .Width(2048)
+                            .Height(2048)
                         )
                     )
                 )
