@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    constexpr f32 MinScrollBarHeight = 12.5f;
 
     FScrollBox::FScrollBox()
     {
@@ -9,9 +10,9 @@ namespace CE
         m_HorizontalScroll = false;
         m_ClipChildren = true;
 
-        m_ScrollBarShape = FRoundedRectangle(1.5f);
-        m_ScrollBarWidth = 10;
-        m_ScrollBarMargin = 2;
+        m_ScrollBarWidth = 8;
+        m_ScrollBarShape = FRoundedRectangle(4);
+        m_ScrollBarMargin = 2.5f;
     }
 
     void FScrollBox::CalculateIntrinsicSize()
@@ -134,19 +135,14 @@ namespace CE
         }
     }
 
-    FWidget* FScrollBox::HitTest(Vec2 mousePosition)
-    {
-        FWidget* hitResult = Super::HitTest(mousePosition);
-        if (hitResult == nullptr)
-            return nullptr;
-
-        
-        return hitResult;
-    }
-
     void FScrollBox::OnPaint(FPainter* painter)
     {
 	    Super::OnPaint(painter);
+
+        if (!GetChild())
+            return;
+
+        FWidget* child = GetChild();
 
         // TODO: Paint scroll bars
 
@@ -168,7 +164,14 @@ namespace CE
                 painter->SetBrush(m_ScrollBarBrush);
                 painter->SetPen(m_ScrollBarPen);
 
-
+                f32 scrollBarHeight = computedSize.y / child->computedSize.y;
+                scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+                f32 normalizedScrollY = NormalizedScrollY();
+                
+                Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
+                    computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
+                
+                painter->DrawShape(Rect::FromSize(barPos, Vec2(m_ScrollBarWidth, scrollBarHeight)), m_ScrollBarShape);
             }
         }
 
@@ -201,7 +204,84 @@ namespace CE
 
     void FScrollBox::HandleEvent(FEvent* event)
     {
+        FWidget* child = GetChild();
+
+        if (event->IsMouseEvent() && event->sender == this && child)
+        {
+            FMouseEvent* mouseEvent = (FMouseEvent*)event;
+            Vec2 localMousePos = mouseEvent->mousePosition - globalPosition;
+            
+            if (mouseEvent->type == FEventType::MouseMove)
+            {
+                if (isVerticalScrollVisible)
+                {
+                    f32 scrollBarHeight = computedSize.y / child->computedSize.y;
+                    scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+                    f32 normalizedScrollY = NormalizedScrollY();
+
+                    Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
+                        computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
+                    Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+
+                    if (Rect::FromSize(barPos, barSize).Contains(localMousePos))
+                    {
+                        CE_LOG(Info, All, "Inside scroll");
+                    }
+                }
+            }
+        }
+
 	    Super::HandleEvent(event);
+    }
+
+    FWidget* FScrollBox::HitTest(Vec2 mousePosition)
+    {
+        FWidget* hitResult = Super::HitTest(mousePosition);
+        if (hitResult == nullptr)
+            return nullptr;
+
+        FWidget* child = GetChild();
+
+        if (child && isVerticalScrollVisible)
+        {
+            f32 scrollBarHeight = computedSize.y / child->computedSize.y;
+            scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+            f32 normalizedScrollY = NormalizedScrollY();
+
+            Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
+                computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
+            Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+
+            if (Rect::FromSize(barPos, barSize).Contains(mousePosition))
+            {
+                return this;
+            }
+        }
+
+        return hitResult;
+    }
+
+    FScrollBox& FScrollBox::NormalizedScrollY(f32 value)
+    {
+        FWidget* child = GetChild();
+        if (child && isVerticalScrollVisible)
+        {
+            Vec2 translation = child->Translation();
+            translation.y = -value * (child->computedSize.y - computedSize.y);
+            child->Translation(translation);
+        }
+        return *this;
+    }
+
+    f32 FScrollBox::NormalizedScrollY()
+    {
+        FWidget* child = GetChild();
+        if (child && isVerticalScrollVisible)
+        {
+            Vec2 translation = child->Translation();
+            return -translation.y / (child->computedSize.y - computedSize.y);
+        }
+        return 0;
     }
 
 }

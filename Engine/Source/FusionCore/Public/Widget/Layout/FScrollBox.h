@@ -14,6 +14,8 @@ namespace CE
 
         void PlaceSubWidgets() override;
 
+        bool SupportsMouseEvents() const override { return true; }
+
     protected:
 
         FWidget* HitTest(Vec2 mousePosition) override;
@@ -40,6 +42,9 @@ namespace CE
         FUSION_PROPERTY(FShape, ScrollBarShape);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
+
+        Self& NormalizedScrollY(f32 value);
+        f32 NormalizedScrollY();
 
     private:
 
