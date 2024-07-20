@@ -135,6 +135,20 @@ namespace CE
         }
     }
 
+    Rect FScrollBox::GetVerticalScrollBarRect()
+    {
+        FWidget* child = GetChild();
+        if (!child)
+            return Rect();
+
+        f32 scrollBarHeight = computedSize.y * (computedSize.y / child->computedSize.y);
+        f32 normalizedScrollY = NormalizedScrollY();
+        Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
+            computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
+
+        return Rect::FromSize(barPos, Vec2(m_ScrollBarWidth, scrollBarHeight));
+    }
+
     void FScrollBox::OnPaint(FPainter* painter)
     {
 	    Super::OnPaint(painter);
@@ -158,21 +172,19 @@ namespace CE
 
                 painter->DrawRect(Rect::FromSize(pos, size));
             }
-
-            if (m_ScrollBarBrush.IsValidBrush())
+            
+            if (isVerticalScrollHighlighted)
+            {
+                painter->SetBrush(m_ScrollBarHoverBrush);
+                painter->SetPen(m_ScrollBarHoverPen);
+            }
+            else
             {
                 painter->SetBrush(m_ScrollBarBrush);
                 painter->SetPen(m_ScrollBarPen);
-
-                f32 scrollBarHeight = computedSize.y / child->computedSize.y;
-                scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
-                f32 normalizedScrollY = NormalizedScrollY();
-                
-                Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
-                    computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
-                
-                painter->DrawShape(Rect::FromSize(barPos, Vec2(m_ScrollBarWidth, scrollBarHeight)), m_ScrollBarShape);
             }
+
+            painter->DrawShape(GetVerticalScrollBarRect(), m_ScrollBarShape);
         }
 
         if (isHorizontalScrollVisible)
@@ -197,7 +209,7 @@ namespace CE
                 painter->SetBrush(m_ScrollBarBrush);
                 painter->SetPen(m_ScrollBarPen);
 
-
+                
             }
         }
     }
@@ -206,7 +218,7 @@ namespace CE
     {
         FWidget* child = GetChild();
 
-        if (event->IsMouseEvent() && event->sender == this && child)
+        if (event->IsMouseEvent() && child)
         {
             FMouseEvent* mouseEvent = (FMouseEvent*)event;
             Vec2 localMousePos = mouseEvent->mousePosition;
@@ -217,30 +229,15 @@ namespace CE
 
             if (isVerticalScrollVisible)
             {
-                f32 scrollBarHeight = computedSize.y / child->computedSize.y;
-                scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
-                f32 normalizedScrollY = NormalizedScrollY();
+                Rect scrollBar = GetVerticalScrollBarRect();
 
-                Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
-                    computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
-                Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
-
-                if (Rect::FromSize(barPos, barSize).Contains(localMousePos))
+                if (scrollBar.Contains(localMousePos))
                 {
                     isVScroll = true;
                 }
             }
-
-            if (mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseLeave)
-            {
-	            if (isVScroll != isVerticalScrollHighlighted)
-	            {
-                    isVerticalScrollHighlighted = isVScroll;
-                    MarkDirty();
-	            }
-            }
             
-            if (mouseEvent->type == FEventType::DragBegin)
+            if (mouseEvent->type == FEventType::DragBegin && event->sender == this)
             {
                 FDragEvent* dragEvent = static_cast<FDragEvent*>(mouseEvent);
 
@@ -250,6 +247,15 @@ namespace CE
                     event->Consume(this);
 
                     isVerticalScrollDragged = true;
+                }
+            }
+
+            if (mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseLeave)
+            {
+                if (isVerticalScrollHighlighted != (isVScroll || isVerticalScrollDragged))
+                {
+                    isVerticalScrollHighlighted = isVScroll || isVerticalScrollDragged;
+                    MarkDirty();
                 }
             }
         }
@@ -263,8 +269,7 @@ namespace CE
             {
                 if (isVerticalScrollDragged)
                 {
-                    f32 scrollBarHeight = computedSize.y / child->computedSize.y;
-                    scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+                    f32 scrollBarHeight = GetVerticalScrollBarRect().GetSize().height;
                     f32 normalizedScrollY = NormalizedScrollY();
 
                     f32 originalHeight = computedSize.y;
@@ -287,16 +292,22 @@ namespace CE
                 if (isVerticalScrollDragged)
                 {
                     isVerticalScrollDragged = false;
+                    isVerticalScrollHighlighted = false;
 
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
+
+                    MarkDirty();
                 }
                 else if (isHorizontalScrollDragged)
                 {
                     isHorizontalScrollDragged = false;
+                    isHorizontalScrollHighlighted = false;
 
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
+
+                    MarkDirty();
                 }
             }
         }

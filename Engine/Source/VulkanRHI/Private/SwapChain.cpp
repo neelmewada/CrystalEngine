@@ -267,7 +267,7 @@ namespace CE::Vulkan
 			return;
 		}
 
-		// Destroy old swapchain if exists
+		// Destroy old Swap Chain if it exists
 		if (oldSwapChain != nullptr)
 		{
 			vkDestroySwapchainKHR(device->GetHandle(), oldSwapChain, VULKAN_CPU_ALLOCATOR);

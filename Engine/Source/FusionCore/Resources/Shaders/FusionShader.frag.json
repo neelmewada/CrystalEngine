@@ -299,12 +299,12 @@
             "location" : 1
         },
         {
-            "type" : "vec3",
+            "type" : "uint",
             "name" : "in.var.TEXCOORD2",
             "location" : 2
         },
         {
-            "type" : "uint",
+            "type" : "vec3",
             "name" : "in.var.TEXCOORD3",
             "location" : 3
         }

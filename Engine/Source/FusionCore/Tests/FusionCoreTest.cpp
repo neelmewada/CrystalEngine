@@ -47,6 +47,13 @@ namespace RenderingTests
         return String::Format("Line no. {}: This is the first sentence. Followed by a really long second sentence that has a total of 14 words. This is the 3rd sentence in the text line. And this is the last sentence.", index);
 	}
 
+    inline String MakeShortText(int index)
+	{
+        return String::Format("Line no. {}: This is the first sentence.", index);
+	}
+
+    static Array scrollColors = { Color::Yellow(), Color::Green(), Color::Cyan(), Color::Blue(), Color::Red() };
+
     void RenderingTestWidget::Construct()
     {
         Super::Construct();
@@ -321,7 +328,7 @@ namespace RenderingTests
                             .FontSize(13)
                             .Bind_Text(BIND_PROPERTY_R(model, Text))
                         ),
-
+                        
                         FNew(FSplitBox)
                         .Direction(FSplitDirection::Horizontal)
                         .HAlign(HAlign::Fill)
@@ -342,25 +349,48 @@ namespace RenderingTests
 
                         FNew(FScrollBox)
                         .ScrollBarBrush(Color::RGBA(255, 255, 255, 100))
+                        .ScrollBarHoverBrush(Color::RGBA(255, 255, 255, 140))
                         .VerticalScroll(true)
                         .HorizontalScroll(true)
-                        .Height(128)
+                        .Height(80)
                         (
 							FNew(FVerticalStack)
                             .ContentHAlign(HAlign::Left)
                             .VAlign(VAlign::Top)
                             .HAlign(HAlign::Left)
                             (
-								FForEach { 64,
-									[this] (int index) -> FWidget&
-									{
+								FForEach { 4,
+                                    [this] (int index) -> FWidget&
+                                    {
                                         return
-										FNew(FLabel)
+                                        FNew(FVerticalStack)
+                                        .ContentHAlign(HAlign::Left)
+                                        (
+                                            FNew(FStyledWidget)
+                                            .Background(scrollColors[index])
+                                            .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+                                            (
+                                                FNew(FLabel)
+                                                .FontSize(16)
+                                                .Foreground(Color::RGBA(140, 140, 140))
+                                                .Text(MakeShortText(index))
+                                            )
+                                        );
+                                    }
+								},
+
+                                FNew(FVerticalStack)
+                                .ContentHAlign(HAlign::Left)
+                                (
+                                    FNew(FStyledWidget)
+                                    .Background(Color::Red())
+                                    .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+                                    (
+                                        FNew(FTextButton)
                                         .FontSize(16)
-                                        .Foreground(Color::White())
-										.Text(MakeText(index));
-									}
-								}
+                                        .Text("Click Here!")
+                                    )
+                                )
                             )
                         )
                     )

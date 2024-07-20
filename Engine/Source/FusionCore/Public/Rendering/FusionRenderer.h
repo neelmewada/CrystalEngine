@@ -161,6 +161,15 @@ namespace CE
             FShapeType shapeType = FShapeType::Rect;
         };
 
+        struct alignas(16) FClipItemData
+        {
+            Matrix4x4 transform;
+            Vec4 cornerRadius;
+            Vec2 size;
+            FShapeType shapeType = FShapeType::Rect;
+            int clipIndex;
+        };
+
         using FClipItemList = StableDynamicArray<FClipItem2D, ClipItemIncrement, false>;
         using FClipItemStack = StableDynamicArray<int, ClipItemIncrement, false>;
 

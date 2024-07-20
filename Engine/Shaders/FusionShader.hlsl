@@ -27,8 +27,8 @@ struct PSInput
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD0;
     float3 globalPos : TEXCOORD1;
-    float3 clipPos : TEXCOORD2;
-    nointerpolation uint instanceId : TEXCOORD3;
+    nointerpolation uint instanceId : TEXCOORD2;
+    float3 clipPos : TEXCOORD3;
 };
 
 #define InstanceIdx input.instanceId

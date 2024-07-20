@@ -291,7 +291,7 @@ namespace CE
         }
 
         curImageIndex = imageIndex;
-
+        
         RPISystem::Get().SimulationTick(curImageIndex);
 
         PrepareDrawList();

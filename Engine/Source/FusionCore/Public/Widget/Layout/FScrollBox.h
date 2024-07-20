@@ -20,6 +20,8 @@ namespace CE
 
     protected:
 
+        Rect GetVerticalScrollBarRect();
+
         FWidget* HitTest(Vec2 mousePosition) override;
 
         void OnPaint(FPainter* painter) override;
