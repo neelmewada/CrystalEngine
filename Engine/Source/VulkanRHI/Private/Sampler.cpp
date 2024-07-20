@@ -59,7 +59,7 @@ namespace CE::Vulkan
         else
             samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		
-        if (vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &sampler) != VK_SUCCESS)
+        if (vkCreateSampler(device->GetHandle(), &samplerCI, VULKAN_CPU_ALLOCATOR, &sampler) != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create vulkan sampler");
         }
@@ -69,7 +69,7 @@ namespace CE::Vulkan
     {
         if (sampler != nullptr)
         {
-            vkDestroySampler(device->GetHandle(), sampler, nullptr);
+            vkDestroySampler(device->GetHandle(), sampler, VULKAN_CPU_ALLOCATOR);
         }
     }
 

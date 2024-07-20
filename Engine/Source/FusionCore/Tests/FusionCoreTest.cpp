@@ -42,6 +42,11 @@ namespace RenderingTests
         outPopup = popup;
 	}
 
+    inline String MakeText(int index)
+	{
+        return String::Format("Line no. {}: This is the first sentence. Followed by a really long second sentence that has a total of 14 words. This is the 3rd sentence in the text line. And this is the last sentence.", index);
+	}
+
     void RenderingTestWidget::Construct()
     {
         Super::Construct();
@@ -53,6 +58,8 @@ namespace RenderingTests
 
         FButton* openPopupBtn = nullptr;
         FTextButton* nativePopupBtn = nullptr;
+
+        PlatformApplication::Get()->AddMessageHandler(this);
 
         BuildPopup(btnPopup, 0);
         BuildPopup(nativePopup, 1);
@@ -102,7 +109,7 @@ namespace RenderingTests
 
                                 FNew(FTerminalWidget)
                                 .FillRatio(1.0f)
-                                ),
+                            ),
 
                             FNew(FHorizontalStack)
                             .HAlign(HAlign::Fill)
@@ -127,7 +134,7 @@ namespace RenderingTests
                                     .Height(11)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
-                                    ),
+                                ),
 
                                 FNew(FButton)
                                 .OnPressed([this]
@@ -153,7 +160,7 @@ namespace RenderingTests
                                     .Height(11)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
-                                    ),
+                                ),
 
                                 FNew(FButton)
                                 .OnPressed([this]
@@ -171,10 +178,10 @@ namespace RenderingTests
                                     .Height(10)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
-                                    )
                                 )
                             )
-                        ),
+                        )
+                    ),
 
                     FNew(FVerticalStack)
                     .Padding(Vec4(10, 10, 10, 10))
@@ -289,7 +296,6 @@ namespace RenderingTests
                                 }),
 
                             FNew(FLabel)
-                            //.Bind_Text({ [this]() -> String { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr, model->OnMemoryFootprintUpdated() })
                             .Bind_Text(BIND_PROPERTY(model, MemoryFootprint, [this] { return String::Format("Fusion Memory: {} KB", model->GetMemoryFootprint() / 1024); }, nullptr))
                             .FontSize(14)
                         ),
@@ -340,18 +346,27 @@ namespace RenderingTests
                         .HorizontalScroll(true)
                         .Height(128)
                         (
-	                        FNew(FStyledWidget)
-	                        .Background(transparentPattern)
-	                        .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
-                            .Width(2048)
-                            .Height(2048)
+							FNew(FVerticalStack)
+                            .ContentHAlign(HAlign::Left)
+                            .VAlign(VAlign::Top)
+                            .HAlign(HAlign::Left)
+                            (
+								FForEach { 64,
+									[this] (int index) -> FWidget&
+									{
+                                        return
+										FNew(FLabel)
+                                        .FontSize(16)
+                                        .Foreground(Color::White())
+										.Text(MakeText(index));
+									}
+								}
+                            )
                         )
                     )
                 )
             )
         );
-        
-        PlatformApplication::Get()->AddMessageHandler(this);
     }
 
     void RenderingTestWidget::OnBeforeDestroy()

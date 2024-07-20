@@ -209,24 +209,94 @@ namespace CE
         if (event->IsMouseEvent() && event->sender == this && child)
         {
             FMouseEvent* mouseEvent = (FMouseEvent*)event;
-            Vec2 localMousePos = mouseEvent->mousePosition - globalPosition;
-            
-            if (mouseEvent->type == FEventType::MouseMove)
+            Vec2 localMousePos = mouseEvent->mousePosition;
+            if (parent)
+                localMousePos -= parent->globalPosition;
+
+            bool isVScroll = false;
+
+            if (isVerticalScrollVisible)
             {
-                if (isVerticalScrollVisible)
+                f32 scrollBarHeight = computedSize.y / child->computedSize.y;
+                scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+                f32 normalizedScrollY = NormalizedScrollY();
+
+                Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
+                    computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
+                Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+
+                if (Rect::FromSize(barPos, barSize).Contains(localMousePos))
+                {
+                    isVScroll = true;
+                }
+            }
+
+            if (mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseLeave)
+            {
+	            if (isVScroll != isVerticalScrollHighlighted)
+	            {
+                    isVerticalScrollHighlighted = isVScroll;
+                    MarkDirty();
+	            }
+            }
+            
+            if (mouseEvent->type == FEventType::DragBegin)
+            {
+                FDragEvent* dragEvent = static_cast<FDragEvent*>(mouseEvent);
+
+                if (isVScroll)
+                {
+                    dragEvent->draggedWidget = this;
+                    event->Consume(this);
+
+                    isVerticalScrollDragged = true;
+                }
+            }
+        }
+
+        if (event->IsDragEvent())
+        {
+            FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
+            Vec2 mouseDelta = dragEvent->mousePosition - dragEvent->prevMousePosition;
+
+            if (dragEvent->type == FEventType::DragMove)
+            {
+                if (isVerticalScrollDragged)
                 {
                     f32 scrollBarHeight = computedSize.y / child->computedSize.y;
                     scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
                     f32 normalizedScrollY = NormalizedScrollY();
 
-                    Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
-                        computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
-                    Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+                    f32 originalHeight = computedSize.y;
 
-                    if (Rect::FromSize(barPos, barSize).Contains(localMousePos))
-                    {
-                        CE_LOG(Info, All, "Inside scroll");
-                    }
+                    normalizedScrollY += mouseDelta.y / (originalHeight - scrollBarHeight);
+                    normalizedScrollY = Math::Clamp01(normalizedScrollY);
+
+                    NormalizedScrollY(normalizedScrollY);
+
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
+                }
+                else if (isHorizontalScrollDragged)
+                {
+
+                }
+            }
+            else if (dragEvent->type == FEventType::DragEnd)
+            {
+                if (isVerticalScrollDragged)
+                {
+                    isVerticalScrollDragged = false;
+
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
+                }
+                else if (isHorizontalScrollDragged)
+                {
+                    isHorizontalScrollDragged = false;
+
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
                 }
             }
         }
@@ -241,6 +311,10 @@ namespace CE
             return nullptr;
 
         FWidget* child = GetChild();
+        if (isVerticalScrollDragged)
+        {
+            return this;
+        }
 
         if (child && isVerticalScrollVisible)
         {
@@ -252,7 +326,7 @@ namespace CE
                 computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
             Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
 
-            if (Rect::FromSize(barPos, barSize).Contains(mousePosition))
+            if (Rect::FromSize(Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, computedPosition.y), barSize).Contains(mousePosition))
             {
                 return this;
             }
@@ -263,11 +337,22 @@ namespace CE
 
     FScrollBox& FScrollBox::NormalizedScrollY(f32 value)
     {
+        value = Math::Clamp01(value);
+
         FWidget* child = GetChild();
+        f32 scrollBarSection = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+
         if (child && isVerticalScrollVisible)
         {
             Vec2 translation = child->Translation();
-            translation.y = -value * (child->computedSize.y - computedSize.y);
+            if (isHorizontalScrollVisible)
+            {
+                translation.y = -value * (child->computedSize.y - (computedSize.y - scrollBarSection));
+            }
+            else
+            {
+                translation.y = -value * (child->computedSize.y - computedSize.y);
+            }
             child->Translation(translation);
         }
         return *this;
@@ -276,10 +361,19 @@ namespace CE
     f32 FScrollBox::NormalizedScrollY()
     {
         FWidget* child = GetChild();
+        f32 scrollBarSection = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+
         if (child && isVerticalScrollVisible)
         {
             Vec2 translation = child->Translation();
-            return -translation.y / (child->computedSize.y - computedSize.y);
+            if (isHorizontalScrollVisible)
+            {
+                return Math::Clamp01(-translation.y / (child->computedSize.y - (computedSize.y - scrollBarSection)));
+            }
+            else
+            {
+                return Math::Clamp01(-translation.y / (child->computedSize.y - computedSize.y));
+            }
         }
         return 0;
     }

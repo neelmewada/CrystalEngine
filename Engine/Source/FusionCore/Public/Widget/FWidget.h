@@ -2,7 +2,13 @@
 
 namespace CE
 {
-    
+    class FWidget;
+
+    struct FWidgetBuilder
+    {
+        FWidgetBuilder() {}
+    };
+
     CLASS(Abstract)
     class FUSIONCORE_API FWidget : public Object
     {
@@ -34,12 +40,24 @@ namespace CE
 
         virtual void ApplyStyle();
 
-        template<typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
-        Self& operator()(const TArgs&... childWidget)
+        template<typename... TArgs>
+        struct TValidate_Children : TFalseType
+        {};
+
+        template<typename T>
+        struct TValidate_Children<T> : TBoolConst<TIsBaseClassOf<FWidget, T>::Value or TIsBaseClassOf<FWidgetBuilder, T>::Value>
+        {};
+
+        template<typename TFirst, typename... TRest>
+        struct TValidate_Children<TFirst, TRest...> : TBoolConst<TValidate_Children<TFirst>::Value and TValidate_Children<TRest...>::Value>
+        {};
+
+        template<typename... TArgs> requires TValidate_Children<TArgs...>::Value and (sizeof...(TArgs) > 0)
+        FWidget& operator()(const TArgs&... childWidget)
         {
             using TupleType = std::tuple<const TArgs&...>;
             TupleType args = { childWidget... };
-            
+
             constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
                 {
                     using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
@@ -48,8 +66,12 @@ namespace CE
                     {
                         this->AddChild(const_cast<ArgType*>(&std::get<i()>(args)));
                     }
+                    else if constexpr (TIsBaseClassOf<FWidgetBuilder, ArgType>::Value)
+                    {
+                        const_cast<ArgType*>(&std::get<i()>(args))->Build(this);
+                    }
                 });
-            
+
             return *this;
         }
 
@@ -99,6 +121,8 @@ namespace CE
 
         void Focus();
         void Unfocus();
+
+    private:
 
     protected:
 
@@ -229,6 +253,27 @@ namespace CE
 
 
         FUSION_WIDGET;
+    };
+
+    struct FForEach : FWidgetBuilder
+    {
+        FForEach(int loopCount, Delegate<FWidget& (int index)> lambda)
+            : loopCount(loopCount), lambda(lambda)
+        {}
+
+        int loopCount;
+        Delegate<FWidget& (int index)> lambda;
+
+        void Build(FWidget* parent)
+        {
+	        if (loopCount > 0 && lambda.IsValid())
+	        {
+		        for (int i = 0; i < loopCount; ++i)
+		        {
+                    parent->AddChild(&lambda(i));
+		        }
+	        }
+        }
     };
 
     template<typename TWidget> requires !TIsAbstract<TWidget>::Value && TIsBaseClassOf<FWidget, TWidget>::Value

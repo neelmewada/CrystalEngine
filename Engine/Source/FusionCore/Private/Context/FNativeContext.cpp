@@ -166,8 +166,7 @@ namespace CE
 
 		const Vec2 newSize = platformWindow->GetDrawableWindowSize().ToVec2();
 
-		//if (newSize != availableSize || childContexts.IsEmpty())
-		if (false)
+		if (newSize != availableSize || childContexts.IsEmpty())
 		{
 			availableSize = newSize;
 

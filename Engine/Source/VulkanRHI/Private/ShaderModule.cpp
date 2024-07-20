@@ -19,7 +19,7 @@ namespace CE::Vulkan
 
 		hash = CalculateHash(desc.byteCode, desc.byteSize);
 		
-		VkResult result = vkCreateShaderModule(device->GetHandle(), &shaderCI, nullptr, &shaderModule);
+		VkResult result = vkCreateShaderModule(device->GetHandle(), &shaderCI, VULKAN_CPU_ALLOCATOR, &shaderModule);
 		if (result != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan shader module. Error code {}", (int)result);
@@ -35,7 +35,7 @@ namespace CE::Vulkan
 
 		if (shaderModule != nullptr)
 		{
-			vkDestroyShaderModule(device->GetHandle(), shaderModule, nullptr);
+			vkDestroyShaderModule(device->GetHandle(), shaderModule, VULKAN_CPU_ALLOCATOR);
 			shaderModule = nullptr;
 		}
 	}

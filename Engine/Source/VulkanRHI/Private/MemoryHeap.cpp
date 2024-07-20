@@ -61,7 +61,7 @@ namespace CE::Vulkan
 
 		allocInfo.memoryTypeIndex = allocatedMemoryTypeIndex;
 		
-		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &allocation);
+		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &allocation);
 		if (result != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to allocate memory of size {}: {}", heapSize, debugName);
@@ -73,7 +73,7 @@ namespace CE::Vulkan
 	{
 		if (allocation != nullptr)
         {
-            vkFreeMemory(device->GetHandle(), allocation, nullptr);
+            vkFreeMemory(device->GetHandle(), allocation, VULKAN_CPU_ALLOCATOR);
             allocation = nullptr;
         }
 	}

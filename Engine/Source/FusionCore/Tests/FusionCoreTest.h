@@ -60,20 +60,18 @@ namespace RenderingTests
 		void OnWindowMaximized(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
 
-		FStackBox* rootBox;
-		FButton* button;
-		FTextInput* textInput;
-		FComboBox* comboBox;
-		FLabel* buttonLabel;
-		FStyledWidget* subWidget;
-		FPopup* btnPopup;
-		FPopup* nativePopup;
-
-		FImage* maximizeIcon;
-		FStyledWidget* borderWidget;
-
-		FTextInput* modelTextInput;
-		FLabel* modelDisplayLabel;
+		FStackBox* rootBox = nullptr;
+		FButton* button = nullptr;
+		FTextInput* textInput = nullptr;
+		FComboBox* comboBox = nullptr;
+		FLabel* buttonLabel = nullptr;
+		FStyledWidget* subWidget = nullptr;
+		FPopup* btnPopup = nullptr;
+		FPopup* nativePopup = nullptr;
+		FImage* maximizeIcon = nullptr;
+		FStyledWidget* borderWidget = nullptr;
+		FTextInput* modelTextInput = nullptr;
+		FLabel* modelDisplayLabel = nullptr;
 		TextInputModel* model = nullptr;
 
 		int hitCounter = 0;

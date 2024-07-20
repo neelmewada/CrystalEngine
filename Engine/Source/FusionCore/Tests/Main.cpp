@@ -273,7 +273,10 @@ TEST(FusionCore, Rendering)
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
-	mainWidget->comboBox->ApplyStyle();
+	if (mainWidget->comboBox)
+	{
+		mainWidget->comboBox->ApplyStyle();
+	}
 
 	int frameCounter = 0;
 
@@ -282,7 +285,7 @@ TEST(FusionCore, Rendering)
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
-		if (frameCounter == 1)
+		if (frameCounter == 1 && mainWidget->model)
 		{
 			mainWidget->model->UpdateMemoryFootprint();
 		}

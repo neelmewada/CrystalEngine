@@ -46,7 +46,7 @@ namespace CE::Vulkan
 
 		tempBufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(bufferDesc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-		if (vkCreateBuffer(device->GetHandle(), &tempBufferCI, nullptr, &tempBuffer) != VK_SUCCESS)
+		if (vkCreateBuffer(device->GetHandle(), &tempBufferCI, VULKAN_CPU_ALLOCATOR, &tempBuffer) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", bufferDesc.name, bufferDesc.bufferSize);
 			return;
@@ -58,7 +58,7 @@ namespace CE::Vulkan
 		outRequirements.offsetAlignment = bufferRequirements.alignment;
 		outRequirements.flags = bufferRequirements.memoryTypeBits;
 		
-		vkDestroyBuffer(device->GetHandle(), tempBuffer, nullptr);
+		vkDestroyBuffer(device->GetHandle(), tempBuffer, VULKAN_CPU_ALLOCATOR);
 	}
 
 	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc)
@@ -80,7 +80,7 @@ namespace CE::Vulkan
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		
-		if (vkCreateBuffer(device->GetHandle(), &bufferCI, nullptr, &buffer) != VK_SUCCESS)
+		if (vkCreateBuffer(device->GetHandle(), &bufferCI, VULKAN_CPU_ALLOCATOR, &buffer) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
@@ -115,7 +115,7 @@ namespace CE::Vulkan
 		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memoryFlags);
 		allocInfo.pNext = nullptr;
 
-		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &bufferMemory);
+		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &bufferMemory);
 
 		const auto& memoryProps = device->GetMemoryProperties();
 		
@@ -157,7 +157,7 @@ namespace CE::Vulkan
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-		if (vkCreateBuffer(device->GetHandle(), &bufferCI, nullptr, &buffer) != VK_SUCCESS)
+		if (vkCreateBuffer(device->GetHandle(), &bufferCI, VULKAN_CPU_ALLOCATOR, &buffer) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
@@ -179,25 +179,25 @@ namespace CE::Vulkan
     {
         if (buffer != nullptr)
         {
-            vkDestroyBuffer(device->GetHandle(), buffer, nullptr);
+            vkDestroyBuffer(device->GetHandle(), buffer, VULKAN_CPU_ALLOCATOR);
             buffer = nullptr;
         }
 
         if (bufferMemory != nullptr)
         {
-            vkFreeMemory(device->GetHandle(), bufferMemory, nullptr);
+            vkFreeMemory(device->GetHandle(), bufferMemory, VULKAN_CPU_ALLOCATOR);
             bufferMemory = nullptr;
         }
         
         if (uploadCmdPool)
         {
-            vkDestroyCommandPool(device->GetHandle(), uploadCmdPool, nullptr);
+            vkDestroyCommandPool(device->GetHandle(), uploadCmdPool, VULKAN_CPU_ALLOCATOR);
             uploadCmdPool = nullptr;
         }
         
         if (uploadFence)
         {
-            vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+            vkDestroyFence(device->GetHandle(), uploadFence, VULKAN_CPU_ALLOCATOR);
             uploadFence = nullptr;
         }
         
@@ -348,7 +348,7 @@ namespace CE::Vulkan
             VkFenceCreateInfo fenceCI{};
             fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
             
-            if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &uploadFence) != VK_SUCCESS)
+            if (vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &uploadFence) != VK_SUCCESS)
             {
                 CE_LOG(Error, All, "Failed to create GPU Buffer Upload Fence for buffer {}", name);
                 return;
@@ -358,9 +358,9 @@ namespace CE::Vulkan
             cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
             cmdPoolCI.queueFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
             
-            if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, nullptr, &uploadCmdPool) != VK_SUCCESS)
+            if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, VULKAN_CPU_ALLOCATOR, &uploadCmdPool) != VK_SUCCESS)
             {
-                vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+                vkDestroyFence(device->GetHandle(), uploadFence, VULKAN_CPU_ALLOCATOR);
                 uploadFence = nullptr;
                 CE_LOG(Error, All, "Failed to create GPU Buffer Upload Command Pool for buffer {}", name);
                 return;
@@ -380,7 +380,7 @@ namespace CE::Vulkan
 			VkFenceCreateInfo fenceCI{};
 			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			
-			if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &uploadFence) != VK_SUCCESS)
+			if (vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &uploadFence) != VK_SUCCESS)
 			{
 				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Fence for buffer {}", name);
 				return;
@@ -390,9 +390,9 @@ namespace CE::Vulkan
 			cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			cmdPoolCI.queueFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
 			
-			if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, nullptr, &uploadCmdPool) != VK_SUCCESS)
+			if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, VULKAN_CPU_ALLOCATOR, &uploadCmdPool) != VK_SUCCESS)
 			{
-				vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+				vkDestroyFence(device->GetHandle(), uploadFence, VULKAN_CPU_ALLOCATOR);
 				uploadFence = nullptr;
 				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Command Pool for buffer {}", name);
 				return;
@@ -489,7 +489,7 @@ namespace CE::Vulkan
             VkFenceCreateInfo fenceCI{};
             fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
             
-            if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &uploadFence) != VK_SUCCESS)
+            if (vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &uploadFence) != VK_SUCCESS)
             {
                 CE_LOG(Error, All, "Failed to create GPU Buffer Upload Fence for buffer {}", name);
                 return;
@@ -499,9 +499,9 @@ namespace CE::Vulkan
             cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
             cmdPoolCI.queueFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
             
-            if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, nullptr, &uploadCmdPool) != VK_SUCCESS)
+            if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, VULKAN_CPU_ALLOCATOR, &uploadCmdPool) != VK_SUCCESS)
             {
-                vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+                vkDestroyFence(device->GetHandle(), uploadFence, VULKAN_CPU_ALLOCATOR);
                 uploadFence = nullptr;
                 CE_LOG(Error, All, "Failed to create GPU Buffer Upload Command Pool for buffer {}", name);
                 return;
@@ -577,7 +577,7 @@ namespace CE::Vulkan
 			VkFenceCreateInfo fenceCI{};
 			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-			if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &uploadFence) != VK_SUCCESS)
+			if (vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &uploadFence) != VK_SUCCESS)
 			{
 				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Fence for buffer {}", name);
 				return;
@@ -587,9 +587,9 @@ namespace CE::Vulkan
 			cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			cmdPoolCI.queueFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
 
-			if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, nullptr, &uploadCmdPool) != VK_SUCCESS)
+			if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, VULKAN_CPU_ALLOCATOR, &uploadCmdPool) != VK_SUCCESS)
 			{
-				vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+				vkDestroyFence(device->GetHandle(), uploadFence, VULKAN_CPU_ALLOCATOR);
 				uploadFence = nullptr;
 				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Command Pool for buffer {}", name);
 				return;

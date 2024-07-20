@@ -43,7 +43,7 @@ namespace CE::Vulkan
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = primaryGraphicsQueue->GetFamilyIndex();
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		if (vkCreateCommandPool(device, &poolInfo, nullptr, &gfxCommandPool) != VK_SUCCESS)
+		if (vkCreateCommandPool(device, &poolInfo, VULKAN_CPU_ALLOCATOR, &gfxCommandPool) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Graphics Command Pool");
 			return;
@@ -93,17 +93,17 @@ namespace CE::Vulkan
 	{
 		delete deviceLimits; deviceLimits = nullptr;
 
-		vkDestroyCommandPool(device, gfxCommandPool, nullptr);
+		vkDestroyCommandPool(device, gfxCommandPool, VULKAN_CPU_ALLOCATOR);
 		gfxCommandPool = nullptr;
 
 		// Command Pools
 		for (const auto& pair : queueFamilyToCmdPool)
 		{
-			vkDestroyCommandPool(device, pair.second, nullptr);
+			vkDestroyCommandPool(device, pair.second, VULKAN_CPU_ALLOCATOR);
 		}
 		queueFamilyToCmdPool.Clear();
 
-		vkDestroyDevice(device, nullptr);
+		vkDestroyDevice(device, VULKAN_CPU_ALLOCATOR);
 		device = nullptr;
 
 		CE_LOG(Info, All, "Vulkan device shutdown");
@@ -386,7 +386,7 @@ namespace CE::Vulkan
 
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;
 
-		if (vkCreateDevice(gpu, &deviceCI, nullptr, &device) != VK_SUCCESS)
+		if (vkCreateDevice(gpu, &deviceCI, VULKAN_CPU_ALLOCATOR, &device) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create vulkan device.");
 			return;
@@ -404,7 +404,7 @@ namespace CE::Vulkan
 			commandPoolCI.queueFamilyIndex = familyIdx;
 
 			VkCommandPool commandPool = nullptr;
-			if (vkCreateCommandPool(device, &commandPoolCI, nullptr, &commandPool) != VK_SUCCESS)
+			if (vkCreateCommandPool(device, &commandPoolCI, VULKAN_CPU_ALLOCATOR, &commandPool) != VK_SUCCESS)
 			{
 				CE_LOG(Error, All, "Failed to create Vulkan Command Pool!");
 				return;
@@ -782,7 +782,7 @@ namespace CE::Vulkan
 
 		// CreateGraphicsPipeline image view and return it
 		VkImageView imageView;
-		if (vkCreateImageView(GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		if (vkCreateImageView(GetHandle(), &imageViewCI, VULKAN_CPU_ALLOCATOR, &imageView) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Image View!");
 			return nullptr;

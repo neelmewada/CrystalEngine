@@ -308,8 +308,6 @@ namespace CE
         rebuildFrameGraph = false;
         recompileFrameGraph = true;
 
-        FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
-
         scheduler->BeginFrameGraph();
         {
             rootContext->EmplaceFrameAttachments();

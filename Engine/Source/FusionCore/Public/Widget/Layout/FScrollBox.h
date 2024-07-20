@@ -16,6 +16,8 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool SupportsDragEvents() const override { return true; }
+
     protected:
 
         FWidget* HitTest(Vec2 mousePosition) override;
@@ -50,6 +52,12 @@ namespace CE
 
         bool isVerticalScrollVisible = false;
         bool isHorizontalScrollVisible = false;
+
+        bool isVerticalScrollDragged = false;
+        bool isHorizontalScrollDragged = false;
+
+        bool isVerticalScrollHighlighted = false;
+        bool isHorizontalScrollHighlighted = false;
 
         FUSION_WIDGET;
     };

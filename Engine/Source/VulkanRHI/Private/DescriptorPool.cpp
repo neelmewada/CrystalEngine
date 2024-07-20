@@ -14,7 +14,7 @@ namespace CE::Vulkan
     {
         for (VkDescriptorPool pool : descriptorPools)
         {
-            vkDestroyDescriptorPool(device->GetHandle(), pool, nullptr);
+            vkDestroyDescriptorPool(device->GetHandle(), pool, VULKAN_CPU_ALLOCATOR);
         }
         descriptorPools.Clear();
     }
@@ -43,7 +43,7 @@ namespace CE::Vulkan
 
 		VkDescriptorPool pool = nullptr;
 
-		auto result = vkCreateDescriptorPool(device->GetHandle(), &info, nullptr, &pool);
+		auto result = vkCreateDescriptorPool(device->GetHandle(), &info, VULKAN_CPU_ALLOCATOR, &pool);
 		if (result != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create vulkan descriptor pool. Error code: {}", (int)result);
@@ -206,7 +206,7 @@ namespace CE::Vulkan
         
         VkDescriptorPool pool = nullptr;
         
-        auto result = vkCreateDescriptorPool(device->GetHandle(), &info, nullptr, &pool);
+        auto result = vkCreateDescriptorPool(device->GetHandle(), &info, VULKAN_CPU_ALLOCATOR, &pool);
         if (result != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create vulkan descriptor pool. Error code: {}", (int)result);

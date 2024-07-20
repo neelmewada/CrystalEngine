@@ -204,7 +204,7 @@ namespace CE::Vulkan
 					semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 					VkSemaphore semaphore = nullptr;
-					auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
+					auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
 					if (result != VK_SUCCESS)
 					{
 						continue;
@@ -217,7 +217,7 @@ namespace CE::Vulkan
 					fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 					VkFence fence = nullptr;
-					result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
+					result = vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
 					if (result != VK_SUCCESS)
 					{
 						continue;
@@ -256,13 +256,13 @@ namespace CE::Vulkan
 		{
 			for (VkSemaphore semaphore : imageAcquiredSemaphores[i])
 			{
-				vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+				vkDestroySemaphore(device->GetHandle(), semaphore, VULKAN_CPU_ALLOCATOR);
 			}
 			imageAcquiredSemaphores[i].Clear();
 
 			for (VkFence fence : imageAcquiredFences[i])
 			{
-				vkDestroyFence(device->GetHandle(), fence, nullptr);
+				vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
 			}
 			imageAcquiredFences[i].Clear();
 		}

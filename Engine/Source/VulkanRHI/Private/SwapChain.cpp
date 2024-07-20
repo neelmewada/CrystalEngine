@@ -41,13 +41,13 @@ namespace CE::Vulkan
 
 		if (swapChain != nullptr)
 		{
-			vkDestroySwapchainKHR(device->GetHandle(), swapChain, nullptr);
+			vkDestroySwapchainKHR(device->GetHandle(), swapChain, VULKAN_CPU_ALLOCATOR);
 			swapChain = nullptr;
 		}
 
 		if (surface != nullptr)
 		{
-			vkDestroySurfaceKHR(rhi->GetInstanceHandle(), surface, nullptr);
+			vkDestroySurfaceKHR(rhi->GetInstanceHandle(), surface, VULKAN_CPU_ALLOCATOR);
 			surface = nullptr;
 		}
 
@@ -261,7 +261,7 @@ namespace CE::Vulkan
 		swapChainCI.clipped = VK_TRUE;
 		swapChainCI.imageArrayLayers = 1;
 
-		if (vkCreateSwapchainKHR(device->GetHandle(), &swapChainCI, nullptr, &swapChain) != VK_SUCCESS)
+		if (vkCreateSwapchainKHR(device->GetHandle(), &swapChainCI, VULKAN_CPU_ALLOCATOR, &swapChain) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan SwapChain!");
 			return;
@@ -270,7 +270,7 @@ namespace CE::Vulkan
 		// Destroy old swapchain if exists
 		if (oldSwapChain != nullptr)
 		{
-			vkDestroySwapchainKHR(device->GetHandle(), oldSwapChain, nullptr);
+			vkDestroySwapchainKHR(device->GetHandle(), oldSwapChain, VULKAN_CPU_ALLOCATOR);
 			oldSwapChain = nullptr;
 		}
 

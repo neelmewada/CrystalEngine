@@ -9,6 +9,9 @@
 
 namespace CE
 {
+    class SharedMutex;
+    class SharedRecursiveMutex;
+
     template<SIZE_T Length, SIZE_T Alignment = alignof(max_align_t)>
     using AlignedStorage = std::aligned_storage_t<Length, Alignment>;
 
@@ -57,9 +60,19 @@ namespace CE
             return PlatformMemory::AlignedAlloc(size, alignment);
         }
 
+        static void* AlignedRealloc(void* block, SIZE_T size, SIZE_T alignment)
+        {
+            return PlatformMemory::AlignedRealloc(block, size, alignment);
+        }
+
         static inline void AlignedFree(void* block)
         {
             PlatformMemory::AlignedFree(block);
+        }
+
+        static SIZE_T AlignedBlockSize(void* block, SIZE_T alignment, SIZE_T offset = 0)
+        {
+            return PlatformMemory::GetAlignedBlockSize(block, alignment, offset);
         }
 
         /* Returns a Size that is Aligned to the given Alignment. IMPORTANT: Alignment should always be a power of 2 */
@@ -67,5 +80,8 @@ namespace CE
         {
             return (baseSize + alignment - 1) & ~(alignment - 1);
         }
+
+        static std::atomic<SIZE_T> totalAllocation;
+
     };
 }

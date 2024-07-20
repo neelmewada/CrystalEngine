@@ -78,7 +78,7 @@ namespace CE::Vulkan
 		framebufferCI.width = width;
 		framebufferCI.height = height;
 		
-		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 
 		renderTarget = new Vulkan::RenderTarget(device, scope->renderPass);
 	}
@@ -87,7 +87,7 @@ namespace CE::Vulkan
 	{
 		if (frameBuffer)
 		{
-			vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
+			vkDestroyFramebuffer(device->GetHandle(), frameBuffer, VULKAN_CPU_ALLOCATOR);
 			frameBuffer = nullptr;
 		}
 
@@ -135,7 +135,7 @@ namespace CE::Vulkan
 		framebufferCI.attachmentCount = attachments.GetSize();
 		framebufferCI.pAttachments = attachments.GetData();
 
-		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 
 		renderTarget = new RenderTarget(device, renderPass);
 	}
@@ -186,7 +186,7 @@ namespace CE::Vulkan
 		framebufferCI.attachmentCount = attachments.GetSize();
 		framebufferCI.pAttachments = attachments.GetData();
 
-		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 
 		renderTarget = new RenderTarget(device, renderPass);
 	}

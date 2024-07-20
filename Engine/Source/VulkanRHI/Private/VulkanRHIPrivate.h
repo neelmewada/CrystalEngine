@@ -6,6 +6,9 @@
 
 #include "vulkan/vulkan.h"
 
+//#define VULKAN_CPU_ALLOCATOR &CE::Vulkan::gVulkanAllocators
+#define VULKAN_CPU_ALLOCATOR nullptr
+
 #include "DeviceLimits.h"
 #include "VulkanRHI.h"
 #include "CommandQueue.h"
@@ -45,5 +48,7 @@
 
 namespace CE::Vulkan
 {
+
+	extern VkAllocationCallbacks gVulkanAllocators;
 
 } // namespace CE::Vulkan

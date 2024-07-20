@@ -143,14 +143,14 @@ namespace CE::Vulkan
 
         for (auto [_, pipelineCache] : pipelineCachesByHash)
         {
-            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
+            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, VULKAN_CPU_ALLOCATOR);
         }
         pipelineCaches.Clear();
         pipelineCachesByHash.Clear();
 
         for (auto [_, pipeline] : pipelinesByHash)
         {
-            vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
+            vkDestroyPipeline(device->GetHandle(), pipeline, VULKAN_CPU_ALLOCATOR);
         }
         pipelines.Clear();
         pipelinesByHash.Clear();
@@ -280,7 +280,7 @@ namespace CE::Vulkan
             cacheCI.initialDataSize = 0;
             cacheCI.pInitialData = nullptr;
 
-            result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, nullptr, &pipelineCache);
+            result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, VULKAN_CPU_ALLOCATOR, &pipelineCache);
             if (result == VK_SUCCESS)
             {
                 pipelineCaches[variant] = pipelineCache;
@@ -291,7 +291,7 @@ namespace CE::Vulkan
         pipelineCache = pipelineCaches[variant];
 
         VkPipeline pipeline = nullptr;
-        result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, nullptr, &pipeline);
+        result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, VULKAN_CPU_ALLOCATOR, &pipeline);
 
         if (result != VK_SUCCESS)
         {

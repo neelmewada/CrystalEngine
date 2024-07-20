@@ -258,7 +258,7 @@ namespace CE
 
 	Vec2 FusionRenderer::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
-		static Array<Rect> offsets{};
+		Array<Rect> offsets{};
 		return CalculateCharacterOffsets(offsets, text, font, width, wordWrap);
 	}
 
@@ -322,6 +322,7 @@ namespace CE
 			}
 
 			FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+			
 			const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
 			const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
 

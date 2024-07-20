@@ -88,8 +88,6 @@ namespace CE
 
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
-        ZoneScoped;
-
         u32 fontSizeInAtlas = fontSize;
 
         static Array<u32> charSet{};

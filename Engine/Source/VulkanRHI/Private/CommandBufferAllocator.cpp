@@ -65,7 +65,7 @@ namespace CE::Vulkan
 	{
 		for (auto pool : commandPools)
 		{
-			vkDestroyCommandPool(context.device->GetHandle(), pool.handle, nullptr);
+			vkDestroyCommandPool(context.device->GetHandle(), pool.handle, VULKAN_CPU_ALLOCATOR);
 		}
 		commandPools.Clear();
 
@@ -90,7 +90,7 @@ namespace CE::Vulkan
 		createInfo.queueFamilyIndex = queueFamilyIndex;
 
 		VkCommandPool handle = nullptr;
-		auto result = vkCreateCommandPool(context.device->GetHandle(), &createInfo, nullptr, &handle);
+		auto result = vkCreateCommandPool(context.device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &handle);
 		if (result == VK_SUCCESS)
 		{
 			commandPools.Add({ handle, queueFamilyIndex });

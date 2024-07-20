@@ -6,7 +6,7 @@ namespace CE::Vulkan
     {
         if (pipelineLayout)
         {
-            vkDestroyPipelineLayout(device->GetHandle(), pipelineLayout, nullptr);
+            vkDestroyPipelineLayout(device->GetHandle(), pipelineLayout, VULKAN_CPU_ALLOCATOR);
             pipelineLayout = nullptr;
         }
 
@@ -15,13 +15,13 @@ namespace CE::Vulkan
             if (setLayout == emptySetLayout)
                 continue;
 
-            vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
+            vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, VULKAN_CPU_ALLOCATOR);
         }
         setLayouts.Clear();
 
         if (emptySetLayout)
         {
-            vkDestroyDescriptorSetLayout(device->GetHandle(), emptySetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(device->GetHandle(), emptySetLayout, VULKAN_CPU_ALLOCATOR);
             emptySetLayout = nullptr;
         }
     }
@@ -82,7 +82,7 @@ namespace CE::Vulkan
             emptySetCI.bindingCount = 0;
             emptySetCI.pBindings = nullptr;
 
-            vkCreateDescriptorSetLayout(device->GetHandle(), &emptySetCI, nullptr, &emptySetLayout);
+            vkCreateDescriptorSetLayout(device->GetHandle(), &emptySetCI, VULKAN_CPU_ALLOCATOR, &emptySetLayout);
         }
 
         for (const RHI::ShaderResourceGroupLayout& srgLayout : desc.srgLayouts)
@@ -198,7 +198,7 @@ namespace CE::Vulkan
                 setLayoutCI.pNext = &bindingFlagsInfo;
 
                 VkDescriptorSetLayout setLayout = nullptr;
-                result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
+                result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
                 if (result == VK_SUCCESS)
                 {
                     setLayouts.Add(setLayout);
@@ -220,7 +220,7 @@ namespace CE::Vulkan
         pipelineLayoutCI.pSetLayouts = setLayouts.GetData();
         pipelineLayoutCI.pushConstantRangeCount = 0;
 
-        result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCI, nullptr, &pipelineLayout);
+        result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &pipelineLayout);
         if (result != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create Vulkan Pipeline Layout!");
@@ -231,13 +231,13 @@ namespace CE::Vulkan
     {
         if (pipeline)
         {
-            vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
+            vkDestroyPipeline(device->GetHandle(), pipeline, VULKAN_CPU_ALLOCATOR);
             pipeline = nullptr;
         }
 
         if (pipelineCache)
         {
-            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
+            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, VULKAN_CPU_ALLOCATOR);
             pipelineCache = nullptr;
         }
     }

@@ -263,7 +263,7 @@ namespace CE::Vulkan
         
         VkImage tempImage = nullptr;
         
-        if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &tempImage) != VK_SUCCESS)
+        if (vkCreateImage(device->GetHandle(), &imageCI, VULKAN_CPU_ALLOCATOR, &tempImage) != VK_SUCCESS)
         {
             return;
         }
@@ -275,7 +275,7 @@ namespace CE::Vulkan
         outRequirements.offsetAlignment = memoryRequirements.alignment;
         outRequirements.flags = memoryRequirements.memoryTypeBits;
         
-        vkDestroyImage(device->GetHandle(), tempImage, nullptr);
+        vkDestroyImage(device->GetHandle(), tempImage, VULKAN_CPU_ALLOCATOR);
     }
 
 	void Texture::Init(const RHI::TextureDescriptor& desc)
@@ -374,7 +374,7 @@ namespace CE::Vulkan
 			imageCI.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 		}
 
-		if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &image) != VK_SUCCESS)
+		if (vkCreateImage(device->GetHandle(), &imageCI, VULKAN_CPU_ALLOCATOR, &image) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Image");
 			return;
@@ -395,7 +395,7 @@ namespace CE::Vulkan
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		if (vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+		if (vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &imageMemory) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to allocate Vulkan Image Memory");
 			return;
@@ -439,7 +439,7 @@ namespace CE::Vulkan
 		imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
 		imageViewCI.subresourceRange.layerCount = arrayLayers;  // No. of array layers to view
 
-		if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		if (vkCreateImageView(device->GetHandle(), &imageViewCI, VULKAN_CPU_ALLOCATOR, &imageView) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Image View");
 			return;
@@ -546,7 +546,7 @@ namespace CE::Vulkan
 		imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
 		imageViewCI.subresourceRange.layerCount = 1;            // No. of array layers to view
 
-		if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		if (vkCreateImageView(device->GetHandle(), &imageViewCI, VULKAN_CPU_ALLOCATOR, &imageView) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Image View!");
 			return;
@@ -563,20 +563,20 @@ namespace CE::Vulkan
     {
         if (imageView != nullptr)
         {
-            vkDestroyImageView(device->GetHandle(), imageView, nullptr);
+            vkDestroyImageView(device->GetHandle(), imageView, VULKAN_CPU_ALLOCATOR);
             imageView = nullptr;
         }
 
         if (imageMemory != nullptr)
         {
-            vkFreeMemory(device->GetHandle(), imageMemory, nullptr);
+            vkFreeMemory(device->GetHandle(), imageMemory, VULKAN_CPU_ALLOCATOR);
             imageMemory = nullptr;
         }
 
 		// Don't destroy images that are managed externally
         if (!importedImage && image != nullptr)
         {
-            vkDestroyImage(device->GetHandle(), image, nullptr);
+            vkDestroyImage(device->GetHandle(), image, VULKAN_CPU_ALLOCATOR);
             image = nullptr;
         }
     }

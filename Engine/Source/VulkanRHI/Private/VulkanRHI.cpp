@@ -29,6 +29,51 @@ namespace CE::Vulkan
 
 	}
 
+    static SIZE_T gAllocatedMemory = 0;
+    static SharedMutex gAllocMutex{};
+    static HashMap<void*, SIZE_T> gAlignmentMap;
+    
+    static void* VkAllocateMemoryFunc(void* pUserData, size_t size, size_t  alignment, VkSystemAllocationScope allocationScope)
+    {
+        LockGuard lock{ gAllocMutex };
+        gAllocatedMemory += Memory::GetAlignedSize(size, alignment);
+        void* block = Memory::AlignedAlloc(size, alignment);
+        gAlignmentMap[block] = alignment;
+        return block;
+    }
+
+    static void* VkReallocateMemoryFunc(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+    {
+        LockGuard lock{ gAllocMutex };
+        gAllocatedMemory += Memory::GetAlignedSize(size, alignment);
+        void* block = Memory::AlignedRealloc(pOriginal, size, alignment);
+        gAlignmentMap[block] = alignment;
+        return block;
+    }
+
+    static void VkFreeMemoryFunc(void* pUserData, void* pMemory)
+    {
+        if (pMemory != nullptr)
+	    {
+		    if (gAlignmentMap[pMemory] > 0)
+		    {
+                LockGuard lock{ gAllocMutex };
+                gAllocatedMemory -= Memory::AlignedBlockSize(pMemory, gAlignmentMap[pMemory], 0);
+                gAlignmentMap.Remove(pMemory);
+		    }
+            Memory::AlignedFree(pMemory);
+	    }
+    }
+
+    VkAllocationCallbacks gVulkanAllocators = {
+	    nullptr,                 /* pUserData;             */
+        VkAllocateMemoryFunc,            /* pfnAllocation;         */
+        VkReallocateMemoryFunc,          /* pfnReallocation;       */
+        VkFreeMemoryFunc,             /* pfnFree;               */
+	    nullptr,                 /* pfnInternalAllocation; */
+        nullptr	    /* pfnInternalFree;       */
+    };
+
     VKAPI_ATTR VkBool32 VulkanValidationCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageTypes,
@@ -163,14 +208,14 @@ namespace CE::Vulkan
         Array<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetData());
         
-        VkResult result = vkCreateInstance(&instanceCI, nullptr, &vkInstance);
+        VkResult result = vkCreateInstance(&instanceCI, VULKAN_CPU_ALLOCATOR, &vkInstance);
         if (result != VK_SUCCESS)
         {
             CE_LOG(Critical, All, "Failed to create vulkan instance. Result = {}" , (int)result);
             return;
         }
 
-        if (enableValidation && CreateDebugUtilsMessengerEXT(vkInstance, &debugCI, nullptr, &vkMessenger) != VK_SUCCESS)
+        if (enableValidation && CreateDebugUtilsMessengerEXT(vkInstance, &debugCI, VULKAN_CPU_ALLOCATOR, &vkMessenger) != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create Vulkan debug messenger!");
             return;
@@ -202,10 +247,10 @@ namespace CE::Vulkan
 
         if (VulkanPlatform::IsValidationEnabled())
         {
-            DestroyDebugUtilsMessengerEXT(vkInstance, vkMessenger, nullptr);
+            DestroyDebugUtilsMessengerEXT(vkInstance, vkMessenger, VULKAN_CPU_ALLOCATOR);
         }
 
-        vkDestroyInstance(vkInstance, nullptr);
+        vkDestroyInstance(vkInstance, VULKAN_CPU_ALLOCATOR);
         vkInstance = nullptr;
 
 		gVulkanRHI = nullptr;

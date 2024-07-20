@@ -51,7 +51,7 @@ namespace CE::Vulkan
         imageViewCI.subresourceRange.baseArrayLayer = desc.baseArrayLayer;        // Start array layer to view from
         imageViewCI.subresourceRange.layerCount = desc.arrayLayerCount;  // No. of array layers to view
 
-        if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+        if (vkCreateImageView(device->GetHandle(), &imageViewCI, VULKAN_CPU_ALLOCATOR, &imageView) != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create Vulkan Image View");
             return;
@@ -62,7 +62,7 @@ namespace CE::Vulkan
     {
         if (imageView)
         {
-            vkDestroyImageView(device->GetHandle(), imageView, nullptr);
+            vkDestroyImageView(device->GetHandle(), imageView, VULKAN_CPU_ALLOCATOR);
             imageView = nullptr;
         }
     }

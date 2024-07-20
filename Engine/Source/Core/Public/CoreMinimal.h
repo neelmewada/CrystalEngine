@@ -3,6 +3,7 @@
 #define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
 
 // Basic headers
+#include "CoreMemory.h"
 #include "CoreTypes.h"
 #include "CoreTemplates.h"
 #include "CoreContainers.h"

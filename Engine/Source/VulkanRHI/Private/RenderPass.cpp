@@ -115,7 +115,7 @@ namespace CE::Vulkan
 		if (desc.dependencies.NonEmpty())
 			renderPassCI.pDependencies = desc.dependencies.GetData();
 
-		auto result = vkCreateRenderPass(device->GetHandle(), &renderPassCI, nullptr, &renderPass);
+		auto result = vkCreateRenderPass(device->GetHandle(), &renderPassCI, VULKAN_CPU_ALLOCATOR, &renderPass);
 		if (result != VK_SUCCESS)
 		{
 			return;
@@ -126,7 +126,7 @@ namespace CE::Vulkan
 	{
 		if (renderPass != nullptr)
 		{
-			vkDestroyRenderPass(device->GetHandle(), renderPass, nullptr);
+			vkDestroyRenderPass(device->GetHandle(), renderPass, VULKAN_CPU_ALLOCATOR);
 			renderPass = nullptr;
 		}
 	}

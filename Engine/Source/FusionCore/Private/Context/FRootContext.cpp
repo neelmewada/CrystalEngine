@@ -180,7 +180,7 @@ namespace CE
 				dragEvent.isInside = true;
 				dragEvent.keyModifiers = keyModifierStates;
 
-				dragEvent.sender = nullptr;
+				dragEvent.sender = draggedWidget;
 				if (hoveredWidgetStack.NonEmpty())
 					dragEvent.sender = hoveredWidgetStack.Top();
 				dragEvent.draggedWidget = draggedWidget;

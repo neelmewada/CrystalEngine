@@ -91,7 +91,7 @@ namespace CE::Vulkan
 			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 			
 			VkFence fence = nullptr;
-			result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
+			result = vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
 			if (result != VK_SUCCESS)
 			{
 				continue;
@@ -114,7 +114,7 @@ namespace CE::Vulkan
 					continue;
 
 				VkSemaphore signalSemaphore = nullptr;
-				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &signalSemaphore);
+				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &signalSemaphore);
 				signalSemaphores[i].Add(signalSemaphore);
 				signalSemaphoresByConsumerScope[i].Add(consumerScope->id, signalSemaphore);
 			}
@@ -122,7 +122,7 @@ namespace CE::Vulkan
 			if (consumers.IsEmpty())
 			{
 				VkSemaphore signalSemaphore = nullptr;
-				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &signalSemaphore);
+				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &signalSemaphore);
 				signalSemaphores[i].Add(signalSemaphore);
 			}
 		}
@@ -278,7 +278,7 @@ namespace CE::Vulkan
 		{
 			for (auto semaphore : signalSemaphores[i])
 			{
-				vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+				vkDestroySemaphore(device->GetHandle(), semaphore, VULKAN_CPU_ALLOCATOR);
 			}
 			signalSemaphores[i].Clear();
 			signalSemaphoresByConsumerScope[i].Clear();
@@ -294,7 +294,7 @@ namespace CE::Vulkan
 
 		for (VkFence fence : renderFinishedFences)
 		{
-			vkDestroyFence(device->GetHandle(), fence, nullptr);
+			vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
 		}
 		renderFinishedFences.Clear();
 	}

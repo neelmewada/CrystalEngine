@@ -12,12 +12,12 @@ namespace CE::Vulkan
         if (signalled)
             createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        vkCreateFence(device->GetHandle(), &createInfo, nullptr, &fence);
+        vkCreateFence(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &fence);
     }
 
     Fence::~Fence()
     {
-        vkDestroyFence(device->GetHandle(), fence, nullptr);
+        vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
     }
 
     void Fence::Reset()

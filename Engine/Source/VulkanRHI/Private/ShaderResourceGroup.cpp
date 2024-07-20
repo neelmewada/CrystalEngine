@@ -322,7 +322,7 @@ namespace CE::Vulkan
 		layoutCI.pBindings = setLayoutBindings.GetData();
 		layoutCI.pNext = &bindingFlagsInfo;
 
-		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &layoutCI, nullptr, &setLayout);
+		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &layoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
 		if (result != VK_SUCCESS)
 		{
 			failed = true;
@@ -334,7 +334,7 @@ namespace CE::Vulkan
     ShaderResourceGroup::~ShaderResourceGroup()
 	{
 		//vkDeviceWaitIdle(device->GetHandle());
-		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
+		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, VULKAN_CPU_ALLOCATOR);
 		setLayout = nullptr;
 
 		srgManager->OnSRGDestroyed(this);
