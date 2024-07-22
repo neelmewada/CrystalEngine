@@ -19,6 +19,7 @@ namespace CE
 
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
+		clipItemIndexListBuffer.Init("ClipItemIndices_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 		shapeItemsBuffer.Init("ShapeItems_" + GetName().GetString(), initialShapeItemCapacity, numFrames);
 		lineItemsBuffer.Init("LineItems_" + GetName().GetString(), initialLineItemCapacity, numFrames);
 
@@ -42,6 +43,7 @@ namespace CE
 			drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ShapeDrawList", shapeItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_LineItems", lineItemsBuffer.GetBuffer(i));
+			drawItemSrg->Bind(i, "_ClipItemIndices", clipItemIndexListBuffer.GetBuffer(i));
 		}
 
 		perViewSrg->FlushBindings();
@@ -56,6 +58,7 @@ namespace CE
 		clipItemsBuffer.Shutdown();
 		shapeItemsBuffer.Shutdown();
 		lineItemsBuffer.Shutdown();
+		clipItemIndexListBuffer.Shutdown();
 
 		for (int i = 0; i < numFrames; i++)
 		{
@@ -88,6 +91,7 @@ namespace CE
 		drawItemList.RemoveAll();
 		clipItemList.RemoveAll();
 		clipItemStack.RemoveAll();
+		clipItemIndexList.RemoveAll();
 		shapeItemList.RemoveAll();
 		lineItemList.RemoveAll();
 		coordinateSpaceStack.RemoveAll();
@@ -243,10 +247,20 @@ namespace CE
 			Matrix4x4::Translation(translation1) *
 			Matrix4x4::Scale(Vec3(size.x, size.y, 1));
 
-		drawItem.clipIndex = -1;
-		if (!clipItemStack.IsEmpty())
+		for (int i = 0; i < clipItemStack.GetCount(); ++i)
 		{
-			drawItem.clipIndex = clipItemStack.Last();
+			int clipIndex = clipItemStack[i];
+			clipItemIndexList.Insert({ .clipItemIndex = clipIndex });
+		}
+
+		if (clipItemStack.IsEmpty())
+		{
+			drawItem.startClipIndex = drawItem.endClipIndex = -1;
+		}
+		else
+		{
+			drawItem.startClipIndex = clipItemIndexList.GetCount() - clipItemStack.GetCount();
+			drawItem.endClipIndex = clipItemIndexList.GetCount() - 1;
 		}
 		
 		drawItemList.Insert(drawItem);
@@ -524,10 +538,20 @@ namespace CE
 			drawItem.penColor = currentPen.GetColor().ToVec4();
 			drawItem.penThickness = currentPen.GetThickness();
 
-			drawItem.clipIndex = -1;
-			if (!clipItemStack.IsEmpty())
+			for (int j = 0; j < clipItemStack.GetCount(); ++j)
 			{
-				drawItem.clipIndex = clipItemStack.Last();
+				int clipIndex = clipItemStack[j];
+				clipItemIndexList.Insert({ .clipItemIndex = clipIndex });
+			}
+
+			if (clipItemStack.IsEmpty())
+			{
+				drawItem.startClipIndex = drawItem.endClipIndex = -1;
+			}
+			else
+			{
+				drawItem.startClipIndex = clipItemIndexList.GetCount() - clipItemStack.GetCount();
+				drawItem.endClipIndex = clipItemIndexList.GetCount() - 1;
 			}
 
 			drawItem.charIndex = glyph.index;
@@ -808,6 +832,22 @@ namespace CE
 				clipItemsBuffer.GetBuffer(imageIndex)->UploadData(clipItemList.GetData(), clipItemList.GetCount() * sizeof(FClipItem2D));
 			}
 
+			if (clipItemIndexList.GetCount() > 0)
+			{
+				if (clipItemIndexListBuffer.GetElementCount() < clipItemIndexList.GetCount())
+				{
+					u64 totalCount = (u64)((f32)clipItemIndexListBuffer.GetElementCount() * (1.0f + StructuredBufferGrowRatio));
+					clipItemIndexListBuffer.GrowToFit(Math::Max<u64>(clipItemIndexList.GetCount() + 16, totalCount));
+
+					for (int i = 0; i < numFrames; ++i)
+					{
+						drawItemSrg->Bind(i, "_ClipItemIndices", clipItemIndexListBuffer.GetBuffer(i));
+					}
+				}
+
+				clipItemIndexListBuffer.GetBuffer(imageIndex)->UploadData(clipItemIndexList.GetData(), clipItemIndexList.GetCount() * sizeof(FClipItemIndexData));
+			}
+
 			if (shapeItemList.GetCount() > 0)
 			{
 				if (shapeItemsBuffer.GetElementCount() < shapeItemList.GetCount())
@@ -932,6 +972,7 @@ namespace CE
 		memory += drawItemList.GetCapacity() * sizeof(FDrawItem2D);
 		memory += clipItemList.GetCapacity() * sizeof(FClipItem2D);
 		memory += clipItemStack.GetCapacity() * sizeof(int);
+		memory += clipItemIndexList.GetCapacity() * sizeof(FClipItemIndexData);
 		memory += coordinateSpaceStack.GetCapacity() * sizeof(Matrix4x4);
 		memory += opacityStack.GetCapacity() * sizeof(f32);
 		memory += lineItemList.GetCapacity() * sizeof(FLineItem2D);
@@ -942,6 +983,7 @@ namespace CE
 		memory += clipItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
 		memory += shapeItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
 		memory += lineItemsBuffer.GetBuffer(0)->GetBufferSize() * 2;
+		memory += clipItemIndexListBuffer.GetBuffer(0)->GetBufferSize() * 2;
 
 		return memory;
 	}

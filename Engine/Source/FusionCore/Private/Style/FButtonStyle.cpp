@@ -32,7 +32,7 @@ namespace CE
         button
             .Background(bg)
             .BackgroundShape(FRoundedRectangle(cornerRadius))
-            .ClipShape(FRectangle())
+            .ClipShape(FShapeType::None)
             .BorderWidth(borderWidth)
             .BorderColor(borderColor)
             ;

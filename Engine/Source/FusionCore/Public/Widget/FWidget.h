@@ -112,6 +112,8 @@ namespace CE
 
         virtual bool SupportsFocusEvents() const { return false; }
 
+        virtual bool CapturesMouseWheel() const { return false; }
+
         virtual void ClearStyle();
 
         bool IsFocused() const { return isFocused; }

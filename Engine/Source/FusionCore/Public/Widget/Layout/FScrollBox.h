@@ -18,9 +18,12 @@ namespace CE
 
         bool SupportsDragEvents() const override { return true; }
 
+        bool CapturesMouseWheel() const override { return true; }
+
     protected:
 
         Rect GetVerticalScrollBarRect();
+        Rect GetHorizontalScrollBarRect();
 
         FWidget* HitTest(Vec2 mousePosition) override;
 
@@ -47,8 +50,14 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
+        FUSION_PROPERTY(f32, VerticalScrollSensitivity);
+        FUSION_PROPERTY(f32, HorizontalScrollSensitivity);
+
         Self& NormalizedScrollY(f32 value);
         f32 NormalizedScrollY();
+
+        Self& NormalizedScrollX(f32 value);
+        f32 NormalizedScrollX();
 
     private:
 

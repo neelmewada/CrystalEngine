@@ -52,7 +52,7 @@ namespace RenderingTests
         return String::Format("Line no. {}: This is the first sentence.", index);
 	}
 
-    static Array scrollColors = { Color::Yellow(), Color::Green(), Color::Cyan(), Color::Blue(), Color::Red() };
+    static Color scrollColors[] = {Color::Yellow(), Color::Green(), Color::Cyan(), Color::Blue(), Color::Red()};
 
     void RenderingTestWidget::Construct()
     {
@@ -359,7 +359,7 @@ namespace RenderingTests
                             .VAlign(VAlign::Top)
                             .HAlign(HAlign::Left)
                             (
-								FForEach { 4,
+								FForEach { 5,
                                     [this] (int index) -> FWidget&
                                     {
                                         return
@@ -373,7 +373,7 @@ namespace RenderingTests
                                                 FNew(FLabel)
                                                 .FontSize(16)
                                                 .Foreground(Color::RGBA(140, 140, 140))
-                                                .Text(MakeShortText(index))
+                                                .Text(MakeText(index))
                                             )
                                         );
                                     }

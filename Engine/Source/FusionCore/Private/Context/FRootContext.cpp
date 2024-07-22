@@ -149,6 +149,36 @@ namespace CE
 			}
 		}
 
+		// - Mouse Wheel Events -
+
+		if (abs(wheelDelta.x) >= FLT_EPSILON || abs(wheelDelta.y) >= FLT_EPSILON)
+		{
+			FMouseEvent mouseEvent{};
+			mouseEvent.type = FEventType::MouseWheel;
+			mouseEvent.buttons = curButtonMask;
+			mouseEvent.mousePosition = mousePos;
+			mouseEvent.prevMousePosition = prevMousePos;
+			mouseEvent.direction = FEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = wheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
+
+			if (hoveredWidgetStack.NonEmpty())
+			{
+				FWidget* sender = hoveredWidgetStack.Top();
+
+				while (sender != nullptr && !sender->CapturesMouseWheel())
+				{
+					sender = sender->parent;
+				}
+
+				if (sender)
+				{
+					mouseEvent.sender = sender;
+					sender->HandleEvent(&mouseEvent);
+				}
+			}
+		}
+
 		// - Mouse Click Events -
 
 		if (abs(mouseDelta.x) >= FLT_EPSILON || abs(mouseDelta.y) >= FLT_EPSILON)

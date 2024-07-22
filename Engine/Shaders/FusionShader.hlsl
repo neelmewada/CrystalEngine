@@ -81,6 +81,11 @@ struct ClipItem2D
     ShapeType shape;
 };
 
+struct ClipItemData
+{
+    int clipIndex;
+};
+
 struct ShapeItem2D
 {
     float4 cornerRadius;
@@ -111,7 +116,8 @@ struct DrawItem2D
     DrawType drawType;
     PenType penType;
     uint shapeOrCharOrLineIndex;
-    int clipIndex;
+    int startClipIndex;
+    int endClipIndex;
 };
 
 struct GlyphItem
@@ -127,6 +133,7 @@ StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
 StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
 StructuredBuffer<LineItem2D> _LineItems : SRG_PerDraw(t3);
+StructuredBuffer<ClipItemData> _ClipItemIndices : SRG_PerDraw(t4);
 
 #if FRAGMENT
 
@@ -150,10 +157,10 @@ PSInput VertMain(VSInput input)
     PSInput o;
     o.instanceId = input.instanceId;
     o.globalPos = mul(float4(input.position, 1.0), _DrawList[InstanceIdx].transform).xyz;
-    const int clipIndex = _DrawList[InstanceIdx].clipIndex;
-    if (clipIndex >= 0)
+    const int clipIndex = _DrawList[InstanceIdx].endClipIndex;
+    if (clipIndex >= 0 && _ClipItemIndices[clipIndex].clipIndex >= 0)
     {
-        o.clipPos = mul(float4(o.globalPos.xy, 0, 1.0), _ClipItems[clipIndex].clipTransform).xyz;
+        o.clipPos = mul(float4(o.globalPos.xy, 0, 1.0), _ClipItems[_ClipItemIndices[clipIndex].clipIndex].clipTransform).xyz;
     }
     else
     {
@@ -261,7 +268,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     const float2 sdfPos = (uv - float2(0.5, 0.5)) * quadSize;
     const float2 pos = input.globalPos.xy;
     const float2 clipPos = input.clipPos.xy;
-    const int clipIndex = drawItem.clipIndex;
+    const int clipIndex = drawItem.endClipIndex;
     const float4 penColor = drawItem.penColor;
     float penThickness = drawItem.penThickness;
 
@@ -269,26 +276,60 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     if (clipIndex >= 0)
     {
-        clipSdf = 1;
-        const float4 r = _ClipItems[clipIndex].cornerRadius;
-
-	    switch (_ClipItems[clipIndex].shape)
+        if (_ClipItemIndices[clipIndex].clipIndex >= 0)
 	    {
-	    case ShapeType::None:
-            clipSdf = -1;
-            break;
-	    case ShapeType::Rect:
-            clipSdf = SDFClipRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
-		    break;
-	    case ShapeType::RoundedRect:
-            clipSdf = SDFClipRoundedRect(clipPos, float2(0, 0), _ClipItems[clipIndex].size, float4(r.z, r.y, r.w, r.x));
-		    break;
-	    case ShapeType::Circle:
-            clipSdf = SDFClipCircle(clipPos, float2(0, 0), _ClipItems[clipIndex].size);
-		    break;
-	    }
+		    clipSdf = 1;
+	    	const float4 r = _ClipItems[_ClipItemIndices[clipIndex].clipIndex].cornerRadius;
 
-        if (clipSdf >= 0) // Outside clip rect
+	    	switch (_ClipItems[_ClipItemIndices[clipIndex].clipIndex].shape)
+	    	{
+	    	case ShapeType::None:
+	    		clipSdf = -1;
+	    		break;
+	    	case ShapeType::Rect:
+	    		clipSdf = SDFClipRect(clipPos, float2(0, 0), _ClipItems[_ClipItemIndices[clipIndex].clipIndex].size);
+	    		break;
+	    	case ShapeType::RoundedRect:
+	    		clipSdf = SDFClipRoundedRect(clipPos, float2(0, 0), _ClipItems[_ClipItemIndices[clipIndex].clipIndex].size, float4(r.z, r.y, r.w, r.x));
+	    		break;
+	    	case ShapeType::Circle:
+	    		clipSdf = SDFClipCircle(clipPos, float2(0, 0), _ClipItems[_ClipItemIndices[clipIndex].clipIndex].size);
+	    		break;
+	    	}
+
+	    	if (clipSdf >= 0) // Outside clip rect
+	    	{
+	    		discard;
+	    	}
+	    }
+    }
+
+    for (int i = _DrawList[InstanceIdx].endClipIndex - 1; i >= _DrawList[InstanceIdx].startClipIndex; --i)
+    {
+        int curClipIndex = _ClipItemIndices[i].clipIndex;
+        float sd = -1;
+
+        const float4 r = _ClipItems[curClipIndex].cornerRadius;
+        float2 curClipPos = mul(float4(input.globalPos.xy, 0, 1.0), _ClipItems[curClipIndex].clipTransform).xy;
+
+        switch (_ClipItems[curClipIndex].shape)
+        {
+        case ShapeType::None:
+            sd = -1;
+	        break;
+        case ShapeType::Rect:
+            sd = SDFClipRect(curClipPos, float2(0, 0), _ClipItems[curClipIndex].size);
+	        break;
+        case ShapeType::RoundedRect:
+            sd = SDFClipRoundedRect(curClipPos, float2(0, 0), _ClipItems[curClipIndex].size, float4(r.z, r.y, r.w, r.x));
+	        break;
+        case ShapeType::Circle:
+            sd = SDFClipCircle(curClipPos, float2(0, 0), _ClipItems[curClipIndex].size);
+	        break;
+        }
+
+        // Comment the if-statement to test nested clipping
+        if (sd >= 0) // Outside clip rect
         {
             discard;
         }

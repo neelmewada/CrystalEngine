@@ -148,7 +148,9 @@ namespace CE
                 uint lineIndex;
                 uint charIndex;
             };
-            int clipIndex;
+            //int clipIndex = -1;
+            int startClipIndex = -1;
+            int endClipIndex = -1;
         };
 
         using FDrawItemList = StableDynamicArray<FDrawItem2D, DrawItemIncrement, false>;
@@ -161,17 +163,14 @@ namespace CE
             FShapeType shapeType = FShapeType::Rect;
         };
 
-        struct alignas(16) FClipItemData
+        struct alignas(4) FClipItemIndexData
         {
-            Matrix4x4 transform;
-            Vec4 cornerRadius;
-            Vec2 size;
-            FShapeType shapeType = FShapeType::Rect;
-            int clipIndex;
+            int clipItemIndex = -1;
         };
 
         using FClipItemList = StableDynamicArray<FClipItem2D, ClipItemIncrement, false>;
         using FClipItemStack = StableDynamicArray<int, ClipItemIncrement, false>;
+        using FClipItemIndexList = StableDynamicArray<FClipItemIndexData, ClipItemIncrement, false>;
 
         using FCoordinateSpaceStack = StableDynamicArray<Matrix4x4, CoordinateStackItemIncrement, false>;
         using FOpacityStack = StableDynamicArray<f32, OpacityStackItemIncrement, false>;
@@ -197,7 +196,7 @@ namespace CE
         f32 drawItemGrowRatio = 0.25f;
 
         FIELD(Config)
-        u32 initialClipItemCapacity = 1000;
+        u32 initialClipItemCapacity = 256;
 
         FIELD(Config)
         f32 clipItemGrowRatio = 0.25f;
@@ -246,6 +245,8 @@ namespace CE
         RPI::DynamicStructuredBuffer<FClipItem2D> clipItemsBuffer;
         FClipItemList clipItemList;
         FClipItemStack clipItemStack;
+        FClipItemIndexList clipItemIndexList;
+        RPI::DynamicStructuredBuffer<FClipItemIndexData> clipItemIndexListBuffer;
 
         RPI::DynamicStructuredBuffer<FShapeItem2D> shapeItemsBuffer;
         FShapeItemList shapeItemList;

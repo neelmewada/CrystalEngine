@@ -21,6 +21,7 @@ namespace CE
         MouseLeave,
         MousePress,
         MouseRelease,
+        MouseWheel,
 
         DragBegin,
         DragMove,
@@ -96,6 +97,7 @@ namespace CE
             case FEventType::MouseLeave:
             case FEventType::MousePress:
             case FEventType::MouseRelease:
+            case FEventType::MouseWheel:
             case FEventType::DragBegin:
             case FEventType::DragMove:
             case FEventType::DragEnd:
