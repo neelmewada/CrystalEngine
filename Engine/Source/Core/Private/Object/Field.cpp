@@ -29,6 +29,8 @@ namespace CE
 			fieldFlags |= FIELD_FusionPropertyData;
 		if (HasAttribute("FusionLayoutProperty"))
 			fieldFlags |= FIELD_FusionPropertyLayout;
+		if (HasAttribute("FusionDataLayoutProperty"))
+			fieldFlags |= FIELD_FusionPropertyDataLayout;
     }
 
 	void FieldType::InitializeDefaults(void* instance)
@@ -132,6 +134,11 @@ namespace CE
     bool FieldType::IsFusionDataProperty()
     {
 		return EnumHasFlag(fieldFlags, FIELD_FusionPropertyData);
+    }
+
+    bool FieldType::IsFusionDataLayoutProperty()
+    {
+		return EnumHasFlag(fieldFlags, FIELD_FusionPropertyDataLayout);
     }
 
     bool FieldType::IsFusionLayoutProperty()

@@ -96,6 +96,25 @@ namespace CE
         }
     }
 
+    void FContainerWidget::DestroyAllChildren()
+    {
+	    for (int i = children.GetSize() - 1; i >= 0; --i)
+	    {
+            FWidget* child = children[i];
+            RemoveChild(child);
+            child->Destroy();
+	    }
+    }
+
+    void FContainerWidget::RemoveAllChildren()
+    {
+        for (int i = children.GetSize() - 1; i >= 0; --i)
+        {
+            FWidget* child = children[i];
+            RemoveChild(child);
+        }
+    }
+
     void FContainerWidget::ClearStyle()
     {
 	    Super::ClearStyle();
@@ -121,7 +140,7 @@ namespace CE
     {
         if (!child)
             return false;
-
+        
         int index = children.IndexOf(child);
         if (index < 0)
             return false;

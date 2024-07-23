@@ -58,7 +58,7 @@ namespace RenderingTests
     {
         Super::Construct();
 
-        FBrush transparentPattern = FBrush("TransparentPattern", Color::White());
+        FBrush transparentPattern = FBrush("/Engine/Resources/Icons/TransparentPattern", Color::White());
         transparentPattern.SetVAlign(VAlign::Center);
         transparentPattern.SetHAlign(HAlign::Center);
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
@@ -136,7 +136,7 @@ namespace RenderingTests
                                 .VAlign(VAlign::Top)
                                 (
                                     FNew(FImage)
-                                    .Background(FBrush("MinimizeIcon"))
+                                    .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
                                     .Width(11)
                                     .Height(11)
                                     .HAlign(HAlign::Center)
@@ -162,7 +162,7 @@ namespace RenderingTests
                                 .VAlign(VAlign::Top)
                                 (
                                     FAssignNew(FImage, maximizeIcon)
-                                    .Background(FBrush("MaximizeIcon"))
+                                    .Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"))
                                     .Width(11)
                                     .Height(11)
                                     .HAlign(HAlign::Center)
@@ -180,7 +180,7 @@ namespace RenderingTests
                                 .VAlign(VAlign::Top)
                                 (
                                     FNew(FImage)
-                                    .Background(FBrush("CrossIcon"))
+                                    .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
                                     .Width(10)
                                     .Height(10)
                                     .HAlign(HAlign::Center)
@@ -189,6 +189,8 @@ namespace RenderingTests
                             )
                         )
                     ),
+
+                    // Window Content Begins
 
                     FNew(FVerticalStack)
                     .Padding(Vec4(10, 10, 10, 10))
@@ -392,7 +394,43 @@ namespace RenderingTests
                                     )
                                 )
                             )
+                        ),
+
+                        FNew(FTabView)
+                        .TabItems(
+							FNew(FLabelTabItem)
+                            .Text("Tab 1")
+                            .ContentWidget(
+								FNew(FStyledWidget)
+                                .Background(Color::Green())
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill)
+                                .Padding(Vec4(1, 1, 1, 1) * 10)
+                                (
+									FNew(FLabel)
+                                    .FontSize(18)
+                                    .Text("This is first tab")
+                                )
+                            )
+                            .Name("Tab1"),
+
+                            FNew(FLabelTabItem)
+                            .Text("Tab 2")
+                            .ContentWidget(
+	                            FNew(FStyledWidget)
+	                            .Background(Color::Cyan())
+	                            .HAlign(HAlign::Fill)
+	                            .VAlign(VAlign::Fill)
+	                            .Padding(Vec4(1, 1, 1, 1) * 10)
+	                            (
+		                            FNew(FLabel)
+		                            .FontSize(18)
+		                            .Text("This is second tab")
+	                            )
+                            )
+                            .Name("Tab2")
                         )
+                        .MinHeight(64)
                     )
                 )
             )
@@ -412,7 +450,7 @@ namespace RenderingTests
 
         if (nativeContext->GetPlatformWindow() == window)
         {
-            maximizeIcon->Background(FBrush("MaximizeIcon"));
+            maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
             this->Padding(Vec4());
         }
     }
@@ -423,7 +461,7 @@ namespace RenderingTests
 
         if (nativeContext->GetPlatformWindow() == window)
         {
-            maximizeIcon->Background(FBrush("RestoreIcon"));
+            maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
             this->Padding(Vec4(1, 1, 1, 1) * 4.0f);
         }
     }

@@ -773,7 +773,8 @@ namespace CE
                     });
                 }
             }
-            else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || token.type == TK_FUSION_LAYOUT_PROPERTY) && 
+            else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || 
+                token.type == TK_FUSION_LAYOUT_PROPERTY || token.type == TK_FUSION_DATA_LAYOUT_PROPERTY) && 
                 curClass != nullptr)
             {
                 i++;
@@ -827,11 +828,14 @@ namespace CE
                     case TK_FUSION_LAYOUT_PROPERTY:
                         field.attribs.Add("FusionLayoutProperty");
                         break;
+                    case TK_FUSION_DATA_LAYOUT_PROPERTY:
+                        field.attribs.Add("FusionDataLayoutProperty");
+                        break;
                     }
 
                     curClass->fields.Add(field);
 
-                    if (token.type == TK_FUSION_DATA_PROPERTY)
+                    if (token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_DATA_LAYOUT_PROPERTY)
                     {
                         curClass->fields.Add({ .name = fieldName + "Binding", .attribs = { "FusionDataBinding" } });
                         curClass->functions.Add({ .name = "Update_" + name, .signature = "(Object*)", .returnType = "void", .attribs = { "FusionDataUpdate" } });

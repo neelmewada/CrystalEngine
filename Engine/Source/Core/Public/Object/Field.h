@@ -26,7 +26,8 @@ namespace CE
         FIELD_VisibleAnywhere = BIT(7),
         FIELD_FusionProperty = BIT(8),
         FIELD_FusionPropertyLayout = BIT(9),
-        FIELD_FusionPropertyData = BIT(10)
+        FIELD_FusionPropertyData = BIT(10),
+        FIELD_FusionPropertyDataLayout = BIT(11)
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -108,6 +109,7 @@ namespace CE
         bool IsFusionProperty();
         bool IsFusionBasicProperty();
         bool IsFusionDataProperty();
+        bool IsFusionDataLayoutProperty();
         bool IsFusionLayoutProperty();
 
         bool IsEditAnywhere() const;

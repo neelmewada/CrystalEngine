@@ -253,6 +253,15 @@ TEST(FusionCore, Rendering)
 			GetDefaultWidget<FComboBoxPopup>()
 				.Style(rootStyle, "ComboBoxPopup.Primary");
 		}
+
+		{
+			auto primaryTabView = CreateObject<FTabViewStyle>(rootStyle, "TabViewStyle");
+			rootStyle->Add("TabView.Primary", primaryTabView);
+
+			primaryTabView->tabItemActiveBackground = Color::RGBA(36, 36, 36);
+			primaryTabView->tabItemHoverBackground = Color::RGBA(36, 36, 36);
+			primaryTabView->tabItemBackground = Color::RGBA(36, 36, 36);
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

@@ -144,7 +144,7 @@ namespace CE
     {
         Super::Construct();
 
-        FBrush downwardArrow = FBrush("DownwardArrow");
+        FBrush downwardArrow = FBrush("/Engine/Resources/Icons/DownwardArrow");
 
         FAssignNew(FComboBoxPopup, popupMenu)
     		.BlockInteraction(false)

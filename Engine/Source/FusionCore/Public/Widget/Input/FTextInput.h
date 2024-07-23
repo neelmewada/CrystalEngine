@@ -151,7 +151,6 @@ namespace CE
         String DoThis() { return ""; }
 
         FUSION_PROPERTY_WRAPPER(SelectionColor, inputLabel);
-        FUSION_PROPERTY_WRAPPER(Text, inputLabel);
         FUSION_PROPERTY_WRAPPER(Foreground, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontFamily, inputLabel);

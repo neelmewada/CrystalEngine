@@ -14,7 +14,7 @@
 	protected:\
 		PropertyType m_##PropertyName = {};\
 	public:\
-		Self& PropertyName(const PropertyType& value) {\
+		Self& PropertyName(PropertyType const& value) {\
 			if constexpr (TEquitable<PropertyType>::Value)\
 			{\
 				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
@@ -87,6 +87,7 @@
 	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
+	FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& Bind_##PropertyName(const CE::PropertyBindingRequest<__WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)>& request) {\
 		WrappingVariable->Bind_##PropertyName(request);\
 		return *this;\

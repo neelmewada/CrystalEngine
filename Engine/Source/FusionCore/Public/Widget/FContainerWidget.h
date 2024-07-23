@@ -24,6 +24,9 @@ namespace CE
 
         void InsertChild(int index, FWidget* child);
 
+        void DestroyAllChildren();
+        void RemoveAllChildren();
+
     protected:
 
         void ClearStyle() override;

@@ -54,7 +54,7 @@ namespace CE
 
 				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg")
 				{
-                    LoadImageResource(path, path.GetFileName().RemoveExtension().GetString());
+                    LoadImageResource(path, "/Engine/Resources/Icons/" + path.GetFileName().RemoveExtension().GetString());
 				}
             });
 
