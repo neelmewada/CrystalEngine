@@ -35,6 +35,8 @@ namespace CE
 
         virtual void OnChildWidgetDestroyed(FWidget* child) {}
 
+        virtual void OnPostComputeLayout() {}
+
         bool AddChild(FWidget* child);
         void RemoveChild(FWidget* child);
 

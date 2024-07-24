@@ -173,6 +173,8 @@ namespace CE
         ApplySizeConstraints();
 
         UpdateLocalTransform();
+
+        OnPostComputeLayout();
     }
 
     void FWidget::ApplyIntrinsicSizeConstraints()

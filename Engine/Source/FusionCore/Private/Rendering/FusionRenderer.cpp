@@ -442,6 +442,39 @@ namespace CE
 		const float startY = pos.y + metrics.ascender * (f32)fontSize;
 		const float startX = pos.x;
 
+		if (!clipItemStack.IsEmpty())
+		{
+			// CPU culling
+
+			Vec2 globalPos = coordinateSpaceStack.Last() * Vec4(pos.x, pos.y, 0, 1);
+			Vec2 drawSize = size;
+
+			if (!isFixedWidth)
+			{
+				drawSize = CalculateTextSize(text, currentFont, 0, wordWrap);
+			}
+			if (drawSize.y <= 0)
+			{
+				drawSize.y = metrics.lineHeight;
+			}
+
+			for (int i = clipItemStack.GetCount() - 1; i >= 0; --i)
+			{
+				int clipIndex = clipItemStack[i];
+
+				Matrix4x4 clipTransform = clipItemList[clipIndex].clipTransform.GetInverse();
+				Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
+
+				Rect shapeRect = Rect::FromSize(globalPos, drawSize);
+				Rect clipRect = Rect::FromSize(clipPos, clipItemList[clipIndex].size);
+
+				if (!shapeRect.Overlaps(clipRect))
+				{
+					return Vec2();
+				}
+			}
+		}
+
 		float maxX = startX;
 		float maxY = startY;
 
@@ -616,9 +649,33 @@ namespace CE
 
 	void FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 quadSize)
 	{
-		ZoneScoped;
 		if (quadSize.x <= 0 || quadSize.y <= 0)
 			return;
+
+		ZoneScoped;
+
+		if (!clipItemStack.IsEmpty())
+		{
+			// CPU culling
+
+			Vec2 globalPos = coordinateSpaceStack.Last() * Vec4(pos.x, pos.y, 0, 1);
+
+			for (int i = clipItemStack.GetCount() - 1; i >= 0; --i)
+			{
+				int clipIndex = clipItemStack[i];
+
+				Matrix4x4 clipTransform = clipItemList[clipIndex].clipTransform.GetInverse();
+				Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
+
+				Rect shapeRect = Rect::FromSize(globalPos, quadSize);
+				Rect clipRect = Rect::FromSize(clipPos, clipItemList[clipIndex].size);
+
+				if (!shapeRect.Overlaps(clipRect))
+				{
+					return;
+				}
+			}
+		}
 
 		FDrawItem2D& drawItem = DrawCustomItem(DRAW_Shape, pos, quadSize);
 		auto app = FusionApplication::Get();

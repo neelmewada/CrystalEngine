@@ -146,11 +146,11 @@ namespace CE
 		Super::Tick(delta);
 		bool isExiting = IsEngineRequestingExit();
 
-		/*CApplication* app = CApplication::TryGet();
+		FusionApplication* app = FusionApplication::TryGet();
 		if (app)
 		{
 			app->Tick();
-		}*/
+		}
 
 		int submittedImageIndex = -1;
 

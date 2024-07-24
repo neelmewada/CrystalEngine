@@ -322,16 +322,23 @@ namespace RenderingTests
                             .FontSize(13)
                             .Text("Randomize")
                             .OnPressed([this]
-                            {
-                                model->ModifyTextInCode();
-                            }),
+	                            {
+	                                model->ModifyTextInCode();
+	                            }),
 
                             FAssignNew(FLabel, modelDisplayLabel)
                             .FontSize(13)
-                            .Bind_Text(BIND_PROPERTY_R(model, Text))
+                            .Bind_Text(BIND_PROPERTY_R(model, Text)),
+
+                            FNew(FTextButton)
+                            .Text("Show/Hide SplitBox")
+                            .OnPressed([this]
+	                            {
+	                                splitBox->Enabled(!splitBox->Enabled());
+	                            })
                         ),
                         
-                        FNew(FSplitBox)
+                        FAssignNew(FSplitBox, splitBox)
                         .Direction(FSplitDirection::Horizontal)
                         .HAlign(HAlign::Fill)
                         .Height(40)

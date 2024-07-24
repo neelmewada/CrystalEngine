@@ -35,7 +35,7 @@ namespace CE
 
     FLabelTabItem::FLabelTabItem()
     {
-
+        
     }
 
     void FLabelTabItem::Construct()

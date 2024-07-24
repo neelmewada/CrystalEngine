@@ -22,7 +22,7 @@ namespace RenderingTests
 
 		MODEL_PROPERTY(String, Text);
 		MODEL_PROPERTY(Array<String>, ComboItems);
-		MODEL_PROPERTY(u64, MemoryFootprint)
+		MODEL_PROPERTY(u64, MemoryFootprint);
 
 	public:
 
@@ -73,6 +73,7 @@ namespace RenderingTests
 		FTextInput* modelTextInput = nullptr;
 		FLabel* modelDisplayLabel = nullptr;
 		TextInputModel* model = nullptr;
+		FSplitBox* splitBox = nullptr;
 
 		int hitCounter = 0;
 
