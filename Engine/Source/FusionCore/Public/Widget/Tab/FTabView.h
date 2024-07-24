@@ -37,6 +37,11 @@ namespace CE
 
         FTabItem* GetTabItem(u32 index) { return tabItems[index]; }
 
+        void SelectTab(int tabIndex);
+        void SelectTab(FTabItem* tabItem);
+
+        FStyledWidget* GetContainer() const { return container; }
+
     public: // - Fusion Properties - 
 
         template <typename... TArgs> requires TValidate_Children<TArgs...>::Value

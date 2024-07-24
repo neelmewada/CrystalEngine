@@ -431,6 +431,7 @@ namespace RenderingTests
                             .Name("Tab2")
                         )
                         .MinHeight(64)
+                        .Margin(Vec4(0, 5, 0, 0))
                     )
                 )
             )

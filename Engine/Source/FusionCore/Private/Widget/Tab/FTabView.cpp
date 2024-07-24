@@ -33,7 +33,9 @@ namespace CE
     bool FTabView::TryAddChild(FWidget* child)
     {
         if (!child || isConstructed)
-            return false;
+        {
+	        return false;
+        }
 
 	    return Super::TryAddChild(child);
     }
@@ -49,11 +51,48 @@ namespace CE
 
         if (tabItems.GetSize() == 1)
         {
-            activeTabIndex = 0;
-            item->itemFlags = FTabItemFlags::Active;
+            SelectTab(0);
         }
+        else
+        {
+            ApplyStyle();
+        }
+    }
 
-        ApplyStyle();
+    void FTabView::SelectTab(int tabIndex)
+    {
+        if (tabIndex < GetTabItemCount())
+        {
+            activeTabIndex = tabIndex;
+
+            for (int i = 0; i < tabItems.GetSize(); ++i)
+            {
+	            if (i == activeTabIndex)
+	            {
+                    tabItems[i]->itemFlags |= FTabItemFlags::Active;
+	            }
+                else
+                {
+                    tabItems[i]->itemFlags &= ~FTabItemFlags::Active;
+                }
+            }
+
+            container->Child(*tabItems[activeTabIndex]->m_ContentWidget);
+
+            ApplyStyle();
+        }
+    }
+
+    void FTabView::SelectTab(FTabItem* tabItem)
+    {
+	    for (int i = 0; i < GetTabItemCount(); ++i)
+	    {
+		    if (GetTabItem(i) == tabItem)
+		    {
+                SelectTab(i);
+			    return;
+		    }
+	    }
     }
 
 }

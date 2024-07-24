@@ -24,7 +24,11 @@ namespace CE
         bool IsActive() const { return EnumHasFlag(itemFlags, FTabItemFlags::Active); }
         bool IsHovered() const { return EnumHasFlag(itemFlags, FTabItemFlags::Hovered); }
 
+        bool SupportsMouseEvents() const override { return true; }
+
     protected:
+
+        void HandleEvent(FEvent* event) override;
 
         FTabItemFlags itemFlags = FTabItemFlags::None;
 

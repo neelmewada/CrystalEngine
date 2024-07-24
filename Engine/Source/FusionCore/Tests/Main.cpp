@@ -258,9 +258,13 @@ TEST(FusionCore, Rendering)
 			auto primaryTabView = CreateObject<FTabViewStyle>(rootStyle, "TabViewStyle");
 			rootStyle->Add("TabView.Primary", primaryTabView);
 
-			primaryTabView->tabItemActiveBackground = Color::RGBA(36, 36, 36);
-			primaryTabView->tabItemHoverBackground = Color::RGBA(36, 36, 36);
+			primaryTabView->tabItemActiveBackground = Color::RGBA(50, 50, 50);
+			primaryTabView->tabItemHoverBackground = Color::RGBA(40, 40, 40);
 			primaryTabView->tabItemBackground = Color::RGBA(36, 36, 36);
+			primaryTabView->tabItemShape = FRoundedRectangle(3, 3, 0, 0);
+
+			GetDefaultWidget<FTabView>()
+				.Style(rootStyle, "TabView.Primary");
 		}
 	}
 

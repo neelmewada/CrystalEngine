@@ -27,6 +27,9 @@ namespace CE
         FBrush tabItemHoverBackground;
 
         FIELD()
+        Vec4 tabItemPadding;
+
+        FIELD()
         FShape tabItemShape;
 
     };
