@@ -349,74 +349,66 @@ namespace RenderingTests
                             .FillRatio(0.5f)
                         ),
 
-                        FNew(FScrollBox)
-                        .ScrollBarBrush(Color::RGBA(255, 255, 255, 100))
-                        .ScrollBarHoverBrush(Color::RGBA(255, 255, 255, 140))
-                        .VerticalScroll(true)
-                        .HorizontalScroll(true)
-                        .Height(80)
-                        (
-							FNew(FVerticalStack)
-                            .ContentHAlign(HAlign::Left)
-                            .VAlign(VAlign::Top)
-                            .HAlign(HAlign::Left)
-                            (
-								FForEach { 5,
-                                    [this] (int index) -> FWidget&
-                                    {
-                                        return
-                                        FNew(FVerticalStack)
-                                        .ContentHAlign(HAlign::Left)
-                                        (
-                                            FNew(FStyledWidget)
-                                            .Background(scrollColors[index])
-                                            .Padding(Vec4(1, 1, 1, 1) * 5.0f)
-                                            (
-                                                FNew(FLabel)
-                                                .FontSize(16)
-                                                .Foreground(Color::RGBA(140, 140, 140))
-                                                .Text(MakeText(index))
-                                            )
-                                        );
-                                    }
-								},
-
-                                FNew(FVerticalStack)
-                                .ContentHAlign(HAlign::Left)
-                                (
-                                    FNew(FStyledWidget)
-                                    .Background(Color::Red())
-                                    .Padding(Vec4(1, 1, 1, 1) * 5.0f)
-                                    (
-                                        FNew(FTextButton)
-                                        .FontSize(16)
-                                        .Text("Click Here!")
-                                    )
-                                )
-                            )
-                        ),
-
                         FNew(FTabView)
                         .TabItems(
 							FNew(FLabelTabItem)
                             .Text("Tab 1")
                             .ContentWidget(
-								FNew(FStyledWidget)
-                                .Background(Color::Green())
-                                .HAlign(HAlign::Fill)
-                                .VAlign(VAlign::Fill)
-                                .Padding(Vec4(1, 1, 1, 1) * 10)
-                                (
-									FNew(FLabel)
-                                    .FontSize(18)
-                                    .Text("This is first tab")
-                                )
+								// Tab 1 Content - BEGIN
+								FNew(FScrollBox)
+		                        .ScrollBarBrush(Color::RGBA(255, 255, 255, 100))
+		                        .ScrollBarHoverBrush(Color::RGBA(255, 255, 255, 140))
+		                        .VerticalScroll(true)
+		                        .HorizontalScroll(true)
+		                        .Height(80)
+		                        (
+									FNew(FVerticalStack)
+		                            .ContentHAlign(HAlign::Left)
+		                            .VAlign(VAlign::Top)
+		                            .HAlign(HAlign::Left)
+		                            (
+										FForEach { 5,
+		                                    [this] (int index) -> FWidget&
+		                                    {
+		                                        return
+		                                        FNew(FVerticalStack)
+		                                        .ContentHAlign(HAlign::Left)
+		                                        (
+		                                            FNew(FStyledWidget)
+		                                            .Background(scrollColors[index])
+		                                            .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+		                                            (
+		                                                FNew(FLabel)
+		                                                .FontSize(16)
+		                                                .Foreground(Color::RGBA(140, 140, 140))
+		                                                .Text(MakeText(index))
+		                                            )
+		                                        );
+		                                    }
+										},
+
+		                                FNew(FVerticalStack)
+		                                .ContentHAlign(HAlign::Left)
+		                                (
+		                                    FNew(FStyledWidget)
+		                                    .Background(Color::Red())
+		                                    .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+		                                    (
+		                                        FNew(FTextButton)
+		                                        .FontSize(16)
+		                                        .Text("Click Here!")
+		                                    )
+		                                )
+		                            )
+		                        )
+                                // Tab 1 Content - END
                             )
                             .Name("Tab1"),
 
                             FNew(FLabelTabItem)
                             .Text("Tab 2")
                             .ContentWidget(
+								// Tab 2 - Content
 	                            FNew(FStyledWidget)
 	                            .Background(Color::Cyan())
 	                            .HAlign(HAlign::Fill)
@@ -426,6 +418,7 @@ namespace RenderingTests
 		                            FNew(FLabel)
 		                            .FontSize(18)
 		                            .Text("This is second tab")
+                                    .Foreground(Color::Black())
 	                            )
                             )
                             .Name("Tab2")
