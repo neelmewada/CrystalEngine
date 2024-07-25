@@ -97,8 +97,9 @@ namespace CE
 #include "Widget/ComboBox/FComboBoxItem.h"
 #include "Widget/ComboBox/FComboBox.h"
 
-#include "Widget/Menu/FMenu.h"
+#include "Widget/Menu/FMenuPopup.h"
 #include "Widget/Menu/FMenuItem.h"
+#include "Widget/Menu/FMenuBar.h"
 
 #include "Widget/Tab/FTabItem.h"
 #include "Widget/Tab/FTabView.h"

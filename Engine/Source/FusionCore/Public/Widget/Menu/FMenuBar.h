@@ -2,15 +2,13 @@
 
 namespace CE
 {
-    class FMenuItem;
-
     CLASS()
-    class FUSIONCORE_API FMenuPopup : public FPopup
+    class FUSIONCORE_API FMenuBar : public FCompoundWidget
     {
-        CE_CLASS(FMenuPopup, FPopup)
+        CE_CLASS(FMenuBar, FWidget)
     public:
 
-        FMenuPopup();
+        FMenuBar();
 
         u32 GetMenuItemCount() const { return menuItems.GetSize(); }
 
@@ -23,7 +21,7 @@ namespace CE
         FIELD()
         Array<FMenuItem*> menuItems;
 
-        FVerticalStack* container = nullptr;
+        FStackBox* container = nullptr;
 
     public: // - Fusion Properties - 
 
@@ -38,11 +36,11 @@ namespace CE
                     using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
                     using ArgType = std::remove_cvref_t<ArgTypeBase>;
 
-					if constexpr (TIsBaseClassOf<FMenuItem, ArgType>::Value)
-					{
+                    if constexpr (TIsBaseClassOf<FMenuItem, ArgType>::Value)
+                    {
                         const_cast<ArgType*>(&std::get<i()>(args))->menuOwner = this;
                         menuItems.Add(const_cast<ArgType*>(&std::get<i()>(args)));
-					}
+                    }
                     if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
                     {
                         container->AddChild(const_cast<ArgType*>(&std::get<i()>(args)));
@@ -57,4 +55,4 @@ namespace CE
     
 }
 
-#include "FMenuPopup.rtti.h"
+#include "FMenuBar.rtti.h"

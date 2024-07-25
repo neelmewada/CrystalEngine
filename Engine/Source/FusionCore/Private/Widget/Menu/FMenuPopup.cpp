@@ -13,7 +13,7 @@ namespace CE
 	    Super::Construct();
 
         Child(
-            FNew(FVerticalStack)
+            FAssignNew(FVerticalStack, container)
         );
     }
 

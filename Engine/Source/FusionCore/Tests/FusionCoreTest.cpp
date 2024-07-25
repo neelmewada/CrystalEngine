@@ -431,7 +431,44 @@ namespace RenderingTests
                             .Name("Tab2")
                         )
                         .MinHeight(64)
-                        .Margin(Vec4(0, 5, 0, 0))
+                        .Margin(Vec4(0, 5, 0, 0)),
+
+                        FNew(FMenuBar)
+                        .Content(
+							FNew(FMenuItem)
+                            .Text("File")
+                            .SubMenu(
+                                FNew(FMenuPopup)
+                                .Content(
+                                    FNew(FMenuItem)
+                                    .Text("New"),
+
+                                    FNew(FMenuItem)
+                                    .Text("Open"),
+
+                                    FNew(FMenuItem)
+                                    .Text("Open As..."),
+
+                                    FNew(FMenuItem)
+                                    .Text("Save"),
+
+                                    FNew(FMenuItem)
+                                    .Text("Save As..."),
+
+                                    FNew(FMenuItem)
+                                    .Text("Exit")
+                                )
+                            )
+                            .Name("FileMenuItem"),
+
+                            FNew(FMenuItem)
+                            .Text("Edit")
+                            .Name("EditMenuItem"),
+
+                            FNew(FMenuItem)
+                            .Text("Help")
+                            .Name("HelpMenuItem")
+                        )
                     )
                 )
             )

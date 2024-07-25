@@ -17,7 +17,11 @@ namespace CE
     {
         FMenuPopup& menu = widget.As<FMenuPopup>();
 
-        
+        for (int i = 0; i < menu.GetMenuItemCount(); ++i)
+        {
+            FMenuItem& item = *menu.GetMenuItem(i);
+            
+        }
     }
     
 } // namespace CE
