@@ -12,15 +12,23 @@ namespace CE
 
         FMenuItem();
 
+        bool IsHovered() const { return isHovered; }
+
+        bool SupportsMouseEvents() const override { return true; }
+
     protected:
 
         void Construct() override final;
+
+        void HandleEvent(FEvent* event) override;
 
         FWidget* menuOwner = nullptr;
 
         FLabel* label = nullptr;
 
         FMenuPopup* subMenu = nullptr;
+
+        bool isHovered = false;
 
     public: // - Fusion Properties - 
 
@@ -29,6 +37,8 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(FontFamily, label);
 
         FUSION_DATA_PROPERTY_WRAPPER(Text, label);
+
+        FUSION_EVENT(FVoidEvent, OnClick);
 
         FMenuItem& SubMenu(FMenuPopup& subMenu);
 
