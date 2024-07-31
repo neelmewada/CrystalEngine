@@ -221,6 +221,8 @@ namespace CE
             child->OnAttachedToParent(this);
             MarkLayoutDirty();
 
+            ApplyStyle();
+
             return true;
         }
 
@@ -235,6 +237,8 @@ namespace CE
             DetachSubobject(child);
             child->parent = nullptr;
             MarkLayoutDirty();
+
+            ApplyStyle();
         }
     }
 

@@ -439,6 +439,7 @@ namespace RenderingTests
                             .Text("File")
                             .SubMenu(
                                 FNew(FMenuPopup)
+                                .Gap(0)
                                 .Content(
                                     FNew(FMenuItem)
                                     .Text("New"),
@@ -448,6 +449,9 @@ namespace RenderingTests
 
                                     FNew(FMenuItem)
                                     .Text("Open As..."),
+
+                                    FNew(FMenuItem)
+                                    .Text("Open Recent"),
 
                                     FNew(FMenuItem)
                                     .Text("Save"),
@@ -469,6 +473,8 @@ namespace RenderingTests
                             .Text("Help")
                             .Name("HelpMenuItem")
                         )
+                        .Margin(Vec4(0, 10, 0, 0))
+                        .Name("MenuBar")
                     )
                 )
             )

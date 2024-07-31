@@ -25,7 +25,9 @@ namespace CE
 
         FVerticalStack* container = nullptr;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
+
+        FUSION_PROPERTY_WRAPPER(Gap, container);
 
         template <typename... TArgs> requires TMatchAllBaseClass<FWidget, TArgs...>::Value and (sizeof...(TArgs) > 0)
         Self& Content(const TArgs&... widgets)

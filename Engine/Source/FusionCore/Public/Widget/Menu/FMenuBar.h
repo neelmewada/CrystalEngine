@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FMenuBar : public FCompoundWidget
+    class FUSIONCORE_API FMenuBar : public FStyledWidget
     {
-        CE_CLASS(FMenuBar, FWidget)
+        CE_CLASS(FMenuBar, FStyledWidget)
     public:
 
         FMenuBar();
@@ -35,16 +35,20 @@ namespace CE
                 {
                     using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
                     using ArgType = std::remove_cvref_t<ArgTypeBase>;
-
-                    if constexpr (TIsBaseClassOf<FMenuItem, ArgType>::Value)
-                    {
-                        const_cast<ArgType*>(&std::get<i()>(args))->menuOwner = this;
-                        menuItems.Add(const_cast<ArgType*>(&std::get<i()>(args)));
-                    }
+					
                     if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
                     {
-                        container->AddChild(const_cast<ArgType*>(&std::get<i()>(args)));
+                        ArgType* widget = const_cast<ArgType*>(&std::get<i()>(args));
+                        if (widget->IsOfType<FMenuItem>())
+                        {
+                            FMenuItem* menuItem = static_cast<FMenuItem*>(widget);
+                            menuItem->menuOwner = this;
+                            menuItems.Add(menuItem);
+                        }
+                        container->AddChild(widget);
                     }
+
+                    ApplyStyle();
                 });
 
             return *this;

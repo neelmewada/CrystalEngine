@@ -330,6 +330,8 @@ namespace CE
 
 		GetRootContext()->SetFocusWidget(popup);
 		popupContext->MarkLayoutDirty();
+
+		popup->ApplyStyle();
 	}
 
 	void FNativeContext::EmplaceFrameAttachments()

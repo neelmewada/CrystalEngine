@@ -14,7 +14,6 @@ namespace CE
 
         Child(
             FNew(FHorizontalStack)
-            .Padding(Vec4(1, 1, 1, 1) * 10.0f)
             (
                 FAssignNew(FLabel, label)
                 .Text("")
@@ -27,13 +26,21 @@ namespace CE
     {
         if (event->sender == this)
         {
-            if (event->type == FEventType::MouseEnter)
+            if (event->type == FEventType::MouseEnter && !isHovered)
             {
                 isHovered = true;
+                if (menuOwner)
+                    menuOwner->ApplyStyle();
             }
-            else if (event->type == FEventType::MouseLeave)
+            else if (event->type == FEventType::MouseLeave && isHovered)
             {
                 isHovered = false;
+                if (menuOwner)
+                    menuOwner->ApplyStyle();
+                if (subMenu && (!menuOwner || menuOwner->IsOfType<FMenuBar>()))
+                {
+                    
+                }
             }
             else if (event->type == FEventType::MousePress)
             {

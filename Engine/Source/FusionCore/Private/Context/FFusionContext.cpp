@@ -246,6 +246,8 @@ namespace CE
 
 		GetRootContext()->SetFocusWidget(popup);
 		MarkLayoutDirty();
+
+		popup->ApplyStyle();
 	}
 
 	void FFusionContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)

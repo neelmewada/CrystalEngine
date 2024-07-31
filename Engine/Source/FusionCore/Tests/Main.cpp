@@ -266,6 +266,27 @@ TEST(FusionCore, Rendering)
 			GetDefaultWidget<FTabView>()
 				.Style(rootStyle, "TabView.Primary");
 		}
+
+		{
+			auto menuStyle = CreateObject<FMenuPopupStyle>(rootStyle, "MenuPopupStyle");
+			rootStyle->Add("MenuPopup.Primary", menuStyle);
+
+			menuStyle->background = Color::RGBA(56, 56, 56);
+			menuStyle->itemPadding = Vec4(10, 5, 10, 5);
+			menuStyle->itemHoverBackground = Color::RGBA(0, 112, 224);
+
+			GetDefaultWidget<FMenuPopup>()
+				.Style(rootStyle, "MenuPopup.Primary");
+
+			auto menuBarStyle = CreateObject<FMenuBarStyle>(rootStyle, "MenuBarStyle");
+			rootStyle->Add("MenuBar.Primary", menuBarStyle);
+
+			menuBarStyle->itemPadding = Vec4(5, 5, 5, 5);
+			menuBarStyle->itemHoverBackground = Color::RGBA(0, 112, 224);
+
+			GetDefaultWidget<FMenuBar>()
+				.Style(rootStyle, "MenuBar.Primary");
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

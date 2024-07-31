@@ -5,7 +5,8 @@ namespace CE
 
     FMenuPopup::FMenuPopup()
     {
-
+        m_AutoClose = true;
+        m_BlockInteraction = false;
     }
 
     void FMenuPopup::Construct()
