@@ -16,6 +16,8 @@ namespace CE
 
         void ClosePopup();
 
+        virtual void OnPopupClosed();
+
     protected:
 
         void HandleEvent(FEvent* event) override;

@@ -21,6 +21,11 @@ namespace CE
         }
     }
 
+    void FPopup::OnPopupClosed()
+    {
+
+    }
+
     void FPopup::HandleEvent(FEvent* event)
     {
         if (event->type == FEventType::FocusChanged)

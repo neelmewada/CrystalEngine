@@ -270,6 +270,8 @@ namespace CE
 				popupContext->QueueDestroy();
 			}
 
+			popup->OnPopupClosed();
+
 			return true;
 		}
 		
@@ -294,6 +296,8 @@ namespace CE
 		}
 
 		MarkLayoutDirty();
+
+		popup->OnPopupClosed();
 
 		return true;
 	}

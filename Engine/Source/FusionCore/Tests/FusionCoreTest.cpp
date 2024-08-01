@@ -451,7 +451,24 @@ namespace RenderingTests
                                     .Text("Open As..."),
 
                                     FNew(FMenuItem)
-                                    .Text("Open Recent"),
+                                    .Text("Open Recent")
+                                    .SubMenu(
+										FNew(FMenuPopup)
+                                        .Gap(0)
+                                        .Content(
+                                            FNew(FMenuItem)
+                                            .Text("Project 1"),
+
+                                            FNew(FMenuItem)
+                                            .Text("Project 2"),
+
+                                            FNew(FMenuItem)
+                                            .Text("Project 3"),
+
+                                            FNew(FMenuItem)
+                                            .Text("Project 4")
+                                        )
+                                    ),
 
                                     FNew(FMenuItem)
                                     .Text("Save"),

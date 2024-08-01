@@ -14,6 +14,8 @@ namespace CE
 
         FMenuItem* GetMenuItem(u32 index) const { return menuItems[index]; }
 
+        void OnMenuItemHovered(FMenuItem* menuItem);
+
     protected:
 
         void Construct() override final;

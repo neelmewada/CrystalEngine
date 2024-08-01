@@ -18,5 +18,17 @@ namespace CE
         );
     }
 
+    void FMenuPopup::OnPopupClosed()
+    {
+	    Super::OnPopupClosed();
+
+        for (FMenuItem* menuItem : menuItems)
+        {
+	        if (menuItem->subMenu)
+	        {
+                menuItem->subMenu->ClosePopup();
+	        }
+        }
+    }
 }
 

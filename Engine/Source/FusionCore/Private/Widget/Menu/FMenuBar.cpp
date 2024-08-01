@@ -8,6 +8,17 @@ namespace CE
 
     }
 
+    void FMenuBar::OnMenuItemHovered(FMenuItem* hoveredItem)
+    {
+        for (FMenuItem* menuItem : menuItems)
+        {
+	        if (menuItem != hoveredItem && menuItem->subMenu != nullptr)
+	        {
+                menuItem->subMenu->ClosePopup();
+	        }
+        }
+    }
+
     void FMenuBar::Construct()
     {
         Super::Construct();

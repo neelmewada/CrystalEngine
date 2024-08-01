@@ -24,23 +24,26 @@ namespace CE
 
     void FMenuItem::HandleEvent(FEvent* event)
     {
-        if (event->sender == this)
+        if (event->IsMouseEvent() && event->sender == this)
         {
             if (event->type == FEventType::MouseEnter && !isHovered)
             {
                 isHovered = true;
                 if (menuOwner)
                     menuOwner->ApplyStyle();
+
+                if (menuOwner->IsOfType<FMenuBar>())
+                {
+                    FMenuBar* menuBar = static_cast<FMenuBar*>(menuOwner);
+                    menuBar->OnMenuItemHovered(this);
+                }
             }
             else if (event->type == FEventType::MouseLeave && isHovered)
             {
                 isHovered = false;
                 if (menuOwner)
                     menuOwner->ApplyStyle();
-                if (subMenu && (!menuOwner || menuOwner->IsOfType<FMenuBar>()))
-                {
-                    
-                }
+
             }
             else if (event->type == FEventType::MousePress)
             {

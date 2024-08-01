@@ -281,6 +281,7 @@ TEST(FusionCore, Rendering)
 			auto menuBarStyle = CreateObject<FMenuBarStyle>(rootStyle, "MenuBarStyle");
 			rootStyle->Add("MenuBar.Primary", menuBarStyle);
 
+			menuBarStyle->background = Color::Black();
 			menuBarStyle->itemPadding = Vec4(5, 5, 5, 5);
 			menuBarStyle->itemHoverBackground = Color::RGBA(0, 112, 224);
 

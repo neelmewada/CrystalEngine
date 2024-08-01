@@ -20,6 +20,8 @@ namespace CE
 
         void Construct() override final;
 
+        void OnPopupClosed() override;
+
         FIELD()
         Array<FMenuItem*> menuItems;
 
