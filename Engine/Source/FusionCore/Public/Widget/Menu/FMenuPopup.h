@@ -16,6 +16,8 @@ namespace CE
 
         FMenuItem* GetMenuItem(u32 index) const { return menuItems[index]; }
 
+        bool FocusParentExistsRecursive(FWidget* parent) override;
+
     protected:
 
         void Construct() override final;
@@ -24,6 +26,9 @@ namespace CE
 
         FIELD()
         Array<FMenuItem*> menuItems;
+
+        FIELD()
+        FMenuItem* ownerItem = nullptr;
 
         FVerticalStack* container = nullptr;
 
@@ -57,6 +62,7 @@ namespace CE
         }
 
         FUSION_WIDGET;
+        friend class FMenuItem;
     };
     
 }

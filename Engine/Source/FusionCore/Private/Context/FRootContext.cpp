@@ -413,13 +413,13 @@ namespace CE
 
 		if (widgetToFocus != curFocusWidget)
 		{
-			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->ParentExistsRecursive(curFocusWidget)))
+			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->FocusParentExistsRecursive(curFocusWidget)))
 			{
 				FWidget* base = curFocusWidget;
 
 				while (base != nullptr)
 				{
-					if (base->parent != nullptr && widgetToFocus->ParentExistsRecursive(base->parent))
+					if (base->parent != nullptr && widgetToFocus->FocusParentExistsRecursive(base->parent))
 					{
 						break;
 					}

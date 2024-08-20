@@ -9,6 +9,11 @@ namespace CE
         m_BlockInteraction = false;
     }
 
+    bool FMenuPopup::FocusParentExistsRecursive(FWidget* parent)
+    {
+	    return Super::FocusParentExistsRecursive(parent) || (ownerItem != nullptr && ownerItem->subMenu == this);
+    }
+
     void FMenuPopup::Construct()
     {
 	    Super::Construct();

@@ -194,6 +194,7 @@ namespace RenderingTests
 
                     FNew(FVerticalStack)
                     .Padding(Vec4(10, 10, 10, 10))
+                    .Name("ContentVStack")
                     (
                         FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Fill)
@@ -451,7 +452,7 @@ namespace RenderingTests
                                     .Text("Open As..."),
 
                                     FNew(FMenuItem)
-                                    .Text("Open Recent")
+                                    .Text("Open Recent...")
                                     .SubMenu(
 										FNew(FMenuPopup)
                                         .Gap(0)

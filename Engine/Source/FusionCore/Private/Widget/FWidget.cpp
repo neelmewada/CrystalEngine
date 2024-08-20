@@ -89,6 +89,11 @@ namespace CE
         return this->parent->ParentExistsRecursive(parent);
     }
 
+    bool FWidget::FocusParentExistsRecursive(FWidget* parent)
+    {
+        return ParentExistsRecursive(parent);
+    }
+
     void FWidget::OnAttachedToParent(FWidget* parent)
     {
         ApplyStyle();

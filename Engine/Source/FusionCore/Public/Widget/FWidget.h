@@ -106,6 +106,8 @@ namespace CE
 
         virtual bool ParentExistsRecursive(FWidget* parent);
 
+        virtual bool FocusParentExistsRecursive(FWidget* parent);
+
         virtual bool SupportsMouseEvents() const { return false; }
 
         virtual bool SupportsKeyboardEvents() const { return false; }

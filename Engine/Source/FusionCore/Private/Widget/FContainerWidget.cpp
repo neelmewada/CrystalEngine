@@ -6,6 +6,7 @@ namespace CE
     FContainerWidget::FContainerWidget()
     {
         m_ClipChildren = false;
+        m_DebugColor = Color::Clear();
     }
 
     void FContainerWidget::SetContextRecursively(FFusionContext* context)
@@ -26,7 +27,7 @@ namespace CE
         if (children.IsEmpty())
             return thisHitTest;
 
-        Vec2 invScale = Vec2(1 / m_Scale.x, 1 / m_Scale.y);
+        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
 
         Vec2 transformedMousePos = (Matrix4x4::Translation(-computedPosition - m_Translation) *
             Matrix4x4::Angle(-m_Angle) *
@@ -113,6 +114,19 @@ namespace CE
             FWidget* child = children[i];
             RemoveChild(child);
         }
+    }
+
+    void FContainerWidget::OnPaint(FPainter* painter)
+    {
+        if (m_DebugColor.a > 0)
+        {
+            painter->SetPen(FPen());
+            painter->SetBrush(m_DebugColor);
+
+            painter->DrawRect(Rect::FromSize(computedPosition, computedSize));
+        }
+
+	    Super::OnPaint(painter);
     }
 
     void FContainerWidget::ClearStyle()

@@ -16,6 +16,8 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool SupportsFocusEvents() const override { return true; }
+
     protected:
 
         void Construct() override final;

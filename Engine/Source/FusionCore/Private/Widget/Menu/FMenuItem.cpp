@@ -32,10 +32,14 @@ namespace CE
                 if (menuOwner)
                     menuOwner->ApplyStyle();
 
-                if (menuOwner->IsOfType<FMenuBar>())
+                if (menuOwner && menuOwner->IsOfType<FMenuBar>())
                 {
                     FMenuBar* menuBar = static_cast<FMenuBar*>(menuOwner);
                     menuBar->OnMenuItemHovered(this);
+                }
+                else if (subMenu)
+                {
+                    GetContext()->PushLocalPopup(subMenu, globalPosition + Vec2(computedSize.x, 0));
                 }
             }
             else if (event->type == FEventType::MouseLeave && isHovered)
@@ -62,7 +66,7 @@ namespace CE
 	                }
                     else if (menuOwner->IsOfType<FMenuBar>())
                     {
-	                    
+                        
                     }
                 }
 
@@ -76,6 +80,7 @@ namespace CE
     FMenuItem& FMenuItem::SubMenu(FMenuPopup& subMenu)
     {
         this->subMenu = &subMenu;
+        subMenu.ownerItem = this;
         return *this;
     }
 

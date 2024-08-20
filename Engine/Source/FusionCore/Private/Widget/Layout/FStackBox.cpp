@@ -19,6 +19,11 @@ namespace CE
 	{
 		ZoneScoped;
 
+		if (GetName() == "ContentVStack")
+		{
+			String::IsAlphabet('a');
+		}
+
 		if (children.IsEmpty())
 		{
 			Super::CalculateIntrinsicSize();
@@ -42,12 +47,12 @@ namespace CE
 
 			if (m_Direction == FStackBoxDirection::Horizontal)
 			{
-				contentSize.width += childSize.width;
+				contentSize.width += childSize.width + childMargin.left;
 				contentSize.height = Math::Max(contentSize.height, childSize.height + childMargin.top + childMargin.bottom);
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
-				contentSize.height += childSize.height;
+				contentSize.height += childSize.height + childMargin.top;
 				contentSize.width = Math::Max(contentSize.width, childSize.width + childMargin.left + childMargin.right);
 			}
 		}
@@ -76,6 +81,11 @@ namespace CE
 	void FStackBox::PlaceSubWidgets()
 	{
 		ZoneScoped;
+
+		if (GetName() == "ContentVStack")
+		{
+			String::IsAlphabet('a');
+		}
 
 		Super::PlaceSubWidgets();
 

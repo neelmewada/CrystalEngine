@@ -29,6 +29,8 @@ namespace CE
 
     protected:
 
+        void OnPaint(FPainter* painter) override;
+
         void ClearStyle() override;
 
         bool TryAddChild(FWidget* child) override;
@@ -46,6 +48,7 @@ namespace CE
 
         FUSION_PROPERTY(bool, ClipChildren);
 
+        FUSION_PROPERTY(Color, DebugColor);
 
         FUSION_WIDGET;
     };
