@@ -440,6 +440,8 @@ namespace RenderingTests
                             .Text("File")
                             .SubMenu(
                                 FNew(FMenuPopup)
+                                .Name("FileMenu")
+                                .As<FMenuPopup>()
                                 .Gap(0)
                                 .Content(
                                     FNew(FMenuItem)
@@ -469,6 +471,8 @@ namespace RenderingTests
                                             FNew(FMenuItem)
                                             .Text("Project 4")
                                         )
+                                        .Name("RecentsMenu")
+                                        .As<FMenuPopup>()
                                     ),
 
                                     FNew(FMenuItem)

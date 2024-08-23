@@ -20,6 +20,8 @@ namespace CE
 
     protected:
 
+        void HandleEvent(FEvent* event) override;
+
         void Construct() override final;
 
         void OnPopupClosed() override;
