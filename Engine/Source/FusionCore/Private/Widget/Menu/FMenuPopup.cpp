@@ -38,7 +38,7 @@ namespace CE
                         FWidget* ownerItemMenu = ownerItem->menuOwner;
                         if (ownerItemMenu == nullptr)
                             break;
-
+                        
                         if (ownerItemMenu->IsOfType<FMenuPopup>())
                         {
                             FMenuPopup* ownerItemMenuPopup = static_cast<FMenuPopup*>(ownerItemMenu);
@@ -72,6 +72,13 @@ namespace CE
     void FMenuPopup::OnPopupClosed()
     {
 	    Super::OnPopupClosed();
+
+        if (ownerItem != nullptr)
+        {
+            ownerItem->isHovered = false;
+            if (ownerItem->menuOwner)
+                ownerItem->menuOwner->ApplyStyle();
+        }
 
         for (FMenuItem* menuItem : menuItems)
         {

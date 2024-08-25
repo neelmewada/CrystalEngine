@@ -250,6 +250,104 @@ namespace CE
 			}
 		}
 
+		if (hoveredWidget != prevHoveredWidget)
+		{
+			/*if (hoveredWidget != nullptr)
+				CE_LOG(Info, All, "Hover Changed: {}", hoveredWidget->GetName());
+			else
+				CE_LOG(Info, All, "Hover Changed: NULL");*/
+
+			prevHoveredWidget = hoveredWidget;
+		}
+
+		// - Focus Events -
+
+		if (owningWidget && IsFocused() && !owningWidget->IsFocused())
+		{
+			FFocusEvent focusEvent{};
+			focusEvent.gotFocus = true;
+			focusEvent.type = FEventType::FocusChanged;
+			focusEvent.sender = owningWidget;
+			focusEvent.focusedWidget = owningWidget;
+			focusEvent.direction = FEventDirection::BottomToTop;
+
+			owningWidget->HandleEvent(&focusEvent);
+		}
+		else if (owningWidget && !IsFocused() && owningWidget->IsFocused())
+		{
+			FFocusEvent focusEvent{};
+			focusEvent.gotFocus = false;
+			focusEvent.type = FEventType::FocusChanged;
+			focusEvent.sender = owningWidget;
+			focusEvent.focusedWidget = nullptr;
+			focusEvent.direction = FEventDirection::TopToBottom;
+
+			owningWidget->HandleEvent(&focusEvent);
+
+			curFocusWidget = nullptr;
+			widgetToFocus = nullptr;
+		}
+
+		if (curFocusWidget != nullptr && !curFocusWidget->IsFocused() && curFocusWidget == widgetToFocus)
+		{
+			curFocusWidget = nullptr;
+			widgetToFocus = nullptr;
+		}
+
+		if (widgetToFocus != curFocusWidget)
+		{
+			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->FocusParentExistsRecursive(curFocusWidget)))
+			{
+				FWidget* base = curFocusWidget;
+
+				while (base != nullptr)
+				{
+					if (base->parent != nullptr && widgetToFocus->FocusParentExistsRecursive(base->parent))
+					{
+						break;
+					}
+					base = base->parent;
+				}
+
+				if (base != nullptr)
+				{
+					FFocusEvent focusEvent{};
+					focusEvent.type = FEventType::FocusChanged;
+					focusEvent.sender = base;
+					focusEvent.focusedWidget = widgetToFocus;
+					focusEvent.gotFocus = false;
+					focusEvent.direction = FEventDirection::TopToBottom;
+
+					base->HandleEvent(&focusEvent);
+				}
+				else
+				{
+					FFocusEvent focusEvent{};
+					focusEvent.type = FEventType::FocusChanged;
+					focusEvent.sender = curFocusWidget;
+					focusEvent.focusedWidget = widgetToFocus;
+					focusEvent.gotFocus = false;
+					focusEvent.direction = FEventDirection::BottomToTop;
+
+					curFocusWidget->HandleEvent(&focusEvent);
+				}
+			}
+
+			if (widgetToFocus != nullptr)
+			{
+				FFocusEvent focusEvent{};
+				focusEvent.type = FEventType::FocusChanged;
+				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus;
+				focusEvent.gotFocus = true;
+				focusEvent.direction = FEventDirection::BottomToTop;
+
+				widgetToFocus->HandleEvent(&focusEvent);
+			}
+
+			curFocusWidget = widgetToFocus;
+		}
+
+
 		Enum* mouseButtonEnum = GetStaticEnum<MouseButton>();
 		for (int i = 0; i < mouseButtonEnum->GetConstantsCount(); ++i)
 		{
@@ -365,103 +463,6 @@ namespace CE
 
 				widgetsPressedPerMouseButton[i] = nullptr;
 			}
-		}
-
-		if (hoveredWidget != prevHoveredWidget)
-		{
-			/*if (hoveredWidget != nullptr)
-				CE_LOG(Info, All, "Hover Changed: {}", hoveredWidget->GetName());
-			else
-				CE_LOG(Info, All, "Hover Changed: NULL");*/
-
-			prevHoveredWidget = hoveredWidget;
-		}
-
-		// - Focus Events -
-
-		if (owningWidget && IsFocused() && !owningWidget->IsFocused())
-		{
-			FFocusEvent focusEvent{};
-			focusEvent.gotFocus = true;
-			focusEvent.type = FEventType::FocusChanged;
-			focusEvent.sender = owningWidget;
-			focusEvent.focusedWidget = owningWidget;
-			focusEvent.direction = FEventDirection::BottomToTop;
-
-			owningWidget->HandleEvent(&focusEvent);
-		}
-		else if (owningWidget && !IsFocused() && owningWidget->IsFocused())
-		{
-			FFocusEvent focusEvent{};
-			focusEvent.gotFocus = false;
-			focusEvent.type = FEventType::FocusChanged;
-			focusEvent.sender = owningWidget;
-			focusEvent.focusedWidget = nullptr;
-			focusEvent.direction = FEventDirection::TopToBottom;
-
-			owningWidget->HandleEvent(&focusEvent);
-
-			curFocusWidget = nullptr;
-			widgetToFocus = nullptr;
-		}
-
-		if (curFocusWidget != nullptr && !curFocusWidget->IsFocused() && curFocusWidget == widgetToFocus)
-		{
-			curFocusWidget = nullptr;
-			widgetToFocus = nullptr;
-		}
-
-		if (widgetToFocus != curFocusWidget)
-		{
-			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->FocusParentExistsRecursive(curFocusWidget)))
-			{
-				FWidget* base = curFocusWidget;
-
-				while (base != nullptr)
-				{
-					if (base->parent != nullptr && widgetToFocus->FocusParentExistsRecursive(base->parent))
-					{
-						break;
-					}
-					base = base->parent;
-				}
-
-				if (base != nullptr)
-				{
-					FFocusEvent focusEvent{};
-					focusEvent.type = FEventType::FocusChanged;
-					focusEvent.sender = base;
-					focusEvent.focusedWidget = widgetToFocus;
-					focusEvent.gotFocus = false;
-					focusEvent.direction = FEventDirection::TopToBottom;
-
-					base->HandleEvent(&focusEvent);
-				}
-				else
-				{
-					FFocusEvent focusEvent{};
-					focusEvent.type = FEventType::FocusChanged;
-					focusEvent.sender = curFocusWidget;
-					focusEvent.focusedWidget = widgetToFocus;
-					focusEvent.gotFocus = false;
-					focusEvent.direction = FEventDirection::BottomToTop;
-
-					curFocusWidget->HandleEvent(&focusEvent);
-				}
-			}
-
-			if (widgetToFocus != nullptr)
-			{
-				FFocusEvent focusEvent{};
-				focusEvent.type = FEventType::FocusChanged;
-				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus;
-				focusEvent.gotFocus = true;
-				focusEvent.direction = FEventDirection::BottomToTop;
-
-				widgetToFocus->HandleEvent(&focusEvent);
-			}
-
-			curFocusWidget = widgetToFocus;
 		}
 
 		FWidget* keyEventWidget = curFocusWidget;

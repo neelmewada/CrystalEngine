@@ -18,6 +18,8 @@ namespace CE
 
         virtual void OnPopupClosed();
 
+        bool IsShown() const { return isShown; }
+
     protected:
 
         void HandleEvent(FEvent* event) override;
