@@ -88,15 +88,6 @@ namespace CE
 			PlatformApplication::Get()->AddMessageHandler(this);
 
 			auto assetManager = gEngine->GetAssetManager();
-
-			auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
-
-			auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
-			auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
-
-			auto atlasData = fontAsset->GetAtlasData();
-
-			RPI::ShaderCollection* draw2dShaderCollection = renderer2dShader->GetShaderCollection();
 			
 			/*CApplicationInitInfo appInitInfo{};
 			appInitInfo.draw2dShader = draw2dShaderCollection->At(0).shader;
