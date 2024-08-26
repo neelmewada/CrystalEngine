@@ -62,6 +62,9 @@ namespace CE
 
         u64 ComputeMemoryFootprint() override;
 
+        void EmplaceFrameAttachments();
+        void EnqueueScopes();
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;

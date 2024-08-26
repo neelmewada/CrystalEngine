@@ -299,6 +299,20 @@ namespace CE
         scheduler->EndExecution();
     }
 
+    void FusionApplication::EmplaceFrameAttachments()
+    {
+        ZoneScoped;
+
+        rootContext->EmplaceFrameAttachments();
+    }
+
+    void FusionApplication::EnqueueScopes()
+    {
+        ZoneScoped;
+
+        rootContext->EnqueueScopes();
+    }
+
     void FusionApplication::BuildFrameGraph()
     {
         ZoneScoped;
@@ -310,9 +324,9 @@ namespace CE
 
         scheduler->BeginFrameGraph();
         {
-            rootContext->EmplaceFrameAttachments();
+            EmplaceFrameAttachments();
 
-            rootContext->EnqueueScopes();
+            EnqueueScopes();
         }
         scheduler->EndFrameGraph();
     }

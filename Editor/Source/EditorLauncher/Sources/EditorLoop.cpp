@@ -199,9 +199,9 @@ void EditorLoop::PostInit()
 	}
 	else
 	{
-		CrystalEditorWindow* editorWindow = CreateWindow<CrystalEditorWindow>("CrystalEditor", mainWindow);
-		editorWindow->SetTitle("Crystal Editor");
-		editorWindow->Show();
+		//CrystalEditorWindow* editorWindow = CreateWindow<CrystalEditorWindow>("CrystalEditor", mainWindow);
+		//editorWindow->SetTitle("Crystal Editor");
+		//editorWindow->Show();
 	}
 }
 
