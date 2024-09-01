@@ -266,6 +266,11 @@ namespace CE
         ApplyStyle();
     }
 
+    void FWidget::QueueDestroy()
+    {
+        FusionApplication::Get()->QueueDestroy(this);
+    }
+
     void FWidget::MarkLayoutDirty()
     {
         FFusionContext* context = GetContext();

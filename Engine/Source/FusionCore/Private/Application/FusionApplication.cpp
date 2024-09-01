@@ -257,6 +257,8 @@ namespace CE
             timers[i]->Tick();
         }
 
+        return;
+
         int submittedFrameIdx = -1;
 
         if (rebuildFrameGraph)
@@ -313,6 +315,37 @@ namespace CE
         rootContext->EnqueueScopes();
     }
 
+    void FusionApplication::UpdateDrawListMask(DrawListMask& drawListMask)
+    {
+        rootContext->SetDrawListMask(drawListMask);
+    }
+
+    void FusionApplication::EnqueueDrawPackets(DrawListContext& drawList, u32 imageIndex)
+    {
+        rootContext->EnqueueDrawPackets(drawList, imageIndex);
+    }
+
+    void FusionApplication::FlushDrawPackets(DrawListContext& drawList, u32 imageIndex)
+    {
+        fontManager->Flush(imageIndex);
+
+        if (imageRegistryUpdated)
+        {
+            textureSrg->Bind("_Textures", registeredImages.GetCount(), registeredImages.GetData());
+            imageRegistryUpdated = false;
+        }
+
+        if (samplersUpdated)
+        {
+            textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
+            samplersUpdated = false;
+        }
+
+        textureSrg->FlushBindings();
+
+        rootContext->SetDrawPackets(drawList);
+    }
+
     void FusionApplication::BuildFrameGraph()
     {
         ZoneScoped;
@@ -352,7 +385,7 @@ namespace CE
         RHI::DrawListMask drawListMask{};
         HashSet<RHI::DrawListTag> drawListTags{};
 
-        rootContext->SetDrawListMask(drawListMask);
+        UpdateDrawListMask(drawListMask);
 
         for (int i = 0; i < drawListMask.GetSize(); ++i)
         {
@@ -364,27 +397,11 @@ namespace CE
 
         drawList.Init(drawListMask);
         {
-            rootContext->EnqueueDrawPackets(drawList, curImageIndex);
+            EnqueueDrawPackets(drawList, curImageIndex);
         }
         drawList.Finalize();
 
-        fontManager->Flush(curImageIndex);
-
-        if (imageRegistryUpdated)
-        {
-            textureSrg->Bind("_Textures", registeredImages.GetCount(), registeredImages.GetData());
-            imageRegistryUpdated = false;
-        }
-
-        if (samplersUpdated)
-        {
-            textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
-            samplersUpdated = false;
-        }
-
-        textureSrg->FlushBindings();
-        
-        rootContext->SetDrawPackets(drawList);
+        FlushDrawPackets(drawList, curImageIndex);
     }
 
     void FusionApplication::RebuildFrameGraph()

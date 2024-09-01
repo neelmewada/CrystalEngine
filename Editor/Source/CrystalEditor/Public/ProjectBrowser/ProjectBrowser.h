@@ -4,9 +4,9 @@ namespace CE::Editor
 {
 
     CLASS(Prefs = Editor)
-    class CRYSTALEDITOR_API ProjectBrowser : public CToolWindow
+    class CRYSTALEDITOR_API ProjectBrowser : public FWindow
     {
-        CE_CLASS(ProjectBrowser, CToolWindow)
+        CE_CLASS(ProjectBrowser, FWindow)
     public:
 
         ProjectBrowser();
@@ -18,7 +18,7 @@ namespace CE::Editor
         void Construct() override;
 
         FUNCTION()
-        void ValidateInputFields(CTextInput* inputField);
+        void ValidateInputFields(FTextInput* inputField);
 
         FUNCTION()
         void OnProjectTemplateSelectionChanged();

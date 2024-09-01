@@ -5,7 +5,7 @@
 #include "CoreRPI.h"
 #include "CoreApplication.h"
 #include "EditorCore.h"
-#include "CrystalWidgets.h"
+#include "FusionCore.h"
 #include "EditorSystem.h"
 
 // Project Browser

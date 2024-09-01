@@ -50,7 +50,7 @@ namespace CE
 			actor->Tick(delta);
 		}
     
-		CWindow* mainViewport = sceneSubsystem->GetMainViewport();
+		/*CWindow* mainViewport = sceneSubsystem->GetMainViewport();
 		if (mainViewport == nullptr)
 			return;
 
@@ -70,7 +70,7 @@ namespace CE
 			viewConstants.viewMatrix = camera->viewMatrix;
 			viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
 			viewConstants.viewPosition = camera->GetPosition();
-		}
+		}*/
 
 		for (CE::RenderPipeline* renderPipeline : renderPipelines)
 		{

@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorSystem CXX)
+project(Fusion CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
     NAMESPACE CE
-    FOLDER Editor/Source
+    FOLDER Engine/Source
     PCHHEADER
         PRIVATE
             Public/${PROJECT_NAME}.h
@@ -25,16 +25,18 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
-        PRIVATE
         PUBLIC
+            CE::Core
+            CE::CoreMedia
+            CE::CoreApplication
+            CE::CoreRHI
+            CE::CoreRPI
             CE::FusionCore
-            CE::EditorCore
+        TARGETS EngineResources
     RUNTIME_DEPENDENCIES
-        
+
 )
 
-
-if(${PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED})
+if(${CE_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
-

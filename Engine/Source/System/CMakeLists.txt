@@ -35,6 +35,7 @@ ce_add_target(System SHARED
             CE::CoreRHI
             CE::CoreRPI
             CE::FusionCore
+            CE::Fusion
         TARGETS 
             Config
     RUNTIME_DEPENDENCIES

@@ -10,7 +10,18 @@ namespace CE
 
     void FStyleSet::Add(const Name& name, FStyle* style)
     {
-        styles.Add(name, style);
+        if (style && name.IsValid())
+        {
+            styles.Add(name, style);
+        }
+    }
+
+    void FStyleSet::Add(FStyle* style)
+    {
+        if (style)
+        {
+            Add(style->GetName(), style);
+        }
     }
 
     void FStyleSet::Remove(const Name& styleName)

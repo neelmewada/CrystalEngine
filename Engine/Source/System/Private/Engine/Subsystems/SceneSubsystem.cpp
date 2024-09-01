@@ -6,23 +6,6 @@ namespace CE
     {
 		
     }
-  
-    void SceneSubsystem::RegisterViewport(CWindow* viewport, CE::Scene* scene)
-    {
-		if (!viewport || !scene)
-			return;
-
-		scenesByViewport[viewport] = scene;
-
-		renderer->RebuildFrameGraph();
-    }
-
-    void SceneSubsystem::SetMainViewport(CWindow* viewport)
-    {
-		mainViewport = viewport;
-
-		renderer->RebuildFrameGraph();
-    }
 
     void SceneSubsystem::Initialize()
 	{
@@ -43,7 +26,6 @@ namespace CE
 
 	void SceneSubsystem::PreShutdown()
 	{
-		mainViewport = nullptr;
     
 		if (mainScene)
 		{

@@ -15,12 +15,12 @@ namespace CE
     };
 
     CLASS()
-    class FUSIONCORE_API FButtonCustomStyle : public FButtonStyle
+    class FUSIONCORE_API FCustomButtonStyle : public FButtonStyle
     {
-        CE_CLASS(FButtonCustomStyle, FButtonStyle)
+        CE_CLASS(FCustomButtonStyle, FButtonStyle)
     public:
 
-        FButtonCustomStyle();
+        FCustomButtonStyle();
 
         void MakeStyle(FWidget& widget) override;
 

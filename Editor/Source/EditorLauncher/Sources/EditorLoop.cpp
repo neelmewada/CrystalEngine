@@ -100,18 +100,22 @@ void EditorLoop::LoadCoreModules()
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreMesh");
 	ModuleManager::Get().LoadModule("CoreShader");
-
-	ModuleManager::Get().LoadModule("CrystalWidgets");
 }
 
 void EditorLoop::LoadEngineModules()
 {
 	ModuleManager::Get().LoadModule("CoreRPI");
+	ModuleManager::Get().LoadModule("FusionCore");
+	ModuleManager::Get().LoadModule("Fusion");
+
 	ModuleManager::Get().LoadModule("System");
 }
 
 void EditorLoop::UnloadEngineModules()
 {
+	ModuleManager::Get().UnloadModule("Fusion");
+	ModuleManager::Get().UnloadModule("FusionCore");
+
 	ModuleManager::Get().UnloadModule("System");
 }
 
@@ -151,7 +155,6 @@ void EditorLoop::Init()
 
 void EditorLoop::PostInit()
 {
-	using namespace CE::Widgets;
 
 	LoadCoreModules();
 	LoadEngineModules();
@@ -168,6 +171,11 @@ void EditorLoop::PostInit()
 	RHI::gDynamicRHI->PostInitialize();
   
 	RPISystem::Get().Initialize();
+
+	FusionApplication* fApp = FusionApplication::Get();
+
+	FusionInitInfo initInfo = {};
+	fApp->Initialize(initInfo);
 
 	gEngine->Initialize();
 
@@ -186,18 +194,16 @@ void EditorLoop::PostInit()
 
 	RPISystem::Get().PostInitialize(rpiInitInfo);
 
-	CApplication::Get()->LoadGlobalStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/EditorStyle.css");
-
 	auto tickDelegate = MemberDelegate(&EditorLoop::AlternateTick, this);
 	this->tickDelegateHandle = tickDelegate.GetHandle();
 	app->AddTickHandler(tickDelegate);
 
-	if (!projectPath.Exists())
+	//if (!projectPath.Exists())
 	{
 		ProjectBrowser* projectBrowser = CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
 		projectBrowser->Show();
 	}
-	else
+	//else
 	{
 		//CrystalEditorWindow* editorWindow = CreateWindow<CrystalEditorWindow>("CrystalEditor", mainWindow);
 		//editorWindow->SetTitle("Crystal Editor");
@@ -224,8 +230,6 @@ void EditorLoop::AlternateTick()
 
 void EditorLoop::RunLoop()
 {
-	using namespace CE::Widgets;
-
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
@@ -262,6 +266,12 @@ void EditorLoop::PreShutdown()
 	}
 
 	gEngine->PreShutdown();
+
+	FusionApplication* fApp = FusionApplication::Get();
+
+	fApp->PreShutdown();
+	fApp->Shutdown();
+	delete fApp;
   
 	RPISystem::Get().Shutdown();
 
@@ -281,7 +291,8 @@ void EditorLoop::PreShutdown()
 	AppPreShutdown();
 
 	// Shutdown core widgets before RHI device
-	ModuleManager::Get().UnloadModule("CrystalWidgets");
+	ModuleManager::Get().UnloadModule("Fusion");
+	ModuleManager::Get().UnloadModule("FusionCore");
 
 	RHI::gDynamicRHI->Shutdown();
 

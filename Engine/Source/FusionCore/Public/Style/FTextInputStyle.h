@@ -27,7 +27,13 @@ namespace CE
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Color background;
+        FBrush background;
+
+        FIELD()
+        FBrush editingBackground;
+
+        FIELD()
+        FBrush hoverBackground;
 
         FIELD()
         Vec4 cornerRadius;

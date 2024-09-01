@@ -81,6 +81,8 @@ namespace CE
 
         Vec2 GetIntrinsicSize() const { return intrinsicSize; }
 
+        void QueueDestroy();
+
         void MarkLayoutDirty();
 
         //! @brief Mark the widget dirty for re-rendering

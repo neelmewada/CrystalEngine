@@ -29,4 +29,11 @@
 ///////////////////////////////////////////////////////
 /// Widgets
 
+#include "Widget/Style/EditorStyle.h"
+
+namespace CE::Editor
+{
+    
+} // namespace CE::Editor
+
 

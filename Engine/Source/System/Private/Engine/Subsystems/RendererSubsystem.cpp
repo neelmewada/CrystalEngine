@@ -87,21 +87,9 @@ namespace CE
 		{
 			PlatformApplication::Get()->AddMessageHandler(this);
 
-			auto assetManager = gEngine->GetAssetManager();
-			
-			/*CApplicationInitInfo appInitInfo{};
-			appInitInfo.draw2dShader = draw2dShaderCollection->At(0).shader;
-			appInitInfo.defaultFont = atlasData;
-			appInitInfo.defaultFontName = "Roboto";
-			appInitInfo.scheduler = GetScheduler();
-			appInitInfo.resourceLoader = this;
+			FusionInitInfo initInfo{};
 
-			CApplication::Get()->Initialize(appInitInfo);
-
-			CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());*/
-
-			// TODO: Implement editor window support later
-			//gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
+			FusionApplication::Get()->Initialize(initInfo);
 
 			//activeScene->mainRenderViewport = primaryViewport;
 		}
@@ -109,9 +97,11 @@ namespace CE
 
 	void RendererSubsystem::PreShutdown()
 	{
+		ZoneScoped;
+
 		Super::PreShutdown();
 
-		/*CApplication* app = CApplication::TryGet();
+		FusionApplication* app = FusionApplication::TryGet();
 
 		if (app)
 		{
@@ -119,7 +109,7 @@ namespace CE
 
 			app->Shutdown();
 			app->Destroy();
-		}*/
+		}
 
 		delete scheduler; scheduler = nullptr;
 	}
@@ -205,7 +195,7 @@ namespace CE
 
 		if (app)
 		{
-			app->SetDrawListMasks(drawListMask);
+			app->UpdateDrawListMask(drawListMask);
 		}
 
 		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
@@ -240,7 +230,7 @@ namespace CE
 
 		if (app)
 		{
-			app->FlushDrawPackets(drawList, curImageIndex);
+			app->EnqueueDrawPackets(drawList, curImageIndex);
 		}
 
 		if (isSceneWindowActive)
@@ -269,7 +259,7 @@ namespace CE
     
 		if (app) // CWidget Scopes & DrawLists
 		{
-			app->SubmitDrawPackets(drawList);
+			app->FlushDrawPackets(drawList, curImageIndex);
 		}
 
 		for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
@@ -324,6 +314,15 @@ namespace CE
     	
 		scheduler->BeginFrameGraph();
 		{
+			auto app = FusionApplication::TryGet();
+
+			if (app)
+			{
+				app->EmplaceFrameAttachments();
+
+				app->EnqueueScopes();
+			}
+
 			/*auto cApp = CApplication::TryGet();
 			
 			if (cApp)

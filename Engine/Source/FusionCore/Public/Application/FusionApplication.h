@@ -65,6 +65,12 @@ namespace CE
         void EmplaceFrameAttachments();
         void EnqueueScopes();
 
+        void UpdateDrawListMask(DrawListMask& drawListMask);
+
+        void EnqueueDrawPackets(DrawListContext& drawList, u32 imageIndex);
+
+        void FlushDrawPackets(DrawListContext& drawList, u32 imageIndex);
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;

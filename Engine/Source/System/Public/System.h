@@ -6,6 +6,7 @@
 #include "CoreShader.h"
 #include "CoreSettings.h"
 #include "FusionCore.h"
+#include "Fusion.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"

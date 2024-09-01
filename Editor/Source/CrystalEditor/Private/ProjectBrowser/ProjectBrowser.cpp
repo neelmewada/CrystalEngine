@@ -5,7 +5,7 @@ namespace CE::Editor
 
     ProjectBrowser::ProjectBrowser()
     {
-        title = "Crystal Project Browser";
+        
     }
 
     ProjectBrowser::~ProjectBrowser()
@@ -17,9 +17,7 @@ namespace CE::Editor
     {
 	    Super::Construct();
 
-        LoadStyleSheet(PlatformDirectories::GetLaunchDir() / "Editor/Styles/ProjectBrowserStyle.css");
-
-        tabWidget = CreateObject<CTabWidget>(this, "TabWidget");
+        
         
         ProjectManager* projectManager = ProjectManager::Get();
 
@@ -231,9 +229,9 @@ namespace CE::Editor
         ValidateInputFields(nullptr);
     }
 
-    void ProjectBrowser::ValidateInputFields(CTextInput*)
+    void ProjectBrowser::ValidateInputFields(FTextInput*)
     {
-        static const HashSet<Name> reservedNames = {
+        static const HashSet<CE::Name> reservedNames = {
             "Game", "Engine", "Editor", "Plugin"
         };
 

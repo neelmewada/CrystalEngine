@@ -14,11 +14,7 @@ namespace CE
 
 		CE::Scene* GetMainScene() { return mainScene; }
 
-		void RegisterViewport(CWindow* viewport, CE::Scene* scene);
-
-		void SetMainViewport(CWindow* viewport);
-
-		CWindow* GetMainViewport() const { return mainViewport; }
+		
 
 	protected:
 
@@ -35,12 +31,7 @@ namespace CE
 		CE::Scene* mainScene = nullptr;
 		
 		FIELD()
-		CWindow* mainViewport = nullptr;
-
-		FIELD()
 		Array<CE::Scene*> otherScenes{};
-
-		HashMap<CWindow*, CE::Scene*> scenesByViewport{};
 
     private:
 

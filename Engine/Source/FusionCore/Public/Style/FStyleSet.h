@@ -12,6 +12,8 @@ namespace CE
 
         void Add(const Name& styleName, FStyle* style);
 
+        void Add(FStyle* style);
+
         void Remove(const Name& styleName);
 
         FStyle* FindStyle(const Name& styleName);

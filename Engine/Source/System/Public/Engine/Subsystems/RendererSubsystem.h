@@ -70,7 +70,7 @@ namespace CE
 		//CWindow* gameWindow = nullptr;
 
 		//! @brief The viewport used to render the main scene to
-		CWindow* primaryViewport = nullptr;
+		
 
 		// - Frame Graph -
 

@@ -38,7 +38,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreMedia
             CE::CoreRHI
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
-            CE::CrystalWidgets
+            CE::FusionCore
             CE::System
     RUNTIME_DEPENDENCIES
         

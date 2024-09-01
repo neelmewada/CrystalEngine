@@ -208,7 +208,7 @@ TEST(FusionCore, Rendering)
 			auto primaryTextInput = CreateObject<FTextInputPlainStyle>(rootStyle, "PrimaryTextInput");
 			rootStyle->Add("TextInput.Primary", primaryTextInput);
 
-			primaryTextInput->background = primaryTextInput->hoverBackground = primaryTextInput->editingBackground = Color::RGBA(15, 15, 15);
+			primaryTextInput->background = Color::RGBA(15, 15, 15);
 			primaryTextInput->borderColor = Color::RGBA(60, 60, 60);
 			primaryTextInput->editingBorderColor = Color::RGBA(0, 112, 224);
 			primaryTextInput->hoverBorderColor = Color::RGBA(74, 74, 74);
