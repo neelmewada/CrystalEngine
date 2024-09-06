@@ -6,6 +6,7 @@
 #include "CoreApplication.h"
 #include "EditorCore.h"
 #include "FusionCore.h"
+#include "Fusion.h"
 #include "EditorSystem.h"
 
 // Project Browser

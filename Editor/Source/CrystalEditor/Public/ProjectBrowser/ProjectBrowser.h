@@ -4,9 +4,9 @@ namespace CE::Editor
 {
 
     CLASS(Prefs = Editor)
-    class CRYSTALEDITOR_API ProjectBrowser : public FWindow
+    class CRYSTALEDITOR_API ProjectBrowser : public FToolWindow
     {
-        CE_CLASS(ProjectBrowser, FWindow)
+        CE_CLASS(ProjectBrowser, FToolWindow)
     public:
 
         ProjectBrowser();

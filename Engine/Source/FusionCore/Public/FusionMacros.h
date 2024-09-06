@@ -86,6 +86,14 @@
 	}\
 	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
+#define FUSION_PROPERTY_WRAPPER2(PropertyName, WrappingVariable, WrappedPropertyName)\
+	Self& WrappedPropertyName(const __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)& value) {\
+		if (WrappingVariable == nullptr) return *this;\
+		WrappingVariable->PropertyName(value);\
+		return *this;\
+	}\
+	auto WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
+
 #define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	Self& Bind_##PropertyName(const CE::PropertyBindingRequest<__WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)>& request) {\

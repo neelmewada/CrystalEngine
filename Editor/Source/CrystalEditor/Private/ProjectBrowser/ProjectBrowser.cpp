@@ -16,8 +16,6 @@ namespace CE::Editor
     void ProjectBrowser::Construct()
     {
 	    Super::Construct();
-
-        
         
         ProjectManager* projectManager = ProjectManager::Get();
 
