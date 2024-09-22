@@ -25,18 +25,18 @@ add_library(${TARGET_WITH_NAMESPACE} STATIC IMPORTED GLOBAL)
 add_library(assimp_zlib STATIC IMPORTED GLOBAL)
 
 if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
-    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEBUG   ${${PACKAGE_NAME}_LIBS_DIR}/Debug/${LIB_NAME}.a)
-    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEV     ${${PACKAGE_NAME}_LIBS_DIR}/Development/${LIB_NAME}.a)
-    set(${PACKAGE_NAME}_STATIC_LIBRARY_RELEASE ${${PACKAGE_NAME}_LIBS_DIR}/Release/${LIB_NAME}.a)
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEBUG   ${${PACKAGE_NAME}_LIBS_DIR}/Debug/libassimpd.a)
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEV     ${${PACKAGE_NAME}_LIBS_DIR}/Debug/libassimpd.a)
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_RELEASE ${${PACKAGE_NAME}_LIBS_DIR}/Release/libassimp.a)
 
     set_target_properties(assimp_zlib 
         PROPERTIES 
-            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/libzstatic$<$<CONFIG:Debug>:d>.a"
+            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development>,Debug,$<CONFIG>>/libassimp$<$<CONFIG:Debug>:d>.a"
     )
 
     set_target_properties(${TARGET_WITH_NAMESPACE}
         PROPERTIES
-            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${PACKAGE_NAME}.a"
+            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development>,Debug,$<CONFIG>>/libassimp$<$<CONFIG:Debug>:d>.a"
     )
 
     target_link_libraries(${TARGET_WITH_NAMESPACE}

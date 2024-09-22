@@ -121,7 +121,7 @@ namespace CE
 		{
 			if (!isBound)
 				return {};
-			return Invoke(Array<Variant>{ args... }).GetValue<TRetType>();
+            return Invoke(Array<Variant>{ args... }).template GetValue<TRetType>();
 		}
 	}
 

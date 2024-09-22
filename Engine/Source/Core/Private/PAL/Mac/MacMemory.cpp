@@ -16,6 +16,19 @@ namespace CE
     {
         free(block);
     }
+
+    void* MacMemory::AlignedRealloc(void* block, SIZE_T size, SIZE_T alignment)
+    {
+        void* newBlock = aligned_alloc(alignment, size);
+        memcpy(newBlock, block, size);
+        AlignedFree(block);
+        return newBlock;
+    }
+
+    SIZE_T MacMemory::GetAlignedBlockSize(void* block, SIZE_T alignment, SIZE_T offset)
+    {
+        return 0;
+    }
     
 }
 

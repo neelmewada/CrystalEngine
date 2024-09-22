@@ -5,7 +5,7 @@
 		std::remove_cvref_t<decltype(*objectPtr)>::Type()\
 			->FindFunction<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ReturnType, \
 				TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*objectPtr)>::functionName)>::ClassType,\
-				__VA_ARGS__>(#functionName,\
+                ##__VA_ARGS__>(#functionName,\
 					&std::remove_cvref_t<decltype(*objectPtr)>::functionName))
 
 #define DECLARE_SCRIPT_EVENT(EventName, ...) \
@@ -373,7 +373,7 @@ namespace CE
             invocationList.EmplaceBack(lambda);
         }
 
-        template<typename TLambda> requires !TIsSameType<TLambda, DelegateType>::Value
+        template<typename TLambda> requires (!TIsSameType<TLambda, DelegateType>::Value)
         DelegateHandle Bind(const TLambda& lambda)
         {
             return BindInternal(lambda, std::make_index_sequence<sizeof...(TArgs)>());
