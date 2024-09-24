@@ -19,6 +19,8 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
+        
+
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
         recentsTab->SetTitle("Recent Projects");
 	    {

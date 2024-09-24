@@ -15,6 +15,7 @@ namespace CE
         virtual ~FStyleManager();
 
         void RegisterStyleSet(const Name& name, FStyleSet* styleSet);
+        void RegisterStyleSet(FStyleSet* styleSet);
         void DeregisterStyleSet(const Name& name);
 
     protected:

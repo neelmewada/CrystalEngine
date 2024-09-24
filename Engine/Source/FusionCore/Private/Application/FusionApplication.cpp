@@ -88,8 +88,6 @@ namespace CE
             destructionQueue[i].object->Destroy();
             destructionQueue.RemoveAt(i);
         }
-
-        rootContext->Destroy();
     }
 
     void FusionApplication::Shutdown()

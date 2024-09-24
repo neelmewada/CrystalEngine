@@ -15,7 +15,18 @@ namespace CE
 
     void FStyleManager::RegisterStyleSet(const Name& name, FStyleSet* styleSet)
     {
-        registeredStyleSets.Add(name, styleSet);
+        if (styleSet && name.IsValid())
+        {
+	        registeredStyleSets.Add(name, styleSet);
+        }
+    }
+
+    void FStyleManager::RegisterStyleSet(FStyleSet* styleSet)
+    {
+        if (styleSet)
+        {
+	        RegisterStyleSet(styleSet->GetName(), styleSet);
+        }
     }
 
     void FStyleManager::DeregisterStyleSet(const Name& name)

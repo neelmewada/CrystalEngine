@@ -177,6 +177,8 @@ void EditorLoop::PostInit()
 	FusionInitInfo initInfo = {};
 	fApp->Initialize(initInfo);
 
+	auto rootContext = fApp->GetRootContext();
+
 	gEngine->Initialize();
 
 	gEngine->PostInitialize();
@@ -200,8 +202,15 @@ void EditorLoop::PostInit()
 
 	//if (!projectPath.Exists())
 	{
-		ProjectBrowser* projectBrowser = CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
-		projectBrowser->Show();
+		FNativeContext* projectBrowserContext = FNativeContext::Create(mainWindow, "Project Browser", rootContext);
+		rootContext->AddChildContext(projectBrowserContext);
+
+		ProjectBrowser* projectBrowser = nullptr;//CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
+
+		FAssignNewOwned(ProjectBrowser, projectBrowser, projectBrowserContext);
+		projectBrowserContext->SetOwningWidget(projectBrowser);
+
+		//projectBrowser->Show();
 	}
 	//else
 	{

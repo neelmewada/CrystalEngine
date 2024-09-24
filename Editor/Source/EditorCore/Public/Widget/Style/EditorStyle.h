@@ -13,6 +13,8 @@ namespace CE::Editor
 
 		void Initialize();
 
+		
+
 		FIELD()
 		FCustomButtonStyle* button = nullptr;
 

@@ -3,6 +3,8 @@
 
 namespace CE::Editor
 {
+    EditorStyle* gEditorStyle = nullptr;
+
 
     class EditorCoreModule : public Module
     {
@@ -18,16 +20,22 @@ namespace CE::Editor
 
                 FRootContext* rootContext = app->GetRootContext();
 
-                FStyleSet* rootStyle = CreateObject<FStyleSet>(rootContext, "RootStyleSet");
-                styleManager->RegisterStyleSet(rootStyle->GetName(), rootStyle);
-                rootContext->SetDefaultStyleSet(rootStyle);
+                gEditorStyle = CreateObject<EditorStyle>(nullptr, "RootEditorStyle");
+                styleManager->RegisterStyleSet(gEditorStyle->GetName(), gEditorStyle);
+                rootContext->SetDefaultStyleSet(gEditorStyle);
 
-
+                gEditorStyle->Initialize();
             }
         }
 
         void ShutdownModule() override
         {
+            if (gEditorStyle)
+            {
+                gEditorStyle->Destroy();
+                gEditorStyle = nullptr;
+            }
+
 			if (ProjectManager::TryGet())
 			{
                 ProjectManager::TryGet()->Destroy();
