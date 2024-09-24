@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    using namespace CE::RHI;
+    using namespace CE::RPI;
+
     static FusionApplication* gInstance = nullptr;
 
     extern RawData GetFusionShaderVert();
@@ -65,7 +68,7 @@ namespace CE
     {
         PlatformApplication::Get()->RemoveMessageHandler(this);
 
-        FrameScheduler* scheduler = FrameScheduler::Get();
+        RHI::FrameScheduler* scheduler = RHI::FrameScheduler::Get();
 
         // Pre-shutdown and cleanup resources before engine assets are unloaded
 

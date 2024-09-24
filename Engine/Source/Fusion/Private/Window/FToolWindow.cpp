@@ -26,7 +26,7 @@ namespace CE
                 (
                     // - Title Bar Begin -
 
-                    FNew(FTitleBar)
+                    FAssignNew(FTitleBar, titleBar)
                     .Background(Color::RGBA(26, 26, 26))
                     .Height(40)
                     .HAlign(HAlign::Fill)
@@ -129,7 +129,8 @@ namespace CE
 
                     // - Body Begin -
 
-                    FAssignNew(FVerticalStack, content)
+                    FAssignNew(FStackBox, content)
+                    .Direction(FStackBoxDirection::Vertical)
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
 

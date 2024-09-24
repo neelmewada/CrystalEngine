@@ -92,10 +92,10 @@ namespace CE::Vulkan
         virtual void DestroyFence(RHI::Fence* fence) override;
 
         virtual RHI::CommandList* AllocateCommandList(RHI::CommandQueue* associatedQueue,
-            CommandListType commandListType = CommandListType::Direct) override;
+                                                      RHI::CommandListType commandListType = RHI::CommandListType::Direct) override;
 
         virtual Array<RHI::CommandList*> AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue,
-            CommandListType commandListType = CommandListType::Direct) override;
+                                                              RHI::CommandListType commandListType = RHI::CommandListType::Direct) override;
 
         virtual void FreeCommandLists(u32 count, RHI::CommandList** commandLists) override;
 
@@ -126,7 +126,7 @@ namespace CE::Vulkan
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
 
-        virtual RHI::TextureView* CreateTextureView(const TextureViewDescriptor& desc) override;
+        virtual RHI::TextureView* CreateTextureView(const RHI::TextureViewDescriptor& desc) override;
         virtual void DestroyTextureView(RHI::TextureView* textureView) override;
         
         virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) override;

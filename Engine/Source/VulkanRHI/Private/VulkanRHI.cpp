@@ -83,25 +83,25 @@ namespace CE::Vulkan
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
 			if (gVulkanRHI != nullptr)
-				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Error, pCallbackData->pMessage);
+				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Error, pCallbackData->pMessage);
             CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
 			if (gVulkanRHI != nullptr)
-				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Info, pCallbackData->pMessage);
+				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Info, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Info: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
         {
 			if (gVulkanRHI != nullptr)
-				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Verbose, pCallbackData->pMessage);
+				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Verbose, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
 			if (gVulkanRHI != nullptr)
-				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Warning, pCallbackData->pMessage);
+				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Warning, pCallbackData->pMessage);
             CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
@@ -324,7 +324,7 @@ namespace CE::Vulkan
 
     // - Command List -
 
-    RHI::CommandList* VulkanRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType)
+    RHI::CommandList* VulkanRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, RHI::CommandListType commandListType)
     {
         if (associatedQueue == nullptr)
             return nullptr;
@@ -335,7 +335,7 @@ namespace CE::Vulkan
         return new Vulkan::CommandList(device, outCmdBuffer, commandListType, vulkanQueue->GetFamilyIndex(), cmdPool);
     }
 
-    Array<RHI::CommandList*> VulkanRHI::AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, CommandListType commandListType)
+    Array<RHI::CommandList*> VulkanRHI::AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, RHI::CommandListType commandListType)
     {
         if (associatedQueue == nullptr)
             return {};
@@ -425,7 +425,7 @@ namespace CE::Vulkan
 		delete swapChain;
 	}
 
-	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const MemoryHeapDescriptor& desc)
+	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc)
 	{
 		return new MemoryHeap(device, desc);
 	}
@@ -440,7 +440,7 @@ namespace CE::Vulkan
         return new Buffer(device, bufferDesc);
     }
 
-	RHI::Buffer* VulkanRHI::CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc)
+	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
 	{
 		return new Buffer(device, bufferDesc, memoryDesc);
 	}
@@ -450,7 +450,7 @@ namespace CE::Vulkan
         delete buffer;
     }
 
-    RHI::TextureView* VulkanRHI::CreateTextureView(const TextureViewDescriptor& desc)
+    RHI::TextureView* VulkanRHI::CreateTextureView(const RHI::TextureViewDescriptor& desc)
     {
         return new Vulkan::TextureView(device, desc);
     }
@@ -465,7 +465,7 @@ namespace CE::Vulkan
         return new Texture(device, textureDesc);
     }
 
-	RHI::Texture* VulkanRHI::CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc)
+	RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
 	{
 		return new Texture(device, textureDesc, memoryDesc);
 	}
@@ -536,17 +536,17 @@ namespace CE::Vulkan
 
         switch (member.dataType)
         {
-        case ShaderStructMemberType::UInt:
-        case ShaderStructMemberType::Int:
-        case ShaderStructMemberType::Float:
+        case RHI::ShaderStructMemberType::UInt:
+        case RHI::ShaderStructMemberType::Int:
+        case RHI::ShaderStructMemberType::Float:
             return sizeof(u32); // 4 byte
-        case ShaderStructMemberType::Float2:
+        case RHI::ShaderStructMemberType::Float2:
             return sizeof(f32) * 2; // 8 bytes
-        case ShaderStructMemberType::Float3:
-        case ShaderStructMemberType::Float4:
-        case ShaderStructMemberType::Float4x4:
+        case RHI::ShaderStructMemberType::Float3:
+        case RHI::ShaderStructMemberType::Float4:
+        case RHI::ShaderStructMemberType::Float4x4:
             return sizeof(f32) * 4; // 16 bytes
-        case ShaderStructMemberType::Struct:
+        case RHI::ShaderStructMemberType::Struct:
             alignment = 0;
             for (const auto& nestedMember : member.nestedMembers)
             {
@@ -609,12 +609,12 @@ namespace CE::Vulkan
         }
     }
 
-    ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
+    RHI::ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
     {
         if (count == 0)
             return {};
         
-        ResourceMemoryRequirements result{};
+        RHI::ResourceMemoryRequirements result{};
         u64 offset = 0;
         result.flags = requirementsList[0].flags;
         result.size = requirementsList[0].size;

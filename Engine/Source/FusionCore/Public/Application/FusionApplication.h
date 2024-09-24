@@ -65,11 +65,11 @@ namespace CE
         void EmplaceFrameAttachments();
         void EnqueueScopes();
 
-        void UpdateDrawListMask(DrawListMask& drawListMask);
+        void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
-        void EnqueueDrawPackets(DrawListContext& drawList, u32 imageIndex);
+        void EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
-        void FlushDrawPackets(DrawListContext& drawList, u32 imageIndex);
+        void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
     protected:
 

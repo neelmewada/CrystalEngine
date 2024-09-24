@@ -19,8 +19,21 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
-        
+        Content(
+            FNew(FTabView)
+            .FillRatio(1.0f)
+            .Margin(Vec4(0, 5, 0, 0))
+            .As<FTabView>()
+            .TabItems(
+                FNew(FLabelTabItem)
+                .Text("Recent Projects"),
 
+                FNew(FLabelTabItem)
+                .Text("New Project")
+            )
+        );
+
+        /*
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
         recentsTab->SetTitle("Recent Projects");
 	    {
@@ -227,6 +240,7 @@ namespace CE::Editor
         }
 
         ValidateInputFields(nullptr);
+		*/
     }
 
     void ProjectBrowser::ValidateInputFields(FTextInput*)
@@ -235,7 +249,7 @@ namespace CE::Editor
             "Game", "Engine", "Editor", "Plugin"
         };
 
-        if (tabWidget->GetActiveTabIndex() == 0)
+        /*if (tabWidget->GetActiveTabIndex() == 0)
         {
             defer(
                 openButton->SetInteractable(isValidInput);
@@ -298,7 +312,7 @@ namespace CE::Editor
             }
             
             isValidInput = true;
-        }
+        }*/
     }
 
     void ProjectBrowser::OnProjectTemplateSelectionChanged()
@@ -308,16 +322,16 @@ namespace CE::Editor
 
     void ProjectBrowser::OnRecentProjectSelectionChanged()
     {
-        const auto& selection = recentsList->GetSelection();
-        if (selection.IsEmpty())
-            return;
+        //const auto& selection = recentsList->GetSelection();
+        //if (selection.IsEmpty())
+        //    return;
 
 
     }
 
     void ProjectBrowser::CreateProject()
     {
-        ValidateInputFields(newProjectLocation);
+        /*ValidateInputFields(newProjectLocation);
 
         if (isValidInput)
         {
@@ -337,12 +351,12 @@ namespace CE::Editor
         else
         {
             createButton->SetInteractable(false);
-        }
+        }*/
     }
 
     void ProjectBrowser::OpenProject()
     {
-        ValidateInputFields(openProjectLocation);
+        /*ValidateInputFields(openProjectLocation);
 
         if (isValidInput)
         {
@@ -359,7 +373,7 @@ namespace CE::Editor
         else
         {
             openButton->SetInteractable(false);
-        }
+        }*/
     }
 
 } // namespace CE::Editor

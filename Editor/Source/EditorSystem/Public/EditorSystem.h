@@ -11,38 +11,14 @@
 
 /////////////////////////////////////////////
 
-#include "Editor/Widgets/EditorViewport.h"
-#include "Editor/Widgets/EditorSplitterContainer.h"
-#include "Editor/Widgets/EditorSplitter.h"
-
-#include "Editor/Widgets/Input/NumericFieldInput.h"
-#include "Editor/Widgets/Input/ColorComponentInput.h"
-
-#include "Editor/Tools/ColorPicker/ColorPickerGradient.h"
-#include "Editor/Tools/ColorPicker/ColorPickerPreview.h"
-#include "Editor/Tools/ColorPicker/ColorPickerTool.h"
-
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 
-/////////////////////////////////////////////
-
-#include "ObjectEditor/Widgets/FieldEditor.h"
-#include "ObjectEditor/Widgets/VectorFieldEditor.h"
-#include "ObjectEditor/Widgets/NumberFieldEditor.h"
-#include "ObjectEditor/Widgets/ColorInput.h"
-#include "ObjectEditor/Widgets/ColorFieldEditor.h"
-#include "ObjectEditor/Widgets/EnumFieldEditor.h"
-
-#include "ObjectEditor/Widgets/PropertyEditorRow.h"
-#include "ObjectEditor/Widgets/PropertyEditorSection.h"
-#include "ObjectEditor/PropertyDrawer.h"
-
-#include "ObjectEditor/ObjectEditor.h"
 
 namespace CE::Editor
 {
 	extern EDITORSYSTEM_API EditorEngine* gEditor;
 
 	EDITORSYSTEM_API AssetDefinitionRegistry* GetAssetDefinitionRegistry();
+
 }

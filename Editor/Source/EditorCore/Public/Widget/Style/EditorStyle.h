@@ -11,9 +11,7 @@ namespace CE::Editor
 
 		EditorStyle();
 
-		void Initialize();
-
-		
+		void InitializeDefault();
 
 		FIELD()
 		FCustomButtonStyle* button = nullptr;
@@ -53,6 +51,9 @@ namespace CE::Editor
 
 		FIELD()
 		Color scrollBarHoverColor = Color::RGBA(255, 255, 255, 140);
+
+		FIELD()
+		FToolWindowStyle* toolWindow = nullptr;
 
 	};
 

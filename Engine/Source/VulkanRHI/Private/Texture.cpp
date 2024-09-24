@@ -196,7 +196,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-    void VulkanRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& desc, ResourceMemoryRequirements& outRequirements)
+    void VulkanRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& desc, RHI::ResourceMemoryRequirements& outRequirements)
     {
         VkImageCreateInfo imageCI{};
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

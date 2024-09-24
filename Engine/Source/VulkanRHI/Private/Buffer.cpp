@@ -33,7 +33,7 @@ namespace CE::Vulkan
 		return bufferUsageFlags;
 	}
 
-	void VulkanRHI::GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements)
+	void VulkanRHI::GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements)
 	{
 		VkBuffer tempBuffer = nullptr;
 		VkBufferCreateInfo tempBufferCI{};

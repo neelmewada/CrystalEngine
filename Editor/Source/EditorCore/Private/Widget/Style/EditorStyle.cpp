@@ -8,7 +8,7 @@ namespace CE::Editor
 	    
     }
 
-    void EditorStyle::Initialize()
+    void EditorStyle::InitializeDefault()
     {
         if (!button)
         {
@@ -166,6 +166,14 @@ namespace CE::Editor
 		GetDefaultWidget<FMenuBar>()
 			.Style(this, menuBar->GetName());
 
+		if (!toolWindow)
+		{
+			toolWindow = CreateObject<FToolWindowStyle>(this, "ToolWindowStyle");
+			Add(toolWindow);
+		}
+
+		GetDefaultWidget<FToolWindow>()
+			.Style(this, toolWindow->GetName());
     }
 
 } // namespace CE::Editor

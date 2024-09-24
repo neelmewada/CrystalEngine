@@ -13,23 +13,23 @@ namespace CE
 
 		RendererSubsystem();
 
-		FrameScheduler* GetScheduler() const { return scheduler; }
+		RHI::FrameScheduler* GetScheduler() const { return scheduler; }
     
 		FUNCTION()
 		void RebuildFrameGraph();
 
 		f32 GetTickPriority() const override;
 
-		void RegisterFeatureProcessor(SubClass<ActorComponent> componentClass, SubClass<FeatureProcessor> fpClass);
+		void RegisterFeatureProcessor(SubClass<ActorComponent> componentClass, SubClass<RPI::FeatureProcessor> fpClass);
 
 		template<typename TActorComponent, typename TFeatureProcessor>
-			requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value and TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
+			requires TIsBaseClassOf<ActorComponent, TActorComponent>::Value and TIsBaseClassOf<RPI::FeatureProcessor, TFeatureProcessor>::Value
 		void RegisterFeatureProcessor()
 		{
 			RegisterFeatureProcessor(TActorComponent::StaticType(), TFeatureProcessor::StaticType());
 		}
 
-		SubClass<FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
+		SubClass<RPI::FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
 
 	protected:
 
@@ -63,7 +63,7 @@ namespace CE
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
 
-		HashMap<ClassType*, SubClass<FeatureProcessor>> componentClassToFeatureProcessorClass{};
+		HashMap<ClassType*, SubClass<RPI::FeatureProcessor>> componentClassToFeatureProcessorClass{};
 		
 		u32 curImageIndex = 0;
 

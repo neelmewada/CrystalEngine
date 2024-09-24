@@ -69,14 +69,14 @@ namespace CE
 
 		// - Feature Processors -
 
-		RegisterFeatureProcessor<StaticMeshComponent, StaticMeshFeatureProcessor>();
+		RegisterFeatureProcessor<StaticMeshComponent, RPI::StaticMeshFeatureProcessor>();
 
 		// - Scheduler -
 
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
 
-		scheduler = FrameScheduler::Create(desc);
+		scheduler = RHI::FrameScheduler::Create(desc);
 
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
@@ -179,8 +179,8 @@ namespace CE
 
 		if (submittedImageIndex != curImageIndex)
 		{
-			RPISystem::Get().SimulationTick(curImageIndex);
-			RPISystem::Get().RenderTick(curImageIndex);
+			RPI::RPISystem::Get().SimulationTick(curImageIndex);
+			RPI::RPISystem::Get().RenderTick(curImageIndex);
 		}
 
 		// ---------------------------------------------------------
@@ -204,7 +204,7 @@ namespace CE
 			if (!renderPipeline)
 				continue;
 
-			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+			renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
 				{
 					if (!pass)
 						return;
@@ -237,13 +237,13 @@ namespace CE
 	    {
 		    for (const auto& [viewTag, views] : rpiScene->GetViews())
 		    {
-		    	for (View* view : views.views)
+		    	for (RPI::View* view : views.views)
 		    	{
 		    		view->GetDrawListContext()->Finalize();
 
 		    		for (const auto& drawListTag : drawListTags)
 		    		{
-		    			DrawList& viewDrawList = view->GetDrawList(drawListTag);
+					    RHI::DrawList& viewDrawList = view->GetDrawList(drawListTag);
 		    			for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
 		    			{
 		    				drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
@@ -268,14 +268,14 @@ namespace CE
 			if (!renderPipeline)
 				continue;
 
-			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
+			renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
 				{
 					if (!pass)
 						return;
 
-					SceneViewTag viewTag = pass->GetViewTag();
-					DrawListTag passDrawTag = pass->GetDrawListTag();
-					ScopeId scopeId = pass->GetScopeId();
+					RPI::SceneViewTag viewTag = pass->GetViewTag();
+					RHI::DrawListTag passDrawTag = pass->GetDrawListTag();
+					RHI::ScopeId scopeId = pass->GetScopeId();
 
 					if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 					{
@@ -307,10 +307,10 @@ namespace CE
 		}*/
 
 		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
-		RPISystem::Get().SimulationTick(curImageIndex);
-		RPISystem::Get().RenderTick(curImageIndex);
+		RPI::RPISystem::Get().SimulationTick(curImageIndex);
+		RPI::RPISystem::Get().RenderTick(curImageIndex);
 
-		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+		RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
     	
 		scheduler->BeginFrameGraph();
 		{
@@ -431,7 +431,7 @@ namespace CE
 	}
 
 	void RendererSubsystem::RegisterFeatureProcessor(SubClass<ActorComponent> componentClass,
-		SubClass<FeatureProcessor> fpClass)
+		SubClass<RPI::FeatureProcessor> fpClass)
 	{
 		if (componentClass == nullptr || fpClass == nullptr)
 			return;
@@ -439,7 +439,7 @@ namespace CE
 		componentClassToFeatureProcessorClass[componentClass] = fpClass;
 	}
 
-	SubClass<FeatureProcessor> RendererSubsystem::GetFeatureProcessClass(SubClass<ActorComponent> componentClass)
+	SubClass<RPI::FeatureProcessor> RendererSubsystem::GetFeatureProcessClass(SubClass<ActorComponent> componentClass)
 	{
 		if (componentClass == nullptr)
 			return nullptr;

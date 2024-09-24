@@ -34,7 +34,7 @@ namespace CE::Editor
 
         Array<IO::Path> recentProjectPaths{};
 
-        CWidget* newErrorBox = nullptr;
+        /*CWidget* newErrorBox = nullptr;
         CLabel* newErrorLabel = nullptr;
 
         CWidget* openErrorBox = nullptr;
@@ -49,7 +49,7 @@ namespace CE::Editor
         CTextInput* openProjectLocation = nullptr;
 
         CTextInput* newProjectLocation = nullptr;
-        CTextInput* newProjectName = nullptr;
+        CTextInput* newProjectName = nullptr;*/
 
         bool isValidInput = true;
 

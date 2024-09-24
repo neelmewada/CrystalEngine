@@ -169,8 +169,8 @@ void EditorLoop::PostInit()
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
-  
-	RPISystem::Get().Initialize();
+
+	RPI::RPISystem::Get().Initialize();
 
 	FusionApplication* fApp = FusionApplication::Get();
 
@@ -194,7 +194,7 @@ void EditorLoop::PostInit()
 	rpiInitInfo.iblConvolutionShader = iblConvolutionShader->GetShaderCollection();
 	rpiInitInfo.textureGenShader = textureGenShader->GetShaderCollection();
 
-	RPISystem::Get().PostInitialize(rpiInitInfo);
+	RPI::RPISystem::Get().PostInitialize(rpiInitInfo);
 
 	auto tickDelegate = MemberDelegate(&EditorLoop::AlternateTick, this);
 	this->tickDelegateHandle = tickDelegate.GetHandle();
@@ -210,7 +210,7 @@ void EditorLoop::PostInit()
 		FAssignNewOwned(ProjectBrowser, projectBrowser, projectBrowserContext);
 		projectBrowserContext->SetOwningWidget(projectBrowser);
 
-		//projectBrowser->Show();
+		mainWindow->Show();
 	}
 	//else
 	{
@@ -280,11 +280,11 @@ void EditorLoop::PreShutdown()
 
 	fApp->PreShutdown();
 	fApp->Shutdown();
-	delete fApp;
+	fApp->Destroy();
   
-	RPISystem::Get().Shutdown();
+	RPI::RPISystem::Get().Shutdown();
 
-	gDynamicRHI->PreShutdown();
+	RHI::gDynamicRHI->PreShutdown();
 
 	InputManager::Get().Shutdown(app);
 	app->PreShutdown();

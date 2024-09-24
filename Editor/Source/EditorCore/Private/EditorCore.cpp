@@ -21,10 +21,10 @@ namespace CE::Editor
                 FRootContext* rootContext = app->GetRootContext();
 
                 gEditorStyle = CreateObject<EditorStyle>(nullptr, "RootEditorStyle");
+                gEditorStyle->InitializeDefault();
+
                 styleManager->RegisterStyleSet(gEditorStyle->GetName(), gEditorStyle);
                 rootContext->SetDefaultStyleSet(gEditorStyle);
-
-                gEditorStyle->Initialize();
             }
         }
 
