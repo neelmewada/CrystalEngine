@@ -58,7 +58,7 @@ namespace CE
 
 		attachmentId = String::Format("Window_{}", windowId);
 
-		drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(attachmentId);
+		drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(attachmentId);
 
 		platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowDragHitTest, this));
 
@@ -101,7 +101,7 @@ namespace CE
 
 		if (drawListTag.IsValid())
 		{
-			RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+			RPI::RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
 		}
 
 		drawListTag = 0;
@@ -495,7 +495,7 @@ namespace CE
 
 		while (hitWidget != nullptr && !hitWidget->SupportsMouseEvents())
 		{
-			if (hitWidget->IsOfType<FTitleBar>())
+			if (hitWidget->IsOfType<FTitleBar>() || hitWidget->WindowDragHitTest())
 			{
 				return true;
 			}

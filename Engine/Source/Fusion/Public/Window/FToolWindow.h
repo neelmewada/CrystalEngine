@@ -10,6 +10,8 @@ namespace CE
 
         FToolWindow();
 
+        FStackBox* GetContentBox() const { return content; }
+
     protected:
 
         void Construct() override;
@@ -27,7 +29,10 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(BorderWidth, borderWidget);
         FUSION_PROPERTY_WRAPPER(BorderColor, borderWidget);
         FUSION_PROPERTY_WRAPPER2(Background, titleBar, TitleBarBackground);
+
         FUSION_PROPERTY_WRAPPER2(Padding, content, ContentPadding);
+        FUSION_PROPERTY_WRAPPER2(FillRatio, content, ContentFillRatio);
+
         FUSION_PROPERTY_WRAPPER2(Text, titleBarLabel, Title);
 
         FStackBoxDirection ContentDirection()

@@ -42,6 +42,10 @@ namespace CE
 
         FStyledWidget* GetContainer() const { return container; }
 
+        FStackBox* GetTabWell() const { return tabWell; }
+
+        bool HasContainer() const { return container != nullptr; }
+
     public: // - Fusion Properties - 
 
         template <typename... TArgs> requires TValidate_Children<TArgs...>::Value
@@ -71,6 +75,21 @@ namespace CE
         Array<FTabItem*> tabItems;
 
         int activeTabIndex = 0;
+
+    public:
+
+        FUSION_PROPERTY_WRAPPER2(Background, container, ContainerBackground);
+        FUSION_PROPERTY_WRAPPER2(BorderColor, container, ContainerBorderColor);
+        FUSION_PROPERTY_WRAPPER2(BorderWidth, container, ContainerBorderWidth);
+
+        FUSION_PROPERTY_WRAPPER2(FillRatio, container, ContainerFillRatio);
+
+        Self& ContainerBorder(const Color& borderColor, f32 borderWidth = 1.0f)
+        {
+            return (*this)
+        		.ContainerBorderColor(borderColor)
+        		.ContainerBorderWidth(borderWidth);
+        }
 
         FUSION_WIDGET;
     };

@@ -6,8 +6,6 @@ namespace CE
     FTabViewStyle::FTabViewStyle()
     {
         tabItemShape = FRoundedRectangle(5, 5, 0, 0);
-
-        tabItemPadding = Vec4(1, 1, 1, 1) * 5;
     }
 
     FTabViewStyle::~FTabViewStyle()
@@ -38,16 +36,16 @@ namespace CE
             tabItem
                 .Background(bg)
                 .BackgroundShape(tabItemShape)
-                .Padding(tabItemPadding)
         	;
         }
 
-        FStyledWidget* container = tabView.GetContainer();
-
-        if (container)
+        if (tabView.HasContainer())
         {
-            
+            tabView
+                .ContainerBackground(containerBackground)
+                .ContainerBorder(containerBorderColor, containerBorderWidth);
         }
+
     }
 
 } // namespace CE

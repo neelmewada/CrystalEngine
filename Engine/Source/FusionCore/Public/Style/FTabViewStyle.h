@@ -27,10 +27,16 @@ namespace CE
         FBrush tabItemHoverBackground;
 
         FIELD()
-        Vec4 tabItemPadding;
+        FShape tabItemShape;
 
         FIELD()
-        FShape tabItemShape;
+        FBrush containerBackground;
+
+        FIELD()
+        Color containerBorderColor;
+
+        FIELD()
+        f32 containerBorderWidth = 0.0f;
 
     };
     

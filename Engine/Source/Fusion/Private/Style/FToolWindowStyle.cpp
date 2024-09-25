@@ -44,7 +44,6 @@ namespace CE
 			.Background(background)
 			.BorderColor(borderColor)
 			.BorderWidth(borderWidth)
-			.ContentPadding(contentPadding)
 			.Padding(newPadding)
 		;
 	}

@@ -18,6 +18,8 @@ namespace CE::Editor
 
 		void InitializeDefault();
 
+		void InitProjectBrowserStyle();
+
 	public:
 
 		FIELD()
@@ -61,6 +63,14 @@ namespace CE::Editor
 
 		FIELD()
 		FToolWindowStyle* toolWindow = nullptr;
+
+		FIELD()
+		FToolWindowStyle* projectBrowserWindow = nullptr;
+
+		// - Project Browser Window -
+
+		FIELD()
+		FTabViewStyle* projectBrowserTabView = nullptr;
 
 	};
 

@@ -197,6 +197,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
 
         FUSION_LAYOUT_PROPERTY(bool, Enabled);
+        FUSION_LAYOUT_PROPERTY(bool, WindowDragHitTest);
 
         FUSION_LAYOUT_PROPERTY(f32, MinWidth);
         FUSION_LAYOUT_PROPERTY(f32, MaxWidth);

@@ -19,7 +19,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "ContentVStack")
+		if (GetName() == "RootBox")
 		{
 			String::IsAlphabet('a');
 		}
@@ -82,7 +82,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "ContentVStack")
+		if (GetName() == "RootBox")
 		{
 			String::IsAlphabet('a');
 		}

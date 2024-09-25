@@ -15,6 +15,7 @@ namespace CE
         Child(
             FNew(FVerticalStack)
             .ContentHAlign(HAlign::Fill)
+            .Name("TabViewContainerParent")
             (
                 FAssignNew(FHorizontalStack, tabWell)
                 .ContentHAlign(HAlign::Left)
@@ -22,8 +23,10 @@ namespace CE
                 .Name("TabWell"),
 
                 FAssignNew(FStyledWidget, container)
+                .FillRatio(1.0f)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
+                .Name("TabViewContainer")
             )
         );
         

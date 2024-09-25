@@ -13,6 +13,13 @@ namespace CE::Editor
 	    
     }
 
+    void ProjectBrowser::OnPostComputeLayout()
+    {
+	    Super::OnPostComputeLayout();
+
+        
+    }
+
     void ProjectBrowser::Construct()
     {
 	    Super::Construct();
@@ -20,23 +27,62 @@ namespace CE::Editor
         ProjectManager* projectManager = ProjectManager::Get();
 
         auto& self = *this;
+        FTabView* tabView = nullptr;
 
         self
 			.Title("Project Browser")
     		.ContentDirection(FStackBoxDirection::Vertical)
+			.ContentPadding(Vec4(0, 0, 0, 0))
     		.Content(
-	            FNew(FTabView)
+	            FAssignNew(FTabView, tabView)
 	            .FillRatio(1.0f)
-	            .Margin(Vec4(0, 5, 0, 0))
+                .Style("TabView.ProjectBrowser")
 	            .As<FTabView>()
 	            .TabItems(
-	                FNew(FLabelTabItem)
-	                .Text("Recent Projects"),
+
+                    // - Recent Projects -
 
 	                FNew(FLabelTabItem)
+                    .FontSize(16)
+	                .Text("Recent Projects")
+                    .ContentWidget(
+                        FNew(FVerticalStack)
+                        .ContentHAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                        .HAlign(HAlign::Fill)
+                        .Padding(Vec4(1, 1, 1, 1) * 10)
+                        (
+                            FNew(FLabel)
+                            .Text("Select a recent project")
+                            .HAlign(HAlign::Left)
+                        )
+                    )
+                    .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10),
+
+                    // - New Project -
+
+	                FNew(FLabelTabItem)
+                    .FontSize(16)
 	                .Text("New Project")
-            )
-        );
+                    .ContentWidget(
+                        FNew(FVerticalStack)
+                        .ContentHAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                        .HAlign(HAlign::Fill)
+                        .Padding(Vec4(1, 1, 1, 1) * 10)
+                        (
+                            FNew(FLabel)
+                            .Text("Create a new project")
+                            .HAlign(HAlign::Left)
+                        )
+                    )
+                    .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10)
+				)
+			);
+
+        this->Style("ProjectBrowserWindow");
+
+        tabView->GetTabWell()->WindowDragHitTest(true);
 
         /*
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");

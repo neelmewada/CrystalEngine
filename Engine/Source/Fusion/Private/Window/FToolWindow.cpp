@@ -22,6 +22,7 @@ namespace CE
             (
                 FAssignNew(FVerticalStack, rootBox)
                 .ContentHAlign(HAlign::Fill)
+                .ContentVAlign(VAlign::Top)
                 .Name("RootBox")
                 (
                     // - Title Bar Begin -
@@ -132,6 +133,8 @@ namespace CE
                     FAssignNew(FStackBox, content)
                     .Direction(FStackBoxDirection::Vertical)
                     .Padding(Vec4(10, 10, 10, 10))
+                    .VAlign(VAlign::Fill)
+                    .FillRatio(1.0f)
                     .Name("ContentVStack")
 
                     // - Body End -
@@ -139,7 +142,7 @@ namespace CE
             )
         );
 
-        //this->Style("ToolWindow");
+        this->Style("ToolWindow");
     }
 
 } // namespace CE

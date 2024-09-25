@@ -13,6 +13,8 @@ namespace CE::Editor
 
         virtual ~ProjectBrowser();
 
+        void OnPostComputeLayout() override;
+
     protected:
 
         void Construct() override;

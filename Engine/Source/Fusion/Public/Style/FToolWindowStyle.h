@@ -33,9 +33,6 @@ namespace CE
 		FIELD()
 		FBrush titleBarBackground = Color::RGBA(26, 26, 26);
 
-		FIELD()
-		Vec4 contentPadding = Vec4(10, 10, 10, 10);
-
 	};
 
 } // namespace CE

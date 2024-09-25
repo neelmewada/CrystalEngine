@@ -235,11 +235,19 @@ namespace CE
         return index;
     }
 
-    void FusionApplication::Tick(bool isExposed)
+    void FusionApplication::SetExposed()
+    {
+        isExposed = true;
+    }
+
+    void FusionApplication::ResetExposed()
+    {
+        isExposed = false;
+    }
+
+    void FusionApplication::Tick()
     {
         ZoneScoped;
-
-        this->isExposed = isExposed;
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {

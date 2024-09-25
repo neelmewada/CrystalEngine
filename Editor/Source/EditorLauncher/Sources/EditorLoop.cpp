@@ -201,7 +201,7 @@ void EditorLoop::PostInit()
 
 	RPI::RPISystem::Get().PostInitialize(rpiInitInfo);
 
-	auto tickDelegate = MemberDelegate(&EditorLoop::AlternateTick, this);
+	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
 	this->tickDelegateHandle = tickDelegate.GetHandle();
 	app->AddTickHandler(tickDelegate);
 
@@ -230,12 +230,14 @@ void EditorLoop::InitStyles()
 
 }
 
-void EditorLoop::AlternateTick()
+void EditorLoop::ExposedTick()
 {
 	auto app = PlatformApplication::Get();
 
 	auto curTime = clock();
 	deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+	FusionApplication::Get()->SetExposed();
 
 	gEngine->Tick(deltaTime);
 
@@ -246,6 +248,8 @@ void EditorLoop::RunLoop()
 {
 	while (!IsEngineRequestingExit())
 	{
+		FusionApplication::Get()->ResetExposed();
+
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 

@@ -7,6 +7,7 @@ namespace CE
     {
         m_BackgroundShape = FRectangle();
         m_Opacity = 1.0f;
+        m_ClipShape = FShapeType::None;
     }
 
     void FStyledWidget::CalculateIntrinsicSize()

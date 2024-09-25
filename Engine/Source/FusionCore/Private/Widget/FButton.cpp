@@ -81,10 +81,6 @@ namespace CE
     {
 	    Super::OnPaintContentOverlay(painter);
 
-        Vec2 pos = GetComputedPosition();
-
-        //painter->SetPen(FPen(Color::White(), 1.0f, FPenStyle::SolidLine));
-        //painter->DrawLine(pos + Vec2(0, 0), pos + Vec2(250, 300));
     }
 
     void FButton::SetState(FButtonState newState)

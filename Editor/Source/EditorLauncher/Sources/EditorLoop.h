@@ -20,7 +20,7 @@ private:
 	void LoadProject();
 
 	void InitStyles();
-	void AlternateTick();
+	void ExposedTick();
 
 	void AppPreInit();
 	void AppInit();

@@ -31,7 +31,7 @@ FetchContent_MakeAvailable(tracy)
 
 
 # Yoga
-# find_package(yoga REQUIRED)
+find_package(yoga REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)

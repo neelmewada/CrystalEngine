@@ -43,8 +43,8 @@ function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
 
         message("***********************************************************************************")
     endif()
-
 endfunction()
+
 
 # function to setup a runtime dependency target
 function(ce_add_rt_deps NAME)

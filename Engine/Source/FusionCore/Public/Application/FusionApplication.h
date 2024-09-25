@@ -49,7 +49,10 @@ namespace CE
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
-        void Tick(bool isExposed = false);
+        void SetExposed();
+        void ResetExposed();
+
+        void Tick();
 
         void RebuildFrameGraph();
 
@@ -142,6 +145,7 @@ namespace CE
 
         FUSION_FRIENDS;
         friend class FTimer;
+        friend class Engine;
     };
     
 } // namespace CE

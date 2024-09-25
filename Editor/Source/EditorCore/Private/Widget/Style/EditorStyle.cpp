@@ -202,6 +202,34 @@ namespace CE::Editor
 
 		GetDefaultWidget<FToolWindow>()
 			.Style(this, toolWindow->GetName());
+
+		InitProjectBrowserStyle();
+    }
+
+    void EditorStyle::InitProjectBrowserStyle()
+    {
+		if (!projectBrowserTabView)
+		{
+			projectBrowserTabView = CreateObject<FTabViewStyle>(this, "ProjectBrowserTabView");
+			Add("TabView.ProjectBrowser", projectBrowserTabView);
+		}
+
+		projectBrowserTabView->tabItemActiveBackground = Color::RGBA(50, 50, 50);
+		projectBrowserTabView->tabItemHoverBackground = Color::RGBA(40, 40, 40);
+		projectBrowserTabView->tabItemBackground = Color::RGBA(26, 26, 26);
+		projectBrowserTabView->tabItemShape = FRoundedRectangle(5, 5, 0, 0);
+
+    	projectBrowserTabView->containerBackground = projectBrowserTabView->tabItemActiveBackground;
+		projectBrowserTabView->containerBorderColor = Color::Clear();
+		projectBrowserTabView->containerBorderWidth = 0.0f;
+
+		if (!projectBrowserWindow)
+		{
+			projectBrowserWindow = CreateObject<FToolWindowStyle>(this, "ProjectBrowserWindow");
+			Add(projectBrowserWindow);
+		}
+
+		projectBrowserWindow->background = Color::RGBA(26, 26, 26);
     }
 
 } // namespace CE::Editor
