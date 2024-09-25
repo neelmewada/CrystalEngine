@@ -10,7 +10,7 @@ namespace CE
 
     void FToolWindow::Construct()
     {
-	    Super::Construct();
+        Super::Construct();
 
         Child(
             FAssignNew(FStyledWidget, borderWidget)
@@ -27,7 +27,7 @@ namespace CE
                     // - Title Bar Begin -
 
                     FAssignNew(FTitleBar, titleBar)
-                    .Background(Color::RGBA(26, 26, 26))
+                    .Background(FBrush(Color::RGBA(26, 26, 26)))
                     .Height(40)
                     .HAlign(HAlign::Fill)
                     (
@@ -123,7 +123,7 @@ namespace CE
                                 )
                             )
                         )
-                    )
+                    ),
 
                     // - Title Bar End -
 
@@ -139,7 +139,7 @@ namespace CE
             )
         );
 
-        this->Style("ToolWindow");
+        //this->Style("ToolWindow");
     }
 
 } // namespace CE

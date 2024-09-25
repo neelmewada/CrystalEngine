@@ -26,6 +26,11 @@ namespace CE
 
     void RendererSubsystem::OnWindowDestroyed(PlatformWindow* window)
     {
+		if (window && window->IsMainWindow())
+		{
+			CE_LOG(Info, All, "Main Window Destroyed");
+		}
+
 		rebuildFrameGraph = recompileFrameGraph = true;
     }
 
@@ -51,7 +56,7 @@ namespace CE
 
 	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
 	{
-		
+		rebuildFrameGraph = recompileFrameGraph = true;
 	}
 
     void RendererSubsystem::Initialize()
@@ -150,6 +155,11 @@ namespace CE
 		if (app)
 		{
 			app->Tick();
+		}
+
+		if (IsEngineRequestingExit())
+		{
+			return;
 		}
 
 		CE::Scene* scene = sceneSubsystem->GetMainScene();

@@ -25,9 +25,13 @@ namespace CE
         FBrush bg = background;
 
         if (button.IsPressed() && button.IsHovered())
-            bg = pressedBackground;
+        {
+	        bg = pressedBackground;
+        }
         else if (button.IsHovered())
-            bg = hoveredBackground;
+        {
+	        bg = hoveredBackground;
+        }
 
         button
             .Background(bg)

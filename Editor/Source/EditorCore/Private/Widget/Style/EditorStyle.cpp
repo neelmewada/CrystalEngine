@@ -2,10 +2,38 @@
 
 namespace CE::Editor
 {
+	static EditorStyle* gEditorStyle = nullptr;
 
     EditorStyle::EditorStyle()
     {
 	    
+    }
+
+    void EditorStyle::Initialize()
+    {
+		auto app = FusionApplication::TryGet();
+
+		if (app)
+		{
+			FStyleManager* styleManager = app->GetStyleManager();
+
+			FRootContext* rootContext = app->GetRootContext();
+
+			gEditorStyle = CreateObject<EditorStyle>(nullptr, "RootEditorStyle");
+			gEditorStyle->InitializeDefault();
+
+			styleManager->RegisterStyleSet(gEditorStyle);
+			rootContext->SetDefaultStyleSet(gEditorStyle);
+		}
+    }
+
+    void EditorStyle::Shutdown()
+    {
+		if (gEditorStyle)
+		{
+			gEditorStyle->Destroy();
+			gEditorStyle = nullptr;
+		}
     }
 
     void EditorStyle::InitializeDefault()
@@ -34,8 +62,8 @@ namespace CE::Editor
 
 		if (!highlightedButton)
 		{
-			highlightedButton = CreateObject<FCustomButtonStyle>(this, "Button.Highlighted");
-			Add(highlightedButton);
+			highlightedButton = CreateObject<FCustomButtonStyle>(this, "Button_Highlighted");
+			Add("Button.Highlighted", highlightedButton);
 		}
 
 		highlightedButton->background = Color::RGBA(0, 112, 224);
@@ -53,8 +81,8 @@ namespace CE::Editor
 
 		if (!windowCloseButton)
 		{
-			windowCloseButton = CreateObject<FCustomButtonStyle>(this, "Button.WindowClose");
-			Add(windowCloseButton);
+			windowCloseButton = CreateObject<FCustomButtonStyle>(this, "Button_WindowClose");
+			Add("Button.WindowClose", windowCloseButton);
 		}
 
 		windowCloseButton->background = Color::Clear();
@@ -68,8 +96,8 @@ namespace CE::Editor
 
 		if (!windowControlButton)
 		{
-			windowControlButton = CreateObject<FCustomButtonStyle>(this, "Button.WindowControl");
-			Add(windowControlButton);
+			windowControlButton = CreateObject<FCustomButtonStyle>(this, "Button_WindowControl");
+			Add("Button.WindowControl", windowControlButton);
 		}
 
 		windowControlButton->background = Color::Clear();

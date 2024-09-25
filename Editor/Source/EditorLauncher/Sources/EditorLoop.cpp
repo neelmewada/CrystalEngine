@@ -182,6 +182,8 @@ void EditorLoop::PostInit()
 
 	auto rootContext = fApp->GetRootContext();
 
+	EditorStyle::Initialize();
+
 	gEngine->Initialize();
 
 	gEngine->PostInitialize();
@@ -208,7 +210,7 @@ void EditorLoop::PostInit()
 		FNativeContext* projectBrowserContext = FNativeContext::Create(mainWindow, "ProjectBrowser", rootContext);
 		rootContext->AddChildContext(projectBrowserContext);
 
-		ProjectBrowser* projectBrowser = nullptr;//CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
+		ProjectBrowser* projectBrowser = nullptr;
 
 		FAssignNewOwned(ProjectBrowser, projectBrowser, projectBrowserContext);
 		projectBrowserContext->SetOwningWidget(projectBrowser);
@@ -251,6 +253,8 @@ void EditorLoop::RunLoop()
 		app->Tick();
 		InputManager::Get().Tick();
 
+		bool isExit = IsEngineRequestingExit();
+
 		// Engine tick
 		gEngine->Tick(deltaTime);
 
@@ -279,10 +283,12 @@ void EditorLoop::PreShutdown()
 	FusionApplication* fApp = FusionApplication::Get();
 
 	fApp->PreShutdown();
+
+	EditorStyle::Shutdown();
+
 	gEngine->PreShutdown();
 
-	fApp->Shutdown();
-	fApp->Destroy();
+	// fApp is Shutdown and destroyed by RendererSubsystem, no need to do it again here.
   
 	RPI::RPISystem::Get().Shutdown();
 

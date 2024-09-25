@@ -11,7 +11,14 @@ namespace CE::Editor
 
 		EditorStyle();
 
+		static void Initialize();
+		static void Shutdown();
+
+	private:
+
 		void InitializeDefault();
+
+	public:
 
 		FIELD()
 		FCustomButtonStyle* button = nullptr;
