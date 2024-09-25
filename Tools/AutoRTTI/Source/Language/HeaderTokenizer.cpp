@@ -120,7 +120,7 @@ namespace CE
         // Regular Expressions
         std::regex identifierRegex = std::regex("[a-zA-Z_][a-zA-Z0-9_]*");
 
-        while (cursor <= length)
+        while (cursor < length) // Changed <= to <
         {
             char c = source[cursor];
             std::string_view substring(source.c_str() + cursor, length - cursor - 1);

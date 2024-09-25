@@ -5,7 +5,7 @@
 
 namespace CE
 {
-	static int SDLWindowEventWatch(void* data, SDL_Event* event);
+	int SDLWindowEventWatch(void* data, SDL_Event* event);
 
 	SDLApplication* SDLApplication::Create()
 	{

@@ -371,7 +371,7 @@ namespace CE::RPI
             values.Add(bufferValue);
         }
 
-        template<typename TEnum> requires TIsEnum<TEnum>::Value and not TIsSameType<TEnum, MaterialPropertyDataType>::Value
+        template<typename TEnum> requires TIsEnum<TEnum>::Value and (not TIsSameType<TEnum, MaterialPropertyDataType>::Value)
         MaterialPropertyValueArray(TEnum enumValue)
         {
             values.Add(enumValue);

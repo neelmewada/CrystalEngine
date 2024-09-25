@@ -150,8 +150,9 @@ namespace CE
 		}
 
 		// - Mouse Wheel Events -
-
-		if (abs(wheelDelta.x) >= FLT_EPSILON || abs(wheelDelta.y) >= FLT_EPSILON)
+        constexpr auto epsilon = std::numeric_limits<float>::epsilon();
+        
+		if (abs(wheelDelta.x) >= epsilon || abs(wheelDelta.y) >= epsilon)
 		{
 			FMouseEvent mouseEvent{};
 			mouseEvent.type = FEventType::MouseWheel;
@@ -181,7 +182,7 @@ namespace CE
 
 		// - Mouse Click Events -
 
-		if (abs(mouseDelta.x) >= FLT_EPSILON || abs(mouseDelta.y) >= FLT_EPSILON)
+        if (abs(mouseDelta.x) >= epsilon || abs(mouseDelta.y) >= epsilon)
 		{
 			FMouseEvent mouseEvent{};
 			mouseEvent.type = FEventType::MouseMove;

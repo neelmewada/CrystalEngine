@@ -8,6 +8,7 @@
 #   define __EMULATE_UUID
 #endif
 
+#undef SIZE_T
 #include <dxc/dxcapi.h>
 
 #include <locale>

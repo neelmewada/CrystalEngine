@@ -29,19 +29,13 @@ if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
     set(${PACKAGE_NAME}_STATIC_LIBRARY_DEV     ${${PACKAGE_NAME}_LIBS_DIR}/Debug/libassimpd.a)
     set(${PACKAGE_NAME}_STATIC_LIBRARY_RELEASE ${${PACKAGE_NAME}_LIBS_DIR}/Release/libassimp.a)
 
-    set_target_properties(assimp_zlib 
-        PROPERTIES 
-            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development>,Debug,$<CONFIG>>/libassimp$<$<CONFIG:Debug>:d>.a"
-    )
-
     set_target_properties(${TARGET_WITH_NAMESPACE}
         PROPERTIES
-            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development>,Debug,$<CONFIG>>/libassimp$<$<CONFIG:Debug>:d>.a"
+            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Debug>,Debug,Release>/libassimp$<$<CONFIG:Debug>:d>.lib"
     )
 
     target_link_libraries(${TARGET_WITH_NAMESPACE}
-        INTERFACE
-            assimp_zlib
+        INTERFACE "z" # Link libz
     )
 
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")

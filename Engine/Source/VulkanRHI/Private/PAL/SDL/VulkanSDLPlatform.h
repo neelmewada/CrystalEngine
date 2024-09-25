@@ -4,7 +4,7 @@
 #include "SDL_vulkan.h"
 
 #include "vulkan/vulkan.h"
-#include "vma/vk_mem_alloc.h"
+//#include "vma/vk_mem_alloc.h"
 
 #include "CoreApplication.h"
 

@@ -3,7 +3,7 @@
 #include "PAL/Common/VulkanPlatform.h"
 
 #define VMA_IMPLEMENTATION
-#include <vma/vk_mem_alloc.h>
+//#include <vma/vk_mem_alloc.h>
 
 namespace CE::Vulkan
 {
@@ -478,7 +478,7 @@ namespace CE::Vulkan
 
 			// Get the last queue of this family as primary transfer queue
 			if (EnumHasFlag(queueMask, RHI::HardwareQueueClassMask::Transfer) && primaryTransferQueue == nullptr &&
-				(!graphicsQueueAllocated || queueCount >= 2))
+                (!graphicsQueueAllocated || queueCount >= 2) && queueCount >= 2)
 			{
 				primaryTransferQueue = queuesByFamily[familyIdx][queueCount - 2];
 			}

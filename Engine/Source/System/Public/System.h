@@ -29,7 +29,6 @@
 #include "Engine/MaterialInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Font.h"
-#include "Engine/Scene.h"
 
 // Engine
 #include "Engine/Subsystem.h"
@@ -70,6 +69,9 @@
 #include "GameFramework/CameraActor.h"
 #include "GameFramework/Light.h"
 #include "GameFramework/DirectionalLight.h"
+
+// Scene
+#include "Engine/Scene.h"
 
 namespace CE
 {

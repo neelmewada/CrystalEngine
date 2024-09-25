@@ -31,7 +31,7 @@ FetchContent_MakeAvailable(tracy)
 
 
 # Yoga
-find_package(yoga REQUIRED)
+# find_package(yoga REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)
@@ -51,7 +51,7 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/macOS/lib")
         set(Vulkan_LIB_DIR "$ENV{VULKAN_SDK}/macOS/lib")
     endif()
-
+    
     link_directories(AFTER $ENV{VULKAN_SDK}/lib)
 
     # Vulkan SpirV Tools

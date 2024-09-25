@@ -31,7 +31,7 @@ endif()
 
 add_subdirectory(Source/CoreShader)
 
-add_subdirectory(Source/CrystalWidgets)
+# add_subdirectory(Source/CrystalWidgets)
 add_subdirectory(Source/FusionCore)
 add_subdirectory(Source/Fusion)
 

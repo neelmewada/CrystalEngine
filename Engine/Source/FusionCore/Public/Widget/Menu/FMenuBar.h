@@ -41,7 +41,7 @@ namespace CE
                     if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
                     {
                         ArgType* widget = const_cast<ArgType*>(&std::get<i()>(args));
-                        if (widget->IsOfType<FMenuItem>())
+                        if (widget->template IsOfType<FMenuItem>())
                         {
                             FMenuItem* menuItem = static_cast<FMenuItem*>(widget);
                             menuItem->menuOwner = this;

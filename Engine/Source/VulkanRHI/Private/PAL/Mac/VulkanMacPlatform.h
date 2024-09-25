@@ -2,7 +2,7 @@
 
 #include "vulkan/vulkan.h"
 #include "vulkan/vulkan_macos.h"
-#include "vma/vk_mem_alloc.h"
+//#include "vma/vk_mem_alloc.h"
 
 namespace CE::Vulkan
 {

@@ -11,6 +11,7 @@
         "GAMESYSTEM_API=",
         "VULKANRHI_API=",
         "SYSTEM_API",
+        "ENGINE_API",
         "CORERPI_API=",
         "CORERHI_API=",
         "EDITORCORE_API=",

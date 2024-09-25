@@ -285,7 +285,7 @@ namespace CE
         }
     };
 
-    template<typename TWidget> requires !TIsAbstract<TWidget>::Value && TIsBaseClassOf<FWidget, TWidget>::Value
+    template<typename TWidget> requires (!TIsAbstract<TWidget>::Value) && TIsBaseClassOf<FWidget, TWidget>::Value
     TWidget& GetDefaultWidget()
     {
         CE_ASSERT(TWidget::Type()->CanBeInstantiated(), "The given widget class ({}) is an abstract class!", TWidget::Type()->GetName());

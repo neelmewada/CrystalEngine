@@ -1,6 +1,6 @@
 #pragma once
 
-#define interface class
+//#define interface class
 
 namespace CE
 {

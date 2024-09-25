@@ -3,7 +3,7 @@
 namespace CE::RHI
 {
     
-    interface IScopeProducer
+    struct IScopeProducer
     {
     protected:
         IScopeProducer() = default;

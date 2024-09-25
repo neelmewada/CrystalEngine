@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	class FrameGraphCompiler;
 	class FrameGraphExecuter;
-	interface IScopeProducer;
+    struct IScopeProducer;
 	
 	struct FrameSchedulerDescriptor
 	{
