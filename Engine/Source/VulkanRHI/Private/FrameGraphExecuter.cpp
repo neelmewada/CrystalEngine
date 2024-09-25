@@ -110,11 +110,11 @@ namespace CE::Vulkan
 		}
 	}
 
-	u32 FrameGraphExecuter::BeginExecution(const FrameGraphExecuteRequest& executeRequest)
+	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 
-		FrameGraph* frameGraph = executeRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		bool swapChainExists = frameGraph->presentSwapChains.NonEmpty();
 

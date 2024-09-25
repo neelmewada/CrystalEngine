@@ -128,10 +128,6 @@ namespace CE
 		bool isExiting = IsEngineRequestingExit();
 
 		FusionApplication* app = FusionApplication::TryGet();
-		if (app)
-		{
-			app->Tick();
-		}
 
 		int submittedImageIndex = -1;
 
@@ -149,6 +145,11 @@ namespace CE
 			recompileFrameGraph = false;
 
 			CompileFrameGraph();
+		}
+
+		if (app)
+		{
+			app->Tick();
 		}
 
 		CE::Scene* scene = sceneSubsystem->GetMainScene();

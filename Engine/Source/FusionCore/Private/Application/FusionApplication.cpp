@@ -258,6 +258,11 @@ namespace CE
             timers[i]->Tick();
         }
 
+        if (rootContext)
+        {
+            rootContext->Tick();
+        }
+
         return;
 
         int submittedFrameIdx = -1;

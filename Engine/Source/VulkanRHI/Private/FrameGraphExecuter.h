@@ -12,17 +12,17 @@ namespace CE::Vulkan
 		FrameGraphExecuter(VulkanDevice* device);
 		~FrameGraphExecuter();
 
-		bool ExecuteInternal(const FrameGraphExecuteRequest& executeRequest) override;
+		bool ExecuteInternal(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
 		void WaitUntilIdle() override;
 
-		u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) override;
+		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
-		void EndExecution(const FrameGraphExecuteRequest& executeRequest) override;
+		void EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
 	private:
 
-		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeId>& executedScopes, 
+		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
 		VulkanDevice* device = nullptr;
