@@ -22,13 +22,7 @@ namespace CE::Editor
 	{
 		Super::PreShutdown();
 
-		auto app = FusionApplication::TryGet();
-
-		if (app)
-		{
-			//app->Shutdown();
-			//app->Destroy();
-		}
+		
 	}
 
 } // namespace CE::Editor

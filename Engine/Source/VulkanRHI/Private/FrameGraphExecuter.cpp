@@ -177,11 +177,11 @@ namespace CE::Vulkan
 		return currentImageIndex;
 	}
 
-	void FrameGraphExecuter::EndExecution(const FrameGraphExecuteRequest& executeRequest)
+	void FrameGraphExecuter::EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
-		FrameGraph* frameGraph = executeRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 
-		HashSet<ScopeId> executedScopes{};
+		HashSet<RHI::ScopeId> executedScopes{};
 		HashSet<Vulkan::SwapChain*> usedSwapChains{};
 
 		for (auto rhiScope : frameGraph->endScopes)
@@ -193,8 +193,8 @@ namespace CE::Vulkan
 		totalFramesSubmitted++;
 	}
 
-	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, 
-		HashSet<ScopeId>& executedScopes,
+	bool FrameGraphExecuter::ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, 
+		HashSet<RHI::ScopeId>& executedScopes,
 		HashSet<Vulkan::SwapChain*>& usedSwapChains)
 	{
 		if (!scope)
@@ -210,8 +210,8 @@ namespace CE::Vulkan
 		if (scope->IsSubPass() && scope->prevSubPass != nullptr)
 			return false;
 
-		FrameGraph* frameGraph = executeRequest.frameGraph;
-		FrameScheduler* scheduler = executeRequest.scheduler;
+		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
+		RHI::FrameScheduler* scheduler = executeRequest.scheduler;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
@@ -303,7 +303,7 @@ namespace CE::Vulkan
 				bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NonEmpty();
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
-				HashSet<AttachmentID> clearedAttachments{};
+				HashSet<RHI::AttachmentID> clearedAttachments{};
 
 				Vulkan::Scope* scopeLoop = currentScope;
 				while (scopeLoop != nullptr)
@@ -319,8 +319,8 @@ namespace CE::Vulkan
 						if (clearedAttachments.Exists(scopeAttachment->GetFrameAttachment()->GetId()))
 							continue;
 
-						ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
-						ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+						RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
+						RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
 						VkClearValue clearValue{};
 
@@ -373,7 +373,7 @@ namespace CE::Vulkan
 				// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
 				{
 					Vulkan::Scope* currentSubPassScope = currentScope;
-					HashSet<AttachmentID> initializedAttachmentIds{};
+					HashSet<RHI::AttachmentID> initializedAttachmentIds{};
 
 					while (currentSubPassScope != nullptr)
 					{
@@ -385,18 +385,18 @@ namespace CE::Vulkan
 								!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
 								continue;
 
-							ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
-							ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+							RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
+							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
-							RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
-							if (resource == nullptr || resource->GetResourceType() != ResourceType::Texture)
+							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
+							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
 								continue;
 
 							initializedAttachmentIds.Add(imageFrameAttachment->GetId());
 
-							if (resource->GetResourceType() == ResourceType::Texture)
+							if (resource->GetResourceType() == RHI::ResourceType::Texture)
 							{
 								Vulkan::Texture* image = (Vulkan::Texture*)resource;
 
@@ -490,7 +490,7 @@ namespace CE::Vulkan
 									image->curFamilyIndex = currentScope->queue->GetFamilyIndex();
 								}
 							}
-							else if (resource->GetResourceType() == ResourceType::Buffer)
+							else if (resource->GetResourceType() == RHI::ResourceType::Buffer)
 							{
 								Vulkan::Buffer* buffer = (Vulkan::Buffer*)resource;
 
@@ -633,7 +633,7 @@ namespace CE::Vulkan
 									commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
 
 								const auto& drawItemProperties = drawList->GetDrawItem(i);
-								const DrawItem* drawItem = drawItemProperties.item;
+								const RHI::DrawItem* drawItem = drawItemProperties.item;
 
 								if (drawItem->enabled)
 								{

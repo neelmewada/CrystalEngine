@@ -53,19 +53,19 @@ static void TestBegin(bool gui)
 		InputManager::Get().Initialize(app);
 	}
 
-	gDynamicRHI = new Vulkan::VulkanRHI();
+	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 
-	gDynamicRHI->Initialize();
-	gDynamicRHI->PostInitialize();
+	RHI::gDynamicRHI->Initialize();
+	RHI::gDynamicRHI->PostInitialize();
 
 	if (gui)
 	{
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
-		FrameScheduler::Create(desc);
+		RHI::FrameScheduler::Create(desc);
 	}
 
-	RPISystem::Get().Initialize();
+	RPI::RPISystem::Get().Initialize();
 
 	FusionApplication* fApp = FusionApplication::Get();
 
@@ -103,14 +103,14 @@ static void TestEnd(bool gui)
 
 	if (gui)
 	{
-		delete FrameScheduler::Get();
+		delete RHI::FrameScheduler::Get();
 	}
 
-	RPISystem::Get().Shutdown();
+	RPI::RPISystem::Get().Shutdown();
 
-	gDynamicRHI->PreShutdown();
-	gDynamicRHI->Shutdown();
-	delete gDynamicRHI; gDynamicRHI = nullptr;
+	RHI::gDynamicRHI->PreShutdown();
+	RHI::gDynamicRHI->Shutdown();
+	delete RHI::gDynamicRHI; RHI::gDynamicRHI = nullptr;
 
 	PlatformApplication* app = PlatformApplication::Get();
 

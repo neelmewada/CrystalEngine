@@ -155,7 +155,6 @@ void EditorLoop::Init()
 
 void EditorLoop::PostInit()
 {
-
 	LoadCoreModules();
 	LoadEngineModules();
 	LoadEditorModules();
@@ -169,6 +168,10 @@ void EditorLoop::PostInit()
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
+
+	RHI::FrameSchedulerDescriptor desc{};
+	desc.numFramesInFlight = 2;
+	RHI::FrameScheduler::Create(desc);
 
 	RPI::RPISystem::Get().Initialize();
 
@@ -202,7 +205,7 @@ void EditorLoop::PostInit()
 
 	//if (!projectPath.Exists())
 	{
-		FNativeContext* projectBrowserContext = FNativeContext::Create(mainWindow, "Project Browser", rootContext);
+		FNativeContext* projectBrowserContext = FNativeContext::Create(mainWindow, "ProjectBrowser", rootContext);
 		rootContext->AddChildContext(projectBrowserContext);
 
 		ProjectBrowser* projectBrowser = nullptr;//CreateWindow<ProjectBrowser>("ProjectBrowser", mainWindow);
@@ -260,9 +263,8 @@ void EditorLoop::PreShutdown()
 	auto app = PlatformApplication::Get();
 	app->RemoveTickHandler(tickDelegateHandle);
 
-	// Destroy the project manager, which consequently saves it's Prefs.
-	auto projectManager = ProjectManager::TryGet();
-	if (projectManager)
+	// Destroy the project manager, which consequently saves it's Preferences to disk.
+	if (auto projectManager = ProjectManager::TryGet())
 	{
 		projectManager->Destroy();
 	}
@@ -274,11 +276,11 @@ void EditorLoop::PreShutdown()
 		UnloadSettings();
 	}
 
-	gEngine->PreShutdown();
-
 	FusionApplication* fApp = FusionApplication::Get();
 
 	fApp->PreShutdown();
+	gEngine->PreShutdown();
+
 	fApp->Shutdown();
 	fApp->Destroy();
   
@@ -394,6 +396,8 @@ void EditorLoop::AppInit()
 
 	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
+
+	mainWindow->Show();
 }
 
 void EditorLoop::AppPreShutdown()

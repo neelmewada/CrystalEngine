@@ -19,6 +19,7 @@ namespace CE
         FImage* maximizeIcon = nullptr;
         FStackBox* content = nullptr;
         FTitleBar* titleBar = nullptr;
+        FLabel* titleBarLabel = nullptr;
 
     public:
 
@@ -27,6 +28,7 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(BorderColor, borderWidget);
         FUSION_PROPERTY_WRAPPER2(Background, titleBar, TitleBarBackground);
         FUSION_PROPERTY_WRAPPER2(Padding, content, ContentPadding);
+        FUSION_PROPERTY_WRAPPER2(Text, titleBarLabel, Title);
 
         FStackBoxDirection ContentDirection()
         {

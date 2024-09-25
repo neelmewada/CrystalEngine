@@ -43,9 +43,9 @@ namespace CE
                                 FNew(FTerminalWidget)
                                 .FillRatio(1.0f),
 
-                                FNew(FLabel)
+                                FAssignNew(FLabel, titleBarLabel)
                                 .FontSize(15)
-                                .Text("Widget Demo")
+                                .Text("Tool Window")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
 
@@ -139,6 +139,7 @@ namespace CE
             )
         );
 
+        this->Style("ToolWindow");
     }
 
 } // namespace CE

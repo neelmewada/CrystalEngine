@@ -4,7 +4,8 @@
 #include "CoreApplication.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
-#include "CrystalWidgets.h"
+#include "FusionCore.h"
+#include "Fusion.h"
 
 #include "EditorCore.h"
 #include "CrystalEditor.h"

@@ -373,7 +373,8 @@ namespace CE
 #endif
 		ModuleManager::Get().LoadModule("CoreRPI");
 		ModuleManager::Get().LoadModule("CoreShader");
-		ModuleManager::Get().LoadModule("CrystalWidgets");
+		ModuleManager::Get().LoadModule("FusionCore");
+		ModuleManager::Get().LoadModule("Fusion");
 
 		ModuleManager::Get().LoadModule("System");
 		ModuleManager::Get().LoadModule("EditorCore");
@@ -398,14 +399,14 @@ namespace CE
 
 		assetDefRegistry = Editor::GetAssetDefinitionRegistry();
 
-		RPISystem::Get().Initialize();
+		RPI::RPISystem::Get().Initialize();
 	}
 
 	void AssetProcessor::PreShutdown()
 	{
 		auto app = PlatformApplication::Get();
 
-		RPISystem::Get().Shutdown();
+		RPI::RPISystem::Get().Shutdown();
 
 		gEngine->PreShutdown();
 
@@ -433,7 +434,8 @@ namespace CE
 		ModuleManager::Get().UnloadModule("EditorCore");
 		ModuleManager::Get().UnloadModule("System");
 
-		ModuleManager::Get().UnloadModule("CrystalWidgets");
+		ModuleManager::Get().UnloadModule("Fusion");
+		ModuleManager::Get().UnloadModule("FusionCore");
 		ModuleManager::Get().UnloadModule("CoreShader");
 		ModuleManager::Get().UnloadModule("CoreRPI");
 #if PAL_TRAIT_VULKAN_SUPPORTED

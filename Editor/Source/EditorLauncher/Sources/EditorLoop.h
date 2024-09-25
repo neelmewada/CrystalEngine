@@ -1,7 +1,6 @@
 #pragma once
 
 using namespace CE;
-using namespace CE::Widgets;
 
 class EditorLoop
 {

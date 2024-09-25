@@ -23,7 +23,7 @@ namespace CE::Editor
                 gEditorStyle = CreateObject<EditorStyle>(nullptr, "RootEditorStyle");
                 gEditorStyle->InitializeDefault();
 
-                styleManager->RegisterStyleSet(gEditorStyle->GetName(), gEditorStyle);
+                styleManager->RegisterStyleSet(gEditorStyle);
                 rootContext->SetDefaultStyleSet(gEditorStyle);
             }
         }

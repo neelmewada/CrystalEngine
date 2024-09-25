@@ -16,7 +16,7 @@ namespace CE::Vulkan
 		height = 0;
 
 		Vulkan::Scope* current = scope;
-		HashSet<AttachmentID> addedAttachments{};
+		HashSet<RHI::AttachmentID> addedAttachments{};
 		
 		while (current != nullptr)
 		{
@@ -39,7 +39,7 @@ namespace CE::Vulkan
 					continue;
 				}
 
-				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)attachment;
+				RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)attachment;
 				RHI::RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
 				if (!resource)
 					continue;

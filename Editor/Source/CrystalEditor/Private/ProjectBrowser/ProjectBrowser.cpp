@@ -19,17 +19,22 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
-        Content(
-            FNew(FTabView)
-            .FillRatio(1.0f)
-            .Margin(Vec4(0, 5, 0, 0))
-            .As<FTabView>()
-            .TabItems(
-                FNew(FLabelTabItem)
-                .Text("Recent Projects"),
+        auto& self = *this;
 
-                FNew(FLabelTabItem)
-                .Text("New Project")
+        self
+			.Title("Project Browser")
+    		.ContentDirection(FStackBoxDirection::Vertical)
+    		.Content(
+	            FNew(FTabView)
+	            .FillRatio(1.0f)
+	            .Margin(Vec4(0, 5, 0, 0))
+	            .As<FTabView>()
+	            .TabItems(
+	                FNew(FLabelTabItem)
+	                .Text("Recent Projects"),
+
+	                FNew(FLabelTabItem)
+	                .Text("New Project")
             )
         );
 

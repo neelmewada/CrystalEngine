@@ -168,7 +168,7 @@ namespace CE::Editor
 
 		if (!toolWindow)
 		{
-			toolWindow = CreateObject<FToolWindowStyle>(this, "ToolWindowStyle");
+			toolWindow = CreateObject<FToolWindowStyle>(this, "ToolWindow");
 			Add(toolWindow);
 		}
 
