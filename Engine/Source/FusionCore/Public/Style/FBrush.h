@@ -72,6 +72,8 @@ namespace CE
             return !operator==(rhs);
         }
 
+        FBrush WithTint(const Color& tintColor) const;
+
     private:
 
         void CopyFrom(const FBrush& from);

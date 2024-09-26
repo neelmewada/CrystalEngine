@@ -215,6 +215,11 @@ void EditorLoop::PostInit()
 		FAssignNewOwned(ProjectBrowser, projectBrowser, projectBrowserContext);
 		projectBrowserContext->SetOwningWidget(projectBrowser);
 
+		projectBrowser->SetMaximizeButton(false);
+		projectBrowser->SetMinimizeButton(true);
+
+		mainWindow->SetResizable(false);
+
 		mainWindow->Show();
 	}
 	//else

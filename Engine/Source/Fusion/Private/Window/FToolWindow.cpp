@@ -8,6 +8,22 @@ namespace CE
 	    
     }
 
+    void FToolWindow::SetMaximizeButton(bool enabled)
+    {
+        Color tintColor = enabled ? Color::White() : Color::RGBA(255, 255, 255, 80);
+
+        maximizeIcon->Background(maximizeIcon->Background().WithTint(tintColor));
+        maximizeButton->SetInteractionEnabled(enabled);
+    }
+
+    void FToolWindow::SetMinimizeButton(bool enabled)
+    {
+        Color tintColor = enabled ? Color::White() : Color::RGBA(255, 255, 255, 80);
+
+        minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
+        minimizeButton->SetInteractionEnabled(enabled);
+    }
+
     void FToolWindow::Construct()
     {
         Super::Construct();
@@ -61,7 +77,7 @@ namespace CE
                                 FNew(FTerminalWidget)
                                 .FillRatio(1.0f),
 
-                                FNew(FButton)
+                                FAssignNew(FButton, minimizeButton)
                                 .OnPressed([this]
                                     {
                                         static_cast<FNativeContext*>(GetContext())->Minimize();
@@ -79,7 +95,7 @@ namespace CE
                                     .VAlign(VAlign::Center)
                                 ),
 
-                                FNew(FButton)
+                                FAssignNew(FButton, maximizeButton)
                                 .OnPressed([this]
                                     {
                                         FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
@@ -115,7 +131,7 @@ namespace CE
                                 .Style("Button.WindowClose")
                                 .VAlign(VAlign::Top)
                                 (
-                                    FNew(FImage)
+                                    FAssignNew(FImage, minimizeIcon)
                                     .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
                                     .Width(10)
                                     .Height(10)

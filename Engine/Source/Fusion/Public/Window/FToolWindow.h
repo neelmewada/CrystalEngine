@@ -12,6 +12,9 @@ namespace CE
 
         FStackBox* GetContentBox() const { return content; }
 
+        void SetMaximizeButton(bool enabled);
+        void SetMinimizeButton(bool enabled);
+
     protected:
 
         void Construct() override;
@@ -19,9 +22,13 @@ namespace CE
         FStyledWidget* borderWidget = nullptr;
         FVerticalStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;
+        FImage* minimizeIcon = nullptr;
         FStackBox* content = nullptr;
         FTitleBar* titleBar = nullptr;
         FLabel* titleBarLabel = nullptr;
+
+        FButton* minimizeButton = nullptr;
+        FButton* maximizeButton = nullptr;
 
     public:
 

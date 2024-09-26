@@ -108,6 +108,13 @@ namespace CE
 		return true;
 	}
 
+	FBrush FBrush::WithTint(const Color& tintColor) const
+	{
+		FBrush result = *this;
+		result.tintColor = tintColor;
+		return result;
+	}
+
 	void FBrush::CopyFrom(const FBrush& from)
     {
 	    if (brushStyle != from.brushStyle)

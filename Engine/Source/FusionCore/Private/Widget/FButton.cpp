@@ -19,7 +19,7 @@ namespace CE
         }
         else
         {
-            buttonState |= FButtonState::InteractionDisabled;
+            buttonState = FButtonState::InteractionDisabled;
         }
 
         ApplyStyle();
@@ -27,7 +27,7 @@ namespace CE
 
     void FButton::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
+        if (event->IsMouseEvent() && !IsInteractionDisabled())
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 

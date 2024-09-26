@@ -44,6 +44,7 @@ namespace CE::Editor
 
 	                FNew(FLabelTabItem)
                     .FontSize(16)
+                    .Bold(true)
 	                .Text("Recent Projects")
                     .ContentWidget(
                         FNew(FVerticalStack)
@@ -63,6 +64,7 @@ namespace CE::Editor
 
 	                FNew(FLabelTabItem)
                     .FontSize(16)
+                    .Bold(true)
 	                .Text("New Project")
                     .ContentWidget(
                         FNew(FVerticalStack)
@@ -81,7 +83,7 @@ namespace CE::Editor
 			);
 
         this->Style("ProjectBrowserWindow");
-
+        
         tabView->GetTabWell()->WindowDragHitTest(true);
 
         /*
