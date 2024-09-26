@@ -159,7 +159,7 @@ namespace CE
 
         Vec2 intrinsicSize;
 
-        //! @brief Global position of the widget, i.e. position in bottom-most context.
+        //! @brief Global position of the widget, i.e. position in the leaf/terminal context.
         Vec2 globalPosition;
 
         //! @brief Transformation matrix in parent widget's coordinate space.
@@ -178,8 +178,13 @@ namespace CE
 
         // - Flags -
 
-        FIELD()
+        FIELD(ReadOnly)
         bool isFocused = false;
+
+    protected:
+
+        FIELD(ReadOnly)
+        bool isCulled = false;
 
     protected: // - Fusion Fields -
 

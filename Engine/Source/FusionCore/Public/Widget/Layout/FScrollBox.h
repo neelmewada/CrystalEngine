@@ -59,6 +59,8 @@ namespace CE
         Self& NormalizedScrollX(f32 value);
         f32 NormalizedScrollX();
 
+        void ClampTranslation();
+
     private:
 
         bool isVerticalScrollVisible = false;

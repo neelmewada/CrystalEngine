@@ -12,8 +12,7 @@ namespace CE
 
         FDataModel();
 
-        virtual void OnModelPropertyModified(const CE::Name& propertyName) {}
-        virtual void OnModelPropertyEdited(const CE::Name& propertyName) {}
+        virtual void OnModelPropertyEdited(const CE::Name& propertyName, Object* modifyingObject) {}
 
     protected:
 

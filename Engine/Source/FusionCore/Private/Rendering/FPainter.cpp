@@ -79,24 +79,24 @@ namespace CE
 		return renderer->GetFontMetrics(font);
 	}
 
-	void FPainter::DrawShape(const Rect& rect, const FShape& shape)
+	bool FPainter::DrawShape(const Rect& rect, const FShape& shape)
 	{
-		renderer->DrawShape(shape, rect.min, rect.GetSize());
+		return renderer->DrawShape(shape, rect.min, rect.GetSize());
 	}
 
-	void FPainter::DrawRect(const Rect& rect)
+	bool FPainter::DrawRect(const Rect& rect)
 	{
-		renderer->DrawShape(FRectangle(), rect.min, rect.GetSize());
+		return renderer->DrawShape(FRectangle(), rect.min, rect.GetSize());
 	}
 
-	void FPainter::DrawCircle(const Rect& rect)
+	bool FPainter::DrawCircle(const Rect& rect)
 	{
-		renderer->DrawShape(FCircle(), rect.min, rect.GetSize());
+		return renderer->DrawShape(FCircle(), rect.min, rect.GetSize());
 	}
 
-	void FPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
+	bool FPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
 	{
-		renderer->DrawShape(FRoundedRectangle(cornerRadius), rect.min, rect.GetSize());
+		return renderer->DrawShape(FRoundedRectangle(cornerRadius), rect.min, rect.GetSize());
 	}
 
 	void FPainter::DrawLine(const Vec2& startPos, const Vec2& endPos)
@@ -107,6 +107,11 @@ namespace CE
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
 		return renderer->DrawText(text, pos, size, wordWrap);
+	}
+
+	bool FPainter::IsCulled(Vec2 pos, Vec2 quadSize)
+	{
+		return renderer->IsCulled(pos, quadSize);
 	}
 
 } // namespace CE

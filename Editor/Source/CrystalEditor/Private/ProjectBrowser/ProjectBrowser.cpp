@@ -26,6 +26,8 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
+        recentProjectsModel = CreateObject<RecentProjectsModel>(this, "RecentProjectsModel");
+
         auto& self = *this;
         FTabView* tabView = nullptr;
 
@@ -53,9 +55,10 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .Padding(Vec4(1, 1, 1, 1) * 10)
                         (
-                            FNew(FLabel)
-                            .Text("Select a recent project")
-                            .HAlign(HAlign::Left)
+                            FNew(FListView, recentsList)
+                            .OnGenerateRow(MemberDelegate(&Self::GenerateRow, this))
+                            .HAlign(HAlign::Fill)
+                            .Height(400)
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10),
@@ -74,8 +77,7 @@ namespace CE::Editor
                         .Padding(Vec4(1, 1, 1, 1) * 10)
                         (
                             FNew(FLabel)
-                            .Text("Create a new project")
-                            .HAlign(HAlign::Left)
+                            .Text("Create a new project here...")
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10)
@@ -85,6 +87,8 @@ namespace CE::Editor
         this->Style("ProjectBrowserWindow");
         
         tabView->GetTabWell()->WindowDragHitTest(true);
+
+        recentProjectsModel->ModelReset();
 
         /*
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
@@ -294,6 +298,24 @@ namespace CE::Editor
 
         ValidateInputFields(nullptr);
 		*/
+    }
+
+    FListItemWidget& ProjectBrowser::GenerateRow(FListItem* item, FListView* view)
+    {
+        return FNew(FListItemWidget)
+            .Child(
+                FNew(FVerticalStack)
+                .Padding(Vec4(1, 1, 1, 1) * 10)
+                (
+                    FNew(FLabel)
+                    .Text("Title")
+                    .FontSize(15),
+
+                    FNew(FLabel)
+                    .Text("Item description goes here.")
+                )
+            )
+            .As<FListItemWidget>();
     }
 
     void ProjectBrowser::ValidateInputFields(FTextInput*)

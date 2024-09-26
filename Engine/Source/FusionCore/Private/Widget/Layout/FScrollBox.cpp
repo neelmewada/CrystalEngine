@@ -500,6 +500,46 @@ namespace CE
         return 0;
     }
 
+    void FScrollBox::ClampTranslation()
+    {
+        FWidget* child = GetChild();
+        if (!child)
+            return;
+
+        f32 scrollBarSection = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+
+        Vec2 translation = child->Translation();
+
+        if (isVerticalScrollVisible)
+        {
+            if (-translation.y < 0)
+            {
+                translation.y = 0;
+            }
+            else if (-translation.y > (child->computedSize.y - computedSize.y))
+            {
+                translation.y = -(child->computedSize.y - computedSize.y);
+            }
+        }
+
+        if (isHorizontalScrollVisible)
+        {
+	        if (-translation.x < 0)
+	        {
+                translation.x = 0;
+	        }
+            else if (-translation.x > (child->computedSize.x - computedSize.x))
+            {
+                translation.x = -(child->computedSize.x - computedSize.x);
+            }
+        }
+
+        if (isVerticalScrollVisible || isHorizontalScrollVisible)
+        {
+            child->Translation(translation);
+        }
+    }
+
     FScrollBox::Self& FScrollBox::NormalizedScrollX(f32 value)
     {
         value = Math::Clamp01(value);

@@ -58,7 +58,7 @@ namespace CE
 
         FUSION_PROPERTY(f32, Opacity);
 
-        FUSION_FRIENDS;
+
         FUSION_WIDGET;
     };
     

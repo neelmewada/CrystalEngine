@@ -185,7 +185,9 @@ namespace CE
         // - Internal Methods -
 
         FDrawItem2D& DrawCustomItem(FDrawType drawType, Vec2 pos, Vec2 size);
-        void DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
+        bool DrawShape(const FShape& shape, Vec2 pos, Vec2 size);
+
+        bool IsCulled(Vec2 pos, Vec2 quadSize);
 
         // - Config -
 

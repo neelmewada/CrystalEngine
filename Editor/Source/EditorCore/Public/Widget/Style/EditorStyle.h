@@ -53,13 +53,7 @@ namespace CE::Editor
 		FMenuBarStyle* menuBar = nullptr;
 
 		FIELD()
-		Color scrollBarBackground = Color::RGBA(50, 50, 50);
-
-		FIELD()
-		Color scrollBarColor = Color::RGBA(255, 255, 255, 100);
-
-		FIELD()
-		Color scrollBarHoverColor = Color::RGBA(255, 255, 255, 140);
+		FScrollBoxStyle* scrollBox = nullptr;
 
 		FIELD()
 		FToolWindowStyle* toolWindow = nullptr;

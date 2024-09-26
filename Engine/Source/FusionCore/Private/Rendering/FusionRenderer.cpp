@@ -416,7 +416,7 @@ namespace CE
 		ZoneScoped;
 
 		if (text.IsEmpty())
-			return Vec2();
+			return {};
 
 		FFontManager* fontManager = FusionApplication::Get()->fontManager;
 
@@ -435,7 +435,7 @@ namespace CE
 
 		FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
 		if (fontAtlas == nullptr)
-			return Vec2();
+			return {};
 
 		const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
@@ -470,7 +470,7 @@ namespace CE
 
 				if (!shapeRect.Overlaps(clipRect))
 				{
-					return Vec2();
+					return {};
 				}
 			}
 		}
@@ -647,10 +647,10 @@ namespace CE
 		lineItemList.Insert(lineItem);
 	}
 
-	void FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 quadSize)
+	bool FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 quadSize)
 	{
 		if (quadSize.x <= 0 || quadSize.y <= 0)
-			return;
+			return false;
 
 		ZoneScoped;
 
@@ -672,7 +672,7 @@ namespace CE
 
 				if (!shapeRect.Overlaps(clipRect))
 				{
-					return;
+					return false;
 				}
 			}
 		}
@@ -830,9 +830,39 @@ namespace CE
 			break;
 		}
 
-		drawItem.shapeIndex = shapeItemList.GetCount();
+		drawItem.shapeIndex = (uint)shapeItemList.GetCount();
 
 		shapeItemList.Insert(shapeItem);
+
+		return true;
+	}
+
+	bool FusionRenderer::IsCulled(Vec2 pos, Vec2 quadSize)
+	{
+		if (!clipItemStack.IsEmpty())
+		{
+			// CPU culling
+
+			Vec2 globalPos = coordinateSpaceStack.Last() * Vec4(pos.x, pos.y, 0, 1);
+
+			for (int i = clipItemStack.GetCount() - 1; i >= 0; --i)
+			{
+				int clipIndex = clipItemStack[i];
+
+				Matrix4x4 clipTransform = clipItemList[clipIndex].clipTransform.GetInverse();
+				Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
+
+				Rect shapeRect = Rect::FromSize(globalPos, quadSize);
+				Rect clipRect = Rect::FromSize(clipPos, clipItemList[clipIndex].size);
+
+				if (!shapeRect.Overlaps(clipRect))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	///////////////////////////////////////////////

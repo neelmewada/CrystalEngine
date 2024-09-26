@@ -73,10 +73,14 @@ namespace CE::Editor
 		highlightedButton->borderColor = Color::RGBA(24, 24, 24);
     	highlightedButton->borderWidth = 1.0f;
 
+		if (!scrollBox)
+		{
+			scrollBox = CreateObject<FScrollBoxStyle>(this, "ScrollBox");
+			Add(scrollBox);
+		}
+
 		GetDefaultWidget<FScrollBox>()
-			.ScrollBarBackground(scrollBarBackground)
-			.ScrollBarBrush(scrollBarColor)
-			.ScrollBarHoverBrush(scrollBarHoverColor)
+			.Style(this, scrollBox->GetName())
 			;
 
 		if (!windowCloseButton)
@@ -214,8 +218,8 @@ namespace CE::Editor
 			Add("TabView.ProjectBrowser", projectBrowserTabView);
 		}
 
-		projectBrowserTabView->tabItemActiveBackground = Color::RGBA(50, 50, 50);
-		projectBrowserTabView->tabItemHoverBackground = Color::RGBA(40, 40, 40);
+		projectBrowserTabView->tabItemActiveBackground = Color::RGBA(40, 40, 40);
+		projectBrowserTabView->tabItemHoverBackground = Color::RGBA(36, 36, 36);
 		projectBrowserTabView->tabItemBackground = Color::RGBA(26, 26, 26);
 		projectBrowserTabView->tabItemShape = FRoundedRectangle(5, 5, 0, 0);
 

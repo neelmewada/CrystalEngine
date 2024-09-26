@@ -38,17 +38,19 @@ namespace CE
 
         // - Draw API -
 
-        void DrawShape(const Rect& rect, const FShape& shape);
+        bool DrawShape(const Rect& rect, const FShape& shape);
 
-        void DrawRect(const Rect& rect);
+        bool DrawRect(const Rect& rect);
 
-        void DrawCircle(const Rect& rect);
+        bool DrawCircle(const Rect& rect);
 
-        void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
+        bool DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
 
         void DrawLine(const Vec2& startPos, const Vec2& endPos);
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+
+        bool IsCulled(Vec2 pos, Vec2 quadSize);
 
     private:
 

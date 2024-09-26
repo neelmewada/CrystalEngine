@@ -19,6 +19,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        FListItemWidget& GenerateRow(FListItem* item, FListView* view);
+
         FUNCTION()
         void ValidateInputFields(FTextInput* inputField);
 
@@ -35,6 +37,12 @@ namespace CE::Editor
         void OpenProject();
 
         Array<IO::Path> recentProjectPaths{};
+
+        FIELD()
+        RecentProjectsModel* recentProjectsModel = nullptr;
+
+        FListView* recentsList = nullptr;
+        FListView* newProjectList = nullptr;
 
         /*CWidget* newErrorBox = nullptr;
         CLabel* newErrorLabel = nullptr;

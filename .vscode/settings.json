@@ -15,6 +15,8 @@
         "CORERPI_API=",
         "CORERHI_API=",
         "EDITORCORE_API=",
+        "EDITORSYSTEM_API=",
+        "CRYSTALEDITOR_API=",
     ],
     "esbonio.sphinx.confDir": "",
     "binary-file-viewer.parserFolders": [
