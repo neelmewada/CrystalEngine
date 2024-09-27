@@ -193,8 +193,11 @@ namespace CE::RPI
 				continue;
 			}
 
-			auto module = RHI::gDynamicRHI->CreateShaderModule(desc.moduleDesc[i]);
-			modulesByStage[desc.moduleDesc[i].stage] = module;
+			auto moduleDesc = desc.moduleDesc[i];
+			moduleDesc.debugName = desc.shaderName;
+
+			auto module = RHI::gDynamicRHI->CreateShaderModule(moduleDesc);
+			modulesByStage[moduleDesc.stage] = module;
 			
 			pipelineDesc.shaderStages.Add({});
 			pipelineDesc.shaderStages.Top().entryPoint = desc.entryPoints[i];

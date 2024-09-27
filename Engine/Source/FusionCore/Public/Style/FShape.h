@@ -12,8 +12,10 @@ namespace CE
     };
     ENUM_CLASS(FShapeType);
 
+    STRUCT()
     struct FUSIONCORE_API FShape final
     {
+        CE_STRUCT(FShape)
     public:
 
         FShape() = default;
@@ -38,7 +40,10 @@ namespace CE
 
     private:
 
+        FIELD()
         FShapeType shapeType = FShapeType::None;
+
+        FIELD()
         Vec4 cornerRadius{};
 
     };

@@ -20,10 +20,11 @@ namespace CE
 
     protected:
 
-        
+        void OnPaint(FPainter* painter) override;
 
     public: // - Fusion Properties - 
 
+        FUSION_LAYOUT_PROPERTY(f32, Gap);
 
         FUSION_WIDGET;
     };

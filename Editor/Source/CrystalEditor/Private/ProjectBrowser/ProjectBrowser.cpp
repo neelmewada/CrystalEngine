@@ -53,12 +53,14 @@ namespace CE::Editor
                         .ContentHAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
                         .HAlign(HAlign::Fill)
-                        .Padding(Vec4(1, 1, 1, 1) * 10)
+                        .Padding(Vec4(1, 1, 1, 1) * 20)
                         (
-                            FNew(FListView, recentsList)
-                            .OnGenerateRow(MemberDelegate(&Self::GenerateRow, this))
+                            FAssignNew(FListView, recentsList)
+                            .GenerateRowDelegate(MemberDelegate(&Self::GenerateRecentProjectRow, this))
+                            .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
                             .HAlign(HAlign::Fill)
-                            .Height(400)
+                            .Height(350)
+                            .Style("ProjectBrowserWindow.ListView")
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10),
@@ -74,10 +76,12 @@ namespace CE::Editor
                         .ContentHAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
                         .HAlign(HAlign::Fill)
-                        .Padding(Vec4(1, 1, 1, 1) * 10)
+                        .Padding(Vec4(1, 1, 1, 1) * 20)
                         (
-                            FNew(FLabel)
-                            .Text("Create a new project here...")
+                            FAssignNew(FListView, newProjectList)
+                            .HAlign(HAlign::Fill)
+                            .Height(360)
+                            .Style("ProjectBrowserWindow.ListView")
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10)
@@ -300,19 +304,21 @@ namespace CE::Editor
 		*/
     }
 
-    FListItemWidget& ProjectBrowser::GenerateRow(FListItem* item, FListView* view)
+    FListItemWidget& ProjectBrowser::GenerateRecentProjectRow(FListItem* item, FListView* view)
     {
+	    auto projectItem = static_cast<RecentProjectItem*>(item);
+
         return FNew(FListItemWidget)
             .Child(
                 FNew(FVerticalStack)
                 .Padding(Vec4(1, 1, 1, 1) * 10)
                 (
                     FNew(FLabel)
-                    .Text("Title")
+                    .Text(projectItem->title)
                     .FontSize(15),
 
                     FNew(FLabel)
-                    .Text("Item description goes here.")
+                    .Text(projectItem->description)
                 )
             )
             .As<FListItemWidget>();
@@ -324,70 +330,6 @@ namespace CE::Editor
             "Game", "Engine", "Editor", "Plugin"
         };
 
-        /*if (tabWidget->GetActiveTabIndex() == 0)
-        {
-            defer(
-                openButton->SetInteractable(isValidInput);
-				openErrorBox->SetVisible(!isValidInput);
-            );
-
-            // Recent Projects tab
-            IO::Path location = openProjectLocation->GetText();
-            if (location.Exists() && location.IsDirectory())
-            {
-                isValidInput = false;
-                openErrorLabel->SetText("Please enter valid project location.");
-                return;
-            }
-
-            if (location.GetExtension() != ProjectManager::Get()->GetProjectFileExtension())
-            {
-                isValidInput = false;
-                openErrorLabel->SetText("Please enter valid project location.");
-	            return;
-            }
-
-            isValidInput = true;
-        }
-        else // New Project tab
-        {
-            defer(
-                createButton->SetInteractable(isValidInput);
-				newErrorBox->SetVisible(!isValidInput);
-            );
-
-            IO::Path location = newProjectLocation->GetText();
-            if (location.Exists() && !location.IsDirectory())
-            {
-                isValidInput = false;
-                newErrorLabel->SetText("The project location entered is not a valid directory");
-	            return;
-            }
-
-            projectName = newProjectName->GetText();
-            if (!IsValidObjectName(projectName) || projectName.GetLength() > 24)
-            {
-                isValidInput = false;
-                newErrorLabel->SetText("The project name should be under 24 letters and should not have special characters except underscore (_).");
-	            return;
-            }
-
-            if ((location / projectName).Exists())
-            {
-                isValidInput = false;
-                newErrorLabel->SetText("The project with given name already exists at specified location.");
-                return;
-            }
-
-            if (reservedNames.Exists(projectName))
-            {
-                isValidInput = false;
-                newErrorLabel->SetText(String::Format("The project name {} is reserved. Please use something else.", projectName));
-	            return;
-            }
-            
-            isValidInput = true;
-        }*/
     }
 
     void ProjectBrowser::OnProjectTemplateSelectionChanged()
@@ -397,11 +339,7 @@ namespace CE::Editor
 
     void ProjectBrowser::OnRecentProjectSelectionChanged()
     {
-        //const auto& selection = recentsList->GetSelection();
-        //if (selection.IsEmpty())
-        //    return;
-
-
+        
     }
 
     void ProjectBrowser::CreateProject()

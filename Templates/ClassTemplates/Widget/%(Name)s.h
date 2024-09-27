@@ -8,9 +8,11 @@ namespace %(NameSpace)s
         CE_CLASS(%(Name)s, FWidget)
     public:
 
-        %(Name)s();
+        // - Public API -
 
     protected:
+
+        %(Name)s();
 
         void Construct() override;
 

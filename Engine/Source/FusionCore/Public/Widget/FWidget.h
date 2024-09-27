@@ -123,9 +123,12 @@ namespace CE
         virtual void ClearStyle();
 
         bool IsFocused() const { return isFocused; }
+        bool IsCulled() const { return isCulled; }
 
-        virtual bool IsSizeDependendentOnContent() const { return true; }
-        virtual bool IsSizeDependendentOnParent() const { return true; }
+        bool IntrinsicSizeExists();
+
+        virtual bool IsSizeDependentOnContent() const { return true; }
+        virtual bool IsSizeDependentOnParent() const { return true; }
 
         void Focus();
         void Unfocus();

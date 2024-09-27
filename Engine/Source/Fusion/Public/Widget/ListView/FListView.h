@@ -17,15 +17,15 @@ namespace CE
         CE_CLASS(FListView, FStyledWidget)
     public:
 
-        typedef ScriptDelegate<FListItemWidget&(FListItem*, FListView*)> GenerateRowCallback;
-
-        FListView();
+        typedef Delegate<FListItemWidget&(FListItem*, FListView*)> GenerateRowCallback;
 
         bool HasScrollBox() const { return scrollBox != nullptr; }
 
         FScrollBox& GetScrollBox() const { return *scrollBox; }
 
     protected:
+
+        FListView();
 
         void Construct() override final;
 
@@ -34,18 +34,22 @@ namespace CE
         void RegenerateRows();
 
         FIELD()
-        GenerateRowCallback m_OnGenerateRow;
+        GenerateRowCallback m_GenerateRowDelegate;
 
-        FVerticalStack* content = nullptr;
+        FListViewContainer* content = nullptr;
         FScrollBox* scrollBox = nullptr;
+
+        Array<FListItemWidget*> itemWidgets;
 
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(FSelectionMode, SelectionMode);
 
+        FUSION_PROPERTY_WRAPPER(Gap, content);
+
         FUSION_DATA_PROPERTY(Array<FListItem*>, ItemList);
 
-        Self& OnGenerateRow(const GenerateRowCallback& callback);
+        Self& GenerateRowDelegate(const GenerateRowCallback& callback);
 
         FUSION_WIDGET;
     };

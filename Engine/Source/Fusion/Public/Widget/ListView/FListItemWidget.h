@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
     CLASS()
     class FUSION_API FListItemWidget : public FStyledWidget
     {
@@ -12,10 +13,16 @@ namespace CE
 
     protected:
 
+        void HandleEvent(FEvent* event) override;
+
+        FListView* listView = nullptr;
+
     public: // - Fusion Properties - 
 
 
         FUSION_WIDGET;
+        friend class FListItemStyle;
+        friend class FListView;
     };
     
 }

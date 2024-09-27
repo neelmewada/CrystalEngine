@@ -34,19 +34,37 @@ namespace CE::Editor
         };
 
         Array<FListItem*> items = GetItemList();
-        items.Reserve(Math::Max(items.GetSize(), recentProjectPaths.GetSize()));
+        int maxCount = Math::Max(items.GetSize(), recentProjectPaths.GetSize());
+        items.Reserve(maxCount);
 
-        for (int i = 0; i < Math::Max(items.GetSize(), recentProjectPaths.GetSize()); ++i)
+        for (int i = 0; i < maxCount; ++i)
         {
-	        if (i < items.GetSize())
-	        {
-                
-	        }
-            else
+            if (i < recentProjectPaths.GetSize())
             {
-	            
+                RecentProjectItem* item = nullptr;
+	            if (i < items.GetSize())
+	            {
+                    item = static_cast<RecentProjectItem*>(items[i]);
+                    item->title = recentProjectPaths[i].GetString();
+                    item->description = "This is the project description!";
+	            }
+                else
+                {
+                    item = CreateObject<RecentProjectItem>(this, "RecentItem");
+                    item->title = recentProjectPaths[i].GetString();
+                    item->description = "This is the project description!";
+                    items.Add(item);
+                }
+            }
+            else if (i < items.GetSize())
+            {
+                RecentProjectItem* item = static_cast<RecentProjectItem*>(items[i]);
+                items.Remove(item);
+                item->Destroy();
             }
         }
+
+        SetItemList(items);
     }
 
 } // namespace CE::Editor

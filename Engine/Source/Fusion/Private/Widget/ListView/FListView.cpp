@@ -16,7 +16,7 @@ namespace CE
             .VerticalScroll(true)
             .HorizontalScroll(false)
             .Child(
-                FAssignNew(FVerticalStack, content)
+                FAssignNew(FListViewContainer, content)
             )
         );
     }
@@ -35,16 +35,33 @@ namespace CE
 
     void FListView::RegenerateRows()
     {
-        // TODO: Regenerate all rows while keeping scroll position intact
+        // Destroy previous FListItemWidget's
 
-        
+        while (content->GetChildCount() > 0)
+        {
+            content->GetChild(0)->Destroy();
+        }
+
+        itemWidgets.Clear();
+
+        if (m_GenerateRowDelegate.IsValid())
+        {
+            for (FListItem* item : m_ItemList)
+            {
+                FListItemWidget& itemWidget = m_GenerateRowDelegate(item, this);
+                itemWidget.listView = this;
+                content->AddChild(&itemWidget);
+                itemWidgets.Add(&itemWidget);
+            }
+        }
 
         //scrollBox->ClampTranslation();
+        MarkLayoutDirty();
     }
 
-    FListView::Self& FListView::OnGenerateRow(const GenerateRowCallback& callback)
+    FListView::Self& FListView::GenerateRowDelegate(const GenerateRowCallback& callback)
     {
-        m_OnGenerateRow = callback;
+        m_GenerateRowDelegate = callback;
         RegenerateRows();
         return *this;
     }

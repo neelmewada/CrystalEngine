@@ -234,6 +234,16 @@ namespace CE::Editor
 		}
 
 		projectBrowserWindow->background = Color::RGBA(26, 26, 26);
+
+		if (!projectBrowserListView)
+		{
+			projectBrowserListView = CreateObject<FStyledWidgetStyle>(this, "ProjectBrowserListView");
+			Add("ProjectBrowserWindow.ListView", projectBrowserListView);
+		}
+
+		projectBrowserListView->background = Color::RGBA(26, 26, 26);
+		projectBrowserListView->borderWidth = 1.0f;
+		projectBrowserListView->borderColor = Color::RGBA(56, 56, 56);
     }
 
 } // namespace CE::Editor

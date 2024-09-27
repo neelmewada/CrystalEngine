@@ -7,6 +7,7 @@ namespace CE::Vulkan
 		: device(device)
 	{
 		this->stage = desc.stage;
+		this->name = desc.debugName;
 		this->isValid = false;
 
 		if (desc.byteSize == 0 || desc.byteCode == nullptr)
@@ -25,6 +26,10 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create Vulkan shader module. Error code {}", (int)result);
 			return;
 		}
+
+#if PLATFORM_DESKTOP && !CE_BUILD_RELEASE
+		device->SetObjectDebugName((uint64_t)shaderModule, VK_OBJECT_TYPE_SHADER_MODULE, name.GetCString());
+#endif
 
 		isValid = true;
 	}

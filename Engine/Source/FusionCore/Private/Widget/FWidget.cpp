@@ -108,6 +108,11 @@ namespace CE
         m_Style = nullptr;
     }
 
+    bool FWidget::IntrinsicSizeExists()
+    {
+        return intrinsicSize.GetSqrMagnitude() <= std::numeric_limits<f32>::epsilon();
+    }
+
     void FWidget::Focus()
     {
         FFusionContext* context = GetContext();

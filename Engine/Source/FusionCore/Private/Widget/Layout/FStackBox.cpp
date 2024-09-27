@@ -77,11 +77,6 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "RootBox")
-		{
-			String::IsAlphabet('a');
-		}
-
 		Super::PlaceSubWidgets();
 
 		if (children.IsEmpty())

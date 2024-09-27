@@ -19,7 +19,7 @@ namespace CE::Editor
 
         void Construct() override;
 
-        FListItemWidget& GenerateRow(FListItem* item, FListView* view);
+        FListItemWidget& GenerateRecentProjectRow(FListItem* item, FListView* view);
 
         FUNCTION()
         void ValidateInputFields(FTextInput* inputField);

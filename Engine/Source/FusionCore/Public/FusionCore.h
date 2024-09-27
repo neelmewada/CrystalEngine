@@ -71,6 +71,7 @@ namespace CE
 #include "Style/FComboBoxStyle.h"
 #include "Style/FTabViewStyle.h"
 #include "Style/FMenuStyle.h"
+#include "Style/FStyledWidgetStyle.h"
 #include "Style/FScrollBoxStyle.h"
 #include "Style/FStyleSet.h"
 #include "Style/FStyleManager.h"

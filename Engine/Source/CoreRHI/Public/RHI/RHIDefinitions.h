@@ -330,6 +330,7 @@ namespace CE::RHI
 
 	struct ShaderModuleDescriptor
 	{
+        Name debugName = nullptr;
 		String name = "";
 		ShaderStage stage = ShaderStage::None;
 		void* byteCode = nullptr;

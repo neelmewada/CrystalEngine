@@ -60,7 +60,7 @@
 	modelPtr->On##propertyName##Updated())
 
 #define BIND_PROPERTY_R(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
-	FUNCTION_BINDING(model, Get##propertyName),\
+	FUNCTION_BINDING(modelPtr, Get##propertyName),\
 	nullptr,\
 	modelPtr->On##propertyName##Updated())
 

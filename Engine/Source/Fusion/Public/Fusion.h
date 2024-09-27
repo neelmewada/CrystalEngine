@@ -4,6 +4,7 @@
 
 #include "Window/FToolWindow.h"
 #include "Style/FToolWindowStyle.h"
+#include "Style/FListItemStyle.h"
 
 #include "Widget/ListView/FListViewModel.h"
 #include "Widget/ListView/FListItem.h"

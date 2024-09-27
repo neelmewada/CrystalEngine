@@ -312,7 +312,10 @@ namespace CE
 
             for (int i = 0; i < invocationList.GetSize(); ++i)
             {
-                invocationList[i].Invoke(args);
+                if (invocationList[i].IsBound())
+                {
+	                invocationList[i].Invoke(args);
+                }
             }
 
             isBroadcasting = false;

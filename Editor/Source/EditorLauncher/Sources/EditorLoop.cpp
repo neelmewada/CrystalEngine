@@ -295,6 +295,9 @@ void EditorLoop::PreShutdown()
 
 	EditorStyle::Shutdown();
 
+	fApp->Shutdown();
+	fApp->Destroy();
+
 	gEngine->PreShutdown();
 
 	// fApp is Shutdown and destroyed by RendererSubsystem, no need to do it again here.

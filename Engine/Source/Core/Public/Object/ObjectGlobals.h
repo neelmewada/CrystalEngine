@@ -113,14 +113,10 @@ namespace CE
 	{
 		if constexpr (TIsSameType<TRetType, void>::Value)
 		{
-			if (!isBound)
-				return;
 			Invoke(Array<Variant>{ args... });
 		}
 		else
 		{
-			if (!isBound)
-				return {};
             return Invoke(Array<Variant>{ args... }).template GetValue<TRetType>();
 		}
 	}

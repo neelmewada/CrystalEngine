@@ -20,8 +20,6 @@ namespace CE
         if (m_Opacity < 0.0001f)
             return;
 
-        bool isButton = IsOfType<FButton>();
-
         if (m_Opacity < 1.0f)
         {
 	        painter->PushOpacity(m_Opacity);
@@ -64,8 +62,12 @@ namespace CE
                 break;
             }
 
-            painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
+            isCulled = !painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
 	    }
+        else
+        {
+            isCulled = painter->IsCulled(computedPosition, computedSize);
+        }
 
         if (transformChanged)
         {

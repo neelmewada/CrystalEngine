@@ -8,9 +8,11 @@ namespace CE
         CE_CLASS(%(Name)s, Object)
     public:
 
-        %(Name)s();
-
         virtual ~%(Name)s();
+
+    protected:
+
+        %(Name)s();
 
     };
     
