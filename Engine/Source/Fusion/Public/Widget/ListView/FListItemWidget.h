@@ -25,6 +25,8 @@ namespace CE
 
         bool IsSelected() const { return EnumHasFlag(itemState, FListItemState::Selected); }
 
+        void Select();
+
     protected:
 
         void HandleEvent(FEvent* event) override;

@@ -33,6 +33,26 @@ namespace CE
         }
     }
 
+    void FListView::OnItemSelected(FListItemWidget* selectedItem)
+    {
+        if (m_SelectionMode == FSelectionMode::None)
+            return;
+
+        for (FListItemWidget* item : itemWidgets)
+        {
+	        if (item != selectedItem && item->IsSelected())
+	        {
+                item->itemState &= ~FListItemState::Selected;
+                item->ApplyStyle();
+	        }
+            else if (item == selectedItem && !item->IsSelected())
+            {
+                item->itemState |= FListItemState::Selected;
+                item->ApplyStyle();
+            }
+        }
+    }
+
     void FListView::RegenerateRows()
     {
         // Destroy previous FListItemWidget's

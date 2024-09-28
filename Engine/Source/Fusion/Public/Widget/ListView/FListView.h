@@ -31,6 +31,8 @@ namespace CE
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
+        void OnItemSelected(FListItemWidget* selectedItem);
+
         void RegenerateRows();
 
         FIELD()
@@ -52,6 +54,8 @@ namespace CE
         Self& GenerateRowDelegate(const GenerateRowCallback& callback);
 
         FUSION_WIDGET;
+        friend class FListItemWidget;
+        friend class FListViewStyle;
     };
     
 }

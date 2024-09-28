@@ -8,6 +8,14 @@ namespace CE
 
     }
 
+    void FListItemWidget::Select()
+    {
+        if (!listView)
+            return;
+
+        listView->OnItemSelected(this);
+    }
+
     void FListItemWidget::HandleEvent(FEvent* event)
     {
         if (event->IsMouseEvent() && listView && listView->SelectionMode() != FSelectionMode::None)
