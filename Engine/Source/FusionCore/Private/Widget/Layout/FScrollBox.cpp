@@ -14,11 +14,16 @@ namespace CE
         m_ScrollBarShape = FRoundedRectangle(4);
         m_ScrollBarMargin = 2.5f;
 
-        m_VerticalScrollSensitivity = m_HorizontalScrollSensitivity = 10.0f;
+        m_VerticalScrollSensitivity = m_HorizontalScrollSensitivity = 15.0f;
     }
 
     void FScrollBox::CalculateIntrinsicSize()
     {
+        if (GetName() == "ListViewScrollBox")
+        {
+            String::IsAlphabet('a');
+        }
+
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right,
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
@@ -40,6 +45,11 @@ namespace CE
 
     void FScrollBox::PlaceSubWidgets()
     {
+        if (GetName() == "ListViewScrollBox")
+        {
+            String::IsAlphabet('a');
+        }
+
         ApplySizeConstraints();
         UpdateLocalTransform();
 
@@ -70,10 +80,20 @@ namespace CE
         CE::VAlign childVAlign = child->VAlign();
         CE::HAlign childHAlign = child->HAlign();
 
+        if (VerticalScroll() && childVAlign == VAlign::Auto)
+        {
+            childVAlign = VAlign::Top;
+        }
+        if (HorizontalScroll() && childHAlign == HAlign::Auto)
+        {
+            childHAlign = HAlign::Left;
+        }
+
         switch (childVAlign)
         {
         case VAlign::Auto:
         case VAlign::Fill:
+            break;
         case VAlign::Top:
             child->computedSize.height = childIntrinsicSize.height;
             child->computedPosition.y = m_Padding.top + childMargin.top;
@@ -92,6 +112,7 @@ namespace CE
         {
         case HAlign::Auto:
         case HAlign::Fill:
+            break;
         case HAlign::Left:
             child->computedSize.width = childIntrinsicSize.width;
             child->computedPosition.x = m_Padding.left + childMargin.left;

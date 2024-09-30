@@ -15,6 +15,9 @@ namespace CE
         FIELD()
         String title = "";
 
+        FIELD()
+        String description = "";
+
     };
     
 } // namespace CE

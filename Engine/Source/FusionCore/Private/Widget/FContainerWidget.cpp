@@ -64,6 +64,16 @@ namespace CE
         return false;
     }
 
+    void FContainerWidget::ApplyStyleRecursively()
+    {
+	    Super::ApplyStyleRecursively();
+
+        for (FWidget* widget : children)
+        {
+            widget->ApplyStyleRecursively();
+        }
+    }
+
     void FContainerWidget::HandleEvent(FEvent* event)
     {
         if (event->stopPropagation)

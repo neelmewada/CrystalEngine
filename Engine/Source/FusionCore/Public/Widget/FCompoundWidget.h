@@ -23,6 +23,8 @@ namespace CE
 
         bool ChildExistsRecursive(FWidget* child) override;
 
+        void ApplyStyleRecursively() override;
+
         void HandleEvent(FEvent* event) override;
 
         void ClearStyle() override;

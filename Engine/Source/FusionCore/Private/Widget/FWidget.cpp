@@ -96,7 +96,7 @@ namespace CE
 
     void FWidget::OnAttachedToParent(FWidget* parent)
     {
-        ApplyStyle();
+        ApplyStyleRecursively();
     }
 
     void FWidget::OnDetachedFromParent(FWidget* parent)
@@ -254,6 +254,11 @@ namespace CE
 
     void FWidget::ApplyStyle()
     {
+        if (GetName() == "NewProjectListView")
+        {
+            String::IsAlphabet('a');
+        }
+
         if (styleKey.IsValid() && m_Style == nullptr)
         {
             Style(styleKey);
@@ -262,6 +267,11 @@ namespace CE
         {
             Style(m_Style);
         }
+    }
+
+    void FWidget::ApplyStyleRecursively()
+    {
+        ApplyStyle();
     }
 
     void FWidget::SetContextRecursively(FFusionContext* context)

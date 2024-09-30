@@ -28,8 +28,8 @@ namespace CE
         {
             FListItemWidget& itemWidget = *itemWidgetPtr;
 
-            FBrush bg = background;
-            Color border = borderColor;
+            FBrush bg = itemBackground;
+            Color border = itemBorderColor;
 
             if (itemWidget.IsSelected())
             {
@@ -44,7 +44,7 @@ namespace CE
 
             itemWidget
                 .Background(bg)
-                .Border(border, borderWidth)
+                .Border(border, itemBorderWidth)
                 ;
         }
     }

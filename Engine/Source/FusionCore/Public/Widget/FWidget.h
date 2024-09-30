@@ -42,6 +42,8 @@ namespace CE
 
         virtual void ApplyStyle();
 
+        virtual void ApplyStyleRecursively();
+
         template<typename... TArgs>
         struct TValidate_Children : TFalseType
         {};

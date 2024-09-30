@@ -237,13 +237,21 @@ namespace CE::Editor
 
 		if (!projectBrowserListView)
 		{
-			projectBrowserListView = CreateObject<FStyledWidgetStyle>(this, "ProjectBrowserListView");
+			projectBrowserListView = CreateObject<FListViewStyle>(this, "ProjectBrowserListView");
 			Add("ProjectBrowserWindow.ListView", projectBrowserListView);
 		}
 
 		projectBrowserListView->background = Color::RGBA(26, 26, 26);
 		projectBrowserListView->borderWidth = 1.0f;
 		projectBrowserListView->borderColor = Color::RGBA(56, 56, 56);
+
+		projectBrowserListView->itemBackground = Color::Clear();
+		projectBrowserListView->hoveredItemBackground = Color::RGBA(0, 112, 224);
+		projectBrowserListView->selectedItemBackground = Color::RGBA(0, 112, 224);
+
+		projectBrowserListView->itemBorderWidth = 0.0f;
+		projectBrowserListView->itemBorderColor = Color::Clear();
+
     }
 
 } // namespace CE::Editor

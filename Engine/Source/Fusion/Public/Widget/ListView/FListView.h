@@ -29,6 +29,8 @@ namespace CE
 
         void Construct() override final;
 
+        void OnPostComputeLayout() override;
+
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void OnItemSelected(FListItemWidget* selectedItem);

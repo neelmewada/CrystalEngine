@@ -10,11 +10,6 @@ namespace CE
 
     void FCompoundWidget::CalculateIntrinsicSize()
     {
-        if (GetName() == "TabViewContainer")
-        {
-            String::IsAlphabet('a');
-        }
-
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right,
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
@@ -34,11 +29,6 @@ namespace CE
 
     void FCompoundWidget::PlaceSubWidgets()
     {
-        if (GetName() == "TabViewContainer")
-        {
-            String::IsAlphabet('a');
-        }
-
         Super::PlaceSubWidgets();
 
         if (!m_Child || !m_Child->Enabled())
@@ -158,6 +148,16 @@ namespace CE
             return true;
 
         return m_Child != nullptr && m_Child->ChildExistsRecursive(child);
+    }
+
+    void FCompoundWidget::ApplyStyleRecursively()
+    {
+	    Super::ApplyStyleRecursively();
+
+        if (m_Child)
+        {
+            m_Child->ApplyStyleRecursively();
+        }
     }
 
     void FCompoundWidget::HandleEvent(FEvent* event)

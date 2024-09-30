@@ -21,6 +21,8 @@ namespace CE::Editor
 
         FListItemWidget& GenerateRecentProjectRow(FListItem* item, FListView* view);
 
+        FListItemWidget& GenerateNewProjectRow(FListItem* item, FListView* view);
+
         FUNCTION()
         void ValidateInputFields(FTextInput* inputField);
 
@@ -39,7 +41,10 @@ namespace CE::Editor
         Array<IO::Path> recentProjectPaths{};
 
         FIELD()
-        RecentProjectsModel* recentProjectsModel = nullptr;
+        RecentProjectsListModel* recentProjectsModel = nullptr;
+
+        FIELD()
+        NewProjectListModel* newProjectModel = nullptr;
 
         FListView* recentsList = nullptr;
         FListView* newProjectList = nullptr;

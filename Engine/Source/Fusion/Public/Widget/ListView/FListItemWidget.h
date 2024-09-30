@@ -21,6 +21,8 @@ namespace CE
 
         // - Public API -
 
+        bool SupportsMouseEvents() const override { return true; }
+
         bool IsHovered() const { return EnumHasFlag(itemState, FListItemState::Hovered); }
 
         bool IsSelected() const { return EnumHasFlag(itemState, FListItemState::Selected); }

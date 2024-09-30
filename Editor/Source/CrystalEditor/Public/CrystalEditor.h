@@ -10,7 +10,8 @@
 #include "EditorSystem.h"
 
 // Project Browser
-#include "ProjectBrowser/RecentProjectsModel.h"
+#include "ProjectBrowser/RecentProjectsListModel.h"
+#include "ProjectBrowser/NewProjectListModel.h"
 #include "ProjectBrowser/ProjectBrowser.h"
 
 // ----------------------------------------

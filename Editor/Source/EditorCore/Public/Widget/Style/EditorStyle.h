@@ -67,7 +67,7 @@ namespace CE::Editor
 		FTabViewStyle* projectBrowserTabView = nullptr;
 
 		FIELD()
-		FStyledWidgetStyle* projectBrowserListView = nullptr;
+		FListViewStyle* projectBrowserListView = nullptr;
 
 	};
 

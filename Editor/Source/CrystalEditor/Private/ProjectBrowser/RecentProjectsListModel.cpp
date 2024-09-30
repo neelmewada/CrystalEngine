@@ -7,17 +7,17 @@ namespace CE::Editor
 	    
     }
 
-    RecentProjectsModel::RecentProjectsModel()
+    RecentProjectsListModel::RecentProjectsListModel()
     {
 
     }
 
-    RecentProjectsModel::~RecentProjectsModel()
+    RecentProjectsListModel::~RecentProjectsListModel()
     {
         
     }
 
-    void RecentProjectsModel::ModelReset()
+    void RecentProjectsListModel::ModelReset()
     {
         ProjectManager* projectManager = ProjectManager::Get();
 
@@ -31,6 +31,13 @@ namespace CE::Editor
             "C:/Projects/MyProj_3",
             "C:/Projects/MyProj_4",
             "C:/Projects/MyProj_5",
+            "C:/Projects/MyProj_6",
+            "C:/Projects/MyProj_7",
+            "C:/Projects/MyProj_8",
+            "C:/Projects/MyProj_9",
+            "C:/Projects/MyProj_10",
+            "C:/Projects/MyProj_11",
+            "C:/Projects/MyProj_12",
         };
 
         Array<FListItem*> items = GetItemList();

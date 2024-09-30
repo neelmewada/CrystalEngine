@@ -26,7 +26,8 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
-        recentProjectsModel = CreateObject<RecentProjectsModel>(this, "RecentProjectsModel");
+        recentProjectsModel = CreateObject<RecentProjectsListModel>(this, "RecentProjectsListModel");
+        newProjectModel = CreateObject<NewProjectListModel>(this, "NewProjectListModel");
 
         auto& self = *this;
         FTabView* tabView = nullptr;
@@ -58,6 +59,7 @@ namespace CE::Editor
                             FAssignNew(FListView, recentsList)
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateRecentProjectRow, this))
                             .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
+                            .SelectionMode(FSelectionMode::Single)
                             .HAlign(HAlign::Fill)
                             .Height(350)
                             .Style("ProjectBrowserWindow.ListView")
@@ -79,9 +81,13 @@ namespace CE::Editor
                         .Padding(Vec4(1, 1, 1, 1) * 20)
                         (
                             FAssignNew(FListView, newProjectList)
+                            .GenerateRowDelegate(MemberDelegate(&Self::GenerateNewProjectRow, this))
+                            .Bind_ItemList(BIND_PROPERTY_R(newProjectModel, ItemList))
+                            .SelectionMode(FSelectionMode::Single)
                             .HAlign(HAlign::Fill)
                             .Height(360)
                             .Style("ProjectBrowserWindow.ListView")
+                            .Name("NewProjectListView")
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10)
@@ -93,6 +99,7 @@ namespace CE::Editor
         tabView->GetTabWell()->WindowDragHitTest(true);
 
         recentProjectsModel->ModelReset();
+        newProjectModel->ModelReset();
 
         /*
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
@@ -321,7 +328,27 @@ namespace CE::Editor
                     .Text(projectItem->description)
                 )
             )
-            .As<FListItemWidget>();
+            .As<FListItemWidget>()
+    	;
+    }
+
+    FListItemWidget& ProjectBrowser::GenerateNewProjectRow(FListItem* item, FListView* view)
+    {
+        return FNew(FListItemWidget)
+			.Child(
+                FNew(FVerticalStack)
+                .Padding(Vec4(1, 1, 1, 1) * 10)
+                (
+                    FNew(FLabel)
+                    .Text(item->title)
+                    .FontSize(15),
+
+                    FNew(FLabel)
+                    .Text(item->description)
+                )
+            )
+			.As<FListItemWidget>()
+        ;
     }
 
     void ProjectBrowser::ValidateInputFields(FTextInput*)

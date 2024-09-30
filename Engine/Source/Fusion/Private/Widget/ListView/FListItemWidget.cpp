@@ -22,17 +22,27 @@ namespace CE
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 
-            if (mouseEvent->type == FEventType::MouseEnter && !IsHovered() && !IsSelected())
+            if (mouseEvent->type == FEventType::MouseEnter && !IsHovered())
             {
                 itemState |= FListItemState::Hovered;
 
-                ApplyStyle();
+                if (listView)
+                {
+	                listView->ApplyStyle();
+                }
             }
-            else if (mouseEvent->type == FEventType::MouseLeave && IsHovered() && !IsSelected())
+            else if (mouseEvent->type == FEventType::MouseLeave && IsHovered())
             {
                 itemState &= ~FListItemState::Hovered;
 
-                ApplyStyle();
+                if (listView)
+                {
+                    listView->ApplyStyle();
+                }
+            }
+            else if (mouseEvent->type == FEventType::MousePress && IsHovered() && !IsSelected() && event->sender == this)
+            {
+                Select();
             }
         }
 

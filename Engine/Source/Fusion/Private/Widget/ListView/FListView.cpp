@@ -17,8 +17,18 @@ namespace CE
             .HorizontalScroll(false)
             .Child(
                 FAssignNew(FListViewContainer, content)
+                .HAlign(HAlign::Fill)
+                .Padding(Vec4(1, 1, 1, 1) * 10)
             )
+            .HAlign(HAlign::Fill)
+            .Name("ListViewScrollBox")
         );
+    }
+
+    void FListView::OnPostComputeLayout()
+    {
+	    Super::OnPostComputeLayout();
+
     }
 
     void FListView::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -43,14 +53,14 @@ namespace CE
 	        if (item != selectedItem && item->IsSelected())
 	        {
                 item->itemState &= ~FListItemState::Selected;
-                item->ApplyStyle();
 	        }
             else if (item == selectedItem && !item->IsSelected())
             {
                 item->itemState |= FListItemState::Selected;
-                item->ApplyStyle();
             }
         }
+
+        ApplyStyle();
     }
 
     void FListView::RegenerateRows()

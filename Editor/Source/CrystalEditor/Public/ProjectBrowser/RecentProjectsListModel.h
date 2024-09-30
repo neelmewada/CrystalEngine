@@ -10,20 +10,17 @@ namespace CE::Editor
 
         RecentProjectItem();
 
-        FIELD()
-        String description = "";
-
     };
 
     CLASS()
-    class CRYSTALEDITOR_API RecentProjectsModel : public FListViewModel
+    class CRYSTALEDITOR_API RecentProjectsListModel : public FListViewModel
     {
-        CE_CLASS(RecentProjectsModel, FListViewModel)
+        CE_CLASS(RecentProjectsListModel, FListViewModel)
     public:
 
-        RecentProjectsModel();
+        RecentProjectsListModel();
 
-        virtual ~RecentProjectsModel();
+        virtual ~RecentProjectsListModel();
 
         // - Public API -
 
@@ -41,4 +38,4 @@ namespace CE::Editor
     
 } // namespace CE::Editor
 
-#include "RecentProjectsModel.rtti.h"
+#include "RecentProjectsListModel.rtti.h"
