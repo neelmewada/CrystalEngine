@@ -21,24 +21,14 @@ namespace CE::Editor
     {
         ProjectManager* projectManager = ProjectManager::Get();
 
-        //const Array<String>& recentProjectPaths = projectManager->GetRecentProjectsList();
+        const Array<String>& recentProjectList = projectManager->GetRecentProjectsList();
 
-        // TODO: Remove test data
         recentProjectPaths.Clear();
-        recentProjectPaths = {
-			"C:/Projects/MyProj_1",
-            "C:/Projects/MyProj_2",
-            "C:/Projects/MyProj_3",
-            "C:/Projects/MyProj_4",
-            "C:/Projects/MyProj_5",
-            "C:/Projects/MyProj_6",
-            "C:/Projects/MyProj_7",
-            "C:/Projects/MyProj_8",
-            "C:/Projects/MyProj_9",
-            "C:/Projects/MyProj_10",
-            "C:/Projects/MyProj_11",
-            "C:/Projects/MyProj_12",
-        };
+
+        for (const String& recentProject : recentProjectList)
+        {
+            recentProjectPaths.Add(recentProject);
+        }
 
         Array<FListItem*> items = GetItemList();
         int maxCount = Math::Max(items.GetSize(), recentProjectPaths.GetSize());

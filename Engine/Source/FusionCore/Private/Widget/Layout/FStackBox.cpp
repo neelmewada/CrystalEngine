@@ -19,6 +19,11 @@ namespace CE
 	{
 		ZoneScoped;
 
+		if (GetName() == "TestStackBox")
+		{
+			String::IsAlphabet('a');
+		}
+
 		if (children.IsEmpty())
 		{
 			Super::CalculateIntrinsicSize();
@@ -76,6 +81,11 @@ namespace CE
 	void FStackBox::PlaceSubWidgets()
 	{
 		ZoneScoped;
+
+		if (GetName() == "TestStackBox")
+		{
+			String::IsAlphabet('a');
+		}
 
 		Super::PlaceSubWidgets();
 

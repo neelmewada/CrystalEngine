@@ -49,22 +49,10 @@ namespace CE::Editor
         FListView* recentsList = nullptr;
         FListView* newProjectList = nullptr;
 
-        /*CWidget* newErrorBox = nullptr;
-        CLabel* newErrorLabel = nullptr;
+        FTextInput* openProjectLocation = nullptr;
 
-        CWidget* openErrorBox = nullptr;
-        CLabel* openErrorLabel = nullptr;
-
-        CTabWidget* tabWidget = nullptr;
-        CListWidget* recentsList = nullptr;
-
-        CButton* createButton = nullptr;
-        CButton* openButton = nullptr;
-
-        CTextInput* openProjectLocation = nullptr;
-
-        CTextInput* newProjectLocation = nullptr;
-        CTextInput* newProjectName = nullptr;*/
+        FTextInput* newProjectLocation = nullptr;
+        FTextInput* newProjectName = nullptr;
 
         bool isValidInput = true;
 

@@ -63,6 +63,18 @@ namespace CE::Editor
                             .HAlign(HAlign::Fill)
                             .Height(350)
                             .Style("ProjectBrowserWindow.ListView")
+                            .Margin(Vec4(0, 0, 0, 25)),
+
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Top)
+                            (
+                                FNew(FLabel)
+                                .Text("Project Location")
+                                .Width(200),
+
+                                FAssignNew(FTextInput, openProjectLocation)
+                                .FillRatio(1.0f)
+                            )
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10),
@@ -88,6 +100,20 @@ namespace CE::Editor
                             .Height(360)
                             .Style("ProjectBrowserWindow.ListView")
                             .Name("NewProjectListView")
+                            .Margin(Vec4(0, 0, 0, 25)),
+
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            (
+                                FNew(FLabel)
+                                .Text("Project Location")
+                                .Width(200)
+                                .VAlign(VAlign::Center)
+                                .Name("ProjectLocationLabel"),
+
+                                FAssignNew(FTextInput, newProjectLocation)
+                                .FillRatio(1.0f)
+                            )
                         )
                     )
                     .Padding(Vec4(1.5f, 1, 1.5f, 1) * 10)
