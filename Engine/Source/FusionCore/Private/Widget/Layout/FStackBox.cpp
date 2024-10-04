@@ -251,7 +251,7 @@ namespace CE
 
 		for (FWidget* child : children)
 		{
-			if (!child->Enabled())
+			if (!child->Enabled() || !child->Visible())
 				continue;
 
 			child->OnPaint(painter);

@@ -32,7 +32,6 @@ namespace CE::Editor
         static const Array<EditorPlatform::FileType> fileTypes = { {.desc = "Crystal Project File", .extensions = { "*.cproject" } } };
 
         auto& self = *this;
-        FTabView* tabView = nullptr;
 
         self
 			.Title("Project Browser")
@@ -78,6 +77,7 @@ namespace CE::Editor
 
                                 FAssignNew(FTextInput, openProjectLocation)
                                 .Text(defaultOpenProjectLocation)
+                                .OnTextEdited(FUNCTION_BINDING(this, ValidateInputFields))
                                 .FillRatio(1.0f),
 
                                 FNew(FTextButton)
@@ -100,23 +100,48 @@ namespace CE::Editor
                             FNew(FHorizontalStack)
                             .Gap(5)
                             .ContentVAlign(VAlign::Center)
-                            .HAlign(HAlign::Right)
+                            .HAlign(HAlign::Fill)
                             (
-                                FNew(FTextButton)
+                                FAssignNew(FStyledWidget, recentWarningWidget)
+                                .Border(Color::Red(), 0.75f)
+                                .BackgroundShape(FRoundedRectangle(2.5f))
+                                .Child(
+                                    FNew(FHorizontalStack)
+                                    .Gap(5)
+                                    .ContentVAlign(VAlign::Center)
+                                    (
+                                        FNew(FImage)
+                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Color::Red()))
+                                        .Width(11)
+                                        .Height(11)
+                                        .HAlign(HAlign::Center)
+                                        .VAlign(VAlign::Center),
+
+                                        FAssignNew(FLabel, recentWarningLabel)
+                                        .Text("This is a warning!")
+                                    )
+                                )
+                                .FillRatio(1.0f)
+                                .Padding(Vec4(2, 1, 2, 1) * 2.5f)
+                                .Visible(false),
+
+                                FAssignNew(FTextButton, openButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Open")
+                                .FontSize(13)
                                 .OnPressed([this]
                                 {
-                                    GetContext()->QueueDestroy();
+                                    CloseWindow();
                                 })
                                 .Width(40),
 
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
+                                .FontSize(13)
                                 .OnPressed([this]
                                 {
-                                    GetContext()->QueueDestroy();
+                                    CloseWindow();
                                 })
                                 .Width(40)
                             )
@@ -158,20 +183,8 @@ namespace CE::Editor
                                 .VAlign(VAlign::Center),
 
                                 FAssignNew(FTextInput, newProjectLocation)
-                                .FillRatio(1.0f)
-                            ),
-
-                            FNew(FHorizontalStack)
-                            .ContentVAlign(VAlign::Center)
-                            .Margin(Vec4(0, 0, 0, 15))
-                            (
-								FNew(FLabel)
-                                .Text("Project Name")
-                                .FontSize(13)
-                                .Width(200)
-                                .VAlign(VAlign::Center),
-
-                                FAssignNew(FTextInput, newProjectName)
+                                .Text(defaultNewProjectLocation)
+                                .OnTextEdited(FUNCTION_BINDING(this, ValidateInputFields))
                                 .FillRatio(1.0f),
 
                                 FNew(FTextButton)
@@ -191,25 +204,65 @@ namespace CE::Editor
                             ),
 
                             FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            .Margin(Vec4(0, 0, 0, 15))
+                            (
+								FNew(FLabel)
+                                .Text("Project Name")
+                                .FontSize(13)
+                                .Width(200)
+                                .VAlign(VAlign::Center),
+
+                                FAssignNew(FTextInput, newProjectName)
+                                .OnTextEdited(FUNCTION_BINDING(this, ValidateInputFields))
+                                .FillRatio(1.0f)
+                            ),
+
+                            FNew(FHorizontalStack)
                             .Gap(5)
                             .ContentVAlign(VAlign::Center)
-                            .HAlign(HAlign::Right)
+                            .HAlign(HAlign::Fill)
                             (
-                                FNew(FTextButton)
+								FAssignNew(FStyledWidget, newWarningWidget)
+                                .Border(Color::Red(), 0.75f)
+                                .BackgroundShape(FRoundedRectangle(2.5f))
+                                .Child(
+									FNew(FHorizontalStack)
+                                    .Gap(5)
+                                    .ContentVAlign(VAlign::Center)
+                                    (
+										FNew(FImage)
+                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Color::Red()))
+                                        .Width(11)
+                                        .Height(11)
+                                        .HAlign(HAlign::Center)
+                                        .VAlign(VAlign::Center),
+
+                                        FAssignNew(FLabel, newWarningLabel)
+                                        .Text("This is a warning!")
+                                    )
+                                )
+                                .FillRatio(1.0f)
+                                .Padding(Vec4(2, 1, 2, 1) * 2.5f)
+                                .Visible(false),
+
+                                FAssignNew(FTextButton, createButton)
                                 .TextHAlign(HAlign::Center)
-                                .Text("Open")
+                                .Text("Create")
+                                .FontSize(13)
                                 .OnPressed([this]
                                 {
-                                    GetContext()->QueueDestroy();
+                                    CloseWindow();
                                 })
                                 .Width(40),
 
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
+                                .FontSize(13)
                                 .OnPressed([this]
                                 {
-                                    GetContext()->QueueDestroy();
+                                    CloseWindow();
                                 })
                                 .Width(40)
                             )
@@ -225,6 +278,10 @@ namespace CE::Editor
 
         recentProjectsModel->ModelReset();
         newProjectModel->ModelReset();
+
+        newProjectList->SelectItem(0);
+
+        ValidateInputFields(openProjectLocation);
 
         /*
         CTabWidgetContainer* recentsTab = CreateObject<CTabWidgetContainer>(tabWidget, "RecentsTab");
@@ -436,6 +493,11 @@ namespace CE::Editor
 		*/
     }
 
+    void ProjectBrowser::CloseWindow()
+    {
+        GetContext()->QueueDestroy();
+    }
+
     FListItemWidget& ProjectBrowser::GenerateRecentProjectRow(FListItem* item, FListView* view)
     {
 	    auto projectItem = static_cast<RecentProjectItem*>(item);
@@ -484,6 +546,63 @@ namespace CE::Editor
             "Game", "Engine", "Editor", "Plugin"
         };
 
+        auto projectManager = ProjectManager::Get();
+
+        // Recent projects tab
+        {
+            recentWarningWidget->Visible(false);
+            openButton->Interactable(true);
+
+	        IO::Path projectLocation = openProjectLocation->Text();
+            if (!projectLocation.Exists() || 
+                projectLocation.GetExtension().GetString() != ProjectManager::GetProjectFileExtension() ||
+                !projectManager->IsValidProjectFile(projectLocation))
+            {
+                openButton->Interactable(false);
+                recentWarningWidget->Visible(true);
+                recentWarningLabel->Text("Invalid project path. Please enter a path to a valid project file!");
+            }
+        }
+
+        // New project tab
+        {
+            newWarningWidget->Visible(false);
+            createButton->Interactable(true);
+
+            IO::Path projectLocation = newProjectLocation->Text();
+            String projectName = newProjectName->Text();
+
+            if (!projectLocation.Exists())
+            {
+                createButton->Interactable(false);
+                newWarningWidget->Visible(true);
+                newWarningLabel->Text("Project location directory does not exist!");
+            }
+            else if (!projectLocation.IsDirectory())
+            {
+                createButton->Interactable(false);
+                newWarningWidget->Visible(true);
+                newWarningLabel->Text("Project location is not a directory!");
+            }
+            else if (projectName.IsEmpty())
+            {
+                createButton->Interactable(false);
+                newWarningWidget->Visible(true);
+                newWarningLabel->Text("Project name should not be empty");
+            }
+            else if (!IsValidObjectName(projectName))
+            {
+                createButton->Interactable(false);
+                newWarningWidget->Visible(true);
+                newWarningLabel->Text("Project name should only contain alphabets, numbers and underscores (_)!");
+            }
+            else if ((projectLocation / projectName).Exists())
+            {
+                createButton->Interactable(false);
+                newWarningWidget->Visible(true);
+                newWarningLabel->Text("A project with given name already exists at the Project Location!");
+            }
+        }
     }
 
     void ProjectBrowser::OnProjectTemplateSelectionChanged()

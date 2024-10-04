@@ -34,6 +34,9 @@ namespace CE
         FBrush pressedBackground{};
 
         FIELD()
+        FBrush disabledBackground{};
+
+        FIELD()
         Vec4 cornerRadius = Vec4(5, 5, 5, 5);
 
         FIELD()

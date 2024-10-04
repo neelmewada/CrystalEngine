@@ -38,9 +38,11 @@ namespace CE
             transformChanged = true;
         }
 
-	    if (m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None)
+	    if ((m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None) ||
+            (m_BorderWidth > 0 && m_BorderColor.a > 0))
 	    {
             painter->SetBrush(m_Background);
+
             if (m_BorderWidth > 0 && m_BorderColor.a > 0)
             {
                 painter->SetPen(FPen(m_BorderColor, m_BorderWidth));

@@ -19,6 +19,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void CloseWindow();
+
         FListItemWidget& GenerateRecentProjectRow(FListItem* item, FListView* view);
 
         FListItemWidget& GenerateNewProjectRow(FListItem* item, FListView* view);
@@ -46,8 +48,17 @@ namespace CE::Editor
         FIELD()
         NewProjectListModel* newProjectModel = nullptr;
 
+        FTabView* tabView = nullptr;
         FListView* recentsList = nullptr;
         FListView* newProjectList = nullptr;
+
+        FStyledWidget* recentWarningWidget = nullptr;
+        FStyledWidget* newWarningWidget = nullptr;
+        FLabel* recentWarningLabel = nullptr;
+        FLabel* newWarningLabel = nullptr;
+
+        FTextButton* openButton = nullptr;
+        FTextButton* createButton = nullptr;
 
         FTextInput* openProjectLocation = nullptr;
 

@@ -10,6 +10,7 @@ namespace CE
         m_MaxWidth = NumericLimits<f32>::Infinity();
 
         m_Enabled = true;
+        m_Visible = true;
     }
 
     FWidget::~FWidget()
@@ -38,7 +39,11 @@ namespace CE
 
         m_OnEvent(event);
 
-        if (event->type == FEventType::FocusChanged)
+        if (event->type == FEventType::HierarchyDetached)
+        {
+            OnLostFocus();
+        }
+        else if (event->type == FEventType::FocusChanged)
         {
             FFocusEvent* focusEvent = static_cast<FFocusEvent*>(event);
 
@@ -54,11 +59,6 @@ namespace CE
                         OnLostFocus();
                 }
             }
-        }
-
-        if (event->IsMouseEvent() && (!event->isConsumed || event->consumer != this))
-        {
-            
         }
 
         if (parent != nullptr && event->direction == FEventDirection::BottomToTop)
@@ -101,6 +101,14 @@ namespace CE
 
     void FWidget::OnDetachedFromParent(FWidget* parent)
     {
+        FHierarchyEvent event{};
+        event.direction = FEventDirection::TopToBottom;
+        event.type = FEventType::HierarchyDetached;
+        event.sender = this;
+        event.parentWidget = parent;
+        event.topMostWidget = this;
+
+        HandleEvent(&event);
     }
 
     void FWidget::ClearStyle()
@@ -135,6 +143,8 @@ namespace CE
     {
         static const HashSet<CE::Name> transformProperties = { "Translation", "Angle", "Scale" };
         static const CE::Name fillRatioName = "FillRatio";
+
+        static const CE::Name enabledName = "Enabled";
 
         if (transformProperties.Exists(propertyName))
         {

@@ -98,5 +98,13 @@ namespace CE
 	    }
     }
 
+    FTabItem* FTabView::GetActiveTab()
+    {
+        if (activeTabIndex < 0 || activeTabIndex >= tabItems.GetSize())
+            return nullptr;
+
+        return tabItems[activeTabIndex];
+    }
+
 }
 

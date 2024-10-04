@@ -124,6 +124,30 @@
 			return *this;\
 		}
 
+#define FUSION_EVENT_WRAPPER(PropertyName, WrappingVariable)\
+	auto PropertyName() const { return WrappingVariable->PropertyName(); }\
+	Self& PropertyName(const FunctionBinding& binding)\
+	{\
+		if (WrappingVariable == nullptr) return *this;\
+		WrappingVariable->PropertyName(binding);\
+		return *this;\
+	}\
+	template<typename TLambda>\
+	Self& PropertyName(const TLambda& lambda)\
+	{\
+		if (WrappingVariable == nullptr) return *this;\
+		WrappingVariable->PropertyName(lambda);\
+		return *this;\
+	}\
+	template<typename TLambda>\
+	Self& PropertyName(DelegateHandle& outHandle, const TLambda& lambda)\
+	{\
+		if (WrappingVariable == nullptr) return *this;\
+		WrappingVariable->PropertyName(outHandle, lambda);\
+		return *this;\
+	}
+
+
 #define FUSION_WIDGET\
 	public:\
 		template<typename TLambda> requires TValidate_IfTrue<TLambda>::Value\

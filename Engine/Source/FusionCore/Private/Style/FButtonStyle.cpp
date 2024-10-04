@@ -24,7 +24,11 @@ namespace CE
 
         FBrush bg = background;
 
-        if (button.IsPressed() && button.IsHovered())
+        if (button.IsInteractionDisabled())
+        {
+            bg = disabledBackground;
+        }
+        else if (button.IsPressed() && button.IsHovered())
         {
 	        bg = pressedBackground;
         }

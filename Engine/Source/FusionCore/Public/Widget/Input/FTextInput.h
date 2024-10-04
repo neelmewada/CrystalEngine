@@ -157,6 +157,8 @@ namespace CE
 
         FUSION_DATA_PROPERTY_WRAPPER(Text, inputLabel);
 
+        FUSION_EVENT(ScriptEvent<void(FTextInput*)>, OnTextEdited);
+
         Self& LeftSlot(FWidget& content);
 
     private: // - Internal Data -

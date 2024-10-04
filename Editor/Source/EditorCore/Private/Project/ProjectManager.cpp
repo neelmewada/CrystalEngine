@@ -69,7 +69,25 @@ namespace CE::Editor
 		return true;
     }
 
-    bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, String projectName)
+	bool ProjectManager::IsValidProjectFile(const IO::Path& projectFilePath)
+	{
+		if (!projectFilePath.Exists() || projectFilePath.GetExtension().GetString() != GetProjectFileExtension())
+			return false;
+
+		CrystalProject project{};
+		JsonFieldDeserializer deserializer = JsonFieldDeserializer(CrystalProject::Type(), &project);
+
+		FileStream stream = FileStream(projectFilePath);
+		stream.SetAsciiMode(true);
+
+		deserializer.Deserialize(&stream);
+
+		stream.Close();
+
+		return project.engineVersion.NonEmpty();
+	}
+
+	bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, String projectName)
     {
 		if (projectFolder.Exists())
 			IO::Path::RemoveRecursively(projectFolder);

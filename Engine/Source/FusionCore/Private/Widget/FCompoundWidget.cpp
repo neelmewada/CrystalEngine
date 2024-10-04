@@ -96,7 +96,7 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (!isCulled && m_Child && m_Child->Enabled())
+        if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
             painter->PushChildCoordinateSpace(localTransform);
             if (m_ClipChildren)
@@ -187,6 +187,11 @@ namespace CE
     {
         if (!child)
             return false;
+
+        if (m_Child)
+        {
+            RemoveChild(m_Child);
+        }
 
         m_Child = child;
         child->parent = this;

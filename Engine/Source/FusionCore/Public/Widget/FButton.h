@@ -49,6 +49,14 @@ namespace CE
 
         FUSION_EVENT(FVoidEvent, OnPressed);
 
+        bool Interactable() const { return !IsInteractionDisabled(); }
+
+        Self& Interactable(bool interactable)
+        {
+            SetInteractionEnabled(interactable);
+	        return *this;
+        }
+
         FUSION_TESTS;
         FUSION_WIDGET;
     };

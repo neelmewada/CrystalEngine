@@ -32,6 +32,8 @@ namespace CE
         KeyPress,
         KeyHeld,
         KeyRelease,
+
+        HierarchyDetached
     };
     ENUM_CLASS(FEventType);
 
@@ -132,6 +134,20 @@ namespace CE
                 return false;
 	        }
         }
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FHierarchyEvent : FEvent
+    {
+        CE_STRUCT(FHierarchyEvent, FEvent)
+    public:
+
+        FIELD()
+        FWidget* parentWidget = nullptr; // The widget that the topMostWidget was attached to or detached from.
+
+        FIELD()
+        FWidget* topMostWidget = nullptr; // The top-most widget that was attached/detached.
+
     };
 
     STRUCT()

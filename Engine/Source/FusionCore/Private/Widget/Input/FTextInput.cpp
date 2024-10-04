@@ -593,6 +593,8 @@ namespace CE
         cursorPos = insertPos + string.GetLength();
 
         MarkLayoutDirty();
+
+        textInput->m_OnTextEdited(textInput);
     }
 
     void FTextInputLabel::InsertAt(char character, int insertPos)
@@ -608,6 +610,8 @@ namespace CE
         cursorPos = insertPos + 1;
 
         MarkLayoutDirty();
+
+        textInput->m_OnTextEdited(textInput);
     }
 
     void FTextInputLabel::RemoveRange(int startIndex, int count)
@@ -625,6 +629,8 @@ namespace CE
         SetCursorPos(startIndex);
 
         MarkLayoutDirty();
+
+        textInput->m_OnTextEdited(textInput);
     }
 
     void FTextInputLabel::RemoveSelectedRange()

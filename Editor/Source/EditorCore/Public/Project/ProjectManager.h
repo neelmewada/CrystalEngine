@@ -22,6 +22,8 @@ namespace CE::Editor
 
 		/// Opens an existing project
         bool LoadProject(const IO::Path& projectFilePath);
+
+		bool IsValidProjectFile(const IO::Path& projectFilePath);
         
 		/// Creates an empty project without opening it
         bool CreateEmptyProject(const IO::Path& projectFolder, String projectName);

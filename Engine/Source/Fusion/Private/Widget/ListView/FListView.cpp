@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
 	FListView::FListView()
 	{
 
@@ -41,6 +42,14 @@ namespace CE
         {
             RegenerateRows();
         }
+    }
+
+    void FListView::SelectItem(int index)
+    {
+        if (index < 0 || index >= itemWidgets.GetSize())
+            return;
+
+        itemWidgets[index]->Select();
     }
 
     void FListView::OnItemSelected(FListItemWidget* selectedItem)

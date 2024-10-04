@@ -263,14 +263,17 @@ namespace CE
 		{
 			renderer->Begin();
 
-			if (painter && owningWidget)
+			if (painter && owningWidget && owningWidget->Visible())
 			{
 				owningWidget->OnPaint(painter);
 			}
 
 			for (int i = 0; i < localPopupStack.GetSize(); ++i)
 			{
-				localPopupStack[i]->OnPaint(painter);
+				if (localPopupStack[i]->Visible())
+				{
+					localPopupStack[i]->OnPaint(painter);
+				}
 			}
 
 			renderer->End();

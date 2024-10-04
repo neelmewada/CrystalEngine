@@ -40,6 +40,10 @@ namespace CE
         void SelectTab(int tabIndex);
         void SelectTab(FTabItem* tabItem);
 
+        int GetActiveTabIndex() { return activeTabIndex; }
+
+        FTabItem* GetActiveTab();
+
         FStyledWidget* GetContainer() const { return container; }
 
         FStackBox* GetTabWell() const { return tabWell; }

@@ -23,6 +23,8 @@ namespace CE
 
         FScrollBox& GetScrollBox() const { return *scrollBox; }
 
+        void SelectItem(int index);
+
     protected:
 
         FListView();
