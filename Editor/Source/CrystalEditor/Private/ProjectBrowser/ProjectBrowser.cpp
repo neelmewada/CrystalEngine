@@ -29,6 +29,8 @@ namespace CE::Editor
         recentProjectsModel = CreateObject<RecentProjectsListModel>(this, "RecentProjectsListModel");
         newProjectModel = CreateObject<NewProjectListModel>(this, "NewProjectListModel");
 
+        static const Array<EditorPlatform::FileType> fileTypes = { {.desc = "Crystal Project File", .extensions = { "*.cproject" } } };
+
         auto& self = *this;
         FTabView* tabView = nullptr;
 
@@ -61,7 +63,7 @@ namespace CE::Editor
                             .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
                             .HAlign(HAlign::Fill)
-                            .Height(350)
+                            .Height(400)
                             .Style("ProjectBrowserWindow.ListView")
                             .Margin(Vec4(0, 0, 0, 25)),
 
@@ -70,10 +72,53 @@ namespace CE::Editor
                             (
                                 FNew(FLabel)
                                 .Text("Project Location")
-                                .Width(200),
+                                .FontSize(13)
+                                .Width(200)
+                                .VAlign(VAlign::Center),
 
                                 FAssignNew(FTextInput, openProjectLocation)
-                                .FillRatio(1.0f)
+                                .Text(defaultOpenProjectLocation)
+                                .FillRatio(1.0f),
+
+                                FNew(FTextButton)
+                                .Text("...")
+                                .OnPressed([this]
+                                {
+                                    String openLocation = EditorPlatform::ShowFileSelectionDialog(defaultOpenProjectLocation, fileTypes)
+                                        .GetString()
+                                        .Replace({ '\\' }, '/');
+
+                                    if (openLocation.IsEmpty())
+                                        return;
+
+                                    defaultOpenProjectLocation = openLocation;
+                                    openProjectLocation->Text(defaultOpenProjectLocation);
+                                })
+                            )
+                            .Margin(Vec4(0, 0, 0, 50)),
+
+                            FNew(FHorizontalStack)
+                            .Gap(5)
+                            .ContentVAlign(VAlign::Center)
+                            .HAlign(HAlign::Right)
+                            (
+                                FNew(FTextButton)
+                                .TextHAlign(HAlign::Center)
+                                .Text("Open")
+                                .OnPressed([this]
+                                {
+                                    GetContext()->QueueDestroy();
+                                })
+                                .Width(40),
+
+                                FNew(FTextButton)
+                                .TextHAlign(HAlign::Center)
+                                .Text("Cancel")
+                                .OnPressed([this]
+                                {
+                                    GetContext()->QueueDestroy();
+                                })
+                                .Width(40)
                             )
                         )
                     )
@@ -97,22 +142,76 @@ namespace CE::Editor
                             .Bind_ItemList(BIND_PROPERTY_R(newProjectModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
                             .HAlign(HAlign::Fill)
-                            .Height(360)
+                            .Height(400)
                             .Style("ProjectBrowserWindow.ListView")
                             .Name("NewProjectListView")
                             .Margin(Vec4(0, 0, 0, 25)),
 
                             FNew(FHorizontalStack)
                             .ContentVAlign(VAlign::Center)
+                            .Margin(Vec4(0, 0, 0, 10))
                             (
                                 FNew(FLabel)
                                 .Text("Project Location")
+                                .FontSize(13)
                                 .Width(200)
-                                .VAlign(VAlign::Center)
-                                .Name("ProjectLocationLabel"),
+                                .VAlign(VAlign::Center),
 
                                 FAssignNew(FTextInput, newProjectLocation)
                                 .FillRatio(1.0f)
+                            ),
+
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            .Margin(Vec4(0, 0, 0, 15))
+                            (
+								FNew(FLabel)
+                                .Text("Project Name")
+                                .FontSize(13)
+                                .Width(200)
+                                .VAlign(VAlign::Center),
+
+                                FAssignNew(FTextInput, newProjectName)
+                                .FillRatio(1.0f),
+
+                                FNew(FTextButton)
+                                .Text("...")
+                                .OnPressed([this]
+                                {
+                                    String newLocation = EditorPlatform::ShowSelectDirectoryDialog(defaultNewProjectLocation)
+                                        .GetString()
+                                        .Replace({ '\\' }, '/');
+
+                                    if (newLocation.IsEmpty())
+                                        return;
+
+                                    defaultNewProjectLocation = newLocation;
+                                    newProjectLocation->Text(defaultNewProjectLocation);
+                                })
+                            ),
+
+                            FNew(FHorizontalStack)
+                            .Gap(5)
+                            .ContentVAlign(VAlign::Center)
+                            .HAlign(HAlign::Right)
+                            (
+                                FNew(FTextButton)
+                                .TextHAlign(HAlign::Center)
+                                .Text("Open")
+                                .OnPressed([this]
+                                {
+                                    GetContext()->QueueDestroy();
+                                })
+                                .Width(40),
+
+                                FNew(FTextButton)
+                                .TextHAlign(HAlign::Center)
+                                .Text("Cancel")
+                                .OnPressed([this]
+                                {
+                                    GetContext()->QueueDestroy();
+                                })
+                                .Width(40)
                             )
                         )
                     )
@@ -348,7 +447,8 @@ namespace CE::Editor
                 (
                     FNew(FLabel)
                     .Text(projectItem->title)
-                    .FontSize(15),
+                    .FontSize(15)
+                    .Margin(Vec4(0, 0, 0, 2.5f)),
 
                     FNew(FLabel)
                     .Text(projectItem->description)
@@ -367,7 +467,8 @@ namespace CE::Editor
                 (
                     FNew(FLabel)
                     .Text(item->title)
-                    .FontSize(15),
+                    .FontSize(15)
+                    .Margin(Vec4(0, 0, 0, 2.5f)),
 
                     FNew(FLabel)
                     .Text(item->description)

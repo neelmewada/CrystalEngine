@@ -43,11 +43,6 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (GetName() == "ProjectLocationLabel")
-        {
-            String::IsAlphabet('a');
-        }
-
         painter->SetFont(m_Font);
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());

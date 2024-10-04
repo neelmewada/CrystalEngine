@@ -32,6 +32,8 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(Italic, label);
         FUSION_PROPERTY_WRAPPER(WordWrap, label);
         FUSION_PROPERTY_WRAPPER(Foreground, label);
+        FUSION_PROPERTY_WRAPPER2(HAlign, label, TextHAlign);
+        FUSION_PROPERTY_WRAPPER2(VAlign, label, TextVAlign);
 
         FUSION_WIDGET;
     };

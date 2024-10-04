@@ -177,7 +177,7 @@ namespace CE
 
 		int imageIndex = scheduler->BeginExecution();
 
-		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
+		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
 		{
 			rebuildFrameGraph = recompileFrameGraph = true;
 			return;

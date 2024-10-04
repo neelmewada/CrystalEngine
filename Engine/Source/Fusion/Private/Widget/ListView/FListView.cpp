@@ -67,6 +67,8 @@ namespace CE
     {
         // Destroy previous FListItemWidget's
 
+        // TODO: Optimize row generation by using recycling, culling, etc
+
         while (content->GetChildCount() > 0)
         {
             content->GetChild(0)->Destroy();
@@ -85,7 +87,7 @@ namespace CE
             }
         }
 
-        //scrollBox->ClampTranslation();
+        scrollBox->ClampTranslation();
         MarkLayoutDirty();
     }
 

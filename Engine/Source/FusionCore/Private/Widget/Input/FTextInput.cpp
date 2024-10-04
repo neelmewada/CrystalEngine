@@ -439,6 +439,23 @@ namespace CE
 
     void FTextInputLabel::OnMouseClick(Vec2 localPos, bool isDoubleClick)
     {
+        if (characterOffsets.IsEmpty())
+        {
+            cursorState = true;
+            cursorPos = 0;
+
+            if (!IsEditing())
+            {
+                StartEditing();
+            }
+            else
+            {
+                MarkDirty();
+            }
+
+	        return;
+        }
+
 	    for (int i = 0; i < characterOffsets.GetSize(); ++i)
 	    {
             if ((i > 0 && localPos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && localPos.x > characterOffsets[i].max.x))
