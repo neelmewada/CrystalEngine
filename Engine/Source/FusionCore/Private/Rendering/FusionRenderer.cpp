@@ -2,7 +2,7 @@
 
 namespace CE
 {
-	constexpr bool ForceDisableBatching = true;
+	constexpr bool ForceDisableBatching = false;
 	constexpr f32 StructuredBufferGrowRatio = 0.25f;
 
 	FusionRenderer::FusionRenderer()
