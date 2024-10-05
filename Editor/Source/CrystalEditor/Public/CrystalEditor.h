@@ -17,4 +17,4 @@
 // ----------------------------------------
 // Crystal Editor
 
-
+#include "CrystalEditor/CrystalEditorWindow.h"

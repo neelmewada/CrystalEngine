@@ -383,6 +383,8 @@ namespace CE
 
 	void AssetProcessor::PostInit()
 	{
+		gEditorMode = EditorMode::AssetProcessor;
+
 		auto app = PlatformApplication::Get();
 		app->Initialize();
 

@@ -4,6 +4,8 @@
 #include "CoreRHI.h"
 #include "System.h"
 
+#include "EditorGlobals.h"
+
 // Platform
 #include "PAL/Common/EditorPlatform.h"
 
@@ -29,7 +31,13 @@
 ///////////////////////////////////////////////////////
 /// Widgets
 
+#include "Widget/Style/EditorDockspaceStyle.h"
+#include "Widget/Style/EditorDockTabStyle.h"
 #include "Widget/Style/EditorStyle.h"
+
+#include "Widget/Window/EditorWindow.h"
+#include "Widget/Window/EditorDockspace.h"
+#include "Widget/Window/EditorDockTab.h"
 
 namespace CE::Editor
 {

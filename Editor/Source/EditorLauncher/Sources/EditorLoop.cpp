@@ -205,8 +205,10 @@ void EditorLoop::PostInit()
 	this->tickDelegateHandle = tickDelegate.GetHandle();
 	app->AddTickHandler(tickDelegate);
 
-	//if (!projectPath.Exists())
+	if (!projectPath.Exists())
 	{
+		gEditorMode = EditorMode::ProjectBrowser;
+
 		FNativeContext* projectBrowserContext = FNativeContext::Create(mainWindow, "ProjectBrowser", rootContext);
 		rootContext->AddChildContext(projectBrowserContext);
 
@@ -222,11 +224,20 @@ void EditorLoop::PostInit()
 
 		mainWindow->Show();
 	}
-	//else
+	else
 	{
-		//CrystalEditorWindow* editorWindow = CreateWindow<CrystalEditorWindow>("CrystalEditor", mainWindow);
-		//editorWindow->SetTitle("Crystal Editor");
-		//editorWindow->Show();
+		gEditorMode = EditorMode::Default;
+
+		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
+		rootContext->AddChildContext(crystalEditorCtx);
+
+		CrystalEditorWindow* crystalEditor = nullptr;
+
+		FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
+		crystalEditorCtx->SetOwningWidget(crystalEditor);
+
+		mainWindow->SetResizable(true);
+		mainWindow->Show();
 	}
 }
 

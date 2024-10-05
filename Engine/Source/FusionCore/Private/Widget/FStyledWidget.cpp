@@ -17,6 +17,11 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
+        if (IsOfType<FTitleBar>())
+        {
+	        String::IsAlphabet('a');
+        }
+
         if (m_Opacity < 0.0001f)
             return;
 

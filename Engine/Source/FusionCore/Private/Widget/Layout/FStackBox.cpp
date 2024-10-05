@@ -19,11 +19,6 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "TestStackBox")
-		{
-			String::IsAlphabet('a');
-		}
-
 		if (children.IsEmpty())
 		{
 			Super::CalculateIntrinsicSize();
@@ -82,7 +77,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "TestStackBox")
+		if (GetName() == "TestHStack")
 		{
 			String::IsAlphabet('a');
 		}

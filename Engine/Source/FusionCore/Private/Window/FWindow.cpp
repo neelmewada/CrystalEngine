@@ -7,12 +7,6 @@ namespace CE
     {
         
     }
-
-    void FWindow::Construct()
-    {
-        Super::Construct();
-        
-    }
     
 }
 

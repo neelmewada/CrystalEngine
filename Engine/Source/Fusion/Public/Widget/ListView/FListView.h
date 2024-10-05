@@ -25,6 +25,8 @@ namespace CE
 
         void SelectItem(int index);
 
+        FListItemWidget* GetSelectedItem();
+
     protected:
 
         FListView();
@@ -46,6 +48,7 @@ namespace CE
         FScrollBox* scrollBox = nullptr;
 
         Array<FListItemWidget*> itemWidgets;
+        Array<FListItemWidget*> selectedItems;
 
     public: // - Fusion Properties - 
 
@@ -54,6 +57,8 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(Gap, content);
 
         FUSION_DATA_PROPERTY(Array<FListItem*>, ItemList);
+
+        FUSION_EVENT(ScriptEvent<void(FListView*)>, OnSelectionChanged);
 
         Self& GenerateRowDelegate(const GenerateRowCallback& callback);
 

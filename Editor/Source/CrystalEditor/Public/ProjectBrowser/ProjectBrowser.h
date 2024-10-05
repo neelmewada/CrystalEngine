@@ -79,9 +79,6 @@ namespace CE::Editor
 
         // - Fields -
 
-        FIELD()
-        String projectName{};
-
     };
     
 } // namespace CE::Editor

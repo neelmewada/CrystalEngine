@@ -38,18 +38,20 @@ namespace CE::Editor
         {
             if (i < recentProjectPaths.GetSize())
             {
+                IO::Path fileName = recentProjectPaths[i].GetFileName().RemoveExtension();
+
                 RecentProjectItem* item = nullptr;
 	            if (i < items.GetSize())
 	            {
                     item = static_cast<RecentProjectItem*>(items[i]);
-                    item->title = recentProjectPaths[i].GetString();
-                    item->description = "This is the project description!";
+                    item->title = fileName.GetString();
+                    item->description = recentProjectPaths[i].GetString();
 	            }
                 else
                 {
                     item = CreateObject<RecentProjectItem>(this, "RecentItem");
-                    item->title = recentProjectPaths[i].GetString();
-                    item->description = "This is the project description!";
+                    item->title = fileName.GetString();
+                    item->description = recentProjectPaths[i].GetString();
                     items.Add(item);
                 }
             }

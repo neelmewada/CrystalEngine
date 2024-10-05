@@ -227,6 +227,19 @@ namespace CE
             Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
     }
 
+    void FWidget::OnPostComputeLayout()
+    {
+        if (IsOfType<FTitleBar>())
+        {
+            FTitleBar* titleBar = static_cast<FTitleBar*>(this);
+
+            Vec2 pos = GetComputedPosition();
+            Vec2 size = GetComputedSize();
+
+            GetName();
+        }
+    }
+
     bool FWidget::AddChild(FWidget* child)
     {
         if (TryAddChild(child))

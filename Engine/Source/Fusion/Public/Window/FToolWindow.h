@@ -62,6 +62,8 @@ namespace CE
             }
             return *this;
         }
+
+        FUSION_WIDGET;
     };
     
 } // namespace CE

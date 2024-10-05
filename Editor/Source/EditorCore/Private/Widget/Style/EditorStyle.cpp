@@ -209,6 +209,7 @@ namespace CE::Editor
 			.Style(this, toolWindow->GetName());
 
 		InitProjectBrowserStyle();
+		InitEditorDockspaceStyle();
     }
 
     void EditorStyle::InitProjectBrowserStyle()
@@ -253,6 +254,18 @@ namespace CE::Editor
 		projectBrowserListView->itemBorderWidth = 0.0f;
 		projectBrowserListView->itemBorderColor = Color::Clear();
 
+    }
+
+    void EditorStyle::InitEditorDockspaceStyle()
+    {
+		if (!editorDockspace)
+		{
+			editorDockspace = CreateObject<EditorDockspaceStyle>(this, "EditorDockspace");
+			Add(editorDockspace);
+		}
+
+		GetDefaultWidget<EditorDockspace>()
+			.Style(this, editorDockspace->GetName());
     }
 
 } // namespace CE::Editor

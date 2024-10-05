@@ -52,10 +52,19 @@ namespace CE
         itemWidgets[index]->Select();
     }
 
+    FListItemWidget* FListView::GetSelectedItem()
+    {
+        if (selectedItems.IsEmpty())
+            return nullptr;
+        return selectedItems[0];
+    }
+
     void FListView::OnItemSelected(FListItemWidget* selectedItem)
     {
         if (m_SelectionMode == FSelectionMode::None)
             return;
+
+        selectedItems.Clear();
 
         for (FListItemWidget* item : itemWidgets)
         {
@@ -66,10 +75,13 @@ namespace CE
             else if (item == selectedItem && !item->IsSelected())
             {
                 item->itemState |= FListItemState::Selected;
+                selectedItems.Add(item);
             }
         }
 
         ApplyStyle();
+
+        m_OnSelectionChanged(this);
     }
 
     void FListView::RegenerateRows()

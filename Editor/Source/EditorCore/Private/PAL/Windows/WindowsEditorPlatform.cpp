@@ -127,6 +127,11 @@ namespace CE::Editor
 		return result;
 	}
 
+	IO::Path WindowsEditorPlatform::GetEditorExecutablePath()
+	{
+		return PlatformDirectories::GetLaunchDir() / GetEditorExecutableName();
+	}
+
 	Color WindowsEditorPlatform::GetScreenPixel(Vec2i screenPos)
 	{
 		HDC dc = GetDC(nullptr);

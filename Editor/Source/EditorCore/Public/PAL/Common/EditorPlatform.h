@@ -13,6 +13,12 @@ namespace CE::Editor
 			Array<String> extensions{};
 		};
 
+		static const String& GetEditorExecutableName()
+		{
+			static String name = "EditorLauncher";
+			return name;
+		}
+
 	};
 
 }

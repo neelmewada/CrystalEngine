@@ -20,6 +20,8 @@ namespace CE::Editor
 
 		void InitProjectBrowserStyle();
 
+		void InitEditorDockspaceStyle();
+
 	public:
 
 		FIELD()
@@ -68,6 +70,10 @@ namespace CE::Editor
 
 		FIELD()
 		FListViewStyle* projectBrowserListView = nullptr;
+
+		// - Editor -
+
+		EditorDockspaceStyle* editorDockspace = nullptr;
 
 	};
 

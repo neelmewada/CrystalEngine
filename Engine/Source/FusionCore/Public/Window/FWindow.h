@@ -11,8 +11,6 @@ namespace CE
 
         FWindow();
 
-        void Construct() override;
-
         bool SupportsMouseEvents() const override { return true; }
 
     public:
