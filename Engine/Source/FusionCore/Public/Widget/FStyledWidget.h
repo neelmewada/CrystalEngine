@@ -38,12 +38,12 @@ namespace CE
 
         Self& CornerRadius(const Vec4& cornerRadius)
         {
-            return ClipShape(FShape::RoundedRect(cornerRadius));
+            return BackgroundShape(FShape::RoundedRect(cornerRadius));
         }
 
         Self& CornerRadius(f32 cornerRadius)
         {
-            return ClipShape(FRoundedRectangle(cornerRadius));
+            return BackgroundShape(FRoundedRectangle(cornerRadius));
         }
 
         FUSION_PROPERTY(Color, BorderColor);

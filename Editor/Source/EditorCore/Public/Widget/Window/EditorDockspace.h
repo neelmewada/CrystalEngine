@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     class EditorDockTab;
+    class EditorDockTabItem;
 
     CLASS()
     class EDITORCORE_API EditorDockspace : public EditorWindow
@@ -12,9 +13,16 @@ namespace CE::Editor
 
         // - Public API -
 
+        void AddDockTab(EditorDockTab* tab);
+
+        void SelectTab(EditorDockTabItem* tabItem);
+        void SelectTab(EditorDockTab* tab);
+
     protected:
 
         EditorDockspace();
+
+        void UpdateTabWell();
 
         void Construct() override;
 
@@ -22,14 +30,19 @@ namespace CE::Editor
         FVerticalStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;
         FImage* minimizeIcon = nullptr;
-        FStackBox* content = nullptr;
+        FStyledWidget* content = nullptr;
         FTitleBar* titleBar = nullptr;
         FLabel* titleBarLabel = nullptr;
 
+        FImage* logo = nullptr;
         FButton* minimizeButton = nullptr;
         FButton* maximizeButton = nullptr;
 
         FHorizontalStack* tabWell = nullptr;
+
+        Array<EditorDockTab*> dockedEditors;
+        Array<EditorDockTabItem*> tabItems;
+        int selectedTab = -1;
 
     public: // - Fusion Properties - 
 
@@ -40,6 +53,7 @@ namespace CE::Editor
         FUSION_PROPERTY_WRAPPER2(Background, titleBar, TitleBarBackground);
 
         FUSION_WIDGET;
+        friend class EditorDockspaceStyle;
     };
     
 }

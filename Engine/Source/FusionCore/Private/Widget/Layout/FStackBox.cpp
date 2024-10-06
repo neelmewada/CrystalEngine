@@ -25,6 +25,11 @@ namespace CE
 			return;
 		}
 
+		if (GetName() == "TestHStack")
+		{
+			String::IsAlphabet('a');
+		}
+
 		intrinsicSize.width = m_Padding.left + m_Padding.right;
 		intrinsicSize.height = m_Padding.top + m_Padding.bottom;
 
@@ -190,7 +195,7 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
-				curPos.x += child->computedSize.width + child->m_Margin.right + m_Gap;
+				curPos.x += child->computedSize.width + child->m_Margin.left + child->m_Margin.right + m_Gap;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
@@ -224,7 +229,7 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
-				curPos.y += child->computedSize.height + child->m_Margin.bottom + m_Gap;
+				curPos.y += child->computedSize.height + child->m_Margin.top + child->m_Margin.bottom + m_Gap;
 			}
 			
 			child->PlaceSubWidgets();

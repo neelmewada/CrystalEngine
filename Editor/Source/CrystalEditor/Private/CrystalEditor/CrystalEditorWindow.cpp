@@ -12,6 +12,12 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        SceneEditor* sceneEditor = nullptr;
+
+        FAssignNew(SceneEditor, sceneEditor);
+
+        AddDockTab(sceneEditor);
+
         Style("EditorDockspace");
     }
     

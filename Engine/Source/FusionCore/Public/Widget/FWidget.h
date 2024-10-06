@@ -40,6 +40,8 @@ namespace CE
         bool AddChild(FWidget* child);
         void RemoveChild(FWidget* child);
 
+        FWidget* GetParent() const { return parent; }
+
         virtual void ApplyStyle();
 
         virtual void ApplyStyleRecursively();

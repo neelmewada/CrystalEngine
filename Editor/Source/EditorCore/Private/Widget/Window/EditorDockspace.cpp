@@ -8,6 +8,93 @@ namespace CE::Editor
 
     }
 
+    void EditorDockspace::AddDockTab(EditorDockTab* tab)
+    {
+        if (dockedEditors.Exists(tab))
+            return;
+
+        dockedEditors.Add(tab);
+
+        UpdateTabWell();
+
+        if (selectedTab < 0)
+        {
+            SelectTab(tab);
+        }
+    }
+
+    void EditorDockspace::SelectTab(EditorDockTabItem* tabItem)
+    {
+	    for (int i = 0; i < tabItems.GetSize(); ++i)
+	    {
+		    if (tabItems[i] == tabItem)
+		    {
+                selectedTab = i;
+                content->Child(*dockedEditors[selectedTab]);
+
+                return;
+		    }
+	    }
+
+        ApplyStyle();
+    }
+
+    void EditorDockspace::SelectTab(EditorDockTab* tab)
+    {
+	    for (int i = 0; i < dockedEditors.GetSize(); ++i)
+	    {
+		    if (dockedEditors[i] == tab)
+		    {
+                selectedTab = i;
+                content->Child(*tab);
+
+                return;
+		    }
+	    }
+
+        ApplyStyle();
+    }
+
+    void EditorDockspace::UpdateTabWell()
+    {
+        while (tabWell->GetChildCount() > dockedEditors.GetSize())
+        {
+            FWidget* child = tabWell->GetChild(tabWell->GetChildCount() - 1);
+            tabWell->RemoveChild(child);
+            child->Destroy();
+
+            EditorDockTabItem* tabItem = tabItems.GetLast();
+            tabItems.Remove(tabItem);
+            tabItem->Destroy();
+        }
+
+        for (int i = 0; i < dockedEditors.GetSize(); ++i)
+        {
+	        if (i < (int)tabItems.GetSize())
+	        {
+                EditorDockTabItem& child = *tabItems[i];
+
+                child
+					.Text(dockedEditors[i]->Title())
+                ;
+	        }
+            else
+            {
+                EditorDockTabItem* child = nullptr;
+
+                FAssignNew(EditorDockTabItem, child)
+                .Text(dockedEditors[i]->Title())
+                .VAlign(VAlign::Fill)
+            	;
+
+                tabWell->AddChild(child);
+                tabItems.Add(child);
+            }
+        }
+
+        ApplyStyle();
+    }
+
     void EditorDockspace::Construct()
     {
         Super::Construct();
@@ -42,13 +129,23 @@ namespace CE::Editor
                         .VAlign(VAlign::Fill)
                         .Name("TestHStack")
                         (
+                            // - Logo -
+
+                            FAssignNew(FImage, logo)
+                            .Background(FBrush("/Engine/Resources/Icons/Logo"))
+                            .Width(32)
+                            .Height(32)
+                            .VAlign(VAlign::Center)
+                            .Margin(Vec4(10, 0, 10, 0)),
+
                             // - Tabs -
 
                             FAssignNew(FHorizontalStack, tabWell)
                             .ContentHAlign(HAlign::Left)
                             .VAlign(VAlign::Fill)
                             .FillRatio(1.0f)
-                            .Name("TabWell"),
+                            .Name("TabWell")
+                            .Padding(Vec4(5, 5, 0, 0)),
 
                             // - Window Controls -
 
@@ -62,7 +159,7 @@ namespace CE::Editor
                             .Style("Button.WindowControl")
                             .VAlign(VAlign::Top)
                             (
-                                FNew(FImage)
+                                FNew(FImage, minimizeIcon)
                                 .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
                                 .Width(11)
                                 .Height(11)
@@ -106,7 +203,7 @@ namespace CE::Editor
                             .Style("Button.WindowClose")
                             .VAlign(VAlign::Top)
                             (
-                                FAssignNew(FImage, minimizeIcon)
+                                FNew(FImage)
                                 .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
                                 .Width(10)
                                 .Height(10)
@@ -118,13 +215,12 @@ namespace CE::Editor
 
                     // - Title Bar End -
 
-                    FAssignNew(FStackBox, content)
-                    .Direction(FStackBoxDirection::Vertical)
+                    FAssignNew(FStyledWidget, content)
                     .Padding(Vec4(10, 10, 10, 10))
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
                     .FillRatio(1.0f)
-                    .Name("ContentVStack")
+                    .Name("Content")
                 )
 
             ) // End of Child

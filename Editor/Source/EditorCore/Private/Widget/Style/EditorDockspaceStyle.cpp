@@ -29,7 +29,32 @@ namespace CE
 			.TitleBarBackground(titleBarBackground)
     	;
 
-        String::IsAlphabet('a');
+        for (int i = 0; i < dockspace.tabItems.GetSize(); ++i)
+        {
+            EditorDockTabItem& tab = *dockspace.tabItems[i];
+
+            FBrush bg = inactiveTabBackground;
+            Color tabBorder = inactiveTabBorder;
+
+            if (tab.isActive)
+            {
+	            bg = activeTabBackground;
+                tabBorder = activeTabBorder;
+            }
+            else if (tab.isHovered)
+            {
+                bg = hoveredTabBackground;
+                tabBorder = hoveredTabBorder;
+            }
+
+            bg = activeTabBackground;
+
+            tab
+				.Background(bg)
+				.Border(tabBorder, tabBorderWidth)
+				.CornerRadius(tabCornerRadius)
+        	;
+        }
     }
     
 } // namespace CE
