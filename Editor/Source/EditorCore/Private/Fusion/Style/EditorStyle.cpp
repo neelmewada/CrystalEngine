@@ -266,6 +266,19 @@ namespace CE::Editor
 
 		GetDefaultWidget<EditorDockspace>()
 			.Style(this, editorDockspace->GetName());
+
+		if (!editorToolBar)
+		{
+			editorToolBar = CreateObject<FStyledWidgetStyle>(this, "EditorToolBar");
+			Add(editorToolBar);
+		}
+
+		editorToolBar->background = Color::RGBA(36, 36, 36);
+		editorToolBar->borderColor = Color::Clear();
+		editorToolBar->borderWidth = 0.0f;
+
+		GetDefaultWidget<EditorToolBar>()
+			.Style(this, editorToolBar->GetName());
     }
 
 } // namespace CE::Editor

@@ -31,13 +31,16 @@
 ///////////////////////////////////////////////////////
 /// Widgets
 
-#include "Widget/Style/EditorDockspaceStyle.h"
-#include "Widget/Style/EditorDockTabStyle.h"
-#include "Widget/Style/EditorStyle.h"
+#include "Fusion/Style/EditorDockspaceStyle.h"
+#include "Fusion/Style/EditorDockTabStyle.h"
+#include "Fusion/Style/EditorStyle.h"
 
-#include "Widget/Window/EditorWindow.h"
-#include "Widget/Window/EditorDockspace.h"
-#include "Widget/Window/EditorDockTab.h"
+#include "Fusion/Widget/EditorToolBar.h"
+
+#include "Fusion/Window/EditorWindow.h"
+#include "Fusion/Window/EditorDockspace.h"
+#include "Fusion/Window/EditorDockTabItem.h"
+#include "Fusion/Window/EditorDockTab.h"
 
 namespace CE::Editor
 {

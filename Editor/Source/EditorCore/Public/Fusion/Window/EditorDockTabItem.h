@@ -2,9 +2,6 @@
 
 namespace CE::Editor
 {
-    class EditorDockTab;
-
-
     CLASS()
     class EDITORCORE_API EditorDockTabItem : public FStyledWidget
     {
@@ -37,30 +34,7 @@ namespace CE::Editor
         FUSION_WIDGET;
         friend class EditorDockspaceStyle;
     };
-
-    CLASS()
-    class EDITORCORE_API EditorDockTab : public EditorWindow
-    {
-        CE_CLASS(EditorDockTab, EditorWindow)
-    public:
-
-        // - Public API -
-
-        virtual bool CanBeClosed() const { return true; }
-
-    protected:
-
-        EditorDockTab();
-
-        void Construct() override;
-
-    public: // - Fusion Properties - 
-
-        FUSION_PROPERTY(String, Title);
-
-        FUSION_WIDGET;
-    };
     
 }
 
-#include "EditorDockTab.rtti.h"
+#include "EditorDockTabItem.rtti.h"

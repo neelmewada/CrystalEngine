@@ -2,14 +2,15 @@
 
 namespace CE::Editor
 {
-	EditorDockTabItem::EditorDockTabItem()
-	{
 
-	}
+    EditorDockTabItem::EditorDockTabItem()
+    {
 
-	void EditorDockTabItem::Construct()
-	{
-		Super::Construct();
+    }
+
+    void EditorDockTabItem::Construct()
+    {
+        Super::Construct();
 
         Child(
             FNew(FHorizontalStack)
@@ -24,7 +25,7 @@ namespace CE::Editor
                 .MinWidth(160)
             )
         );
-	}
+    }
 
     void EditorDockTabItem::OnPostComputeLayout()
     {
@@ -36,8 +37,8 @@ namespace CE::Editor
         String::IsAlphabet('a');
     }
 
-	void EditorDockTabItem::HandleEvent(FEvent* event)
-	{
+    void EditorDockTabItem::HandleEvent(FEvent* event)
+    {
         if (event->IsMouseEvent())
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
@@ -72,19 +73,7 @@ namespace CE::Editor
             }
         }
 
-		Super::HandleEvent(event);
-	}
-
-	EditorDockTab::EditorDockTab()
-    {
-
-    }
-
-    void EditorDockTab::Construct()
-    {
-        Super::Construct();
-
-        
+        Super::HandleEvent(event);
     }
     
 }

@@ -132,7 +132,7 @@ namespace CE::Editor
                             // - Logo -
 
                             FAssignNew(FImage, logo)
-                            .Background(FBrush("/Engine/Resources/Icons/Logo"))
+                            .Background(FBrush("/Engine/Resources/Icons/LogoGray"))
                             .Width(32)
                             .Height(32)
                             .VAlign(VAlign::Center)
@@ -159,7 +159,7 @@ namespace CE::Editor
                             .Style("Button.WindowControl")
                             .VAlign(VAlign::Top)
                             (
-                                FNew(FImage, minimizeIcon)
+                                FAssignNew(FImage, minimizeIcon)
                                 .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
                                 .Width(11)
                                 .Height(11)
@@ -216,7 +216,7 @@ namespace CE::Editor
                     // - Title Bar End -
 
                     FAssignNew(FStyledWidget, content)
-                    .Padding(Vec4(10, 10, 10, 10))
+                    .Padding(Vec4(0, 0, 0, 0))
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
                     .FillRatio(1.0f)

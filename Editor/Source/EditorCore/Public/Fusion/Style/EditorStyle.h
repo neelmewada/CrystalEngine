@@ -75,6 +75,8 @@ namespace CE::Editor
 
 		EditorDockspaceStyle* editorDockspace = nullptr;
 
+		FStyledWidgetStyle* editorToolBar = nullptr;
+
 	};
 
 } // namespace CE::Editor
