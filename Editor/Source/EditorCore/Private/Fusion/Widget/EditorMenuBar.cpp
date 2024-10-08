@@ -8,11 +8,6 @@ namespace CE::Editor
 
     }
 
-    void EditorMenuBar::Construct()
-    {
-        Super::Construct();
-        
-    }
     
 }
 

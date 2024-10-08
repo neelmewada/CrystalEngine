@@ -5,7 +5,21 @@ namespace CE
 
     EditorMenuBarStyle::EditorMenuBarStyle()
     {
+        itemFontSize = 14;
+    }
 
+    SubClass<FWidget> EditorMenuBarStyle::GetWidgetClass() const
+    {
+        return EditorMenuBar::StaticType();
+    }
+
+    void EditorMenuBarStyle::MakeStyle(FWidget& widget)
+    {
+	    Super::MakeStyle(widget);
+
+        EditorMenuBar& menuBar = widget.As<EditorMenuBar>();
+
+        
     }
 
     EditorMenuBarStyle::~EditorMenuBarStyle()

@@ -177,10 +177,8 @@ void EditorLoop::PostInit()
 
 	FusionApplication* fApp = FusionApplication::Get();
 
-	FusionInitInfo initInfo = {};
-	fApp->Initialize(initInfo);
-
-	auto rootContext = fApp->GetRootContext();
+	//FusionInitInfo initInfo = {};
+	//fApp->Initialize(initInfo);
 
 	EditorStyle::Initialize();
 
@@ -204,6 +202,8 @@ void EditorLoop::PostInit()
 	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
 	this->tickDelegateHandle = tickDelegate.GetHandle();
 	app->AddTickHandler(tickDelegate);
+
+	auto rootContext = fApp->GetRootContext();
 
 	if (!projectPath.Exists())
 	{

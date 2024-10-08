@@ -67,7 +67,7 @@ namespace CE::Editor
 			Add("Button.Highlighted", highlightedButton);
 		}
 
-		highlightedButton->background = Color::RGBA(0, 112, 224);
+		highlightedButton->background = highlightColor;
 		highlightedButton->hoveredBackground = Color::RGBA(14, 134, 255);
 		highlightedButton->pressedBackground = Color::RGBA(0, 100, 200);
 		highlightedButton->cornerRadius = Vec4(1, 1, 1, 1) * 5;
@@ -121,7 +121,7 @@ namespace CE::Editor
 
 		textInput->background = textInput->hoverBackground = textInput->editingBackground = Color::RGBA(15, 15, 15);
 		textInput->borderColor = Color::RGBA(60, 60, 60);
-		textInput->editingBorderColor = Color::RGBA(0, 112, 224);
+		textInput->editingBorderColor = highlightColor;
 		textInput->hoverBorderColor = Color::RGBA(74, 74, 74);
 		textInput->borderWidth = 1.0f;
 		textInput->cornerRadius = Vec4(5, 5, 5, 5);
@@ -148,7 +148,7 @@ namespace CE::Editor
 		}
 
 		comboBoxItem->background = Color::Clear();
-		comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
+		comboBoxItem->hoverBackground = highlightColor;
 		comboBoxItem->selectedBackground = Color::Clear();
 		comboBoxItem->selectedShape = FShapeType::RoundedRect;
 		comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
@@ -181,7 +181,7 @@ namespace CE::Editor
 
 		menuPopup->background = Color::RGBA(56, 56, 56);
 		menuPopup->itemPadding = Vec4(10, 5, 10, 5);
-		menuPopup->itemHoverBackground = Color::RGBA(0, 112, 224);
+		menuPopup->itemHoverBackground = highlightColor;
 
 		GetDefaultWidget<FMenuPopup>()
 			.Style(this, menuPopup->GetName());
@@ -194,7 +194,7 @@ namespace CE::Editor
 
 		menuBar->background = Color::Black();
 		menuBar->itemPadding = Vec4(5, 5, 5, 5);
-		menuBar->itemHoverBackground = Color::RGBA(0, 112, 224);
+		menuBar->itemHoverBackground = highlightColor;
 
 		GetDefaultWidget<FMenuBar>()
 			.Style(this, menuBar->GetName());
@@ -209,7 +209,7 @@ namespace CE::Editor
 			.Style(this, toolWindow->GetName());
 
 		InitProjectBrowserStyle();
-		InitEditorDockspaceStyle();
+		InitEditorStyle();
     }
 
     void EditorStyle::InitProjectBrowserStyle()
@@ -248,15 +248,15 @@ namespace CE::Editor
 		projectBrowserListView->borderColor = Color::RGBA(56, 56, 56);
 
 		projectBrowserListView->itemBackground = Color::Clear();
-		projectBrowserListView->hoveredItemBackground = Color::RGBA(0, 112, 224);
-		projectBrowserListView->selectedItemBackground = Color::RGBA(0, 112, 224);
+		projectBrowserListView->hoveredItemBackground = highlightColor;
+		projectBrowserListView->selectedItemBackground = highlightColor;
 
 		projectBrowserListView->itemBorderWidth = 0.0f;
 		projectBrowserListView->itemBorderColor = Color::Clear();
 
     }
 
-    void EditorStyle::InitEditorDockspaceStyle()
+    void EditorStyle::InitEditorStyle()
     {
 		if (!editorDockspace)
 		{
@@ -279,6 +279,26 @@ namespace CE::Editor
 
 		GetDefaultWidget<EditorToolBar>()
 			.Style(this, editorToolBar->GetName());
+
+		if (!editorMenuBar)
+		{
+			editorMenuBar = CreateObject<EditorMenuBarStyle>(this, "EditorMenuBar");
+			Add(editorMenuBar);
+		}
+
+		editorMenuBar->background = editorToolBar->background;
+		editorMenuBar->borderColor = Color::Clear();
+		editorMenuBar->borderWidth = 0.0f;
+
+    	editorMenuBar->itemBackground = Color::Clear();
+		editorMenuBar->itemHoverBackground = highlightColor;
+		editorMenuBar->itemBorderColor = Color::Clear();
+		editorMenuBar->itemHoverBorderColor = Color::Clear();
+		editorMenuBar->itemPadding = Vec4(2, 1, 2, 1) * 5;
+		
+		GetDefaultWidget<EditorMenuBar>()
+			.Style(this, editorMenuBar->GetName());
+
     }
 
 } // namespace CE::Editor

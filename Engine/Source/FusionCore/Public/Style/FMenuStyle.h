@@ -32,6 +32,9 @@ namespace CE
         Vec4 itemPadding;
 
         FIELD()
+        int itemFontSize = 14;
+
+        FIELD()
         FBrush itemBackground;
 
         FIELD()

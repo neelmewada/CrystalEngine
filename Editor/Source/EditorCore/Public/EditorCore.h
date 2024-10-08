@@ -33,14 +33,18 @@
 
 #include "Fusion/Style/EditorDockspaceStyle.h"
 #include "Fusion/Style/EditorDockTabStyle.h"
+#include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
 #include "Fusion/Widget/EditorToolBar.h"
+#include "Fusion/Widget/EditorMenuBar.h"
 
 #include "Fusion/Window/EditorWindow.h"
 #include "Fusion/Window/EditorDockspace.h"
 #include "Fusion/Window/EditorDockTabItem.h"
 #include "Fusion/Window/EditorDockTab.h"
+
+#include "Fusion/Window/EditorMinorDockspace.h"
 
 namespace CE::Editor
 {

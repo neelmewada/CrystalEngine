@@ -20,9 +20,12 @@ namespace CE::Editor
 
 		void InitProjectBrowserStyle();
 
-		void InitEditorDockspaceStyle();
+		void InitEditorStyle();
 
 	public:
+
+		FIELD()
+		Color highlightColor = Color::RGBA(0, 112, 224);
 
 		FIELD()
 		FCustomButtonStyle* button = nullptr;
@@ -73,9 +76,14 @@ namespace CE::Editor
 
 		// - Editor -
 
+		FIELD()
 		EditorDockspaceStyle* editorDockspace = nullptr;
 
+		FIELD()
 		FStyledWidgetStyle* editorToolBar = nullptr;
+
+		FIELD()
+		EditorMenuBarStyle* editorMenuBar = nullptr;
 
 	};
 

@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class EDITORCORE_API EditorMenuBarStyle : public Object
+    class EDITORCORE_API EditorMenuBarStyle : public FMenuBarStyle
     {
-        CE_CLASS(EditorMenuBarStyle, Object)
+        CE_CLASS(EditorMenuBarStyle, FMenuBarStyle)
     public:
 
         virtual ~EditorMenuBarStyle();
@@ -13,6 +13,12 @@ namespace CE
     protected:
 
         EditorMenuBarStyle();
+
+    public:
+
+        SubClass<FWidget> GetWidgetClass() const override;
+
+        void MakeStyle(FWidget& widget) override;
 
     };
     

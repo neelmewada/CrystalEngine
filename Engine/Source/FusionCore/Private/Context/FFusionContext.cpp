@@ -244,10 +244,11 @@ namespace CE
 		popup->isShown = true;
 		popup->isNativePopup = false;
 
-		GetRootContext()->SetFocusWidget(popup);
 		MarkLayoutDirty();
 
 		popup->ApplyStyle();
+
+		GetRootContext()->SetFocusWidget(popup);
 	}
 
 	void FFusionContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)

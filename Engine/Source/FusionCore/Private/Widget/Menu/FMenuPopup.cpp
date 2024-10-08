@@ -20,37 +20,36 @@ namespace CE
         {
             FFocusEvent* focusEvent = static_cast<FFocusEvent*>(event);
 
-            if (focusEvent->GotFocus() != IsFocused())
+            if (focusEvent->LostFocus() && AutoClose())
             {
-                if (focusEvent->LostFocus() && AutoClose())
-                {
-                    FWidget* focusedWidget = focusEvent->focusedWidget;
+                FWidget* focusedWidget = focusEvent->focusedWidget;
 
+                ClosePopup();
+
+                if (focusedWidget != nullptr)
+                {
                     FMenuItem* ownerItem = this->ownerItem;
 
-                    while (ownerItem != nullptr && ownerItem->subMenu != nullptr)
+                    while (ownerItem != nullptr)
                     {
-                        if (focusedWidget == nullptr)
-                        {
-                            ownerItem->subMenu->ClosePopup();
-                        }
-
-                        FWidget* ownerItemMenu = ownerItem->menuOwner;
-                        if (ownerItemMenu == nullptr)
+                        FWidget* menuOwner = ownerItem->menuOwner;
+                        if (menuOwner == nullptr)
                             break;
-                        
-                        if (ownerItemMenu->IsOfType<FMenuPopup>())
+
+                        if (menuOwner->IsOfType<FMenuPopup>())
                         {
-                            FMenuPopup* ownerItemMenuPopup = static_cast<FMenuPopup*>(ownerItemMenu);
-                            if (!focusedWidget->FocusParentExistsRecursive(ownerItemMenuPopup))
+                            FMenuPopup* menuOwnerPopup = static_cast<FMenuPopup*>(menuOwner);
+
+                            if (!focusedWidget->ParentExistsRecursive(menuOwnerPopup))
                             {
-                                ownerItemMenuPopup->ClosePopup();
+                                menuOwnerPopup->ClosePopup();
                             }
-	                        ownerItem = ownerItemMenuPopup->ownerItem;
+
+                            ownerItem = menuOwnerPopup->ownerItem;
                         }
-                        else
+                        else if (menuOwner->IsOfType<FMenuBar>())
                         {
-	                        ownerItem = nullptr;
+                            ownerItem = nullptr;
                         }
                     }
                 }

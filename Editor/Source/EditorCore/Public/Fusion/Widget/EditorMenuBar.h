@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API EditorMenuBar : public FWidget
+    class EDITORCORE_API EditorMenuBar : public FMenuBar
     {
-        CE_CLASS(EditorMenuBar, FWidget)
+        CE_CLASS(EditorMenuBar, FMenuBar)
     public:
 
         // - Public API -
@@ -13,8 +13,6 @@ namespace CE::Editor
     protected:
 
         EditorMenuBar();
-
-        void Construct() override;
 
     public: // - Fusion Properties - 
 

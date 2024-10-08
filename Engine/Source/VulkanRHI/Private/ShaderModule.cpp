@@ -19,7 +19,7 @@ namespace CE::Vulkan
 		shaderCI.codeSize = desc.byteSize;
 
 		hash = CalculateHash(desc.byteCode, desc.byteSize);
-		
+
 		VkResult result = vkCreateShaderModule(device->GetHandle(), &shaderCI, VULKAN_CPU_ALLOCATOR, &shaderModule);
 		if (result != VK_SUCCESS)
 		{

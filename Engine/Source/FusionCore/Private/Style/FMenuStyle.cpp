@@ -33,6 +33,7 @@ namespace CE
             Color borderColor = item.IsHovered() ? this->itemBorderColor : this->itemHoverBorderColor;
 
             item
+				.FontSize(itemFontSize)
                 .Background(itemBg)
                 .Border(borderColor, itemBorderWidth)
                 .BackgroundShape(FRectangle())

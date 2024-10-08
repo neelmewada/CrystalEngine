@@ -17,17 +17,17 @@ namespace CE::Editor
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
             (
+                FAssignNew(EditorMenuBar, menuBar)
+                .HAlign(HAlign::Fill),
+
                 FAssignNew(EditorToolBar, toolBar)
                 .HAlign(HAlign::Fill),
 
-                FNew(FTerminalWidget)
-                .FillRatio(1.0f)
-                .HAlign(HAlign::Fill)
-
-                /*FAssignNew(FStyledWidget, content)
+                FAssignNew(FStyledWidget, content)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
-                .FillRatio(1.0f)*/
+                .FillRatio(1.0f)
+                .Name("EditorContent")
             )
         );
     }
