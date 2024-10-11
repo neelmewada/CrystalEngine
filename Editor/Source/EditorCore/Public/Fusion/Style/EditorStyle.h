@@ -80,6 +80,15 @@ namespace CE::Editor
 		EditorDockspaceStyle* editorDockspace = nullptr;
 
 		FIELD()
+		EditorMinorDockspaceStyle* editorMinorDockspace = nullptr;
+
+		FIELD()
+		EditorDockTabStyle* editorDockTab = nullptr;
+
+		FIELD()
+		EditorDockTabStyle* editorMinorDockTab = nullptr;
+
+		FIELD()
 		FStyledWidgetStyle* editorToolBar = nullptr;
 
 		FIELD()

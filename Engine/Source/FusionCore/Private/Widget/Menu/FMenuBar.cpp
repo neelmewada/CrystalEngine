@@ -10,12 +10,29 @@ namespace CE
 
     void FMenuBar::OnMenuItemHovered(FMenuItem* hoveredItem)
     {
+        bool isSubMenuOpen = false;
+        
         for (FMenuItem* menuItem : menuItems)
         {
-	        if (menuItem != hoveredItem && menuItem->subMenu != nullptr)
-	        {
-                menuItem->subMenu->ClosePopup();
-	        }
+            if (menuItem->subMenu != nullptr && menuItem->subMenu->IsShown())
+            {
+                isSubMenuOpen = true;
+            }
+        }
+
+        if (isSubMenuOpen)
+        {
+            for (FMenuItem* menuItem : menuItems)
+            {
+                if (menuItem != hoveredItem && menuItem->subMenu != nullptr && menuItem->subMenu->IsShown())
+                {
+                    menuItem->subMenu->ClosePopup();
+                }
+                else if (menuItem == hoveredItem && menuItem->subMenu != nullptr && !menuItem->subMenu->IsShown())
+                {
+                    menuItem->OpenSubMenu();
+                }
+            }
         }
     }
 

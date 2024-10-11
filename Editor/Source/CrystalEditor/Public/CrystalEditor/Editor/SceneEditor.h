@@ -18,6 +18,16 @@ namespace CE::Editor
 
         void Construct() override;
 
+        FSplitBox* rootSplitBox = nullptr;
+
+    private:
+
+        void ConstructMenuBar();
+        void ConstructDockspaces();
+
+        EditorMinorDockspace* right = nullptr;
+        EditorMinorDockspace* center = nullptr;
+
     public: // - Fusion Properties - 
 
 

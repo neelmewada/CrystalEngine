@@ -8,6 +8,23 @@ namespace CE
 
     }
 
+    void FMenuItem::OpenSubMenu()
+    {
+        if (!subMenu)
+            return;
+
+        if (menuOwner == nullptr || menuOwner->IsOfType<FMenuItem>())
+        {
+            GetContext()->PushLocalPopup(subMenu, globalPosition + Vec2(computedSize.x, 0));
+        }
+        else if (menuOwner != nullptr && menuOwner->IsOfType<FMenuBar>())
+        {
+            Vec2 offset = Vec2(0, computedSize.y);
+
+            GetContext()->PushLocalPopup(subMenu, globalPosition + offset);
+        }
+    }
+
     void FMenuItem::Construct()
     {
 	    Super::Construct();

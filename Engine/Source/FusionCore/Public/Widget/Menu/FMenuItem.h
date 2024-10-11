@@ -18,6 +18,8 @@ namespace CE
 
         bool SupportsFocusEvents() const override { return true; }
 
+        void OpenSubMenu();
+
     protected:
 
         void Construct() override final;

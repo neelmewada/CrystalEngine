@@ -14,14 +14,67 @@ namespace CE::Editor
 
         Title("Scene Editor");
 
+        ConstructMenuBar();
+        ConstructDockspaces();
+
+    }
+
+    void SceneEditor::ConstructDockspaces()
+    {
+        (*content)
+            .Child(
+                FAssignNew(FSplitBox, rootSplitBox)
+                .Direction(FSplitDirection::Horizontal)
+                .HAlign(HAlign::Fill)
+                .VAlign(VAlign::Fill)
+                (
+                    FNew(FSplitBox)
+                    .Direction(FSplitDirection::Vertical)
+                    .VAlign(VAlign::Fill)
+                    .FillRatio(0.75f)
+                    (
+                        FAssignNew(EditorMinorDockspace, center)
+                        .DockTabs(
+                            FNew(EditorMinorDockTab)
+                            .Title("Viewport")
+
+                        )
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(0.75f),
+
+                        FAssignNew(EditorMinorDockspace, center)
+                        .DockTabs(
+                            FNew(EditorMinorDockTab)
+                            .Title("Logs")
+
+                        )
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(0.25f)
+                    ),
+
+                    FAssignNew(EditorMinorDockspace, right)
+                    .DockTabs(
+                        FNew(EditorMinorDockTab)
+                        .Title("Details")
+
+                    )
+                    .VAlign(VAlign::Fill)
+                    .FillRatio(0.25f)
+                )
+            )
+    		.Padding(Vec4(0, 5, 0, 0));
+    }
+
+    void SceneEditor::ConstructMenuBar()
+    {
         (*menuBar)
-			.Content(
+            .Content(
                 FNew(FMenuItem)
                 .Text("File")
                 .SubMenu(
-                    FNew(FMenuPopup)
+                    FNew(EditorMenuPopup)
                     .Name("FileMenu")
-                    .As<FMenuPopup>()
+                    .As<EditorMenuPopup>()
                     .Gap(0)
                     .Content(
                         FNew(FMenuItem)
@@ -36,7 +89,7 @@ namespace CE::Editor
                         FNew(FMenuItem)
                         .Text("Open Recent...")
                         .SubMenu(
-                            FNew(FMenuPopup)
+                            FNew(EditorMenuPopup)
                             .Gap(0)
                             .Content(
                                 FNew(FMenuItem)
@@ -52,7 +105,7 @@ namespace CE::Editor
                                 .Text("Project 4")
                             )
                             .Name("RecentsMenu")
-                            .As<FMenuPopup>()
+                            .As<EditorMenuPopup>()
                         ),
 
                         FNew(FMenuItem)
@@ -64,15 +117,28 @@ namespace CE::Editor
                         FNew(FMenuItem)
                         .Text("Exit")
                         .OnClick([this]
-                        {
-                            GetContext()->QueueDestroy();
-                        })
+                            {
+                                GetContext()->QueueDestroy();
+                            })
                     )
                 )
                 .Name("FileMenuItem"),
 
                 FNew(FMenuItem)
                 .Text("Edit")
+                .SubMenu(
+                    FNew(EditorMenuPopup)
+                    .Name("EditMenu")
+                    .As<EditorMenuPopup>()
+                    .Gap(0)
+                    .Content(
+                        FNew(FMenuItem)
+                        .Text("Project Settings"),
+
+                        FNew(FMenuItem)
+                        .Text("Editor Settings")
+                    )
+                )
                 .Name("EditMenuItem"),
 
                 FNew(FMenuItem)
@@ -81,6 +147,6 @@ namespace CE::Editor
             )
             ;
     }
-    
+
 }
 

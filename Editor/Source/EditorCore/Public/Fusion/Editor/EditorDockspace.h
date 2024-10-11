@@ -52,6 +52,20 @@ namespace CE::Editor
 
         FUSION_PROPERTY_WRAPPER2(Background, titleBar, TitleBarBackground);
 
+
+        template<typename... TArgs> requires TMatchAllBaseClass<EditorDockTab, TArgs...>::Value and (sizeof...(TArgs) > 0)
+        Self& DockTabs(TArgs&... dockTabs)
+        {
+            std::initializer_list<EditorDockTab*> list = { &dockTabs... };
+
+            for (EditorDockTab* dockTab : list)
+            {
+                AddDockTab(dockTab);
+            }
+
+            return *this;
+        }
+
         FUSION_WIDGET;
         friend class EditorDockspaceStyle;
     };

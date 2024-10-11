@@ -20,6 +20,15 @@ namespace CE
 
     public:
 
+        FIELD()
+        FBrush background = Color::RGBA(36, 36, 36);
+
+        FIELD()
+        Color borderColor = Color::Clear();
+
+        FIELD()
+        f32 borderWidth = 0.0f;
+
     };
     
 } // namespace CE

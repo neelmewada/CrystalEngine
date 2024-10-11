@@ -180,10 +180,15 @@ namespace CE::Editor
 		}
 
 		menuPopup->background = Color::RGBA(56, 56, 56);
+		menuPopup->borderColor = Color::RGBA(26, 26, 26);
+		menuPopup->borderWidth = 0.5f;
 		menuPopup->itemPadding = Vec4(10, 5, 10, 5);
 		menuPopup->itemHoverBackground = highlightColor;
 
 		GetDefaultWidget<FMenuPopup>()
+			.Style(this, menuPopup->GetName());
+
+		GetDefaultWidget<EditorMenuPopup>()
 			.Style(this, menuPopup->GetName());
 
 		if (!menuBar)
@@ -266,6 +271,35 @@ namespace CE::Editor
 
 		GetDefaultWidget<EditorDockspace>()
 			.Style(this, editorDockspace->GetName());
+
+		if (!editorMinorDockspace)
+		{
+			editorMinorDockspace = CreateObject<EditorMinorDockspaceStyle>(this, "EditorMinorDockspace");
+			Add(editorMinorDockspace);
+		}
+
+		GetDefaultWidget<EditorMinorDockspace>()
+			.Style(this, editorMinorDockspace->GetName());
+
+		if (!editorDockTab)
+		{
+			editorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorDockTab");
+			Add(editorDockTab);
+		}
+
+		editorDockTab->background = Color::RGBA(26, 26, 26);
+
+		GetDefaultWidget<EditorDockTab>()
+			.Style(this, editorDockTab->GetName());
+
+		if (!editorMinorDockTab)
+		{
+			editorMinorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorMinorDockTab");
+			Add(editorMinorDockTab);
+		}
+
+		GetDefaultWidget<EditorMinorDockTab>()
+			.Style(this, editorMinorDockTab->GetName());
 
 		if (!editorToolBar)
 		{

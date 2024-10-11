@@ -31,6 +31,19 @@ namespace CE::Editor
             )
         );
     }
-    
+
+    EditorMinorDockTab::EditorMinorDockTab()
+    {
+        m_TabRole = EditorDockTabRole::Minor;
+    }
+
+    void EditorMinorDockTab::Construct()
+    {
+	    Super::Construct();
+
+        MenuBarEnabled(false);
+        ToolBarEnabled(false);
+    }
+
 }
 

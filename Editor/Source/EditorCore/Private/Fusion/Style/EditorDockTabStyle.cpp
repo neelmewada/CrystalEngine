@@ -22,7 +22,11 @@ namespace CE
     {
         EditorDockTab& dockTab = widget.As<EditorDockTab>();
 
-
+        dockTab
+			.ContentBackground(background)
+			.ContentBorderColor(borderColor)
+			.ContentBorderWidth(borderWidth)
+            ;
     }
     
 } // namespace CE

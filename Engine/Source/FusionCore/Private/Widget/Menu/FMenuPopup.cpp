@@ -7,6 +7,8 @@ namespace CE
     {
         m_AutoClose = true;
         m_BlockInteraction = false;
+
+        m_Padding = Vec4(1, 1, 1, 1);
     }
 
     bool FMenuPopup::FocusParentExistsRecursive(FWidget* parent)
@@ -24,21 +26,24 @@ namespace CE
             {
                 FWidget* focusedWidget = focusEvent->focusedWidget;
 
-                ClosePopup();
-
                 if (focusedWidget != nullptr)
                 {
                     FMenuItem* ownerItem = this->ownerItem;
 
+                    if (ownerItem && !focusedWidget->ParentExistsRecursive(ownerItem))
+                    {
+                        ClosePopup();
+                    }
+
                     while (ownerItem != nullptr)
                     {
-                        FWidget* menuOwner = ownerItem->menuOwner;
-                        if (menuOwner == nullptr)
+                        FWidget* ownerMenu = ownerItem->menuOwner;
+                        if (ownerMenu == nullptr)
                             break;
 
-                        if (menuOwner->IsOfType<FMenuPopup>())
+                        if (ownerMenu->IsOfType<FMenuPopup>())
                         {
-                            FMenuPopup* menuOwnerPopup = static_cast<FMenuPopup*>(menuOwner);
+                            FMenuPopup* menuOwnerPopup = static_cast<FMenuPopup*>(ownerMenu);
 
                             if (!focusedWidget->ParentExistsRecursive(menuOwnerPopup))
                             {
@@ -47,11 +52,15 @@ namespace CE
 
                             ownerItem = menuOwnerPopup->ownerItem;
                         }
-                        else if (menuOwner->IsOfType<FMenuBar>())
+                        else if (ownerMenu->IsOfType<FMenuBar>())
                         {
                             ownerItem = nullptr;
                         }
                     }
+                }
+                else
+                {
+                    ClosePopup();
                 }
             }
         }

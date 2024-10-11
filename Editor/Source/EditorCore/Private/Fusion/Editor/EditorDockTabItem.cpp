@@ -13,7 +13,7 @@ namespace CE::Editor
         Super::Construct();
 
         Child(
-            FNew(FHorizontalStack)
+            FAssignNew(FHorizontalStack, content)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             .Padding(Vec4(1, 0, 1, 0) * 20)

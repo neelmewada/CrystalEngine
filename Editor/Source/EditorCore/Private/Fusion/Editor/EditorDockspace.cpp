@@ -10,7 +10,7 @@ namespace CE::Editor
 
     void EditorDockspace::AddDockTab(EditorDockTab* tab)
     {
-        if (dockedEditors.Exists(tab))
+    	if (tab == nullptr || dockedEditors.Exists(tab))
             return;
 
         dockedEditors.Add(tab);

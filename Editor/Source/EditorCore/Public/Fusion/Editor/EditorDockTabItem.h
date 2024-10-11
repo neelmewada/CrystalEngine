@@ -23,6 +23,7 @@ namespace CE::Editor
         void OnPostComputeLayout() override;
 
         FLabel* label = nullptr;
+        FHorizontalStack* content = nullptr;
 
         bool isActive = false;
         bool isHovered = false;
@@ -31,8 +32,11 @@ namespace CE::Editor
 
         FUSION_PROPERTY_WRAPPER(Text, label);
 
+        FUSION_PROPERTY_WRAPPER2(Padding, content, ContentPadding);
+
         FUSION_WIDGET;
         friend class EditorDockspaceStyle;
+        friend class EditorMinorDockspaceStyle;
     };
     
 }
