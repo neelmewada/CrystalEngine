@@ -3,18 +3,6 @@
 #include "Core/ViewData.hlsli"
 #include "Core/Gamma.hlsli"
 
-#ifndef COMPILE
-// Only for intellisense purpose! Actual constant buffer is in ViewData.hlsli file
-cbuffer _PerViewData : SRG_PerView(b0)
-{
-    float4x4 viewMatrix;
-    float4x4 viewProjectionMatrix;
-    float4x4 projectionMatrix;
-    float4 viewPosition;
-    float2 pixelResolution;
-};
-#endif
-
 struct VSInput
 {
     float3 position : POSITION;
@@ -34,19 +22,20 @@ struct PSInput
 #define InstanceIdx input.instanceId
 
 ///////////////////////////////////////////////////////////
-/// Data Structures & Types
+//// Data Structures & Types
 
-// TODO: Features
-// - Clipping by shape
-// - Shapes with Fill and Border
-// - Text characters
-// - 
+/// TODO: Features
+/// - Clipping by shape
+/// - Shapes with Fill and Border
+/// - Text characters
+/// - 
 
 enum DrawType : uint
 {
 	DRAW_Shape,
     DRAW_Line,
-    DRAW_Text
+    DRAW_Text,
+    DRAW_FrameBuffer
 };
 
 enum class ShapeType: uint
@@ -105,7 +94,7 @@ struct LineItem2D
     float dashLength;
 };
 
-// Could be a shape, font character, or any other draw item
+/// Could be a shape, font character, or any other draw item
 struct DrawItem2D
 {
     float4x4 transform;
@@ -127,7 +116,7 @@ struct GlyphItem
 };
 
 ///////////////////////////////////////////////////////////
-/// Shader Resources
+//// Shader Resources
 
 StructuredBuffer<DrawItem2D> _DrawList : SRG_PerDraw(t0);
 StructuredBuffer<ClipItem2D> _ClipItems : SRG_PerDraw(t1);
@@ -135,13 +124,18 @@ StructuredBuffer<ShapeItem2D> _ShapeDrawList : SRG_PerDraw(t2);
 StructuredBuffer<LineItem2D> _LineItems : SRG_PerDraw(t3);
 StructuredBuffer<ClipItemData> _ClipItemIndices : SRG_PerDraw(t4);
 
+cbuffer _DrawDataConstants : SRG_PerDraw(b5)
+{
+    uint _FrameIndex;
+};
+
 #if FRAGMENT
 
 Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
 StructuredBuffer<GlyphItem> _GlyphItems : SRG_PerMaterial(t1);
 SamplerState _FontAtlasSampler : SRG_PerMaterial(s2);
 
-#define MAX_TEXTURE_COUNT 100000
+#define MAX_TEXTURE_COUNT 250000
 #define MAX_SAMPLER_COUNT 128
 
 Texture2D _Textures[MAX_TEXTURE_COUNT] : SRG_PerObject(t0);
@@ -150,7 +144,7 @@ SamplerState _TextureSamplers[MAX_SAMPLER_COUNT] : SRG_PerObject(s1);
 #endif
 
 ///////////////////////////////////////////////////////////
-/// Vertex Shader
+//// Vertex Shader
 
 PSInput VertMain(VSInput input)
 {
@@ -172,11 +166,11 @@ PSInput VertMain(VSInput input)
 }
 
 ///////////////////////////////////////////////////////////
-/// Fragment Shader
+//// Fragment Shader
 
-// - SDF Functions -
+/// - SDF Functions -
 
-// Credit: https://iquilezles.org/articles/distfunctions2d/
+/// Credit: https://iquilezles.org/articles/distfunctions2d/
 float SDFClipRect(in float2 p, in float2 shapePos, in float2 shapeSize)
 {
     p -= float2(shapePos.x + shapeSize.x * 0.5, shapePos.y + shapeSize.y * 0.5);
@@ -184,11 +178,11 @@ float SDFClipRect(in float2 p, in float2 shapePos, in float2 shapeSize)
     return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-// Credit: https://iquilezles.org/articles/distfunctions2d/
-// r.x = roundness bottom-right  
-// r.y = roundness top-right
-// r.z = roundness bottom-left
-// r.w = roundness top-left
+/// Credit: https://iquilezles.org/articles/distfunctions2d/
+/// r.x = roundness bottom-right  
+/// r.y = roundness top-right
+/// r.z = roundness bottom-left
+/// r.w = roundness top-left
 float SDFClipRoundedRect(in float2 p, in float2 shapePos, in float2 shapeSize, in float4 r)
 {
     p -= float2(shapePos.x + shapeSize.x * 0.5, shapePos.y + shapeSize.y * 0.5);
@@ -212,7 +206,7 @@ float SDFCircle(in float2 p, in float2 shapeSize)
     return length(p) - r;
 }
 
-// Credit: https://www.ronja-tutorials.com/post/034-2d-sdf-basics/
+/// Credit: https://www.ronja-tutorials.com/post/034-2d-sdf-basics/
 float SDFRect(in float2 p, in float2 shapeSize)
 {
     const float2 componentWiseEdgeDistance = abs(p) - shapeSize * 0.5;
@@ -221,11 +215,11 @@ float SDFRect(in float2 p, in float2 shapeSize)
     return outsideDistance + insideDistance;
 }
 
-// Credit: https://iquilezles.org/articles/distfunctions2d/
-// r.x = roundness bottom-right  
-// r.y = roundness top-right
-// r.z = roundness bottom-left
-// r.w = roundness top-left
+/// Credit: https://iquilezles.org/articles/distfunctions2d/
+/// r.x = roundness bottom-right  
+/// r.y = roundness top-right
+/// r.z = roundness bottom-left
+/// r.w = roundness top-left
 float SDFRoundedRect(in float2 p, in float2 shapeSize, in float4 r)
 {
     r.xy = (p.x > 0.0) ? r.xy : r.zw;
@@ -234,7 +228,7 @@ float SDFRoundedRect(in float2 p, in float2 shapeSize, in float4 r)
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
-// Credit: https://iquilezles.org/articles/distfunctions2d/
+/// Credit: https://iquilezles.org/articles/distfunctions2d/
 float SDFSegment(in float2 p, in float2 a, in float2 b)
 {
     float2 ba = b - a;
@@ -243,7 +237,7 @@ float SDFSegment(in float2 p, in float2 a, in float2 b)
     return length(pa - h * ba);
 }
 
-// Signed distance function for a dashed line segment
+/// Signed distance function for a dashed line segment
 float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength, float thickness)
 {
     float2 ba = b - a;
@@ -256,7 +250,7 @@ float SDFDashedLine(float2 p, float2 a, float2 b, float dashLength, float thickn
     return lerp(1.0, d, dashMask);
 }
 
-// -----------------------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------------------
 
 #if FRAGMENT
 
@@ -297,7 +291,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 	    		break;
 	    	}
 
-	    	if (clipSdf >= 0) // Outside clip rect
+	    	if (clipSdf >= 0) /// Outside clip rect
 	    	{
 	    		discard;
 	    	}
@@ -328,8 +322,8 @@ float4 FragMain(PSInput input) : SV_TARGET
 	        break;
         }
 
-        // Comment the if-statement to test nested clipping
-        if (sd >= 0) // Outside clip rect
+        /// Comment the if-statement to test nested clipping
+        if (sd >= 0) /// Outside clip rect
         {
             discard;
         }
@@ -390,7 +384,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             color = lerp(color, penColor, clamp(-borderSdf * 2.5, 0, 1));
         }
 
-        // Lerp fillColor with SDF for anti-aliased edges
+        /// Lerp fillColor with SDF for anti-aliased edges
         pixelColor = lerp(float4(color.rgb, 0), color, clamp01(-sd * 5));
     }
     else if (drawItem.drawType == DRAW_Line)
@@ -430,6 +424,16 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         pixelColor.rgb = penColor.rgb;
         pixelColor.a = penColor.a * alpha * 1.1;
+    }
+    else if (drawItem.drawType == DRAW_FrameBuffer)
+    {
+		const uint shapeIndex = drawItem.shapeOrCharOrLineIndex;
+        const ShapeItem2D shapeItem = _ShapeDrawList[shapeIndex];
+        const uint samplerIndex = shapeItem.samplerIndex;
+        const uint textureIndex = shapeItem.textureOrGradientIndex + _FrameIndex;
+		
+        pixelColor.rgb = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], uv).rgb;
+	    pixelColor.a = 1.0;
     }
 
     return float4(pixelColor.rgb, pixelColor.a * clipLerpFactor * drawItem.opacity);

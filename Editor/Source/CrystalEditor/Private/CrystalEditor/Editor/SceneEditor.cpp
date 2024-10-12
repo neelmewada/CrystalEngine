@@ -36,20 +36,23 @@ namespace CE::Editor
                         FAssignNew(EditorMinorDockspace, center)
                         .DockTabs(
                             FNew(EditorMinorDockTab)
-                            .Title("Viewport")
+                            .Title("Viewport").Content(
+                                FNew(FStyledWidget)
+                                
+                            )
 
                         )
                         .HAlign(HAlign::Fill)
-                        .FillRatio(0.75f),
+                        .FillRatio(0.6f),
 
-                        FAssignNew(EditorMinorDockspace, center)
+                        FAssignNew(EditorMinorDockspace, bottom)
                         .DockTabs(
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
 
                         )
                         .HAlign(HAlign::Fill)
-                        .FillRatio(0.25f)
+                        .FillRatio(0.4f)
                     ),
 
                     FAssignNew(EditorMinorDockspace, right)

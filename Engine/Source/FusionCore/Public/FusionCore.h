@@ -108,4 +108,5 @@ namespace CE
 
 #include "Window/FTitleBar.h"
 #include "Window/FWindow.h"
+#include "Widget/FViewport.h"
 

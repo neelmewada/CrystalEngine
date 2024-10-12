@@ -40,6 +40,8 @@ namespace CE
 
         bool DrawShape(const Rect& rect, const FShape& shape);
 
+        void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
+
         bool DrawRect(const Rect& rect);
 
         bool DrawCircle(const Rect& rect);

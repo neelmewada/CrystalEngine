@@ -84,6 +84,12 @@ namespace CE
 		return renderer->DrawShape(shape, rect.min, rect.GetSize());
 	}
 
+	void FPainter::DrawFrameBuffer(const Rect& rect,
+		const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
+	{
+		renderer->DrawFrameBuffer(frames, rect.min, rect.GetSize());
+	}
+
 	bool FPainter::DrawRect(const Rect& rect)
 	{
 		return renderer->DrawShape(FRectangle(), rect.min, rect.GetSize());

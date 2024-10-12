@@ -44,6 +44,8 @@ namespace CE::Editor
         FUSION_PROPERTY_WRAPPER2(BorderColor, content, ContentBorderColor);
         FUSION_PROPERTY_WRAPPER2(BorderWidth, content, ContentBorderWidth);
 
+        Self& Content(FWidget& widget);
+
 
         FUSION_WIDGET;
     };

@@ -38,12 +38,27 @@ namespace CE
 			viewConstantsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(viewConstantsBufferDesc);
 			viewConstantsUpdateRequired[i] = true;
 
+			RHI::BufferDescriptor drawDataConstantBufferDesc{};
+			drawDataConstantBufferDesc.name = "DrawDataConstants";
+			drawDataConstantBufferDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			drawDataConstantBufferDesc.bufferSize = sizeof(FDrawDataConstants);
+			drawDataConstantBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			drawDataConstantBufferDesc.structureByteStride = sizeof(FDrawDataConstants);
+
+			drawDataConstantsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(drawDataConstantBufferDesc);
+
+			FDrawDataConstants data;
+			data.frameIndex = i;
+
+			drawDataConstantsBuffer[i]->UploadData(&data, drawDataConstantBufferDesc.bufferSize);
+
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ClipItems", clipItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ShapeDrawList", shapeItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_LineItems", lineItemsBuffer.GetBuffer(i));
 			drawItemSrg->Bind(i, "_ClipItemIndices", clipItemIndexListBuffer.GetBuffer(i));
+			drawItemSrg->Bind(i, "_DrawDataConstants", drawDataConstantsBuffer[i]);
 		}
 
 		perViewSrg->FlushBindings();
@@ -64,6 +79,9 @@ namespace CE
 		{
 			delete viewConstantsBuffer[i];
 			viewConstantsBuffer[i] = nullptr;
+
+			delete drawDataConstantsBuffer[i];
+			drawDataConstantsBuffer[i] = nullptr;
 		}
 
 		for (auto drawPacket : drawPackets)
@@ -645,6 +663,45 @@ namespace CE
 		FLineItem2D lineItem = { .lineStart = Vec2(0, 0), .lineEnd = size, .dashLength = dashLength };
 
 		lineItemList.Insert(lineItem);
+	}
+
+	void FusionRenderer::DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames,
+		Vec2 pos, Vec2 quadSize)
+	{
+		if (quadSize.x <= 0 || quadSize.y <= 0)
+			return;
+
+		for (int i = 0; i < Math::Min<int>(frames.GetSize(), numFrames); ++i)
+		{
+			if (frames[i] == nullptr)
+				return;
+		}
+
+		ZoneScoped;
+
+		auto app = FusionApplication::Get();
+		int imageIndex = app->FindImageIndex(frames[0]->GetRhiTexture());
+		if (imageIndex < 0)
+			return;
+
+		FDrawItem2D& drawItem = DrawCustomItem(DRAW_FrameBuffer, pos, quadSize);
+
+		FShapeItem2D shapeItem;
+		shapeItem.shape = FShapeType::None;
+		shapeItem.cornerRadius = {};
+		shapeItem.textureOrGradientIndex = imageIndex;
+
+		drawItem.shapeIndex = (uint)shapeItemList.GetCount();
+
+		RHI::SamplerDescriptor sampler{};
+		sampler.addressModeU = sampler.addressModeV = sampler.addressModeW = SamplerAddressMode::ClampToBorder;
+		sampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+		sampler.enableAnisotropy = false;
+		sampler.samplerFilterMode = FilterMode::Linear;
+
+		shapeItem.samplerIndex = app->FindOrCreateSampler(sampler);
+
+		shapeItemList.Insert(shapeItem);
 	}
 
 	bool FusionRenderer::DrawShape(const FShape& shape, Vec2 pos, Vec2 quadSize)

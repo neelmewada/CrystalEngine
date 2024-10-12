@@ -86,7 +86,7 @@ namespace CE
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 		// TODO: Implement multi scene support
-		CE::Scene* activeScene = sceneSubsystem->GetMainScene();
+		CE::Scene* mainScene = sceneSubsystem->GetMainScene();
 
 		if (mainWindow)
 		{
@@ -96,7 +96,7 @@ namespace CE
 
 			FusionApplication::Get()->Initialize(initInfo);
 
-			//activeScene->mainRenderViewport = primaryViewport;
+			//mainScene->mainRenderViewport = primaryViewport;
 		}
 	}
 

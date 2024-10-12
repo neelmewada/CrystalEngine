@@ -44,8 +44,12 @@ namespace CE
         int RegisterImage(const Name& imageName, RHI::Texture* image);
         void DeregisterImage(const Name& imageName);
         void DeregisterImage(RHI::Texture* image);
+        void ReplaceImage(int index, RHI::Texture* newImage);
         RHI::Texture* FindImage(const Name& imageName);
         int FindImageIndex(const Name& imageName);
+        int FindImageIndex(RHI::Texture* image);
+
+        int FindOrRegisterImage(const Name& imageName, RHI::Texture* image);
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 

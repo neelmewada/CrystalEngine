@@ -27,6 +27,7 @@ namespace CE::Editor
 
         EditorMinorDockspace* right = nullptr;
         EditorMinorDockspace* center = nullptr;
+        EditorMinorDockspace* bottom = nullptr;
 
     public: // - Fusion Properties - 
 

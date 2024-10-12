@@ -201,6 +201,14 @@ namespace CE
         imageRegistryUpdated = true;
     }
 
+    void FusionApplication::ReplaceImage(int index, RHI::Texture* newImage)
+    {
+        registeredImages[index] = newImage;
+        registeredImageIndices[newImage] = index;
+
+        imageRegistryUpdated = true;
+    }
+
     RHI::Texture* FusionApplication::FindImage(const Name& imageName)
     {
         if (!registeredImagesByName.KeyExists(imageName))
@@ -216,6 +224,24 @@ namespace CE
         if (!registeredImagesByName.KeyExists(imageName))
             return -1;
         return registeredImagesByName[imageName];
+    }
+
+    int FusionApplication::FindImageIndex(RHI::Texture* image)
+    {
+        if (!registeredImageIndices.KeyExists(image))
+            return -1;
+        return registeredImageIndices[image];
+    }
+
+    int FusionApplication::FindOrRegisterImage(const Name& imageName, RHI::Texture* image)
+    {
+        if (image == nullptr || !imageName.IsValid())
+            return -1;
+
+        int imageIndex = FindImageIndex(imageName);
+        if (imageIndex >= 0)
+            return imageIndex;
+        return RegisterImage(imageName, image);
     }
 
     int FusionApplication::FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc)
@@ -576,6 +602,12 @@ namespace CE
                     "_ClipItemIndices",
                     (u32)vertexReflection["ssbos"][4]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+        		.TryAdd(SRGVariableDescriptor(
+					"_DrawDataConstants",
+                    (u32)vertexReflection["ubos"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::ConstantBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
                 ));
 

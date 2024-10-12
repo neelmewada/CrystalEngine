@@ -77,6 +77,8 @@ namespace CE
 
         void DrawLine(const Vec2& from, const Vec2& to);
 
+        void DrawFrameBuffer(const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames, Vec2 pos, Vec2 size);
+
     protected:
 
         using float4 = Vec4;
@@ -86,11 +88,17 @@ namespace CE
 
         // - Data Structures -
 
+        struct alignas(4) FDrawDataConstants
+        {
+            u32 frameIndex = 0;
+        };
+
         enum FDrawType : u32
         {
 	        DRAW_Shape,
             DRAW_Line,
-            DRAW_Text
+            DRAW_Text,
+            DRAW_FrameBuffer
         };
 
         enum FBrushType : u32
@@ -236,6 +244,7 @@ namespace CE
         StaticArray<RHI::Buffer*, MaxImageCount> viewConstantsBuffer{};
         RHI::ShaderResourceGroup* perViewSrg = nullptr;
 
+        StaticArray<RHI::Buffer*, MaxImageCount> drawDataConstantsBuffer{};
 
         // - Drawing -
 

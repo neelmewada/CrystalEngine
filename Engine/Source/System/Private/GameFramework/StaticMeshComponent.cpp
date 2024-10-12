@@ -17,7 +17,6 @@ namespace CE
             StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 
             fp->ReleaseMesh(meshHandle);
-            //meshHandle.Free();
 	    }
     }
 

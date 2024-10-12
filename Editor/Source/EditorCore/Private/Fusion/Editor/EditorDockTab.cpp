@@ -32,6 +32,12 @@ namespace CE::Editor
         );
     }
 
+    EditorDockTab& EditorDockTab::Content(FWidget& widget)
+    {
+        content->Child(widget);
+        return *this;
+    }
+
     EditorMinorDockTab::EditorMinorDockTab()
     {
         m_TabRole = EditorDockTabRole::Minor;

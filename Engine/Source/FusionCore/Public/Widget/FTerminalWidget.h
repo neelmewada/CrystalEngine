@@ -12,7 +12,7 @@ namespace CE
 
     protected:
 
-        void Construct() override final;
+        void Construct() override;
 
     protected: // - Fusion Fields -
 

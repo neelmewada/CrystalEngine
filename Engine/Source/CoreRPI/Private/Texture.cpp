@@ -265,6 +265,8 @@ namespace CE::RPI
             RPISystem::Get().QueueDestroy(textureView);
             textureView = nullptr;
         }
+
+        samplerState = nullptr;
     }
 
     RHI::TextureView* Texture::GetOrCreateTextureView()
