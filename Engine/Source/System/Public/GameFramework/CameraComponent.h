@@ -47,6 +47,8 @@ namespace CE
 
 		float GetFieldOfView() const { return fieldOfView; }
 
+		void SetFieldOfView(f32 value) { this->fieldOfView = value; }
+
 		RPI::View* GetRpiView() const { return rpiView; }
 
 		Vec2 GetViewport() const { return viewport; }

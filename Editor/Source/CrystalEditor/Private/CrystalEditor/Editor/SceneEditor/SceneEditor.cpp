@@ -18,14 +18,39 @@ namespace CE::Editor
         auto assetManager = gEngine->GetAssetManager();
 
         TextureCube* skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+        CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
+
+        CE::Texture* albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
+        CE::Texture* normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
+        CE::Texture* metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
+        CE::Texture* roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
+
+        CE::Texture* plasticAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/albedo");
+        CE::Texture* plasticNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/normal");
+        CE::Texture* plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
+        CE::Texture* plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
 
         scene->SetSkyboxCubeMap(skybox);
 
         {
-            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
-            scene->AddActor(camera);
+            CE::Material* material = CreateObject<CE::Material>(scene, "Material");
+            material->SetShader(standardShader);
+
+            material->SetProperty("_AlbedoTex", albedoTex);
+            material->SetProperty("_NormalTex", normalTex);
+            material->SetProperty("_MetallicTex", metallicTex);
+            material->SetProperty("_RoughnessTex", roughnessTex);
+            material->ApplyProperties();
+
+            CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
+            plasticMaterial->SetShader(standardShader);
+
+            plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
+            plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
+            plasticMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
+            plasticMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
+            plasticMaterial->ApplyProperties();
 
             StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
             {
@@ -35,6 +60,22 @@ namespace CE::Editor
 
                 sphereMesh->SetModelAsset(sphereModel);
             }
+
+            StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "SampleMesh");
+            scene->AddActor(meshActor);
+
+            StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
+            meshComponent->SetStaticMesh(sphereMesh);
+            meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+            meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+            meshComponent->SetMaterial(material, 0, 0);
+
+            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
+            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
+            scene->AddActor(camera);
+
+            CameraComponent* cameraComponent = camera->GetCameraComponent();
+            cameraComponent->SetFieldOfView(60);
 
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
             scene->AddActor(skyboxActor);
