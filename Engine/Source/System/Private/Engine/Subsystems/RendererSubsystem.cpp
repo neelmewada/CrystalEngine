@@ -141,6 +141,11 @@ namespace CE
 
 		int submittedImageIndex = -1;
 
+		if (app)
+		{
+			app->Tick();
+		}
+
 		if (rebuildFrameGraph)
 		{
 			rebuildFrameGraph = false;
@@ -155,11 +160,6 @@ namespace CE
 			recompileFrameGraph = false;
 
 			CompileFrameGraph();
-		}
-
-		if (app)
-		{
-			app->Tick();
 		}
 
 		if (IsEngineRequestingExit())
@@ -609,6 +609,12 @@ namespace CE
 
 		renderViewports.Add(viewport);
 		RebuildFrameGraph();
+
+		if (viewport->IsEmbeddedViewport())
+		{
+			FViewport* embeddedViewport = static_cast<FViewport*>(viewport);
+			embeddedViewport->OnFrameBufferRecreated(FUNCTION_BINDING(this, RebuildFrameGraph));
+		}
 	}
 
 	void RendererSubsystem::RemoveViewport(FGameWindow* viewport)

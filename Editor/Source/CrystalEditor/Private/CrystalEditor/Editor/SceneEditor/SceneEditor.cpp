@@ -10,16 +10,53 @@ namespace CE::Editor
 
     void SceneEditor::LoadSandboxScene()
     {
-        CE::Scene* sandbox = CreateObject<CE::Scene>(this, "SandboxScene");
+        CE::Scene* scene = CreateObject<CE::Scene>(this, "SandboxScene");
 
         EditorViewport* viewport = viewportTab->GetViewport();
-        viewport->SetScene(sandbox->GetRpiScene());
+        viewport->SetScene(scene->GetRpiScene());
 
-        TextureCube* skybox = gEngine->GetAssetManager()->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
-        sandbox->SetSkyboxCubeMap(skybox);
+        auto assetManager = gEngine->GetAssetManager();
+
+        TextureCube* skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+        CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
+
+        scene->SetSkyboxCubeMap(skybox);
+
+        {
+            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
+            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
+            scene->AddActor(camera);
+
+            StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
+            {
+                RPI::ModelAsset* sphereModel = CreateObject<ModelAsset>(sphereMesh, "SphereModel");
+                RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
+                sphereModel->AddModelLod(sphereLodAsset);
+
+                sphereMesh->SetModelAsset(sphereModel);
+            }
+
+            StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
+            scene->AddActor(skyboxActor);
+
+            StaticMeshComponent* skyboxMeshComponent = skyboxActor->GetMeshComponent();
+            skyboxMeshComponent->SetStaticMesh(sphereMesh);
+
+            skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
+            skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
+
+            {
+                CE::Material* skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Material");
+                skyboxMaterial->SetShader(skyboxShader);
+                skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
+
+                skyboxMaterial->SetProperty("_CubeMap", skybox);
+                skyboxMaterial->ApplyProperties();
+            }
+        }
 
         gEditor->AddRenderViewport(viewport);
-        gEngine->LoadScene(sandbox);
+        gEngine->LoadScene(scene);
     }
 
     void SceneEditor::Construct()

@@ -18,8 +18,6 @@ namespace CE::Editor
 
         void Construct() override;
 
-        CE::Scene* scene = nullptr;
-
     public: // - Fusion Properties -
 
 
