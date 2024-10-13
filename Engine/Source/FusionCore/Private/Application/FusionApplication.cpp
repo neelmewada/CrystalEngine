@@ -528,6 +528,11 @@ namespace CE
         rootContext->MarkLayoutDirty();
     }
 
+    void FusionApplication::OnRenderViewportDestroyed(FGameWindow* renderViewport)
+    {
+        onRenderViewportDestroyed(renderViewport);
+    }
+
     // - Shader Resources -
 
     void FusionApplication::InitializeShaders()

@@ -101,6 +101,8 @@ namespace CE
 
     	// - Directional Shadow Map
 
+        // TODO: Add shadow map support
+
         /*PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
 	    {
             PassImageAttachmentDesc directionalShadowMapListDesc{};

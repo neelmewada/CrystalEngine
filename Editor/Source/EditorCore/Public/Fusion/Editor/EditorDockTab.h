@@ -58,6 +58,8 @@ namespace CE::Editor
 
         EditorMinorDockTab();
 
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
         void Construct() override;
 
     };

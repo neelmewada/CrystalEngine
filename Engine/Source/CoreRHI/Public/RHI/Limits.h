@@ -17,14 +17,6 @@ namespace CE::RHI
 		//! @brief Max number of back buffers (images) that can be used in swap chain.
 		constexpr u32 MaxSwapChainImageCount = 2;
 
-#if PLATFORM_DESKTOP
-		//! @brief Max number of FrameScheduler instances a program can have simultaneously
-		constexpr u32 MaxFrameSchedulerCount = 4;
-#elif PLATFORM_MOBILE
-		constexpr u32 MaxFrameSchedulerCount = 1;
-#else
-		constexpr u32 MaxFrameSchedulerCount = 2;
-#endif
 
 		namespace Pipeline
 		{

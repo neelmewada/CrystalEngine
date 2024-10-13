@@ -14,6 +14,7 @@ namespace CE
 			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
 
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+			rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
 		}
 	}
 
@@ -32,6 +33,9 @@ namespace CE
 
 	void CE::Scene::OnBeginPlay()
 	{
+		if (isPlaying)
+			return;
+
 		isPlaying = true;
 
 		for (Actor* actor : actors)
@@ -48,6 +52,22 @@ namespace CE
 				continue;
 
 			actor->Tick(delta);
+		}
+
+		const auto& viewports = rendererSubsystem->GetAllViewports();
+
+		for (CameraComponent* camera : cameras)
+		{
+			for (FGameWindow* viewport : viewports)
+			{
+				if (viewport->GetScene() == rpiScene)
+				{
+					camera->windowSize = viewport->GetComputedSize().ToVec2i();
+					break;
+				}
+			}
+
+			camera->TickCamera();
 		}
     
 		/*CWindow* mainViewport = sceneSubsystem->GetMainViewport();

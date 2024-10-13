@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	class RendererSubsystem;
 	class FWindow;
 	class FLayoutManager;
 	class FWidget;
@@ -24,6 +25,8 @@ namespace CE
 		static FNativeContext* Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext = nullptr);
 
 		PlatformWindow* GetPlatformWindow() const { return platformWindow; }
+
+		Name GetAttachmentId() const { return attachmentId; }
 
 		bool IsFocused() const override;
 
@@ -84,11 +87,15 @@ namespace CE
 		RHI::DrawListTag drawListTag = 0;
 		Name attachmentId;
 
+		Array<ImageScopeAttachmentDescriptor> shaderReadOnlyAttachmentDependencies;
+		Array<ImageScopeAttachmentDescriptor> shaderWriteAttachmentDependencies;
+
 		FusionRenderer* renderer = nullptr;
 		FPainter* painter = nullptr;
 		int windowId = -1;
 
 		FUSION_FRIENDS;
+		friend class CE::RendererSubsystem;
 	};
 
 } // namespace CE

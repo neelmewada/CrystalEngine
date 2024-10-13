@@ -26,7 +26,7 @@ namespace CE
 
         void SetMainViewTag(const Name& viewTag) { mainViewTag = viewTag; }
 
-        RHI::DrawListTag GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag buitinDrawItemTag);
+        RHI::DrawListTag GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag builtinDrawItemTag);
 
         void SetOwnerCamera(CameraComponent* owner) { targetCamera = owner; }
 

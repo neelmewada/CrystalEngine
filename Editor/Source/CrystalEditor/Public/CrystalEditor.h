@@ -17,5 +17,7 @@
 // ----------------------------------------
 // Crystal Editor
 
-#include "CrystalEditor/Editor/SceneEditor.h"
+#include "CrystalEditor/Editor/DockTabs/EditorViewportTab.h"
+
+#include "CrystalEditor/Editor/SceneEditor/SceneEditor.h"
 #include "CrystalEditor/CrystalEditorWindow.h"

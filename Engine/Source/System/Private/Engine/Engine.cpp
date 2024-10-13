@@ -143,6 +143,27 @@ namespace CE
 		return nullptr;
 	}
 
+	void Engine::LoadScene(CE::Scene* scene)
+	{
+		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();
+
+		sceneSubsystem->LoadScene(scene);
+	}
+
+	void Engine::AddRenderViewport(FGameWindow* viewport)
+	{
+		RendererSubsystem* rendererSubsystem = GetSubsystem<RendererSubsystem>();
+
+		rendererSubsystem->AddViewport(viewport);
+	}
+
+	void Engine::RemoveRenderViewport(FGameWindow* viewport)
+	{
+		RendererSubsystem* rendererSubsystem = GetSubsystem<RendererSubsystem>();
+
+		rendererSubsystem->RemoveViewport(viewport);
+	}
+
 	EngineSubsystem* Engine::CreateSubsystem(ClassType* type)
 	{
 		if (type == nullptr || type->GetTypeId() == TYPEID(EngineSubsystem) || !type->IsSubclassOf<EngineSubsystem>())

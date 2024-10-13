@@ -8,6 +8,20 @@ namespace CE::Editor
 
     }
 
+    void SceneEditor::LoadSandboxScene()
+    {
+        CE::Scene* sandbox = CreateObject<CE::Scene>(this, "SandboxScene");
+
+        EditorViewport* viewport = viewportTab->GetViewport();
+        viewport->SetScene(sandbox->GetRpiScene());
+
+        TextureCube* skybox = gEngine->GetAssetManager()->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+        sandbox->SetSkyboxCubeMap(skybox);
+
+        gEditor->AddRenderViewport(viewport);
+        gEngine->LoadScene(sandbox);
+    }
+
     void SceneEditor::Construct()
     {
         Super::Construct();
@@ -17,11 +31,11 @@ namespace CE::Editor
         ConstructMenuBar();
         ConstructDockspaces();
 
+        LoadSandboxScene();
     }
 
     void SceneEditor::ConstructDockspaces()
     {
-		
 
         (*content)
             .Child(
@@ -37,14 +51,8 @@ namespace CE::Editor
                     (
                         FAssignNew(EditorMinorDockspace, center)
                         .DockTabs(
-                            FNew(EditorMinorDockTab)
-                            .Title("Viewport")
-                            .Content(
-                                FNew(FViewport)
-                                .HAlign(HAlign::Fill)
-                                .VAlign(VAlign::Fill)
-                            )
-
+                            FAssignNew(EditorViewportTab, viewportTab)
+                            
                         )
                         .HAlign(HAlign::Fill)
                         .FillRatio(0.6f),

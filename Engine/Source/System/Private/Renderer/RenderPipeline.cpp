@@ -75,9 +75,9 @@ namespace CE
         }
     }
 
-    RHI::DrawListTag CE::RenderPipeline::GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag buitinDrawItemTag)
+    RHI::DrawListTag CE::RenderPipeline::GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag builtinDrawItemTag)
     {
-        return RPISystem::Get().GetBuiltinDrawListTag(buitinDrawItemTag);
+        return RPISystem::Get().GetBuiltinDrawListTag(builtinDrawItemTag);
     }
 
 } // namespace CE

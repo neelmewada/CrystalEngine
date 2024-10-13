@@ -41,6 +41,8 @@
 #include "Fusion/Widget/EditorMenuBar.h"
 #include "Fusion/Widget/EditorMenuPopup.h"
 
+#include "Fusion/Editor/EditorViewport.h"
+
 #include "Fusion/Editor/EditorWindow.h"
 #include "Fusion/Editor/EditorDockspace.h"
 #include "Fusion/Editor/EditorDockTabItem.h"

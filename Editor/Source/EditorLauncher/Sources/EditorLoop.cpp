@@ -177,9 +177,6 @@ void EditorLoop::PostInit()
 
 	FusionApplication* fApp = FusionApplication::Get();
 
-	//FusionInitInfo initInfo = {};
-	//fApp->Initialize(initInfo);
-
 	EditorStyle::Initialize();
 
 	gEngine->Initialize();
@@ -272,8 +269,6 @@ void EditorLoop::RunLoop()
 		// App & Input Tick
 		app->Tick();
 		InputManager::Get().Tick();
-
-		bool isExit = IsEngineRequestingExit();
 
 		// Engine tick
 		gEngine->Tick(deltaTime);

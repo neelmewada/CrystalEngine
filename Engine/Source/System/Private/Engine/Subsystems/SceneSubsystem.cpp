@@ -18,19 +18,18 @@ namespace CE
 	{
 		Super::PostInitialize();
 
-		// TODO: Implement multi scene support
+		// TODO: Implement multi scene support later
 		
 		// Create & set an empty scene by default
-		mainScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
+		//activeScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
 	{
-    
-		if (mainScene)
+		if (activeScene)
 		{
-			mainScene->Destroy();
-			mainScene = nullptr;
+			activeScene->Destroy();
+			activeScene = nullptr;
 		}
 
 		Super::PreShutdown();
@@ -42,6 +41,36 @@ namespace CE
 		Super::Shutdown();
 	}
 
+	CE::Scene* SceneSubsystem::FindRpiSceneOwner(RPI::Scene* scene)
+	{
+		if (!scene)
+			return nullptr;
+
+		if (activeScene != nullptr && activeScene->GetRpiScene() == scene)
+			return activeScene;
+
+		for (CE::Scene* otherScene : otherScenes)
+		{
+			if (otherScene->GetRpiScene() == scene)
+				return otherScene;
+		}
+
+		return nullptr;
+	}
+
+	void SceneSubsystem::LoadScene(CE::Scene* scene)
+	{
+		if (activeScene == scene)
+			return;
+
+		activeScene = scene;
+
+		if (activeScene && isPlaying)
+		{
+			activeScene->OnBeginPlay();
+		}
+	}
+
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
@@ -50,13 +79,18 @@ namespace CE
 		{
 			isPlaying = true;
 
-			if (mainScene != nullptr)
-				mainScene->OnBeginPlay();
+			if (activeScene != nullptr)
+				activeScene->OnBeginPlay();
 		}
 		
-		if (mainScene != nullptr)
+		if (activeScene != nullptr)
 		{
-			mainScene->Tick(deltaTime);
+			activeScene->Tick(deltaTime);
+		}
+		
+		for (CE::Scene* otherScene : otherScenes)
+		{
+			otherScene->Tick(deltaTime);
 		}
 	}
 
@@ -64,10 +98,12 @@ namespace CE
 	{
 		otherScenes.Remove(scene);
 
-		if (scene == mainScene)
+		if (scene == activeScene)
 		{
-			mainScene = nullptr;
+			activeScene = nullptr;
 		}
+
+		renderer->OnSceneDestroyed(scene);
 	}
 
 } // namespace CE

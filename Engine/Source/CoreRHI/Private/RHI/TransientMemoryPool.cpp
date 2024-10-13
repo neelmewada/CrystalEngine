@@ -21,12 +21,8 @@ namespace CE::RHI
 		}
 		allocatedImages.Clear();
 
-		if (bufferPool)
-			delete bufferPool;
-		bufferPool = nullptr;
-		if (imagePool)
-			delete imagePool;
-		imagePool = nullptr;
+		delete bufferPool; bufferPool = nullptr;
+		delete imagePool; imagePool = nullptr;
 	}
 
     void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, 

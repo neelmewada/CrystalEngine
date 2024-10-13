@@ -137,6 +137,13 @@ namespace CE
         void Focus();
         void Unfocus();
 
+        //! @brief Returns true if this widget is both enabled and visible in parent hierarchy.
+        //! Use this method sparingly, especially in recursive functions as it can add overhead.
+        bool IsVisibleInHierarchy();
+
+        //! @brief Returns true if this widget is both enabled and visible.
+        bool IsVisible();
+
     private:
 
     protected:

@@ -63,7 +63,12 @@ namespace CE
 	{
 		Super::Initialize();
 
+		auto app = FusionApplication::TryGet();
 
+		if (app)
+		{
+			app->onRenderViewportDestroyed.Bind(FUNCTION_BINDING(this, RemoveViewport));
+		}
 	}
 
 	void RendererSubsystem::PostInitialize()
@@ -86,7 +91,7 @@ namespace CE
 		PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 		// TODO: Implement multi scene support
-		CE::Scene* mainScene = sceneSubsystem->GetMainScene();
+		CE::Scene* mainScene = sceneSubsystem->GetActiveScene();
 
 		if (mainWindow)
 		{
@@ -96,7 +101,7 @@ namespace CE
 
 			FusionApplication::Get()->Initialize(initInfo);
 
-			//mainScene->mainRenderViewport = primaryViewport;
+			//activeScene->mainRenderViewport = primaryViewport;
 		}
 	}
 
@@ -162,18 +167,9 @@ namespace CE
 			return;
 		}
 
-		CE::Scene* scene = sceneSubsystem->GetMainScene();
-		RPI::Scene* rpiScene = scene->GetRpiScene();
-		bool isSceneWindowActive = true;
-
-		/*if (sceneSubsystem->mainViewport != nullptr)
-		{
-			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
-			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
-			{
-				isSceneWindowActive = false;
-			}
-		}*/
+		//CE::Scene* scene = sceneSubsystem->GetActiveScene();
+		//RPI::Scene* rpiScene = scene->GetRpiScene();
+		constexpr bool isSceneWindowActive = false;
 
 		int imageIndex = scheduler->BeginExecution();
 
@@ -209,7 +205,32 @@ namespace CE
 			app->UpdateDrawListMask(drawListMask);
 		}
 
-		for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+		for (FGameWindow* renderViewport : renderViewports)
+		{
+			RPI::Scene* rpiScene = renderViewport->GetScene();
+			if (!rpiScene)
+				continue;
+
+			for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+			{
+				RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+				if (!renderPipeline)
+					continue;
+
+				renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
+					{
+						if (!pass)
+							return;
+
+						if (pass->GetDrawListTag().IsValid())
+						{
+							drawListMask.Set(pass->GetDrawListTag());
+						}
+					});
+			}
+		}
+
+		/*for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
 			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
 			if (!renderPipeline)
@@ -225,7 +246,7 @@ namespace CE
 						drawListMask.Set(pass->GetDrawListTag());
 					}
 				});
-		}
+		}*/
 
 		// - Enqueue additional draw packets
 
@@ -244,7 +265,31 @@ namespace CE
 			app->EnqueueDrawPackets(drawList, curImageIndex);
 		}
 
-		if (isSceneWindowActive)
+		for (FGameWindow* renderViewport : renderViewports)
+		{
+			RPI::Scene* rpiScene = renderViewport->GetScene();
+			if (!rpiScene)
+				continue;
+
+			for (const auto& [viewTag, views] : rpiScene->GetViews())
+			{
+				for (RPI::View* view : views.views)
+				{
+					view->GetDrawListContext()->Finalize();
+
+					for (const auto& drawListTag : drawListTags)
+					{
+						RHI::DrawList& viewDrawList = view->GetDrawList(drawListTag);
+						for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
+						{
+							drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
+						}
+					}
+				}
+			}
+		}
+
+		/*if (isSceneWindowActive)
 	    {
 		    for (const auto& [viewTag, views] : rpiScene->GetViews())
 		    {
@@ -262,18 +307,47 @@ namespace CE
 		    		}
 		    	}
 		    }
-	    }
+	    }*/
 
 		drawList.Finalize();
 
 		// - Set scope draw lists
     
-		if (app) // CWidget Scopes & DrawLists
+		if (app) // FWidget Scopes & DrawLists
 		{
 			app->FlushDrawPackets(drawList, curImageIndex);
 		}
 
-		for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
+		for (FGameWindow* renderViewport : renderViewports)
+		{
+			RPI::Scene* rpiScene = renderViewport->GetScene();
+			if (!rpiScene)
+				continue;
+
+			for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+			{
+				RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+				if (!renderPipeline)
+					continue;
+
+				renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
+					{
+						if (!pass)
+							return;
+
+						RPI::SceneViewTag viewTag = pass->GetViewTag();
+						RHI::DrawListTag passDrawTag = pass->GetDrawListTag();
+						RHI::ScopeId scopeId = pass->GetScopeId();
+
+						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
+						{
+							scheduler->SetScopeDrawList(scopeId, &drawList.GetDrawListForTag(passDrawTag));
+						}
+					});
+			}
+		}
+		
+		/*for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
 		{
 			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
 			if (!renderPipeline)
@@ -293,7 +367,7 @@ namespace CE
 						scheduler->SetScopeDrawList(scopeId, &drawList.GetDrawListForTag(passDrawTag));
 					}
 				});
-		}
+		}*/
 
 		scheduler->EndExecution();
 	}
@@ -304,20 +378,9 @@ namespace CE
 		recompileFrameGraph = true;
 
 		// TODO: Implement multi scene support
-    	CE::Scene* scene = sceneSubsystem->GetMainScene();
 
-		bool isSceneWindowActive = true;
-		
-		/*if (sceneSubsystem->mainViewport != nullptr)
-		{
-			CPlatformWindow* nativeWindow = sceneSubsystem->mainViewport->GetNativeWindow();
-			if (nativeWindow && nativeWindow->GetPlatformWindow()->IsMinimized())
-			{
-				isSceneWindowActive = false;
-			}
-		}*/
+		// TODO: Enqueue draw packets early! Some scope producers (shadow, reflection probe, etc.) need to have all draw packets available beforehand.
 
-		// TODO: Enqueue draw packets early! Some scope producers need to have all draw packets available beforehand.
 		RPI::RPISystem::Get().SimulationTick(curImageIndex);
 		RPI::RPISystem::Get().RenderTick(curImageIndex);
 
@@ -330,6 +393,73 @@ namespace CE
 			if (app)
 			{
 				app->EmplaceFrameAttachments();
+
+				// Cleanup first
+				for (FGameWindow* renderViewport : renderViewports)
+				{
+					FNativeContext* nativeContext = static_cast<FNativeContext*>(renderViewport->GetContext());
+					if (!nativeContext)
+						continue;
+
+					nativeContext->shaderReadOnlyAttachmentDependencies.Clear();
+					nativeContext->shaderWriteAttachmentDependencies.Clear();
+				}
+
+				for (FGameWindow* renderViewport : renderViewports)
+				{
+					RPI::Scene* rpiScene = renderViewport->GetScene();
+					CE::Scene* scene = sceneSubsystem->FindRpiSceneOwner(rpiScene);
+					if (scene == nullptr || !scene->IsEnabled())
+						continue;
+					if (!renderViewport->IsVisibleInHierarchy())
+						continue;
+					FNativeContext* nativeContext = static_cast<FNativeContext*>(renderViewport->GetContext());
+
+					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+					{
+						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+						const auto& attachments = rpiPipeline->attachments;
+
+						for (PassAttachment* passAttachment : attachments)
+						{
+							if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+							{
+								if (renderViewport->IsEmbeddedViewport())
+								{
+									FViewport* viewport = static_cast<FViewport*>(renderViewport);
+
+									passAttachment->attachmentId = String::Format("Viewport_{}", viewport->GetUuid());
+
+									StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> frameBuffer{};
+
+									RHI::ImageScopeAttachmentDescriptor descriptor{};
+									descriptor.attachmentId = passAttachment->attachmentId;
+									descriptor.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+									descriptor.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+									nativeContext->shaderReadOnlyAttachmentDependencies.Add(descriptor);
+
+									for (int i = 0; i < frameBuffer.GetSize(); ++i)
+									{
+										frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
+									}
+
+									attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, frameBuffer);
+								}
+								else
+								{
+									passAttachment->attachmentId = nativeContext->attachmentId;
+								}
+							}
+							else
+							{
+								passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+							}
+						}
+
+						rpiPipeline->ImportScopeProducers(scheduler);
+					}
+				}
 
 				app->EnqueueScopes();
 			}
@@ -438,7 +568,7 @@ namespace CE
 
 	void RendererSubsystem::SubmitDrawPackets(int imageIndex)
 	{
-
+		
 	}
 
 	void RendererSubsystem::RegisterFeatureProcessor(SubClass<ActorComponent> componentClass,
@@ -470,6 +600,38 @@ namespace CE
 		}
 
 		return nullptr;
+	}
+
+	void RendererSubsystem::AddViewport(FGameWindow* viewport)
+	{
+		if (renderViewports.Exists(viewport))
+			return;
+
+		renderViewports.Add(viewport);
+		RebuildFrameGraph();
+	}
+
+	void RendererSubsystem::RemoveViewport(FGameWindow* viewport)
+	{
+		if (renderViewports.Remove(viewport))
+		{
+			RebuildFrameGraph();
+		}
+	}
+
+	void RendererSubsystem::OnSceneDestroyed(CE::Scene* scene)
+	{
+		if (!scene)
+			return;
+
+		for (FGameWindow* renderViewport : renderViewports)
+		{
+			if (renderViewport != nullptr && renderViewport->GetScene() == scene->GetRpiScene())
+			{
+				renderViewports.Remove(renderViewport);
+				return;
+			}
+		}
 	}
 
 } // namespace CE

@@ -1211,6 +1211,16 @@ namespace CE
 			return;
 		}
 
+		// Remove this object from destroyed objects list if the address exists in it
+		{
+			LockGuard lock{ gDestroyedObjectsMutex };
+
+			if (gDestroyedObjects.Exists(this))
+			{
+				gDestroyedObjects.Remove(this);
+			}
+		}
+
 		for (Object* subObject : attachedObjects)
 		{
 			if (!subObject)

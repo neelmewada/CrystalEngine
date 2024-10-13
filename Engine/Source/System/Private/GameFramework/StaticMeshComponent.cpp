@@ -70,12 +70,20 @@ namespace CE
 	    Super::Tick(delta);
         
         CE::Scene* scene = GetScene();
-        if (!scene || !staticMesh)
+        if (!scene)
             return;
 
         RPI::Scene* rpiScene = scene->GetRpiScene();
         StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
         if (!fp)
+            return;
+
+        if (staticMesh == nullptr && meshHandle.IsValid())
+        {
+            fp->ReleaseMesh(meshHandle);
+        }
+
+        if (!staticMesh)
             return;
 
         RPI::Model* model = staticMesh->GetModelAsset()->GetModel();

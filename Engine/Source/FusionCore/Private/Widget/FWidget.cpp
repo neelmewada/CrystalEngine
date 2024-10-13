@@ -139,6 +139,16 @@ namespace CE
         }
     }
 
+    bool FWidget::IsVisibleInHierarchy()
+    {
+        return Enabled() && Visible() && (parent == nullptr || parent->IsVisibleInHierarchy());
+    }
+
+    bool FWidget::IsVisible()
+    {
+        return Enabled() && Visible();
+    }
+
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         static const HashSet<CE::Name> transformProperties = { "Translation", "Angle", "Scale" };

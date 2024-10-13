@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace CE
 {
     class FNativeContext;
@@ -8,6 +9,7 @@ namespace CE
     class FNativeContext;
     class FRootContext;
     class FStyleManager;
+    class FGameWindow;
 
     struct FusionInitInfo
     {
@@ -78,6 +80,8 @@ namespace CE
 
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
+        ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
+
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;
@@ -87,6 +91,8 @@ namespace CE
         void OnWindowMinimized(PlatformWindow* window) override;
         void OnWindowCreated(PlatformWindow* window) override;
         void OnWindowExposed(PlatformWindow* window) override;
+
+        void OnRenderViewportDestroyed(FGameWindow* renderViewport);
 
     protected:
 
@@ -150,6 +156,7 @@ namespace CE
         FUSION_FRIENDS;
         friend class FTimer;
         friend class Engine;
+        friend class FGameWindow;
     };
     
 } // namespace CE

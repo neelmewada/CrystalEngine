@@ -3,14 +3,20 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FViewport : public FTerminalWidget
+    class FUSIONCORE_API FViewport : public FGameWindow
     {
-        CE_CLASS(FViewport, FTerminalWidget)
+        CE_CLASS(FViewport, FGameWindow)
     public:
 
         // - Public API -
 
         void RecreateFrameBuffer();
+
+        Vec2i GetResolution() const { return currentSize; }
+
+        u32 GetFrameCount() const { return frames.GetSize(); }
+
+        RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
 
     protected:
 
@@ -23,8 +29,6 @@ namespace CE
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void OnPaint(FPainter* painter) override;
-
-    private:
 
         Vec2i currentSize = Vec2i(0, 0);
 

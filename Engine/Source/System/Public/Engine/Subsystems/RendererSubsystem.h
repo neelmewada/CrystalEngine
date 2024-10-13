@@ -31,7 +31,17 @@ namespace CE
 
 		SubClass<RPI::FeatureProcessor> GetFeatureProcessClass(SubClass<ActorComponent> componentClass);
 
+		FUNCTION()
+		void AddViewport(FGameWindow* viewport);
+
+		FUNCTION()
+		void RemoveViewport(FGameWindow* viewport);
+
+		const Array<FGameWindow*>& GetAllViewports() const { return renderViewports; }
+
 	protected:
+
+		void OnSceneDestroyed(CE::Scene* scene);
 
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;
@@ -67,10 +77,7 @@ namespace CE
 		
 		u32 curImageIndex = 0;
 
-		//CWindow* gameWindow = nullptr;
-
-		//! @brief The viewport used to render the main scene to
-		
+		Array<FGameWindow*> renderViewports;
 
 		// - Frame Graph -
 
@@ -80,6 +87,8 @@ namespace CE
 
 		bool rebuildFrameGraph = true;
 		bool recompileFrameGraph = true;
+
+		friend class SceneSubsystem;
 	};
     
 } // namespace CE

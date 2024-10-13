@@ -380,6 +380,16 @@ namespace CE
 				swapChainAttachment.multisampleState.sampleCount = 1;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
+				for (const auto& shaderReadOnlyAttachmentDependency : shaderReadOnlyAttachmentDependencies)
+				{
+					scheduler->UseAttachment(shaderReadOnlyAttachmentDependency, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Read);
+				}
+
+				for (const auto& shaderWriteAttachmentDependency : shaderWriteAttachmentDependencies)
+				{
+					scheduler->UseAttachment(shaderWriteAttachmentDependency, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Write);
+				}
+
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();

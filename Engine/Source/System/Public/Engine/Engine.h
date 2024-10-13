@@ -5,6 +5,7 @@ namespace CE
 	class AssetManager;
 	class GameInstance;
 	class EngineSubsystem;
+	class Scene;
 
 	CLASS(Abstract, Config = Engine)
 	class SYSTEM_API Engine : public Object
@@ -39,6 +40,13 @@ namespace CE
 		{
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
+
+		// - Public API -
+
+		void LoadScene(CE::Scene* scene);
+
+		void AddRenderViewport(FGameWindow* viewport);
+		void RemoveRenderViewport(FGameWindow* viewport);
 
 		// - Internal API -
 

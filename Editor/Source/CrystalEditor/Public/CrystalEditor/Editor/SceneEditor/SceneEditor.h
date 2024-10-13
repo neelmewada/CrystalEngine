@@ -16,6 +16,8 @@ namespace CE::Editor
 
         SceneEditor();
 
+        void LoadSandboxScene();
+
         void Construct() override;
 
         FSplitBox* rootSplitBox = nullptr;
@@ -28,6 +30,11 @@ namespace CE::Editor
         EditorMinorDockspace* right = nullptr;
         EditorMinorDockspace* center = nullptr;
         EditorMinorDockspace* bottom = nullptr;
+
+        EditorViewportTab* viewportTab = nullptr;
+
+        // Sandbox
+        CE::Scene* sandboxScene = nullptr;
 
     public: // - Fusion Properties - 
 

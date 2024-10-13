@@ -96,13 +96,13 @@ namespace CE
 	protected:
 
 		FIELD()
-		Array<Actor*> actors{};
+		Array<Actor*> actors;
 		
 		FIELD()
-		Array<CE::RenderPipeline*> renderPipelines{};
+		Array<CE::RenderPipeline*> renderPipelines;
 
 		FIELD()
-		SubClass<CE::RenderPipeline> defaultRenderPipeline{};
+		SubClass<CE::RenderPipeline> defaultRenderPipeline = nullptr;
 
 		FIELD()
 		TextureCube* skyboxCubeMap = nullptr;
@@ -122,11 +122,13 @@ namespace CE
 
 		HashMap<Uuid, Actor*> actorsByUuid{};
 		HashMap<TypeId, HashMap<Uuid, ActorComponent*>> componentsByType{};
+		// Includes main camera + other cameras
 		Array<CameraComponent*> cameras{};
 
 		CameraComponent* mainCamera = nullptr;
 
 		SceneSubsystem* sceneSubsystem = nullptr;
+		RendererSubsystem* rendererSubsystem = nullptr;;
 
 		friend class Actor;
 		friend class ActorComponent;

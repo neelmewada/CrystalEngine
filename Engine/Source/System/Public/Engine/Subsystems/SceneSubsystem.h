@@ -12,9 +12,13 @@ namespace CE
 	public:
 		SceneSubsystem();
 
-		CE::Scene* GetMainScene() { return mainScene; }
+		CE::Scene* GetActiveScene() { return activeScene; }
 
-		
+		const Array<CE::Scene*>& GetOtherScenes() const { return otherScenes; }
+
+		CE::Scene* FindRpiSceneOwner(RPI::Scene* scene);
+
+		void LoadScene(CE::Scene* scene);
 
 	protected:
 
@@ -28,7 +32,7 @@ namespace CE
 		void OnSceneDestroyed(CE::Scene* scene);
 
 		FIELD()
-		CE::Scene* mainScene = nullptr;
+		CE::Scene* activeScene = nullptr;
 		
 		FIELD()
 		Array<CE::Scene*> otherScenes{};

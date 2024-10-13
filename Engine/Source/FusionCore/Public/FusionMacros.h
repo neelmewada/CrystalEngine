@@ -20,9 +20,10 @@
 				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
 					return *this;\
 			}\
-			this->m_##PropertyName = value; DirtyFunc;\
+			this->m_##PropertyName = value;\
 			thread_local const CE::Name nameValue = #PropertyName;\
 			OnFusionPropertyModified(nameValue);\
+			DirtyFunc;\
 			return *this;\
 		}\
 		const auto& PropertyName() const { return this->m_##PropertyName; }

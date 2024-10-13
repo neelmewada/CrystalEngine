@@ -46,27 +46,35 @@ namespace CE
         }
     }
 
-
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);
       
+        
+    }
+
+    void CameraComponent::TickCamera()
+    {
         if (windowSize.x > 0 && windowSize.y > 0)
         {
-	        if (projection == CameraProjection::Perspective && windowSize.height > 0)
-	        {
-                projectionMatrix = Matrix4x4::PerspectiveProjection((f32)windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);
-	        }
+            RPI::PerViewConstants& viewConstants = rpiView->GetViewConstants();
+
+            if (projection == CameraProjection::Perspective && windowSize.height > 0)
+            {
+                viewConstants.projectionMatrix = Matrix4x4::PerspectiveProjection((f32)windowSize.width / windowSize.height, fieldOfView, nearPlane, farPlane);
+            }
             else if (projection == CameraProjection::Orthogonal && windowSize.height > 0)
             {
-                projectionMatrix = Matrix4x4::OrthographicProjection((f32)windowSize.width / windowSize.height, nearPlane, farPlane);
+                viewConstants.projectionMatrix = Matrix4x4::OrthographicProjection((f32)windowSize.width / windowSize.height, nearPlane, farPlane);
             }
 
             Vec3 lookDir = GetForwardVector();
             Vec3 upDir = GetUpwardVector();
-            
-            viewMatrix = Quat::LookRotation2(lookDir, upDir).ToMatrix() * Matrix4x4::Translation(-GetPosition());
+
+            viewConstants.viewMatrix = Quat::LookRotation2(lookDir, upDir).ToMatrix() * Matrix4x4::Translation(-GetPosition());
+            viewConstants.viewPosition = GetPosition();
+            viewConstants.pixelResolution = windowSize.ToVec2();
+            viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
         }
     }
-
 } // namespace CE

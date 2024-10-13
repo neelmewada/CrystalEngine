@@ -65,6 +65,8 @@ namespace CE
 
 		void Tick(f32 delta) override;
 
+		void TickCamera();
+
 	private:
 
     	FIELD()
@@ -87,12 +89,6 @@ namespace CE
 
 		FIELD(EditAnywhere, Category = "Camera")
 		float fieldOfView = 60;
-
-		FIELD(ReadOnly)
-		Matrix4x4 projectionMatrix{};
-
-		FIELD(ReadOnly)
-		Matrix4x4 viewMatrix{};
     
 		FIELD()
 		Vec2 viewport = Vec2(1, 1);

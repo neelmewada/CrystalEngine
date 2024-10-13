@@ -43,6 +43,18 @@ namespace CE::Editor
         m_TabRole = EditorDockTabRole::Minor;
     }
 
+    void EditorMinorDockTab::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const CE::Name tabRole = "TabRole";
+
+        if (propertyName == tabRole)
+        {
+            m_TabRole = EditorDockTabRole::Minor;
+        }
+    }
+
     void EditorMinorDockTab::Construct()
     {
 	    Super::Construct();
