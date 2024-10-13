@@ -21,6 +21,8 @@ namespace CE::Editor
 
     void SceneEditor::ConstructDockspaces()
     {
+		
+
         (*content)
             .Child(
                 FAssignNew(FSplitBox, rootSplitBox)
@@ -36,9 +38,11 @@ namespace CE::Editor
                         FAssignNew(EditorMinorDockspace, center)
                         .DockTabs(
                             FNew(EditorMinorDockTab)
-                            .Title("Viewport").Content(
-                                FNew(FStyledWidget)
-                                
+                            .Title("Viewport")
+                            .Content(
+                                FNew(FViewport)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill)
                             )
 
                         )

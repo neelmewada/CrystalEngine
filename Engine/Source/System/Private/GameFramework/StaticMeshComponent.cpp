@@ -5,6 +5,7 @@ namespace CE
 
     StaticMeshComponent::StaticMeshComponent()
     {
+        meshChanged = true;
 		canTick = true;
     }
 
