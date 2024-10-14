@@ -28,6 +28,8 @@ namespace CE
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
+        void OnPostComputeLayout() override;
+
         void OnPaint(FPainter* painter) override;
 
         Vec2i currentSize = Vec2i(0, 0);

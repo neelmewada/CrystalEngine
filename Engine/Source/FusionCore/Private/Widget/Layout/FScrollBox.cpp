@@ -19,11 +19,6 @@ namespace CE
 
     void FScrollBox::CalculateIntrinsicSize()
     {
-        if (GetName() == "ListViewScrollBox")
-        {
-            String::IsAlphabet('a');
-        }
-
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right,
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
@@ -45,11 +40,6 @@ namespace CE
 
     void FScrollBox::PlaceSubWidgets()
     {
-        if (GetName() == "ListViewScrollBox")
-        {
-            String::IsAlphabet('a');
-        }
-
         ApplySizeConstraints();
         UpdateLocalTransform();
 

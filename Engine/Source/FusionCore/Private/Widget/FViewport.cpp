@@ -40,6 +40,18 @@ namespace CE
         }
     }
 
+    void FViewport::OnPostComputeLayout()
+    {
+	    Super::OnPostComputeLayout();
+
+        if ((int)computedSize.x != currentSize.x || (int)computedSize.y != currentSize.y)
+        {
+            currentSize = computedSize.ToVec2i();
+
+            RecreateFrameBuffer();
+        }
+    }
+
     void FViewport::RecreateFrameBuffer()
     {
         if (currentSize.x <= 0 || currentSize.y <= 0)
@@ -109,13 +121,6 @@ namespace CE
     void FViewport::OnPaint(FPainter* painter)
     {
 	    Super::OnPaint(painter);
-
-        if ((int)computedSize.x != currentSize.x || (int)computedSize.y != currentSize.y)
-        {
-            currentSize = computedSize.ToVec2i();
-
-            RecreateFrameBuffer();
-        }
 
         painter->SetPen(FPen());
         painter->SetBrush(FBrush());
