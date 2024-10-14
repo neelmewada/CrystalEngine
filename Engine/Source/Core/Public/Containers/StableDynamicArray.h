@@ -18,6 +18,14 @@ namespace CE
             Free();
         }
 
+        typedef T* iterator;
+        typedef const T* const_iterator;
+
+        iterator begin() { return data; }
+        const_iterator begin() const { return data; }
+        iterator end() { return data + count; }
+        const_iterator end() const { return data + count; }
+
         const T& operator[](SIZE_T index) const
         {
             return data[index];

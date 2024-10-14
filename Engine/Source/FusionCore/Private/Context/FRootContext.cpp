@@ -90,7 +90,8 @@ namespace CE
 		FWidget* hoveredWidget = nativeContext->HitTest(mousePos);
 
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
-			(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
+			//(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
+			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top())))
 		{
 			FMouseEvent event{};
 			event.type = FEventType::MouseLeave;
@@ -101,7 +102,8 @@ namespace CE
 			event.isInside = true;
 			event.keyModifiers = keyModifierStates;
 
-			while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
+			//while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
+			while (hoveredWidgetStack.NonEmpty() && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
 			{
 				event.sender = hoveredWidgetStack.Top();
 				event.Reset();
@@ -116,7 +118,8 @@ namespace CE
 
 		if (hoveredWidget != nullptr &&
 			(hoveredWidgetStack.IsEmpty() || hoveredWidgetStack.Top() != hoveredWidget) &&
-			(hoveredWidgetStack.IsEmpty() || !hoveredWidget->ChildExistsRecursive(hoveredWidgetStack.Top())))
+			//(hoveredWidgetStack.IsEmpty() || !hoveredWidget->ChildExistsRecursive(hoveredWidgetStack.Top())))
+			(hoveredWidgetStack.IsEmpty() || !hoveredWidgetStack.Top()->ParentExistsRecursive(hoveredWidget)))
 		{
 			FMouseEvent event{};
 			event.type = FEventType::MouseEnter;

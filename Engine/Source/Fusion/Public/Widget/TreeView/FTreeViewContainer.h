@@ -13,10 +13,6 @@ namespace CE
 
         // - Public API -
 
-        u32 GetChildCount() const { return children.GetSize(); }
-
-        FTreeViewRow* GetChild(u32 index) const { return children[index]; }
-
         void SetContextRecursively(FFusionContext* context) override;
 
         FWidget* HitTest(Vec2 localMousePos) override;
@@ -45,7 +41,9 @@ namespace CE
             return *this;
         }
 
-        Array<FTreeViewRow*> children;
+        typedef StableDynamicArray<FTreeViewRow*, 64, false> TreeViewRowList;
+
+        TreeViewRowList children;
 
     public: // - Fusion Properties - 
 

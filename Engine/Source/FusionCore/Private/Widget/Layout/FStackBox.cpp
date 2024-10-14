@@ -25,11 +25,6 @@ namespace CE
 			return;
 		}
 
-		if (GetName() == "TestHStack")
-		{
-			String::IsAlphabet('a');
-		}
-
 		intrinsicSize.width = m_Padding.left + m_Padding.right;
 		intrinsicSize.height = m_Padding.top + m_Padding.bottom;
 
@@ -81,11 +76,6 @@ namespace CE
 	void FStackBox::PlaceSubWidgets()
 	{
 		ZoneScoped;
-
-		if (GetName() == "TestHStack")
-		{
-			String::IsAlphabet('a');
-		}
 
 		Super::PlaceSubWidgets();
 
