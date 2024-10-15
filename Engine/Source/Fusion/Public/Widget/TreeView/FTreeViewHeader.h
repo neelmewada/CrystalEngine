@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSION_API FTreeViewHeader : public FWidget
+    class FUSION_API FTreeViewHeader : public FCompoundWidget
     {
-        CE_CLASS(FTreeViewHeader, FWidget)
+        CE_CLASS(FTreeViewHeader, FCompoundWidget)
     public:
 
         // - Public API -

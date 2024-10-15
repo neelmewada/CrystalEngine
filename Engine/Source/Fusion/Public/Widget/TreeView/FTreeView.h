@@ -2,8 +2,8 @@
 
 namespace CE
 {
-    typedef ScriptDelegate<f32(int)> FRowHeightDelegate;
-    typedef ScriptDelegate<FTreeViewRow&(int)> FGenerateRowDelegate;
+    typedef ScriptDelegate<f32(const FModelIndex&)> FRowHeightDelegate;
+    typedef ScriptDelegate<FTreeViewRow&(const FModelIndex&)> FGenerateRowDelegate;
 
     CLASS()
     class FUSION_API FTreeView : public FStyledWidget
@@ -12,6 +12,8 @@ namespace CE
     public:
 
         // - Public API -
+
+        void OnModelUpdate();
 
     protected:
 
@@ -22,10 +24,27 @@ namespace CE
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         FStyledWidget* headerContainer = nullptr;
+        FStyledWidget* containerStyle = nullptr;
         FTreeViewHeader* header = nullptr;
         FTreeViewContainer* container = nullptr;
 
+        bool isVerticalScrollVisible = false;
+        bool isVerticalScrollDragged = false;
+        bool isVerticalScrollHighlighted = false;
+
     public: // - Fusion Properties -
+
+        FUSION_PROPERTY(f32, VerticalScrollSensitivity);
+
+        FUSION_PROPERTY(FBrush, ScrollBarBackground);
+        FUSION_PROPERTY(FPen, ScrollBarBackgroundPen);
+        FUSION_PROPERTY(FBrush, ScrollBarBrush);
+        FUSION_PROPERTY(FBrush, ScrollBarHoverBrush);
+        FUSION_PROPERTY(FPen, ScrollBarPen);
+        FUSION_PROPERTY(FPen, ScrollBarHoverPen);
+        FUSION_PROPERTY(FShape, ScrollBarShape);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
         FUSION_PROPERTY(FBrush, Background);
         FUSION_PROPERTY(FBrush, RowBackground);
@@ -38,7 +57,10 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(FGenerateRowDelegate, GenerateRowDelegate);
 
+        Self& Header(FTreeViewHeader& header);
+
         FUSION_WIDGET;
+        friend class FTreeViewContainer;
     };
     
 }

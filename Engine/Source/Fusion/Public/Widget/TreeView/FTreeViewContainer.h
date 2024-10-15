@@ -33,7 +33,11 @@ namespace CE
 
         void Construct() override;
 
-        FTreeView* treeView = nullptr;
+        void OnPaint(FPainter* painter) override;
+
+        void OnPostComputeLayout() override;
+
+        void OnModelUpdate();
 
         Self& TreeView(FTreeView* treeView)
         {
@@ -43,7 +47,9 @@ namespace CE
 
         typedef StableDynamicArray<FTreeViewRow*, 64, false> TreeViewRowList;
 
+        FTreeView* treeView = nullptr;
         TreeViewRowList children;
+        HashSet<FModelIndex> expandedRows;
 
     public: // - Fusion Properties - 
 

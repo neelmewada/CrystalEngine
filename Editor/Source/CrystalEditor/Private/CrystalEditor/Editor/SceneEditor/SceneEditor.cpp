@@ -147,8 +147,7 @@ namespace CE::Editor
 
                     FAssignNew(EditorMinorDockspace, right)
                     .DockTabs(
-                        FNew(EditorMinorDockTab)
-                        .Title("Details")
+                        FAssignNew(SceneOutlinerTab, sceneOutlinerTab)
 
                     )
                     .VAlign(VAlign::Fill)

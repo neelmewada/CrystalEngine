@@ -33,6 +33,8 @@ namespace CE::Editor
 
         EditorViewportTab* viewportTab = nullptr;
 
+        SceneOutlinerTab* sceneOutlinerTab = nullptr;
+
         // Sandbox
         CE::Scene* sandboxScene = nullptr;
 

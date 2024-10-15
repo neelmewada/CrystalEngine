@@ -5,7 +5,11 @@ namespace CE
 
     FTreeView::FTreeView()
     {
+        m_ScrollBarWidth = 8;
+        m_ScrollBarShape = FRoundedRectangle(4);
+        m_ScrollBarMargin = 2.5f;
 
+        m_VerticalScrollSensitivity = 15.0f;
     }
 
     void FTreeView::Construct()
@@ -20,10 +24,16 @@ namespace CE
                 FAssignNew(FStyledWidget, headerContainer)
                 .HAlign(HAlign::Fill),
 
-                FAssignNew(FTreeViewContainer, container)
-                .TreeView(this)
+                FAssignNew(FStyledWidget, containerStyle)
+                .ClipChildren(true)
                 .HAlign(HAlign::Fill)
                 .FillRatio(1.0f)
+                (
+                    FAssignNew(FTreeViewContainer, container)
+                    .TreeView(this)
+                    .HAlign(HAlign::Fill)
+                    .FillRatio(1.0f)
+                )
             )
         );
     }
@@ -36,8 +46,23 @@ namespace CE
 
         if (propertyName == model)
         {
+            // TODO: Do model loading
+            container->OnModelUpdate();
+
             MarkLayoutDirty();
         }
+    }
+
+    FTreeView::Self& FTreeView::Header(FTreeViewHeader& header)
+    {
+        this->header = &header;
+        headerContainer->Child(header);
+        return *this;
+    }
+
+    void FTreeView::OnModelUpdate()
+    {
+        container->OnModelUpdate();
     }
 
 }

@@ -1,18 +1,18 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
     CLASS()
-    class FUSION_API FTreeViewRow : public FStyledWidget
+    class CRYSTALEDITOR_API SceneTreeView : public FTreeView
     {
-        CE_CLASS(FTreeViewRow, FStyledWidget)
+        CE_CLASS(SceneTreeView, FTreeView)
     public:
 
         // - Public API -
 
     protected:
 
-        FTreeViewRow();
+        SceneTreeView();
 
         void Construct() override;
 
@@ -20,9 +20,8 @@ namespace CE
 
 
         FUSION_WIDGET;
-        friend class FTreeView;
     };
     
 }
 
-#include "FTreeViewRow.rtti.h"
+#include "SceneTreeView.rtti.h"

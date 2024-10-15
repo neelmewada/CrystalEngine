@@ -5,13 +5,122 @@ namespace CE
 
     FTreeViewContainer::FTreeViewContainer()
     {
-
+        
     }
 
     void FTreeViewContainer::Construct()
     {
         Super::Construct();
+
         
+    }
+
+    void FTreeViewContainer::OnPaint(FPainter* painter)
+    {
+        Super::OnPaint(painter);
+
+        if (children.IsEmpty() || !Enabled())
+            return;
+
+        painter->PushChildCoordinateSpace(localTransform);
+        //if (m_ClipChildren)
+        {
+            //painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+        }
+
+        for (FTreeViewRow* child : children)
+        {
+            if (!child->Enabled() || !child->Visible())
+                continue;
+
+            child->OnPaint(painter);
+        }
+
+        //if (m_ClipChildren)
+        {
+            //painter->PopClipShape();
+        }
+        painter->PopChildCoordinateSpace();
+    }
+
+    void FTreeViewContainer::OnPostComputeLayout()
+    {
+	    Super::OnPostComputeLayout();
+
+        OnModelUpdate();
+    }
+
+    void FTreeViewContainer::OnModelUpdate()
+    {
+        if (treeView == nullptr || treeView->m_Model == nullptr)
+            return;
+
+        auto model = treeView->m_Model;
+
+        int childIndex = 0;
+        f32 curPosY = 0;
+        f32 scrollY = -Translation().y;
+
+        if (treeView->header)
+        {
+            model->SetHeaderData(*treeView->header);
+        }
+
+        Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
+            {
+                int rowCount = model->GetRowCount(parent);
+	            if (rowCount == 0)
+	                return;
+
+                for (int i = 0; i < rowCount; ++i)
+                {
+                    FModelIndex index = model->GetIndex(i, 0, parent);
+                    if (!index.IsValid())
+                        continue;
+
+                    f32 rowHeight = 0;
+
+                    if (!treeView->m_RowHeightDelegate.IsBound())
+                    {
+                        rowHeight = treeView->m_RowHeight;
+                    }
+                    else
+                    {
+                        rowHeight = treeView->m_RowHeightDelegate(index);
+                    }
+
+                    f32 topY = curPosY;
+                    f32 bottomY = curPosY + rowHeight;
+
+                    if (bottomY < scrollY)
+                    {
+                        curPosY += rowHeight; // We are above the scroll view
+	                    continue;
+                    }
+                    else if (topY > scrollY + computedSize.y)
+                    {
+	                    break; // We are below the scroll view
+                    }
+
+                    FTreeViewRow* rowWidget = nullptr;
+                    if (childIndex < children.GetCount())
+                    {
+                        rowWidget = children[childIndex];
+                    }
+                    else
+                    {
+                        rowWidget = &treeView->m_GenerateRowDelegate(index);
+                        children.Insert(rowWidget);
+                    }
+
+                    childIndex++;
+                    curPosY += rowHeight;
+
+                    model->SetData(i, *rowWidget, parent);
+                }
+            };
+
+        MarkDirty();
     }
 
     void FTreeViewContainer::SetContextRecursively(FFusionContext* context)
@@ -107,7 +216,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (children.IsEmpty())
+        if (treeView == nullptr || treeView->m_Model == nullptr)
         {
             Super::CalculateIntrinsicSize();
             return;
@@ -116,9 +225,46 @@ namespace CE
         intrinsicSize.width = m_Padding.left + m_Padding.right;
         intrinsicSize.height = m_Padding.top + m_Padding.bottom;
 
-        Vec2 contentSize = {};
+        Vec2 contentSize = Vec2();
 
-        // TODO: Calculate intrinsic size
+        auto model = treeView->m_Model;
+
+        f32 totalRowHeight = 0;
+
+        Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
+            {
+                int rowCount = model->GetRowCount(parent);
+                if (rowCount == 0)
+                    return;
+
+                for (int i = 0; i < rowCount; ++i)
+                {
+                    FModelIndex index = model->GetIndex(i, 0, parent);
+                    if (!index.IsValid())
+                        continue;
+
+                    if (!treeView->m_RowHeightDelegate.IsBound())
+                    {
+	                    totalRowHeight += treeView->m_RowHeight;
+                    }
+                    else
+                    {
+                        totalRowHeight += treeView->m_RowHeightDelegate(index);
+                    }
+
+                    if (expandedRows.Exists(index))
+                    {
+                        visitor(index);
+                    }
+                }
+            };
+
+        visitor(FModelIndex());
+
+        intrinsicSize.width += m_MinWidth;
+        intrinsicSize.height += contentSize.height;
+
+        ApplyIntrinsicSizeConstraints();
     }
 
     void FTreeViewContainer::PlaceSubWidgets()
@@ -132,8 +278,14 @@ namespace CE
             return;
         }
 
-        // TODO: Place sub-widgets
+        Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
+        f32 remainingSize = 0;
+        Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
+            m_Padding.top + m_Padding.bottom);
 
+        
+
+        // TODO: Place sub-widgets
     }
     
 }

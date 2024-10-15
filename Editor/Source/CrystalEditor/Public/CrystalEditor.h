@@ -14,10 +14,20 @@
 #include "ProjectBrowser/NewProjectListModel.h"
 #include "ProjectBrowser/ProjectBrowser.h"
 
-// ----------------------------------------
+// ------------------------------------------------
 // Crystal Editor
+
+// - Viewport -
 
 #include "CrystalEditor/Editor/DockTabs/EditorViewportTab.h"
 
+// - Scene Editor -
+
+#include "CrystalEditor/Editor/SceneEditor/Details/SceneTreeViewModel.h"
+#include "CrystalEditor/Editor/SceneEditor/Details/SceneTreeView.h"
+#include "CrystalEditor/Editor/SceneEditor/Details/SceneOutlinerTab.h"
 #include "CrystalEditor/Editor/SceneEditor/SceneEditor.h"
+
+// - Crystal Editor Window -
+
 #include "CrystalEditor/CrystalEditorWindow.h"
