@@ -27,7 +27,8 @@ namespace CE::Editor
         void ConstructMenuBar();
         void ConstructDockspaces();
 
-        EditorMinorDockspace* right = nullptr;
+        EditorMinorDockspace* rightTop = nullptr;
+        EditorMinorDockspace* rightBottom = nullptr;
         EditorMinorDockspace* center = nullptr;
         EditorMinorDockspace* bottom = nullptr;
 

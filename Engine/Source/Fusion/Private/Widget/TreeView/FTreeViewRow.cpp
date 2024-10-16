@@ -13,7 +13,9 @@ namespace CE
         Super::Construct();
 
         Child(
-            FNew(FHorizontalStack)
+            FAssignNew(FHorizontalStack, contentStack)
+            .ContentHAlign(HAlign::Fill)
+            .ContentVAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
         );

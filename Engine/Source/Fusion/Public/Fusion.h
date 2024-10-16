@@ -22,6 +22,7 @@
 #include "Widget/TreeView/FTreeViewContainer.h"
 #include "Widget/TreeView/FTreeViewHeaderColumn.h"
 #include "Widget/TreeView/FTreeViewHeader.h"
+#include "Widget/TreeView/FTreeViewCell.h"
 #include "Widget/TreeView/FTreeViewRow.h"
 #include "Widget/TreeView/FTreeViewModel.h"
 #include "Widget/TreeView/FTreeView.h"

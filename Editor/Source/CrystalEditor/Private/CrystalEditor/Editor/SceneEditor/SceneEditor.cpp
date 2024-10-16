@@ -145,13 +145,28 @@ namespace CE::Editor
                         .FillRatio(0.4f)
                     ),
 
-                    FAssignNew(EditorMinorDockspace, right)
-                    .DockTabs(
-                        FAssignNew(SceneOutlinerTab, sceneOutlinerTab)
-
-                    )
+                    FNew(FSplitBox)
+                    .Direction(FSplitDirection::Vertical)
                     .VAlign(VAlign::Fill)
                     .FillRatio(0.25f)
+                    (
+                        FAssignNew(EditorMinorDockspace, rightTop)
+                        .DockTabs(
+                            FAssignNew(SceneOutlinerTab, sceneOutlinerTab)
+
+                        )
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(0.5f),
+
+                        FAssignNew(EditorMinorDockspace, rightBottom)
+                        .DockTabs(
+                            FNew(EditorMinorDockTab)
+                            .Title("Details")
+
+                        )
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(0.5f)
+                    )
                 )
             )
     		.Padding(Vec4(0, 5, 0, 0));
