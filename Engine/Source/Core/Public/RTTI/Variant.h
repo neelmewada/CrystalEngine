@@ -96,7 +96,13 @@ namespace CE
 		
 		Variant(Name value) 
 		{
-			SetInternalValue(value); 
+			SetInternalValue(value);
+		}
+
+		template<typename TStruct> requires TStruct::IsStruct and TIsCopyable<TStruct>::Value
+		Variant(const TStruct& value)
+		{
+			SetStructValue(value);
 		}
 
 		template<typename ElementType>
@@ -253,6 +259,11 @@ namespace CE
 			return isArray;
 		}
 
+		bool IsStruct() const
+		{
+			return isStruct;
+		}
+
 		bool IsObject() const;
 		bool CanCastObject(TypeId castTo) const;
 
@@ -262,9 +273,11 @@ namespace CE
 			return arrayElementTypeId == TYPEID(T);
 		}
 
-		template<typename T>
-		INLINE T GetValue() const
+		template<typename TType>
+		const TType& GetValue() const
 		{
+			typedef std::remove_cvref_t<TType> T;
+
 			if (CanCastObject(TYPEID(T)))
 			{
 				
@@ -274,10 +287,26 @@ namespace CE
 				throw VariantCastException(String::Format("Failed to cast Variant to the return type"));
 			}
 
-			if constexpr (std::is_reference_v<T>)
+			if constexpr (TIsStruct<T>::Value)
 			{
-                typedef typename std::remove_reference<T>::type PlainType;
-				return *(PlainType*)this;
+				if (StructValue == nullptr)
+				{
+					throw VariantCastException(String::Format("Failed to cast struct type. Struct value is NULL!"));
+				}
+				const T& val = *(T*)StructValue;
+				return val;
+			}
+			else if constexpr (TIsSameType<T, Array<String>>::Value)
+			{
+				return GetArrayStringValue();
+			}
+			else if constexpr (TIsSameType<T, Array<Name>>::Value)
+			{
+				return GetArrayNameValue();
+			}
+			else if constexpr (TIsSameType<T, Array<IO::Path>>::Value)
+			{
+				return GetArrayPathValue();
 			}
 			else
 			{
@@ -285,8 +314,8 @@ namespace CE
 			}
 		}
 
-		template<>
-		INLINE Array<String> GetValue() const
+		//template<>
+		const Array<String>& GetArrayStringValue() const
 		{
 			if (valueTypeId != TYPEID(Array<String>))
 			{
@@ -300,8 +329,8 @@ namespace CE
 			return stringArrayValue;
 		}
 
-		template<>
-		INLINE Array<Name> GetValue() const
+		//template<>
+		const Array<Name>& GetArrayNameValue() const
 		{
 			if (valueTypeId != TYPEID(Array<Name>))
 			{
@@ -315,8 +344,8 @@ namespace CE
 			return nameArrayValue;
 		}
 
-		template<>
-		INLINE Array<IO::Path> GetValue() const
+		//template<>
+		const Array<IO::Path>& GetArrayPathValue() const
 		{
 			if (valueTypeId != TYPEID(Array<IO::Path>))
 			{
@@ -354,15 +383,26 @@ namespace CE
 		template<typename T>
 		INLINE void SetInternalValue(const T& value)
 		{
-			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
+			memset(this, 0, sizeof(Variant)); // Initialize memory to 0
 			valueTypeId = TYPEID(T);
 			*(T*)this = value;
+		}
+
+		template<typename TStruct>
+		void SetStructValue(const TStruct& value)
+		{
+			Clear();
+			valueTypeId = TYPEID(TStruct);
+			structType = TStruct::StaticType();
+			isStruct = true;
+			StructValue = malloc(sizeof(TStruct));
+			new(StructValue) TStruct(value);
 		}
 
 		/// Initializes/sets the memory block to zero
 		void Clear()
 		{
-			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
+			memset(this, 0, sizeof(Variant)); // Initialize memory to 0
 		}
 
 		union
@@ -381,6 +421,11 @@ namespace CE
 			f32    Float32Value;
 			f64    Float64Value;
 			void*  PtrValue;
+			struct
+			{
+				void* StructValue;
+				StructType* structType;
+			};
             
             Vec2   Vec2Value;
             Vec3   Vec3Value;
@@ -408,6 +453,7 @@ namespace CE
 		TypeId arrayElementTypeId = 0;
 		bool isPointer = false;
 		bool isArray = false;
+		bool isStruct = false;
 	};
 
 } // namespace CE

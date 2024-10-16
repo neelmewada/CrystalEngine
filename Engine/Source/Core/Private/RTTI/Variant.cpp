@@ -14,6 +14,7 @@ namespace CE
 		arrayElementTypeId = copy.arrayElementTypeId;
 		isPointer = copy.isPointer;
 		isArray = copy.isArray;
+		isStruct = copy.isStruct;
 
 		if (copy.IsOfType<String>())
 		{
@@ -38,6 +39,18 @@ namespace CE
 		else if (copy.IsOfType<IO::Path>())
 		{
 			pathValue = copy.pathValue;
+		}
+		else if (copy.isStruct && copy.StructValue != nullptr)
+		{
+			if (structType != nullptr)
+			{
+				StructValue = malloc(structType->GetSize());
+				structType->CopyConstructor(copy.StructValue, StructValue);
+			}
+			else
+			{
+				memcpy(this, &copy, sizeof(Variant));
+			}
 		}
 		else
 		{
@@ -71,6 +84,15 @@ namespace CE
 		{
 			pathValue.~Path();
 		}
+		else if (isStruct && StructValue != nullptr)
+		{
+			if (structType != nullptr)
+			{
+				structType->CallDestructor(StructValue);
+			}
+			free(StructValue);
+			StructValue = nullptr;
+		}
 
 		memset(this, 0, sizeof(Variant));
 	}
@@ -89,6 +111,9 @@ namespace CE
 	{
 		TypeInfo* valueType = CE::GetTypeInfo(valueTypeId);
 		TypeInfo* castToType = CE::GetTypeInfo(castTo);
+
+		if (valueType == nullptr || castToType == nullptr)
+			return false;
 
 		return valueType->IsObject() && castToType->IsObject() && valueType->IsAssignableTo(castTo);
 	}

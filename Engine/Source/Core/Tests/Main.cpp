@@ -5,6 +5,7 @@
 
 #pragma region Registration
 
+CE_RTTI_STRUCT_IMPL(, VariantTests, VariantStruct)
 CE_RTTI_CLASS_IMPL(, BundleTests, WritingTestObj1)
 CE_RTTI_CLASS_IMPL(, BundleTests, WritingTestObj2)
 CE_RTTI_CLASS_IMPL(, ObjectTests, BaseClass)
@@ -21,6 +22,7 @@ CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
 static void CERegisterModuleTypes()
 {
     CE_REGISTER_TYPES(
+		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
         ObjectTests::BaseClass,
@@ -38,6 +40,7 @@ static void CERegisterModuleTypes()
 static void CEDeregisterModuleTypes()
 {
     CE_DEREGISTER_TYPES(
+		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
         ObjectTests::BaseClass,
@@ -485,6 +488,7 @@ TEST(Containers, DateTime)
 TEST(Containers, Variant)
 {
 	TEST_BEGIN;
+	CERegisterModuleTypes();
 
 	// String
 	Variant value = "TestString";
@@ -509,6 +513,33 @@ TEST(Containers, Variant)
 	EXPECT_EQ(value.GetValue<Array<String>>()[0], "Item1");
 	EXPECT_EQ(value.GetValue<Array<String>>()[1], "Item2");
 
+	// Struct
+	VariantStruct testStruct{};
+	testStruct.stringArray = { "Item0", "Item1", "Item2" };
+	testStruct.stringData = "Test String";
+
+	value = testStruct;
+	EXPECT_TRUE(value.IsStruct());
+
+	testStruct.stringData = "New String";
+	testStruct.stringArray = { "NewItem0", "NewItem1" };
+
+	VariantStruct copyStruct = value.GetValue<VariantStruct>();
+	EXPECT_EQ(copyStruct.stringData, "Test String");
+	EXPECT_EQ(copyStruct.stringArray.GetSize(), 3);
+	EXPECT_EQ(copyStruct.stringArray[0], "Item0");
+	EXPECT_EQ(copyStruct.stringArray[1], "Item1");
+	EXPECT_EQ(copyStruct.stringArray[2], "Item2");
+
+	Variant variant2 = value;
+	VariantStruct variant2Struct = variant2.GetValue<VariantStruct>();
+	EXPECT_EQ(variant2Struct.stringData, "Test String");
+	EXPECT_EQ(variant2Struct.stringArray.GetSize(), 3);
+	EXPECT_EQ(variant2Struct.stringArray[0], "Item0");
+	EXPECT_EQ(variant2Struct.stringArray[1], "Item1");
+	EXPECT_EQ(variant2Struct.stringArray[2], "Item2");
+
+	CEDeregisterModuleTypes();
 	TEST_END;
 }
 

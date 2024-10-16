@@ -56,7 +56,16 @@ namespace CE
     FTreeView::Self& FTreeView::Header(FTreeViewHeader& header)
     {
         this->header = &header;
+        header.treeView = this;
+        
+        header
+			.HAlign(HAlign::Fill)
+			.VAlign(VAlign::Fill)
+    	;
+
         headerContainer->Child(header);
+
+        ApplyStyle();
         return *this;
     }
 

@@ -54,6 +54,8 @@ namespace CE
     {
         if (treeView == nullptr || treeView->m_Model == nullptr)
             return;
+        if (!treeView->m_GenerateRowDelegate.IsBound())
+            return;
 
         auto model = treeView->m_Model;
 
@@ -252,9 +254,10 @@ namespace CE
                         totalRowHeight += treeView->m_RowHeightDelegate(index);
                     }
 
-                    if (expandedRows.Exists(index))
+                    // TODO: Uncomment this
+                    //if (expandedRows.Exists(index))
                     {
-                        visitor(index);
+                        //visitor(index);
                     }
                 }
             };

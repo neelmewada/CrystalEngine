@@ -17,8 +17,10 @@
 #include "Widget/ListView/FListView.h"
 
 // - Tree View -
+#include "Widget/TreeView/FTreeViewStyle.h"
 #include "Widget/TreeView/FTreeViewItem.h"
 #include "Widget/TreeView/FTreeViewContainer.h"
+#include "Widget/TreeView/FTreeViewHeaderColumn.h"
 #include "Widget/TreeView/FTreeViewHeader.h"
 #include "Widget/TreeView/FTreeViewRow.h"
 #include "Widget/TreeView/FTreeViewModel.h"

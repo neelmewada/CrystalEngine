@@ -4,6 +4,40 @@
 
 using namespace CE;
 
+namespace VariantTests
+{
+	STRUCT()
+	struct VariantStruct
+	{
+		CE_STRUCT(VariantStruct)
+	public:
+
+		VariantStruct() {}
+
+		virtual ~VariantStruct() {}
+
+		VariantStruct(const VariantStruct& copy)
+		{
+			CopyFrom(copy);
+		}
+
+		VariantStruct& operator=(const VariantStruct& copy)
+		{
+			CopyFrom(copy);
+			return *this;
+		}
+
+		void CopyFrom(const VariantStruct& copy)
+		{
+			stringData = copy.stringData;
+			stringArray = copy.stringArray;
+		}
+
+		String stringData;
+		Array<String> stringArray;
+	};
+}
+
 namespace BundleTests
 {
 	using namespace CE;
@@ -351,6 +385,15 @@ namespace JsonTests
 		Array<InnerStruct> innerArray{};
 	};
 }
+
+CE_RTTI_STRUCT(, VariantTests, VariantStruct,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+	),
+	CE_FUNCTION_LIST(
+	)
+)
 
 CE_RTTI_CLASS(, BundleTests, WritingTestObj1,
     CE_SUPER(CE::Object),

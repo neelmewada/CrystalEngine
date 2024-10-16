@@ -281,10 +281,13 @@ namespace CE
 	struct TIsAbstract : TBoolConst<__is_abstract(T)> {};
 
 	template<typename T>
-	struct TIsClass : TBoolConst<__is_class(T) && T::IsClass()> {};
+	struct TIsClass : TBoolConst<__is_class(T) && T::IsClass> {};
+
+	template<typename T, typename = void>
+	struct TIsStruct : TBoolConst<false> {};
 
 	template<typename T>
-	struct TIsStruct : TBoolConst<__is_class(T) && T::IsStruct()> {};
+	struct TIsStruct<T, std::void_t<decltype(T::IsStruct)>> : TBoolConst<__is_class(T) && T::IsStruct> {};
 
 	template<typename What, typename... Args>
 	struct TIsTypePresent : TBoolConst<(std::is_same_v<What, Args> or ...)>
@@ -388,6 +391,12 @@ namespace CE
 
 	template<typename T>
 	struct TIsCopyConstructible : TBoolConst<std::is_copy_constructible<T>::value>
+	{
+
+	};
+
+	template<typename T>
+	struct TIsCopyable : TBoolConst<std::is_copy_constructible_v<T> and std::is_copy_assignable_v<T>>
 	{
 
 	};

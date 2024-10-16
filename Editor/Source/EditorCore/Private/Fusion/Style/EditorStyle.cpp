@@ -333,6 +333,14 @@ namespace CE::Editor
 		GetDefaultWidget<EditorMenuBar>()
 			.Style(this, editorMenuBar->GetName());
 
+		if (!treeView)
+		{
+			treeView = CreateObject<FTreeViewStyle>(this, "TreeView");
+			Add(treeView);
+		}
+
+		GetDefaultWidget<FTreeView>()
+			.Style(this, treeView->GetName());
     }
 
 } // namespace CE::Editor

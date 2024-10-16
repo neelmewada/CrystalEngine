@@ -4,11 +4,15 @@ namespace CE
 {
     class FAbstractItemModel;
 
-    struct FModelIndex
+    STRUCT()
+    struct FUSION_API FModelIndex final
     {
+        CE_STRUCT(FModelIndex)
     public:
 
         FModelIndex() {}
+
+        virtual ~FModelIndex() {}
 
         bool IsValid() const { return model != nullptr; }
 
@@ -17,6 +21,11 @@ namespace CE
         u32 GetRow() const { return row; }
 
         u32 GetColumn() const { return col; }
+
+        SIZE_T GetHash() const;
+
+        bool operator==(const FModelIndex& other) const;
+        bool operator!=(const FModelIndex& other) const;
 
     private:
 
@@ -52,17 +61,9 @@ namespace CE
         virtual u32 GetRowCount(const FModelIndex& parent = {}) = 0;
         virtual u32 GetColumnCount(const FModelIndex& parent = {}) = 0;
 
-
-
         ScriptEvent<void(FAbstractItemModel*)> onModelUpdated;
 
     };
-
-    template<>
-    inline SIZE_T GetHash<FModelIndex>(const FModelIndex& value)
-    {
-        return GetCombinedHashes({ (SIZE_T)value.GetRow(), (SIZE_T)value.GetColumn(), (SIZE_T)value.GetDataPtr() });
-    }
     
 } // namespace CE
 

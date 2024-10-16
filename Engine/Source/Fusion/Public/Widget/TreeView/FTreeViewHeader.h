@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    class FTreeView;
+
+
     CLASS()
     class FUSION_API FTreeViewHeader : public FCompoundWidget
     {
@@ -10,16 +13,56 @@ namespace CE
 
         // - Public API -
 
+        u32 GetHeaderCount() const { return contentStack->GetChildCount(); }
+
     protected:
 
         FTreeViewHeader();
 
         void Construct() override;
 
+        FStyledWidget* CreateSeparator();
+
+        FHorizontalStack* contentStack = nullptr;
+
+        Array<FStyledWidget*> separators;
+
+        FTreeView* treeView = nullptr;
+
     public: // - Fusion Properties - 
 
+        template<typename... TWidget> requires TMatchAllBaseClass<FWidget, TWidget...>::Value
+        Self& Columns(TWidget&... widgets)
+        {
+            separators.Clear();
+            contentStack->DestroyAllChildren();
+
+            std::initializer_list<FWidget*> list = { &widgets... };
+            int size = list.size();
+            int i = -1;
+
+            for (FWidget* widget : list)
+            {
+                i++;
+                if (!widget->IsOfType<FTreeViewHeaderColumn>())
+                {
+                    CE_LOG(Error, All, "Invalid widget of type {}! Expected widget FTreeViewHeaderColumn.", widget->GetClass()->GetName().GetLastComponent());
+	                continue;
+                }
+                contentStack->AddChild(widget);
+                if (i < size - 1)
+                {
+                    separators.Add(CreateSeparator());
+                    contentStack->AddChild(separators.Top());
+                }
+            }
+
+            return *this;
+        }
 
         FUSION_WIDGET;
+        friend class FTreeView;
+        friend class FTreeViewStyle;
     };
     
 }

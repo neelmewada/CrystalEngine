@@ -120,7 +120,8 @@ namespace CE
                     }
                     else
                     {
-                        static_assert(Internal::AlwaysFalse<void>, "Invalid argument in Items(...)");
+                        CE_LOG(Error, All, "Invalid argument in FComboBox::Items(...)");
+                        //static_assert(Internal::AlwaysFalse<void>, "Invalid argument in Items(...)");
                     }
                 });
 

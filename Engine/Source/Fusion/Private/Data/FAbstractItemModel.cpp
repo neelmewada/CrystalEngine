@@ -2,10 +2,24 @@
 
 namespace CE
 {
+	SIZE_T FModelIndex::GetHash() const
+	{
+        return GetCombinedHashes({ (SIZE_T)GetRow(), (SIZE_T)GetColumn(), (SIZE_T)GetDataPtr() });
+	}
+
+	bool FModelIndex::operator==(const FModelIndex& other) const
+	{
+        return GetHash() == other.GetHash();
+	}
+
+	bool FModelIndex::operator!=(const FModelIndex& other) const
+	{
+        return !operator==(other);
+	}
 
     FAbstractItemModel::FAbstractItemModel()
     {
-
+        
     }
 
     FAbstractItemModel::~FAbstractItemModel()

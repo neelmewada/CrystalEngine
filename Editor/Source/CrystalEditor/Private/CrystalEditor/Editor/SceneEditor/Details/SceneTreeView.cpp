@@ -11,7 +11,8 @@ namespace CE::Editor
     void SceneTreeView::Construct()
     {
         Super::Construct();
-        
+
+        Style("TreeView");
     }
     
 }

@@ -103,7 +103,7 @@ namespace CE
 			event.keyModifiers = keyModifierStates;
 
 			//while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
-			while (hoveredWidgetStack.NonEmpty() && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
+			while (hoveredWidgetStack.NonEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
 			{
 				event.sender = hoveredWidgetStack.Top();
 				event.Reset();

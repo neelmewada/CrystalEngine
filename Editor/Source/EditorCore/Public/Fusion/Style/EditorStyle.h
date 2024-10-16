@@ -94,6 +94,9 @@ namespace CE::Editor
 		FIELD()
 		EditorMenuBarStyle* editorMenuBar = nullptr;
 
+		FIELD()
+		FTreeViewStyle* treeView = nullptr;
+
 	};
 
 } // namespace CE::Editor

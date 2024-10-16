@@ -15,6 +15,8 @@ namespace CE
 
         void OnModelUpdate();
 
+        FStyledWidget* GetHeaderContainer() const { return headerContainer; }
+
     protected:
 
         FTreeView();
@@ -46,7 +48,6 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
-        FUSION_PROPERTY(FBrush, Background);
         FUSION_PROPERTY(FBrush, RowBackground);
         FUSION_PROPERTY(FBrush, RowBackgroundAlternate);
 
@@ -61,6 +62,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FTreeViewContainer;
+        friend class FTreeViewStyle;
     };
     
 }
