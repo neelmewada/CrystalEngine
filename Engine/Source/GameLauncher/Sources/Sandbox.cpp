@@ -86,7 +86,7 @@ void GameLoop::SetupTestScene()
 		// - Camera -
 
 		CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
+		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 2));
 		scene->AddActor(camera);
 
 		CameraComponent* cameraComponent = camera->GetCameraComponent();
@@ -129,7 +129,7 @@ void GameLoop::SetupTestScene()
 		{
 			StaticMeshComponent* meshComponent = groundMesh->GetMeshComponent();
 			meshComponent->SetStaticMesh(cubeMesh);
-			meshComponent->SetLocalPosition(Vec3(0, -0.6f, 5));
+			meshComponent->SetLocalPosition(Vec3(0, -0.75f, 5));
 			meshComponent->SetLocalScale(Vec3(5, 0.05f, 5));
 			meshComponent->SetMaterial(woodMaterial, 0, 0);
 		}
