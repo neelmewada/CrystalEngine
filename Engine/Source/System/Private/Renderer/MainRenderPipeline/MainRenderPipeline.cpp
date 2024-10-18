@@ -18,32 +18,32 @@ namespace CE
     {
 	    Super::ConstructPipeline();
 
-        PassTree* passTree = renderPipeline->passTree;
+	    RPI::PassTree* passTree = renderPipeline->passTree;
     	renderPipeline->mainViewTag = "MainCamera";
 
-        ParentPass* rootPass = passTree->GetRootPass();
+	    RPI::ParentPass* rootPass = passTree->GetRootPass();
 
         // -------------------------------
         // Attachments
         // -------------------------------
 
-        PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
+	    RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
 
 		// - Depth Stencil
-    	
-        PassAttachment* depthStencilAttachment;
+
+	    RPI::PassAttachment* depthStencilAttachment;
 	    {
-            PassImageAttachmentDesc depthStencilAttachmentDesc{};
+            RPI::PassImageAttachmentDesc depthStencilAttachmentDesc{};
             depthStencilAttachmentDesc.name = "DepthStencil";
-            depthStencilAttachmentDesc.lifetime = AttachmentLifetimeType::Transient;
+            depthStencilAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
             depthStencilAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
-            depthStencilAttachmentDesc.imageDescriptor.format = Format::D32_SFLOAT_S8_UINT;
+            depthStencilAttachmentDesc.imageDescriptor.format = RHI::Format::D32_SFLOAT_S8_UINT;
             depthStencilAttachmentDesc.imageDescriptor.arrayLayers = 1;
             depthStencilAttachmentDesc.imageDescriptor.mipCount = 1;
-            depthStencilAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
-            depthStencilAttachmentDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil;
-            depthStencilAttachmentDesc.fallbackFormats = { Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
+            depthStencilAttachmentDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
+            depthStencilAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::DepthStencil;
+            depthStencilAttachmentDesc.fallbackFormats = { RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
 
             switch (mainRenderPipelineAsset->msaa)
             {
@@ -66,19 +66,19 @@ namespace CE
 
     	// - Color MSAA
     	
-        PassAttachment* colorMsaa;
+        RPI::PassAttachment* colorMsaa;
 	    {
-            PassImageAttachmentDesc colorMsaaAttachmentDesc{};
+            RPI::PassImageAttachmentDesc colorMsaaAttachmentDesc{};
             colorMsaaAttachmentDesc.name = "ColorMSAA";
-            colorMsaaAttachmentDesc.lifetime = AttachmentLifetimeType::Transient;
+            colorMsaaAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
             colorMsaaAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
-            colorMsaaAttachmentDesc.imageDescriptor.format = Format::B8G8R8A8_UNORM;
+            colorMsaaAttachmentDesc.imageDescriptor.format = RHI::Format::R8G8B8A8_UNORM;
             colorMsaaAttachmentDesc.imageDescriptor.mipCount = 1;
             colorMsaaAttachmentDesc.imageDescriptor.arrayLayers = 1;
-            colorMsaaAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
-            colorMsaaAttachmentDesc.imageDescriptor.bindFlags = TextureBindFlags::Color;
-            colorMsaaAttachmentDesc.fallbackFormats = { Format::R8G8B8A8_UNORM, Format::B8G8R8A8_UNORM };
+            colorMsaaAttachmentDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
+            colorMsaaAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Color;
+            colorMsaaAttachmentDesc.fallbackFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 
             switch (mainRenderPipelineAsset->msaa)
             {
@@ -105,9 +105,9 @@ namespace CE
 
         /*PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
 	    {
-            PassImageAttachmentDesc directionalShadowMapListDesc{};
+            RPI::PassImageAttachmentDesc directionalShadowMapListDesc{};
             directionalShadowMapListDesc.name = "DirectionalShadowMapList";
-            directionalShadowMapListDesc.lifetime = AttachmentLifetimeType::External;
+            directionalShadowMapListDesc.lifetime = RHI::AttachmentLifetimeType::External;
             directionalShadowMapListDesc.sizeSource.fixedSizes = Vec3i(1, 1, 1) * mainRenderPipelineAsset->directionalShadowResolution;
 
             directionalShadowMapListDesc.imageDescriptor.format = Format::D32_SFLOAT;
@@ -127,14 +127,14 @@ namespace CE
 
         // - Depth Pass
 
-        RasterPass* depthPass = (RasterPass*)PassSystem::Get().CreatePass(this, "DepthPass");
+        RPI::RasterPass* depthPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DepthPass");
     	depthPass->SetViewTag(mainViewTag);
-        depthPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Depth));
+        depthPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Depth));
 	    {
-            PassAttachmentBinding outputBinding{};
-            outputBinding.slotType = PassSlotType::Output;
+            RPI::PassAttachmentBinding outputBinding{};
+            outputBinding.slotType = RPI::PassSlotType::Output;
             outputBinding.attachment = depthStencilAttachment;
-            outputBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+            outputBinding.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
             outputBinding.name = "DepthOutput";
             outputBinding.connectedBinding = outputBinding.fallbackBinding = nullptr;
 
@@ -145,16 +145,16 @@ namespace CE
 
         // - Skybox Pass
 
-        RasterPass* skyboxPass = (RasterPass*)PassSystem::Get().CreatePass(this, "SkyboxPass");
+	    RPI::RasterPass* skyboxPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "SkyboxPass");
     	skyboxPass->SetViewTag(mainViewTag);
-        skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Skybox));
+        skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Skybox));
 	    {
-            PassSlot* colorOutputSlot = skyboxPass->FindSlot("ColorOutput");
+		    RPI::PassSlot* colorOutputSlot = skyboxPass->FindSlot("ColorOutput");
 
-            PassAttachmentBinding colorOutputBinding{};
-            colorOutputBinding.slotType = PassSlotType::Output;
+            RPI::PassAttachmentBinding colorOutputBinding{};
+            colorOutputBinding.slotType = RPI::PassSlotType::Output;
             colorOutputBinding.attachment = colorMsaa;
-            colorOutputBinding.attachmentUsage = ScopeAttachmentUsage::Color;
+            colorOutputBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
             colorOutputBinding.name = "ColorOutput";
             colorOutputBinding.connectedBinding = colorOutputBinding.fallbackBinding = nullptr;
 
@@ -186,25 +186,25 @@ namespace CE
 
         // - Opaque Pass
 
-        auto opaquePass = CreateObject<RasterPass>(this, "OpaquePass");
+        auto opaquePass = CreateObject<RPI::RasterPass>(this, "OpaquePass");
     	opaquePass->SetViewTag(mainViewTag);
-        opaquePass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque));
+        opaquePass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Opaque));
 	    {
             // DepthInput
             {
-                PassSlot depthSlot{};
+	            RPI::PassSlot depthSlot{};
                 depthSlot.name = "DepthInput";
-                depthSlot.slotType = PassSlotType::Input;
-                depthSlot.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-                depthSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                depthSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                depthSlot.slotType = RPI::PassSlotType::Input;
+                depthSlot.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+                depthSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                depthSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
                 opaquePass->AddSlot(depthSlot);
 
-                PassAttachmentBinding depthSlotBinding{};
+                RPI::PassAttachmentBinding depthSlotBinding{};
                 depthSlotBinding.name = "DepthInput";
-                depthSlotBinding.slotType = PassSlotType::Input;
-                depthSlotBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+                depthSlotBinding.slotType = RPI::PassSlotType::Input;
+                depthSlotBinding.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
                 depthSlotBinding.connectedBinding = depthPass->FindOutputBinding("DepthOutput");
 
                 opaquePass->AddAttachmentBinding(depthSlotBinding);
@@ -212,19 +212,19 @@ namespace CE
 
             // ColorMSAA
             {
-                PassSlot colorSlot{};
+	            RPI::PassSlot colorSlot{};
                 colorSlot.name = "ColorMSAA";
-                colorSlot.slotType = PassSlotType::InputOutput;
-                colorSlot.attachmentUsage = ScopeAttachmentUsage::Color;
-                colorSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                colorSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                colorSlot.slotType = RPI::PassSlotType::InputOutput;
+                colorSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+                colorSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                colorSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
                 opaquePass->AddSlot(colorSlot);
 
-                PassAttachmentBinding colorBinding{};
+                RPI::PassAttachmentBinding colorBinding{};
                 colorBinding.name = "ColorMSAA";
-                colorBinding.slotType = PassSlotType::InputOutput;
-                colorBinding.attachmentUsage = ScopeAttachmentUsage::Color;
+                colorBinding.slotType = RPI::PassSlotType::InputOutput;
+                colorBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
                 colorBinding.connectedBinding = skyboxPass->FindOutputBinding("ColorOutput");
 
                 opaquePass->AddAttachmentBinding(colorBinding);
@@ -235,14 +235,14 @@ namespace CE
 
         // - Resolve Pass
 
-        auto resolvePass = (RasterPass*)PassSystem::Get().CreatePass(this, "ResolvePass");
+        auto resolvePass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "ResolvePass");
     	resolvePass->SetViewTag(mainViewTag);
 	    {
 		    {
-                PassAttachmentBinding colorBinding{};
+                RPI::PassAttachmentBinding colorBinding{};
                 colorBinding.name = "ColorMSAA";
-                colorBinding.slotType = PassSlotType::InputOutput;
-                colorBinding.attachmentUsage = ScopeAttachmentUsage::Color;
+                colorBinding.slotType = RPI::PassSlotType::InputOutput;
+                colorBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
                 colorBinding.connectedBinding = opaquePass->FindInputOutputBinding("ColorMSAA");
                 colorBinding.fallbackBinding = nullptr;
 
@@ -250,10 +250,10 @@ namespace CE
 		    }
 	    	
 		    {
-                PassAttachmentBinding resolveBinding{};
+                RPI::PassAttachmentBinding resolveBinding{};
                 resolveBinding.name = "Resolve";
-                resolveBinding.slotType = PassSlotType::Output;
-                resolveBinding.attachmentUsage = ScopeAttachmentUsage::Resolve;
+                resolveBinding.slotType = RPI::PassSlotType::Output;
+                resolveBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Resolve;
                 resolveBinding.attachment = pipelineOutput;
                 resolveBinding.connectedBinding = resolveBinding.fallbackBinding = nullptr;
 

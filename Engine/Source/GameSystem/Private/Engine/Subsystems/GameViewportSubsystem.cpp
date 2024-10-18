@@ -40,6 +40,8 @@ namespace CE
 
 			mainWindow->SetResizable(true);
 			mainWindow->Show();
+
+			gameWindow->GetContext()->SetClearScreen(false);
 		}
 	}
 

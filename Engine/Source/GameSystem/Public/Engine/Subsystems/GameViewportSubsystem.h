@@ -19,6 +19,8 @@ namespace CE
 
         f32 GetTickPriority() const override;
 
+        FGameWindow* GetGameWindow() const { return gameWindow; }
+
     private:
 
         FGameWindow* gameWindow = nullptr;

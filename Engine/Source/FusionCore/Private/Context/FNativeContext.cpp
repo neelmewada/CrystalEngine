@@ -63,7 +63,7 @@ namespace CE
 		platformWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowDragHitTest, this));
 
 		RHI::SwapChainDescriptor desc{};
-		desc.imageCount = FrameScheduler::Get()->GetFramesInFlight();
+		desc.imageCount = RHI::FrameScheduler::Get()->GetFramesInFlight();
 		desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 		platformWindow->GetDrawableWindowSize(&desc.preferredWidth, &desc.preferredHeight);
 
@@ -343,9 +343,9 @@ namespace CE
 
 		Super::EmplaceFrameAttachments();
 
-		FrameScheduler* scheduler = FrameScheduler::Get();
+		RHI::FrameScheduler* scheduler = RHI::FrameScheduler::Get();
 
-		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+		RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
 		attachmentDatabase.EmplaceFrameAttachment(attachmentId, swapChain);
 	}
@@ -356,9 +356,9 @@ namespace CE
 
 		Super::EnqueueScopes();
 
-		FrameScheduler* scheduler = FrameScheduler::Get();
+		RHI::FrameScheduler* scheduler = RHI::FrameScheduler::Get();
 
-		FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+		RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
 		if (platformWindow != nullptr && !platformWindow->IsMinimized() && platformWindow->IsShown())
 		{
@@ -382,12 +382,12 @@ namespace CE
 
 				for (const auto& shaderReadOnlyAttachmentDependency : shaderReadOnlyAttachmentDependencies)
 				{
-					scheduler->UseAttachment(shaderReadOnlyAttachmentDependency, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Read);
+					scheduler->UseAttachment(shaderReadOnlyAttachmentDependency, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 				}
 
 				for (const auto& shaderWriteAttachmentDependency : shaderWriteAttachmentDependencies)
 				{
-					scheduler->UseAttachment(shaderWriteAttachmentDependency, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Write);
+					scheduler->UseAttachment(shaderWriteAttachmentDependency, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Write);
 				}
 
 				scheduler->PresentSwapChain(swapChain);
@@ -414,7 +414,7 @@ namespace CE
 
 		const auto& drawPackets = renderer->FlushDrawPackets(imageIndex);
 
-		for (DrawPacket* drawPacket : drawPackets)
+		for (RHI::DrawPacket* drawPacket : drawPackets)
 		{
 			drawList.AddDrawPacket(drawPacket);
 		}
@@ -426,7 +426,7 @@ namespace CE
 
 		Super::SetDrawPackets(drawList);
 
-		auto scheduler = FrameScheduler::Get();
+		auto scheduler = RHI::FrameScheduler::Get();
 
 		scheduler->SetScopeDrawList(attachmentId, &drawList.GetDrawListForTag(drawListTag));
 	}

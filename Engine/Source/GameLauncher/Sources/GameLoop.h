@@ -18,6 +18,8 @@ public:
 
 private:
 
+	void SetupTestScene();
+
 	void LoadProject();
 	void UnloadProject();
 
