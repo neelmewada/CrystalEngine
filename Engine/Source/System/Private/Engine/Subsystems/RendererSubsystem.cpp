@@ -420,9 +420,9 @@ namespace CE
 						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
 						const auto& attachments = rpiPipeline->attachments;
 
-						for (PassAttachment* passAttachment : attachments)
+						for (RPI::PassAttachment* passAttachment : attachments)
 						{
-							if (passAttachment->lifetime == AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+							if (passAttachment->lifetime == RHI::AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
 							{
 								if (renderViewport->IsEmbeddedViewport())
 								{

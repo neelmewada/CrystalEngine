@@ -22,17 +22,24 @@ namespace CE
 	{
 		Super::PostInitialize();
 
-		CApplication* app = CApplication::TryGet();
+		FusionApplication* app = FusionApplication::TryGet();
 		auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 
 		SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
-		CE::Scene* activeScene = sceneSubsystem->GetMainScene();
+		CE::Scene* activeScene = sceneSubsystem->GetActiveScene();
 
 		if (mainWindow && app)
 		{
-			gameWindow = CreateWindow<CGameWindow>(gProjectName, mainWindow);
+			auto rootContext = app->GetRootContext();
 
-			sceneSubsystem->SetMainViewport(gameWindow);
+			FNativeContext* gameWindowContext = FNativeContext::Create(mainWindow, "GameWindow", rootContext);
+			rootContext->AddChildContext(gameWindowContext);
+
+			FAssignNewOwned(FGameWindow, gameWindow, gameWindowContext);
+			gameWindowContext->SetOwningWidget(gameWindow);
+
+			mainWindow->SetResizable(true);
+			mainWindow->Show();
 		}
 	}
 

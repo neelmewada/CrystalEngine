@@ -7,15 +7,15 @@ namespace CE
     {
 		canTick = true;
 
-#if PLATFORM_DESKTOP
-        renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
-#else
-		#error Unimplemented render pipeline
-#endif
-
         if (!IsDefaultInstance())
         {
-            rpiView = RPI::View::CreateView("Camera", View::UsageCamera);
+#if PLATFORM_DESKTOP
+            renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
+#else
+#error Unimplemented render pipeline
+#endif
+
+            rpiView = RPI::View::CreateView("Camera", RPI::View::UsageCamera);
 
             renderPipeline->SetOwnerCamera(this);
         }

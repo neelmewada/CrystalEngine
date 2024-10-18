@@ -10,13 +10,13 @@ namespace CE::RPI
 
         SetShaderCollection(shaderCollection);
 
-        MaterialSystem::Get().materials.Add(this);
+        MaterialSystem::Get().AddMaterial(this);
     }
 
     Material::Material(ShaderCollection* shaderCollection)
 		: ownsShaderCollection(false), shaderCollection(shaderCollection)
 	{
-        MaterialSystem::Get().materials.Add(this);
+        MaterialSystem::Get().RemoveMaterial(this);
 
         SetShaderCollection(shaderCollection);
 	}

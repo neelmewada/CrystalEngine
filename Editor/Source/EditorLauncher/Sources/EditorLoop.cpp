@@ -117,6 +117,7 @@ void EditorLoop::UnloadEngineModules()
 	ModuleManager::Get().UnloadModule("FusionCore");
 
 	ModuleManager::Get().UnloadModule("System");
+	ModuleManager::Get().UnloadModule("CoreRPI");
 }
 
 void EditorLoop::LoadEditorModules()

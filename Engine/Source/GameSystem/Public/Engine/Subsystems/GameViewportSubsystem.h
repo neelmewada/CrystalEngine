@@ -21,7 +21,7 @@ namespace CE
 
     private:
 
-        CGameWindow* gameWindow = nullptr;
+        FGameWindow* gameWindow = nullptr;
 
     };
     

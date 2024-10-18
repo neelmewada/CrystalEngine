@@ -14,7 +14,7 @@ endforeach()
 set(CE_EDITOR_PATH "${CMAKE_BINARY_DIR}/$<CONFIG>" CACHE STRING "Path to editor build folder, where all the editor binaries exist")
 
 if (CE_STANDALONE)
-    
+
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "Windows")

@@ -31,7 +31,9 @@ ce_add_target(${PROJECT_NAME} GUIAPP
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::System
             CE::GameSystem
-            $<${CE_BUILD_TESTS}:Sandbox>
+        TARGETS 
+            Config
+            EngineAssets
     RUNTIME_DEPENDENCIES
 )
 

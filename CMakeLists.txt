@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 set (CMAKE_CXX_STANDARD 20)
 
-if(NOT PROJECT_NAME)
-    project(CrystalEngine
-        LANGUAGES C CXX)
-endif()
+project(CrystalEngine
+            LANGUAGES C CXX)
 
 include(CMake/CESet.cmake)
 include(CMake/Macros.cmake)

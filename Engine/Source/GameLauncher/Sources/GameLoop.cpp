@@ -7,7 +7,7 @@ void GameLoop::PreInit(int argc, char** argv)
 	// Setup before loading anything
 
 	gProjectPath = PlatformDirectories::GetLaunchDir();
-	String folderName = gProjectPath.GetFilename().GetString();
+	String folderName = gProjectPath.GetFileName().GetString();
 
 	if (folderName != "Debug" && folderName != "Development" && folderName != "Profile" && folderName != "Release")
 	{
@@ -86,18 +86,29 @@ void GameLoop::LoadCoreModules()
 {
 	// Load other Core modules
 	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("CoreMesh");
 }
 
 void GameLoop::LoadEngineModules()
 {
+	ModuleManager::Get().LoadModule("CoreRPI");
+	ModuleManager::Get().LoadModule("FusionCore");
+	ModuleManager::Get().LoadModule("Fusion");
+
 	ModuleManager::Get().LoadModule("System");
 	ModuleManager::Get().LoadModule("GameSystem");
 }
 
 void GameLoop::UnloadEngineModules()
 {
+	ModuleManager::Get().UnloadModule("Fusion");
+	ModuleManager::Get().UnloadModule("FusionCore");
+
 	ModuleManager::Get().UnloadModule("GameSystem");
 	ModuleManager::Get().UnloadModule("System");
+
+	// CoreRPI should always shutdown after the engine modules!
+	ModuleManager::Get().UnloadModule("CoreRPI");
 }
 
 void GameLoop::Init()
@@ -105,167 +116,168 @@ void GameLoop::Init()
 	// Load most important core modules for startup
 	LoadStartupCoreModules();
 
-	// Load Project
-	LoadProject();
-
 	// Load application
 	AppPreInit();
 }
 
 void GameLoop::PostInit()
 {
-	// Load non-important core modules
 	LoadCoreModules();
+	LoadEngineModules();
 
-	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
-	RHI::gDynamicRHI->Initialize();
+	// Load Project
+	LoadProject();
 
 	AppInit();
 
+	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
+
+	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
 
-	// Load game engine modules
-	LoadEngineModules();
+	RHI::FrameSchedulerDescriptor desc{};
+	desc.numFramesInFlight = 2;
+	RHI::FrameScheduler::Create(desc);
 
-	gEngine->PreInit();
+	RPI::RPISystem::Get().Initialize();
 
-	// Load Render viewports & cmd lists
-
-	u32 width = 0, height = 0;
-	mainWindow->GetDrawableWindowSize(&width, &height);
-
-	RHI::RenderTargetColorOutputDesc colorDesc{};
-	colorDesc.loadAction = RHI::RenderPassLoadAction::Clear;
-	colorDesc.storeAction = RHI::RenderPassStoreAction::Store;
-	colorDesc.sampleCount = 1;
-	colorDesc.preferredFormat = RHI::ColorFormat::Auto;
-
-	RHI::RenderTargetLayout rtLayout{};
-	rtLayout.backBufferCount = 2;
-	rtLayout.numColorOutputs = 1;
-	rtLayout.colorOutputs[0] = colorDesc;
-	rtLayout.presentationRTIndex = 0;
-	rtLayout.depthStencilFormat = RHI::DepthStencilFormat::Auto;
-
-	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
-
-	// Create GameViewport
-	GameViewport* gameViewport = CreateObject<GameViewport>(gEngine, "GameViewport");
-	//gameViewport->Initialize(rpiViewport);
-	
-	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
-	
-	// Load game code
-	ModuleManager::Get().LoadModule("Sandbox");
+	FusionApplication* fApp = FusionApplication::Get();
 
 	// Initialize engine & it's subsystems, and set game viewport
 	gEngine->Initialize();
 
-	gEngine->SetPrimaryGameViewport(gameViewport);
-
 	// Post initialize
 	gEngine->PostInitialize();
+
+	AssetManager* assetManager = AssetManager::Get();
+
+	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+	CE::Shader* textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
+
+	RPI::RPISystemInitInfo rpiInitInfo{};
+	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
+	rpiInitInfo.iblConvolutionShader = iblConvolutionShader->GetShaderCollection();
+	rpiInitInfo.textureGenShader = textureGenShader->GetShaderCollection();
+
+	RPI::RPISystem::Get().PostInitialize(rpiInitInfo);
+
+	auto tickDelegate = MemberDelegate(&GameLoop::ExposedTick, this);
+	this->tickDelegateHandle = tickDelegate.GetHandle();
+	app->AddTickHandler(tickDelegate);
+}
+
+void GameLoop::ExposedTick()
+{
+	auto app = PlatformApplication::Get();
+
+	auto curTime = clock();
+	deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+	FusionApplication::Get()->SetExposed();
+
+	gEngine->Tick(deltaTime);
+
+	previousTime = curTime;
 }
 
 void GameLoop::RunLoop()
 {
-	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
-
-	if (sceneSubsystem)
-		sceneSubsystem->OnBeginPlay();
-	auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
-
-	auto rt = viewport->GetRenderTarget();
-	
 	while (!IsEngineRequestingExit())
 	{
-		auto curTime = clock();
-		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+		FusionApplication::Get()->ResetExposed();
 
+		auto curTime = clock();
+		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+		// App & Input Tick
 		app->Tick();
-		
-		// - Engine -
+		InputManager::Get().Tick();
+
+		// Engine tick
 		gEngine->Tick(deltaTime);
 
-		if (!sceneSubsystem)
-			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
-
-		// - Render -
-		viewport->SetClearColor(Color::Black());
-		if (sceneSubsystem && sceneSubsystem->GetMainScene() != nullptr)
-		{
-			CameraComponent* mainCamera = sceneSubsystem->GetMainScene()->GetMainCamera();
-			if (mainCamera != nullptr)
-			{
-				viewport->SetClearColor(mainCamera->GetClearColor());
-			}
-		}
-
-		cmdList->Begin();
-
-		RHI::ViewportState viewportRect = RHI::ViewportState(0, 0, rt->GetWidth(), rt->GetHeight(), 0.0f, 1.0f);
-		RHI::ScissorState scissorRect = RHI::ScissorState(0, 0, rt->GetWidth(), rt->GetHeight());
-
-		cmdList->SetScissorRects(1, &scissorRect);
-		cmdList->SetViewportRects(1, &viewportRect);
-		
-		cmdList->End();
-
-		if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))
-		{
-			RHI::gDynamicRHI->PresentViewport(cmdList);
-		}
-		
 		previousTime = curTime;
 	}
-
-	cmdList->WaitForExecution();
 }
 
 void GameLoop::PreShutdown()
 {
-	// Unload game code
+	auto app = PlatformApplication::Get();
+	app->RemoveTickHandler(tickDelegateHandle);
 
-	UnloadSettings();
+	// Save project & settings, and unload
+	if (projectPath.Exists())
+	{
+		SaveSettings();
+		UnloadSettings();
+	}
+
+	FusionApplication* fApp = FusionApplication::Get();
+
+	fApp->PreShutdown();
+
+	fApp->Shutdown();
+	fApp->Destroy();
 
 	gEngine->PreShutdown();
 
-	gEngine->GetPrimaryGameViewport()->Shutdown();
+	// fApp is Shutdown and destroyed by RendererSubsystem, no need to do it again here.
 
-	gEngine->Shutdown();
-
-	RHI::gDynamicRHI->DestroyCommandList(cmdList);
-	RHI::gDynamicRHI->DestroyViewport(viewport);
-
-	ModuleManager::Get().UnloadModule("Sandbox");
-	UnloadEngineModules();
+	RPI::RPISystem::Get().Shutdown();
 
 	RHI::gDynamicRHI->PreShutdown();
 
+	InputManager::Get().Shutdown(app);
+	app->PreShutdown();
+
+	gEngine->Shutdown();
+
+	// Unload engine modules
+	UnloadEngineModules();
+
 	AppPreShutdown();
+
+	// Shutdown core widgets before RHI device
+	ModuleManager::Get().UnloadModule("Fusion");
+	ModuleManager::Get().UnloadModule("FusionCore");
 
 	RHI::gDynamicRHI->Shutdown();
 
-	delete RHI::gDynamicRHI;
-	RHI::gDynamicRHI = nullptr;
+	// Unload modules
 
+	ModuleManager::Get().UnloadModule("CoreShader");
+	ModuleManager::Get().UnloadModule("CoreMedia");
+	ModuleManager::Get().UnloadModule("CoreMesh");
+
+#if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");
+#endif
 	ModuleManager::Get().UnloadModule("CoreRHI");
 }
 
 void GameLoop::Shutdown()
 {
+	IO::Path exitLaunchProcess = gExitLaunchProcess;
+	String exitLaunchArgs = gExitLaunchArguments;
+
 	// Shutdown application
 	AppShutdown();
 
-	ModuleManager::Get().UnloadModule("CoreShader");
+	// Unload settings module
 	ModuleManager::Get().UnloadModule("CoreSettings");
 
 	// Unload most important modules at last
+	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 
 	Logger::Shutdown();
+
+	if (!exitLaunchProcess.IsEmpty())
+	{
+		PlatformProcess::LaunchProcess(exitLaunchProcess, exitLaunchArgs);
+	}
 }
 
 void GameLoop::LoadProject()
@@ -297,7 +309,10 @@ void GameLoop::AppPreInit()
 
 void GameLoop::AppInit()
 {
+	gEngine->PreInit();
 	app->Initialize();
+
+	InputManager::Get().Initialize(app);
 
 	String windowTitle = gProjectName;
 	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
@@ -307,6 +322,7 @@ void GameLoop::AppInit()
 	}
 
 	mainWindow = app->InitMainWindow(windowTitle, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+	mainWindow->Show();
 }
 
 void GameLoop::AppPreShutdown()

@@ -10,6 +10,7 @@ public:
 	void Init();
 	void PostInit();
 
+	void ExposedTick();
 	void RunLoop();
 
 	void PreShutdown();
@@ -38,14 +39,12 @@ private:
 	CE::PlatformApplication* app = nullptr;
 	CE::PlatformWindow* mainWindow = nullptr;
 
-	// RHI
-	CE::RHI::Viewport* viewport = nullptr;
-	CE::RHI::GraphicsCommandList* cmdList = nullptr;
-
 	IO::Path projectPath{};
 
 	clock_t previousTime{};
-
+	f32 deltaTime = 0;
+	DelegateHandle tickDelegateHandle = 0;
+	FGameWindow* gameWindow = nullptr;
 };
 
 extern GameLoop gGameLoop;
