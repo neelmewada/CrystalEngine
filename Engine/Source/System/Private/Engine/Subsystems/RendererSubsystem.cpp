@@ -605,7 +605,10 @@ namespace CE
 	void RendererSubsystem::AddViewport(FGameWindow* viewport)
 	{
 		if (renderViewports.Exists(viewport))
+		{
+			RebuildFrameGraph();
 			return;
+		}
 
 		renderViewports.Add(viewport);
 		RebuildFrameGraph();

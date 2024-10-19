@@ -60,4 +60,13 @@ namespace CE
 		return 3;
 	}
 
+	void GameViewportSubsystem::SetScene(CE::Scene* scene)
+	{
+		this->scene = scene;
+		gameWindow->SetScene(scene->GetRpiScene());
+		gEngine->GetSubsystem<RendererSubsystem>()->RebuildFrameGraph();
+
+		gEngine->AddRenderViewport(gameWindow);
+	}
+
 } // namespace CE

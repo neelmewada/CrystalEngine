@@ -21,9 +21,12 @@ namespace CE
 
         FGameWindow* GetGameWindow() const { return gameWindow; }
 
+        void SetScene(CE::Scene* scene);
+
     private:
 
         FGameWindow* gameWindow = nullptr;
+        CE::Scene* scene = nullptr;
 
     };
     

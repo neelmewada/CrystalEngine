@@ -30,6 +30,7 @@ namespace CE
 
 		void DetachComponent(SceneComponent* component);
 
+		bool ParentComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 

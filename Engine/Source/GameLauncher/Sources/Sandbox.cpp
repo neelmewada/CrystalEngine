@@ -14,7 +14,6 @@ void GameLoop::SetupTestScene()
 	GameViewportSubsystem* viewportSubsystem = gEngine->GetSubsystem<GameViewportSubsystem>();
 	gameWindow = viewportSubsystem->GetGameWindow();
 
-	gameWindow->SetScene(scene->GetRpiScene());
 	scene->SetSkyboxCubeMap(skybox);
 
 	{
@@ -135,7 +134,7 @@ void GameLoop::SetupTestScene()
 		}
 	}
 
-	gEngine->AddRenderViewport(gameWindow);
+	viewportSubsystem->SetScene(scene);
 	gEngine->LoadScene(scene);
 }
 

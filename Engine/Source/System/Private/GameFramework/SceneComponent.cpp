@@ -21,9 +21,9 @@ namespace CE
 		if (!component || component == this)
 			return;
 
-		if (ComponentExistsRecursive(component))
+		if (component->ParentComponentExistsRecursive(this))
 		{
-			CE_LOG(Error, All, "SceneComponent::SetupAttachment called with a scene component that already exists in it's hierarcy");
+			CE_LOG(Error, All, "SceneComponent::SetupAttachment called with a scene component that already exists in it's hierarchy");
 			return;
 		}
 
@@ -88,6 +88,18 @@ namespace CE
 		}
 
 		SetDirty();
+	}
+
+	bool SceneComponent::ParentComponentExistsRecursive(SceneComponent* component)
+	{
+		if (this == component)
+			return true;
+
+		if (parentComponent)
+		{
+			parentComponent->ParentComponentExistsRecursive(component);
+		}
+		return false;
 	}
 
 	bool SceneComponent::ComponentExistsRecursive(SceneComponent* component)
