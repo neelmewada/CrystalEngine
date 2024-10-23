@@ -28,7 +28,7 @@ namespace CE::Vulkan
 
 		struct AttachmentBinding
 		{
-			AttachmentID attachmentId{};
+			RHI::AttachmentID attachmentId{};
 			RHI::Format format = RHI::Format::Undefined;
 			RHI::AttachmentLoadStoreAction loadStoreAction{};
 			VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -61,6 +61,7 @@ namespace CE::Vulkan
 
 		struct Descriptor
 		{
+			Name name;
 			FixedArray<AttachmentBinding, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 			FixedArray<SubPassDescriptor, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
 			Array<VkSubpassDependency> dependencies{};

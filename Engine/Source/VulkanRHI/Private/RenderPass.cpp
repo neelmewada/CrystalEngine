@@ -120,6 +120,12 @@ namespace CE::Vulkan
 		{
 			return;
 		}
+
+		String name = descriptor.name.GetString();
+
+#if PLATFORM_DESKTOP && !CE_BUILD_RELEASE
+		device->SetObjectDebugName((uint64_t)renderPass, VK_OBJECT_TYPE_RENDER_PASS, name.GetCString());
+#endif
 	}
 
 	RenderPass::~RenderPass()
@@ -143,10 +149,10 @@ namespace CE::Vulkan
 			outDescriptor.attachments.Clear();
 			outDescriptor.dependencies.Clear();
 			outDescriptor.subpasses.Clear();
-			HashMap<AttachmentID, ImageFrameAttachment*> attachmentsById{};
-			HashMap<AttachmentID, AttachmentBinding> attachmentBindingsById{};
-			HashMap<AttachmentID, int> attachmentIndicesById{};
-			Array<AttachmentID> attachmentIdsInOrder{};
+			HashMap<RHI::AttachmentID, RHI::ImageFrameAttachment*> attachmentsById{};
+			HashMap<RHI::AttachmentID, AttachmentBinding> attachmentBindingsById{};
+			HashMap<RHI::AttachmentID, int> attachmentIndicesById{};
+			Array<RHI::AttachmentID> attachmentIdsInOrder{};
 			int totalAttachmentCount = 0;
 
 			VkSubpassDependency dependency{};
@@ -175,9 +181,9 @@ namespace CE::Vulkan
 					if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
 						scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
 						continue;
-					
-					ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
-					ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+					RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
+					RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 					auto attachmentId = imageFrameAttachment->GetId();
 
 					RHI::Format format;
@@ -188,7 +194,7 @@ namespace CE::Vulkan
 					}
 					else
 					{
-						RHIResource* resource = imageFrameAttachment->GetResource();
+						RHI::RHIResource* resource = imageFrameAttachment->GetResource();
 						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 							continue;
 						Texture* image = (Texture*)resource;
@@ -425,7 +431,7 @@ namespace CE::Vulkan
 					scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
 					continue;
                 
-				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+				RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
 				ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 				RHI::Format format;
 				u32 sampleCount = 1;
@@ -526,19 +532,19 @@ namespace CE::Vulkan
 
 			switch (attachmentLayout.attachmentUsage)
 			{
-			case ScopeAttachmentUsage::Color:
+			case RHI::ScopeAttachmentUsage::Color:
 				attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				break;
-			case ScopeAttachmentUsage::DepthStencil:
+			case RHI::ScopeAttachmentUsage::DepthStencil:
 				attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 				attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 				break;
-			case ScopeAttachmentUsage::Resolve:
+			case RHI::ScopeAttachmentUsage::Resolve:
 				attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				break;
-			case ScopeAttachmentUsage::SubpassInput:
+			case RHI::ScopeAttachmentUsage::SubpassInput:
 				attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				break;
@@ -559,22 +565,22 @@ namespace CE::Vulkan
 
 				switch (rtLayout.attachmentLayouts[i].attachmentUsage)
 				{
-				case ScopeAttachmentUsage::Color:
+				case RHI::ScopeAttachmentUsage::Color:
 					attachmentRef.attachmentIndex = i;
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					subpass.colorAttachments.Add(attachmentRef);
 					break;
-				case ScopeAttachmentUsage::DepthStencil:
+				case RHI::ScopeAttachmentUsage::DepthStencil:
 					attachmentRef.attachmentIndex = i;
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 					subpass.depthStencilAttachment.Add(attachmentRef);
 					break;
-				case ScopeAttachmentUsage::Resolve:
+				case RHI::ScopeAttachmentUsage::Resolve:
 					attachmentRef.attachmentIndex = i;
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					subpass.resolveAttachments.Add(attachmentRef);
 					break;
-				case ScopeAttachmentUsage::SubpassInput:
+				case RHI::ScopeAttachmentUsage::SubpassInput:
 					attachmentRef.attachmentIndex = i;
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					subpass.resolveAttachments.Add(attachmentRef);
@@ -647,7 +653,7 @@ namespace CE::Vulkan
 					if (renderPassUsedAttachments.Exists(unusedAttachmentIndex))
 					{
 						// If we want to keep the data in this attachment intact, we need to add it to preserveAttachments
-						if (outDescriptor.attachments[unusedAttachmentIndex].loadStoreAction.storeAction == AttachmentStoreAction::Store)
+						if (outDescriptor.attachments[unusedAttachmentIndex].loadStoreAction.storeAction == RHI::AttachmentStoreAction::Store)
 						{
 							subpass.preserveAttachments.Add(unusedAttachmentIndex);
 						}

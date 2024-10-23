@@ -8,6 +8,7 @@ namespace CE::Vulkan
         : device(device)
     {
         RenderPass::Descriptor desc{};
+        desc.name = "RenderTarget";
         RenderPass::BuildDescriptor(rtLayout, desc);
         renderPass = device->GetRenderPassCache()->FindOrCreate(desc);
     }
@@ -55,7 +56,7 @@ namespace CE::Vulkan
         return new RenderTarget(device, rpDesc);
     }
 
-    RenderTarget* RenderTarget::Clone(MultisampleState msaa, const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection)
+    RenderTarget* RenderTarget::Clone(RHI::MultisampleState msaa, const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection)
     {
         if (renderPass == nullptr)
             return nullptr;
@@ -91,7 +92,7 @@ namespace CE::Vulkan
     void RenderTarget::GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection)
     {
         outColorFormats.Clear();
-        outDepthStencilFormat = Format::Undefined;
+        outDepthStencilFormat = RHI::Format::Undefined;
 
         if (renderPass == nullptr)
             return;

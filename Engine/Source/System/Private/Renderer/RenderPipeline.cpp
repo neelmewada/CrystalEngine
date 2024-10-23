@@ -35,13 +35,13 @@ namespace CE
 
         renderPipeline->passTree->Clear();
 
-        PassImageAttachmentDesc pipelineOutputDesc{};
+        RPI::PassImageAttachmentDesc pipelineOutputDesc{};
         pipelineOutputDesc.name = "PipelineOutput";
-        pipelineOutputDesc.lifetime = AttachmentLifetimeType::External;
-        pipelineOutputDesc.imageDescriptor.dimension = Dimension::Dim2D;
-        pipelineOutputDesc.imageDescriptor.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+        pipelineOutputDesc.lifetime = RHI::AttachmentLifetimeType::External;
+        pipelineOutputDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
+        pipelineOutputDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
 
-        auto pipelineOutput = new PassAttachment(pipelineOutputDesc);
+        auto pipelineOutput = new RPI::PassAttachment(pipelineOutputDesc);
         renderPipeline->attachments.Add(pipelineOutput);
     }
     
@@ -77,7 +77,7 @@ namespace CE
 
     RHI::DrawListTag CE::RenderPipeline::GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag builtinDrawItemTag)
     {
-        return RPISystem::Get().GetBuiltinDrawListTag(builtinDrawItemTag);
+        return RPI::RPISystem::Get().GetBuiltinDrawListTag(builtinDrawItemTag);
     }
 
 } // namespace CE

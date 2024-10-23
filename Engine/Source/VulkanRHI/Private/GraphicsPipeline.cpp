@@ -126,6 +126,7 @@ namespace CE::Vulkan
         else
         {
             RenderPass::Descriptor rpDesc{};
+            rpDesc.name = name;
             RenderPass::BuildDescriptor(desc.rtLayout, rpDesc);
             renderPass = rpCache->FindOrCreate(rpDesc);
             if (renderPass)
