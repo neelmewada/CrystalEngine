@@ -8,6 +8,7 @@ namespace CE::RPI
         lifetime = desc.lifetime;
         sizeSource = desc.sizeSource;
         fallbackFormats = desc.fallbackFormats;
+        formatSource = desc.formatSource;
         
         attachmentDescriptor = RPI::UnifiedAttachmentDescriptor(desc.imageDescriptor);
     }

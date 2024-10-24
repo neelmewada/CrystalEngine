@@ -13,9 +13,9 @@ namespace CE::RPI
 
 	protected:
 
-    	void ProduceScopes(FrameScheduler* scheduler) override;
+    	void ProduceScopes(RHI::FrameScheduler* scheduler) override;
 
-    	void EmplaceAttachments(FrameScheduler* scheduler) override;
+    	void EmplaceAttachments(RHI::FrameScheduler* scheduler) override;
 
 	};
 

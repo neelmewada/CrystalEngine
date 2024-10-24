@@ -16,13 +16,15 @@ namespace CE::RPI
 		Name name{};
 
 		//! @brief Actual attachment id to use in Frame Scheduler.
-		AttachmentID attachmentId = "";
+		RHI::AttachmentID attachmentId = "";
 
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
         PassAttachmentSizeSource sizeSource{};
         
         RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
+
+		Name formatSource = "";
 
 		Array<RHI::Format> fallbackFormats{};
 	};

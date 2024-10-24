@@ -73,11 +73,13 @@ namespace CE
             colorMsaaAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
             colorMsaaAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
-            colorMsaaAttachmentDesc.imageDescriptor.format = RHI::Format::R8G8B8A8_UNORM;
+            colorMsaaAttachmentDesc.imageDescriptor.format = RHI::Format::Undefined;
             colorMsaaAttachmentDesc.imageDescriptor.mipCount = 1;
             colorMsaaAttachmentDesc.imageDescriptor.arrayLayers = 1;
             colorMsaaAttachmentDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
             colorMsaaAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Color;
+
+            colorMsaaAttachmentDesc.formatSource = pipelineOutput->name;
             colorMsaaAttachmentDesc.fallbackFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 
             switch (mainRenderPipelineAsset->msaa)

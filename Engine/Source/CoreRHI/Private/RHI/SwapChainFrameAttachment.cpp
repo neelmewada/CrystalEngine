@@ -9,7 +9,22 @@ namespace CE::RHI
     {
 		for (int i = 0; i < swapChain->GetImageCount(); i++)
 		{
-			SetResource(i, swapChain->GetImage(i));
+			Texture* image = swapChain->GetImage(i);
+			if (image)
+			{
+				descriptor.width = image->GetWidth();
+				descriptor.height = image->GetHeight();
+				descriptor.depth = image->GetDepth();
+				descriptor.format = image->GetFormat();
+				descriptor.sampleCount = image->GetSampleCount();
+				descriptor.dimension = image->GetDimension();
+				descriptor.arrayLayers = image->GetArrayLayerCount();
+				descriptor.bindFlags = image->GetBindFlags();
+				descriptor.mipLevels = image->GetMipLevelCount();
+				descriptor.defaultHeapType = MemoryHeapType::Default;
+			}
+
+			SetResource(i, image);
 		}
     }
 

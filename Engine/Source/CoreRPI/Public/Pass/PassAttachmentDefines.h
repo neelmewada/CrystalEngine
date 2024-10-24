@@ -151,6 +151,9 @@ namespace CE::RPI
 		ImageDescriptor imageDescriptor{};
 
 		FIELD()
+		Name formatSource;
+
+		FIELD()
 		Array<RHI::Format> fallbackFormats{};
     };
 

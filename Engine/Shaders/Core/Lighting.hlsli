@@ -39,7 +39,7 @@ cbuffer _LightData : SRG_PerScene(b2)
 
 SamplerState _ShadowMapSampler : SRG_PerScene(s3);
 
-Texture2D<float> DirectionalShadowMap : SRG_PerPass(t0);
+Texture2D<float> _DirectionalShadowMap : SRG_PerPass(t0);
 
 TextureCube<float4> _Skybox : SRG_PerScene(t5);
 SamplerState _DefaultSampler : SRG_PerScene(s6);
@@ -58,14 +58,14 @@ float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
     bias = max(0.01 * (1.0 - NdotL), 0.005);
     
     float w; float h;
-    DirectionalShadowMap.GetDimensions(w, h);
+    _DirectionalShadowMap.GetDimensions(w, h);
     float2 texelSize = float2(1, 1) / float2(w, h);
     float shadow = 0;
     for (int x = -1; x <= 1; x++)
     {
         for(int y = -1; y <= 1; y++)
         {
-            float pcfDepth = DirectionalShadowMap.Sample(_ShadowMapSampler, projectionCoords.xy + float2(x, y) * texelSize);
+            float pcfDepth = _DirectionalShadowMap.Sample(_ShadowMapSampler, projectionCoords.xy + float2(x, y) * texelSize);
             shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
         }
     }

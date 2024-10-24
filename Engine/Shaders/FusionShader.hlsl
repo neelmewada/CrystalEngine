@@ -372,7 +372,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             color = shapeItem.brushColor;
 	        break;
         case BRUSH_Texture:
-            color = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], textureUV).rgba * shapeItem.brushColor;
+            color = _Textures[NonUniformResourceIndex(textureIndex)].Sample(_TextureSamplers[NonUniformResourceIndex(samplerIndex)], textureUV).rgba * shapeItem.brushColor;
 	        break;
         case BRUSH_LinearGradient:
 	        break;
@@ -432,7 +432,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         const uint samplerIndex = shapeItem.samplerIndex;
         const uint textureIndex = shapeItem.textureOrGradientIndex + _FrameIndex;
 		
-        pixelColor.rgb = _Textures[textureIndex].Sample(_TextureSamplers[samplerIndex], uv).rgb;
+        pixelColor.rgb = _Textures[NonUniformResourceIndex(textureIndex)].Sample(_TextureSamplers[NonUniformResourceIndex(samplerIndex)], uv).rgb;
 	    pixelColor.a = 1.0;
     }
 

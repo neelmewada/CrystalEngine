@@ -13,7 +13,7 @@ namespace CE::RPI
 	    
     }
 	
-    void RasterPass::ProduceScopes(FrameScheduler* scheduler)
+    void RasterPass::ProduceScopes(RHI::FrameScheduler* scheduler)
     {
         Name scopeId = GetScopeId();
         
@@ -42,34 +42,34 @@ namespace CE::RPI
 					if (!slot)
                         return;
 
-                    ScopeAttachmentAccess attachmentAccess = ScopeAttachmentAccess::Undefined;
+                    RHI::ScopeAttachmentAccess attachmentAccess = RHI::ScopeAttachmentAccess::Undefined;
                     switch (slot->slotType)
                     {
                     case PassSlotType::Input:
-                        attachmentAccess = ScopeAttachmentAccess::Read;
+                        attachmentAccess = RHI::ScopeAttachmentAccess::Read;
 	                    break;
                     case PassSlotType::Output:
-                        attachmentAccess = ScopeAttachmentAccess::Write;
+                        attachmentAccess = RHI::ScopeAttachmentAccess::Write;
 	                    break;
                     case PassSlotType::InputOutput:
-                        attachmentAccess = ScopeAttachmentAccess::ReadWrite;
+                        attachmentAccess = RHI::ScopeAttachmentAccess::ReadWrite;
 	                    break;
                     default:
                         return;
                     }
 
-                    if (attachment->attachmentDescriptor.type == AttachmentType::Image)
+                    if (attachment->attachmentDescriptor.type == RHI::AttachmentType::Image)
                     {
-                        ImageScopeAttachmentDescriptor imageScopeAttachment{};
+	                    RHI::ImageScopeAttachmentDescriptor imageScopeAttachment{};
                         imageScopeAttachment.attachmentId = attachment->attachmentId;
                         imageScopeAttachment.loadStoreAction = slot->loadStoreAction;
                         imageScopeAttachment.multisampleState.sampleCount = attachment->attachmentDescriptor.imageDesc.sampleCount;
 
                         scheduler->UseAttachment(imageScopeAttachment, slot->attachmentUsage, attachmentAccess);
                     }
-                    else if (attachment->attachmentDescriptor.type == AttachmentType::Buffer)
+                    else if (attachment->attachmentDescriptor.type == RHI::AttachmentType::Buffer)
                     {
-                        BufferScopeAttachmentDescriptor bufferScopeAttachment{};
+	                    RHI::BufferScopeAttachmentDescriptor bufferScopeAttachment{};
                         bufferScopeAttachment.attachmentId = attachment->attachmentId;
                         bufferScopeAttachment.loadStoreAction = slot->loadStoreAction;
 
@@ -113,13 +113,13 @@ namespace CE::RPI
         scheduler->EndScope();
     }
 	
-    void RasterPass::EmplaceAttachments(FrameScheduler* scheduler)
+    void RasterPass::EmplaceAttachments(RHI::FrameScheduler* scheduler)
     {
     	auto emplaceAttachment = [&](const PassAttachmentBinding& attachmentBinding)
     		{
-                FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
+			    RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
 
-    			if (attachmentBinding.attachment != nullptr && attachmentBinding.attachment->lifetime == AttachmentLifetimeType::Transient)
+    			if (attachmentBinding.attachment != nullptr && attachmentBinding.attachment->lifetime == RHI::AttachmentLifetimeType::Transient)
     			{
                     if (attachmentDatabase.FindFrameAttachment(attachmentBinding.attachment->name) != nullptr)
                         return;
@@ -129,28 +129,48 @@ namespace CE::RPI
 
     				switch (attachmentDescriptor.type)
     				{
-    				case AttachmentType::Buffer:
+    				case RHI::AttachmentType::Buffer:
     				{
     					RHI::BufferDescriptor bufferDescriptor{};
     					bufferDescriptor.name = attachment->name;
     					bufferDescriptor.bindFlags = attachmentDescriptor.bufferDesc.bindFlags;
     					bufferDescriptor.bufferSize = attachmentDescriptor.bufferDesc.byteSize;
-    					bufferDescriptor.defaultHeapType = MemoryHeapType::Default;
+    					bufferDescriptor.defaultHeapType = RHI::MemoryHeapType::Default;
     					
     					//attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
     				}
     					break;
-    				case AttachmentType::Image:
+    				case RHI::AttachmentType::Image:
     				{
     					RHI::ImageDescriptor imageDescriptor{};
     					imageDescriptor.name = attachment->name;
                         imageDescriptor.bindFlags = attachmentDescriptor.imageDesc.bindFlags;
-                        imageDescriptor.defaultHeapType = MemoryHeapType::Default;
+                        imageDescriptor.defaultHeapType = RHI::MemoryHeapType::Default;
                         imageDescriptor.arrayLayers = attachmentDescriptor.imageDesc.arrayLayers;
                         imageDescriptor.dimension = attachmentDescriptor.imageDesc.dimension;
                         imageDescriptor.format = attachmentDescriptor.imageDesc.format;
                         imageDescriptor.sampleCount = attachmentDescriptor.imageDesc.sampleCount;
                         imageDescriptor.mipLevels = attachmentDescriptor.imageDesc.mipCount;
+
+                        if (attachment->formatSource.IsValid())
+                        {
+	                        if (Ptr<PassAttachment> sourcePassAttachment = renderPipeline->FindAttachment(attachment->formatSource))
+                            {
+	                            if (RHI::FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(sourcePassAttachment->attachmentId))
+                                {
+	                                if (sourceAttachment->IsSwapChainAttachment())
+	                                {
+                                        auto srcSwapChainAttachment = (RHI::SwapChainFrameAttachment*)sourceAttachment;
+                                        imageDescriptor.format = srcSwapChainAttachment->GetImageDescriptor().format;
+	                                }
+	                                else if (sourceAttachment->IsImageAttachment())
+	                                {
+                                        auto srcImageAttachment = (RHI::ImageFrameAttachment*)sourceAttachment;
+                                        imageDescriptor.format = srcImageAttachment->GetImageDescriptor().format;
+	                                }
+                                }
+                            }
+                        }
 
                         if (attachment->sizeSource.IsFixedSize())
                         {
@@ -164,13 +184,13 @@ namespace CE::RPI
                             if (!sourcePassAttachment)
                                 return;
 
-                            FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(sourcePassAttachment->attachmentId);
+                            RHI::FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(sourcePassAttachment->attachmentId);
                             if (!sourceAttachment)
                                 return;
 
                             if (sourceAttachment->IsSwapChainAttachment())
                             {
-                                auto srcSwapChainAttachment = (SwapChainFrameAttachment*)sourceAttachment;
+                                auto srcSwapChainAttachment = (RHI::SwapChainFrameAttachment*)sourceAttachment;
                                 imageDescriptor.width = srcSwapChainAttachment->GetSwapChain()->GetWidth();
                                 imageDescriptor.height = srcSwapChainAttachment->GetSwapChain()->GetHeight();
                                 imageDescriptor.depth = 1;
@@ -180,7 +200,7 @@ namespace CE::RPI
                             }
                             else if (sourceAttachment->IsImageAttachment())
                             {
-                                auto srcImageAttachment = (ImageFrameAttachment*)sourceAttachment;
+                                auto srcImageAttachment = (RHI::ImageFrameAttachment*)sourceAttachment;
                                 imageDescriptor.width = srcImageAttachment->GetImageDescriptor().width;
                                 imageDescriptor.height = srcImageAttachment->GetImageDescriptor().height;
                                 imageDescriptor.depth = srcImageAttachment->GetImageDescriptor().depth;
@@ -199,7 +219,7 @@ namespace CE::RPI
                             return; // Invalid size entry
                         }
 
-                        RHI::DeviceLimits* deviceLimits = gDynamicRHI->GetDeviceLimits();
+                        RHI::DeviceLimits* deviceLimits = RHI::gDynamicRHI->GetDeviceLimits();
                         if (!deviceLimits->IsFormatSupported(imageDescriptor.format, imageDescriptor.bindFlags))
                         {
                             Array<RHI::Format> fallbackFormats = attachmentBinding.attachment->fallbackFormats;

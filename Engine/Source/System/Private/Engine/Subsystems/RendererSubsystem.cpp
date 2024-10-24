@@ -230,24 +230,6 @@ namespace CE
 			}
 		}
 
-		/*for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
-		{
-			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
-			if (!renderPipeline)
-				continue;
-
-			renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
-				{
-					if (!pass)
-						return;
-
-					if (pass->GetDrawListTag().IsValid())
-					{
-						drawListMask.Set(pass->GetDrawListTag());
-					}
-				});
-		}*/
-
 		// - Enqueue additional draw packets
 
 		for (int i = 0; i < drawListMask.GetSize(); ++i)
@@ -289,26 +271,6 @@ namespace CE
 			}
 		}
 
-		/*if (isSceneWindowActive)
-	    {
-		    for (const auto& [viewTag, views] : rpiScene->GetViews())
-		    {
-		    	for (RPI::View* view : views.views)
-		    	{
-		    		view->GetDrawListContext()->Finalize();
-
-		    		for (const auto& drawListTag : drawListTags)
-		    		{
-					    RHI::DrawList& viewDrawList = view->GetDrawList(drawListTag);
-		    			for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
-		    			{
-		    				drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
-		    			}
-		    		}
-		    	}
-		    }
-	    }*/
-
 		drawList.Finalize();
 
 		// - Set scope draw lists
@@ -346,28 +308,6 @@ namespace CE
 					});
 			}
 		}
-		
-		/*for (int i = 0; isSceneWindowActive && i < rpiScene->GetRenderPipelineCount(); ++i)
-		{
-			RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
-			if (!renderPipeline)
-				continue;
-
-			renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
-				{
-					if (!pass)
-						return;
-
-					RPI::SceneViewTag viewTag = pass->GetViewTag();
-					RHI::DrawListTag passDrawTag = pass->GetDrawListTag();
-					RHI::ScopeId scopeId = pass->GetScopeId();
-
-					if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
-					{
-						scheduler->SetScopeDrawList(scopeId, &drawList.GetDrawListForTag(passDrawTag));
-					}
-				});
-		}*/
 
 		scheduler->EndExecution();
 	}
