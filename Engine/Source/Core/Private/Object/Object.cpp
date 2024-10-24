@@ -671,6 +671,8 @@ namespace CE
 				continue;
 			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(Uuid))
 				continue;
+			if (field->IsInternal())
+				continue;
 
 			if (field->IsObjectField()) // Deep copy object fields
 			{

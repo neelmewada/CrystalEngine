@@ -51,7 +51,7 @@ namespace CE::RPI
 
 		/// @brief List of image dimensions supported by this pass slot.
 		FIELD()
-        Array<RHI::Dimension> dimensions = { Dimension::Dim2D };
+        FixedArray<RHI::Dimension, 4> dimensions = { RHI::Dimension::Dim2D };
 	};
 
 	//! @brief Name of the PassAttachment to use as reference
@@ -175,7 +175,7 @@ namespace CE::RPI
 		UnifiedAttachmentDescriptor()
         {
 			memset(this, 0, sizeof(*this));
-			type = AttachmentType::None;
+			type = RHI::AttachmentType::None;
         }
 
 		UnifiedAttachmentDescriptor(const ImageDescriptor& imageDesc)
@@ -198,7 +198,7 @@ namespace CE::RPI
 
 		~UnifiedAttachmentDescriptor();
 
-		AttachmentType type = AttachmentType::None;
+		RHI::AttachmentType type = RHI::AttachmentType::None;
 
 		union {
 			ImageDescriptor imageDesc;

@@ -71,13 +71,13 @@ namespace CE::RPI
 
 		for (int i = 0; i < scopeProducers.GetSize(); i++)
 		{
-			IScopeProducer* scopeProducer = scopeProducers[i];
+			RHI::IScopeProducer* scopeProducer = scopeProducers[i];
 			scopeProducer->EmplaceAttachments(scheduler);
 		}
 
 		for (int i = 0; i < scopeProducers.GetSize(); i++)
 		{
-			IScopeProducer* scopeProducer = scopeProducers[i];
+			RHI::IScopeProducer* scopeProducer = scopeProducers[i];
 			scopeProducer->ProduceScopes(scheduler);
 		}
     }

@@ -40,14 +40,14 @@ namespace CE::Vulkan
 		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);
 		virtual ~Scope();
 
-		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) override;
+		virtual bool CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
 
 	private:
 
 		void DestroySyncObjects();
 		
 		//FixedArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
-		FixedArray<HashMap<ScopeId, VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};
+		FixedArray<HashMap<RHI::ScopeId, VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};
 		FixedArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphores{};
 
 		FixedArray<VkFence, RHI::Limits::MaxSwapChainImageCount> renderFinishedFences{};

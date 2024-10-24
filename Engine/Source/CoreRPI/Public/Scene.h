@@ -31,6 +31,8 @@ namespace CE::RPI
 
 		FeatureProcessor* GetFeatureProcessor(SubClass<FeatureProcessor> classType);
 
+		void AddDefaultFeatureProcessors();
+
 		template<typename TFeatureProcessor> requires TIsBaseClassOf<FeatureProcessor, TFeatureProcessor>::Value
 		TFeatureProcessor* AddFeatureProcessor()
 		{
@@ -74,7 +76,7 @@ namespace CE::RPI
 		void RebuildPipelineLookupTable();
 
 		void SetSkyboxCubeMap(RPI::Texture* skyboxCubeMap, RPI::Texture* skyboxIrradiance);
-		
+
 	private:
 
 		bool needsLookupTableRebuild = true;

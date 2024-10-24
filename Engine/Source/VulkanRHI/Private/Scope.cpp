@@ -40,7 +40,7 @@ namespace CE::Vulkan
 		passShaderResourceGroup = nullptr;
 	}
 
-	bool Scope::CompileInternal(const FrameGraphCompileRequest& compileRequest)
+	bool Scope::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
@@ -226,7 +226,7 @@ namespace CE::Vulkan
 						if (scopeAttachment->GetUsage() != RHI::ScopeAttachmentUsage::Shader)
 							continue;
 
-						FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+						RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
 
 						for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
 						{

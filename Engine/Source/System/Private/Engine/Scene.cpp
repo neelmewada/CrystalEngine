@@ -10,8 +10,7 @@ namespace CE
 		if (!IsDefaultInstance())
 		{
 			rpiScene = new RPI::Scene();
-			rpiScene->AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
-			rpiScene->AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+			rpiScene->AddDefaultFeatureProcessors();
 
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 			rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();

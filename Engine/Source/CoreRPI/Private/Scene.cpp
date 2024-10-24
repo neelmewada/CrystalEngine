@@ -5,7 +5,7 @@ namespace CE::RPI
     
 	Scene::Scene()
 	{
-		if (RPISystem::Get().isInitialized && gDynamicRHI != nullptr)
+		if (RPISystem::Get().isInitialized && RHI::gDynamicRHI != nullptr)
 		{
 			RPISystem::Get().scenes.Add(this);
 		}
@@ -62,6 +62,12 @@ namespace CE::RPI
 		}
 
 		return nullptr;
+	}
+
+	void Scene::AddDefaultFeatureProcessors()
+	{
+		AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+		AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
 	}
 
 	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)

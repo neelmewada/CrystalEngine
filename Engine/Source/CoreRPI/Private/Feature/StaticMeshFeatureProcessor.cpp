@@ -32,12 +32,12 @@ namespace CE::RPI
 		{
 			RHI::BufferDescriptor bufferDescriptor{};
 			bufferDescriptor.name = "ObjectBuffer";
-			bufferDescriptor.bindFlags = BufferBindFlags::ConstantBuffer;
+			bufferDescriptor.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 			bufferDescriptor.bufferSize = sizeof(Matrix4x4);
-			bufferDescriptor.defaultHeapType = MemoryHeapType::Upload;
+			bufferDescriptor.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDescriptor.structureByteStride = sizeof(Matrix4x4);
 
-			objectBuffers[i] = gDynamicRHI->CreateBuffer(bufferDescriptor);
+			objectBuffers[i] = RHI::gDynamicRHI->CreateBuffer(bufferDescriptor);
 
 			Matrix4x4 defaultValue = Matrix4x4::Identity();
 
@@ -103,7 +103,7 @@ namespace CE::RPI
 				}
 			}
 
-			const auto& objectSrgLayout = material->GetCurrentShader()->GetDefaultVariant()->GetSrgLayout(SRGType::PerObject);
+			const auto& objectSrgLayout = material->GetCurrentShader()->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
 
 			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
 

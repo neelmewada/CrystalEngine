@@ -12,7 +12,7 @@ namespace CE::Vulkan
 		u32 totalBits = 0;
 	};
 
-	thread_local static Array<FormatEntry> formatEntries{
+	thread_local static const Array<FormatEntry> formatEntries{
 		// RHI::Format, VkFormat, numChannels, totalBytes
 		{ RHI::Format::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 8 },
 		{ RHI::Format::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 8 },
@@ -55,9 +55,10 @@ namespace CE::Vulkan
 		{ RHI::Format::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 * 8 },
 		{ RHI::Format::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 * 8 },
 		{ RHI::Format::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 * 8 },
-		{ RHI::Format::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 * 8 },
-		{ RHI::Format::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 * 8 },
-		{ RHI::Format::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 * 8 },
+		{ RHI::Format::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 32 + 8 },
+		{ RHI::Format::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 24 + 8 },
+		{ RHI::Format::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 16 + 8 },
+		{ RHI::Format::D16_UNORM, VK_FORMAT_D16_UNORM, 1, 16 },
 
 		{ RHI::Format::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 3 * 8 },
 		{ RHI::Format::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 3 * 8 },

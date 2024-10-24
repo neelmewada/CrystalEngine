@@ -170,7 +170,7 @@ namespace CE
 		localScaleMat[2][2] = localScale.z;
 
 		localTransform = localTranslationMat * localRotationMat * localScaleMat;
-
+		
 		if (parentComponent != nullptr)
 		{
 			transform = parentComponent->transform * localTransform;

@@ -77,7 +77,7 @@ namespace CE
 		FIELD()
 		Actor* parent = nullptr;
 
-		FIELD()
+		FIELD(Internal)
 		CE::Scene* scene = nullptr;
 
 		FIELD(EditAnywhere, Category = "Actor", DisplayName = "Enabled")

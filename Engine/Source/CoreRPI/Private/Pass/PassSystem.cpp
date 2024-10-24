@@ -16,13 +16,13 @@ namespace CE::RPI
             PassSlot depthStencilOutput{};
             depthStencilOutput.name = "DepthStencilOutput";
             depthStencilOutput.slotType = PassSlotType::Output;
-            depthStencilOutput.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-            depthStencilOutput.dimensions = { Dimension::Dim2D };
-            depthStencilOutput.formats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
-            depthStencilOutput.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
-            depthStencilOutput.loadStoreAction.storeAction = AttachmentStoreAction::Store;
-            depthStencilOutput.loadStoreAction.loadActionStencil = AttachmentLoadAction::Clear;
-            depthStencilOutput.loadStoreAction.storeActionStencil = AttachmentStoreAction::Store;
+            depthStencilOutput.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+            depthStencilOutput.dimensions = { RHI::Dimension::Dim2D };
+            depthStencilOutput.formats = { RHI::Format::D32_SFLOAT_S8_UINT, RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
+            depthStencilOutput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            depthStencilOutput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            depthStencilOutput.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Clear;
+            depthStencilOutput.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
             depthStencilOutput.loadStoreAction.clearValueDepth = 1.0f;
             depthStencilOutput.loadStoreAction.clearValueStencil = 0;
 
@@ -38,18 +38,39 @@ namespace CE::RPI
             PassSlot depthOutput{};
             depthOutput.name = "DepthOutput";
             depthOutput.slotType = PassSlotType::Output;
-            depthOutput.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-            depthOutput.dimensions = { Dimension::Dim2D };
-            depthOutput.formats = { Format::D32_SFLOAT, Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
-            depthOutput.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
-            depthOutput.loadStoreAction.storeAction = AttachmentStoreAction::Store;
-            depthOutput.loadStoreAction.loadActionStencil = AttachmentLoadAction::DontCare;
-            depthOutput.loadStoreAction.storeActionStencil = AttachmentStoreAction::DontCare;
+            depthOutput.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+            depthOutput.dimensions = { RHI::Dimension::Dim2D };
+            depthOutput.formats = { RHI::Format::D32_SFLOAT, RHI::Format::D32_SFLOAT_S8_UINT, RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
+            depthOutput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            depthOutput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            depthOutput.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+            depthOutput.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
             depthOutput.loadStoreAction.clearValueDepth = 1.0f;
 
             depthPass->AddSlot(depthOutput);
 
             RegisterTemplate(depthPass);
+        }
+
+        // - Directional Shadow Pass -
+        {
+            RasterPass* shadowPass = CreateObject<RasterPass>(transient, "DirectionalShadowPass");
+
+            PassSlot depthOutput{};
+            depthOutput.name = "DepthOutput";
+            depthOutput.slotType = PassSlotType::Output;
+            depthOutput.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+            depthOutput.dimensions = { RHI::Dimension::Dim2D };
+            depthOutput.formats = { RHI::Format::D32_SFLOAT, RHI::Format::D16_UNORM };
+            depthOutput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            depthOutput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            depthOutput.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+            depthOutput.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
+            depthOutput.loadStoreAction.clearValueDepth = 1.0f;
+
+            shadowPass->AddSlot(depthOutput);
+
+            RegisterTemplate(shadowPass);
         }
 
         // - Skybox Pass -
@@ -59,11 +80,11 @@ namespace CE::RPI
             PassSlot colorOutput{};
             colorOutput.name = "ColorOutput";
             colorOutput.slotType = PassSlotType::Output;
-            colorOutput.attachmentUsage = ScopeAttachmentUsage::Color;
-            colorOutput.dimensions = { Dimension::Dim2D };
+            colorOutput.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+            colorOutput.dimensions = {RHI::Dimension::Dim2D };
             colorOutput.formats = {};
-            colorOutput.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
-            colorOutput.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+            colorOutput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            colorOutput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
             colorOutput.loadStoreAction.clearValue = Vec4(0, 0, 0, 0);
 
             skyboxPass->AddSlot(colorOutput);
@@ -78,22 +99,22 @@ namespace CE::RPI
             PassSlot depthInput{};
             depthInput.name = "DepthInput";
             depthInput.slotType = PassSlotType::Input;
-            depthInput.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-            depthInput.dimensions = { Dimension::Dim2D };
-            depthInput.formats = { Format::D32_SFLOAT, Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
-            depthInput.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-            depthInput.loadStoreAction.storeAction = AttachmentStoreAction::Store;
-            depthInput.loadStoreAction.loadActionStencil = AttachmentLoadAction::DontCare;
-            depthInput.loadStoreAction.storeActionStencil = AttachmentStoreAction::DontCare;
+            depthInput.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+            depthInput.dimensions = {RHI::Dimension::Dim2D };
+            depthInput.formats = { RHI::Format::D32_SFLOAT, RHI::Format::D32_SFLOAT_S8_UINT, RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
+            depthInput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+            depthInput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            depthInput.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+            depthInput.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
             
             PassSlot colorOutput{};
             colorOutput.name = "ColorOutput";
             colorOutput.slotType = PassSlotType::InputOutput;
-            colorOutput.attachmentUsage = ScopeAttachmentUsage::Color;
-            colorOutput.dimensions = { Dimension::Dim2D };
+            colorOutput.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+            colorOutput.dimensions = {RHI::Dimension::Dim2D };
             colorOutput.formats = { };
-            colorOutput.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-            colorOutput.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+            colorOutput.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+            colorOutput.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
             opaquePass->AddSlot(depthInput);
             opaquePass->AddSlot(colorOutput);
@@ -108,20 +129,20 @@ namespace CE::RPI
             PassSlot colorSlot{};
             colorSlot.name = "ColorMSAA";
             colorSlot.slotType = PassSlotType::InputOutput;
-            colorSlot.attachmentUsage = ScopeAttachmentUsage::Color;
-            colorSlot.dimensions = { Dimension::Dim2D };
+            colorSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+            colorSlot.dimensions = {RHI::Dimension::Dim2D };
             colorSlot.formats = {};
-            colorSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-            colorSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+            colorSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+            colorSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
             PassSlot resolveSlot{};
             resolveSlot.name = "Resolve";
             resolveSlot.slotType = PassSlotType::Output;
-            resolveSlot.attachmentUsage = ScopeAttachmentUsage::Resolve;
-            resolveSlot.dimensions = { Dimension::Dim2D };
+            resolveSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Resolve;
+            resolveSlot.dimensions = {RHI::Dimension::Dim2D };
             resolveSlot.formats = {};
-            resolveSlot.loadStoreAction.loadAction = AttachmentLoadAction::DontCare;
-            resolveSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+            resolveSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::DontCare;
+            resolveSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
             resolvePass->AddSlot(colorSlot);
             resolvePass->AddSlot(resolveSlot);

@@ -50,6 +50,7 @@ namespace CE::RHI
 		{ RHI::Format::R32G32_SFLOAT,		2, 64 },
 		{ RHI::Format::R32G32B32A32_SFLOAT,	4, 128 },
 		{ RHI::Format::D16_UNORM_S8_UINT,	2, 24 },
+		{ RHI::Format::D16_UNORM,			1, 16 },
 		{ RHI::Format::D24_UNORM_S8_UINT,	2, 32 },
 		{ RHI::Format::D32_SFLOAT_S8_UINT,	2, 40 },
 		{ RHI::Format::D32_SFLOAT,			1, 32 },

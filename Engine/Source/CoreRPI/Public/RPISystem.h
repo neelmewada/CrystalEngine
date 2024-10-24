@@ -76,7 +76,7 @@ namespace CE::RPI
 		const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
 		RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
 
-		DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
+		RHI::DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
 
 		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
 		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
@@ -125,6 +125,7 @@ namespace CE::RPI
 		RPI::Texture* defaultAlbedoTex = nullptr;
 		RPI::Texture* defaultNormalTex = nullptr;
 		RPI::Texture* defaultRoughnessTex = nullptr;
+		RPI::Texture* defaultDepthTex = nullptr;
 
 		RPI::Texture* brdfLutTexture = nullptr;
 

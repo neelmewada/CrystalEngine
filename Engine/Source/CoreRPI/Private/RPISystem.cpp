@@ -60,7 +60,7 @@ namespace CE::RPI
         for (int i = 1; i < (int)BuiltinDrawItemTag::COUNT; ++i)
         {
             RHI::DrawListTag tag{};
-            DrawListTagRegistry* registry = GetDrawListTagRegistry();
+            RHI::DrawListTagRegistry* registry = GetDrawListTagRegistry();
 
             switch ((BuiltinDrawItemTag)i)
             {
@@ -107,8 +107,8 @@ namespace CE::RPI
 		    	if (!variant)
 		    		continue;
 
-		    	viewSrgLayout = variant->GetSrgLayout(SRGType::PerView);
-		    	sceneSrgLayout = variant->GetSrgLayout(SRGType::PerScene);
+		    	viewSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerView);
+		    	sceneSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerScene);
 		    }
 	    }
 
@@ -149,12 +149,12 @@ namespace CE::RPI
         brdfLutDesc.sampleCount = 1;
         brdfLutDesc.arrayLayers = 1;
         brdfLutDesc.mipLevels = 1;
-        brdfLutDesc.defaultHeapType = MemoryHeapType::Default;
+        brdfLutDesc.defaultHeapType = RHI::MemoryHeapType::Default;
         brdfLutDesc.width = brdfLutDesc.height = 512;
         brdfLutDesc.depth = 1;
-        brdfLutDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
-        brdfLutDesc.format = Format::R8G8_UNORM;
-        brdfLutDesc.dimension = Dimension::Dim2D;
+        brdfLutDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
+        brdfLutDesc.format = RHI::Format::R8G8_UNORM;
+        brdfLutDesc.dimension = RHI::Dimension::Dim2D;
 
         brdfLutTexture = new RPI::Texture(rpiDesc);
         RHI::Texture* brdfLut = brdfLutTexture->GetRhiTexture();
@@ -166,9 +166,9 @@ namespace CE::RPI
             RHI::RenderAttachmentLayout colorAttachment{};
             colorAttachment.attachmentId = "BRDF LUT";
             colorAttachment.format = RHI::Format::R8G8_UNORM;
-            colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
-            colorAttachment.loadAction = AttachmentLoadAction::Clear;
-            colorAttachment.storeAction = AttachmentStoreAction::Store;
+            colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+            colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
+            colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
             colorAttachment.multisampleState.sampleCount = 1;
             rtLayout.attachmentLayouts.Add(colorAttachment);
 
@@ -181,14 +181,14 @@ namespace CE::RPI
 			delete brdfLutRTB;
         );
 
-        auto queue = gDynamicRHI->GetPrimaryGraphicsQueue();
-        auto cmdList = gDynamicRHI->AllocateCommandList(queue);
-        auto fence = gDynamicRHI->CreateFence(false);
+        auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+        auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+        auto fence = RHI::gDynamicRHI->CreateFence(false);
 
         const auto& fullscreenQuad = GetFullScreenQuad();
         const auto& fullscreenQuadArgs = GetFullScreenQuadDrawArgs();
 
-        AttachmentClearValue clearValue{ .clearValue = Vec4(0, 0, 0, 0) };
+        RHI::AttachmentClearValue clearValue{ .clearValue = Vec4(0, 0, 0, 0) };
 
         cmdList->Begin();
         {
@@ -235,8 +235,8 @@ namespace CE::RPI
         queue->Execute(1, &cmdList, fence);
         fence->WaitForFence();
 
-        gDynamicRHI->DestroyFence(fence); fence = nullptr;
-        gDynamicRHI->FreeCommandLists(1, &cmdList);
+        RHI::gDynamicRHI->DestroyFence(fence); fence = nullptr;
+        RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
     }
 
     void RPISystem::Shutdown()
@@ -272,6 +272,8 @@ namespace CE::RPI
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
+        delete defaultDepthTex; defaultDepthTex = nullptr;
+
         delete brdfLutTexture; brdfLutTexture = nullptr;
 
         {
@@ -414,8 +416,8 @@ namespace CE::RPI
         auto prevTime = clock();
 
         RHI::SamplerDescriptor samplerDesc{};
-        samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = 
-            SamplerAddressMode::Repeat;
+        samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW =
+	        RHI::SamplerAddressMode::Repeat;
         samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
         samplerDesc.enableAnisotropy = false;
 
@@ -446,6 +448,12 @@ namespace CE::RPI
         auto roughnessTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
 
         defaultRoughnessTex = new RPI::Texture(roughnessTex, samplerDesc);
+
+        textureDesc.name = "Default Depth";
+        textureDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats().GetFirst();
+        auto depthTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+        defaultDepthTex = new RPI::Texture(depthTex, samplerDesc);
 
         const int numPixels = textureDesc.width * textureDesc.height;
         const u64 albedoSize = textureDesc.width * textureDesc.height * 4;
@@ -497,23 +505,23 @@ namespace CE::RPI
         {
             RHI::ResourceBarrierDescriptor barrier{};
             barrier.resource = stagingBuffer;
-            barrier.fromState = ResourceState::Undefined;
-            barrier.toState = ResourceState::CopySource;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::CopySource;
             cmdList->ResourceBarrier(1, &barrier);
 
             barrier.resource = albedoTex;
-            barrier.fromState = ResourceState::Undefined;
-            barrier.toState = ResourceState::CopyDestination;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
 
             barrier.resource = roughnessTex;
-            barrier.fromState = ResourceState::Undefined;
-            barrier.toState = ResourceState::CopyDestination;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
 
             barrier.resource = normalTex;
-            barrier.fromState = ResourceState::Undefined;
-            barrier.toState = ResourceState::CopyDestination;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
 
             // Albedo Copy
@@ -539,18 +547,18 @@ namespace CE::RPI
             cmdList->CopyTextureRegion(copy);
             
             barrier.resource = albedoTex;
-            barrier.fromState = ResourceState::CopyDestination;
-            barrier.toState = ResourceState::FragmentShaderResource;
+            barrier.fromState = RHI::ResourceState::CopyDestination;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
 
             barrier.resource = roughnessTex;
-            barrier.fromState = ResourceState::CopyDestination;
-            barrier.toState = ResourceState::FragmentShaderResource;
+            barrier.fromState = RHI::ResourceState::CopyDestination;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
 
             barrier.resource = normalTex;
-            barrier.fromState = ResourceState::CopyDestination;
-            barrier.toState = ResourceState::FragmentShaderResource;
+            barrier.fromState = RHI::ResourceState::CopyDestination;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
         }
         cmdList->End();

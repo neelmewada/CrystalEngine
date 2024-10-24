@@ -43,9 +43,9 @@ namespace CE::RPI
 
 		const Name& GetPassName() const override { return GetName(); }
 
-		DrawListTag GetDrawListTag() const { return drawListTag; }
+		RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
 
-		void SetDrawListTag(DrawListTag tag) { drawListTag = tag; }
+		void SetDrawListTag(RHI::DrawListTag tag) { drawListTag = tag; }
 
 		SceneViewTag GetViewTag() const { return viewTag; }
 
@@ -59,14 +59,14 @@ namespace CE::RPI
 
 	protected:
 
-		void ProduceScopes(FrameScheduler* scheduler) override {}
+		void ProduceScopes(RHI::FrameScheduler* scheduler) override {}
 
-		void EmplaceAttachments(FrameScheduler* scheduler) override {}
+		void EmplaceAttachments(RHI::FrameScheduler* scheduler) override {}
 
 		Pass();
 
 		/// @brief Draw list tag this pass is associated to.
-		DrawListTag drawListTag{};
+		RHI::DrawListTag drawListTag{};
 		
 		/// @brief The view tag associated with a view.
 		/// The view that matches this tag will be queried by this pass.

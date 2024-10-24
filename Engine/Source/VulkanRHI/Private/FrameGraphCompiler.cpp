@@ -61,13 +61,13 @@ namespace CE::Vulkan
 		DestroySyncObjects();
 	}
 
-	void FrameGraphCompiler::CompileScopesInternal(const FrameGraphCompileRequest& compileRequest)
+	void FrameGraphCompiler::CompileScopesInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
 		//vkDeviceWaitIdle(device->GetHandle());
 
 		// Queue allocation logic...
 
-		FrameGraph* frameGraph = compileRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
         QueueAllocator queueAllocator{};
         queueAllocator.queuesByFamily = device->queuesByFamily;
         queueAllocator.presentQueue = device->presentQueue;
@@ -90,11 +90,11 @@ namespace CE::Vulkan
 
 			for (auto attachment : scope->attachments)
 			{
-				FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
+				RHI::FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
 				if (frameAttachment->IsSwapChainAttachment())
 				{
 					swapChainFound = true;
-					RHI::SwapChain* swapChain = ((SwapChainFrameAttachment*)frameAttachment)->GetSwapChain();
+					RHI::SwapChain* swapChain = ((RHI::SwapChainFrameAttachment*)frameAttachment)->GetSwapChain();
 					if (!scope->swapChainsUsedByAttachments.Exists(swapChain))
 						scope->swapChainsUsedByAttachments.Add(swapChain);
 				}
@@ -122,9 +122,9 @@ namespace CE::Vulkan
 		trackNumber = 0;
 	}
 
-	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)
+	void FrameGraphCompiler::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
-		FrameGraph* frameGraph = compileRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		vkDeviceWaitIdle(device->GetHandle());
 
@@ -270,20 +270,20 @@ namespace CE::Vulkan
 
     //! If two scopes are executed one different queues and there's a dependency between them, then we
 	//! need to use a wait semaphore for it.
-    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest)
+    void FrameGraphCompiler::CompileCrossQueueDependencies(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
-		HashSet<ScopeId> visitedScopes{};
+		HashSet<RHI::ScopeId> visitedScopes{};
 		for (auto scope : compileRequest.frameGraph->producers)
 		{
 			CompileCrossQueueDependenciesInternal(compileRequest, (Vulkan::Scope*)scope, visitedScopes);
 		}
 	}
 
-	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest, 
+	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const RHI::FrameGraphCompileRequest& compileRequest, 
 		Vulkan::Scope* current, 
-		HashSet<ScopeId>& visitedScopes)
+		HashSet<RHI::ScopeId>& visitedScopes)
 	{
-		FrameGraph* frameGraph = compileRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		if (visitedScopes.Exists(current->GetId()))
 			return;
 
@@ -295,7 +295,7 @@ namespace CE::Vulkan
 		{
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)rhiScope;
 
-			HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerScope, current);
+			HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerScope, current);
 
 			for (auto [from, to] : commonAttachments)
 			{
@@ -334,9 +334,9 @@ namespace CE::Vulkan
 		}
 	}
 
-	void FrameGraphCompiler::CompileBarriers(const FrameGraphCompileRequest& compileRequest)
+	void FrameGraphCompiler::CompileBarriers(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
-		FrameGraph* frameGraph = compileRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		for (int i = 0; i < visitedScopes.GetSize(); i++)
 		{
 			visitedScopes[i].Clear();
@@ -356,7 +356,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	static bool RequiresDependency(ScopeAttachment* from, ScopeAttachment* to)
+	static bool RequiresDependency(RHI::ScopeAttachment* from, RHI::ScopeAttachment* to)
 	{
 		if (from == nullptr || to == nullptr)
 			return false;
@@ -382,12 +382,12 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	void FrameGraphCompiler::CompileBarriers(int imageIndex, const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
+	void FrameGraphCompiler::CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
 		if (current == nullptr)
 			return;
 
-		FrameGraph* frameGraph = compileRequest.frameGraph;
+		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		if (!visitedScopes[imageIndex].Exists(current->id))
 		{
@@ -400,7 +400,7 @@ namespace CE::Vulkan
 
 				bool isDifferentQueue = producerScope->queue != current->queue;
 
-				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
+				HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
 				// TODO: Add support for Compute Shader barriers
 				// Currently, Shader attachments only consider Vertex/Fragment shaders
@@ -413,16 +413,16 @@ namespace CE::Vulkan
 					// Image -> Image barrier
 					if (from->IsImageAttachment() && to->IsImageAttachment() && RequiresDependency(from, to))
 					{
-						ImageScopeAttachment* fromImage = (ImageScopeAttachment*)from;
-						ImageScopeAttachment* toImage = (ImageScopeAttachment*)to;
+						RHI::ImageScopeAttachment* fromImage = (RHI::ImageScopeAttachment*)from;
+						RHI::ImageScopeAttachment* toImage = (RHI::ImageScopeAttachment*)to;
 						VkImageMemoryBarrier imageBarrier{};
 						imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
-						ImageFrameAttachment* imageAttachment = (ImageFrameAttachment*)fromImage->GetFrameAttachment();
+						RHI::ImageFrameAttachment* imageAttachment = (RHI::ImageFrameAttachment*)fromImage->GetFrameAttachment();
 						if (imageAttachment == nullptr)
 							continue;
 
-						RHIResource* resource = imageAttachment->GetResource(imageIndex);
+						RHI::RHIResource* resource = imageAttachment->GetResource(imageIndex);
 						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 							continue;
 
@@ -593,16 +593,16 @@ namespace CE::Vulkan
 					// Buffer -> Buffer barrier
 					else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))
 					{
-						BufferScopeAttachment* fromBuffer = (BufferScopeAttachment*)from;
-						BufferScopeAttachment* toBuffer = (BufferScopeAttachment*)to;
+						RHI::BufferScopeAttachment* fromBuffer = (RHI::BufferScopeAttachment*)from;
+						RHI::BufferScopeAttachment* toBuffer = (RHI::BufferScopeAttachment*)to;
 						VkBufferMemoryBarrier bufferBarrier{};
 						bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 
-						BufferFrameAttachment* bufferAttachment = (BufferFrameAttachment*)fromBuffer->GetFrameAttachment();
+						RHI::BufferFrameAttachment* bufferAttachment = (RHI::BufferFrameAttachment*)fromBuffer->GetFrameAttachment();
 						if (bufferAttachment == nullptr)
 							continue;
 
-						RHIResource* resource = bufferAttachment->GetResource(imageIndex);
+						RHI::RHIResource* resource = bufferAttachment->GetResource(imageIndex);
 						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
 							continue;
 

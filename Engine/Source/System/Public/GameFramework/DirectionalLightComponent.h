@@ -12,6 +12,7 @@ namespace CE
 
     protected:
 
+        void Tick(f32 delta) override;
 
     private:
 
