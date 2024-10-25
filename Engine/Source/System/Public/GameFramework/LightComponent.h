@@ -12,6 +12,14 @@ namespace CE
 
         virtual ~LightComponent();
 
+        const Color& GetLightColor() const { return lightColor; }
+
+        void SetLightColor(const Color& value) { lightColor = value; }
+
+        f32 GetIntensity() const { return intensity; }
+
+        void SetIntensity(f32 value) { intensity = value; }
+
     protected:
 
         FIELD(EditAnywhere, Category = "Light")
@@ -19,6 +27,9 @@ namespace CE
 
         FIELD(EditAnywhere, Category = "Light")
         f32 intensity = 1.0f;
+
+        FIELD(EditAnywhere, Category = "Light")
+        f32 temperature = 0.0f;
 
     private:
 

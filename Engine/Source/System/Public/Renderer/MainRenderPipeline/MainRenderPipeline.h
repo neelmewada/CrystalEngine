@@ -14,9 +14,6 @@ namespace CE
     protected:
 
         void ConstructPipeline() override;
-
-        FIELD()
-        MainRenderPipelineAsset* mainRenderPipelineAsset = nullptr;
         
     };
     

@@ -45,26 +45,6 @@ namespace CE
         renderPipeline->attachments.Add(pipelineOutput);
     }
     
-    void CE::RenderPipeline::SetRenderPipelineAsset(RenderPipelineAsset* renderPipelineAsset)
-    {
-        if (this->renderPipelineAsset == renderPipelineAsset)
-            return;
-
-        if (this->renderPipelineAsset != nullptr)
-        {
-            this->renderPipelineAsset->renderPipelines.Remove(this);
-        }
-        
-        this->renderPipelineAsset = renderPipelineAsset;
-
-        if (this->renderPipelineAsset != nullptr)
-        {
-            this->renderPipelineAsset->renderPipelines.Add(this);
-        }
-
-        MarkDirty();
-    }
-    
     void CE::RenderPipeline::Tick()
     {
         if (isDirty)
@@ -78,6 +58,11 @@ namespace CE
     RHI::DrawListTag CE::RenderPipeline::GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag builtinDrawItemTag)
     {
         return RPI::RPISystem::Get().GetBuiltinDrawListTag(builtinDrawItemTag);
+    }
+
+    void CE::RenderPipeline::ApplyChanges()
+    {
+        MarkDirty();
     }
 
 } // namespace CE

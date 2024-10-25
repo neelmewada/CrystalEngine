@@ -10,6 +10,8 @@ namespace CE
 
         DirectionalLight();
 
+        DirectionalLightComponent* GetDirectionalLightComponent() const { return directionalLightComponent; }
+
     protected:
 
         FIELD()

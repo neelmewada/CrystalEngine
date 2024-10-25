@@ -3,7 +3,7 @@ registerFileType((fileExt, filePath, fileData) => {
     // Check for wav extension
     if (fileExt == 'casset' || fileExt == "temp") {
         const headerArray = fileData.getBytesAt(0, 8);
-        const matchArray = [ 0x00, 0x50, 0x41, 0x43, 0x4b, 0x00, 0x00, 0x0a ];
+        const matchArray = [ 0x00, 0x42, 0x55, 0x4e, 0x44, 0x4c, 0x45, 0x00 ];
         for (let i = 0; i < matchArray.length; i++) {
             if (matchArray[i] != headerArray[i])
                 return false;
@@ -15,7 +15,7 @@ registerFileType((fileExt, filePath, fileData) => {
 
 registerParser(() => {
     read(8);
-    addRow('Header', ".PACK..\n", "Bundle header entry")
+    addRow('Header', ".BUNDLE.", "Bundle header entry")
     addDetails(() => {
         for (let i = 0; i < 8; i++) {
             read(1);

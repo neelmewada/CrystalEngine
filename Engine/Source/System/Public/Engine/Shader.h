@@ -24,7 +24,7 @@ namespace CE
 		ShaderBlobFormat format = ShaderBlobFormat::Spirv;
 
 		FIELD()
-		ShaderStage shaderStage = ShaderStage::None;
+		RHI::ShaderStage shaderStage = RHI::ShaderStage::None;
 
 		FIELD()
 		BinaryBlob byteCode{};
@@ -52,7 +52,7 @@ namespace CE
 		FIELD()
 		ShaderReflection reflectionInfo{};
 
-		ShaderBlob* GetShaderBlobForStage(ShaderStage stage);
+		ShaderBlob* GetShaderBlobForStage(RHI::ShaderStage stage);
 
 		friend class CE::Shader;
 	};

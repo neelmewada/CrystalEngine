@@ -132,6 +132,19 @@ void GameLoop::SetupTestScene()
 			meshComponent->SetLocalScale(Vec3(5, 0.05f, 5));
 			meshComponent->SetMaterial(woodMaterial, 0, 0);
 		}
+
+		// - Sun -
+
+		DirectionalLight* sunActor = CreateObject<DirectionalLight>(scene, "Sun");
+		scene->AddActor(sunActor);
+		{
+			DirectionalLightComponent* sunLight = sunActor->GetDirectionalLightComponent();
+
+			sunLight->SetLocalPosition(Vec3(0, 0, 0));
+			sunLight->SetLocalEulerAngles(Vec3(30, 0, 0));
+			sunLight->SetIntensity(20.0f);
+			sunLight->SetLightColor(Color::White());
+		}
 	}
 
 	viewportSubsystem->SetScene(scene);

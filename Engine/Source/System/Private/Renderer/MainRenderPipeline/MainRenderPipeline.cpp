@@ -5,8 +5,7 @@ namespace CE
 
     MainRenderPipeline::MainRenderPipeline()
     {
-        mainRenderPipelineAsset = CreateDefaultSubobject<MainRenderPipelineAsset>("MainRenderPipelineAsset");
-        renderPipelineAsset = mainRenderPipelineAsset;
+        
     }
 
     MainRenderPipeline::~MainRenderPipeline()
@@ -45,7 +44,7 @@ namespace CE
             depthStencilAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::DepthStencil;
             depthStencilAttachmentDesc.fallbackFormats = { RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
 
-            switch (mainRenderPipelineAsset->msaa)
+            switch (msaa)
             {
             case MSAA1:
                 depthStencilAttachmentDesc.imageDescriptor.sampleCount = 1;
@@ -82,7 +81,7 @@ namespace CE
             colorMsaaAttachmentDesc.formatSource = pipelineOutput->name;
             colorMsaaAttachmentDesc.fallbackFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 
-            switch (mainRenderPipelineAsset->msaa)
+            switch (msaa)
             {
             case MSAA1:
                 colorMsaaAttachmentDesc.imageDescriptor.sampleCount = 1;

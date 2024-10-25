@@ -18,8 +18,6 @@ namespace CE
 
         virtual void ConstructPipeline();
 
-        void SetRenderPipelineAsset(RenderPipelineAsset* renderPipelineAsset);
-
         virtual void Tick();
 
         void MarkDirty() { isDirty = true; }
@@ -31,6 +29,8 @@ namespace CE
         void SetOwnerCamera(CameraComponent* owner) { targetCamera = owner; }
 
         CameraComponent* GetOwnerCamera() const { return targetCamera; }
+
+        void ApplyChanges();
         
     protected:
 
@@ -40,10 +40,15 @@ namespace CE
         Name mainViewTag = "MainCamera";
 
         FIELD()
-        RenderPipelineAsset* renderPipelineAsset = nullptr;
+        CameraComponent* targetCamera = nullptr;
+
+    public:
 
         FIELD()
-        CameraComponent* targetCamera = nullptr;
+        MSAA msaa = MSAA2;
+
+        FIELD()
+        int directionalShadowResolution = 512;
 
     private:
 

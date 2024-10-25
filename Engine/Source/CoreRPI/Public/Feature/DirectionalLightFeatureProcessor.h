@@ -16,32 +16,44 @@ namespace CE::RPI
 	{
 	public:
 
-		Model* model = nullptr;
-
-		ModelAsset* originalModel = nullptr;
-
-		Matrix4x4 localToWorldTransform{};
-
-		RPI::Scene* scene = nullptr;
-
-		CustomMaterialMap materialMap{};
-
-		MeshDrawPacketsByLod drawPacketsListByLod{};
-
-		Array<RHI::ShaderResourceGroup*> objectSrgList{};
-
-		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> objectBuffers{};
+		Vec4 direction;
+		Matrix4x4 projectionMatrix;
+		Matrix4x4 viewMatrix;
+		Matrix4x4 viewProjectionMatrix;
+		Vec3 viewPosition;
+		
+		Vec4 colorAndIntensity;
+		float temperature = 0;
 
 		void Init(DirectionalLightFeatureProcessor* fp);
 		void Deinit(DirectionalLightFeatureProcessor* fp);
 
-		void UpdateSrgs(int imageIndex);
+		void UpdateSrgs(u32 imageIndex);
+
+	private:
+
+		RPI::Scene* scene = nullptr;
+
+		RHI::ShaderResourceGroup* viewSrg = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
+
+	public:
 
 		struct Flags
 		{
 			bool visible : 1 = true;
 			bool initialized : 1 = false;
 		} flags{};
+
+		friend class DirectionalLightFeatureProcessor;
+	};
+
+	using DirectionalLightDynamicArray = PagedDynamicArray<DirectionalLightInstance, 16>;
+	using DirectionalLightHandle = DirectionalLightDynamicArray::Handle;
+
+	struct DirectionalLightHandleDescriptor
+	{
+		
 	};
 
     CLASS()
@@ -54,8 +66,22 @@ namespace CE::RPI
 
         virtual ~DirectionalLightFeatureProcessor();
 
+		DirectionalLightHandle AcquireLight(const DirectionalLightHandleDescriptor& desc);
+		bool ReleaseLight(DirectionalLightHandle& handle);
+
+		void Simulate(const SimulatePacket& packet) override;
+
+		void Render(const RenderPacket& packet) override;
+
+		int GetMaxDirectionalLights();
+
     protected:
 
+		DirectionalLightDynamicArray lightInstances{};
+
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> directionalLightBuffers{};
+
+		int maxDirectionalLights = 0;
 
     };
     

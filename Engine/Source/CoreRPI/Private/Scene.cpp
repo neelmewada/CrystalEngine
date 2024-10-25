@@ -47,6 +47,7 @@ namespace CE::RPI
 			classType->GetName().GetLastComponent(), OF_Transient, classType);
 		featureProcessors.Add(fp);
 		fp->scene = this;
+
 		return fp;
 	}
 
@@ -226,6 +227,8 @@ namespace CE::RPI
 
 			view->UpdateSrg(imageIndex);
 		}
+
+		lightConstantsBuffer->GetBuffer(imageIndex)->UploadData(&lightConstants, sizeof(LightConstants));
 
 		shaderResourceGroup->FlushBindings();
 

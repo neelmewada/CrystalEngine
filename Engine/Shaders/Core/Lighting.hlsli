@@ -50,7 +50,7 @@ Texture2D<float2> _BrdfLut : SRG_PerScene(s9);
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
     float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;
-    projectionCoords = projectionCoords * float3(0.5, 0.5, 1.0) + float3(0.5, 0.5, 0); // In Vulkan, Z axis is already if [0, 1] range, so we ONLY map X and Y to [0, 1] range FROM [-1, 1] range
+    projectionCoords = projectionCoords * float3(0.5, 0.5, 1.0) + float3(0.5, 0.5, 0); // In Vulkan, Z axis is already in [0, 1] range, so we ONLY map X and Y to [0, 1] range FROM [-1, 1] range
     projectionCoords.z = clamp(projectionCoords.z, 0, 1);
     
     float currentDepth = projectionCoords.z;

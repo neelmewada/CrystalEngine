@@ -3,12 +3,12 @@
 
 #pragma shader_feature USE_INSTANCING
 
-#if USE_INSTANCING
-
 struct ObjectData
 {
     float4x4 modelMatrix;
 };
+
+#if USE_INSTANCING
 
 StructuredBuffer<ObjectData> _ObjectData : SRG_PerObject(t0);
 
@@ -16,11 +16,6 @@ StructuredBuffer<ObjectData> _ObjectData : SRG_PerObject(t0);
 #define INSTANCING() uint instanceId : SV_InstanceID;
 
 #else // !USE_INSTANCING
-
-struct ObjectData
-{
-    float4x4 modelMatrix;
-};
 
 ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b0);
 

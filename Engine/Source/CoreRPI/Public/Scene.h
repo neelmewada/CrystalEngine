@@ -55,7 +55,11 @@ namespace CE::RPI
 
 		RenderPipeline* GetRenderPipeline(u32 index) const { return renderPipelines[index]; }
 
+		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
+
 		RHI::DrawListMask& GetDrawListMask(SceneViewTag viewTag);
+
+		LightConstants& GetLightConstants() { return lightConstants; }
 
 		ArrayView<ViewPtr> GetViews(const SceneViewTag& viewTag);
 
@@ -81,7 +85,7 @@ namespace CE::RPI
 
 		bool needsLookupTableRebuild = true;
 
-		HashMap<DrawListTag, PipelineStateList> pipelineLookupMap{};
+		HashMap<RHI::DrawListTag, PipelineStateList> pipelineLookupMap{};
 
 		Array<RenderPipeline*> renderPipelines{};
 

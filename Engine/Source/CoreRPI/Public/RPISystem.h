@@ -68,6 +68,8 @@ namespace CE::RPI
 			return brdfLutTexture;
 		}
 
+		RPI::ShaderCollection* GetStandardShader() const { return standardShader; }
+
 		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
 
 		const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }

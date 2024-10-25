@@ -111,6 +111,21 @@ namespace CE::RHI
 		FIELD()
 		Array<SRGVariableDescriptor> variables{};
 
+		const SRGVariableDescriptor& FindVariable(const Name& name) const
+		{
+			static SRGVariableDescriptor empty{};
+
+			for (const auto& variable : variables)
+			{
+				if (variable.name == name)
+				{
+					return variable;
+				}
+			}
+
+			return empty;
+		}
+
 		Self& TryAdd(const SRGVariableDescriptor& variable)
 		{
 			for (int i = 0; i < variables.GetSize(); i++)

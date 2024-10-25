@@ -28,6 +28,8 @@ namespace CE::RPI
 			u32 imageIndex = 0;
 		};
 
+		RPI::Scene* GetScene() const { return scene; }
+
 		virtual void Simulate(const SimulatePacket& packet) {}
 
 		//! @brief The feature processor should enqueue draw packets to relevant draw lists.
