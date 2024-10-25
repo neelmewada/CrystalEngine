@@ -23,6 +23,8 @@ namespace CE::RPI
 		
 		~View();
 
+		void Free();
+
 		enum UsageFlags
 		{
 			UsageNone = 0,

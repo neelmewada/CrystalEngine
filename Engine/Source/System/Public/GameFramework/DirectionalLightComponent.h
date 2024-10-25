@@ -12,6 +12,8 @@ namespace CE
 
         ~DirectionalLightComponent();
 
+        RPI::View* GetRpiView() const { return rpiView; }
+
     protected:
 
         void OnEnabled() override;
@@ -28,6 +30,7 @@ namespace CE
         // - Internal -
 
         RPI::DirectionalLightHandle lightHandle{};
+        RPI::ViewPtr rpiView = nullptr;
     };
     
 } // namespace CE

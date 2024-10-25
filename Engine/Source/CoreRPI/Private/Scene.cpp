@@ -241,6 +241,8 @@ namespace CE::RPI
 					if (!pass || pass->IsParentPass())
 						return;
 
+					SceneViewTag viewTag = pass->GetViewTag();
+
 					if (pass->IsOfType<GpuPass>())
 					{
 						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
@@ -324,7 +326,7 @@ namespace CE::RPI
 
 					PipelineStateList& entry = pipelineLookupMap[drawListTag];
 					PipelineStateData* pipelineStateData = nullptr;
-
+					
 					for (int i = 0; i < entry.GetSize(); i++)
 					{
 						if (entry[i].viewTag == viewTag)

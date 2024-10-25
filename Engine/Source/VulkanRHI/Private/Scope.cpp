@@ -238,7 +238,7 @@ namespace CE::Vulkan
 
 								RHI::Texture* image = (RHI::Texture*)resource;
 								
-								passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+								passShaderResourceGroup->Bind(imageIdx, "_" + attachmentName.GetString(), image);
 							}
 							else if (frameAttachment->IsBufferAttachment())
 							{
@@ -248,7 +248,7 @@ namespace CE::Vulkan
 
 								RHI::Buffer* buffer = (RHI::Buffer*)resource;
 
-								passShaderResourceGroup->Bind(imageIdx, attachmentName, buffer);
+								passShaderResourceGroup->Bind(imageIdx, "_" + attachmentName.GetString(), buffer);
 							}
 						}
 					}

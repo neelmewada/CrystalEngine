@@ -177,6 +177,11 @@ namespace CE::RPI
                             imageDescriptor.width = attachment->sizeSource.fixedSizes.x;
                             imageDescriptor.height = attachment->sizeSource.fixedSizes.y;
                             imageDescriptor.depth = attachment->sizeSource.fixedSizes.z;
+
+                            if (imageDescriptor.dimension == Dimension::Dim2D)
+                            {
+                                imageDescriptor.depth = 1;
+                            }
                         }
                         else if (attachment->sizeSource.source.IsValid())
                         {

@@ -159,7 +159,9 @@ namespace CE
         {
             if (!sceneComponent)
                 return;
-			
+
+			OnSceneComponentAttached(sceneComponent);
+
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
@@ -231,7 +233,9 @@ namespace CE
         {
             if (!sceneComponent)
                 return;
-            
+
+			OnSceneComponentDetached(sceneComponent);
+
             if (sceneComponent->IsOfType<CameraComponent>())
 			{
 				CameraComponent* camera = (CameraComponent*)sceneComponent;
@@ -290,10 +294,34 @@ namespace CE
 		recursivelyRemove(actor);
 	}
 
+	void CE::Scene::OnSceneComponentAttached(SceneComponent* sceneComponent)
+	{
+		if (sceneComponent->IsOfType<DirectionalLightComponent>())
+		{
+			auto directionalLight = static_cast<DirectionalLightComponent*>(sceneComponent);
+
+			rpiScene->AddView("DirectionalLightShadow", directionalLight->GetRpiView());
+		}
+	}
+
+	void CE::Scene::OnSceneComponentDetached(SceneComponent* sceneComponent)
+	{
+		if (sceneComponent->IsOfType<DirectionalLightComponent>())
+		{
+			auto directionalLight = static_cast<DirectionalLightComponent*>(sceneComponent);
+
+			rpiScene->RemoveView("DirectionalLightShadow", directionalLight->GetRpiView());
+		}
+	}
+
 	void CE::Scene::OnCameraComponentAttached(CameraComponent* camera)
 	{
 		cameras.Add(camera);
-		AddRenderPipeline(camera->GetRenderPipeline(), camera);
+
+		CE::RenderPipeline* renderPipeline = camera->GetRenderPipeline();
+
+		AddRenderPipeline(renderPipeline, camera);
+
 		if (mainCamera == nullptr)
 		{
 			mainCamera = camera;

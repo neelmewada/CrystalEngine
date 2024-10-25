@@ -9,16 +9,17 @@ namespace CE::RPI
 
 	View::~View()
 	{
+		Free();
+	}
+
+	void View::Free()
+	{
 		for (int i = 0; i < viewConstantBuffers.GetSize(); ++i)
 		{
 			delete viewConstantBuffers[i]; viewConstantBuffers[i] = nullptr;
 		}
 
-		if (shaderResourceGroup != nullptr)
-		{
-			delete shaderResourceGroup;
-			shaderResourceGroup = nullptr;
-		}
+		delete shaderResourceGroup; shaderResourceGroup = nullptr;
 	}
 
 	View* View::CreateView(const Name& name, UsageFlags usageFlags)
@@ -26,6 +27,7 @@ namespace CE::RPI
 		View* view = new View();
 		view->name = name;
 		view->usageFlags = usageFlags;
+
 		if (gDynamicRHI != nullptr)
 		{
 			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().GetViewSrgLayout());
@@ -46,6 +48,7 @@ namespace CE::RPI
 
 			view->shaderResourceGroup->FlushBindings();
 		}
+
 		return view;
 	}
 

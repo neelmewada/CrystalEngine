@@ -8,27 +8,6 @@ namespace CE::RPI
             return;
 
         flags.initialized = true;
-
-        RHI::DrawListTag shadowTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow);
-        RPI::Shader* shader = RPISystem::Get().GetStandardShader()->GetShader(shadowTag);
-        const RHI::ShaderResourceGroupLayout& perViewLayout = shader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerView);
-
-        viewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewLayout);
-
-        RHI::BufferDescriptor viewConstantBufferDesc;
-        viewConstantBufferDesc.name = "DirectionalLight ViewConstants";
-        viewConstantBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-        viewConstantBufferDesc.bufferSize = sizeof(PerViewConstants);
-        viewConstantBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-        viewConstantBufferDesc.structureByteStride = viewConstantBufferDesc.bufferSize;
-
-        for (int i = 0; i < viewConstantBuffers.GetSize(); ++i)
-        {
-            viewConstantBuffers[i] = RHI::gDynamicRHI->CreateBuffer(viewConstantBufferDesc);
-            viewSrg->Bind(i, "_PerViewData", viewConstantBuffers[i]);
-        }
-
-        viewSrg->FlushBindings();
     }
 
     void DirectionalLightInstance::Deinit(DirectionalLightFeatureProcessor* fp)
@@ -36,29 +15,13 @@ namespace CE::RPI
         if (!flags.initialized)
             return;
 
-        delete viewSrg; viewSrg = nullptr;
-
-        for (int i = 0; i < viewConstantBuffers.GetSize(); ++i)
-        {
-            delete viewConstantBuffers[i]; viewConstantBuffers[i] = nullptr;
-        }
-
+        view = nullptr;
         flags.initialized = false;
     }
 
     void DirectionalLightInstance::UpdateSrgs(u32 imageIndex)
     {
-        void* data;
-        viewConstantBuffers[imageIndex]->Map(0, viewConstantBuffers[imageIndex]->GetBufferSize(), &data);
-        {
-            auto constants = (PerViewConstants*)data;
-            constants->pixelResolution = Vec2(512, 512);
-            constants->viewMatrix = viewMatrix;
-            constants->projectionMatrix = projectionMatrix;
-            constants->viewProjectionMatrix = viewProjectionMatrix;
-            constants->viewPosition = viewPosition;
-        }
-        viewConstantBuffers[imageIndex]->Unmap();
+        view->UpdateSrg(imageIndex);
     }
 
     DirectionalLightFeatureProcessor::DirectionalLightFeatureProcessor()

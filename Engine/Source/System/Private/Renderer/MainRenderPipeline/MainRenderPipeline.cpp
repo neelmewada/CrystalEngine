@@ -102,25 +102,23 @@ namespace CE
 
     	// - Directional Shadow Map
 
-        // TODO: Add shadow map support
-
-        /*PassAttachment* directionalShadowMapList; // Directional shadow maps are always externally managed
+        PassAttachment* directionalShadowMap;
 	    {
-            RPI::PassImageAttachmentDesc directionalShadowMapListDesc{};
-            directionalShadowMapListDesc.name = "DirectionalShadowMapList";
-            directionalShadowMapListDesc.lifetime = RHI::AttachmentLifetimeType::External;
-            directionalShadowMapListDesc.sizeSource.fixedSizes = Vec3i(1, 1, 1) * mainRenderPipelineAsset->directionalShadowResolution;
+            RPI::PassImageAttachmentDesc directionalShadowMapDesc{};
+            directionalShadowMapDesc.name = "DirectionalShadowMap";
+            directionalShadowMapDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
+            directionalShadowMapDesc.sizeSource.fixedSizes = Vec3i(directionalShadowResolution, directionalShadowResolution, 1);
 
-            directionalShadowMapListDesc.imageDescriptor.format = Format::D32_SFLOAT;
-            directionalShadowMapListDesc.imageDescriptor.mipCount = 1;
-            directionalShadowMapListDesc.imageDescriptor.arrayLayers = 1;
-            directionalShadowMapListDesc.imageDescriptor.dimension = Dimension::Dim2D;
-            directionalShadowMapListDesc.imageDescriptor.sampleCount = 1;
-            directionalShadowMapListDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil | TextureBindFlags::ShaderRead;
-            directionalShadowMapListDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
+            directionalShadowMapDesc.imageDescriptor.format = Format::D32_SFLOAT;
+            directionalShadowMapDesc.imageDescriptor.mipCount = 1;
+            directionalShadowMapDesc.imageDescriptor.arrayLayers = 1;
+            directionalShadowMapDesc.imageDescriptor.dimension = Dimension::Dim2D;
+            directionalShadowMapDesc.imageDescriptor.sampleCount = 1;
+            directionalShadowMapDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil | TextureBindFlags::ShaderRead;
+            directionalShadowMapDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
 
-            directionalShadowMapList = renderPipeline->AddAttachment(directionalShadowMapListDesc);
-	    }*/
+            directionalShadowMap = renderPipeline->AddAttachment(directionalShadowMapDesc);
+	    }
 
         // -------------------------------
         // Passes
@@ -150,8 +148,6 @@ namespace CE
     	skyboxPass->SetViewTag(mainViewTag);
         skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Skybox));
 	    {
-		    RPI::PassSlot* colorOutputSlot = skyboxPass->FindSlot("ColorOutput");
-
             RPI::PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = RPI::PassSlotType::Output;
             colorOutputBinding.attachment = colorMsaa;
@@ -166,24 +162,25 @@ namespace CE
 
         // - Directional Shadow Pass
 
-        /*DirectionalShadowPass* shadowPass = CreateObject<DirectionalShadowPass>(this, "DirectionalShadowPass");
-    	shadowPass->SetViewTag(mainViewTag);
-        shadowPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow));
+        RPI::RasterPass* directionalShadowPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DirectionalShadowPass");
+    	//directionalShadowPass->SetViewTag("DirectionalLightShadow");
+        directionalShadowPass->SetViewTag(mainViewTag);
+        directionalShadowPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow));
 	    {
-            // Array of Texture2D<float> i.e. Shadow maps
+            // Directional Shadow Map
             {
                 PassAttachmentBinding shadowMapListBinding{};
-                shadowMapListBinding.name = "DirectionalShadowListOutput";
                 shadowMapListBinding.slotType = PassSlotType::Output;
                 shadowMapListBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
-                shadowMapListBinding.attachment = directionalShadowMapList;
+                shadowMapListBinding.attachment = directionalShadowMap;
+                shadowMapListBinding.name = "DepthOutput";
                 shadowMapListBinding.connectedBinding = shadowMapListBinding.fallbackBinding = nullptr;
 
-                shadowPass->AddAttachmentBinding(shadowMapListBinding);
+                directionalShadowPass->AddAttachmentBinding(shadowMapListBinding);
             }
 
-            rootPass->AddChild(shadowPass);
-	    }*/
+            rootPass->AddChild(directionalShadowPass);
+	    }
 
         // - Opaque Pass
 
@@ -229,6 +226,26 @@ namespace CE
                 colorBinding.connectedBinding = skyboxPass->FindOutputBinding("ColorOutput");
 
                 opaquePass->AddAttachmentBinding(colorBinding);
+            }
+
+            // DirectionalShadowMap
+            {
+                RPI::PassSlot shadowMapSlot{};
+                shadowMapSlot.name = "DirectionalShadowMap";
+                shadowMapSlot.slotType = RPI::PassSlotType::Input;
+                shadowMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+                shadowMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+                shadowMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+                opaquePass->AddSlot(shadowMapSlot);
+
+                RPI::PassAttachmentBinding shadowMapBinding{};
+                shadowMapBinding.name = "DirectionalShadowMap";
+                shadowMapBinding.slotType = RPI::PassSlotType::Input;
+                shadowMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                shadowMapBinding.connectedBinding = directionalShadowPass->FindOutputBinding("DepthOutput");
+
+                opaquePass->AddAttachmentBinding(shadowMapBinding);
             }
 
             rootPass->AddChild(opaquePass);

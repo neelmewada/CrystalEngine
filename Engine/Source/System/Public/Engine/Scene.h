@@ -88,6 +88,9 @@ namespace CE
 		void OnActorChainAttached(Actor* actor);
 		void OnActorChainDetached(Actor* actor);
 
+		void OnSceneComponentAttached(SceneComponent* sceneComponent);
+		void OnSceneComponentDetached(SceneComponent* sceneComponent);
+
 		void OnCameraComponentAttached(CameraComponent* cameraComponent);
 		void OnCameraComponentDetached(CameraComponent* cameraComponent);
 

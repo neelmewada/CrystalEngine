@@ -39,6 +39,8 @@ namespace CE
 		CE::Scene* scene = GetScene();
 		if (scene != nullptr)
 		{
+			scene->OnSceneComponentAttached(component);
+
 			if (component->IsOfType<CameraComponent>())
 			{
 				scene->OnCameraComponentAttached((CameraComponent*)component);
@@ -72,6 +74,8 @@ namespace CE
 		CE::Scene* scene = GetScene();
 		if (scene != nullptr)
 		{
+			scene->OnSceneComponentDetached(component);
+
 			if (component->IsOfType<CameraComponent>())
 			{
 				scene->OnCameraComponentDetached((CameraComponent*)component);

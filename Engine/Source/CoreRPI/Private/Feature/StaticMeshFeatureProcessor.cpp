@@ -216,7 +216,38 @@ namespace CE::RPI
 
 		// - Enqueue Draw Packets to relevant views -
 
-		for (View* view : packet.views)
+		for (const auto& range : parallelRanges)
+		{
+			Job* jobFunction = new JobFunction([&range, imageIndex, &packet](Job* job)
+				{
+					for (View* view : packet.views)
+					{
+						for (auto it = range.begin; it != range.end; ++it)
+						{
+							if (it->drawPacketsListByLod.IsEmpty())
+								continue;
+							if (!it->flags.visible)
+								continue;
+
+							it->UpdateSrgs(imageIndex);
+
+							for (RHI::ShaderResourceGroup* objectSrg : it->objectSrgList)
+							{
+								objectSrg->FlushBindings();
+							}
+
+							const auto& meshDrawPacketList = it->drawPacketsListByLod[0];
+							RHI::DrawPacket* drawPacket = meshDrawPacketList[0].GetDrawPacket();
+							view->AddDrawPacket(drawPacket, 0);
+						}
+					}
+				});
+
+			jobFunction->SetDependent(&jobCompletion);
+			jobFunction->Start();
+		}
+
+		/*for (View* view : packet.views)
 		{
 			for (const auto& range : parallelRanges)
 			{
@@ -245,7 +276,7 @@ namespace CE::RPI
 				jobFunction->SetDependent(&jobCompletion);
 				jobFunction->Start();
 			}
-		}
+		}*/
 
 		jobCompletion.StartAndWaitForCompletion();
 	}

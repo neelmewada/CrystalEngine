@@ -5,11 +5,16 @@ namespace CE
 
     DirectionalLightComponent::DirectionalLightComponent()
     {
-	    
+	    if (!IsDefaultInstance())
+	    {
+            rpiView = RPI::View::CreateView("DirectionalLightShadow", View::UsageShadow);
+	    }
     }
 
     DirectionalLightComponent::~DirectionalLightComponent()
     {
+        rpiView = nullptr;
+
         if (lightHandle.IsValid())
         {
             CE::Scene* scene = GetScene();
@@ -77,9 +82,12 @@ namespace CE
         Vec3 forward = GetForwardVector();
         Vec3 up = GetUpwardVector();
 
+        lightHandle->view = rpiView;
+
         lightHandle->colorAndIntensity = lightColor.ToVec4();
         lightHandle->colorAndIntensity.w = intensity;
         lightHandle->temperature = temperature;
+        lightHandle->shadowDistance = shadowDistance;
 
         lightHandle->direction = forward;
         lightHandle->viewPosition = mainCamera->GetPosition() + Vec4(0, 5, 0, 0); // Position light 5 units above camera

@@ -40,6 +40,9 @@ namespace CE::RPI
 #include "Buffer.h"
 #include "DynamicStructuredBuffer.h"
 
+// View
+#include "View.h"
+
 // Passes
 #include "Pass/PassAttachmentDefines.h"
 #include "Pass/PassAttachment.h"
@@ -51,7 +54,6 @@ namespace CE::RPI
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
 
-#include "View.h"
 #include "RenderPipeline.h"
 
 // Mesh

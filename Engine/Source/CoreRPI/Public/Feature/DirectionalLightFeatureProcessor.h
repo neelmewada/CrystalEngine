@@ -24,6 +24,9 @@ namespace CE::RPI
 		
 		Vec4 colorAndIntensity;
 		float temperature = 0;
+		float shadowDistance = 10;
+
+		ViewPtr view = nullptr;
 
 		void Init(DirectionalLightFeatureProcessor* fp);
 		void Deinit(DirectionalLightFeatureProcessor* fp);
@@ -34,8 +37,8 @@ namespace CE::RPI
 
 		RPI::Scene* scene = nullptr;
 
-		RHI::ShaderResourceGroup* viewSrg = nullptr;
-		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
+		//RHI::ShaderResourceGroup* viewSrg = nullptr;
+		//StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
 
 	public:
 
