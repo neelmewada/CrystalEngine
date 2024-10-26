@@ -153,6 +153,32 @@ namespace CE
 		}
 	}
 
+	void CE::Scene::RegisterActorComponent(ActorComponent* actorComponent)
+	{
+		auto componentClass = actorComponent->GetClass();
+		auto componentUuid = actorComponent->GetUuid();
+
+		while (componentClass->GetTypeId() != TYPEID(Object))
+		{
+			componentsByType[componentClass->GetTypeId()][componentUuid] = actorComponent;
+
+			componentClass = componentClass->GetSuperClass(0);
+		}
+	}
+
+	void CE::Scene::DeregisterActorComponent(ActorComponent* actorComponent)
+	{
+		auto componentClass = actorComponent->GetClass();
+		auto componentUuid = actorComponent->GetUuid();
+
+		while (componentClass->GetTypeId() != TYPEID(Object))
+		{
+			componentsByType[componentClass->GetTypeId()].Remove(componentUuid);
+
+			componentClass = componentClass->GetSuperClass(0);
+		}
+	}
+
 	void CE::Scene::OnActorChainAttached(Actor* actor)
 	{
 		if (!actor)
@@ -295,6 +321,44 @@ namespace CE
         };
 		
 		recursivelyRemove(actor);
+	}
+
+	void CE::Scene::RegisterSceneComponent(SceneComponent* sceneComponent)
+	{
+		if (!sceneComponent)
+			return;
+
+		auto componentClass = sceneComponent->GetClass();
+		auto componentUuid = sceneComponent->GetUuid();
+
+		if (componentsByType[componentClass->GetTypeId()].KeyExists(componentUuid))
+			return;
+
+		while (componentClass->GetTypeId() != TYPEID(Object))
+		{
+			componentsByType[componentClass->GetTypeId()][sceneComponent->GetUuid()] = sceneComponent;
+
+			componentClass = componentClass->GetSuperClass(0);
+		}
+	}
+
+	void CE::Scene::DeregisterSceneComponent(SceneComponent* sceneComponent)
+	{
+		if (!sceneComponent)
+			return;
+
+		auto componentClass = sceneComponent->GetClass();
+		auto componentUuid = sceneComponent->GetUuid();
+
+		if (!componentsByType[componentClass->GetTypeId()].KeyExists(componentUuid))
+			return;
+
+		while (componentClass->GetTypeId() != TYPEID(Object))
+		{
+			componentsByType[componentClass->GetTypeId()].Remove(sceneComponent->GetUuid());
+
+			componentClass = componentClass->GetSuperClass(0);
+		}
 	}
 
 	void CE::Scene::OnSceneComponentAttached(SceneComponent* sceneComponent)

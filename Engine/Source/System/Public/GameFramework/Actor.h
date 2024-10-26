@@ -29,6 +29,9 @@ namespace CE
 		void AttachActor(Actor* actor);
 		void DetachActor(Actor* actor);
 
+		void AttachComponent(ActorComponent* actorComponent);
+		void DetachComponent(ActorComponent* actorComponent);
+
 		Actor* GetParentActor() const { return parent; }
 
 		CE::Scene* GetScene() const { return scene; }
@@ -59,9 +62,19 @@ namespace CE
 
 		void OnFieldEdited(FieldType* field) override;
 
+		void OnSubobjectAttached(Object* object) override;
+		void OnSubobjectDetached(Object* object) override;
+
 		virtual void OnEnabled();
 
 		virtual void OnDisabled();
+
+	private:
+
+		void SetRootComponentInternal(SceneComponent* rootComponent);
+
+		void AttachComponentInternal(ActorComponent* component);
+		void DetachComponentInternal(ActorComponent* component);
 
 	private:
 

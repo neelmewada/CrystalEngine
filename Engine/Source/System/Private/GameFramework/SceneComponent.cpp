@@ -27,6 +27,8 @@ namespace CE
 			return;
 		}
 
+		AttachSubobject(component);
+
 		component->parentComponent = this;
 		component->owner = this->owner;
 		attachedComponents.Add(component);
@@ -39,6 +41,7 @@ namespace CE
 		CE::Scene* scene = GetScene();
 		if (scene != nullptr)
 		{
+			scene->RegisterSceneComponent(component);
 			scene->OnSceneComponentAttached(component);
 
 			if (component->IsOfType<CameraComponent>())
@@ -51,41 +54,6 @@ namespace CE
 			while (componentClass->GetTypeId() != TYPEID(Object))
 			{
 				scene->componentsByType[componentClass->GetTypeId()][component->GetUuid()] = component;
-
-				componentClass = componentClass->GetSuperClass(0);
-			}
-		}
-
-		SetDirty();
-	}
-
-	void SceneComponent::DetachComponent(SceneComponent* component)
-	{
-		if (!component || component == this)
-			return;
-
-		if (!ComponentExists(component))
-			return;
-
-		component->parentComponent = nullptr;
-		component->owner = nullptr;
-		attachedComponents.Remove(component);
-
-		CE::Scene* scene = GetScene();
-		if (scene != nullptr)
-		{
-			scene->OnSceneComponentDetached(component);
-
-			if (component->IsOfType<CameraComponent>())
-			{
-				scene->OnCameraComponentDetached((CameraComponent*)component);
-			}
-
-			Class* componentClass = component->GetClass();
-
-			while (componentClass->GetTypeId() != TYPEID(Object))
-			{
-				scene->componentsByType[componentClass->GetTypeId()].Remove(component->GetUuid());
 
 				componentClass = componentClass->GetSuperClass(0);
 			}
@@ -119,6 +87,20 @@ namespace CE
 	bool SceneComponent::ComponentExists(SceneComponent* component)
 	{
 		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
+	}
+
+	void SceneComponent::OnSubobjectDetached(Object* subobject)
+	{
+		Super::OnSubobjectDetached(subobject);
+
+		if (subobject->IsOfType<SceneComponent>())
+		{
+			auto detachedComponent = static_cast<SceneComponent*>(subobject);
+			if (CE::Scene* scene = GetScene())
+			{
+				scene->DeregisterSceneComponent(detachedComponent);
+			}
+		}
 	}
 
 	void SceneComponent::OnFieldEdited(FieldType* field)

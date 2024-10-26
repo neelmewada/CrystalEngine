@@ -85,8 +85,14 @@ namespace CE
 
 		// - Internal API -
 
+		void RegisterActorComponent(ActorComponent* actorComponent);
+		void DeregisterActorComponent(ActorComponent* actorComponent);
+
 		void OnActorChainAttached(Actor* actor);
 		void OnActorChainDetached(Actor* actor);
+
+		void RegisterSceneComponent(SceneComponent* sceneComponent);
+		void DeregisterSceneComponent(SceneComponent* sceneComponent);
 
 		void OnSceneComponentAttached(SceneComponent* sceneComponent);
 		void OnSceneComponentDetached(SceneComponent* sceneComponent);

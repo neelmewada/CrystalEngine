@@ -16,140 +16,18 @@ void GameLoop::SetupTestScene()
 
 	scene->SetSkyboxCubeMap(skybox);
 
-	{
-		// - Textures & Materials -
-
-		CE::Texture* aluminiumAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
-		CE::Texture* aluminiumNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
-		CE::Texture* aluminiumMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
-		CE::Texture* aluminiumRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
-
-		CE::Texture* plasticAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/albedo");
-		CE::Texture* plasticNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/normal");
-		CE::Texture* plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
-		CE::Texture* plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
-
-		CE::Texture* woodAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/albedo");
-		CE::Texture* woodNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/normal");
-		CE::Texture* woodMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/metallic");
-		CE::Texture* woodRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/roughness");
-
-		CE::Material* aluminiumMaterial = CreateObject<CE::Material>(scene, "Material");
-		aluminiumMaterial->SetShader(standardShader);
-		{
-			aluminiumMaterial->SetProperty("_AlbedoTex", aluminiumAlbedoTex);
-			aluminiumMaterial->SetProperty("_NormalTex", aluminiumNormalTex);
-			aluminiumMaterial->SetProperty("_MetallicTex", aluminiumMetallicTex);
-			aluminiumMaterial->SetProperty("_RoughnessTex", aluminiumRoughnessTex);
-			aluminiumMaterial->ApplyProperties();
-		}
-
-		CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
-		plasticMaterial->SetShader(standardShader);
-		{
-			plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
-			plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
-			plasticMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
-			plasticMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
-			plasticMaterial->ApplyProperties();
-		}
-
-		CE::Material* woodMaterial = CreateObject<CE::Material>(scene, "WoodMaterial");
-		woodMaterial->SetShader(standardShader);
-		{
-			woodMaterial->SetProperty("_AlbedoTex", woodAlbedoTex);
-			woodMaterial->SetProperty("_NormalTex", woodNormalTex);
-			woodMaterial->SetProperty("_MetallicTex", woodMetallicTex);
-			woodMaterial->SetProperty("_RoughnessTex", woodRoughnessTex);
-			woodMaterial->ApplyProperties();
-		}
-
-		StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
-		{
-			RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh, "SphereModel");
-			RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
-			sphereModel->AddModelLod(sphereLodAsset);
-
-			sphereMesh->SetModelAsset(sphereModel);
-		}
-
-		StaticMesh* cubeMesh = CreateObject<StaticMesh>(scene, "CubeMesh");
-		{
-			RPI::ModelAsset* cubeModel = CreateObject<RPI::ModelAsset>(cubeMesh, "CubeModel");
-			RPI::ModelLodAsset* cubeLodAsset = RPI::ModelLodAsset::CreateCubeAsset(cubeModel);
-			cubeModel->AddModelLod(cubeLodAsset);
-
-			cubeMesh->SetModelAsset(cubeModel);
-		}
-
-		// - Camera -
-
-		CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 2));
-		scene->AddActor(camera);
-
-		CameraComponent* cameraComponent = camera->GetCameraComponent();
-		cameraComponent->SetFieldOfView(60);
-
-		// - Skybox -
-
-		StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
-		scene->AddActor(skyboxActor);
-		{
-			StaticMeshComponent* skyboxMeshComponent = skyboxActor->GetMeshComponent();
-			skyboxMeshComponent->SetStaticMesh(sphereMesh);
-
-			skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
-			skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
-
-			CE::Material* skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Material");
-			skyboxMaterial->SetShader(skyboxShader);
-			skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
-
-			skyboxMaterial->SetProperty("_CubeMap", skybox);
-			skyboxMaterial->ApplyProperties();
-		}
-
-		// - Mesh 1 -
-
-		StaticMeshActor* mesh1 = CreateObject<StaticMeshActor>(scene, "Mesh_1");
-		scene->AddActor(mesh1);
-		{
-			StaticMeshComponent* meshComponent = mesh1->GetMeshComponent();
-			meshComponent->SetStaticMesh(sphereMesh);
-			meshComponent->SetLocalPosition(Vec3(0, 0, 5));
-			meshComponent->SetMaterial(aluminiumMaterial, 0, 0);
-		}
-
-		// - Ground -
-
-		StaticMeshActor* groundMesh = CreateObject<StaticMeshActor>(scene, "GroundPlane");
-		scene->AddActor(groundMesh);
-		{
-			StaticMeshComponent* meshComponent = groundMesh->GetMeshComponent();
-			meshComponent->SetStaticMesh(cubeMesh);
-			meshComponent->SetLocalPosition(Vec3(0, -0.75f, 5));
-			meshComponent->SetLocalScale(Vec3(5, 0.05f, 5));
-			meshComponent->SetMaterial(woodMaterial, 0, 0);
-		}
-
-		// - Sun -
-
-		DirectionalLight* sunActor = CreateObject<DirectionalLight>(scene, "Sun");
-		scene->AddActor(sunActor);
-		{
-			DirectionalLightComponent* sunLight = sunActor->GetDirectionalLightComponent();
-
-			sunLight->SetLocalPosition(Vec3(0, 0, 0));
-			sunLight->SetLocalEulerAngles(Vec3(30, 0, 0));
-			sunLight->SetIntensity(20.0f);
-			sunLight->SetLightColor(Color::White());
-		}
-
-		//sunActor->SetEnabled(false);
-	}
-
 	viewportSubsystem->SetScene(scene);
 	gEngine->LoadScene(scene);
+
+	{
+		Actor* sandboxActor = CreateObject<Actor>(scene, "SandboxActor");
+
+		SandboxComponent* component = CreateObject<SandboxComponent>(sandboxActor, "SandboxComponent");
+		sandboxActor->AttachComponent(component);
+
+		scene->AddActor(sandboxActor);
+
+		component->SetupScene();
+	}
 }
 

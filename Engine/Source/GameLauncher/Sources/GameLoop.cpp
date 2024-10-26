@@ -97,12 +97,17 @@ void GameLoop::LoadEngineModules()
 
 	ModuleManager::Get().LoadModule("System");
 	ModuleManager::Get().LoadModule("GameSystem");
+	// TODO: Sandbox
+	ModuleManager::Get().LoadModule("Sandbox");
 }
 
 void GameLoop::UnloadEngineModules()
 {
 	ModuleManager::Get().UnloadModule("Fusion");
 	ModuleManager::Get().UnloadModule("FusionCore");
+
+	// TODO: Sandbox
+	ModuleManager::Get().UnloadModule("Sandbox");
 
 	ModuleManager::Get().UnloadModule("GameSystem");
 	ModuleManager::Get().UnloadModule("System");
@@ -185,9 +190,16 @@ void GameLoop::ExposedTick()
 
 void GameLoop::RunLoop()
 {
+	previousTime = clock();
+	auto fApp = FusionApplication::Get();
+
 	while (!IsEngineRequestingExit())
 	{
-		FusionApplication::Get()->ResetExposed();
+		if (fApp->IsExposed())
+		{
+			fApp->ResetExposed();
+			previousTime = clock(); // Reset previous time when window becomes unexposed
+		}
 
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;

@@ -42,5 +42,6 @@ add_subdirectory(Source/System)
 
 if(${CE_STANDALONE})
     add_subdirectory(Source/GameSystem)
+    add_subdirectory(Source/Sandbox)
     add_subdirectory(Source/GameLauncher)
 endif()

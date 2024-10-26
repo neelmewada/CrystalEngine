@@ -55,6 +55,7 @@ namespace CE
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
+        bool IsExposed() const { return isExposed; }
         void SetExposed();
         void ResetExposed();
 

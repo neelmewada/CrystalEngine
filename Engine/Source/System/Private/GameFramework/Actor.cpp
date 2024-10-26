@@ -30,11 +30,14 @@ namespace CE
 
 	void Actor::SetRootComponent(SceneComponent* component)
 	{
+		if (rootComponent == component)
+			return;
+
 		if (rootComponent)
 		{
 			// If current rootComponent's lifecycle is managed by `this` actor, destroy it.
 			// Otherwise, just detach the subobject without destroying it.
-			if (IsObjectPresentInHierarchy(rootComponent))
+			if (rootComponent->ParentExistsInChain(this))
 			{
 				rootComponent->Destroy();
 			}
@@ -51,6 +54,7 @@ namespace CE
 		if (rootComponent) // component can be set to nullptr
 		{
 			rootComponent->owner = this;
+			AttachSubobject(component);
 
 			if (scene)
 			{
@@ -126,6 +130,57 @@ namespace CE
         };
         
         recursivelyResetScene(actor);
+	}
+
+	void Actor::AttachComponent(ActorComponent* actorComponent)
+	{
+		if (!actorComponent)
+			return;
+
+		AttachSubobject(actorComponent);
+	}
+
+	void Actor::DetachComponent(ActorComponent* actorComponent)
+	{
+		if (!actorComponent)
+			return;
+
+		DetachSubobject(actorComponent);
+	}
+
+	void Actor::AttachComponentInternal(ActorComponent* component)
+	{
+		if (!component)
+			return;
+		if (component->IsOfType<SceneComponent>())
+		{
+			CE_LOG(Error, All, "Cannot attach a scene component to an actor using AttachComponent(). Use SetRootComponent() instead!");
+			return;
+		}
+		if (attachedComponents.Exists(component))
+			return;
+
+		attachedComponents.Add(component);
+		component->owner = this;
+
+		if (scene)
+		{
+			scene->RegisterActorComponent(component);
+		}
+	}
+
+	void Actor::DetachComponentInternal(ActorComponent* component)
+	{
+		if (!component || !attachedComponents.Exists(component))
+			return;
+
+		if (scene)
+		{
+			scene->DeregisterActorComponent(component);
+		}
+
+		attachedComponents.Remove(component);
+		component->owner = nullptr;
 	}
 
 	void Actor::OnBeginPlay()
@@ -243,6 +298,40 @@ namespace CE
 		}
 	}
 
+	void Actor::OnSubobjectAttached(Object* object)
+	{
+		Super::OnSubobjectAttached(object);
+
+		if (object->IsOfType<SceneComponent>())
+		{
+			auto sceneComponent = static_cast<SceneComponent*>(object);
+
+		}
+		else if (object->IsOfType<ActorComponent>())
+		{
+			auto actorComponent = static_cast<ActorComponent*>(object);
+
+			AttachComponentInternal(actorComponent);
+		}
+	}
+
+	void Actor::OnSubobjectDetached(Object* object)
+	{
+		Super::OnSubobjectDetached(object);
+
+		if (object->IsOfType<SceneComponent>())
+		{
+			auto sceneComponent = static_cast<SceneComponent*>(object);
+
+		}
+		else if (object->IsOfType<ActorComponent>())
+		{
+			auto actorComponent = static_cast<ActorComponent*>(object);
+
+			DetachComponentInternal(actorComponent);
+		}
+	}
+
 	void Actor::OnEnabled()
 	{
 		if (rootComponent != nullptr && rootComponent->IsEnabled())
@@ -280,6 +369,29 @@ namespace CE
 		{
 			if (!child->IsEnabled())
 				child->OnDisabled();
+		}
+	}
+
+	void Actor::SetRootComponentInternal(SceneComponent* component)
+	{
+		if (rootComponent == component)
+			return;
+
+		if (rootComponent)
+		{
+			rootComponent = nullptr;
+		}
+
+		rootComponent = component;
+
+		if (rootComponent) // rootComponent can be set to nullptr
+		{
+			rootComponent->owner = this;
+
+			if (scene)
+			{
+				scene->OnRootComponentSet(rootComponent, this);
+			}
 		}
 	}
 

@@ -24,11 +24,9 @@ namespace CE
 
 		bool IsEnabled() const final;
 
-		/// @brief Add the passed scene component as a child of receiving scene component.
+		/// @brief Add the parameter scene component as a child of receiving scene component.
 		/// @param component: Component to add as child.
 		void SetupAttachment(SceneComponent* component);
-
-		void DetachComponent(SceneComponent* component);
 
 		bool ParentComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExistsRecursive(SceneComponent* component);
@@ -69,6 +67,8 @@ namespace CE
 		SceneComponent* GetParentComponent() const { return parentComponent; }
 
     protected:
+
+		void OnSubobjectDetached(Object* subobject) override;
 
 		void OnFieldEdited(FieldType* field) override;
 
