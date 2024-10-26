@@ -39,7 +39,7 @@ namespace CE
 
         if (lightHandle.IsValid())
         {
-            lightHandle->flags.visible = true;
+            //lightHandle->flags.visible = true;
         }
     }
 
@@ -49,7 +49,20 @@ namespace CE
 
         if (lightHandle.IsValid())
         {
-            lightHandle->flags.visible = false;
+            CE::Scene* scene = GetScene();
+            if (!scene)
+                return;
+
+            RPI::Scene* rpiScene = scene->GetRpiScene();
+            if (!rpiScene)
+                return;
+
+            DirectionalLightFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+            if (!fp)
+                return;
+
+            fp->ReleaseLight(lightHandle);
+            //lightHandle->flags.visible = false;
         }
     }
 

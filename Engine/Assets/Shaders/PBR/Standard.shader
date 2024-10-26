@@ -160,7 +160,7 @@ Shader "PBR/Standard"
                     if (_DirectionalLights[i].shadow > 0)
                     {
                         // TODO: Add shadow
-                        //shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+                        shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
                     }
                     shadow = clamp(shadow, 0, 1);
 

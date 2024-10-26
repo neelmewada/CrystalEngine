@@ -148,18 +148,28 @@ namespace CE
 
 	void Actor::Tick(f32 delta)
     {
-		if (rootComponent && rootComponent->CanTick())
+		if (!IsSelfEnabled())
+			return;
+
+		if (rootComponent && rootComponent->CanTick() && rootComponent->IsSelfEnabled())
+		{
 			rootComponent->Tick(delta);
+		}
 
 		for (auto component : attachedComponents)
 		{
-			if (component->CanTick())
+			if (component->CanTick() && component->IsSelfEnabled())
+			{
 				component->Tick(delta);
+			}
 		}
 
 		for (auto child : children)
 		{
-			child->Tick(delta);
+			if (child->IsSelfEnabled())
+			{
+				child->Tick(delta);
+			}
 		}
     }
 

@@ -47,7 +47,7 @@ namespace CE
 	{
 		for (Actor* actor : actors)
 		{
-			if (!actor->isEnabled)
+			if (!actor->IsSelfEnabled())
 				continue;
 
 			actor->Tick(delta);
@@ -57,6 +57,9 @@ namespace CE
 
 		for (CameraComponent* camera : cameras)
 		{
+			if (!camera->IsEnabled())
+				continue;
+
 			for (FGameWindow* viewport : viewports)
 			{
 				if (viewport->GetScene() == rpiScene)

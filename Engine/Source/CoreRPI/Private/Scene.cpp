@@ -166,6 +166,12 @@ namespace CE::RPI
 
 			shaderResourceGroup->Bind("_DefaultSampler", RPISystem::Get().FindOrCreateSampler(samplerDesc));
 
+			RHI::SamplerDescriptor shadowMapSampler{};
+			shadowMapSampler.addressModeU = shadowMapSampler.addressModeV = shadowMapSampler.addressModeW = SamplerAddressMode::ClampToEdge;
+			shadowMapSampler.enableAnisotropy = false;
+			shadowMapSampler.samplerFilterMode = FilterMode::Linear;
+			shaderResourceGroup->Bind("_ShadowMapSampler", RPISystem::Get().FindOrCreateSampler(shadowMapSampler));
+
 			shaderResourceGroup->Bind("_BrdfLut", RPISystem::Get().GetBrdfLutTexture()->GetRhiTexture());
 
 			RHI::SamplerDescriptor skyboxSamplerDesc{};

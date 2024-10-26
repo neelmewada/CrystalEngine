@@ -145,6 +145,8 @@ void GameLoop::SetupTestScene()
 			sunLight->SetIntensity(20.0f);
 			sunLight->SetLightColor(Color::White());
 		}
+
+		//sunActor->SetEnabled(false);
 	}
 
 	viewportSubsystem->SetScene(scene);

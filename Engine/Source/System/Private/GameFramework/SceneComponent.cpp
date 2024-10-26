@@ -232,7 +232,10 @@ namespace CE
 
 		for (auto component : attachedComponents)
 		{
-			component->Tick(delta);
+			if (component->IsSelfEnabled() && component->CanTick())
+			{
+				component->Tick(delta);
+			}
 		}
 	}
 
