@@ -12,8 +12,16 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        (*this)
+			.GenerateRowDelegate(MemberDelegate(&Self::GenerateRow, this))
+            ;
+
         Style("TreeView");
     }
-    
+
+    FTreeViewRow& SceneTreeView::GenerateRow(const FModelIndex& modelIndex)
+    {
+    }
+
 }
 

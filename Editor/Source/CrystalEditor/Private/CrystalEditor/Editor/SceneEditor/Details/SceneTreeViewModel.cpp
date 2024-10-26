@@ -61,6 +61,7 @@ namespace CE
 
     }
 
+
     void SceneTreeViewModel::SetScene(CE::Scene* scene)
     {
         this->scene = scene;

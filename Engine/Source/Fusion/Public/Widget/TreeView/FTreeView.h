@@ -54,6 +54,7 @@ namespace CE
         FUSION_PROPERTY(FTreeViewModel*, Model);
 
         FUSION_PROPERTY(int, ExpandableColumn);
+        FUSION_LAYOUT_PROPERTY(bool, AutoHeight);
         FUSION_LAYOUT_PROPERTY(f32, RowHeight);
         FUSION_LAYOUT_PROPERTY(FRowHeightDelegate, RowHeightDelegate);
 

@@ -17,6 +17,7 @@ namespace CE::Editor
         void Construct() override;
 
         SceneTreeView* treeView = nullptr;
+        SceneTreeViewModel* treeViewModel = nullptr;
 
     public: // - Fusion Properties - 
 

@@ -11,6 +11,11 @@ namespace CE::Editor
     void SceneOutlinerTab::Construct()
     {
         Super::Construct();
+
+        CE::Scene* scene = gEngine->GetActiveScene();
+
+        treeViewModel = CreateObject<SceneTreeViewModel>(this, "TreeViewModel");
+        treeViewModel->SetScene(scene);
         
         (*this)
 			.Title("Scene Outliner")
@@ -29,6 +34,7 @@ namespace CE::Editor
                     )
                 )
                 .RowHeight(20)
+                .Model(treeViewModel)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
             )

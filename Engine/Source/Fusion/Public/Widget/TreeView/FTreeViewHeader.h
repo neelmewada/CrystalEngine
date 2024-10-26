@@ -15,6 +15,8 @@ namespace CE
 
         u32 GetHeaderCount() const { return contentStack->GetChildCount(); }
 
+        FTreeViewHeaderColumn* GetHeader(u32 index);
+
     protected:
 
         FTreeViewHeader();

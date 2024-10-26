@@ -5,7 +5,7 @@ namespace CE
     CLASS()
     class CRYSTALEDITOR_API SceneTreeViewModel : public FTreeViewModel
     {
-        CE_CLASS(SceneTreeViewModel, Object)
+        CE_CLASS(SceneTreeViewModel, FTreeViewModel)
     public:
 
         virtual ~SceneTreeViewModel();

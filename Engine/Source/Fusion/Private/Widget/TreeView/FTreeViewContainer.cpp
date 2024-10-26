@@ -47,7 +47,6 @@ namespace CE
     {
 	    Super::OnPostComputeLayout();
 
-        OnModelUpdate();
     }
 
     void FTreeViewContainer::OnModelUpdate()
@@ -115,12 +114,28 @@ namespace CE
                         children.Insert(rowWidget);
                     }
 
+                    rowWidget->Enabled(true);
+
                     childIndex++;
                     curPosY += rowHeight;
 
                     model->SetData(i, *rowWidget, parent);
+
+                    if (expandedRows.Exists(index) && model->GetRowCount(index) > 0)
+                    {
+                        visitor(index);
+                    }
                 }
             };
+
+        visitor(FModelIndex());
+
+        while (childIndex < children.GetCount())
+        {
+            children[childIndex]->Enabled(false);
+
+            childIndex++;
+        }
 
         MarkDirty();
     }
@@ -242,8 +257,6 @@ namespace CE
                 for (int i = 0; i < rowCount; ++i)
                 {
                     FModelIndex index = model->GetIndex(i, 0, parent);
-                    if (!index.IsValid())
-                        continue;
 
                     if (!treeView->m_RowHeightDelegate.IsBound())
                     {
@@ -254,15 +267,21 @@ namespace CE
                         totalRowHeight += treeView->m_RowHeightDelegate(index);
                     }
 
-                    // TODO: Uncomment this
-                    //if (expandedRows.Exists(index))
+                    if (expandedRows.Exists(index))
                     {
-                        //visitor(index);
+                        visitor(index);
                     }
                 }
             };
 
-        visitor(FModelIndex());
+        if (treeView->AutoHeight())
+        {
+            visitor(FModelIndex());
+        }
+        else
+        {
+            contentSize.height = m_MinHeight;
+        }
 
         intrinsicSize.width += m_MinWidth;
         intrinsicSize.height += contentSize.height;

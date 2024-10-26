@@ -8,6 +8,11 @@ namespace CE
 
     }
 
+    FTreeViewHeaderColumn* FTreeViewHeader::GetHeader(u32 index)
+    {
+        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index));
+    }
+
     void FTreeViewHeader::Construct()
     {
         Super::Construct();

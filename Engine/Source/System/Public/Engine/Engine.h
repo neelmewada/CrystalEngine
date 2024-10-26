@@ -45,6 +45,8 @@ namespace CE
 
 		void LoadScene(CE::Scene* scene);
 
+		CE::Scene* GetActiveScene();
+
 		void AddRenderViewport(FGameWindow* viewport);
 		void RemoveRenderViewport(FGameWindow* viewport);
 

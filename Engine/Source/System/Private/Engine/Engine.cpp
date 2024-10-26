@@ -150,6 +150,13 @@ namespace CE
 		sceneSubsystem->LoadScene(scene);
 	}
 
+	CE::Scene* Engine::GetActiveScene()
+	{
+		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();
+
+		return sceneSubsystem->GetActiveScene();
+	}
+
 	void Engine::AddRenderViewport(FGameWindow* viewport)
 	{
 		RendererSubsystem* rendererSubsystem = GetSubsystem<RendererSubsystem>();

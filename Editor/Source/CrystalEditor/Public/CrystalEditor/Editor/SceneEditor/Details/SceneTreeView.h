@@ -16,6 +16,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        FTreeViewRow& GenerateRow(const FModelIndex& modelIndex);
+
     public: // - Fusion Properties - 
 
 
