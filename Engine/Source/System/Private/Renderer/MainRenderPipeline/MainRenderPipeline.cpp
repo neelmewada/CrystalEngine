@@ -236,6 +236,7 @@ namespace CE
                 shadowMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
                 shadowMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
                 shadowMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                shadowMapSlot.shaderInputName = "_DirectionalShadowMap";
 
                 opaquePass->AddSlot(shadowMapSlot);
 
@@ -280,6 +281,15 @@ namespace CE
 
             rootPass->AddChild(resolvePass);
 	    }
+
+        // -------------------------------
+        // Apply Shader Layout
+        // -------------------------------
+
+        CE::Shader* standardShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+        RPI::ShaderCollection* shaderCollection = standardShader->GetShaderCollection();
+
+        renderPipeline->ApplyShaderLayout(shaderCollection);
     }
 
 } // namespace CE

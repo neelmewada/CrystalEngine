@@ -64,6 +64,7 @@ namespace CE::RPI
                         imageScopeAttachment.attachmentId = attachment->attachmentId;
                         imageScopeAttachment.loadStoreAction = slot->loadStoreAction;
                         imageScopeAttachment.multisampleState.sampleCount = attachment->attachmentDescriptor.imageDesc.sampleCount;
+                        imageScopeAttachment.shaderInputName = slot->shaderInputName;
 
                         scheduler->UseAttachment(imageScopeAttachment, slot->attachmentUsage, attachmentAccess);
                     }
@@ -72,6 +73,7 @@ namespace CE::RPI
 	                    RHI::BufferScopeAttachmentDescriptor bufferScopeAttachment{};
                         bufferScopeAttachment.attachmentId = attachment->attachmentId;
                         bufferScopeAttachment.loadStoreAction = slot->loadStoreAction;
+                        bufferScopeAttachment.shaderInputName = slot->shaderInputName;
 
                         scheduler->UseAttachment(bufferScopeAttachment, slot->attachmentUsage, attachmentAccess);
                     }
@@ -108,7 +110,11 @@ namespace CE::RPI
             {
                 scheduler->UseShaderResourceGroup(sceneSrg);
             }
-            
+
+            if (!perPassSrgLayout.IsEmpty())
+            {
+                scheduler->UsePassSrgLayout(perPassSrgLayout);
+            }
         }
         scheduler->EndScope();
     }

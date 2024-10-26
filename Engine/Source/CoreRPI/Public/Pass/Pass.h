@@ -53,6 +53,8 @@ namespace CE::RPI
 
 		Name GetScopeId() const;
 
+		const RHI::ShaderResourceGroupLayout& GetPerPassSrgLayout() const { return perPassSrgLayout; }
+
 		const Array<PassAttachmentBinding>& GetInputBindings() const { return inputBindings; }
 		const Array<PassAttachmentBinding>& GetInputOutputBindings() const { return inputOutputBindings; }
 		const Array<PassAttachmentBinding>& GetOutputBindings() const { return outputBindings; }
@@ -79,6 +81,9 @@ namespace CE::RPI
 
 		FIELD()
 		Array<PassSlot> slots{};
+
+		FIELD()
+		RHI::ShaderResourceGroupLayout perPassSrgLayout{};
 
 		Array<PassAttachmentBinding> inputBindings{};
 		Array<PassAttachmentBinding> inputOutputBindings{};

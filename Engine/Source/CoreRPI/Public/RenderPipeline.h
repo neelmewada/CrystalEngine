@@ -9,6 +9,7 @@ namespace CE::RPI
 	class PassTree;
 	class Scene;
 	class View;
+	class ShaderCollection;
 
 	struct SceneViews
 	{
@@ -40,6 +41,8 @@ namespace CE::RPI
 		PassAttachment* AddAttachment(const RPI::PassBufferAttachmentDesc& bufferDesc);
 
 		void ImportScopeProducers(RHI::FrameScheduler* scheduler);
+
+		void ApplyShaderLayout(RPI::ShaderCollection* shaderCollection);
 
 		/// @brief Name of the pipeline
 		Name name{};

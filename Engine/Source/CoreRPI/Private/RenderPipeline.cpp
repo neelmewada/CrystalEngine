@@ -82,4 +82,23 @@ namespace CE::RPI
 		}
     }
 
+    void RenderPipeline::ApplyShaderLayout(RPI::ShaderCollection* shaderCollection)
+    {
+		if (!shaderCollection || !passTree)
+			return;
+
+		passTree->IterateRecursively([shaderCollection](Pass* pass)
+			{
+				RHI::DrawListTag drawListTag = pass->GetDrawListTag();
+				if (!drawListTag.IsValid())
+					return;
+
+				RPI::Shader* shader = shaderCollection->GetShader(drawListTag);
+				if (!shader)
+					return;
+
+				pass->perPassSrgLayout = shader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerPass);
+			});
+    }
+
 } // namespace CE::RPI

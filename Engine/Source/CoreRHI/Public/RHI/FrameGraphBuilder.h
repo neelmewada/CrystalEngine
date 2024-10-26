@@ -28,6 +28,8 @@ namespace CE::RHI
 
 		bool UseShaderResourceGroup(RHI::ShaderResourceGroup* srg);
 
+		bool UsePassSrgLayout(const RHI::ShaderResourceGroupLayout& srgLayout);
+
 		bool UseAttachment(const BufferScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 

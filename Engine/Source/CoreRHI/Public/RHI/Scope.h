@@ -67,6 +67,8 @@ namespace CE::RHI
 
 		bool UsesAttachment(AttachmentID attachmentId);
 
+		void SetPassSrgLayout(const RHI::ShaderResourceGroupLayout& layout) { passSrgLayout = layout; }
+
 		static HashMap<ScopeAttachment*, ScopeAttachment*> FindCommonFrameAttachments(Scope* from, Scope* to);
 
 		inline bool IsSubPass() const
@@ -87,7 +89,7 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		RHI::HardwareQueueClass queueClass{};
-		Array<RHI::PipelineState*> usePipelines{};
+		Array<RHI::PipelineState*> usePipelines;
 
 		u32 groupCountX = 1;
 		u32 groupCountY = 1;
@@ -96,20 +98,21 @@ namespace CE::RHI
 		ScopeId id{};
 		int scopeGroupIndex = -1;
 		//bool usesSwapChainAttachment = false;
-		Array<SwapChain*> swapChainsUsedByAttachments{};
+		Array<SwapChain*> swapChainsUsedByAttachments;
 
 		Scope* prevSubPass = nullptr;
 		Scope* nextSubPass = nullptr;
 
-		Array<Scope*> producers{};
-		Array<Scope*> consumers{};
+		Array<Scope*> producers;
+		Array<Scope*> consumers;
 
 		Scope* prev = nullptr;
 		Scope* next = nullptr;
 
 		DrawList* drawList = nullptr;
 
-		Array<ExecuteCondition> executeConditions{};
+		Array<ExecuteCondition> executeConditions;
+		RHI::ShaderResourceGroupLayout passSrgLayout;
 		
 		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionPerFrame{};
 		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionAllFrames{};

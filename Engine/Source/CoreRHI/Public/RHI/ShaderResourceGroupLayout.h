@@ -31,7 +31,7 @@ namespace CE::RHI
     ENUM_CLASS_FLAGS(ShaderStructMemberType);
 
     STRUCT()
-    struct CORERHI_API ShaderStructMember
+    struct CORERHI_API ShaderStructMember final
     {
         CE_STRUCT(ShaderStructMember)
     public:
@@ -58,7 +58,7 @@ namespace CE::RHI
     ENUM_CLASS_FLAGS(SRGVariableFlags);
 
 	STRUCT()
-	struct CORERHI_API SRGVariableDescriptor
+	struct CORERHI_API SRGVariableDescriptor final
 	{
 		CE_STRUCT(SRGVariableDescriptor)
 	public:
@@ -100,7 +100,7 @@ namespace CE::RHI
 	};
 
 	STRUCT()
-	struct CORERHI_API ShaderResourceGroupLayout
+	struct CORERHI_API ShaderResourceGroupLayout final
 	{
 		CE_STRUCT(ShaderResourceGroupLayout)
 	public:
@@ -110,6 +110,11 @@ namespace CE::RHI
 
 		FIELD()
 		Array<SRGVariableDescriptor> variables{};
+
+		bool IsEmpty() const
+		{
+			return variables.IsEmpty();
+		}
 
 		const SRGVariableDescriptor& FindVariable(const Name& name) const
 		{

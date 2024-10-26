@@ -8,6 +8,7 @@ namespace CE::RHI
 	struct ScopeAttachmentDescriptor
 	{
 		AttachmentID attachmentId{};
+		Name shaderInputName{};
 		AttachmentLoadStoreAction loadStoreAction{};
 		MultisampleState multisampleState{};
 	};
@@ -37,6 +38,8 @@ namespace CE::RHI
 
 		inline const AttachmentID& GetId() const { return id; }
 
+		const Name& GetShaderInputName() const { return shaderInputName; }
+
 		inline FrameAttachment* GetFrameAttachment() const { return attachment; }
 
 		inline ScopeAttachmentUsage GetUsage() const { return usage; }
@@ -52,6 +55,8 @@ namespace CE::RHI
 	protected:
 
 		AttachmentID id{};
+
+		Name shaderInputName{};
 
 		Scope* scope = nullptr;
 

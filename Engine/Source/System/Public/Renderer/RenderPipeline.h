@@ -48,6 +48,9 @@ namespace CE
         FIELD(EditAnywhere, Category = "Anti-Aliasing")
         MSAA msaa = MSAA2;
 
+        FIELD(EditAnywhere, Category = "Depth Stencil")
+        b8 useStencil = false;
+
         FIELD(EditAnywhere, Category = "Shadows")
         int directionalShadowResolution = 1024;
 

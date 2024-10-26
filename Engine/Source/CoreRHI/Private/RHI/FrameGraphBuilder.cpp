@@ -53,6 +53,8 @@ namespace CE::RHI
 			scopeAttachment->usage = usage;
 			scopeAttachment->access = access;
 		}
+
+		scopeAttachment->shaderInputName = descriptor.shaderInputName;
 		
 		return true;
 	}
@@ -63,6 +65,15 @@ namespace CE::RHI
 			return false;
 
 		currentScope->AddShaderResourceGroups(srg);
+		return true;
+	}
+
+	bool FrameGraphBuilder::UsePassSrgLayout(const RHI::ShaderResourceGroupLayout& srgLayout)
+	{
+		if (!currentScope || !frameGraph || srgLayout.IsEmpty())
+			return false;
+
+		currentScope->passSrgLayout = srgLayout;
 		return true;
 	}
 
@@ -85,6 +96,8 @@ namespace CE::RHI
 			scopeAttachment->usage = usage;
 			scopeAttachment->access = access;
 		}
+
+		scopeAttachment->shaderInputName = descriptor.shaderInputName;
 
 		return true;
 	}

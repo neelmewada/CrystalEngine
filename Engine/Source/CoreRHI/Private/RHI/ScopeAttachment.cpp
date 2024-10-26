@@ -14,6 +14,7 @@ namespace CE::RHI
 		, usage(usage), access(access)
 		, loadStoreAction(descriptor.loadStoreAction)
 		, multisampleState(descriptor.multisampleState)
+		, shaderInputName(descriptor.shaderInputName)
 	{
 	}
 

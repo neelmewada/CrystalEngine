@@ -40,6 +40,7 @@ cbuffer _LightData : SRG_PerScene(b2)
 
 SamplerState _ShadowMapSampler : SRG_PerScene(s3);
 
+// - Per Pass -
 Texture2D<float> _DirectionalShadowMap : SRG_PerPass(t0);
 
 TextureCube<float4> _Skybox : SRG_PerScene(t5);
