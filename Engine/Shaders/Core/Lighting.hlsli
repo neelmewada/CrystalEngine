@@ -13,6 +13,7 @@ struct DirectionalLight
     float4 direction;
     float4 colorAndIntensity;
     float temperature;
+    uint shadow;
 };
 
 struct PointLight

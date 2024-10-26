@@ -10,6 +10,7 @@ namespace CE::RPI
         Vec4 direction;
         Vec4 colorAndIntensity;
         float temperature;
+		u32 shadow = 0;
     };
 
 	class CORERPI_API DirectionalLightInstance
@@ -21,6 +22,7 @@ namespace CE::RPI
 		Matrix4x4 viewMatrix;
 		Matrix4x4 viewProjectionMatrix;
 		Vec3 viewPosition;
+		Vec2i pixelResolution;
 		
 		Vec4 colorAndIntensity;
 		float temperature = 0;
@@ -46,6 +48,7 @@ namespace CE::RPI
 		{
 			bool visible : 1 = true;
 			bool initialized : 1 = false;
+			bool shadows : 1 = true;
 		} flags{};
 
 		friend class DirectionalLightFeatureProcessor;

@@ -234,7 +234,7 @@ namespace CE::RPI
 
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
-			View* targetView = renderPipeline->view;
+			//View* targetView = renderPipeline->view;
 
 			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
 				{
@@ -243,14 +243,19 @@ namespace CE::RPI
 
 					SceneViewTag viewTag = pass->GetViewTag();
 
-					if (pass->IsOfType<GpuPass>())
+					if (pass->IsOfType<GpuPass>() && viewsByTag.KeyExists(viewTag))
 					{
 						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
+
+						// TODO: Handle multiple views logic
+						View* targetView = viewsByTag[viewTag].views[0];
+
 						if (targetView != nullptr)
 						{
 							gpuPass->SetViewSrg(targetView->GetShaderResourceGroup());
-							gpuPass->SetSceneSrg(shaderResourceGroup);
 						}
+
+						gpuPass->SetSceneSrg(shaderResourceGroup);
 					}
 				});
 		}

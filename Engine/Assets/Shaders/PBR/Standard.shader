@@ -157,6 +157,10 @@ Shader "PBR/Standard"
                     float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
                     // Disable shadows temporarily
                     float shadow = 0.0;//CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+                    if (_DirectionalLights[i].shadow > 0)
+                    {
+                        // TODO: Add shadow
+                    }
                     shadow = clamp(shadow, 0, 1);
 
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);

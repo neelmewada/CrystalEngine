@@ -31,6 +31,9 @@ namespace CE
         FIELD(EditAnywhere, Category = "Light")
         f32 temperature = 0.0f;
 
+        FIELD(EditAnywhere, Category = "Light")
+        b8 enableShadows = true;
+
     private:
 
     };

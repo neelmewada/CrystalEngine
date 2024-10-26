@@ -267,6 +267,11 @@ namespace CE
 							drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
 						}
 					}
+
+					if (viewTag == "DirectionalLightShadow")
+					{
+						break;
+					}
 				}
 			}
 		}

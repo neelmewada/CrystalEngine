@@ -21,6 +21,13 @@ namespace CE::RPI
 
     void DirectionalLightInstance::UpdateSrgs(u32 imageIndex)
     {
+        PerViewConstants& constants = view->GetViewConstants();
+        constants.projectionMatrix = projectionMatrix;
+        constants.viewMatrix = viewMatrix;
+        constants.viewProjectionMatrix = viewProjectionMatrix;
+        constants.viewPosition = viewPosition;
+        constants.pixelResolution = pixelResolution.ToVec2();
+
         view->UpdateSrg(imageIndex);
     }
 
@@ -111,6 +118,7 @@ namespace CE::RPI
 
             int lightCount = Math::Min((int)lightInstances.GetCount(), maxDirectionalLights);
             int i = 0;
+            int shadowIndex = -1;
 
             for (auto& lightInstance : lightInstances)
             {
@@ -129,6 +137,13 @@ namespace CE::RPI
                 constants->colorAndIntensity = lightInstance.colorAndIntensity;
                 constants->lightSpaceMatrix = lightInstance.viewProjectionMatrix;
                 constants->temperature = lightInstance.temperature;
+                constants->shadow = 0;
+
+                if (shadowIndex == -1 && lightInstance.flags.shadows)
+                {
+                    shadowIndex = i;
+                    constants->shadow = 1;
+                }
 
                 i++;
             }

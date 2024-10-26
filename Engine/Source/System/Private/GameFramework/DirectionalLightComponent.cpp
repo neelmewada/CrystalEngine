@@ -73,6 +73,10 @@ namespace CE
         if (!mainCamera)
             return;
 
+        CE::RenderPipeline* rp = mainCamera->GetRenderPipeline();
+        if (!rp)
+            return;
+
         if (!lightHandle.IsValid())
         {
             RPI::DirectionalLightHandleDescriptor desc{};
@@ -83,11 +87,13 @@ namespace CE
         Vec3 up = GetUpwardVector();
 
         lightHandle->view = rpiView;
+        lightHandle->flags.shadows = enableShadows;
 
         lightHandle->colorAndIntensity = lightColor.ToVec4();
         lightHandle->colorAndIntensity.w = intensity;
         lightHandle->temperature = temperature;
         lightHandle->shadowDistance = shadowDistance;
+        lightHandle->pixelResolution = Vec2i(1, 1) * rp->directionalShadowResolution;
 
         lightHandle->direction = forward;
         lightHandle->viewPosition = mainCamera->GetPosition() + Vec4(0, 5, 0, 0); // Position light 5 units above camera

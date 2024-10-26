@@ -18,6 +18,11 @@ namespace CE
 
     void CE::RenderPipeline::ConstructPipeline()
     {
+	    if (RendererSubsystem* renderer = gEngine->GetSubsystem<RendererSubsystem>())
+        {
+            renderer->RebuildFrameGraph();
+        }
+
         renderPipeline->name = GetName();
         renderPipeline->uuid = GetUuid();
 
