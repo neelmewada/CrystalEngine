@@ -178,6 +178,8 @@ namespace CE::RPI
 
 	void StaticMeshFeatureProcessor::Simulate(const SimulatePacket& packet)
 	{
+		ZoneScoped;
+
 		Super::Simulate(packet);
 
 		JobCompletion jobCompletion = JobCompletion();
@@ -207,6 +209,8 @@ namespace CE::RPI
 
 	void StaticMeshFeatureProcessor::Render(const RenderPacket& packet)
 	{
+		ZoneScoped;
+
 		Super::Render(packet);
 
 		auto parallelRanges = modelInstances.GetParallelRanges();
@@ -247,42 +251,13 @@ namespace CE::RPI
 			jobFunction->Start();
 		}
 
-		/*for (View* view : packet.views)
-		{
-			for (const auto& range : parallelRanges)
-			{
-				Job* jobFunction = new JobFunction([range, view, imageIndex](Job* job)
-					{
-						for (auto it = range.begin; it != range.end; ++it)
-						{
-							if (it->drawPacketsListByLod.IsEmpty())
-								continue;
-							if (!it->flags.visible)
-								continue;
-
-							it->UpdateSrgs(imageIndex);
-
-							for (RHI::ShaderResourceGroup* objectSrg : it->objectSrgList)
-							{
-								objectSrg->FlushBindings();
-							}
-
-							const auto& meshDrawPacketList = it->drawPacketsListByLod[0];
-							RHI::DrawPacket* drawPacket = meshDrawPacketList[0].GetDrawPacket();
-							view->AddDrawPacket(drawPacket, 0);
-						}
-					}, true);
-
-				jobFunction->SetDependent(&jobCompletion);
-				jobFunction->Start();
-			}
-		}*/
-
 		jobCompletion.StartAndWaitForCompletion();
 	}
 
 	void StaticMeshFeatureProcessor::OnRenderEnd()
 	{
+		ZoneScoped;
+
 		Super::OnRenderEnd();
 
 		
@@ -290,6 +265,8 @@ namespace CE::RPI
 
 	Array<Job*> StaticMeshFeatureProcessor::CreateInitJobs()
 	{
+		ZoneScoped;
+
 		Array<Job*> jobs{};
 
 		auto ranges = modelInstances.GetParallelRanges();

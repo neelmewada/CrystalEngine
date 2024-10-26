@@ -124,6 +124,8 @@ namespace CE::RPI
 
 	void Scene::Simulate(f32 currentTime)
 	{
+		ZoneScoped;
+
 		if (shaderResourceGroup == nullptr)
 		{
 			const auto& srgLayout = RPISystem::Get().sceneSrgLayout;
@@ -209,6 +211,8 @@ namespace CE::RPI
 
 	void Scene::PrepareRender(f32 currentTime, u32 imageIndex)
 	{
+		ZoneScoped;
+
 		// - Rebuild render packet -
 		renderPacket.drawListMask.Reset();
 		renderPacket.views.Clear();
@@ -249,7 +253,7 @@ namespace CE::RPI
 
 					SceneViewTag viewTag = pass->GetViewTag();
 
-					if (pass->IsOfType<GpuPass>() && viewsByTag.KeyExists(viewTag))
+					if (pass->IsOfType<GpuPass>() && viewsByTag.KeyExists(viewTag) && viewsByTag[viewTag].views.NonEmpty())
 					{
 						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
 
@@ -278,6 +282,8 @@ namespace CE::RPI
 
 	void Scene::OnRenderEnd()
 	{
+		ZoneScoped;
+
 		for (FeatureProcessor* fp : featureProcessors)
 		{
 			fp->OnRenderEnd();
@@ -286,6 +292,8 @@ namespace CE::RPI
 
 	void Scene::CollectDrawPackets()
 	{
+		ZoneScoped;
+
 		for (FeatureProcessor* fp : featureProcessors)
 		{
 			fp->Render(renderPacket);
