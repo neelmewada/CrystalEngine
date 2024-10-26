@@ -53,7 +53,7 @@ float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
     float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;
     projectionCoords = projectionCoords * float3(0.5, 0.5, 1.0) + float3(0.5, 0.5, 0); // In Vulkan, Z axis is already in [0, 1] range, so we ONLY map X and Y to [0, 1] range FROM [-1, 1] range
     projectionCoords.z = clamp(projectionCoords.z, 0, 1);
-    
+
     float currentDepth = projectionCoords.z;
     float bias = 0.005;
     bias = max(0.01 * (1.0 - NdotL), 0.005);

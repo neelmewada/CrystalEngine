@@ -28,7 +28,7 @@ namespace CE
 
 	    RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
 
-		// - Depth Stencil
+		// - Depth Stencil -
 
 	    RPI::PassAttachment* depthStencilAttachment;
 	    {
@@ -63,7 +63,7 @@ namespace CE
             depthStencilAttachment = renderPipeline->AddAttachment(depthStencilAttachmentDesc);
 	    }
 
-    	// - Color MSAA
+    	// - Color MSAA -
     	
         RPI::PassAttachment* colorMsaa;
 	    {
@@ -100,7 +100,7 @@ namespace CE
             colorMsaa = renderPipeline->AddAttachment(colorMsaaAttachmentDesc);
 	    }
 
-    	// - Directional Shadow Map
+    	// - Directional Shadow Map -
 
         PassAttachment* directionalShadowMap;
 	    {
@@ -114,8 +114,8 @@ namespace CE
             directionalShadowMapDesc.imageDescriptor.arrayLayers = 1;
             directionalShadowMapDesc.imageDescriptor.dimension = Dimension::Dim2D;
             directionalShadowMapDesc.imageDescriptor.sampleCount = 1;
-            directionalShadowMapDesc.imageDescriptor.bindFlags = TextureBindFlags::DepthStencil | TextureBindFlags::ShaderRead;
-            directionalShadowMapDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM_S8_UINT };
+            directionalShadowMapDesc.imageDescriptor.bindFlags = TextureBindFlags::Depth | TextureBindFlags::ShaderRead;
+            directionalShadowMapDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM, Format::D16_UNORM_S8_UINT };
 
             directionalShadowMap = renderPipeline->AddAttachment(directionalShadowMapDesc);
 	    }
@@ -124,7 +124,7 @@ namespace CE
         // Passes
         // -------------------------------
 
-        // - Depth Pass
+        // - Depth Pass -
 
         RPI::RasterPass* depthPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DepthPass");
     	depthPass->SetViewTag(mainViewTag);
@@ -142,7 +142,7 @@ namespace CE
             rootPass->AddChild(depthPass);
 	    }
 
-        // - Skybox Pass
+        // - Skybox Pass -
 
 	    RPI::RasterPass* skyboxPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "SkyboxPass");
     	skyboxPass->SetViewTag(mainViewTag);
@@ -160,7 +160,7 @@ namespace CE
             rootPass->AddChild(skyboxPass);
 	    }
 
-        // - Directional Shadow Pass
+        // - Directional Shadow Pass -
 
         RPI::RasterPass* directionalShadowPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DirectionalShadowPass");
     	directionalShadowPass->SetViewTag("DirectionalLightShadow");
@@ -182,7 +182,7 @@ namespace CE
             rootPass->AddChild(directionalShadowPass);
 	    }
 
-        // - Opaque Pass
+        // - Opaque Pass -
 
         auto opaquePass = CreateObject<RPI::RasterPass>(this, "OpaquePass");
     	opaquePass->SetViewTag(mainViewTag);
@@ -251,7 +251,7 @@ namespace CE
             rootPass->AddChild(opaquePass);
 	    }
 
-        // - Resolve Pass
+        // - Resolve Pass -
 
         auto resolvePass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "ResolvePass");
     	resolvePass->SetViewTag(mainViewTag);

@@ -16,6 +16,10 @@ namespace CE::Vulkan
 			VkFormat vkFormat = RHIFormatToVkFormat(rhiFormat);
 			if (vkFormat == VK_FORMAT_UNDEFINED)
 				continue;
+			if (vkFormat == VK_FORMAT_D32_SFLOAT)
+			{
+				String::IsAlphabet('a');
+			}
 
 			VkFormatProperties properties;
 			vkGetPhysicalDeviceFormatProperties(device->GetPhysicalHandle(), vkFormat, &properties);

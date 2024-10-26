@@ -16,6 +16,7 @@ namespace CE
 
         RPI::RenderPipeline* GetRpiRenderPipeline() const { return renderPipeline; }
 
+        //! @brief Never call this function directly! Use ApplyChanges() instead.
         virtual void ConstructPipeline();
 
         virtual void Tick();
@@ -44,11 +45,11 @@ namespace CE
 
     public:
 
-        FIELD()
+        FIELD(EditAnywhere, Category = "Anti-Aliasing")
         MSAA msaa = MSAA2;
 
-        FIELD()
-        int directionalShadowResolution = 512;
+        FIELD(EditAnywhere, Category = "Shadows")
+        int directionalShadowResolution = 1024;
 
     private:
 
