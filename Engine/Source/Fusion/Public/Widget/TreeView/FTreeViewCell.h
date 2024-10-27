@@ -23,6 +23,8 @@ namespace CE
 
 
         FUSION_PROPERTY_WRAPPER(Text, label);
+        FUSION_PROPERTY_WRAPPER(FontSize, label);
+        FUSION_PROPERTY_WRAPPER(Foreground, label);
 
         FUSION_WIDGET;
     };

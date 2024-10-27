@@ -65,10 +65,28 @@ namespace CE
 
 		activeScene = scene;
 
+		if (activeScene)
+		{
+			for (ISceneSubsystemCallbacks* callbackHandler : callbackHandlers)
+			{
+				callbackHandler->OnSceneLoaded(activeScene);
+			}
+		}
+
 		if (activeScene && isPlaying)
 		{
 			activeScene->OnBeginPlay();
 		}
+	}
+
+	void SceneSubsystem::AddCallbacks(ISceneSubsystemCallbacks* callbacks)
+	{
+		callbackHandlers.Add(callbacks);
+	}
+
+	void SceneSubsystem::RemoveCallbacks(ISceneSubsystemCallbacks* callbacks)
+	{
+		callbackHandlers.Remove(callbacks);
 	}
 
 	void SceneSubsystem::Tick(f32 deltaTime)

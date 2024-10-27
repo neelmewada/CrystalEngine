@@ -177,6 +177,11 @@ namespace CE
         return Enabled() && Visible();
     }
 
+    void FWidget::SetParent(FWidget* parent)
+    {
+        this->parent = parent;
+    }
+
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         ZoneScoped;

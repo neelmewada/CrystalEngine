@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ISceneSubsystemCallbacks.h"
+
 namespace CE
 {
 	class Scene;
@@ -19,6 +21,9 @@ namespace CE
 		CE::Scene* FindRpiSceneOwner(RPI::Scene* scene);
 
 		void LoadScene(CE::Scene* scene);
+
+		void AddCallbacks(ISceneSubsystemCallbacks* callbacks);
+		void RemoveCallbacks(ISceneSubsystemCallbacks* callbacks);
 
 	protected:
 
@@ -40,6 +45,7 @@ namespace CE
     private:
 
 		RendererSubsystem* renderer = nullptr;
+		Array<ISceneSubsystemCallbacks*> callbackHandlers{};
 
 		bool isPlaying = false;
 

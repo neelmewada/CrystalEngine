@@ -5,6 +5,7 @@ namespace CE
 	class AssetManager;
 	class GameInstance;
 	class EngineSubsystem;
+	class SceneSubsystem;
 	class Scene;
 
 	CLASS(Abstract, Config = Engine)
@@ -34,6 +35,8 @@ namespace CE
 		AssetManager* GetAssetManager() const { return assetManager; }
 
 		EngineSubsystem* GetSubsystem(ClassType* subsystemClass);
+
+		SceneSubsystem* GetSceneSubsystem();
 
 		template<typename TSubsystem> requires TIsBaseClassOf<EngineSubsystem, TSubsystem>::Value
 		FORCE_INLINE TSubsystem* GetSubsystem()

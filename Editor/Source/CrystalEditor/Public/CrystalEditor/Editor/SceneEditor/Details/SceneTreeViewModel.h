@@ -16,6 +16,8 @@ namespace CE
 
 	public:
 
+        bool IsReady() override { return scene != nullptr; }
+
         FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent) override;
 
         u32 GetRowCount(const FModelIndex& parent) override;

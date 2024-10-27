@@ -13,6 +13,16 @@ namespace CE
         return static_cast<FTreeViewCell*>(contentStack->GetChild(index));
     }
 
+    void FTreeViewRow::AddCell(FTreeViewCell& cell)
+    {
+        contentStack->AddChild(&cell);
+    }
+
+    void FTreeViewRow::AddCell(FTreeViewCell* cell)
+    {
+        contentStack->AddChild(cell);
+    }
+
     void FTreeViewRow::Construct()
     {
         Super::Construct();

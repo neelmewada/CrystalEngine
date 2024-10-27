@@ -3,7 +3,7 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneEditor : public EditorDockTab
+    class CRYSTALEDITOR_API SceneEditor : public EditorDockTab, public ISceneSubsystemCallbacks
     {
         CE_CLASS(SceneEditor, EditorDockTab)
     public:
@@ -19,6 +19,10 @@ namespace CE::Editor
         void LoadSandboxScene();
 
         void Construct() override;
+
+        void OnBeforeDestroy() override;
+
+        void OnSceneLoaded(CE::Scene* scene) override;
 
         FSplitBox* rootSplitBox = nullptr;
 

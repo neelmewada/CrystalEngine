@@ -32,6 +32,18 @@ namespace CE
         FIELD()
         FBrush background = Color::RGBA(26, 26, 26);
 
+        FIELD()
+        FBrush rowBackground = Color::Clear();
+
+        FIELD()
+        FBrush rowAlternateBackground = Color::Clear();
+
+        FIELD()
+        FBrush rowSelectionBackground = Color::RGBA(0, 112, 224);
+
+        FIELD()
+        FBrush rowHoverBackground = Color::RGBA(0, 112, 224, 80);
+
     };
     
 } // namespace CE

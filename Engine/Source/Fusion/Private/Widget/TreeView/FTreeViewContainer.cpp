@@ -47,98 +47,7 @@ namespace CE
     {
 	    Super::OnPostComputeLayout();
 
-    }
-
-    void FTreeViewContainer::OnModelUpdate()
-    {
-        if (treeView == nullptr || treeView->m_Model == nullptr)
-            return;
-        if (!treeView->m_GenerateRowDelegate.IsValid())
-            return;
-
-        auto model = treeView->m_Model;
-
-        int childIndex = 0;
-        f32 curPosY = 0;
-        f32 scrollY = -Translation().y;
-
-        if (treeView->header)
-        {
-            model->SetHeaderData(*treeView->header);
-        }
-
-        Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
-            {
-                int rowCount = model->GetRowCount(parent);
-	            if (rowCount == 0)
-	                return;
-
-                for (int i = 0; i < rowCount; ++i)
-                {
-                    FModelIndex index = model->GetIndex(i, 0, parent);
-                    if (!index.IsValid())
-                        continue;
-
-                    f32 rowHeight = 0;
-
-                    if (!treeView->m_RowHeightDelegate.IsValid())
-                    {
-                        rowHeight = treeView->m_RowHeight;
-                    }
-                    else
-                    {
-                        rowHeight = treeView->m_RowHeightDelegate(index);
-                    }
-
-                    f32 topY = curPosY;
-                    f32 bottomY = curPosY + rowHeight;
-
-                    if (bottomY < scrollY)
-                    {
-                        curPosY += rowHeight; // We are above the scroll view
-	                    continue;
-                    }
-                    else if (topY > scrollY + computedSize.y)
-                    {
-	                    break; // We are below the scroll view
-                    }
-
-                    FTreeViewRow* rowWidget = nullptr;
-                    if (childIndex < children.GetCount())
-                    {
-                        rowWidget = children[childIndex];
-                    }
-                    else
-                    {
-                        rowWidget = &treeView->m_GenerateRowDelegate(index);
-                        children.Insert(rowWidget);
-                    }
-
-                    rowWidget->index = index;
-                    rowWidget->Enabled(true);
-
-                    childIndex++;
-                    curPosY += rowHeight;
-
-                    model->SetData(i, *rowWidget, parent);
-
-                    if (expandedRows.Exists(index) && model->GetRowCount(index) > 0)
-                    {
-                        visitor(index);
-                    }
-                }
-            };
-
-        visitor(FModelIndex());
-
-        while (childIndex < children.GetCount())
-        {
-            children[childIndex]->Enabled(false);
-
-            childIndex++;
-        }
-
-        MarkDirty();
+        OnModelUpdate();
     }
 
     void FTreeViewContainer::SetContextRecursively(FFusionContext* context)
@@ -230,11 +139,144 @@ namespace CE
         Super::HandleEvent(event);
     }
 
+    void FTreeViewContainer::OnModelUpdate()
+    {
+        if (treeView == nullptr || treeView->m_Model == nullptr || !treeView->m_Model->IsReady())
+            return;
+        if (!treeView->m_GenerateRowDelegate.IsValid())
+            return;
+
+        auto model = treeView->m_Model;
+
+        int childIndex = 0;
+        f32 curPosY = 0;
+        f32 scrollY = -Translation().y;
+        int globalRowIdx = 0;
+
+        if (treeView->header)
+        {
+            model->SetHeaderData(*treeView->header);
+        }
+
+        Delegate<void(const FModelIndex&, int)> visitor = [&](const FModelIndex& parent, int indentLevel) -> void
+            {
+                int rowCount = model->GetRowCount(parent);
+                if (rowCount == 0)
+                    return;
+
+                for (int i = 0; i < rowCount; ++i)
+                {
+                    FModelIndex index = model->GetIndex(i, 0, parent);
+                    if (!index.IsValid())
+                        continue;
+
+                    f32 rowHeight = 0;
+
+                    if (!treeView->m_RowHeightDelegate.IsValid())
+                    {
+                        rowHeight = treeView->m_RowHeight;
+                    }
+                    else
+                    {
+                        rowHeight = treeView->m_RowHeightDelegate(index);
+                    }
+
+                    f32 topY = curPosY;
+                    f32 bottomY = curPosY + rowHeight;
+
+                    if (bottomY < scrollY)
+                    {
+                        curPosY += rowHeight; // We are above the scroll view
+                        globalRowIdx++;
+                        continue;
+                    }
+                    else if (topY > scrollY + computedSize.y)
+                    {
+                        break; // We are below the scroll view
+                    }
+
+                    FTreeViewRow* rowWidget = nullptr;
+                    if (childIndex < children.GetCount())
+                    {
+                        rowWidget = children[childIndex];
+                    }
+                    else
+                    {
+                        rowWidget = &treeView->m_GenerateRowDelegate();
+                        children.Insert(rowWidget);
+                    }
+
+                    rowWidget->SetParent(this);
+                    rowWidget->index = index;
+                    rowWidget->Enabled(true);
+                    rowWidget->isAlternate = (globalRowIdx % 2 != 0);
+                    rowWidget->treeView = treeView;
+
+                    auto ctx = GetContext();
+                    rowWidget->SetContextRecursively(ctx);
+                    rowWidget->ApplyStyleRecursively();
+
+                    (*rowWidget)
+						.Background(rowWidget->isAlternate ? treeView->m_RowBackgroundAlternate : treeView->m_RowBackground)
+                        ;
+
+                    childIndex++;
+                    curPosY += rowHeight;
+
+                    model->SetData(i, *rowWidget, parent);
+
+                    for (int c = 0; c < treeView->header->GetColumnCount() && c < rowWidget->GetCellCount(); ++c)
+                    {
+                        f32 minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
+                        rowWidget->Visible(true);
+
+                        FTreeViewCell* cell = rowWidget->GetCell(c);
+
+                        if (treeView->m_ExpandableColumn == c && indentLevel > 0)
+                        {
+                            f32 indentOffset = treeView->m_Indentation * indentLevel;
+                            if (indentOffset < minWidth)
+                            {
+                                cell->Margin(Vec4(indentOffset, 0, 0, 0));
+                                cell->Width(minWidth - indentOffset);
+                            }
+                            else
+                            {
+                                rowWidget->Visible(false);
+                            }
+                        }
+                        else
+                        {
+                            cell->Width(minWidth);
+                        }
+                    }
+
+                    globalRowIdx++;
+
+                    if (expandedRows.Exists(index) && model->GetRowCount(index) > 0)
+                    {
+                        visitor(index, indentLevel + 1);
+                    }
+                }
+            };
+
+        visitor(FModelIndex(), 0);
+
+        while (childIndex < children.GetCount())
+        {
+            children[childIndex]->Enabled(false);
+
+            childIndex++;
+        }
+
+        MarkDirty();
+    }
+
     void FTreeViewContainer::CalculateIntrinsicSize()
     {
         ZoneScoped;
 
-        if (treeView == nullptr || treeView->m_Model == nullptr)
+        if (treeView == nullptr || treeView->m_Model == nullptr || !treeView->m_Model->IsReady())
         {
             Super::CalculateIntrinsicSize();
             return;
@@ -278,10 +320,7 @@ namespace CE
         if (treeView->AutoHeight())
         {
             visitor(FModelIndex());
-        }
-        else
-        {
-            contentSize.height = m_MinHeight;
+            contentSize.height = totalRowHeight;
         }
 
         for (int i = 0; i < children.GetCount(); ++i)
@@ -290,9 +329,15 @@ namespace CE
                 continue;
 
             children[i]->CalculateIntrinsicSize();
+            contentSize.width = Math::Max(contentSize.width, children[i]->GetIntrinsicSize().width);
+
+            if (!treeView->AutoHeight())
+            {
+                contentSize.height += children[i]->GetIntrinsicSize().height;
+            }
         }
 
-        intrinsicSize.width += m_MinWidth;
+        intrinsicSize.width += contentSize.width;
         intrinsicSize.height += contentSize.height;
 
         ApplyIntrinsicSizeConstraints();
@@ -318,7 +363,9 @@ namespace CE
 
         for (int i = 0; i < children.GetCount(); ++i)
         {
-	        if (!children[i]->Enabled())
+            auto child = children[i];
+
+	        if (!child->Enabled())
                 continue;
 
             f32 rowHeight = 0;
@@ -328,11 +375,15 @@ namespace CE
             }
             else
             {
-                rowHeight = treeView->m_RowHeightDelegate(children[i]->index);
+                rowHeight = treeView->m_RowHeightDelegate(child->index);
             }
 
-            children[i]->SetComputedPosition(curPos);
-            children[i]->SetComputedSize(Vec2(availableSize.x, ));
+            child->SetComputedPosition(curPos);
+            child->SetComputedSize(Vec2(availableSize.x, rowHeight));
+
+        	child->PlaceSubWidgets();
+
+            curPos.y += rowHeight;
         }
 
         // TODO: Place sub-widgets

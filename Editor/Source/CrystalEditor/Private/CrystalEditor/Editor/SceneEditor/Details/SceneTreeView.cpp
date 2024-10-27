@@ -19,7 +19,7 @@ namespace CE::Editor
         Style("TreeView");
     }
 
-    FTreeViewRow& SceneTreeView::GenerateRow(const FModelIndex& modelIndex)
+    FTreeViewRow& SceneTreeView::GenerateRow()
     {
         FTreeViewRow& row = FNew(FTreeViewRow);
 
@@ -27,9 +27,10 @@ namespace CE::Editor
 
         for (int i = 0; i < numColumns; ++i)
         {
-            row.Cells(
+            row.AddCell(
 				FNew(FTreeViewCell)
                 .Text("Cell")
+                .FontSize(13)
             );
         }
 

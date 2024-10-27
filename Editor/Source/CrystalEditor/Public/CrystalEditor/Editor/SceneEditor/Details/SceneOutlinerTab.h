@@ -10,6 +10,8 @@ namespace CE::Editor
 
         // - Public API -
 
+        void SetScene(CE::Scene* scene);
+
     protected:
 
         SceneOutlinerTab();
@@ -23,6 +25,7 @@ namespace CE::Editor
 
 
         FUSION_WIDGET;
+        friend class SceneEditor;
     };
     
 }

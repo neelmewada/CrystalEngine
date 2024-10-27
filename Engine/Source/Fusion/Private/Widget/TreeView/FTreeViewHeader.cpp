@@ -8,9 +8,16 @@ namespace CE
 
     }
 
-    FTreeViewHeaderColumn* FTreeViewHeader::GetHeader(u32 index)
+    u32 FTreeViewHeader::GetColumnCount() const
     {
-        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index));
+        if (contentStack->GetChildCount() == 0)
+            return 0;
+        return contentStack->GetChildCount() / 2 + 1;
+    }
+
+    FTreeViewHeaderColumn* FTreeViewHeader::GetColumn(u32 index)
+    {
+        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index * 2));
     }
 
     void FTreeViewHeader::Construct()
@@ -34,6 +41,7 @@ namespace CE
         .Background(Color::Black())
         .Width(5)
         .VAlign(VAlign::Fill)
+        .Name("Separator")
     	;
 
         if (treeView)

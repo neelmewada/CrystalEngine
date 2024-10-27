@@ -143,6 +143,14 @@ namespace CE
 		return nullptr;
 	}
 
+	SceneSubsystem* Engine::GetSceneSubsystem()
+	{
+		if (this == nullptr)
+			return nullptr;
+
+		return GetSubsystem<SceneSubsystem>();
+	}
+
 	void Engine::LoadScene(CE::Scene* scene)
 	{
 		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();

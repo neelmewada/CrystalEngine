@@ -13,6 +13,7 @@ namespace CE
 
         m_AutoHeight = false;
         m_MinHeight = 30;
+        m_Indentation = 10;
     }
 
     void FTreeView::Construct()
@@ -46,6 +47,7 @@ namespace CE
 	    Super::OnFusionPropertyModified(propertyName);
 
         static const CE::Name model = "Model";
+        static const CE::Name indentation = "Indentation";
 
         if (propertyName == model)
         {

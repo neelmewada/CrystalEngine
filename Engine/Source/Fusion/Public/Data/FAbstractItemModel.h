@@ -52,6 +52,10 @@ namespace CE
 
         // - Public API -
 
+        //! @brief Override this function and return false if the data is not ready or if it's empty.
+        //! That will prevent rendering of any content in the item view.
+        virtual bool IsReady() { return true; }
+
         FModelIndex CreateIndex(u32 row, u32 column, void* data = nullptr);
 
         virtual FModelIndex GetParent(const FModelIndex& index) { return FModelIndex(); }

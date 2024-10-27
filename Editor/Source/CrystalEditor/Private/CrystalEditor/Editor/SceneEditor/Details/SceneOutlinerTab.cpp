@@ -15,7 +15,6 @@ namespace CE::Editor
         CE::Scene* scene = gEngine->GetActiveScene();
 
         treeViewModel = CreateObject<SceneTreeViewModel>(this, "TreeViewModel");
-        treeViewModel->SetScene(scene);
         
         (*this)
 			.Title("Scene Outliner")
@@ -30,17 +29,28 @@ namespace CE::Editor
 
                         FNew(FTreeViewHeaderColumn)
                         .Title("Type")
-                        .Width(80)
+                        .Width(140)
                     )
                 )
-                .RowHeight(20)
-                .Model(treeViewModel)
+                .RowHeight(25)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
             )
     	;
 
+        if (scene)
+        {
+            treeViewModel->SetScene(scene);
+            treeView->Model(treeViewModel);
+        }
+
         treeView->ApplyStyleRecursively();
+    }
+
+    void SceneOutlinerTab::SetScene(CE::Scene* scene)
+    {
+        treeViewModel->SetScene(scene);
+        treeView->Model(treeViewModel);
     }
     
 }

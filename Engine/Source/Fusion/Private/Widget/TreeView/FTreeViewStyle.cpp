@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewStyle::FTreeViewStyle()
     {
-
+        rowAlternateBackground = Color::RGBA(36, 36, 36);
     }
 
     FTreeViewStyle::~FTreeViewStyle()
@@ -47,6 +47,11 @@ namespace CE
                     ;
             }
         }
+
+        treeView
+    		.RowBackground(rowBackground)
+			.RowBackgroundAlternate(rowAlternateBackground)
+    	;
     }
 
 } // namespace CE

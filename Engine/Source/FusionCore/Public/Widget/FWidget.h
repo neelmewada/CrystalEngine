@@ -148,6 +148,9 @@ namespace CE
         //! @brief Returns true if this widget is both enabled and visible.
         bool IsVisible();
 
+        //! @brief Internal use only! Never call this function directly.
+        void SetParent(FWidget* parent);
+
     private:
 
     protected:

@@ -106,10 +106,27 @@ namespace CE::Editor
 
         Title("Scene Editor");
 
+        gEngine->GetSceneSubsystem()->AddCallbacks(this);
+
         ConstructMenuBar();
         ConstructDockspaces();
 
         LoadSandboxScene();
+    }
+
+    void SceneEditor::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (SceneSubsystem* sceneSubsystem = gEngine->GetSceneSubsystem())
+        {
+            sceneSubsystem->RemoveCallbacks(this);
+        }
+    }
+
+    void SceneEditor::OnSceneLoaded(CE::Scene* scene)
+    {
+        sceneOutlinerTab->SetScene(scene);
     }
 
     void SceneEditor::ConstructDockspaces()

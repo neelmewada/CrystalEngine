@@ -13,9 +13,9 @@ namespace CE
 
         // - Public API -
 
-        u32 GetHeaderCount() const { return contentStack->GetChildCount(); }
+        u32 GetColumnCount() const;
 
-        FTreeViewHeaderColumn* GetHeader(u32 index);
+        FTreeViewHeaderColumn* GetColumn(u32 index);
 
     protected:
 

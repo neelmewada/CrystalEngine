@@ -14,6 +14,9 @@ namespace CE
 
         FTreeViewCell* GetCell(u32 index) const;
 
+        void AddCell(FTreeViewCell& cell);
+        void AddCell(FTreeViewCell* cell);
+
     protected:
 
         FTreeViewRow();
@@ -23,8 +26,10 @@ namespace CE
         FHorizontalStack* contentStack = nullptr;
 
         FModelIndex index{};
+        bool isAlternate = false;
+        FTreeView* treeView = nullptr;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
 
         template<typename... TWidget> requires TMatchAllBaseClass<FWidget, TWidget...>::Value
         Self& Cells(TWidget&... widgets)
