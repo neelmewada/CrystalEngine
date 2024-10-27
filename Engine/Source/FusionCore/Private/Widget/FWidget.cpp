@@ -29,6 +29,8 @@ namespace CE
 
     void FWidget::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
         globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
     }
 
@@ -36,6 +38,8 @@ namespace CE
     {
         if (event->stopPropagation)
             return;
+
+        ZoneScoped;
 
         m_OnEvent(event);
 
@@ -69,6 +73,11 @@ namespace CE
 
     FWidget* FWidget::HitTest(Vec2 localMousePos)
     {
+        ZoneScoped;
+
+        if (!Enabled())
+            return nullptr;
+
         Vec2 rectPos = computedPosition;
         Vec2 rectSize = computedSize;
 
@@ -81,6 +90,8 @@ namespace CE
 
     bool FWidget::ParentExistsRecursive(FWidget* parent)
     {
+        ZoneScoped;
+
         if (this->parent == nullptr)
             return false;
         if (this->parent == parent || this == parent)
@@ -101,6 +112,8 @@ namespace CE
 
     void FWidget::OnDetachedFromParent(FWidget* parent)
     {
+        ZoneScoped;
+
         FHierarchyEvent event{};
         event.direction = FEventDirection::TopToBottom;
         event.type = FEventType::HierarchyDetached;
@@ -123,6 +136,8 @@ namespace CE
 
     void FWidget::Focus()
     {
+        ZoneScoped;
+
         FFusionContext* context = GetContext();
         if (context)
         {
@@ -132,6 +147,8 @@ namespace CE
 
     void FWidget::Unfocus()
     {
+        ZoneScoped;
+
         FFusionContext* context = GetContext();
         if (IsFocused() && context)
         {
@@ -139,18 +156,31 @@ namespace CE
         }
     }
 
+    bool FWidget::IsEnabledInHierarchy()
+    {
+        ZoneScoped;
+
+        return Enabled() && (parent == nullptr || parent->IsEnabledInHierarchy());
+    }
+
     bool FWidget::IsVisibleInHierarchy()
     {
+        ZoneScoped;
+
         return Enabled() && Visible() && (parent == nullptr || parent->IsVisibleInHierarchy());
     }
 
     bool FWidget::IsVisible()
     {
+        ZoneScoped;
+
         return Enabled() && Visible();
     }
 
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
+        ZoneScoped;
+
         static const HashSet<CE::Name> transformProperties = { "Translation", "Angle", "Scale" };
         static const CE::Name fillRatioName = "FillRatio";
 
@@ -169,6 +199,8 @@ namespace CE
 
     void FWidget::OnAfterConstruct()
     {
+        ZoneScoped;
+
 	    Super::OnAfterConstruct();
 
         Construct();
@@ -176,6 +208,8 @@ namespace CE
 
     void FWidget::OnBeforeDestroy()
     {
+        ZoneScoped;
+
 	    Super::OnBeforeDestroy();
 
         if (GetContext())
@@ -192,6 +226,8 @@ namespace CE
 
     void FWidget::CalculateIntrinsicSize()
     {
+        ZoneScoped;
+
         intrinsicSize = Vec2(m_MinWidth + m_Padding.left + m_Padding.right, 
             m_MinHeight + m_Padding.top + m_Padding.bottom);
 
@@ -200,6 +236,8 @@ namespace CE
 
     void FWidget::PlaceSubWidgets()
     {
+        ZoneScoped;
+
         ApplySizeConstraints();
 
         UpdateLocalTransform();
@@ -252,6 +290,8 @@ namespace CE
 
     bool FWidget::AddChild(FWidget* child)
     {
+        ZoneScoped;
+
         if (TryAddChild(child))
         {
             if (child->GetOuter() == nullptr)
@@ -274,6 +314,8 @@ namespace CE
 
     void FWidget::RemoveChild(FWidget* child)
     {
+        ZoneScoped;
+
         if (TryRemoveChild(child))
         {
             child->OnDetachedFromParent(this);
@@ -287,10 +329,7 @@ namespace CE
 
     void FWidget::ApplyStyle()
     {
-        if (GetName() == "NewProjectListView")
-        {
-            String::IsAlphabet('a');
-        }
+        ZoneScoped;
 
         if (styleKey.IsValid() && m_Style == nullptr)
         {
@@ -380,6 +419,8 @@ namespace CE
 
     FWidget& FWidget::Style(const CE::Name& styleKey)
     {
+        ZoneScoped;
+
         if (!styleKey.IsValid())
             return *this;
 
@@ -400,6 +441,8 @@ namespace CE
 
     FWidget& FWidget::Style(FStyleSet* styleSet, const CE::Name& styleKey)
     {
+        ZoneScoped;
+
         if (!styleSet)
             return *this;
 

@@ -10,6 +10,7 @@ namespace CE
         m_ScrollBarMargin = 2.5f;
 
         m_VerticalScrollSensitivity = 15.0f;
+
         m_AutoHeight = false;
         m_MinHeight = 30;
     }

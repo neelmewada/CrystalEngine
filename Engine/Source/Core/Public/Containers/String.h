@@ -104,7 +104,9 @@ namespace CE
         }
         inline bool operator==(const char* cString) const
         {
-            if (cString == nullptr)
+            if (cString == GetCString())
+                return true;
+            if (cString == nullptr || GetCString() == nullptr)
                 return false;
             return strcmp(GetCString(), cString) == 0;
         }

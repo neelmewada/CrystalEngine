@@ -10,6 +10,10 @@ namespace CE
 
         // - Public API -
 
+        u32 GetCellCount() const { return contentStack->GetChildCount(); }
+
+        FTreeViewCell* GetCell(u32 index) const;
+
     protected:
 
         FTreeViewRow();
@@ -18,10 +22,12 @@ namespace CE
 
         FHorizontalStack* contentStack = nullptr;
 
+        FModelIndex index{};
+
     public: // - Fusion Properties - 
 
         template<typename... TWidget> requires TMatchAllBaseClass<FWidget, TWidget...>::Value
-        Self& Columns(TWidget&... widgets)
+        Self& Cells(TWidget&... widgets)
         {
             contentStack->DestroyAllChildren();
 
@@ -45,6 +51,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FTreeView;
+        friend class FTreeViewContainer;
     };
     
 }

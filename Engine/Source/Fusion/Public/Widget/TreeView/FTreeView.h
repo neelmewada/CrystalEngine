@@ -2,8 +2,8 @@
 
 namespace CE
 {
-    typedef ScriptDelegate<f32(const FModelIndex&)> FRowHeightDelegate;
-    typedef ScriptDelegate<FTreeViewRow&(const FModelIndex&)> FGenerateRowDelegate;
+    typedef Delegate<f32(const FModelIndex&)> FRowHeightDelegate;
+    typedef Delegate<FTreeViewRow&(const FModelIndex&)> FGenerateRowDelegate;
 
     CLASS()
     class FUSION_API FTreeView : public FStyledWidget

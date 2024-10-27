@@ -23,7 +23,7 @@ namespace CE
             if (row >= scene->GetRootActorCount())
                 return {};
 
-            return CreateIndex(row, column, scene->GetRootActor(0));
+            return CreateIndex(row, column, scene->GetRootActor(row));
         }
 
         Actor* parentActor = (Actor*)parent.GetDataPtr();
@@ -58,9 +58,19 @@ namespace CE
 
     void SceneTreeViewModel::SetData(u32 row, FTreeViewRow& rowWidget, const FModelIndex& parent)
     {
+        if (!scene)
+            return;
 
+        FModelIndex index = GetIndex(row, 0, parent);
+        if (!index.IsValid() || index.GetDataPtr() == nullptr)
+            return;
+
+        Actor* actor = (Actor*)index.GetDataPtr();
+        String actorType = actor->GetType()->GetName().GetLastComponent();
+
+        rowWidget.GetCell(0)->Text(actor->GetName().GetString());
+        rowWidget.GetCell(1)->Text(actorType);
     }
-
 
     void SceneTreeViewModel::SetScene(CE::Scene* scene)
     {

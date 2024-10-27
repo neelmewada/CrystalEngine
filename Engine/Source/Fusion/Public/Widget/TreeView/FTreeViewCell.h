@@ -16,9 +16,11 @@ namespace CE
 
         void Construct() override;
 
+        FImage* arrowIcon = nullptr;
         FLabel* label = nullptr;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
+
 
         FUSION_PROPERTY_WRAPPER(Text, label);
 

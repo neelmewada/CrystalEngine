@@ -513,6 +513,8 @@ TEST(Containers, Variant)
 	EXPECT_EQ(value.GetValue<Array<String>>()[0], "Item1");
 	EXPECT_EQ(value.GetValue<Array<String>>()[1], "Item2");
 
+	// Object
+
 	// Struct
 	VariantStruct testStruct{};
 	testStruct.stringArray = { "Item0", "Item1", "Item2" };

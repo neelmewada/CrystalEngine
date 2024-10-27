@@ -15,6 +15,10 @@ namespace CE
 		isPointer = copy.isPointer;
 		isArray = copy.isArray;
 		isStruct = copy.isStruct;
+		if (isStruct)
+		{
+			structType = copy.structType;
+		}
 
 		if (copy.IsOfType<String>())
 		{

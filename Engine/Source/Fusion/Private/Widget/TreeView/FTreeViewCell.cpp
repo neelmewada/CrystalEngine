@@ -12,6 +12,8 @@ namespace CE
     {
         Super::Construct();
 
+        FBrush downwardArrow = FBrush("/Engine/Resources/Icons/DownwardArrow");
+
         Child(
             FNew(FHorizontalStack)
             .ContentHAlign(HAlign::Left)
@@ -19,6 +21,11 @@ namespace CE
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
             (
+                FAssignNew(FImage, arrowIcon)
+                .Background(downwardArrow)
+                .Angle(90)
+                .Enabled(false),
+
                 FAssignNew(FLabel, label)
                 .HAlign(HAlign::Left)
             )

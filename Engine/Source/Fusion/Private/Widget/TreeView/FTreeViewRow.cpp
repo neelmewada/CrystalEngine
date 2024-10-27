@@ -8,6 +8,11 @@ namespace CE
 
     }
 
+    FTreeViewCell* FTreeViewRow::GetCell(u32 index) const
+    {
+        return static_cast<FTreeViewCell*>(contentStack->GetChild(index));
+    }
+
     void FTreeViewRow::Construct()
     {
         Super::Construct();

@@ -53,7 +53,7 @@ namespace CE
     {
         if (treeView == nullptr || treeView->m_Model == nullptr)
             return;
-        if (!treeView->m_GenerateRowDelegate.IsBound())
+        if (!treeView->m_GenerateRowDelegate.IsValid())
             return;
 
         auto model = treeView->m_Model;
@@ -81,7 +81,7 @@ namespace CE
 
                     f32 rowHeight = 0;
 
-                    if (!treeView->m_RowHeightDelegate.IsBound())
+                    if (!treeView->m_RowHeightDelegate.IsValid())
                     {
                         rowHeight = treeView->m_RowHeight;
                     }
@@ -114,6 +114,7 @@ namespace CE
                         children.Insert(rowWidget);
                     }
 
+                    rowWidget->index = index;
                     rowWidget->Enabled(true);
 
                     childIndex++;
@@ -233,6 +234,11 @@ namespace CE
     {
         ZoneScoped;
 
+        ScriptDelegate<FTreeViewRow&(void)> testDelegate = [&]() -> FTreeViewRow&
+            {
+                return FNew(FTreeViewRow);
+            };
+
         if (treeView == nullptr || treeView->m_Model == nullptr)
         {
             Super::CalculateIntrinsicSize();
@@ -258,7 +264,7 @@ namespace CE
                 {
                     FModelIndex index = model->GetIndex(i, 0, parent);
 
-                    if (!treeView->m_RowHeightDelegate.IsBound())
+                    if (!treeView->m_RowHeightDelegate.IsValid())
                     {
 	                    totalRowHeight += treeView->m_RowHeight;
                     }
@@ -300,12 +306,20 @@ namespace CE
             return;
         }
 
+        f32 scrollY = -Translation().y;
+
         Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
         f32 remainingSize = 0;
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
             m_Padding.top + m_Padding.bottom);
 
-        
+        for (int i = 0; i < children.GetCount(); ++i)
+        {
+	        if (!children[i]->Enabled())
+                continue;
+
+
+        }
 
         // TODO: Place sub-widgets
     }
