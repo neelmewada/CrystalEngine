@@ -32,7 +32,7 @@ namespace CE
 		{}
 	};
 
-	class CORE_API Variant
+	class CORE_API Variant final
 	{
 	public:
 		Variant() : valueTypeId(0)
@@ -154,6 +154,12 @@ namespace CE
 			valueTypeId = TYPEID(CE::Array<IO::Path>);
 			arrayElementTypeId = TYPEID(IO::Path);
 			isArray = true;
+		}
+
+		template<typename RefType> requires TIsBaseClassOf<Object, std::remove_cvref_t<RefType>>::Value
+		Variant(RefType& ref) : Variant((RefType*)& ref)
+		{
+			
 		}
 
 		template<typename PtrType>

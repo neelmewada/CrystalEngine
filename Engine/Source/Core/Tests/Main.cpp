@@ -514,6 +514,15 @@ TEST(Containers, Variant)
 	EXPECT_EQ(value.GetValue<Array<String>>()[1], "Item2");
 
 	// Object
+	Object* testObject = CreateObject<Object>(nullptr, "TestObject");
+	{
+		Object& ref = *testObject;
+		value = ref;
+
+		EXPECT_TRUE(value.IsOfType<Object>());
+		EXPECT_EQ(value.GetValue<Object*>(), testObject);
+	}
+	testObject->Destroy(); testObject = nullptr;
 
 	// Struct
 	VariantStruct testStruct{};
