@@ -135,7 +135,6 @@ namespace CE
 		ZoneScoped;
 
 		Super::Tick(delta);
-		bool isExiting = IsEngineRequestingExit();
 
 		FusionApplication* app = FusionApplication::TryGet();
 
@@ -144,6 +143,11 @@ namespace CE
 		if (app)
 		{
 			app->Tick();
+		}
+
+		if (IsEngineRequestingExit())
+		{
+			return;
 		}
 
 		if (rebuildFrameGraph)

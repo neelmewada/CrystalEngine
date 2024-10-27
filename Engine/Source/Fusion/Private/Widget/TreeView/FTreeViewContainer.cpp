@@ -287,8 +287,6 @@ namespace CE
 
         treeView->ApplyStyle();
         MarkDirty();
-
-        CE_LOG(Info, All, "OnModelUpdate()");
     }
 
     void FTreeViewContainer::CalculateIntrinsicSize()

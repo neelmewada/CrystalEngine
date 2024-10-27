@@ -30,6 +30,8 @@ namespace CE::Editor
         EditorToolBar* toolBar = nullptr;
         FStyledWidget* content = nullptr;
 
+        FWidget* dockspace = nullptr;
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(String, Title);
@@ -46,8 +48,10 @@ namespace CE::Editor
 
         Self& Content(FWidget& widget);
 
-
         FUSION_WIDGET;
+        friend class EditorDockspace;
+        friend class EditorMinorDockspace;
+        friend class EditorDockTabItem;
     };
 
     CLASS()
@@ -62,6 +66,9 @@ namespace CE::Editor
 
         void Construct() override;
 
+        friend class EditorDockspace;
+        friend class EditorMinorDockspace;
+        friend class EditorDockTabItem;
     };
     
 }

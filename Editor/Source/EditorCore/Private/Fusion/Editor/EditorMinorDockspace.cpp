@@ -13,6 +13,8 @@ namespace CE::Editor
         if (tab == nullptr || dockedEditors.Exists(tab))
             return;
 
+        tab->dockspace = this;
+
         dockedEditors.Add(tab);
 
         UpdateTabWell();
@@ -32,7 +34,13 @@ namespace CE::Editor
                 selectedTab = i;
                 content->Child(*dockedEditors[selectedTab]);
 
-                return;
+                tabItems[i]->isActive = true;
+            }
+            else
+            {
+                tabItems[i]->isActive = false;
+
+                AttachSubobject(dockedEditors[i]);
             }
         }
 
@@ -48,7 +56,13 @@ namespace CE::Editor
                 selectedTab = i;
                 content->Child(*tab);
 
-                return;
+                tabItems[i]->isActive = true;
+            }
+            else
+            {
+                tabItems[i]->isActive = false;
+
+                AttachSubobject(dockedEditors[i]);
             }
         }
 
@@ -77,6 +91,8 @@ namespace CE::Editor
                 child
                     .Text(dockedEditors[i]->Title())
                     ;
+
+                child.dockTab = dockedEditors[i];
             }
             else
             {
@@ -87,6 +103,8 @@ namespace CE::Editor
                     .Text(dockedEditors[i]->Title())
                     .VAlign(VAlign::Fill)
                     ;
+
+                child->dockTab = dockedEditors[i];
 
                 tabWell->AddChild(child);
                 tabItems.Add(child);

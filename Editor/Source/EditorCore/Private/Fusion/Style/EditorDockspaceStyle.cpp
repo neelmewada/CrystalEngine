@@ -47,7 +47,7 @@ namespace CE
                 tabBorder = hoveredTabBorder;
             }
 
-            bg = activeTabBackground;
+            //bg = activeTabBackground;
 
             tab
 				.Background(bg)

@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+    class EditorDockTab;
+
     CLASS()
     class EDITORCORE_API EditorDockTabItem : public FStyledWidget
     {
@@ -24,6 +26,7 @@ namespace CE::Editor
 
         FLabel* label = nullptr;
         FHorizontalStack* content = nullptr;
+        EditorDockTab* dockTab = nullptr;
 
         bool isActive = false;
         bool isHovered = false;
@@ -35,6 +38,9 @@ namespace CE::Editor
         FUSION_PROPERTY_WRAPPER2(Padding, content, ContentPadding);
 
         FUSION_WIDGET;
+        friend class EditorDockspace;
+        friend class EditorMinorDockspace;
+        friend class EditorDockTab;
         friend class EditorDockspaceStyle;
         friend class EditorMinorDockspaceStyle;
     };

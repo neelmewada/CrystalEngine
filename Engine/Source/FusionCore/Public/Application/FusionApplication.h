@@ -3,7 +3,8 @@
 
 namespace CE
 {
-    class FNativeContext;
+	class FViewport;
+	class FNativeContext;
     class FFusionContext;
     class FLayoutManager;
     class FNativeContext;
@@ -37,6 +38,9 @@ namespace CE
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();
+
+        void RegisterViewport(FViewport* viewport);
+        void DeregisterViewport(FViewport* viewport);
 
         void PushCursor(SystemCursor cursor);
         SystemCursor GetCursor();
@@ -153,6 +157,8 @@ namespace CE
             int frameCounter = 0;
         };
         Array<DestroyItem> destructionQueue{};
+
+        HashSet<FViewport*> viewports{};
 
         FUSION_FRIENDS;
         friend class FTimer;

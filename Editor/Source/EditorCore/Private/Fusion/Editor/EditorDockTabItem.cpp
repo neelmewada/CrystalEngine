@@ -39,35 +39,33 @@ namespace CE::Editor
 
     void EditorDockTabItem::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
+        if (event->IsMouseEvent() && dockTab && dockTab->dockspace)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+            FWidget* dockspace = dockTab->dockspace;
 
             if (mouseEvent->type == FEventType::MouseEnter)
             {
                 isHovered = true;
 
-                if (GetParent())
-                {
-                    GetParent()->ApplyStyle();
-                }
+                dockspace->ApplyStyle();
             }
             else if (mouseEvent->type == FEventType::MouseLeave)
             {
                 isHovered = false;
 
-                if (GetParent())
-                {
-                    GetParent()->ApplyStyle();
-                }
+                dockspace->ApplyStyle();
             }
             else if (mouseEvent->type == FEventType::MousePress)
             {
-                isActive = true;
-
-                if (GetParent() && GetParent()->IsOfType<EditorDockspace>())
+                if (dockspace->IsOfType<EditorDockspace>())
                 {
-                    EditorDockspace* editorDockspace = static_cast<EditorDockspace*>(GetParent());
+                    EditorDockspace* editorDockspace = static_cast<EditorDockspace*>(dockspace);
+                    editorDockspace->SelectTab(this);
+                }
+                else if (dockspace->IsOfType<EditorMinorDockspace>())
+                {
+                    EditorMinorDockspace* editorDockspace = static_cast<EditorMinorDockspace*>(dockspace);
                     editorDockspace->SelectTab(this);
                 }
             }

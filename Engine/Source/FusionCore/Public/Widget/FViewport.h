@@ -18,11 +18,15 @@ namespace CE
 
         RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
 
+        void Release();
+
     protected:
 
         FViewport();
 
         ~FViewport();
+
+		void OnBeforeDestroy() override;
 
         void Construct() override;
 

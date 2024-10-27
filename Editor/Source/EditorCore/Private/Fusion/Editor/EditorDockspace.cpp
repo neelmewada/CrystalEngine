@@ -13,6 +13,8 @@ namespace CE::Editor
     	if (tab == nullptr || dockedEditors.Exists(tab))
             return;
 
+        tab->dockspace = this;
+
         dockedEditors.Add(tab);
 
         UpdateTabWell();
@@ -32,8 +34,14 @@ namespace CE::Editor
                 selectedTab = i;
                 content->Child(*dockedEditors[selectedTab]);
 
-                return;
+                tabItems[i]->isActive = true;
 		    }
+            else
+            {
+                tabItems[i]->isActive = false;
+
+                AttachSubobject(dockedEditors[i]);
+            }
 	    }
 
         ApplyStyle();
@@ -48,8 +56,14 @@ namespace CE::Editor
                 selectedTab = i;
                 content->Child(*tab);
 
-                return;
+                tabItems[i]->isActive = true;
 		    }
+            else
+            {
+                tabItems[i]->isActive = false;
+
+                AttachSubobject(dockedEditors[i]);
+            }
 	    }
 
         ApplyStyle();
@@ -74,6 +88,8 @@ namespace CE::Editor
 	        {
                 EditorDockTabItem& child = *tabItems[i];
 
+                child.dockTab = dockedEditors[i];
+
                 child
 					.Text(dockedEditors[i]->Title())
                 ;
@@ -86,6 +102,8 @@ namespace CE::Editor
                 .Text(dockedEditors[i]->Title())
                 .VAlign(VAlign::Fill)
             	;
+
+                child->dockTab = dockedEditors[i];
 
                 tabWell->AddChild(child);
                 tabItems.Add(child);
@@ -120,7 +138,7 @@ namespace CE::Editor
 
                     FAssignNew(FTitleBar, titleBar)
                     .Background(FBrush(Color::RGBA(26, 26, 26)))
-                    .Height(45)
+                    .Height(40)
                     .HAlign(HAlign::Fill)
                     (
                         FNew(FHorizontalStack)
@@ -226,6 +244,13 @@ namespace CE::Editor
             ) // End of Child
         );
     }
-    
+
+    void EditorDockspace::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        
+    }
+
 }
 

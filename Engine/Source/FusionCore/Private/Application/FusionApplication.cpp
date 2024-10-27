@@ -98,6 +98,16 @@ namespace CE
         delete fusionShader; fusionShader = nullptr;
     }
 
+    void FusionApplication::RegisterViewport(FViewport* viewport)
+    {
+        viewports.Add(viewport);
+    }
+
+    void FusionApplication::DeregisterViewport(FViewport* viewport)
+    {
+        viewports.Remove(viewport);
+    }
+
     void FusionApplication::PushCursor(SystemCursor cursor)
     {
         cursorStack.Insert(cursor);

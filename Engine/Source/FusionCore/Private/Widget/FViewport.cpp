@@ -11,6 +11,11 @@ namespace CE
 
     FViewport::~FViewport()
     {
+        
+    }
+
+    void FViewport::Release()
+    {
         for (int i = 0; i < frames.GetSize(); ++i)
         {
             if (frames[i] != nullptr)
@@ -20,11 +25,23 @@ namespace CE
         }
     }
 
+    void FViewport::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (IsDefaultInstance())
+            return;
+
+        FusionApplication::Get()->DeregisterViewport(this);
+
+        Release();
+    }
+
     void FViewport::Construct()
     {
         Super::Construct();
 
-
+        FusionApplication::Get()->RegisterViewport(this);
     }
 
     void FViewport::OnFusionPropertyModified(const CE::Name& propertyName)
@@ -125,7 +142,10 @@ namespace CE
         painter->SetPen(FPen());
         painter->SetBrush(FBrush());
 
-        painter->DrawFrameBuffer(Rect::FromSize(computedPosition, computedSize), frames);
+        if (frames[0] != nullptr)
+        {
+            painter->DrawFrameBuffer(Rect::FromSize(computedPosition, computedSize), frames);
+        }
     }
 
 }
