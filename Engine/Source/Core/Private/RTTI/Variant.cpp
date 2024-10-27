@@ -104,11 +104,7 @@ namespace CE
 	bool Variant::IsObject() const
 	{
 		TypeInfo* type = CE::GetTypeInfo(valueTypeId);
-		if (type)
-		{
-			return type->IsObject();
-		}
-		return false;
+		return type ? type->IsObject() : false;
 	}
 
 	bool Variant::CanCastObject(TypeId castTo) const

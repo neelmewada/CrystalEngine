@@ -521,6 +521,9 @@ TEST(Containers, Variant)
 
 		EXPECT_TRUE(value.IsOfType<Object>());
 		EXPECT_EQ(value.GetValue<Object*>(), testObject);
+
+		auto& getValue = value.GetValue<Object&>();
+		EXPECT_EQ(ref.GetUuid(), getValue.GetUuid());
 	}
 	testObject->Destroy(); testObject = nullptr;
 

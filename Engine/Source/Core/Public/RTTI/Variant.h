@@ -283,6 +283,7 @@ namespace CE
 		const TType& GetValue() const
 		{
 			typedef std::remove_cvref_t<TType> T;
+			constexpr bool IsRefType = std::is_reference_v<TType>;
 
 			if (CanCastObject(TYPEID(T)))
 			{
@@ -313,6 +314,14 @@ namespace CE
 			else if constexpr (TIsSameType<T, Array<IO::Path>>::Value)
 			{
 				return GetArrayPathValue();
+			}
+			else if constexpr (IsRefType)
+			{
+				if (isPointer)
+				{
+					return (T&)*(T*)PtrValue;
+				}
+				return *(T*)this;
 			}
 			else
 			{

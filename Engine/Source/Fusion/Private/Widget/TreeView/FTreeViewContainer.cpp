@@ -234,11 +234,6 @@ namespace CE
     {
         ZoneScoped;
 
-        ScriptDelegate<FTreeViewRow&(void)> testDelegate = [&]() -> FTreeViewRow&
-            {
-                return FNew(FTreeViewRow);
-            };
-
         if (treeView == nullptr || treeView->m_Model == nullptr)
         {
             Super::CalculateIntrinsicSize();
@@ -289,6 +284,14 @@ namespace CE
             contentSize.height = m_MinHeight;
         }
 
+        for (int i = 0; i < children.GetCount(); ++i)
+        {
+            if (!children[i]->Enabled())
+                continue;
+
+            children[i]->CalculateIntrinsicSize();
+        }
+
         intrinsicSize.width += m_MinWidth;
         intrinsicSize.height += contentSize.height;
 
@@ -318,7 +321,18 @@ namespace CE
 	        if (!children[i]->Enabled())
                 continue;
 
+            f32 rowHeight = 0;
+            if (!treeView->m_RowHeightDelegate.IsValid())
+            {
+                rowHeight = treeView->m_RowHeight;
+            }
+            else
+            {
+                rowHeight = treeView->m_RowHeightDelegate(children[i]->index);
+            }
 
+            children[i]->SetComputedPosition(curPos);
+            children[i]->SetComputedSize(Vec2(availableSize.x, ));
         }
 
         // TODO: Place sub-widgets
