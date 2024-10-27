@@ -3,7 +3,7 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneOutlinerTab : public EditorMinorDockTab
+    class CRYSTALEDITOR_API SceneOutlinerTab : public EditorMinorDockTab, ISceneCallbacks
     {
         CE_CLASS(SceneOutlinerTab, EditorMinorDockTab)
     public:
@@ -17,6 +17,10 @@ namespace CE::Editor
         SceneOutlinerTab();
 
         void Construct() override;
+
+        void OnBeforeDestroy() override;
+
+        void OnSceneHierarchyUpdated(CE::Scene* scene) override;
 
         SceneTreeView* treeView = nullptr;
         SceneTreeViewModel* treeViewModel = nullptr;

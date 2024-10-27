@@ -153,6 +153,19 @@ namespace CE
 		}
 	}
 
+	void CE::Scene::AddSceneCallbacks(ISceneCallbacks* callbacks)
+	{
+		if (sceneCallbacks.Exists(callbacks))
+			return;
+
+		sceneCallbacks.Add(callbacks);
+	}
+
+	void CE::Scene::RemoveSceneCallbacks(ISceneCallbacks* callbacks)
+	{
+		sceneCallbacks.Remove(callbacks);
+	}
+
 	void CE::Scene::RegisterActorComponent(ActorComponent* actorComponent)
 	{
 		auto componentClass = actorComponent->GetClass();
@@ -183,6 +196,11 @@ namespace CE
 	{
 		if (!actor)
 			return;
+
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
 		
 		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -257,6 +275,11 @@ namespace CE
 	{
 		if (!actor)
 			return;
+
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
         
 		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {

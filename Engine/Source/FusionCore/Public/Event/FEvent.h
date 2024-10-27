@@ -178,6 +178,10 @@ namespace CE
         FIELD()
         KeyModifier keyModifiers = KeyModifier::None;
 
+        bool IsLeftButton() const { return EnumHasFlag(buttons, MouseButtonMask::Left); }
+        bool IsRightButton() const { return EnumHasFlag(buttons, MouseButtonMask::Right); }
+        bool IsMiddleButton() const { return EnumHasFlag(buttons, MouseButtonMask::Middle); }
+
     };
 
     STRUCT()

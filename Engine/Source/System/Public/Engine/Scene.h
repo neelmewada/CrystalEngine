@@ -81,6 +81,12 @@ namespace CE
 		void RemoveRenderPipeline(CE::RenderPipeline* renderPipeline);
 
 		void SetSkyboxCubeMap(TextureCube* cubeMap);
+
+		// - Internal -
+
+		void AddSceneCallbacks(ISceneCallbacks* callbacks);
+		void RemoveSceneCallbacks(ISceneCallbacks* callbacks);
+
 	private:
 
 		// - Internal API -
@@ -122,6 +128,8 @@ namespace CE
 		bool isEnabled = true;
 
 		b8 isPlaying = false;
+
+		Array<ISceneCallbacks*> sceneCallbacks;
 
 		// - RPI -
 

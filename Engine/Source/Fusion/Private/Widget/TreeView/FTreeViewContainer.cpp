@@ -136,6 +136,17 @@ namespace CE
             }
         }
 
+        if (event->IsMouseEvent() && event->sender == this)
+        {
+            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+
+            if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
+            {
+                treeView->SelectionModel()->ClearSelection();
+                treeView->ApplyStyle();
+            }
+        }
+
         Super::HandleEvent(event);
     }
 
@@ -211,34 +222,39 @@ namespace CE
                     rowWidget->Enabled(true);
                     rowWidget->isAlternate = (globalRowIdx % 2 != 0);
                     rowWidget->treeView = treeView;
+                    rowWidget->isHovered = false;
 
                     auto ctx = GetContext();
                     rowWidget->SetContextRecursively(ctx);
                     rowWidget->ApplyStyleRecursively();
-
-                    (*rowWidget)
-						.Background(rowWidget->isAlternate ? treeView->m_RowBackgroundAlternate : treeView->m_RowBackground)
-                        ;
 
                     childIndex++;
                     curPosY += rowHeight;
 
                     model->SetData(i, *rowWidget, parent);
 
+                    int childrenCount = model->GetRowCount(index);
+
                     for (int c = 0; c < treeView->header->GetColumnCount() && c < rowWidget->GetCellCount(); ++c)
                     {
                         f32 minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
                         rowWidget->Visible(true);
 
-                        FTreeViewCell* cell = rowWidget->GetCell(c);
+                        FTreeViewCell& cell = *rowWidget->GetCell(c);
+
+                        cell
+							.ArrowVisible(treeView->m_ExpandableColumn == c && childrenCount > 0)
+							.ArrowEnabled(treeView->m_ExpandableColumn == c)
+							.ArrowExpanded(treeView->m_SelectionModel->IsSelected(index))
+                        ;
 
                         if (treeView->m_ExpandableColumn == c && indentLevel > 0)
                         {
                             f32 indentOffset = treeView->m_Indentation * indentLevel;
                             if (indentOffset < minWidth)
                             {
-                                cell->Margin(Vec4(indentOffset, 0, 0, 0));
-                                cell->Width(minWidth - indentOffset);
+                                cell.Margin(Vec4(indentOffset, 0, 0, 0));
+                                cell.Width(minWidth - indentOffset);
                             }
                             else
                             {
@@ -247,13 +263,13 @@ namespace CE
                         }
                         else
                         {
-                            cell->Width(minWidth);
+                            cell.Width(minWidth);
                         }
                     }
 
                     globalRowIdx++;
 
-                    if (expandedRows.Exists(index) && model->GetRowCount(index) > 0)
+                    if (childrenCount > 0 && expandedRows.Exists(index))
                     {
                         visitor(index, indentLevel + 1);
                     }
@@ -269,7 +285,10 @@ namespace CE
             childIndex++;
         }
 
+        treeView->ApplyStyle();
         MarkDirty();
+
+        CE_LOG(Info, All, "OnModelUpdate()");
     }
 
     void FTreeViewContainer::CalculateIntrinsicSize()

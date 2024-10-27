@@ -22,6 +22,8 @@ namespace CE
 
         u32 GetColumn() const { return col; }
 
+        FAbstractItemModel* GetModel() const { return model; }
+
         SIZE_T GetHash() const;
 
         bool operator==(const FModelIndex& other) const;

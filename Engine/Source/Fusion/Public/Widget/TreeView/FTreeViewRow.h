@@ -14,8 +14,16 @@ namespace CE
 
         FTreeViewCell* GetCell(u32 index) const;
 
+        const FModelIndex& GetIndex() const { return index; }
+
         void AddCell(FTreeViewCell& cell);
         void AddCell(FTreeViewCell* cell);
+
+        bool IsAlternate() const { return isAlternate; }
+        bool IsHovered() const { return isHovered; }
+
+        bool SupportsMouseEvents() const override { return true; }
+        bool SupportsKeyboardEvents() const override { return true; }
 
     protected:
 
@@ -23,10 +31,13 @@ namespace CE
 
         void Construct() override;
 
+        void HandleEvent(FEvent* event) override;
+
         FHorizontalStack* contentStack = nullptr;
 
         FModelIndex index{};
         bool isAlternate = false;
+        bool isHovered = false;
         FTreeView* treeView = nullptr;
 
     public: // - Fusion Properties -

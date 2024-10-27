@@ -8,6 +8,7 @@
 
 // - Data -
 #include "Data/FAbstractItemModel.h"
+#include "Data/FItemSelectionModel.h"
 
 // - List View -
 #include "Widget/ListView/FListViewModel.h"

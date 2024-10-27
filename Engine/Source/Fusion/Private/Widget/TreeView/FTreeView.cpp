@@ -5,6 +5,9 @@ namespace CE
 
     FTreeView::FTreeView()
     {
+        m_SelectionModel = CreateDefaultSubobject<FItemSelectionModel>("SelectionModel");
+        m_SelectionModel->SetSelectionMode(FSelectionMode::Single);
+
         m_ScrollBarWidth = 8;
         m_ScrollBarShape = FRoundedRectangle(4);
         m_ScrollBarMargin = 2.5f;
@@ -52,7 +55,7 @@ namespace CE
         if (propertyName == model)
         {
             // TODO: Do model loading
-            container->OnModelUpdate();
+            //container->OnModelUpdate();
             
             MarkLayoutDirty();
         }
@@ -77,6 +80,13 @@ namespace CE
     void FTreeView::OnModelUpdate()
     {
         container->OnModelUpdate();
+    }
+
+    void FTreeView::SelectRow(const FModelIndex& index)
+    {
+        m_SelectionModel->Select(index);
+
+        ApplyStyle();
     }
 
 }

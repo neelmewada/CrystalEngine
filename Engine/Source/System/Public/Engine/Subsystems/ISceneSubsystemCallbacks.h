@@ -11,5 +11,13 @@ namespace CE
         virtual void OnSceneLoaded(CE::Scene* scene) {}
 
     };
+
+    struct ISceneCallbacks
+    {
+        virtual ~ISceneCallbacks() = default;
+
+        virtual void OnSceneHierarchyUpdated(CE::Scene* scene) {}
+
+    };
     
 } // namespace CE

@@ -36,13 +36,13 @@ namespace CE
         FBrush rowBackground = Color::Clear();
 
         FIELD()
-        FBrush rowAlternateBackground = Color::Clear();
+        FBrush rowAlternateBackground = Color::RGBA(21, 21, 21);
 
         FIELD()
         FBrush rowSelectionBackground = Color::RGBA(0, 112, 224);
 
         FIELD()
-        FBrush rowHoverBackground = Color::RGBA(0, 112, 224, 80);
+        FBrush rowHoverBackground = Color::RGBA(36 ,36 , 36);
 
     };
     

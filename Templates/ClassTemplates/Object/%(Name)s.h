@@ -6,13 +6,13 @@ namespace CE
     class %(Module_API)s %(Name)s : public Object
     {
         CE_CLASS(%(Name)s, Object)
-    public:
-
-        virtual ~%(Name)s();
-
     protected:
 
         %(Name)s();
+        
+    public:
+
+        virtual ~%(Name)s();
 
     };
     

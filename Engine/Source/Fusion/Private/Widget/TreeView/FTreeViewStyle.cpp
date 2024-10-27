@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewStyle::FTreeViewStyle()
     {
-        rowAlternateBackground = Color::RGBA(36, 36, 36);
+        
     }
 
     FTreeViewStyle::~FTreeViewStyle()
@@ -48,10 +48,23 @@ namespace CE
             }
         }
 
-        treeView
-    		.RowBackground(rowBackground)
-			.RowBackgroundAlternate(rowAlternateBackground)
-    	;
+        if (treeView.container)
+        {
+            for (FTreeViewRow* child : treeView.container->children)
+            {
+                FBrush rowBg = rowBackground;
+                if (child->IsAlternate())
+                    rowBg = rowAlternateBackground;
+                if (treeView.SelectionModel()->IsSelected(child->GetIndex()))
+                    rowBg = rowSelectionBackground;
+                else if (child->IsHovered())
+                    rowBg = rowHoverBackground;
+
+                (*child)
+                    .Background(rowBg)
+                    ;
+            }
+        }
     }
 
 } // namespace CE

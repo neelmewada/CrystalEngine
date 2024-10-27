@@ -27,13 +27,15 @@ namespace CE
 
         void PlaceSubWidgets() override;
 
+        bool SupportsMouseEvents() const override { return true; }
+
     protected:
 
         FTreeViewContainer();
 
         void Construct() override;
 
-        void OnPaint(FPainter* painter) override;
+    	void OnPaint(FPainter* painter) override;
 
         void OnPostComputeLayout() override;
 
@@ -50,11 +52,13 @@ namespace CE
         FTreeView* treeView = nullptr;
         TreeViewRowList children;
         HashSet<FModelIndex> expandedRows;
+        Vec2 modelUpdateComputedSize;
 
     public: // - Fusion Properties - 
 
         FUSION_WIDGET;
         friend class FTreeView;
+        friend class FTreeViewStyle;
     };
     
 }

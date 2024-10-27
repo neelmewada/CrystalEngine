@@ -28,6 +28,8 @@ namespace CE
 
         void SetScene(CE::Scene* scene);
 
+        CE::Scene* GetScene() const { return scene; }
+
     protected:
 
         CE::Scene* scene = nullptr;

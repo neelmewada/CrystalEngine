@@ -74,6 +74,9 @@ namespace CE
 
     void SceneTreeViewModel::SetScene(CE::Scene* scene)
     {
+        if (this->scene == scene)
+            return;
+
         this->scene = scene;
         onModelUpdated(this);
     }

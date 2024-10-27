@@ -35,6 +35,30 @@ namespace CE
             .VAlign(VAlign::Fill)
         );
     }
-    
+
+    void FTreeViewRow::HandleEvent(FEvent* event)
+    {
+        if (event->IsMouseEvent())
+        {
+            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+
+            if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
+            {
+                treeView->SelectRow(index);
+            }
+            else if (mouseEvent->type == FEventType::MouseEnter)
+            {
+                isHovered = true;
+                treeView->ApplyStyle();
+            }
+            else if (mouseEvent->type == FEventType::MouseLeave)
+            {
+                isHovered = false;
+                treeView->ApplyStyle();
+            }
+        }
+
+	    Super::HandleEvent(event);
+    }
 }
 

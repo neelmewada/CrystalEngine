@@ -25,14 +25,18 @@ namespace CE::Editor
 
         u32 numColumns = m_Model->GetColumnCount();
 
-        for (int i = 0; i < numColumns; ++i)
-        {
-            row.AddCell(
-				FNew(FTreeViewCell)
-                .Text("Cell")
-                .FontSize(13)
-            );
-        }
+        row.Cells(
+            FNew(FTreeViewCell)
+            .Text("Name")
+            .ArrowEnabled(true)
+            .FontSize(13),
+
+            FNew(FTreeViewCell)
+            .Text("Type")
+            .FontSize(13)
+            .Foreground(Color::RGBA(255, 255, 255, 140))
+            .ArrowEnabled(false)
+        );
 
         return row;
     }

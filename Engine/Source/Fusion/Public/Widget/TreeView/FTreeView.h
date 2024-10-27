@@ -17,6 +17,8 @@ namespace CE
 
         FStyledWidget* GetHeaderContainer() const { return headerContainer; }
 
+        void SelectRow(const FModelIndex& index);
+
     protected:
 
         FTreeView();
@@ -48,10 +50,8 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
-        FUSION_PROPERTY(FBrush, RowBackground);
-        FUSION_PROPERTY(FBrush, RowBackgroundAlternate);
-
         FUSION_PROPERTY(FTreeViewModel*, Model);
+        FUSION_PROPERTY(FItemSelectionModel*, SelectionModel);
 
         FUSION_PROPERTY(int, ExpandableColumn);
         FUSION_LAYOUT_PROPERTY(bool, AutoHeight);

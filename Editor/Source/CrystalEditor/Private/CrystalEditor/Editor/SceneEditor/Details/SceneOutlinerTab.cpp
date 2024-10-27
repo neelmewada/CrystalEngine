@@ -40,15 +40,42 @@ namespace CE::Editor
 
         if (scene)
         {
-            treeViewModel->SetScene(scene);
-            treeView->Model(treeViewModel);
+            SetScene(scene);
         }
 
         treeView->ApplyStyleRecursively();
     }
 
+    void SceneOutlinerTab::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (IsDefaultInstance())
+            return;
+
+        if (treeViewModel && treeViewModel->GetScene() != nullptr)
+        {
+            treeViewModel->GetScene()->RemoveSceneCallbacks(this);
+        }
+    }
+
+    void SceneOutlinerTab::OnSceneHierarchyUpdated(CE::Scene* scene)
+    {
+        treeView->OnModelUpdate();
+    }
+
     void SceneOutlinerTab::SetScene(CE::Scene* scene)
     {
+        if (treeViewModel->GetScene() == scene)
+            return;
+
+        if (treeViewModel->GetScene() != nullptr)
+        {
+            treeViewModel->GetScene()->RemoveSceneCallbacks(this);
+        }
+
+        scene->AddSceneCallbacks(this);
+
         treeViewModel->SetScene(scene);
         treeView->Model(treeViewModel);
     }

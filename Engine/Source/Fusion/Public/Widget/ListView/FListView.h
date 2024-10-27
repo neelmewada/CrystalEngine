@@ -3,14 +3,6 @@
 namespace CE
 {
 
-    ENUM()
-    enum class FSelectionMode
-    {
-	    None,
-        Single
-    };
-    ENUM_CLASS(FSelectionMode);
-
     CLASS()
     class FUSION_API FListView : public FStyledWidget
     {

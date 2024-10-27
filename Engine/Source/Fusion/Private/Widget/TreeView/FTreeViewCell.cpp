@@ -12,7 +12,7 @@ namespace CE
     {
         Super::Construct();
 
-        FBrush downwardArrow = FBrush("/Engine/Resources/Icons/DownwardArrow");
+        FBrush downwardArrow = FBrush("/Engine/Resources/Icons/CaretDown");
 
         Child(
             FNew(FHorizontalStack)
@@ -24,14 +24,31 @@ namespace CE
             (
                 FAssignNew(FImage, arrowIcon)
                 .Background(downwardArrow)
-                .Angle(90)
-                .Enabled(false),
+                .Width(10)
+                .Height(10)
+                .VAlign(VAlign::Center)
+                .Enabled(true)
+                .Visible(false)
+                .Margin(Vec4(0, 0, 5, 0)),
 
                 FAssignNew(FLabel, label)
                 .HAlign(HAlign::Left)
             )
         );
+
+        ArrowExpanded(false);
     }
-    
+
+    bool FTreeViewCell::ArrowExpanded()
+    {
+        return abs(arrowIcon->Angle()) < 1;
+    }
+
+    FTreeViewCell::Self& FTreeViewCell::ArrowExpanded(bool expanded)
+    {
+        arrowIcon->Angle(expanded ? 0 : -90);
+        return *this;
+    }
+
 }
 

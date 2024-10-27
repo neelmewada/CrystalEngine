@@ -26,7 +26,14 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(FontSize, label);
         FUSION_PROPERTY_WRAPPER(Foreground, label);
 
+        FUSION_PROPERTY_WRAPPER2(Enabled, arrowIcon, ArrowEnabled);
+        FUSION_PROPERTY_WRAPPER2(Visible, arrowIcon, ArrowVisible);
+
+        bool ArrowExpanded();
+        Self& ArrowExpanded(bool expanded);
+
         FUSION_WIDGET;
+        friend class FTreeViewContainer;
     };
     
 }
