@@ -13,10 +13,8 @@
 	void Set##PropertyName(const decltype(VariableName)& value)\
 	{ \
 		VariableName = value; \
-		thread_local CE::FieldType* field = GetClass()->FindField(#VariableName); \
 		thread_local CE::Name fieldName = #VariableName; \
-		if (field != nullptr) this->Object::OnFieldChanged(field); \
-		this->Object::OnFieldChanged(fieldName); \
+		this->OnFieldChanged(fieldName); \
 	}
 
 #define CE_FUNCTION_LIST(x) x

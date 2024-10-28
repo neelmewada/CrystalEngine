@@ -188,7 +188,6 @@ namespace CE
 
         // - Updates -
 
-        virtual void OnFieldChanged(FieldType* field);
         virtual void OnFieldChanged(const Name& fieldName);
 
         virtual void OnFieldValidate() {}
