@@ -40,7 +40,7 @@ namespace CE
 
 	protected:
 
-		void OnFieldEdited(FieldType* field) override;
+		void OnFieldChanged(const Name& fieldName) override;
 
 		virtual void OnEnabled();
 

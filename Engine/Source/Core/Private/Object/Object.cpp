@@ -635,7 +635,12 @@ namespace CE
         }
     }
 
-    void Object::OnFieldEdited(FieldType* field)
+    void Object::OnFieldChanged(FieldType* field)
+    {
+
+    }
+
+    void Object::OnFieldChanged(const Name& fieldName)
     {
 
     }

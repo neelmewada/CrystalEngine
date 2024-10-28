@@ -60,7 +60,7 @@ namespace CE
 
 	protected:
 
-		void OnFieldEdited(FieldType* field) override;
+		void OnFieldChanged(const Name& fieldName) override;
 
 		void OnSubobjectAttached(Object* object) override;
 		void OnSubobjectDetached(Object* object) override;

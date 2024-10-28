@@ -103,20 +103,15 @@ namespace CE
 		}
 	}
 
-	void SceneComponent::OnFieldEdited(FieldType* field)
+	void SceneComponent::OnFieldChanged(const Name& fieldName)
 	{
-		Super::OnFieldEdited(field);
+		Super::OnFieldChanged(fieldName);
 
-		thread_local const Name localPositionName = "localPosition";
-		thread_local const Name localEulerAnglesName = "localEulerAngles";
-		thread_local const Name localScaleName = "localScale";
+		thread_local const HashSet<CE::Name> transformFields = { NAMEOF(localPosition), NAMEOF(localEulerAngles), NAMEOF(localScale) };
 
-		if (field->GetName() == localPositionName ||
-			field->GetName() == localEulerAnglesName ||
-			field->GetName() == localScaleName)
+		if (transformFields.Exists(fieldName))
 		{
-			if (!IsDirty())
-				SetDirty();
+			SetDirty();
 		}
 	}
 

@@ -272,12 +272,13 @@ namespace CE
 
     void StructType::CacheAllFields()
     {
+        LockGuard lock{ cachedFieldsMutex };
+
         if (fieldsCached)
             return;
 
         fieldsCached = true;
 
-        LockGuard lock{ cachedFieldsMutex };
         cachedFields.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
@@ -329,11 +330,12 @@ namespace CE
 
     void StructType::CacheAllFunctions()
     {
+        LockGuard lock{ cachedFunctionsMutex };
+
         if (functionsCached)
             return;
 
         functionsCached = true;
-        LockGuard lock{ cachedFunctionsMutex };
 
         cachedFunctions.Clear();
 		cachedFunctionsMap.Clear();

@@ -32,7 +32,7 @@
 
 #define TEXT(x) x
 
-#define NAMEOF(x) (CE::GetStaticType<x>() != nullptr ? CE::GetStaticType<x>()->GetName() : "")
+#define NAMEOF(x) CE::Name(#x, &x)
 
 #define CE_INLINE inline
 #define INLINE inline

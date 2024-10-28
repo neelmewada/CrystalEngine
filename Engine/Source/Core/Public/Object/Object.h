@@ -188,9 +188,8 @@ namespace CE
 
         // - Updates -
 
-        //! @brief Called when a field inside this object is edited by an editor
-        //! @param field The field that was edited.
-        virtual void OnFieldEdited(FieldType* field);
+        virtual void OnFieldChanged(FieldType* field);
+        virtual void OnFieldChanged(const Name& fieldName);
 
         virtual void OnFieldValidate() {}
 

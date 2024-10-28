@@ -34,18 +34,6 @@ namespace CE
 
 		Vec3 GetPosition() const { return globalPosition; }
 
-		Vec3 GetLocalPosition() const { return localPosition; }
-
-		Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
-
-		Vec3 GetLocalScale() const { return localScale; }
-
-		void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(); }
-
-		void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(); }
-
-		void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(); }
-
 		void OnBeginPlay() override;
 
 		void Tick(f32 delta) override;
@@ -70,7 +58,7 @@ namespace CE
 
 		void OnSubobjectDetached(Object* subobject) override;
 
-		void OnFieldEdited(FieldType* field) override;
+		void OnFieldChanged(const Name& fieldName) override;
 
 		bool IsTransformUpdated() const { return transformUpdated; }
 
@@ -127,6 +115,12 @@ namespace CE
 		Matrix4x4 localTranslationMat = Matrix4x4::Identity();
 		Matrix4x4 localRotationMat = Matrix4x4::Identity();
 		Matrix4x4 localScaleMat = Matrix4x4::Identity();
+
+    public: // - Accessors -
+
+		CE_PROPERTY(LocalPosition, localPosition);
+		CE_PROPERTY(LocalEulerAngles, localEulerAngles);
+		CE_PROPERTY(LocalScale, localScale);
         
         friend class CE::Scene;
 		friend class Actor;

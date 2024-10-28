@@ -8,6 +8,17 @@
 #define CE_FIELD(FieldName, ...)\
 	Type.AddField(#FieldName, &Self::FieldName, offsetof(Self, FieldName), "" #__VA_ARGS__, TYPEID(TGetUnderlyingType<decltype(Self::FieldName)>::Type));
 
+#define CE_PROPERTY(PropertyName, VariableName) \
+	const decltype(VariableName)& Get##PropertyName() const { return VariableName; }\
+	void Set##PropertyName(const decltype(VariableName)& value)\
+	{ \
+		VariableName = value; \
+		thread_local CE::FieldType* field = GetClass()->FindField(#VariableName); \
+		thread_local CE::Name fieldName = #VariableName; \
+		if (field != nullptr) this->Object::OnFieldChanged(field); \
+		this->Object::OnFieldChanged(fieldName); \
+	}
+
 #define CE_FUNCTION_LIST(x) x
 #define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
 

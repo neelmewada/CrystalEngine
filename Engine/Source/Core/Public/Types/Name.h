@@ -46,6 +46,10 @@ namespace CE
         Name& operator=(const Name& copy);
 		Name(Name&& move);
 
+        template<typename T>
+        Name(const char* name, T* fieldRef) : Name(String(name))
+		{}
+
         CE_INLINE bool IsValid() const
         {
             return hashValue != 0;

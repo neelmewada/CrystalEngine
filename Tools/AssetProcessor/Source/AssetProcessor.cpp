@@ -182,7 +182,7 @@ namespace CE
 
 						DateTime stampedTime = DateTime::FromNumber(stampedTimeInt);
 
-						if (lastWriteTime != stampedTime) // Source asset modified
+						if (lastWriteTime != stampedTime || version != StampFileVersion) // Source asset modified OR stamp version is different
 						{
 							allSourceAssetPaths.Add(path);
 							allProductAssetPaths.Add(productPath);

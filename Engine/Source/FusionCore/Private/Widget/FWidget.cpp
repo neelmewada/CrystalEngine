@@ -407,6 +407,8 @@ namespace CE
 
     FWidget& FWidget::Style(FStyle* style)
     {
+        ZoneScoped;
+
         if (style == nullptr)
         {
             m_Style = nullptr;

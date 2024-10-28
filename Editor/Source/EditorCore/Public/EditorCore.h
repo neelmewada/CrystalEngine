@@ -37,18 +37,19 @@
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
+#include "Fusion/PropertyEditor/DetailsView.h"
+
 #include "Fusion/Widget/EditorToolBar.h"
 #include "Fusion/Widget/EditorMenuBar.h"
 #include "Fusion/Widget/EditorMenuPopup.h"
+#include "Fusion/Widget/EditorViewport.h"
+#include "Fusion/Widget/EditorWindow.h"
 
-#include "Fusion/Editor/EditorViewport.h"
+#include "Fusion/Docking/EditorDockspace.h"
+#include "Fusion/Docking/EditorDockTabItem.h"
+#include "Fusion/Docking/EditorDockTab.h"
 
-#include "Fusion/Editor/EditorWindow.h"
-#include "Fusion/Editor/EditorDockspace.h"
-#include "Fusion/Editor/EditorDockTabItem.h"
-#include "Fusion/Editor/EditorDockTab.h"
-
-#include "Fusion/Editor/EditorMinorDockspace.h"
+#include "Fusion/Docking/EditorMinorDockspace.h"
 
 namespace CE::Editor
 {

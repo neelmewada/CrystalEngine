@@ -283,13 +283,13 @@ namespace CE
 		}
 	}
 
-	void Actor::OnFieldEdited(FieldType* field)
+	void Actor::OnFieldChanged(const Name& fieldName)
 	{
-		Super::OnFieldEdited(field);
+		Super::OnFieldChanged(fieldName);
 
-		thread_local const Name isEnabledName = "isEnabled";
+		thread_local const Name isEnabledName = NAMEOF(isEnabledName);
 
-		if (field->GetName() == isEnabledName)
+		if (fieldName == isEnabledName)
 		{
 			if (IsEnabled())
 				OnEnabled();
