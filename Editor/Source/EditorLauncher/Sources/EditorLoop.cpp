@@ -129,12 +129,16 @@ void EditorLoop::LoadEditorModules()
 
 	ModuleManager::Get().LoadModule("CrystalEditor");
 
+	ObjectEditorRegistry::Get().Init();
+
 	Prefs::Get().LoadPrefsJson();
 }
 
 void EditorLoop::UnloadEditorModules()
 {
 	Prefs::Get().SavePrefsJson();
+
+	ObjectEditorRegistry::Get().Shutdown();
 
 	ModuleManager::Get().UnloadModule("CrystalEditor");
 

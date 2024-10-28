@@ -18,7 +18,28 @@ namespace CE
 		return !gDestroyedObjects.Exists(object);
 	}
 
-    Object::Object() : name("Object"), uuid(Uuid())
+	SharedMutex ObjectListener::mutex{};
+	HashSet<IObjectUpdateListener*> ObjectListener::listeners{};
+
+	void ObjectListener::AddListener(IObjectUpdateListener* listener)
+	{
+		listeners.Add(listener);
+	}
+
+	void ObjectListener::RemoveListener(IObjectUpdateListener* listener)
+	{
+		listeners.Remove(listener);
+	}
+
+	void ObjectListener::Trigger(Object* object, const Name& fieldName)
+	{
+		for (IObjectUpdateListener* listener : listeners)
+		{
+			listener->OnObjectFieldChanged(object, fieldName);
+		}
+	}
+
+	Object::Object() : name("Object"), uuid(Uuid())
     {
         ConstructInternal();
     }
@@ -637,7 +658,7 @@ namespace CE
 
     void Object::OnFieldChanged(const Name& fieldName)
     {
-
+		ObjectListener::Trigger(this, fieldName);
     }
 
     Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)

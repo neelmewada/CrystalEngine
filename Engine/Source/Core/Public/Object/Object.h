@@ -20,6 +20,8 @@
 #include "Event.h"
 #include "Binding.h"
 
+#include "ObjectListener.h"
+
 #if PAL_TRAIT_BUILD_TESTS
 class Bundle_WriteRead_Test;
 #endif
@@ -31,20 +33,6 @@ namespace CE
     class FieldType;
     class FunctionType;
     class Bundle;
-
-    template<typename TObject>
-    class IObjectUpdateListener
-    {
-    public:
-        virtual void OnObjectUpdated(TObject* component) {}
-    };
-
-    template<typename T>
-    class IValueUpdateListener
-    {
-    public:
-        virtual void OnValueUpdated(const T& newValue) {}
-    };
 
     class CORE_API Object
     {

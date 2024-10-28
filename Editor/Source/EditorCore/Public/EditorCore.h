@@ -38,6 +38,8 @@
 #include "Fusion/Style/EditorStyle.h"
 
 #include "Fusion/PropertyEditor/DetailsView.h"
+#include "Fusion/PropertyEditor/ObjectEditor.h"
+#include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
 
 #include "Fusion/Widget/EditorToolBar.h"
 #include "Fusion/Widget/EditorMenuBar.h"
