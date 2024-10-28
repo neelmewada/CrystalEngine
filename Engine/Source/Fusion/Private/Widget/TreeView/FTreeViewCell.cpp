@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewCell::FTreeViewCell()
     {
-
+        m_ClipChildren = true;
     }
 
     void FTreeViewCell::Construct()

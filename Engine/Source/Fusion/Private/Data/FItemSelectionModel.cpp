@@ -28,6 +28,8 @@ namespace CE
         selection.Add(index);
 
         ValidateSelection();
+
+        m_OnSelectionChanged.Broadcast(this);
     }
 
     bool FItemSelectionModel::IsSelected(const FModelIndex& index)
@@ -63,11 +65,15 @@ namespace CE
         this->selectionMode = selectionMode;
 
         ValidateSelection();
+
+        m_OnSelectionChanged.Broadcast(this);
     }
 
     void FItemSelectionModel::ClearSelection()
     {
         selection.Clear();
+
+        m_OnSelectionChanged.Broadcast(this);
     }
 
     void FItemSelectionModel::ValidateSelection()

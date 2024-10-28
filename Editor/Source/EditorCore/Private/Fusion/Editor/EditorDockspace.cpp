@@ -165,6 +165,20 @@ namespace CE::Editor
                             .Name("TabWell")
                             .Padding(Vec4(5, 5, 0, 0)),
 
+                            // - Project Title -
+
+                            FAssignNew(FStyledWidget, projectLabelParent)
+                            .VAlign(VAlign::Top)
+                            .Height(16)
+                            .Padding(Vec4(2, 1, 2, 1) * 6)
+                            .Margin(Vec4(0, 0, 60, 0))
+                            .Enabled(false)
+                            (
+                                FAssignNew(FLabel, projectLabel)
+                                .Text("Project Name")
+                                .VAlign(VAlign::Center)
+                            ),
+
                             // - Window Controls -
 
                             FAssignNew(FButton, minimizeButton)

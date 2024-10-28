@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    class FItemSelectionModel;
+    DECLARE_SCRIPT_EVENT(FItemSelectionChanged, FItemSelectionModel*);
+
     ENUM()
     enum class FSelectionMode
     {
@@ -35,6 +38,8 @@ namespace CE
 
         // - Public API -
 
+        const HashSet<FModelIndex>& GetSelection() const { return selection; }
+
         void Select(const FModelIndex& index);
 
         bool IsSelected(const FModelIndex& index);
@@ -50,6 +55,10 @@ namespace CE
         HashSet<FModelIndex> selection{};
         FSelectionMode selectionMode = FSelectionMode::None;
         FSelectionType selectionType = FSelectionType::Row;
+
+    public:
+
+        FUSION_EVENT(FItemSelectionChanged, OnSelectionChanged);
 
         friend class FTreeView;
         friend class FTreeViewContainer;

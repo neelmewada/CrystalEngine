@@ -416,7 +416,10 @@ namespace CE
         if (style && IsOfType(style->GetWidgetClass()))
         {
             m_Style = style;
-            m_Style->MakeStyle(*this);
+            if (!IsDefaultInstance())
+            {
+	            m_Style->MakeStyle(*this);
+            }
             MarkDirty();
         }
         return *this;

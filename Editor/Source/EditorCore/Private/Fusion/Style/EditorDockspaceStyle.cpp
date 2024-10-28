@@ -29,6 +29,8 @@ namespace CE
 			.TitleBarBackground(titleBarBackground)
     	;
 
+        dockspace.projectLabelParent->Background(projectLabelBackground);
+
         for (int i = 0; i < dockspace.tabItems.GetSize(); ++i)
         {
             EditorDockTabItem& tab = *dockspace.tabItems[i];
@@ -46,8 +48,6 @@ namespace CE
                 bg = hoveredTabBackground;
                 tabBorder = hoveredTabBorder;
             }
-
-            //bg = activeTabBackground;
 
             tab
 				.Background(bg)

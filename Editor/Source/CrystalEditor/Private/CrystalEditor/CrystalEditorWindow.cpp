@@ -21,6 +21,11 @@ namespace CE::Editor
         projectSettingsTab->Title("Project Settings");
         AddDockTab(projectSettingsTab);
 
+        ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+
+        projectLabelParent->Enabled(true);
+        projectLabel->Text(projectSettings->projectName);
+
         Style("EditorDockspace");
     }
     
