@@ -183,6 +183,14 @@ namespace CE
         }
     }
 
+    void FCompoundWidget::RemoveChildWidget()
+    {
+        if (m_Child)
+        {
+            RemoveChild(m_Child);
+        }
+    }
+
     bool FCompoundWidget::TryAddChild(FWidget* child)
     {
         if (!child)

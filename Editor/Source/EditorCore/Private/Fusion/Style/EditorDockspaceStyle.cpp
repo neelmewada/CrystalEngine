@@ -5,7 +5,7 @@ namespace CE
 
     EditorDockspaceStyle::EditorDockspaceStyle()
     {
-
+        
     }
 
     EditorDockspaceStyle::~EditorDockspaceStyle()

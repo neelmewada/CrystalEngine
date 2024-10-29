@@ -24,6 +24,9 @@ namespace CE::Editor
 
         void OnSceneLoaded(CE::Scene* scene) override;
 
+        FUNCTION()
+        void OnSelectionChanged(FItemSelectionModel* selectionModel);
+
         FSplitBox* rootSplitBox = nullptr;
 
     private:
@@ -39,6 +42,8 @@ namespace CE::Editor
         EditorViewportTab* viewportTab = nullptr;
 
         SceneOutlinerTab* sceneOutlinerTab = nullptr;
+
+        DetailsTab* detailsTab = nullptr;
 
         // Sandbox
         CE::Scene* sandboxScene = nullptr;

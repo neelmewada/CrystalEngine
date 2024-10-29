@@ -19,6 +19,8 @@ namespace CE
 
         void SelectRow(const FModelIndex& index);
 
+        bool SupportsFocusEvents() const override { return true; }
+
     protected:
 
         FTreeView();

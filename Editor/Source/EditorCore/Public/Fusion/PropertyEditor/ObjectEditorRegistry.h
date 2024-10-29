@@ -35,6 +35,18 @@ namespace CE
         ObjectEditor* FindOrCreate(Object* targetObject);
         ObjectEditor* FindOrCreate(const Array<Object*>& targetObjects);
 
+        template<typename T> requires !TIsSameType<Object, T>::Value and TIsBaseClassOf<Object, T>::Value
+        ObjectEditor* FindOrCreate(const Array<T*>& targetObjects)
+        {
+            Array<Object*> objects;
+            objects.Resize(targetObjects.GetSize());
+            for (int i = 0; i < targetObjects.GetSize(); ++i)
+            {
+                objects[i] = targetObjects[i];
+            }
+            return FindOrCreate(objects);
+        }
+
     private:
 
         SubClass<ObjectEditor> FindEditorClass(Object* targetObject);

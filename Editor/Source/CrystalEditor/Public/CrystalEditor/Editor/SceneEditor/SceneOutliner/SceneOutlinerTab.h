@@ -6,12 +6,6 @@ namespace CE::Editor
     class CRYSTALEDITOR_API SceneOutlinerTab : public EditorMinorDockTab, ISceneCallbacks
     {
         CE_CLASS(SceneOutlinerTab, EditorMinorDockTab)
-    public:
-
-        // - Public API -
-
-        void SetScene(CE::Scene* scene);
-
     protected:
 
         SceneOutlinerTab();
@@ -24,6 +18,10 @@ namespace CE::Editor
 
         SceneTreeView* treeView = nullptr;
         SceneTreeViewModel* treeViewModel = nullptr;
+
+    public: // - Public API -
+
+        void SetScene(CE::Scene* scene);
 
     public: // - Fusion Properties - 
 

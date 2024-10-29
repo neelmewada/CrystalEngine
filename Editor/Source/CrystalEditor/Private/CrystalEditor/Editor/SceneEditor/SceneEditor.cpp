@@ -129,6 +129,33 @@ namespace CE::Editor
         sceneOutlinerTab->SetScene(scene);
     }
 
+    void SceneEditor::OnSelectionChanged(FItemSelectionModel* selectionModel)
+    {
+        const auto& selection = selectionModel->GetSelection();
+
+        Array<Actor*> selectedActors{};
+
+        for (const FModelIndex& modelIndex : selection)
+        {
+            if (!modelIndex.IsValid())
+                continue;
+
+            Actor* actor = (Actor*)modelIndex.GetDataPtr();
+            selectedActors.Add(actor);
+        }
+
+        if (selectedActors.NonEmpty())
+        {
+            // TODO: Create and set object editor
+            ObjectEditor* editor = ObjectEditorRegistry::Get().FindOrCreate(selectedActors);
+            detailsTab->SetObjectEditor(editor);
+        }
+        else
+        {
+            detailsTab->SetObjectEditor(nullptr);
+        }
+    }
+
     void SceneEditor::ConstructDockspaces()
     {
 
@@ -156,6 +183,22 @@ namespace CE::Editor
                         .DockTabs(
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
+                            .Content(
+                                FNew(FVerticalStack)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill)
+                                (
+                                    FNew(FExpandableSection)
+                                    .Title("Section Title")
+                                    .ExpandableContent(
+                                        FNew(FLabel)
+                                        .Text("This is the content!")
+                                        .FontSize(18)
+                                    )
+                                    .HAlign(HAlign::Fill)
+                                    .VAlign(VAlign::Top)
+                                )
+                            )
 
                         )
                         .HAlign(HAlign::Fill)
@@ -177,8 +220,7 @@ namespace CE::Editor
 
                         FAssignNew(EditorMinorDockspace, rightBottom)
                         .DockTabs(
-                            FNew(EditorMinorDockTab)
-                            .Title("Details")
+                            FAssignNew(DetailsTab, detailsTab)
 
                         )
                         .HAlign(HAlign::Fill)
@@ -187,6 +229,8 @@ namespace CE::Editor
                 )
             )
     		.Padding(Vec4(0, 5, 0, 0));
+
+        sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged));
     }
 
     void SceneEditor::ConstructMenuBar()

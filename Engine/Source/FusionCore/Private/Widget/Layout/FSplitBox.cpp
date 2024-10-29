@@ -6,6 +6,7 @@ namespace CE
     FSplitBox::FSplitBox()
     {
 		m_SplitterSize = 5.0f;
+		m_SplitterHoverBackground = Color::RGBA(255, 255, 255, 120);
     }
 
     void FSplitBox::CalculateIntrinsicSize()
@@ -164,9 +165,12 @@ namespace CE
 				? Vec2(m_SplitterSize, availableSize.y)
 				: Vec2(availableSize.x, m_SplitterSize);
 
-			painter->SetBrush(Color::RGBA(255, 255, 255, 120));
-			painter->SetPen(FPen());
-			painter->DrawRect(Rect::FromSize(splitterPos, splitterSize));
+			if (m_SplitterHoverBackground.a > 0)
+			{
+				painter->SetBrush(m_SplitterHoverBackground);
+				painter->SetPen(FPen());
+				painter->DrawRect(Rect::FromSize(splitterPos, splitterSize));
+			}
 		}
 
 		for (FWidget* child : children)
@@ -317,6 +321,8 @@ namespace CE
 
 					dragEvent->draggedWidget = this;
 					dragEvent->Consume(this);
+
+					m_OnSplitterDragged(this);
 				}
 				else
 				{

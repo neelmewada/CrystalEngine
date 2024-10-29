@@ -43,6 +43,9 @@ namespace CE::Editor
 		FTextInputPlainStyle* textInput = nullptr;
 
 		FIELD()
+		FExpandableSectionStyle* expandableSection = nullptr;
+
+		FIELD()
 		FComboBoxPlainStyle* comboBox = nullptr;
 
 		FIELD()

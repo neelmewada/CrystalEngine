@@ -12,8 +12,8 @@ namespace %(NameSpace)s
 
         void Construct() override;
 
-    public:
-        // - Public API -
+    public: // - Public API -
+
 
     public: // - Fusion Properties - 
 

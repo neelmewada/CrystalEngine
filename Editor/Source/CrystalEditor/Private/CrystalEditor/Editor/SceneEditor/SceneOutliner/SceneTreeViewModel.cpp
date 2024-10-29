@@ -34,6 +34,34 @@ namespace CE
 
     }
 
+    FModelIndex SceneTreeViewModel::FindIndex(Actor* actor)
+    {
+        if (!actor || !actor->GetScene())
+            return {};
+
+        if (scene != actor->GetScene())
+            return {};
+
+        if (actor->GetParentActor() == nullptr)
+        {
+            int index = scene->GetIndexOfActor(actor);
+            if (index < 0)
+                return {};
+
+            return GetIndex(index, 0, {});
+        }
+        
+        FModelIndex parentIndex = FindIndex(actor->GetParentActor());
+        if (!parentIndex.IsValid())
+            return {};
+
+        int index = actor->GetParentActor()->GetIndexOfActor(actor);
+        if (index < 0)
+            return {};
+
+        return GetIndex(index, 0, parentIndex);
+    }
+
     u32 SceneTreeViewModel::GetRowCount(const FModelIndex& parent)
     {
         if (!scene)

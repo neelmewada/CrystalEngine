@@ -30,9 +30,11 @@ namespace CE
 		void AddActor(Actor* actor);
 		void RemoveActor(Actor* actor);
 
-		u32 GetRootActorCount() const { return actors.GetSize(); }
+		int GetRootActorCount() const { return actors.GetSize(); }
 
-		Actor* GetRootActor(u32 index) const { return actors[index]; }
+		Actor* GetRootActor(int index) const { return actors[index]; }
+
+		int GetIndexOfActor(Actor* actor) const;
     
 		bool IsEnabled() const { return isEnabled; }
 

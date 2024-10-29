@@ -88,9 +88,11 @@ namespace CE
         if (buttonState == newState)
             return;
 
+        ZoneScoped;
+
         buttonState = newState;
 
-        if (m_Style)
+        if (m_Style && !IsDefaultInstance())
         {
             m_Style->MakeStyle(*this);
         }

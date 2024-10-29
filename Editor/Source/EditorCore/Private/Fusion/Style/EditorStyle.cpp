@@ -129,6 +129,15 @@ namespace CE::Editor
 		GetDefaultWidget<FTextInput>()
 			.Style(this, textInput->GetName());
 
+		if (!expandableSection)
+		{
+			expandableSection = CreateObject<FExpandableSectionStyle>(this, "ExpandableSection");
+			Add(expandableSection);
+		}
+
+		GetDefaultWidget<FExpandableSection>()
+			.Style(this, expandableSection->GetName());
+			
 		if (!comboBox)
 		{
 			comboBox = CreateObject<FComboBoxPlainStyle>(this, "ComboBox");

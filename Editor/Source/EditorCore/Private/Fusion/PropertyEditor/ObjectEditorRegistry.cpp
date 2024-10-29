@@ -21,7 +21,7 @@ namespace CE
 
     void ObjectEditorRegistry::Shutdown()
     {
-
+        
     }
 
     void ObjectEditorRegistry::RegisterCustomEditor(ClassType* targetClass, const SubClass<ObjectEditor>& editorClass)
@@ -54,6 +54,36 @@ namespace CE
 
         SubClass<ObjectEditor> editorClass = nullptr;
 
+        ObjectEditor* existingEditor = nullptr;
+
+        for (int i = 0; i < targetObjects.GetSize(); ++i)
+        {
+            Object* object = targetObjects[i];
+
+            if (object == nullptr)
+                continue;
+
+            ObjectEditor* found = nullptr;
+
+            if (objectEditorsByInstances.KeyExists(object->GetUuid()))
+            {
+                found = objectEditorsByInstances[object->GetUuid()];
+            }
+
+            if (found && i == 0)
+            {
+                existingEditor = found;
+            }
+            else if (existingEditor != found || i == 0)
+            {
+                existingEditor = nullptr;
+                break;
+            }
+        }
+
+        if (existingEditor)
+            return existingEditor;
+
         for (Object* targetObject : targetObjects)
         {
             if (targetObject == nullptr)
@@ -73,6 +103,23 @@ namespace CE
             return nullptr;
 
         ObjectEditor* editor = CreateObject<ObjectEditor>(GetTransient(MODULE_NAME), "ObjectEditor", OF_NoFlags, editorClass);
+
+        if (targetObjects.GetSize() == 1)
+        {
+            editor->target = targetObjects[0];
+        }
+
+        editor->targets = targetObjects;
+
+        for (Object* targetObject : targetObjects)
+        {
+            if (targetObject == nullptr)
+                continue;
+
+            objectEditorsByInstances[targetObject->GetUuid()] = editor;
+        }
+
+        editor->CreateGUI();
 
         return editor;
     }

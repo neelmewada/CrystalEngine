@@ -29,6 +29,8 @@ namespace CE
 
         void ClearStyle() override;
 
+        void RemoveChildWidget();
+
     protected:
 
         // Never call this function directly! Use AddChild() instead

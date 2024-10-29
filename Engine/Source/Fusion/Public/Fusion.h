@@ -5,6 +5,7 @@
 #include "Window/FToolWindow.h"
 #include "Style/FToolWindowStyle.h"
 #include "Style/FListViewStyle.h"
+#include "Style/FExpandableSectionStyle.h"
 
 // - Data -
 #include "Data/FAbstractItemModel.h"
@@ -27,3 +28,5 @@
 #include "Widget/TreeView/FTreeViewRow.h"
 #include "Widget/TreeView/FTreeViewModel.h"
 #include "Widget/TreeView/FTreeView.h"
+
+#include "Widget/FExpandableSection.h"

@@ -42,6 +42,8 @@ namespace CE
 
         void Select(const FModelIndex& index);
 
+        void Deselect(const FModelIndex& index);
+
         bool IsSelected(const FModelIndex& index);
 
         void SetSelectionMode(FSelectionMode selectionMode);

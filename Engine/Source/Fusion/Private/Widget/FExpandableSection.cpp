@@ -1,0 +1,88 @@
+#include "Fusion.h"
+
+namespace CE
+{
+
+    FExpandableSection::FExpandableSection()
+    {
+        m_Expanded = true;
+    }
+
+    void FExpandableSection::Construct()
+    {
+        Super::Construct();
+
+        FBrush downwardArrow = FBrush("/Engine/Resources/Icons/CaretDown");
+
+
+        Child(
+            FNew(FVerticalStack)
+            .Gap(0)
+            .VAlign(VAlign::Fill)
+            .HAlign(HAlign::Fill)
+            (
+                FAssignNew(FButton, header)
+                .OnPressed([this]
+                {
+                    Expanded(!Expanded());
+                })
+                .Background(Color::Green())
+                .Child(
+                    FNew(FHorizontalStack)
+                    .Gap(10)
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Center)
+                    (
+                        FAssignNew(FImage, arrowIcon)
+                        .Background(downwardArrow)
+                        .Width(10)
+                        .Height(10)
+                        .VAlign(VAlign::Center)
+                        .HAlign(HAlign::Left)
+                        .Margin(Vec4(0, 0, 5, 0))
+                        .Angle(m_Expanded ? 0 : -90),
+
+                        FAssignNew(FLabel, titleLabel)
+                        .FontSize(14)
+                        .Text("Section")
+                        .VAlign(VAlign::Center),
+
+                        FNew(FTerminalWidget)
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(1.0f)
+                    )
+                )
+                .Style(""),
+
+                FAssignNew(FStyledWidget, content)
+                .Background(Color::Red())
+                .Enabled(m_Expanded)
+            )
+        );
+
+        header->ClearStyle();
+        header->Background(Color::Blue());
+        header->Border(Color::Clear(), 0);
+        header->CornerRadius(0);
+    }
+
+    void FExpandableSection::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        thread_local CE::Name expanded = "Expanded";
+
+        if (propertyName == expanded)
+        {
+            arrowIcon->Angle(m_Expanded ? 0 : -90);
+            content->Enabled(m_Expanded);
+        }
+    }
+
+    FExpandableSection::Self& FExpandableSection::ExpandableContent(FWidget& widget)
+    {
+        content->Child(widget);
+        return *this;
+    }
+}
+

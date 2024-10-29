@@ -29,6 +29,8 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool SupportsKeyboardEvents() const override { return true; }
+
     protected:
 
         FTreeViewContainer();

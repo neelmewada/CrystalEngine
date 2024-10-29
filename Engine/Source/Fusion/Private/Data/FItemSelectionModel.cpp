@@ -32,6 +32,16 @@ namespace CE
         m_OnSelectionChanged.Broadcast(this);
     }
 
+    void FItemSelectionModel::Deselect(const FModelIndex& index)
+    {
+        if (selection.Exists(index))
+        {
+            selection.Remove(index);
+
+            m_OnSelectionChanged.Broadcast(this);
+        }
+    }
+
     bool FItemSelectionModel::IsSelected(const FModelIndex& index)
     {
         auto model = index.GetModel();

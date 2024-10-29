@@ -82,25 +82,26 @@ namespace CE
             Vec2 childPos;
             Vec2 childSize;
             Vec2 childIntrinsicSize = child->GetIntrinsicSize();
+            Vec4 childMargin = child->Margin();
 
             switch (childVAlign)
             {
             case VAlign::Auto:
             case VAlign::Fill:
-                childSize.y = availableSize.y;
-                childPos.y = origin.y;
+                childSize.y = availableSize.y - childMargin.top - childMargin.bottom;
+                childPos.y = origin.y + childMargin.top - childMargin.bottom;
 	            break;
             case VAlign::Top:
                 childSize.y = childIntrinsicSize.y;
-                childPos.y = origin.y;
+                childPos.y = origin.y + childMargin.top - childMargin.bottom;
 	            break;
             case VAlign::Center:
                 childSize.y = childIntrinsicSize.y;
-                childPos.y = origin.y + (availableSize.y - childSize.y) * 0.5f;
+                childPos.y = origin.y + childMargin.top - childMargin.bottom + (availableSize.y - childSize.y) * 0.5f;
 	            break;
             case VAlign::Bottom:
                 childSize.y = childIntrinsicSize.y;
-                childPos.y = origin.y + (availableSize.y - childSize.y);
+                childPos.y = origin.y + childMargin.top - childMargin.bottom + (availableSize.y - childSize.y);
 	            break;
             }
 
@@ -108,20 +109,20 @@ namespace CE
             {
             case HAlign::Auto:
             case HAlign::Fill:
-                childSize.x = availableSize.x;
-                childPos.x = origin.x;
+                childSize.x = availableSize.x - childMargin.left - childMargin.right;
+                childPos.x = origin.x + childMargin.left - childMargin.right;
 	            break;
             case HAlign::Left:
                 childSize.x = childIntrinsicSize.x;
-                childPos.x = origin.x;
+                childPos.x = origin.x + childMargin.left - childMargin.right;
 	            break;
             case HAlign::Center:
                 childSize.x = childIntrinsicSize.x;
-                childPos.x = origin.x + (availableSize.x - childSize.x) * 0.5f;
+                childPos.x = origin.x + (availableSize.x - childSize.x) * 0.5f + childMargin.left - childMargin.right;
 	            break;
             case HAlign::Right:
                 childSize.x = childIntrinsicSize.x;
-                childPos.x = origin.x + (availableSize.x - childSize.x);
+                childPos.x = origin.x + (availableSize.x - childSize.x) + childMargin.left - childMargin.right;
 	            break;
             }
 

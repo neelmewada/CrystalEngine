@@ -3,22 +3,24 @@
 namespace CE
 {
     CLASS()
-    class EDITORCORE_API ObjectEditor : public Object
+    class EDITORCORE_API ObjectEditor : public FStyledWidget
     {
-        CE_CLASS(ObjectEditor, Object)
+        CE_CLASS(ObjectEditor, FStyledWidget)
     protected:
 
         ObjectEditor();
-        
-    public:
 
         virtual ~ObjectEditor();
+
+        void Construct() override;
+
+    public:
 
         virtual bool SupportsMultiObjectEditing() const { return false; }
 
     protected:
 
-    private:
+        void CreateGUI();
 
         FIELD(ReadOnly)
         Array<Object*> targets;

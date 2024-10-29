@@ -124,6 +124,11 @@ namespace CE
 		OnActorChainDetached(actor);
 	}
 
+	int CE::Scene::GetIndexOfActor(Actor* actor) const
+	{
+		return actors.IndexOf(actor);
+	}
+
 	void CE::Scene::AddRenderPipeline(CE::RenderPipeline* renderPipeline, CameraComponent* camera)
 	{
 		if (renderPipeline && !renderPipelines.Exists(renderPipeline))

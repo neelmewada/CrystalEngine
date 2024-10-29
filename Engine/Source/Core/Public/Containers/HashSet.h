@@ -68,6 +68,9 @@ namespace CE
         auto begin() { return impl.begin(); }
         auto end() { return impl.end(); }
 
+        auto begin() const { return impl.begin(); }
+        auto end() const { return impl.end(); }
+
         auto cbegin() const { return impl.cbegin(); }
         auto cend() const { return impl.cend(); }
         

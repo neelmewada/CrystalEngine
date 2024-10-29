@@ -36,6 +36,7 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
             )
+			.Style("EditorMinorDockTab")
     	;
 
         if (scene)

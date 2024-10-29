@@ -2,6 +2,10 @@
 
 namespace CE
 {
+    class FSplitBox;
+
+    DECLARE_SCRIPT_EVENT(FSplitBoxEvent, FSplitBox*);
+
     ENUM()
     enum class FSplitDirection
     {
@@ -26,6 +30,8 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
+        int GetDraggedSplitIndex() const { return draggedSplitIndex; }
+
     protected:
 
         void Construct() override;
@@ -34,12 +40,16 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
+
+        FUSION_PROPERTY(Color, SplitterHoverBackground);
 
         FUSION_LAYOUT_PROPERTY(FSplitDirection, Direction);
         FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
         FUSION_LAYOUT_PROPERTY(f32, SplitterSize);
+
+        FUSION_EVENT(FSplitBoxEvent, OnSplitterDragged);
 
     private:
 

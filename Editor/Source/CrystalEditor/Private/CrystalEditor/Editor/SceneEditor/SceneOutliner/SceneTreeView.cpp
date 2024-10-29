@@ -11,7 +11,7 @@ namespace CE::Editor
     void SceneTreeView::Construct()
     {
         Super::Construct();
-
+        
         (*this)
 			.GenerateRowDelegate(MemberDelegate(&Self::GenerateRow, this))
             ;
