@@ -10,11 +10,15 @@ namespace CE::Editor
 
         // - Public API -
 
+        static CrystalEditorWindow* Get();
+
     protected:
 
         CrystalEditorWindow();
 
         void Construct() override;
+
+        void OnBeforeDestroy() override;
 
     public: // - Fusion Properties - 
 

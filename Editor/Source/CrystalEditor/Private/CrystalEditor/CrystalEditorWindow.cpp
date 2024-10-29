@@ -2,6 +2,12 @@
 
 namespace CE::Editor
 {
+    static CrystalEditorWindow* instance = nullptr;
+
+	CrystalEditorWindow* CrystalEditorWindow::Get()
+	{
+        return instance;
+	}
 
     CrystalEditorWindow::CrystalEditorWindow()
     {
@@ -11,6 +17,8 @@ namespace CE::Editor
     void CrystalEditorWindow::Construct()
     {
         Super::Construct();
+
+        instance = this;
 
         SceneEditor* sceneEditor = nullptr;
         FAssignNew(SceneEditor, sceneEditor);
@@ -28,6 +36,15 @@ namespace CE::Editor
 
         Style("EditorDockspace");
     }
-    
+
+    void CrystalEditorWindow::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (this == instance)
+        {
+            instance = nullptr;
+        }
+    }
 }
 

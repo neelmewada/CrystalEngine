@@ -42,6 +42,10 @@ namespace CE
 
 		SceneComponent* GetRootComponent() const { return rootComponent; }
 
+		int GetComponentCount() const { return attachedComponents.GetSize(); }
+
+		ActorComponent* GetComponent(int index) const { return attachedComponents[index]; }
+
 		void SetLocalPosition(const Vec3& localPos)
 		{
 			if (rootComponent)

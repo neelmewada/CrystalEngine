@@ -175,6 +175,7 @@ namespace CE::Editor
                             .Enabled(false)
                             (
                                 FAssignNew(FLabel, projectLabel)
+                                .FontSize(14)
                                 .Text("Project Name")
                                 .VAlign(VAlign::Center)
                             ),

@@ -25,9 +25,20 @@ namespace CE::Editor
                     .HAlign(HAlign::Center)
                     .Margin(Vec4(0, 50, 0, 0)),
 
-                    FAssignNew(FStyledWidget, editorContainer)
+                    FNew(FVerticalStack)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
+                    (
+                        FAssignNew(FLabel, actorName)
+                        .Text("Actor Name")
+                        .FontSize(14)
+                        .HAlign(HAlign::Left),
+
+                        FAssignNew(ComponentTreeView, treeView)
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(1.0f)
+
+                    )
                 )
             )
 			.Style("EditorMinorDockTab")
@@ -36,7 +47,7 @@ namespace CE::Editor
         bool editorExists = editor != nullptr;
 
         emptyLabel->Enabled(!editorExists);
-        editorContainer->Enabled(editorExists);
+        //editorContainer->Enabled(editorExists);
     }
 
     void DetailsTab::SetObjectEditor(ObjectEditor* editor)
@@ -50,15 +61,15 @@ namespace CE::Editor
 
         if (editor)
         {
-            editorContainer->Child(*editor);
+            //editorContainer->Child(*editor);
         }
         else
         {
-            editorContainer->RemoveChildWidget();
+            //editorContainer->RemoveChildWidget();
         }
 
         emptyLabel->Enabled(!editorExists);
-        editorContainer->Enabled(editorExists);
+        //editorContainer->Enabled(editorExists);
     }
 
 }

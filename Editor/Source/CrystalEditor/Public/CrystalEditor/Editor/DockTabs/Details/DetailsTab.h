@@ -22,8 +22,11 @@ namespace CE::Editor
     protected:
 
         FLabel* emptyLabel = nullptr;
-        FStyledWidget* editorContainer = nullptr;
+        //FStyledWidget* editorContainer = nullptr;
         ObjectEditor* editor = nullptr;
+
+        FLabel* actorName = nullptr;
+        ComponentTreeView* treeView = nullptr;
 
         FUSION_WIDGET;
     };

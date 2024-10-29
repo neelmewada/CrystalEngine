@@ -46,6 +46,11 @@
 #include "Fusion/Widget/EditorViewport.h"
 #include "Fusion/Widget/EditorWindow.h"
 
+#include "Fusion/Widget/ComponentTreeView/ComponentTreeItem.h"
+#include "Fusion/Widget/ComponentTreeView/ComponentTreeViewRow.h"
+#include "Fusion/Widget/ComponentTreeView/ComponentTreeView.h"
+
+// Docking
 #include "Fusion/Docking/EditorDockspace.h"
 #include "Fusion/Docking/EditorDockTabItem.h"
 #include "Fusion/Docking/EditorDockTab.h"

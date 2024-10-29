@@ -42,7 +42,7 @@ namespace CE
         FBrush hoveredTabBackground = Color::RGBA(32, 32, 32);
 
         FIELD()
-        FBrush projectLabelBackground = Color::RGBA(14, 14, 14);
+        FBrush projectLabelBackground = Color::Clear();
 
         FIELD()
         Vec4 tabCornerRadius = Vec4(5, 5, 0, 0);
