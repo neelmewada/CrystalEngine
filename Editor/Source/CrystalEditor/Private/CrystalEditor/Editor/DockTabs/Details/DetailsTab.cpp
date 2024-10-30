@@ -25,7 +25,7 @@ namespace CE::Editor
                     .HAlign(HAlign::Center)
                     .Margin(Vec4(0, 50, 0, 0)),
 
-                    FNew(FVerticalStack)
+                    FAssignNew(FVerticalStack, editorContainer)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
                     (
@@ -44,20 +44,23 @@ namespace CE::Editor
 			.Style("EditorMinorDockTab")
         ;
 
-        bool editorExists = editor != nullptr;
-
-        emptyLabel->Enabled(!editorExists);
-        //editorContainer->Enabled(editorExists);
+        
+        SetSelectedActor(nullptr);
     }
 
-    void DetailsTab::SetObjectEditor(ObjectEditor* editor)
+    void DetailsTab::SetSelectedActor(Actor* actor)
     {
-        if (this->editor == editor)
-            return;
+        if (actor)
+        {
+            treeView->SetActor(actor);
+            actorName->Text(actor->GetName().GetString());
+        }
+        else
+        {
+            editor = nullptr;
+        }
 
-        this->editor = editor;
-
-        bool editorExists = editor != nullptr;
+        bool actorExists = actor != nullptr;
 
         if (editor)
         {
@@ -68,8 +71,8 @@ namespace CE::Editor
             //editorContainer->RemoveChildWidget();
         }
 
-        emptyLabel->Enabled(!editorExists);
-        //editorContainer->Enabled(editorExists);
+        emptyLabel->Enabled(!actorExists);
+        editorContainer->Enabled(actorExists);
     }
 
 }

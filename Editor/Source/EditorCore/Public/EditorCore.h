@@ -49,6 +49,7 @@
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeItem.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeViewRow.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeView.h"
+#include "Fusion/Widget/ComponentTreeView/ComponentTreeViewStyle.h"
 
 // Docking
 #include "Fusion/Docking/EditorDockspace.h"

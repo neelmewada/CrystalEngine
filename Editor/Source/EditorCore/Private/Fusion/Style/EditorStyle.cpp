@@ -182,6 +182,16 @@ namespace CE::Editor
 		GetDefaultWidget<FTabView>()
 			.Style(this, tabView->GetName());
 
+		if (!expandCaretButton)
+		{
+			expandCaretButton = CreateObject<FImageButtonStyle>(this, "ExpandCaretButton");
+			Add(expandCaretButton);
+		}
+
+		expandCaretButton->tintColor = Color::RGBA(134, 134, 134);
+		expandCaretButton->hoverTintColor = Color::RGBA(180, 180, 180);
+		expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
+
 		if (!menuPopup)
 		{
 			menuPopup = CreateObject<FMenuPopupStyle>(this, "MenuPopup");
@@ -272,6 +282,15 @@ namespace CE::Editor
 
     void EditorStyle::InitEditorStyle()
     {
+		if (!componentTreeView)
+		{
+			componentTreeView = CreateObject<ComponentTreeViewStyle>(this, "ComponentTreeView");
+			Add(componentTreeView);
+		}
+
+		GetDefaultWidget<ComponentTreeView>()
+			.Style(this, componentTreeView->GetName());
+
 		if (!editorDockspace)
 		{
 			editorDockspace = CreateObject<EditorDockspaceStyle>(this, "EditorDockspace");

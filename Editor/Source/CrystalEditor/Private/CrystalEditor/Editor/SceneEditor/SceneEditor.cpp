@@ -94,6 +94,20 @@ namespace CE::Editor
                 skyboxMaterial->SetProperty("_CubeMap", skybox);
                 skyboxMaterial->ApplyProperties();
             }
+
+            Actor* sampleActor = CreateObject<Actor>(scene, "SampleActor");
+            {
+                SceneComponent* root = CreateObject<SceneComponent>(sampleActor, "Root");
+                sampleActor->SetRootComponent(root);
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    SceneComponent* child = CreateObject<SceneComponent>(root, String::Format("Child_{}", i));
+                    root->SetupAttachment(child);
+                }
+
+                scene->AddActor(sampleActor);
+            }
         }
 
         gEditor->AddRenderViewport(viewport);
@@ -147,12 +161,11 @@ namespace CE::Editor
         if (selectedActors.NonEmpty())
         {
             // TODO: Create and set object editor
-            ObjectEditor* editor = ObjectEditorRegistry::Get().FindOrCreate(selectedActors);
-            detailsTab->SetObjectEditor(editor);
+            detailsTab->SetSelectedActor(selectedActors.GetLast());
         }
         else
         {
-            detailsTab->SetObjectEditor(nullptr);
+            detailsTab->SetSelectedActor(nullptr);
         }
     }
 

@@ -1,7 +1,9 @@
 #pragma once
 
+
 namespace CE::Editor
 {
+	class ComponentTreeViewStyle;
 
 	CLASS()
 	class EDITORCORE_API EditorStyle : public FStyleSet
@@ -67,9 +69,12 @@ namespace CE::Editor
 		FToolWindowStyle* toolWindow = nullptr;
 
 		FIELD()
-		FToolWindowStyle* projectBrowserWindow = nullptr;
+		FImageButtonStyle* expandCaretButton = nullptr;
 
 		// - Project Browser Window -
+
+		FIELD()
+		FToolWindowStyle* projectBrowserWindow = nullptr;
 
 		FIELD()
 		FTabViewStyle* projectBrowserTabView = nullptr;
@@ -78,6 +83,9 @@ namespace CE::Editor
 		FListViewStyle* projectBrowserListView = nullptr;
 
 		// - Editor -
+
+		FIELD()
+		ComponentTreeViewStyle* componentTreeView = nullptr;
 
 		FIELD()
 		EditorDockspaceStyle* editorDockspace = nullptr;

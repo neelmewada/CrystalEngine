@@ -117,6 +117,16 @@ namespace CE
 	    }
     }
 
+    void FContainerWidget::QueueDestroyAllChildren()
+    {
+        for (int i = children.GetSize() - 1; i >= 0; --i)
+        {
+            FWidget* child = children[i];
+            RemoveChild(child);
+            child->QueueDestroy();
+        }
+    }
+
     void FContainerWidget::RemoveAllChildren()
     {
         for (int i = children.GetSize() - 1; i >= 0; --i)

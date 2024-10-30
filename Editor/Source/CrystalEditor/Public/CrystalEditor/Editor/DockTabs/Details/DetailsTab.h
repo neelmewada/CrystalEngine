@@ -14,7 +14,7 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        void SetObjectEditor(ObjectEditor* editor);
+        void SetSelectedActor(Actor* actor);
 
     public: // - Fusion Properties -
 
@@ -22,7 +22,7 @@ namespace CE::Editor
     protected:
 
         FLabel* emptyLabel = nullptr;
-        //FStyledWidget* editorContainer = nullptr;
+        FVerticalStack* editorContainer = nullptr;
         ObjectEditor* editor = nullptr;
 
         FLabel* actorName = nullptr;
