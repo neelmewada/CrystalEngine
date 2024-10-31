@@ -36,6 +36,11 @@ namespace CE
         intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
         ApplyIntrinsicSizeConstraints();
+
+        if (GetName() == "DebugScrollBox")
+        {
+
+        }
     }
 
     void FScrollBox::PlaceSubWidgets()
@@ -145,6 +150,11 @@ namespace CE
         {
             isHorizontalScrollVisible = false;
             MarkLayoutDirty();
+        }
+
+        if (GetName() == "DebugScrollBox")
+        {
+            CE_LOG(Info, All, "Self: {} | Child: {}", computedSize, child->GetComputedSize());
         }
     }
 

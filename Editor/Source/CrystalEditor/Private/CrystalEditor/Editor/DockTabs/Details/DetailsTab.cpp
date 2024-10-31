@@ -57,14 +57,15 @@ namespace CE::Editor
                             FNew(FScrollBox)
                             .VerticalScroll(true)
                             .HorizontalScroll(false)
-                            .Child(
-                                FAssignNew(FStyledWidget, editorContainer)
-                                .HAlign(HAlign::Fill)
-                                .VAlign(VAlign::Fill)
-                            )
                             .HAlign(HAlign::Fill)
                             .FillRatio(0.7f)
                             .Margin(Vec4(0, 5, 0, 0))
+                            .Name("DebugScrollBox")
+                            (
+                                FAssignNew(FStyledWidget, editorContainer)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Top)
+                            )
                         )
 
                     )
