@@ -19,6 +19,8 @@ namespace CE
 
         Child(
             FAssignNew(FVerticalStack, content)
+            .HAlign(HAlign::Fill)
+            .VAlign(VAlign::Fill)
         );
         
     }
@@ -42,17 +44,19 @@ namespace CE
         if (target == nullptr)
             return;
 
-        if (FWidget* child = GetChild())
-        {
-            RemoveChild(child);
-            child->Destroy();
-        }
+        content->QueueDestroyAllChildren();
 
         // TODO: Create editors and bind them to respective fields of Object
         // Editor widget will hold reference to FieldType* (edited field) and Array<Object*> (array of target objects)
         // Editor widget will listen to changes made in any of the Array<Object*> through code (NOT UI input) using the Setters.
 
-        HashMap<CE::Name, Array<FieldType*>> fieldsByCategory;
+        struct FieldData
+        {
+            FieldType* field = nullptr;
+            Object* targetObject = nullptr;
+        };
+
+        HashMap<CE::Name, Array<FieldData>> fieldsByCategory;
         Array<CE::Name> categories;
         HashMap<CE::Name, int> categoryOrders;
         HashSet<TypeId> visitedComponents{};
@@ -74,7 +78,7 @@ namespace CE
 
                     if (!field->HasAttribute("Category"))
                     {
-                        fieldsByCategory["General"].Add(field);
+                        fieldsByCategory["General"].Add({ field, target });
                     }
                     else
                     {
@@ -97,9 +101,9 @@ namespace CE
                         categoryOrders[category] = order;
                     }
 
-                    fieldsByCategory[category].Add(field);
+                    fieldsByCategory[category].Add({ field, target });
                 }
-
+                
 	            if (target->IsOfType<Actor>())
 	            {
                     Actor* actor = static_cast<Actor*>(target);
@@ -127,10 +131,29 @@ namespace CE
         for (int i = 0; i < categories.GetSize(); ++i)
         {
             const CE::Name& category = categories[i];
+            if (fieldsByCategory[category].IsEmpty())
+                continue;
+
+            FExpandableSection* section = nullptr;
+
+            FAssignNew(FExpandableSection, section)
+                .Title(category.GetString())
+				.ExpandableContent(
+                    FNew(FLabel)
+                    .FontSize(14)
+                    .Text("Content here")
+                )
+                ;
+
+            content->AddChild(section);
 
             for (int j = 0; j < fieldsByCategory[category].GetSize(); ++j)
             {
-                FieldType* field = fieldsByCategory[category][j];
+                FieldType* field = fieldsByCategory[category][j].field;
+                Object* target = fieldsByCategory[category][j].targetObject;
+
+                if (!field || !target)
+                    continue;
 
 
             }

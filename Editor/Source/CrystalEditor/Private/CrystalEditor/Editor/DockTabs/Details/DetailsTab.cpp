@@ -54,10 +54,17 @@ namespace CE::Editor
                                 .FillRatio(1.0f)
                             ),
 
-                            FAssignNew(FStyledWidget, editorContainer)
+                            FNew(FScrollBox)
+                            .VerticalScroll(true)
+                            .HorizontalScroll(false)
+                            .Child(
+                                FAssignNew(FStyledWidget, editorContainer)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill)
+                            )
                             .HAlign(HAlign::Fill)
                             .FillRatio(0.7f)
-                            .Padding(Vec4(0, 5, 0, 0))
+                            .Margin(Vec4(0, 5, 0, 0))
                         )
 
                     )
