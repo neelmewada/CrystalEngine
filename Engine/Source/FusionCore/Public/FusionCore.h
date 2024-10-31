@@ -96,6 +96,7 @@ namespace CE
 #include "Widget/FButton.h"
 #include "Widget/FImageButton.h"
 #include "Widget/FTextButton.h"
+#include "Widget/FCheckbox.h"
 #include "Widget/Input/FTextInput.h"
 #include "Widget/ComboBox/FComboBoxPopup.h"
 #include "Widget/ComboBox/FComboBoxItem.h"
