@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+
     CLASS()
     class EDITORCORE_API ComponentTreeView : public FStyledWidget
     {
@@ -25,6 +26,7 @@ namespace CE::Editor
 
     public: // - Fusion Properties - 
 
+        FUSION_EVENT(ScriptEvent<void(ComponentTreeItem*)>, OnSelectionChanged);
 
     protected:
 

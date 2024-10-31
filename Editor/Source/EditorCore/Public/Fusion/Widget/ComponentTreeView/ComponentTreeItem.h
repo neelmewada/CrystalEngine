@@ -15,6 +15,8 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        Actor* GetActor() const { return actor; }
+
         ActorComponent* GetComponent() const { return component; }
 
         bool IsSceneComponent() const { return component != nullptr && component->IsOfType<SceneComponent>(); }

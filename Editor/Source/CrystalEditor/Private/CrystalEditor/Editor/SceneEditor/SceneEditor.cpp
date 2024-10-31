@@ -229,7 +229,7 @@ namespace CE::Editor
 
                         )
                         .HAlign(HAlign::Fill)
-                        .FillRatio(0.4f),
+                        .FillRatio(0.3f),
 
                         FAssignNew(EditorMinorDockspace, rightBottom)
                         .DockTabs(
@@ -237,7 +237,7 @@ namespace CE::Editor
 
                         )
                         .HAlign(HAlign::Fill)
-                        .FillRatio(0.6f)
+                        .FillRatio(0.7f)
                     )
                 )
             )

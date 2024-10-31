@@ -55,6 +55,7 @@ namespace CE
 
         HashMap<Uuid, ObjectEditor*> objectEditorsByInstances;
 
+        friend class ObjectEditor;
     };
     
 } // namespace CE

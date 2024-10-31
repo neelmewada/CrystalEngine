@@ -25,18 +25,40 @@ namespace CE::Editor
                     .HAlign(HAlign::Center)
                     .Margin(Vec4(0, 50, 0, 0)),
 
-                    FAssignNew(FVerticalStack, editorContainer)
+                    FAssignNew(FCompoundWidget, detailsContainer)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
-                    (
-                        FAssignNew(FLabel, actorName)
-                        .Text("Actor Name")
-                        .FontSize(14)
-                        .HAlign(HAlign::Left),
-
-                        FAssignNew(ComponentTreeView, treeView)
+                    .As<FCompoundWidget>()
+                    .Child(
+                        FNew(FSplitBox)
+                        .Direction(FSplitDirection::Vertical)
+                        .SplitterSize(4.0f)
+                        .VAlign(VAlign::Fill)
                         .HAlign(HAlign::Fill)
                         .FillRatio(1.0f)
+                        (
+                            FNew(FVerticalStack)
+                            .HAlign(HAlign::Fill)
+                            .FillRatio(0.3f)
+                            (
+                                FAssignNew(FLabel, actorName)
+                                .Text("Actor Name")
+                                .FontSize(14)
+                                .HAlign(HAlign::Left)
+                                .Margin(Vec4(5, 10, 5, 10)),
+
+                                FAssignNew(ComponentTreeView, treeView)
+                                .OnSelectionChanged(FUNCTION_BINDING(this, OnComponentSelectionChanged))
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill)
+                                .FillRatio(1.0f)
+                            ),
+
+                            FAssignNew(FStyledWidget, editorContainer)
+                            .HAlign(HAlign::Fill)
+                            .FillRatio(0.7f)
+                            .Padding(Vec4(0, 5, 0, 0))
+                        )
 
                     )
                 )
@@ -48,6 +70,23 @@ namespace CE::Editor
         SetSelectedActor(nullptr);
     }
 
+    void DetailsTab::OnComponentSelectionChanged(ComponentTreeItem* item)
+    {
+        editorContainer->RemoveChildWidget();
+
+        if (editor)
+        {
+            editor->QueueDestroy();
+            editor = nullptr;
+        }
+
+        if (item && item->GetActor())
+        {
+            editor = ObjectEditorRegistry::Get().FindOrCreate(item->GetActor());
+            editorContainer->Child(*editor);
+        }
+    }
+
     void DetailsTab::SetSelectedActor(Actor* actor)
     {
         if (actor)
@@ -55,24 +94,11 @@ namespace CE::Editor
             treeView->SetActor(actor);
             actorName->Text(actor->GetName().GetString());
         }
-        else
-        {
-            editor = nullptr;
-        }
 
         bool actorExists = actor != nullptr;
 
-        if (editor)
-        {
-            //editorContainer->Child(*editor);
-        }
-        else
-        {
-            //editorContainer->RemoveChildWidget();
-        }
-
         emptyLabel->Enabled(!actorExists);
-        editorContainer->Enabled(actorExists);
+        detailsContainer->Enabled(actorExists);
     }
 
 }

@@ -12,6 +12,9 @@ namespace CE::Editor
 
         void Construct() override;
 
+        FUNCTION()
+        void OnComponentSelectionChanged(ComponentTreeItem* item);
+
     public: // - Public API -
 
         void SetSelectedActor(Actor* actor);
@@ -22,7 +25,8 @@ namespace CE::Editor
     protected:
 
         FLabel* emptyLabel = nullptr;
-        FVerticalStack* editorContainer = nullptr;
+        FCompoundWidget* detailsContainer = nullptr;
+        FStyledWidget* editorContainer = nullptr;
         ObjectEditor* editor = nullptr;
 
         FLabel* actorName = nullptr;

@@ -130,6 +130,9 @@ namespace CE::Editor
 
     void ComponentTreeView::SelectItem(ComponentTreeItem* item)
     {
+        if (selectedItem == item)
+            return;
+
         selectedItem = item;
 
         for (ComponentTreeViewRow* row : rows)
@@ -138,6 +141,8 @@ namespace CE::Editor
         }
 
         ApplyStyle();
+
+        m_OnSelectionChanged(item);
     }
 
     void ComponentTreeView::Expand(ComponentTreeViewRow* expandRow)

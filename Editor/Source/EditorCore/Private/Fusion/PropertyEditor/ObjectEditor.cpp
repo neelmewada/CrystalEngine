@@ -17,7 +17,23 @@ namespace CE
     {
 	    Super::Construct();
 
+        Child(
+            FAssignNew(FVerticalStack, content)
+        );
         
+    }
+
+    void ObjectEditor::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        for (Object* target : targets)
+        {
+            if (ObjectEditorRegistry::Get().objectEditorsByInstances[target->GetUuid()] == this)
+            {
+	            ObjectEditorRegistry::Get().objectEditorsByInstances.Remove(target->GetUuid());
+            }
+        }
     }
 
     void ObjectEditor::CreateGUI()
@@ -36,50 +52,66 @@ namespace CE
         // Editor widget will hold reference to FieldType* (edited field) and Array<Object*> (array of target objects)
         // Editor widget will listen to changes made in any of the Array<Object*> through code (NOT UI input) using the Setters.
 
-        Class* clazz = target->GetClass();
-
-        u32 numFields = clazz->GetFieldCount();
-
         HashMap<CE::Name, Array<FieldType*>> fieldsByCategory;
         Array<CE::Name> categories;
         HashMap<CE::Name, int> categoryOrders;
+        HashSet<TypeId> visitedComponents{};
 
-        for (int i = 0; i < numFields; ++i)
-        {
-            Field* field = clazz->GetFieldAt(i);
-
-            if (!field->IsEditAnywhere())
-                continue;
-
-            CE::Name category = "General";
-
-            if (!field->HasAttribute("Category"))
+        std::function<void(Object*,bool)> visitor = [&](Object* target, bool recurseComponents)
             {
-	            fieldsByCategory["General"].Add(field);
-            }
-            else
-            {
-                category = field->GetAttribute("Category").GetStringValue();
-                if (!category.IsValid())
+                Class* clazz = target->GetClass();
+
+                u32 numFields = clazz->GetFieldCount();
+
+                for (int i = 0; i < numFields; ++i)
                 {
-	                category = "General";
+                    Field* field = clazz->GetFieldAt(i);
+
+                    if (!field->IsEditAnywhere())
+                        continue;
+
+                    CE::Name category = "General";
+
+                    if (!field->HasAttribute("Category"))
+                    {
+                        fieldsByCategory["General"].Add(field);
+                    }
+                    else
+                    {
+                        category = field->GetAttribute("Category").GetStringValue();
+                        if (!category.IsValid())
+                        {
+                            category = "General";
+                        }
+                    }
+
+                    if (!fieldsByCategory.KeyExists(category))
+                    {
+                        categories.Add(category);
+                    }
+
+                    if (field->HasAttribute("CategoryOrder"))
+                    {
+                        int order = 0;
+                        String::TryParse(field->GetAttribute("CategoryOrder").GetStringValue(), order);
+                        categoryOrders[category] = order;
+                    }
+
+                    fieldsByCategory[category].Add(field);
                 }
-            }
 
-            if (!fieldsByCategory.KeyExists(category))
-            {
-                categories.Add(category);
-            }
+	            if (target->IsOfType<Actor>())
+	            {
+                    Actor* actor = static_cast<Actor*>(target);
 
-            if (field->HasAttribute("CategoryOrder"))
-            {
-                int order = 0;
-                String::TryParse(field->GetAttribute("CategoryOrder").GetStringValue(), order);
-                categoryOrders[category] = order;
-            }
+                    if (actor->GetRootComponent())
+                    {
+                        visitor(actor->GetRootComponent(), true);
+                    }
+	            }
+            };
 
-            fieldsByCategory[category].Add(field);
-        }
+        visitor(target, target->IsOfType<Actor>());
 
         categories.Sort([&](const CE::Name& lhs, const CE::Name& rhs)
             {

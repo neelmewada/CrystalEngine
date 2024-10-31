@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	constexpr f32 SplitterTolerance = 2;
 
     FSplitBox::FSplitBox()
     {
@@ -160,7 +161,10 @@ namespace CE
 		if (hoveredSplitIndex >= 0 && isCursorPushed)
 		{
 			FWidget* left = children[hoveredSplitIndex];
-			Vec2 splitterPos = left->GetComputedPosition() + (m_Direction == FSplitDirection::Horizontal ? Vec2(left->computedSize.width, 0) : Vec2(0, left->computedSize.height));
+			Vec2 splitterPos = left->GetComputedPosition() + 
+				(m_Direction == FSplitDirection::Horizontal 
+					? Vec2(left->computedSize.width, 0)
+					: Vec2(0, left->computedSize.height));
 			Vec2 splitterSize = m_Direction == FSplitDirection::Horizontal
 				? Vec2(m_SplitterSize, availableSize.y)
 				: Vec2(availableSize.x, m_SplitterSize);

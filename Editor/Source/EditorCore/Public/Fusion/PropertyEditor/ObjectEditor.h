@@ -14,6 +14,8 @@ namespace CE
 
         void Construct() override;
 
+        void OnBeforeDestroy() override;
+
     public:
 
         virtual bool SupportsMultiObjectEditing() const { return false; }
@@ -21,6 +23,8 @@ namespace CE
     protected:
 
         void CreateGUI();
+
+        FVerticalStack* content = nullptr;
 
         FIELD(ReadOnly)
         Array<Object*> targets;
