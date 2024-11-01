@@ -38,6 +38,7 @@ namespace CE
         virtual void OnPostComputeLayout();
 
         bool AddChild(FWidget* child);
+        bool AddChild(FWidget& child);
         void RemoveChild(FWidget* child);
 
         FWidget* GetParent() const { return parent; }

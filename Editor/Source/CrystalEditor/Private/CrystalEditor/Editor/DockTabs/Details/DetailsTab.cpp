@@ -84,7 +84,7 @@ namespace CE::Editor
 
         if (editor)
         {
-            editor->QueueDestroy();
+            editor->Destroy();
             editor = nullptr;
         }
 

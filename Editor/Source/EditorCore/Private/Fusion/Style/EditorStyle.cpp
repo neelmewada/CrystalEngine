@@ -49,7 +49,10 @@ namespace CE::Editor
 		button->pressedBackground = Color::RGBA(50, 50, 50);
 		button->disabledBackground = Color::RGBA(40, 40, 40);
 		button->cornerRadius = Vec4(1, 1, 1, 1) * 5;
-		button->borderColor = Color::RGBA(24, 24, 24);
+		button->borderColor = 
+			button->hoveredBorderColor = 
+			
+			button->pressedBorderColor = Color::RGBA(24, 24, 24);
 		button->borderWidth = 1.0f;
 
 		GetDefaultWidget<FButton>()
@@ -71,7 +74,9 @@ namespace CE::Editor
 		highlightedButton->hoveredBackground = Color::RGBA(14, 134, 255);
 		highlightedButton->pressedBackground = Color::RGBA(0, 100, 200);
 		highlightedButton->cornerRadius = Vec4(1, 1, 1, 1) * 5;
-		highlightedButton->borderColor = Color::RGBA(24, 24, 24);
+		highlightedButton->borderColor = 
+			highlightedButton->hoveredBorderColor = 
+			highlightedButton->pressedBorderColor = Color::RGBA(24, 24, 24);
     	highlightedButton->borderWidth = 1.0f;
 
 		if (!scrollBox)
@@ -167,6 +172,32 @@ namespace CE::Editor
 		GetDefaultWidget<FComboBox>()
 			.ItemStyle(comboBoxItem)
 			.Style(this, comboBox->GetName());
+
+		if (!checkbox)
+		{
+			checkbox = CreateObject<FCheckboxStyle>(this, "Checkbox");
+			Add(checkbox);
+		}
+
+		checkbox->background = textInput->background;
+		checkbox->hoveredBackground = textInput->hoverBackground;
+		checkbox->pressedBackground = textInput->editingBackground;
+		checkbox->disabledBackground = Color::RGBA(10, 10, 10);
+
+		checkbox->borderColor = textInput->borderColor;
+		checkbox->hoveredBorderColor = textInput->hoverBorderColor;
+		checkbox->pressedBorderColor = textInput->editingBorderColor;
+		checkbox->borderWidth = textInput->borderWidth;
+
+		Color checkboxForeground = highlightColor;
+
+		checkbox->foregroundColor = checkboxForeground;
+		checkbox->foregroundDisabledColor = checkboxForeground;
+		checkbox->foregroundHoverColor = checkboxForeground;
+		checkbox->foregroundPressedColor = checkboxForeground;
+
+		GetDefaultWidget<FCheckbox>()
+			.Style(this, checkbox->GetName());
 
 		if (!tabView)
 		{

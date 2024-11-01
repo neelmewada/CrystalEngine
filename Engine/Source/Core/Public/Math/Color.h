@@ -185,6 +185,11 @@ namespace CE
             return hash;
         }
 
+        inline Color WithAlpha(f32 alpha) const
+        {
+            return Color(r, g, b, alpha);
+        }
+
     public:
 
         union {

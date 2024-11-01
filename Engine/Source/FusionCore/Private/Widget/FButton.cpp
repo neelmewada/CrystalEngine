@@ -67,6 +67,7 @@ namespace CE
 
                     if (mouseEvent->isInside)
                     {
+                        OnClick();
                         m_OnPressed();
                     }
                 }

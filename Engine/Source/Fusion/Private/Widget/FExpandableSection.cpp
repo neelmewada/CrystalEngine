@@ -51,8 +51,7 @@ namespace CE
                         .HAlign(HAlign::Fill)
                         .FillRatio(1.0f)
                     )
-                )
-                .Style(""),
+                ),
 
                 FAssignNew(FStyledWidget, content)
                 .Background(Color::Red())

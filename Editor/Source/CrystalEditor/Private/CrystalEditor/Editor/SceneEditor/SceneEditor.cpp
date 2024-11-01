@@ -204,9 +204,17 @@ namespace CE::Editor
                                     FNew(FExpandableSection)
                                     .Title("Section Title")
                                     .ExpandableContent(
-                                        FNew(FLabel)
-                                        .Text("This is the content!")
-                                        .FontSize(18)
+                                        FNew(FVerticalStack)
+                                        .ContentVAlign(VAlign::Top)
+                                        .ContentHAlign(HAlign::Left)
+                                        (
+                                            FNew(FLabel)
+                                            .Text("This is the content!")
+                                            .FontSize(18),
+
+                                            FNew(FCheckbox)
+                                            .Name("DebugCheckbox")
+                                        )
                                     )
                                     .HAlign(HAlign::Fill)
                                     .VAlign(VAlign::Top)

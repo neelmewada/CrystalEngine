@@ -22,13 +22,12 @@ namespace CE::Editor
                 .VAlign(VAlign::Top)
             )
         );
-
-        Background(Color::Black());
     }
 
     void ComponentTreeView::SetActor(Actor* actor)
     {
-        content->QueueDestroyAllChildren();
+        //content->QueueDestroyAllChildren();
+        content->DestroyAllChildren();
 
         for (ComponentTreeItem* item : items)
         {

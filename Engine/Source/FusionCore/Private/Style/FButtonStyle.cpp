@@ -23,6 +23,7 @@ namespace CE
         FButton& button = widget.As<FButton>();
 
         FBrush bg = background;
+        Color border = borderColor;
 
         if (button.IsInteractionDisabled())
         {
@@ -31,10 +32,12 @@ namespace CE
         else if (button.IsPressed() && button.IsHovered())
         {
 	        bg = pressedBackground;
+            border = pressedBorderColor;
         }
         else if (button.IsHovered())
         {
 	        bg = hoveredBackground;
+            border = hoveredBorderColor;
         }
 
         button
@@ -42,7 +45,7 @@ namespace CE
             .BackgroundShape(FRoundedRectangle(cornerRadius))
             .ClipShape(FShapeType::None)
             .BorderWidth(borderWidth)
-            .BorderColor(borderColor)
+            .BorderColor(border)
             ;
 
         if (button.GetChild() == nullptr || abs(contentMoveY) < 0.001f)

@@ -71,6 +71,9 @@ namespace CE::Editor
 		FIELD()
 		FImageButtonStyle* expandCaretButton = nullptr;
 
+		FIELD()
+		FCheckboxStyle* checkbox = nullptr;
+
 		// - Project Browser Window -
 
 		FIELD()

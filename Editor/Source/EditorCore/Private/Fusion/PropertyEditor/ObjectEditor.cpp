@@ -44,7 +44,8 @@ namespace CE
         if (target == nullptr)
             return;
 
-        content->QueueDestroyAllChildren();
+        //content->QueueDestroyAllChildren();
+        content->DestroyAllChildren();
 
         // TODO: Create editors and bind them to respective fields of Object
         // Editor widget will hold reference to FieldType* (edited field) and Array<Object*> (array of target objects)
@@ -135,15 +136,14 @@ namespace CE
                 continue;
 
             FExpandableSection* section = nullptr;
+            FVerticalStack* expandContent = nullptr;
 
             FAssignNew(FExpandableSection, section)
                 .Title(category.GetString())
 				.ExpandableContent(
-                    FNew(FLabel)
-                    .FontSize(14)
-                    .Text("Content here")
+                    FAssignNew(FVerticalStack, expandContent)
                 )
-                ;
+            ;
 
             content->AddChild(section);
 
@@ -155,7 +155,11 @@ namespace CE
                 if (!field || !target)
                     continue;
 
-                
+                expandContent->AddChild(
+                    FNew(FLabel)
+                    .FontSize(14)
+                    .Text(field->GetDisplayName())
+                );
             }
         }
     }

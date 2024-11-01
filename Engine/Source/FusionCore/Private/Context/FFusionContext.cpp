@@ -116,6 +116,11 @@ namespace CE
 		{
 			owningWidget = nullptr;
 		}
+
+		if (curFocusWidget == widget)
+		{
+			curFocusWidget = nullptr;
+		}
 	}
 
 	bool FFusionContext::ParentContextExistsRecursive(FFusionContext* parent) const

@@ -317,6 +317,11 @@ namespace CE
         return false;
     }
 
+    bool FWidget::AddChild(FWidget& child)
+    {
+        return AddChild(&child);
+    }
+
     void FWidget::RemoveChild(FWidget* child)
     {
         ZoneScoped;

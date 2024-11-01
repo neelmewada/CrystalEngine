@@ -40,6 +40,8 @@ namespace CE
 
         void SetState(FButtonState newState);
 
+        virtual void OnClick() {}
+
     protected: // - Fields -
 
         FIELD(NonSerialized)
