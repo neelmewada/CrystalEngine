@@ -287,7 +287,7 @@ namespace CE
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
-            if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+            //if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
             {
                 destructionQueue[i].object->Destroy();
                 destructionQueue.RemoveAt(i);

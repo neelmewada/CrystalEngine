@@ -22,7 +22,7 @@ namespace CE::Editor
                 .FontSize(14)
                 .VAlign(VAlign::Center)
                 .HAlign(HAlign::Left)
-                .MinWidth(160)
+                .MinWidth(140)
             )
         );
     }

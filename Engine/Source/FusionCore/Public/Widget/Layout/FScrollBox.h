@@ -22,6 +22,8 @@ namespace CE
 
     protected:
 
+        void OnPostComputeLayout() override;
+
         Rect GetVerticalScrollBarRect();
         Rect GetHorizontalScrollBarRect();
 

@@ -36,11 +36,6 @@ namespace CE
         intrinsicSize.height = Math::Max(intrinsicSize.height, childSize.height + m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
         ApplyIntrinsicSizeConstraints();
-
-        if (GetName() == "DebugScrollBox")
-        {
-
-        }
     }
 
     void FScrollBox::PlaceSubWidgets()
@@ -152,9 +147,20 @@ namespace CE
             MarkLayoutDirty();
         }
 
-        if (GetName() == "DebugScrollBox")
+        OnPostComputeLayout();
+    }
+
+    void FScrollBox::OnPostComputeLayout()
+    {
+	    Super::OnPostComputeLayout();
+
+        if (VerticalScroll())
+	    {
+		    NormalizedScrollY(Math::Clamp01(NormalizedScrollY()));
+	    }
+        if (HorizontalScroll())
         {
-            CE_LOG(Info, All, "Self: {} | Child: {}", computedSize, child->GetComputedSize());
+	        NormalizedScrollX(Math::Clamp01(NormalizedScrollX()));
         }
     }
 
@@ -484,7 +490,7 @@ namespace CE
         FWidget* child = GetChild();
         f32 scrollBarSection = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
 
-        if (child && isVerticalScrollVisible)
+        if (child)
         {
             Vec2 translation = child->Translation();
             if (isHorizontalScrollVisible)
@@ -506,7 +512,7 @@ namespace CE
         FWidget* child = GetChild();
         f32 scrollBarSection = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
 
-        if (child && isVerticalScrollVisible)
+        if (child)
         {
             Vec2 translation = child->Translation();
             if (isHorizontalScrollVisible)

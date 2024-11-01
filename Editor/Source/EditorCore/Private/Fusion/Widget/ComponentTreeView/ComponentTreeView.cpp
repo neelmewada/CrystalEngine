@@ -13,7 +13,7 @@ namespace CE::Editor
         Super::Construct();
 
         Child(
-            FNew(FScrollBox)
+            FAssignNew(FScrollBox, scrollBox)
             .VerticalScroll(true)
             .HorizontalScroll(false)
             (
@@ -123,6 +123,8 @@ namespace CE::Editor
 
             items.Add(item);
         }
+
+        scrollBox->NormalizedScrollY(0);
 
         SelectItem(actorItem);
     }

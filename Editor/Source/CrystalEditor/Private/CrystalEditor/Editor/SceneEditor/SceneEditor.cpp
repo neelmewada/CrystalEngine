@@ -112,6 +112,8 @@ namespace CE::Editor
 
         gEditor->AddRenderViewport(viewport);
         gEngine->LoadScene(scene);
+
+        Title(scene->GetName().GetString());
     }
 
     void SceneEditor::Construct()

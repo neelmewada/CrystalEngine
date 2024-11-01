@@ -131,7 +131,7 @@ namespace CE::Editor
                                 .FontSize(13)
                                 .OnPressed([this]
                                 {
-                                    CloseWindow();
+                                    OpenProject();
                                 })
                                 .Width(40),
 

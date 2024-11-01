@@ -32,6 +32,7 @@ namespace CE::Editor
 
         Actor* actor = nullptr;
         FVerticalStack* content = nullptr;
+        FScrollBox* scrollBox = nullptr;
         Array<ComponentTreeViewRow*> rows;
         Array<ComponentTreeItem*> items;
         HashSet<ComponentTreeItem*> expandedItems;

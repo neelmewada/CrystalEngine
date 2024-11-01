@@ -469,10 +469,22 @@ namespace CE
 			}
 		}
 
+		static String lastFocusName = "";
+
+		if (!IsValidObject(curFocusWidget))
+		{
+			curFocusWidget = nullptr;
+		}
+
 		FWidget* keyEventWidget = curFocusWidget;
 		while (keyEventWidget != nullptr && !keyEventWidget->SupportsKeyboardEvents())
 		{
 			keyEventWidget = keyEventWidget->parent;
+		}
+
+		if (curFocusWidget != nullptr)
+		{
+			lastFocusName = curFocusWidget->GetName().GetString() + " | " + curFocusWidget->GetClass()->GetName().GetLastComponent();
 		}
 
 		if (keyEventWidget != nullptr)

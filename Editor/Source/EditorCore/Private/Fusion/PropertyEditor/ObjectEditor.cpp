@@ -43,8 +43,7 @@ namespace CE
         // Default ObjectEditor doesn't support multi-object editing yet.
         if (target == nullptr)
             return;
-
-        //content->QueueDestroyAllChildren();
+        
         content->DestroyAllChildren();
 
         // TODO: Create editors and bind them to respective fields of Object

@@ -352,7 +352,7 @@ void EditorLoop::Shutdown()
 {
 	IO::Path exitLaunchProcess = gExitLaunchProcess;
 	String exitLaunchArgs = gExitLaunchArguments;
-
+	
 	// Shutdown application
 	AppShutdown();
 
@@ -410,8 +410,9 @@ void EditorLoop::AppInit()
 	}
 
 	PlatformWindowInfo windowInfo{};
-	windowInfo.maximised = windowInfo.fullscreen = windowInfo.hidden = false;
+	windowInfo.maximised = windowInfo.fullscreen = false;
 	windowInfo.resizable = true;
+	windowInfo.hidden = true;
 	windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 	if (projectPath.IsEmpty())
 	{
@@ -426,7 +427,7 @@ void EditorLoop::AppInit()
 	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
 
-	mainWindow->Show();
+	//mainWindow->Show();
 }
 
 void EditorLoop::AppPreShutdown()

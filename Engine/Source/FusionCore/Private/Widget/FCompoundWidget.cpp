@@ -90,6 +90,8 @@ namespace CE
         }
 
         m_Child->PlaceSubWidgets();
+
+        OnPostComputeLayout();
     }
 
     void FCompoundWidget::OnPaint(FPainter* painter)
