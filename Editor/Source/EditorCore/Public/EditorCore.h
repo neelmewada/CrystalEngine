@@ -39,6 +39,8 @@
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
+#include "Fusion/PropertyEditor/PropertyEditor.h"
+#include "Fusion/PropertyEditor/PropertyEditorRegistry.h"
 
 #include "Fusion/Widget/EditorToolBar.h"
 #include "Fusion/Widget/EditorMenuBar.h"

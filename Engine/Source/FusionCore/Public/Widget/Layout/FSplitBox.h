@@ -43,11 +43,13 @@ namespace CE
     public: // - Fusion Properties -
 
         FUSION_PROPERTY(Color, SplitterHoverBackground);
+        FUSION_PROPERTY(Color, SplitterBackground);
 
         FUSION_LAYOUT_PROPERTY(FSplitDirection, Direction);
         FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
         FUSION_LAYOUT_PROPERTY(f32, SplitterSize);
+        FUSION_LAYOUT_PROPERTY(f32, SplitterDrawRatio);
 
         FUSION_EVENT(FSplitBoxEvent, OnSplitterDragged);
 

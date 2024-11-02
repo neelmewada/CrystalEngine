@@ -15,6 +15,9 @@ namespace %(NameSpace)s
     public: // - Public API -
 
 
+    protected: // - Internal -
+
+
     public: // - Fusion Properties - 
 
 

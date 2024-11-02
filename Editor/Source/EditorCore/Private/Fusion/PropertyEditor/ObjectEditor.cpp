@@ -45,6 +45,7 @@ namespace CE
             return;
         
         content->DestroyAllChildren();
+        splitters.Clear();
 
         // TODO: Create editors and bind them to respective fields of Object
         // Editor widget will hold reference to FieldType* (edited field) and Array<Object*> (array of target objects)
@@ -154,12 +155,32 @@ namespace CE
                 if (!field || !target)
                     continue;
 
-                expandContent->AddChild(
-                    FNew(FLabel)
-                    .FontSize(14)
-                    .Text(field->GetDisplayName())
-                );
+                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get().Create(field, target);
+
+            	splitters.Add(propertyEditor->GetSplitBox());
+                splitters.Top()->OnSplitterDragged(FUNCTION_BINDING(this, OnSplitterDragged));
+                
+                expandContent->AddChild(propertyEditor);
+
+                thread_local Array targetsArray = { target };
+                targetsArray[0] = target;
+
+                propertyEditor->SetTarget(field, targetsArray);
             }
+        }
+    }
+
+    void ObjectEditor::OnSplitterDragged(FSplitBox* splitBox)
+    {
+        f32 splitRatio = splitBox->GetChild(0)->FillRatio();
+
+        for (FSplitBox* splitter : splitters)
+        {
+	        if (splitter != splitBox)
+	        {
+                splitter->GetChild(0)->FillRatio(splitRatio);
+                splitter->GetChild(1)->FillRatio(1.0f - splitRatio);
+	        }
         }
     }
 

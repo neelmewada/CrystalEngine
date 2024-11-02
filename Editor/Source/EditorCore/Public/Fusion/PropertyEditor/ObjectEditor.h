@@ -24,7 +24,12 @@ namespace CE
 
         void CreateGUI();
 
+        FUNCTION()
+        void OnSplitterDragged(FSplitBox* splitBox);
+
         FVerticalStack* content = nullptr;
+
+        Array<FSplitBox*> splitters;
 
         FIELD(ReadOnly)
         Array<Object*> targets;

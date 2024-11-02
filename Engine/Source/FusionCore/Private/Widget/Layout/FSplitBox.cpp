@@ -6,8 +6,10 @@ namespace CE
 
     FSplitBox::FSplitBox()
     {
+		m_SplitterDrawRatio = 1.0f;
 		m_SplitterSize = 5.0f;
 		m_SplitterHoverBackground = Color::RGBA(255, 255, 255, 120);
+		m_SplitterBackground = Color::Clear();
     }
 
     void FSplitBox::CalculateIntrinsicSize()
@@ -157,6 +159,27 @@ namespace CE
 
 		Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
 			m_Padding.top + m_Padding.bottom);
+
+		if (m_SplitterBackground.a > 0)
+		{
+			for (int i = 0; i < children.GetSize() - 1; ++i)
+			{
+				f32 offset = (1.0f - m_SplitterDrawRatio) * m_SplitterSize * 0.5f;
+
+				FWidget* left = children[i];
+				Vec2 splitterPos = left->GetComputedPosition() +
+					(m_Direction == FSplitDirection::Horizontal
+						? Vec2(left->computedSize.width + offset, 0)
+						: Vec2(0, left->computedSize.height + offset));
+				Vec2 splitterSize = m_Direction == FSplitDirection::Horizontal
+					? Vec2(m_SplitterSize * m_SplitterDrawRatio, availableSize.y)
+					: Vec2(availableSize.x, m_SplitterSize * m_SplitterDrawRatio);
+
+				painter->SetBrush(m_SplitterBackground);
+				painter->SetPen(FPen());
+				painter->DrawRect(Rect::FromSize(splitterPos, splitterSize));
+			}
+		}
 
 		if (hoveredSplitIndex >= 0 && isCursorPushed)
 		{
