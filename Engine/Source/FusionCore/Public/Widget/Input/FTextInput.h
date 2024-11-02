@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FTextValidator.h"
+
 namespace CE
 {
     class FTextInput;
@@ -66,9 +68,12 @@ namespace CE
 
         void InsertAt(const String& string, int insertPos);
         void InsertAt(char character, int insertPos);
+        bool CanInsertAt(const String& string, int insertPos);
 
         void RemoveRange(int startIndex, int count);
         void RemoveSelectedRange();
+        bool CanRemoveSelectedText();
+        bool CanRemoveRange(int startIndex, int count);
 
         String GetSelectedText();
 
@@ -124,11 +129,15 @@ namespace CE
 
         bool SupportsDragEvents() const override { return true; }
 
+        FHorizontalStack* GetContentStack() const { return contentStack; }
+
     protected:
 
         void OnLostFocus() override;
 
         void Construct() override final;
+
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void HandleEvent(FEvent* event) override;
 
@@ -138,7 +147,7 @@ namespace CE
         FTextInputState state = FTextInputState::None;
 
         FIELD()
-        FStackBox* stack = nullptr;
+        FHorizontalStack* contentStack = nullptr;
 
         FIELD()
         FTextInputLabel* inputLabel = nullptr;
@@ -154,6 +163,7 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(Foreground, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontFamily, inputLabel);
+        FUSION_PROPERTY(FTextInputValidator, Validator);
 
         FUSION_DATA_PROPERTY_WRAPPER(Text, inputLabel);
 

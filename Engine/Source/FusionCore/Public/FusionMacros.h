@@ -85,7 +85,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	auto PropertyName() const { return WrappingVariable->PropertyName(); }
+	const auto& PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_PROPERTY_WRAPPER2(PropertyName, WrappingVariable, WrappedPropertyName)\
 	Self& WrappedPropertyName(const __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)& value) {\
@@ -93,7 +93,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	auto WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
+	const auto& WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\

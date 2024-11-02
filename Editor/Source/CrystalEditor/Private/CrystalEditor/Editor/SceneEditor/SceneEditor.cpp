@@ -215,7 +215,12 @@ namespace CE::Editor
                                             .FontSize(18),
 
                                             FNew(FCheckbox)
-                                            .Name("DebugCheckbox")
+                                            .Name("DebugCheckbox"),
+
+                                            FNew(FTextInput)
+                                            .Text("")
+                                            .Validator(FNumericInputValidator<f32>)
+                                            .MinWidth(40)
                                         )
                                     )
                                     .HAlign(HAlign::Fill)

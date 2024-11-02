@@ -204,9 +204,25 @@ namespace CE
                         if (PlatformApplication::Get()->HasClipboardText())
                         {
                             textToPaste = PlatformApplication::Get()->GetClipboardText();
-                            if (IsTextSelected())
-                                RemoveSelectedRange();
-                            InsertAt(textToPaste, cursorPos);
+                            bool canInsert = true;
+                            if (IsTextSelected() && CanRemoveSelectedText())
+                            {
+	                            RemoveSelectedRange();
+                            }
+                            else if (IsTextSelected())
+                            {
+                                canInsert = false;
+                            }
+
+                            if (canInsert && !CanInsertAt(textToPaste, cursorPos))
+                            {
+                                canInsert = false;
+                            }
+
+                            if (canInsert)
+                            {
+	                            InsertAt(textToPaste, cursorPos);
+                            }
                         }
 
                         isCommand = true;
@@ -217,12 +233,12 @@ namespace CE
 
                         isCommand = true;
                     }
-                    else if (IsTextSelected())
+                    else if (IsTextSelected() && CanRemoveSelectedText())
                     {
                         RemoveSelectedRange();
                     }
                 }
-                else if (IsTextSelected())
+                else if (IsTextSelected() && CanRemoveSelectedText())
                 {
                     RemoveSelectedRange();
                 }
@@ -232,8 +248,11 @@ namespace CE
                     String str = "";
                     str.Append(c);
 
-                    InsertAt(str, cursorPos);
-                    ScrollTo(cursorPos);
+                    if (CanInsertAt(str, cursorPos))
+                    {
+                        InsertAt(str, cursorPos);
+                        ScrollTo(cursorPos);
+                    }
                 }
             }
             else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&
@@ -294,18 +313,21 @@ namespace CE
                     String str = "";
                     str.Append(c);
 
-                    InsertAt(str, cursorPos);
+                    if (CanInsertAt(str, cursorPos))
+                    {
+                        InsertAt(str, cursorPos);
+                    }
                 }
             }
-            else if (IsTextSelected() && (keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete))
+            else if (IsTextSelected() && CanRemoveSelectedText() && (keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete))
             {
                 RemoveSelectedRange();
             }
-            else if (keyEvent->key == KeyCode::Backspace)
+            else if (keyEvent->key == KeyCode::Backspace && CanRemoveRange(cursorPos - 1, 1))
             {
                 RemoveRange(cursorPos - 1, 1);
             }
-            else if (keyEvent->key == KeyCode::Delete)
+            else if (keyEvent->key == KeyCode::Delete && CanRemoveRange(cursorPos, 1))
             {
                 RemoveRange(cursorPos, 1);
             }
@@ -614,6 +636,20 @@ namespace CE
         textInput->m_OnTextEdited(textInput);
     }
 
+    bool FTextInputLabel::CanInsertAt(const String& string, int insertPos)
+    {
+        if (!textInput->m_Validator.IsValid())
+            return true;
+
+        String text = Text();
+        for (int i = 0; i < string.GetLength(); ++i)
+        {
+            text.InsertAt(string[i], insertPos + i);
+        }
+
+        return textInput->m_Validator(text);
+    }
+
     void FTextInputLabel::RemoveRange(int startIndex, int count)
     {
         if (startIndex < 0 || startIndex > m_Text.GetLength())
@@ -642,6 +678,31 @@ namespace CE
 
             ScrollTo(selectionStart);
         }
+    }
+
+    bool FTextInputLabel::CanRemoveSelectedText()
+    {
+        if (!textInput->m_Validator.IsValid() || !IsTextSelected())
+            return true;
+
+        String text = Text();
+        text.Remove(selectionStart, selectionEnd - selectionStart + 1);
+
+        return textInput->m_Validator(text);
+    }
+
+    bool FTextInputLabel::CanRemoveRange(int startIndex, int count)
+    {
+        if (!textInput->m_Validator.IsValid())
+            return true;
+
+        String text = Text();
+        if (startIndex >= text.GetLength() || (count + startIndex) > text.GetLength())
+            return true;
+
+        text.Remove(startIndex, count);
+
+        return textInput->m_Validator(text);
     }
 
     String FTextInputLabel::GetSelectedText()
@@ -691,14 +752,12 @@ namespace CE
 	    Super::Construct();
         
         Child(
-            FAssignNew(FHorizontalStack, stack)
+            FAssignNew(FHorizontalStack, contentStack)
             .ContentVAlign(VAlign::Center)
-            .Name("TextInputHStack")
             (
                 FNew(FStyledWidget)
                 .ClipShape(FRectangle())
                 .FillRatio(1.0f)
-                .Name("InputHolder")
                 (
                     FAssignNew(FTextInputLabel, inputLabel)
                     .Text("")
@@ -707,12 +766,26 @@ namespace CE
                     .Foreground(Color::White())
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
-                    .Name("TextInputLabel")
                 )
             )
         );
 
         inputLabel->textInput = this;
+    }
+
+    void FTextInput::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        thread_local const CE::Name validator = "Validator";
+
+        if (propertyName == validator)
+        {
+            if (m_Validator.IsValid() && !Text().IsEmpty() && !m_Validator(Text()))
+            {
+                Text("");
+            }
+        }
     }
 
     void FTextInput::HandleEvent(FEvent* event)
@@ -760,7 +833,7 @@ namespace CE
 
     FTextInput& FTextInput::LeftSlot(FWidget& content)
     {
-        stack->InsertChild(0, &content);
+        contentStack->InsertChild(0, &content);
         return *this;
     }
 
