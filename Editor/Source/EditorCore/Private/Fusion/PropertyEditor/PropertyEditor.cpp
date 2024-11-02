@@ -27,7 +27,7 @@ namespace CE::Editor
                 .ContentVAlign(VAlign::Center)
                 .ClipChildren(true)
                 .FillRatio(0.35f)
-                .Name("DebugStack")
+                .Padding(Vec4(1, 1, 1, 1) * 5)
                 (
                     FAssignNew(FLabel, fieldNameLabel)
                     .Text("Field Name")
@@ -38,6 +38,7 @@ namespace CE::Editor
                 .ContentVAlign(VAlign::Center)
                 .ClipChildren(true)
                 .FillRatio(0.65f)
+                .Padding(Vec4(1, 1, 1, 1) * 5)
                 (
                     FNew(FLabel)
                     .Text("Field Editor")
