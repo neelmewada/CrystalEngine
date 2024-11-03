@@ -86,6 +86,8 @@ namespace CE::Editor
             return *this;
         }
 
+        Self& VectorType(TypeId type);
+
         FUSION_WIDGET;
     };
     

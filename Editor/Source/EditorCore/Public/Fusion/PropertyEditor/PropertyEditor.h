@@ -12,6 +12,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        virtual bool IsFieldSupported(FieldType* field);
+
         virtual void SetTarget(FieldType* field, const Array<Object*>& targets);
 
         void OnPaint(FPainter* painter) override;

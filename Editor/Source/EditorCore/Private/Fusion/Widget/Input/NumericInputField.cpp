@@ -5,7 +5,7 @@ namespace CE::Editor
 
     NumericInputField::NumericInputField()
     {
-        m_Padding = Vec4(10, 5, 10, 5);
+        m_Padding = Vec4(10, 4, 10, 4);
         m_RangeMin = -NumericLimits<f32>::Infinity();
         m_RangeMax = NumericLimits<f32>::Infinity();
     }
@@ -58,5 +58,52 @@ namespace CE::Editor
         painter->DrawRoundedRect(Rect::FromSize(pos, size), Vec4(2, 0, 0, 2));
     }
 
+    NumericInputField::Self& NumericInputField::NumericType(TypeId type)
+    {
+        numericType = type;
+
+        if (type == TYPEID(f32))
+        {
+            Validator(FNumericInputValidator<f32>);
+        }
+        else if (type == TYPEID(f64))
+        {
+            Validator(FNumericInputValidator<f64>);
+        }
+        else if (type == TYPEID(u8))
+        {
+            Validator(FNumericInputValidator<u8>);
+        }
+        else if (type == TYPEID(s8))
+        {
+            Validator(FNumericInputValidator<s8>);
+        }
+        else if (type == TYPEID(u16))
+        {
+            Validator(FNumericInputValidator<u16>);
+        }
+        else if (type == TYPEID(s16))
+        {
+            Validator(FNumericInputValidator<s16>);
+        }
+        else if (type == TYPEID(u32))
+        {
+            Validator(FNumericInputValidator<u32>);
+        }
+        else if (type == TYPEID(s32))
+        {
+            Validator(FNumericInputValidator<s32>);
+        }
+        else if (type == TYPEID(u64))
+        {
+            Validator(FNumericInputValidator<u64>);
+        }
+        else if (type == TYPEID(s64))
+        {
+            Validator(FNumericInputValidator<s64>);
+        }
+
+        return *this;
+    }
 }
 

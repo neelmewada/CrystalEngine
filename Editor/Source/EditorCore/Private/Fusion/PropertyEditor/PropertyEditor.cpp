@@ -49,11 +49,84 @@ namespace CE::Editor
 
     }
 
+    bool PropertyEditor::IsFieldSupported(FieldType* field)
+    {
+        thread_local HashSet<TypeId> supportedFields = {
+            
+        };
+
+        if (field->GetDeclarationType() == nullptr)
+            return false;
+
+        return field->IsNumericField() || field->IsStringField() ||
+            field->GetDeclarationType()->IsVectorType() || field->IsEnumField() ||
+            supportedFields.Exists(field->GetDeclarationTypeId());
+    }
+
     void PropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
     {
         FieldNameText(field->GetDisplayName());
 
-        
+        right->DestroyAllChildren();
+
+        auto printError = [&](const String& msg)
+            {
+                right->AddChild(
+                    FNew(FLabel)
+                    .FontSize(12)
+                    .Text("Error: " + msg)
+                    .Foreground(Color::Red())
+                );
+            };
+
+        if (targets.GetSize() > 1)
+        {
+            printError("Multiple objects selected!");
+	        return;
+        }
+        if (targets.GetSize() == 0)
+        {
+            printError("No objects selected!");
+            return;
+        }
+
+        TypeInfo* fieldDeclType = field->GetDeclarationType();
+        if (fieldDeclType == nullptr)
+        {
+            printError("Cannot find field type!");
+	        return;
+        }
+
+        thread_local HashSet<TypeId> floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
+        thread_local HashSet<TypeId> intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
+
+        if (fieldDeclType->IsVectorType())
+        {
+            right->AddChild(
+				FNew(VectorInputField)
+                .VectorType(fieldDeclType->GetTypeId())
+                .FillRatio(1.0f)
+            );
+        }
+        else if (field->IsNumericField())
+        {
+            right->AddChild(
+                FNew(NumericInputField)
+                .NumericType(fieldDeclType->GetTypeId())
+                .ColorTagVisible(false)
+                .FillRatio(1.0f)
+            );
+        }
+        else if (fieldDeclType->IsEnum())
+        {
+	        auto enumType = static_cast<EnumType*>(fieldDeclType);
+
+            // TODO: Add combo box
+        }
+        else if (field->GetDeclarationTypeId() == TYPEID(bool))
+        {
+	        // TODO: Add check box
+        }
     }
 
     void PropertyEditor::OnPaint(FPainter* painter)

@@ -40,6 +40,8 @@ namespace CE::Editor
             return *this;
         }
 
+        Self& NumericType(TypeId type);
+
         FUSION_WIDGET;
     };
     
