@@ -96,10 +96,7 @@ namespace CE::Editor
             printError("Cannot find field type!");
 	        return;
         }
-
-        thread_local HashSet<TypeId> floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
-        thread_local HashSet<TypeId> intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
-
+        
         if (fieldDeclType->IsVectorType())
         {
             right->AddChild(

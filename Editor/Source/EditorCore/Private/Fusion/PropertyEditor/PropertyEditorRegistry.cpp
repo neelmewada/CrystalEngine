@@ -69,6 +69,12 @@ namespace CE::Editor
 
         editor = CreateObject<PropertyEditor>(transient, "PropertyEditor", OF_NoFlags, propertyEditorClass);
 
+        if (!editor->IsFieldSupported(field))
+        {
+            editor->Destroy();
+            editor = nullptr;
+        }
+
         return editor;
     }
 
