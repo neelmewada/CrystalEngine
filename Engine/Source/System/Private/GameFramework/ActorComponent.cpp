@@ -23,7 +23,7 @@ namespace CE
 		return owner != nullptr ? owner->GetScene() : nullptr;
 	}
 
-	bool ActorComponent::IsEnabled() const
+	bool ActorComponent::IsEnabledInHierarchy() const
 	{
 		if (!owner)
 			return isEnabled;
@@ -37,6 +37,9 @@ namespace CE
 			return;
 
 		isEnabled = enabled;
+
+		thread_local CE::Name name = "isEnabled";
+		this->OnFieldChanged(name);
 
 		if (isEnabled)
 			OnEnabled();
@@ -52,7 +55,7 @@ namespace CE
 
 		if (fieldName == isEnabledName)
 		{
-			if (IsEnabled())
+			if (IsEnabledInHierarchy())
 				OnEnabled();
 			else
 				OnDisabled();

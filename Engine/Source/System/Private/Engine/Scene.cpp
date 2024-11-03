@@ -57,7 +57,7 @@ namespace CE
 
 		for (CameraComponent* camera : cameras)
 		{
-			if (!camera->IsEnabled())
+			if (!camera->IsEnabledInHierarchy())
 				continue;
 
 			for (FGameWindow* viewport : viewports)

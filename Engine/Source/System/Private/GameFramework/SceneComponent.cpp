@@ -8,12 +8,12 @@ namespace CE
 		canTick = true;
     }
 
-    bool SceneComponent::IsEnabled() const
+    bool SceneComponent::IsEnabledInHierarchy() const
     {
 		if (!parentComponent)
-			return Super::IsEnabled();
+			return Super::IsEnabledInHierarchy();
 
-		return Super::IsEnabled() && parentComponent->IsEnabled();
+		return Super::IsEnabledInHierarchy() && parentComponent->IsEnabledInHierarchy();
     }
 
 	void SceneComponent::SetupAttachment(SceneComponent* component)
@@ -209,7 +209,7 @@ namespace CE
 
 		for (auto component : attachedComponents)
 		{
-			if (component->IsSelfEnabled() && component->CanTick())
+			if (component->IsEnabled() && component->CanTick())
 			{
 				component->Tick(delta);
 			}

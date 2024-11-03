@@ -30,38 +30,11 @@ namespace CE
 
 		virtual ~CameraComponent();
 
-		const Color& GetClearColor() const { return clearColor; }
-
-		void SetClearColor(const Color& clearColor) { this->clearColor = clearColor; }
-
-		CameraProjection GetProjection() const { return projection; }
-		void SetProjection(CameraProjection projection) { this->projection = projection; }
-
-		float GetFarPlane() const { return farPlane; }
-
-		void SetFarPlane(f32 value) { farPlane = value; }
-
-    	float GetNearPlane() const { return nearPlane; }
-
-		void SetNearPlane(f32 value) { nearPlane = value; }
-
-		float GetFieldOfView() const { return fieldOfView; }
-
-		void SetFieldOfView(f32 value) { this->fieldOfView = value; }
-
 		RPI::View* GetRpiView() const { return rpiView; }
-
-		Vec2 GetViewport() const { return viewport; }
-
-		void SetViewport(const Vec2& value) { viewport = value; }
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
 		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
-
-    	const Name& GetViewTag() const { return cameraType == CameraType::MainCamera ? "MainCamera" : viewTag; }
-
-    	void SetViewTag(const Name& tag) { viewTag = tag; }
     	
     protected:
 
@@ -70,9 +43,6 @@ namespace CE
 		void TickCamera();
 
 	private:
-
-    	FIELD()
-    	Name viewTag = "MainCamera";
 
     	FIELD()
     	CameraType cameraType = CameraType::MainCamera;
@@ -102,6 +72,16 @@ namespace CE
     	CE::RenderPipeline* renderPipeline = nullptr;
 
 		RPI::ViewPtr rpiView = nullptr;
+
+	public: // - Accessors -
+
+		CE_PROPERTY(CameraType, cameraType);
+		CE_PROPERTY(ClearColor, clearColor);
+		CE_PROPERTY(Projection, projection);
+		CE_PROPERTY(NearPlane, nearPlane);
+		CE_PROPERTY(FarPlane, farPlane);
+		CE_PROPERTY(FieldOfView, fieldOfView);
+		CE_PROPERTY(Viewport, viewport);
 
 		friend class CE::Scene;
 		friend class RendererSubsystem;

@@ -206,14 +206,14 @@ namespace CE
 		if (!IsSelfEnabled())
 			return;
 
-		if (rootComponent && rootComponent->CanTick() && rootComponent->IsSelfEnabled())
+		if (rootComponent && rootComponent->CanTick() && rootComponent->IsEnabled())
 		{
 			rootComponent->Tick(delta);
 		}
 
 		for (auto component : attachedComponents)
 		{
-			if (component->CanTick() && component->IsSelfEnabled())
+			if (component->CanTick() && component->IsEnabled())
 			{
 				component->Tick(delta);
 			}
@@ -334,14 +334,14 @@ namespace CE
 
 	void Actor::OnEnabled()
 	{
-		if (rootComponent != nullptr && rootComponent->IsEnabled())
+		if (rootComponent != nullptr && rootComponent->IsEnabledInHierarchy())
 		{
 			rootComponent->OnEnabled();
 		}
 
 		for (ActorComponent* attachedComponent : attachedComponents)
 		{
-			if (attachedComponent->IsEnabled())
+			if (attachedComponent->IsEnabledInHierarchy())
 				attachedComponent->OnEnabled();
 		}
 
@@ -354,14 +354,14 @@ namespace CE
 
 	void Actor::OnDisabled()
 	{
-		if (rootComponent != nullptr && !rootComponent->IsEnabled())
+		if (rootComponent != nullptr && !rootComponent->IsEnabledInHierarchy())
 		{
 			rootComponent->OnDisabled();
 		}
 
 		for (ActorComponent* attachedComponent : attachedComponents)
 		{
-			if (!attachedComponent->IsEnabled())
+			if (!attachedComponent->IsEnabledInHierarchy())
 				attachedComponent->OnDisabled();
 		}
 

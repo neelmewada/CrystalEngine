@@ -23,7 +23,7 @@ namespace CE
 
 		bool IsSceneComponent() const final { return true; }
 
-		bool IsEnabled() const final;
+		bool IsEnabledInHierarchy() const override final;
 
 		/// @brief Add the parameter scene component as a child of receiving scene component.
 		/// @param component: Component to add as child.
@@ -122,6 +122,7 @@ namespace CE
 		CE_PROPERTY(LocalPosition, localPosition);
 		CE_PROPERTY(LocalEulerAngles, localEulerAngles);
 		CE_PROPERTY(LocalScale, localScale);
+		CE_PROPERTY(Mobility, mobility);
         
         friend class CE::Scene;
 		friend class Actor;

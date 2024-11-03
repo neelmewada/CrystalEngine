@@ -425,7 +425,7 @@ namespace CE
 
 					for (CameraComponent* camera : scene->cameras)
 					{
-						if (!camera->IsEnabled())
+						if (!camera->IsEnabledInHierarchy())
 							continue;
 						// TODO: Add support for multiple cameras in scene
 						if (camera != scene->mainCamera)

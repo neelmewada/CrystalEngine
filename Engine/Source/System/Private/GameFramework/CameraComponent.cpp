@@ -37,7 +37,7 @@ namespace CE
         this->renderPipeline = renderPipeline;
         if (renderPipeline)
         {
-            renderPipeline->SetMainViewTag(viewTag);
+            renderPipeline->SetMainViewTag("MainCamera");
         }
         
         if (scene)
