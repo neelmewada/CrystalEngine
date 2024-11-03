@@ -51,6 +51,8 @@ namespace CE::Editor
     void PropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
     {
         FieldNameText(field->GetDisplayName());
+
+        
     }
 }
 

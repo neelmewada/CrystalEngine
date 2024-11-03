@@ -658,6 +658,9 @@ namespace CE
 
     void Object::OnFieldChanged(const Name& fieldName)
     {
+		if (EnumHasFlag(objectFlags, OF_InsideConstructor))
+			return;
+
 		ObjectListener::Trigger(this, fieldName);
     }
 

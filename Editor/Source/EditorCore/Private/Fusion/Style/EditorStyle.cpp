@@ -133,6 +133,8 @@ namespace CE::Editor
 
 		GetDefaultWidget<FTextInput>()
 			.Style(this, textInput->GetName());
+		GetDefaultWidget<NumericInputField>()
+			.Style(this, textInput->GetName());
 
 		if (!expandableSection)
 		{

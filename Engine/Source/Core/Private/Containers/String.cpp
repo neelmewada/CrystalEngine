@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 
 #include "NaturalLess.h"
+#include "Object/Bundle.h"
 
 using namespace CE;
 
@@ -823,7 +824,13 @@ namespace CE
     void String::Remove(int startIndex, int count)
     {
         if (count < 0)
+        {
+	        count = (int)StringLength - startIndex;
+        }
+        if (startIndex + count > StringLength)
+        {
             count = StringLength - startIndex;
+        }
 
         for (int i = startIndex; i < StringLength; ++i)
         {

@@ -319,7 +319,8 @@ namespace CE
                     }
                 }
             }
-            else if (IsTextSelected() && CanRemoveSelectedText() && (keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete))
+            else if ((keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete) 
+                && IsTextSelected() && CanRemoveSelectedText())
             {
                 RemoveSelectedRange();
             }
@@ -556,6 +557,8 @@ namespace CE
             m_Text = originalText;
         }
 
+        textInput->OnFinishEdit();
+
         cursorTimer->Stop();
         cursorState = false;
         
@@ -569,6 +572,8 @@ namespace CE
         {
             m_TextBinding.write.Invoke(m_Text, this);
         }
+
+        textInput->m_OnTextEditingFinished(textInput);
     }
 
     void FTextInputLabel::SetCursorPos(int newCursorPos)
@@ -717,15 +722,27 @@ namespace CE
 
     void FTextInputLabel::SelectAll()
     {
-        SelectRange(0, characterOffsets.GetSize());
+        if (characterOffsets.IsEmpty())
+        {
+            DeselectAll();
+	        return;
+        }
+
+        SelectRange(0, characterOffsets.GetSize() - 1);
     }
 
     void FTextInputLabel::SelectRange(int startIndex, int endIndex)
     {
+        if (characterOffsets.IsEmpty())
+        {
+            DeselectAll();
+            return;
+        }
+
         isSelectionActive = true;
 
         selectionStart = Math::Max(0, startIndex);
-        selectionEnd = Math::Min<int>(endIndex, characterOffsets.GetSize());
+        selectionEnd = Math::Min<int>(endIndex, characterOffsets.GetSize() - 1);
         MarkDirty();
     }
 
@@ -790,11 +807,11 @@ namespace CE
 
     void FTextInput::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent() && event->sender == this)
+        if (event->IsMouseEvent() && event->sender == this && !event->isConsumed)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
             auto app = FusionApplication::Get();
-
+            
             if (mouseEvent->type == FEventType::MouseEnter)
             {
                 app->PushCursor(SystemCursor::IBeam);

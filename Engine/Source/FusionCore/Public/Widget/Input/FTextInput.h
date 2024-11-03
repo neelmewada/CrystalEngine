@@ -6,6 +6,7 @@ namespace CE
 {
     class FTextInput;
     class FStackBox;
+    DECLARE_SCRIPT_EVENT(FTextInputEvent, FTextInput*);
 
     ENUM(Flags)
     enum class FTextInputState : u8
@@ -135,7 +136,9 @@ namespace CE
 
         void OnLostFocus() override;
 
-        void Construct() override final;
+        void Construct() override;
+
+        virtual void OnFinishEdit() {}
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
@@ -167,7 +170,8 @@ namespace CE
 
         FUSION_DATA_PROPERTY_WRAPPER(Text, inputLabel);
 
-        FUSION_EVENT(ScriptEvent<void(FTextInput*)>, OnTextEdited);
+        FUSION_EVENT(FTextInputEvent, OnTextEdited);
+        FUSION_EVENT(FTextInputEvent, OnTextEditingFinished);
 
         Self& LeftSlot(FWidget& content);
 

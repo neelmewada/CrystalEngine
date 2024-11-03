@@ -14,6 +14,8 @@ namespace CE
         if constexpr (TIsSameType<T, f32>::Value || TIsSameType<T, f64>::Value)
         {
             int periodCount = 0;
+            static constexpr char infinity[] = "inf";
+            bool isInfinity = false;
 
 	        for (int i = 0; i < value.GetLength(); ++i)
 	        {
@@ -21,12 +23,37 @@ namespace CE
                     return false;
 
 		        if (i == 0 && value[0] != '+' && value[0] != '-' && 
-                    !String::IsNumeric(value[0]) && value[0] != '.')
+                    !String::IsNumeric(value[0]) && value[0] != '.' && 
+                    value[0] != 'i' && value[0] != 'I')
 		        {
                     return false;
 		        }
 
                 if ((value[i] == '+' || value[i] == '-') && i > 0)
+                {
+                    return false;
+                }
+
+                if (i > 0 && (value[0] == '+' || value[0] == '-'))
+                {
+                    if (i - 1 < sizeof(infinity) - 1 &&
+                        std::tolower(value[i]) == infinity[i - 1])
+                    {
+                        isInfinity = true;
+	                    continue;
+                    }
+                }
+                else
+                {
+	                if (i < sizeof(infinity) - 1 &&
+                        std::tolower(value[i]) == infinity[i])
+	                {
+                        isInfinity = true;
+		                continue;
+	                }
+                }
+
+                if (isInfinity)
                 {
                     return false;
                 }

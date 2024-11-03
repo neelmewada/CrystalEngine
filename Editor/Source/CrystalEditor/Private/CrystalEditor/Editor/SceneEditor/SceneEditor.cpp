@@ -217,10 +217,13 @@ namespace CE::Editor
                                             FNew(FCheckbox)
                                             .Name("DebugCheckbox"),
 
-                                            FNew(FTextInput)
+                                            FNew(NumericInputField)
                                             .Text("")
-                                            .Validator(FNumericInputValidator<f32>)
-                                            .MinWidth(40)
+                                            .Width(120),
+
+                                            FNew(VectorInputField)
+                                            .VectorType<Vec4>()
+                                            .Width(200)
                                         )
                                     )
                                     .HAlign(HAlign::Fill)

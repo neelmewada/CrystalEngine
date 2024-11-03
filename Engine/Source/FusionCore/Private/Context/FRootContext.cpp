@@ -471,6 +471,7 @@ namespace CE
 
 		static String lastFocusName = "";
 
+		// TODO: Temporary fix. Need to implement Object reference counting.
 		if (!IsValidObject(curFocusWidget))
 		{
 			curFocusWidget = nullptr;
