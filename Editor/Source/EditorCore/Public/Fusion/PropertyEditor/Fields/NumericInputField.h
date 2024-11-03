@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API NumericInputField : public FTextInput
+    class EDITORCORE_API NumericInputField : public EditorField
     {
-        CE_CLASS(NumericInputField, FTextInput)
+        CE_CLASS(NumericInputField, EditorField)
     protected:
 
         NumericInputField();
@@ -18,11 +18,10 @@ namespace CE::Editor
 
     protected: // - Internal -
 
-        void OnFinishEdit() override;
-
         void OnPaint(FPainter* painter) override;
 
         TypeId numericType = 0;
+        FTextInput* input = nullptr;
 
     public: // - Fusion Properties - 
 
@@ -36,7 +35,7 @@ namespace CE::Editor
         Self& NumericType()
         {
             numericType = TYPEID(T);
-            Validator(FNumericInputValidator<T>);
+            input->Validator(FNumericInputValidator<T>);
             return *this;
         }
 

@@ -37,8 +37,9 @@
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
-#include "Fusion/Widget/Input/NumericInputField.h"
-#include "Fusion/Widget/Input/VectorInputField.h"
+#include "Fusion/PropertyEditor/Fields/EditorField.h"
+#include "Fusion/PropertyEditor/Fields/NumericInputField.h"
+#include "Fusion/PropertyEditor/Fields/VectorInputField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"

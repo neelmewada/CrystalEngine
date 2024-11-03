@@ -156,6 +156,8 @@ namespace CE
                     continue;
 
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get().Create(field, target);
+                if (propertyEditor == nullptr)
+                    continue;
 
             	splitters.Add(propertyEditor->GetSplitBox());
                 splitters.Top()->OnSplitterDragged(FUNCTION_BINDING(this, OnSplitterDragged));
@@ -166,6 +168,11 @@ namespace CE
                 targetsArray[0] = target;
 
                 propertyEditor->SetTarget(field, targetsArray);
+            }
+
+            if (expandContent->GetChildCount() == 0)
+            {
+                section->Destroy();
             }
         }
     }

@@ -5,7 +5,7 @@ namespace CE::Editor
 
     NumericInputField::NumericInputField()
     {
-        m_Padding = Vec4(10, 4, 10, 4);
+        //sm_Padding = Vec4(10, 4, 10, 4);
         m_RangeMin = -NumericLimits<f32>::Infinity();
         m_RangeMax = NumericLimits<f32>::Infinity();
     }
@@ -14,12 +14,16 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        NumericType<f32>();
+        Child(
+			FAssignNew(FTextInput, input)
+            .Padding(Vec4(10, 4, 8, 4))
+        );
 
-        Text("0");
+        NumericType<f32>();
+        input->Text("0");
     }
 
-    void NumericInputField::OnFinishEdit()
+    /*void NumericInputField::OnFinishEdit()
     {
 	    Super::OnFinishEdit();
 
@@ -39,7 +43,7 @@ namespace CE::Editor
                 Text(String::Format("{}", Math::Clamp<f32>(0, m_RangeMin, m_RangeMax)));
             }
         }
-    }
+    }*/
 
     void NumericInputField::OnPaint(FPainter* painter)
     {
@@ -64,43 +68,43 @@ namespace CE::Editor
 
         if (type == TYPEID(f32))
         {
-            Validator(FNumericInputValidator<f32>);
+            input->Validator(FNumericInputValidator<f32>);
         }
         else if (type == TYPEID(f64))
         {
-            Validator(FNumericInputValidator<f64>);
+            input->Validator(FNumericInputValidator<f64>);
         }
         else if (type == TYPEID(u8))
         {
-            Validator(FNumericInputValidator<u8>);
+            input->Validator(FNumericInputValidator<u8>);
         }
         else if (type == TYPEID(s8))
         {
-            Validator(FNumericInputValidator<s8>);
+            input->Validator(FNumericInputValidator<s8>);
         }
         else if (type == TYPEID(u16))
         {
-            Validator(FNumericInputValidator<u16>);
+            input->Validator(FNumericInputValidator<u16>);
         }
         else if (type == TYPEID(s16))
         {
-            Validator(FNumericInputValidator<s16>);
+            input->Validator(FNumericInputValidator<s16>);
         }
         else if (type == TYPEID(u32))
         {
-            Validator(FNumericInputValidator<u32>);
+            input->Validator(FNumericInputValidator<u32>);
         }
         else if (type == TYPEID(s32))
         {
-            Validator(FNumericInputValidator<s32>);
+            input->Validator(FNumericInputValidator<s32>);
         }
         else if (type == TYPEID(u64))
         {
-            Validator(FNumericInputValidator<u64>);
+            input->Validator(FNumericInputValidator<u64>);
         }
         else if (type == TYPEID(s64))
         {
-            Validator(FNumericInputValidator<s64>);
+            input->Validator(FNumericInputValidator<s64>);
         }
 
         return *this;

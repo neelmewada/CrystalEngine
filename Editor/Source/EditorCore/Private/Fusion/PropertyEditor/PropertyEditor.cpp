@@ -60,6 +60,7 @@ namespace CE::Editor
 
         return field->IsNumericField() || field->IsStringField() ||
             field->GetDeclarationType()->IsVectorType() || field->IsEnumField() ||
+            field->GetDeclarationTypeId() == TYPEID(bool) ||
             supportedFields.Exists(field->GetDeclarationTypeId());
     }
 
