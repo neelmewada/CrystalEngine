@@ -18,7 +18,7 @@ namespace CE::Editor
             .SplitterHoverBackground(Color::Clear())
             .SplitterBackground(Color::RGBA(26, 26, 26))
             .SplitterSize(4.0f)
-            .SplitterDrawRatio(0.5f)
+            .SplitterDrawRatio(0.25f)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
@@ -27,7 +27,7 @@ namespace CE::Editor
                 .ContentVAlign(VAlign::Center)
                 .ClipChildren(true)
                 .FillRatio(0.35f)
-                .Padding(Vec4(1, 1, 1, 1) * 5)
+                .Padding(Vec4(2, 1, 2, 1) * 5)
                 (
                     FAssignNew(FLabel, fieldNameLabel)
                     .Text("Field Name")
@@ -38,10 +38,11 @@ namespace CE::Editor
                 .ContentVAlign(VAlign::Center)
                 .ClipChildren(true)
                 .FillRatio(0.65f)
-                .Padding(Vec4(1, 1, 1, 1) * 5)
+                .Padding(Vec4(2, 1, 2, 1) * 5)
                 (
-                    FNew(FLabel)
+                    FNew(FTextInput)
                     .Text("Field Editor")
+                    .FontSize(13)
                 )
             )
         );
@@ -53,6 +54,20 @@ namespace CE::Editor
         FieldNameText(field->GetDisplayName());
 
         
+    }
+
+    void PropertyEditor::OnPaint(FPainter* painter)
+    {
+	    Super::OnPaint(painter);
+
+        painter->SetPen(FPen(Color::RGBA(26, 26, 26), 1));
+        painter->SetBrush(FBrush());
+
+        constexpr f32 height = 1.0f;
+        Vec2 pos = computedPosition + Vec2(0, computedSize.height - height);
+        Vec2 size = Vec2(computedSize.width, height);
+
+        painter->DrawLine(pos, pos + Vec2(size.x, 0));
     }
 }
 

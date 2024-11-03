@@ -102,6 +102,10 @@ namespace CE
         {
         case HAlign::Auto:
         case HAlign::Fill:
+            if (isVerticalScrollVisible)
+            {
+                child->computedSize.width -= m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+            }
             break;
         case HAlign::Left:
             child->computedSize.width = childIntrinsicSize.width;

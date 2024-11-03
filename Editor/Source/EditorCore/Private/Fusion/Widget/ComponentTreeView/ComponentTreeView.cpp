@@ -16,10 +16,11 @@ namespace CE::Editor
             FAssignNew(FScrollBox, scrollBox)
             .VerticalScroll(true)
             .HorizontalScroll(false)
+            .Name("ComponentTreeScrollBox")
             (
                 FAssignNew(FVerticalStack, content)
                 .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Top)
+                .VAlign(VAlign::Auto)
             )
         );
     }

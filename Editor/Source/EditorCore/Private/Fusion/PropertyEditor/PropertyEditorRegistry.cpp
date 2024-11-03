@@ -34,8 +34,6 @@ namespace CE::Editor
 
         FAssignNewOwned(PropertyEditor, editor, transient);
 
-
-
         return editor;
     }
 

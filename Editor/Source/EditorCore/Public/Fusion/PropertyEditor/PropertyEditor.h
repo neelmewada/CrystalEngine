@@ -14,6 +14,8 @@ namespace CE::Editor
 
         virtual void SetTarget(FieldType* field, const Array<Object*>& targets);
 
+        void OnPaint(FPainter* painter) override;
+
     public: // - Public API -
 
         FSplitBox* GetSplitBox() const { return splitBox; }
