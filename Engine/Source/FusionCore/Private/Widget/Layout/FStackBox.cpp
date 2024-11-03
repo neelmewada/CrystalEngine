@@ -84,6 +84,11 @@ namespace CE
 			return;
 		}
 
+		if (GetName() == "TestHStack")
+		{
+			String::IsAlphabet('a');
+		}
+
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
 		f32 crossAxisSize = 0;
 		f32 remainingSize = 0;
@@ -119,18 +124,26 @@ namespace CE
 				if (child->m_FillRatio > 0)
 				{
 					totalFillRatio += child->m_FillRatio;
+					remainingSize -= child->Margin().left + child->Margin().right +
+						child->Padding().left + child->Padding().right + child->MinWidth();
 				}
-
-				remainingSize -= childIntrinsicSize.width + child->Margin().left + child->Margin().right;
+				else
+				{
+					remainingSize -= childIntrinsicSize.width + child->Margin().left + child->Margin().right;
+				}
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
 				if (child->m_FillRatio > 0)
 				{
 					totalFillRatio += child->m_FillRatio;
+					remainingSize -= child->Margin().top + child->Margin().bottom +
+						child->Padding().top + child->Padding().bottom + child->MinHeight();
 				}
-
-				remainingSize -= childIntrinsicSize.height + child->Margin().top + child->Margin().bottom;
+				else
+				{
+					remainingSize -= childIntrinsicSize.height + child->Margin().top + child->Margin().bottom;
+				}
 			}
 		}
 
@@ -176,7 +189,9 @@ namespace CE
 
 				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.width = childIntrinsicSize.width + remainingSize * child->m_FillRatio / totalFillRatio;
+					child->computedSize.width = child->Margin().left + child->Margin().right +
+						child->Padding().left + child->Padding().right + child->MinWidth() + 
+						remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{
@@ -210,7 +225,10 @@ namespace CE
 
 				if (child->m_FillRatio > 0)
 				{
-					child->computedSize.height = childIntrinsicSize.height + remainingSize * child->m_FillRatio / totalFillRatio;
+					child->computedSize.height = child->Margin().top + child->Margin().bottom +
+						child->Padding().top + child->Padding().bottom + child->MinHeight() +
+						remainingSize * child->m_FillRatio / totalFillRatio;
+					//child->computedSize.height = childIntrinsicSize.height + remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{
