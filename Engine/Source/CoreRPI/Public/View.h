@@ -74,6 +74,9 @@ namespace CE::RPI
 		//! The function is thread safe and is supposed to be called every frame!
 		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);
 
+		bool IsEnabled() const { return enabled; }
+		void SetEnabled(bool enabled) { this->enabled = enabled; }
+
 	private:
 
 		RHI::DrawListContext drawListContext{};

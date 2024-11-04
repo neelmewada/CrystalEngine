@@ -42,6 +42,10 @@ namespace CE
 
 		void TickCamera();
 
+		void OnEnabled() override;
+
+		void OnDisabled() override;
+
 	private:
 
     	FIELD()

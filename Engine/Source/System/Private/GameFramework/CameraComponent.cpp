@@ -77,4 +77,18 @@ namespace CE
             viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
         }
     }
+
+    void CameraComponent::OnEnabled()
+    {
+        Super::OnEnabled();
+
+        rpiView->SetEnabled(true);
+    }
+
+    void CameraComponent::OnDisabled()
+    {
+	    Super::OnDisabled();
+
+        rpiView->SetEnabled(false);
+    }
 } // namespace CE

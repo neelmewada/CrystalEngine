@@ -71,28 +71,6 @@ namespace CE
 
 			camera->TickCamera();
 		}
-    
-		/*CWindow* mainViewport = sceneSubsystem->GetMainViewport();
-		if (mainViewport == nullptr)
-			return;
-
-		Vec2i windowSize = mainViewport->GetWindowSize().ToVec2i();
-
-		for (CameraComponent* camera : cameras)
-		{
-			camera->windowSize = windowSize;
-
-			RPI::View* view = camera->GetRpiView();
-			if (!view)
-				continue;
-
-			PerViewConstants& viewConstants = view->GetViewConstants();
-			viewConstants.pixelResolution = windowSize.ToVec2();
-			viewConstants.projectionMatrix = camera->projectionMatrix;
-			viewConstants.viewMatrix = camera->viewMatrix;
-			viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
-			viewConstants.viewPosition = camera->GetPosition();
-		}*/
 
 		for (CE::RenderPipeline* renderPipeline : renderPipelines)
 		{

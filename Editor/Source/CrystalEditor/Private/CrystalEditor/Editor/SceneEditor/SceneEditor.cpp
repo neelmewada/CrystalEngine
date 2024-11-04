@@ -31,6 +31,12 @@ namespace CE::Editor
         CE::Texture* plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
         CE::Texture* plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
 
+        CE::Texture* woodAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/albedo");
+        CE::Texture* woodNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/normal");
+        CE::Texture* woodMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/metallic");
+        CE::Texture* woodRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/roughness");
+
+
         scene->SetSkyboxCubeMap(skybox);
 
         {
@@ -45,12 +51,23 @@ namespace CE::Editor
 
             CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
             plasticMaterial->SetShader(standardShader);
+	        {
+		        plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
+            	plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
+            	plasticMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
+            	plasticMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
+            	plasticMaterial->ApplyProperties();
+	        }
 
-            plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
-            plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
-            plasticMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
-            plasticMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
-            plasticMaterial->ApplyProperties();
+            CE::Material* woodMaterial = CreateObject<CE::Material>(scene, "WoodMaterial");
+            woodMaterial->SetShader(standardShader);
+        	{
+                woodMaterial->SetProperty("_AlbedoTex", woodAlbedoTex);
+                woodMaterial->SetProperty("_NormalTex", woodNormalTex);
+                woodMaterial->SetProperty("_MetallicTex", woodMetallicTex);
+                woodMaterial->SetProperty("_RoughnessTex", woodRoughnessTex);
+                woodMaterial->ApplyProperties();
+            }
 
             StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
             {
@@ -61,14 +78,34 @@ namespace CE::Editor
                 sphereMesh->SetModelAsset(sphereModel);
             }
 
-            StaticMeshActor* meshActor = CreateObject<StaticMeshActor>(scene, "SampleMesh");
-            scene->AddActor(meshActor);
+            StaticMesh* cubeMesh = CreateObject<StaticMesh>(scene, "CubeMesh");
+            {
+                RPI::ModelAsset* cubeModel = CreateObject<ModelAsset>(cubeMesh, "CubeModel");
+                RPI::ModelLodAsset* cubeLodAsset = RPI::ModelLodAsset::CreateCubeAsset(cubeModel);
+                cubeModel->AddModelLod(cubeLodAsset);
 
-            StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
-            meshComponent->SetStaticMesh(sphereMesh);
-            meshComponent->SetLocalPosition(Vec3(0, 0, 5));
-            meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
-            meshComponent->SetMaterial(material, 0, 0);
+                cubeMesh->SetModelAsset(cubeModel);
+            }
+
+            StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereMesh");
+            scene->AddActor(sphereActor);
+	        {
+		        StaticMeshComponent* meshComponent = sphereActor->GetMeshComponent();
+            	meshComponent->SetStaticMesh(sphereMesh);
+            	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+            	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+            	meshComponent->SetMaterial(material, 0, 0);
+	        }
+
+            StaticMeshActor* groundActor = CreateObject<StaticMeshActor>(scene, "Ground");
+            scene->AddActor(groundActor);
+            {
+                StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
+                meshComponent->SetStaticMesh(cubeMesh);
+                meshComponent->SetLocalPosition(Vec3(0, -2, 5));
+                meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
+                meshComponent->SetMaterial(woodMaterial, 0, 0);
+            }
 
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
             camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));

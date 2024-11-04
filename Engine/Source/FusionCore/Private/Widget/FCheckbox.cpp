@@ -34,13 +34,14 @@ namespace CE
         if (checked == propertyName)
         {
             checkmark->Visible(m_Checked);
-            m_OnCheckChanged(this);
         }
     }
 
     void FCheckbox::OnClick()
     {
         Checked(!Checked());
+
+        m_OnCheckChanged(this);
     }
     
 }
