@@ -62,6 +62,21 @@ namespace CE
 		}
 	}
 
+	void ActorComponent::OnFieldEdited(const Name& fieldName)
+	{
+		Super::OnFieldEdited(fieldName);
+
+		thread_local const Name isEnabledName = NAMEOF(isEnabled);
+
+		if (fieldName == isEnabledName)
+		{
+			if (IsEnabledInHierarchy())
+				OnEnabled();
+			else
+				OnDisabled();
+		}
+	}
+
 	void ActorComponent::OnEnabled()
 	{
 		

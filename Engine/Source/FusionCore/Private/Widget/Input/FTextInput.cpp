@@ -247,6 +247,8 @@ namespace CE
                 {
                     String str = "";
                     str.Append(c);
+                    bool isSelected = IsTextSelected();
+                    bool canRemove = CanRemoveSelectedText();
 
                     if (CanInsertAt(str, cursorPos))
                     {
@@ -310,6 +312,11 @@ namespace CE
 
                 if (c != 0)
                 {
+                    if (IsTextSelected() && CanRemoveSelectedText())
+                    {
+                        RemoveSelectedRange();
+                    }
+
                     String str = "";
                     str.Append(c);
 
