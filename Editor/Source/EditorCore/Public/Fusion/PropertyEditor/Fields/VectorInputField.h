@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API VectorInputField : public FHorizontalStack
+    class EDITORCORE_API VectorInputField : public EditorField
     {
-        CE_CLASS(VectorInputField, FHorizontalStack)
+        CE_CLASS(VectorInputField, EditorField)
     protected:
 
         VectorInputField();

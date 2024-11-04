@@ -16,6 +16,7 @@ namespace CE::Editor
 
         Child(
 			FAssignNew(FTextInput, input)
+            .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .Padding(Vec4(10, 4, 8, 4))
         );
 
@@ -23,11 +24,9 @@ namespace CE::Editor
         input->Text("0");
     }
 
-    /*void NumericInputField::OnFinishEdit()
+    void NumericInputField::OnFinishEdit(FTextInput*)
     {
-	    Super::OnFinishEdit();
-
-        const String& text = Text();
+        const String& text = input->Text();
         String lowerText = text.ToLower();
 
         if (!text.IsEmpty())
@@ -36,14 +35,14 @@ namespace CE::Editor
             if (String::TryParse(text, value))
             {
                 value = Math::Clamp(value, m_RangeMin, m_RangeMax);
-                Text(String::Format("{}", value));
+                input->Text(String::Format("{}", value));
             }
             else
             {
-                Text(String::Format("{}", Math::Clamp<f32>(0, m_RangeMin, m_RangeMax)));
+                input->Text(String::Format("{}", Math::Clamp<f32>(0, m_RangeMin, m_RangeMax)));
             }
         }
-    }*/
+    }
 
     void NumericInputField::OnPaint(FPainter* painter)
     {

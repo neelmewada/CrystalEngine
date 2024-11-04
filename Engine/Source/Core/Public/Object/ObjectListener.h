@@ -16,16 +16,17 @@ namespace CE
         CE_STATIC_CLASS(ObjectListener)
     public:
 
-        static void AddListener(IObjectUpdateListener* listener);
+        static void AddListener(Object* target, IObjectUpdateListener* listener);
 
-        static void RemoveListener(IObjectUpdateListener* listener);
+        static void RemoveListener(Object* target, IObjectUpdateListener* listener);
+        static void RemoveAllListeners(Object* target);
 
     private:
 
         static void Trigger(Object* object, const Name& fieldName);
 
         static SharedMutex mutex;
-        static HashSet<IObjectUpdateListener*> listeners;
+        static HashMap<Object*, Array<IObjectUpdateListener*>> listeners;
 
         friend class Object;
     };

@@ -12,33 +12,35 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        (*this)
-        .ContentVAlign(VAlign::Fill)
-        .ContentHAlign(HAlign::Fill)
-        (
-            FAssignNew(NumericInputField, fieldX)
-            .ColorTagVisible(true)
-            .ColorTag(Color::Red())
-            .VAlign(VAlign::Fill)
-            .FillRatio(1.0f),
+        Child(
+            FNew(FHorizontalStack)
+            .ContentVAlign(VAlign::Fill)
+            .ContentHAlign(HAlign::Fill)
+            (
+                FAssignNew(NumericInputField, fieldX)
+                .ColorTagVisible(true)
+                .ColorTag(Color::Red())
+                .VAlign(VAlign::Fill)
+                .FillRatio(1.0f),
 
-            FAssignNew(NumericInputField, fieldY)
-            .ColorTagVisible(true)
-            .ColorTag(Color::Green())
-            .VAlign(VAlign::Fill)
-            .FillRatio(1.0f),
+                FAssignNew(NumericInputField, fieldY)
+                .ColorTagVisible(true)
+                .ColorTag(Color::Green())
+                .VAlign(VAlign::Fill)
+                .FillRatio(1.0f),
 
-            FAssignNew(NumericInputField, fieldZ)
-            .ColorTagVisible(true)
-            .ColorTag(Color::Blue())
-            .VAlign(VAlign::Fill)
-            .FillRatio(1.0f),
+                FAssignNew(NumericInputField, fieldZ)
+                .ColorTagVisible(true)
+                .ColorTag(Color::Blue())
+                .VAlign(VAlign::Fill)
+                .FillRatio(1.0f),
 
-            FAssignNew(NumericInputField, fieldW)
-            .ColorTagVisible(true)
-            .ColorTag(Color::White())
-            .VAlign(VAlign::Fill)
-            .FillRatio(1.0f)
+                FAssignNew(NumericInputField, fieldW)
+                .ColorTagVisible(true)
+                .ColorTag(Color::White())
+                .VAlign(VAlign::Fill)
+                .FillRatio(1.0f)
+            )
         );
 
         VectorType<Vec3>();
@@ -46,8 +48,8 @@ namespace CE::Editor
 
     VectorInputField::Self& VectorInputField::VectorType(TypeId type)
     {
-        thread_local HashSet<TypeId> floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
-        thread_local HashSet<TypeId> intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
+        thread_local HashSet floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
+        thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
 
         if (floatVectors.Exists(type))
         {

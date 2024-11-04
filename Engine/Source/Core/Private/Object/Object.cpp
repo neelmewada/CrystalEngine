@@ -19,21 +19,37 @@ namespace CE
 	}
 
 	SharedMutex ObjectListener::mutex{};
-	HashSet<IObjectUpdateListener*> ObjectListener::listeners{};
+	HashMap<Object*, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
 
-	void ObjectListener::AddListener(IObjectUpdateListener* listener)
+	void ObjectListener::AddListener(Object* target, IObjectUpdateListener* listener)
 	{
-		listeners.Add(listener);
+		LockGuard lock{ mutex };
+
+		listeners[target].Add(listener);
 	}
 
-	void ObjectListener::RemoveListener(IObjectUpdateListener* listener)
+	void ObjectListener::RemoveListener(Object* target, IObjectUpdateListener* listener)
 	{
-		listeners.Remove(listener);
+		LockGuard lock{ mutex };
+
+		listeners[target].Remove(listener);
+	}
+
+	void ObjectListener::RemoveAllListeners(Object* target)
+	{
+		LockGuard lock{ mutex };
+
+		listeners[target].Clear();
 	}
 
 	void ObjectListener::Trigger(Object* object, const Name& fieldName)
 	{
-		for (IObjectUpdateListener* listener : listeners)
+		LockGuard lock{ mutex };
+
+		if (!listeners.KeyExists(object))
+			return;
+
+		for (IObjectUpdateListener* listener : listeners[object])
 		{
 			listener->OnObjectFieldChanged(object, fieldName);
 		}
@@ -46,7 +62,7 @@ namespace CE
 
 	Object::~Object()
 	{
-		// Never call delete directly. Use Destroy() instead
+		// Never call delete directly. Use Destroy() instead.
 	}
 
 	void Object::UnbindAllEvents()

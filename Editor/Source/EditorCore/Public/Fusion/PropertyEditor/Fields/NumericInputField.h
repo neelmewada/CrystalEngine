@@ -20,6 +20,9 @@ namespace CE::Editor
 
         void OnPaint(FPainter* painter) override;
 
+        FUNCTION()
+        void OnFinishEdit(FTextInput* field);
+
         TypeId numericType = 0;
         FTextInput* input = nullptr;
 
