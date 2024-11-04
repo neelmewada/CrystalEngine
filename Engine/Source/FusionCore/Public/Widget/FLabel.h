@@ -29,9 +29,9 @@ namespace CE
         Self& Italic(bool italic);
 
         const CE::Name& FontFamily();
-        int FontSize();
-        bool Bold();
-        bool Italic();
+        const int& FontSize();
+        const bool& Bold();
+        const bool& Italic();
 
         FUSION_WIDGET;
     };

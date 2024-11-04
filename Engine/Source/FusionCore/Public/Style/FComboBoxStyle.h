@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS(Abstract)
+    CLASS()
     class FUSIONCORE_API FComboBoxStyle : public FStyle
     {
         CE_CLASS(FComboBoxStyle, FStyle)
@@ -12,44 +12,10 @@ namespace CE
 
         SubClass<FWidget> GetWidgetClass() const override;
 
-    };
-
-    CLASS(Abstract)
-    class FUSIONCORE_API FComboBoxPopupStyle : public FStyle
-    {
-	    CE_CLASS(FComboBoxPopupStyle, FStyle)
-    public:
-
-        FComboBoxPopupStyle();
-
-        SubClass<FWidget> GetWidgetClass() const override;
-
-    };
-
-    CLASS(Abstract)
-    class FUSIONCORE_API FComboBoxItemStyle : public FStyle
-    {
-	    CE_CLASS(FComboBoxItemStyle, FStyle)
-    public:
-
-        FComboBoxItemStyle();
-
-        SubClass<FWidget> GetWidgetClass() const override;
-
-    };
-
-    CLASS()
-    class FUSIONCORE_API FComboBoxPlainStyle : public FComboBoxStyle
-    {
-        CE_CLASS(FComboBoxPlainStyle, FComboBoxStyle)
-    public:
-
-        FComboBoxPlainStyle();
-
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Color background;
+        FBrush background;
 
         FIELD()
         Color borderColor;
@@ -72,32 +38,37 @@ namespace CE
     };
 
     CLASS()
-    class FUSIONCORE_API FComboBoxPopupPlainStyle : public FComboBoxPopupStyle
+    class FUSIONCORE_API FComboBoxPopupStyle : public FStyle
     {
-        CE_CLASS(FComboBoxPopupPlainStyle, FComboBoxPopupStyle)
+	    CE_CLASS(FComboBoxPopupStyle, FStyle)
     public:
 
-        FComboBoxPopupPlainStyle();
+        FComboBoxPopupStyle();
+
+        SubClass<FWidget> GetWidgetClass() const override;
 
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Color background;
+        FBrush background;
 
         FIELD()
         Color borderColor;
 
         FIELD()
-        f32 borderWidth = 0.0f;
+        f32 borderWidth = 0;
+
     };
 
     CLASS()
-    class FUSIONCORE_API FComboBoxItemPlainStyle : public FComboBoxItemStyle
+    class FUSIONCORE_API FComboBoxItemStyle : public FStyle
     {
-        CE_CLASS(FComboBoxItemPlainStyle, FComboBoxItemStyle)
+	    CE_CLASS(FComboBoxItemStyle, FStyle)
     public:
 
-        FComboBoxItemPlainStyle();
+        FComboBoxItemStyle();
+
+        SubClass<FWidget> GetWidgetClass() const override;
 
         void MakeStyle(FWidget& widget) override;
 
@@ -114,13 +85,13 @@ namespace CE
         Vec4 shapeCornerRadius;
 
         FIELD()
-        Color background;
+        FBrush background;
 
         FIELD()
-        Color hoverBackground;
+        FBrush hoverBackground;
 
         FIELD()
-        Color selectedBackground;
+        FBrush selectedBackground;
 
         FIELD()
         Color borderColor;
@@ -133,8 +104,8 @@ namespace CE
 
         FIELD()
         f32 borderWidth = 0.0f;
-
     };
+
     
 } // namespace CE
 

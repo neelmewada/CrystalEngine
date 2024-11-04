@@ -48,13 +48,13 @@ namespace CE::Editor
 		FExpandableSectionStyle* expandableSection = nullptr;
 
 		FIELD()
-		FComboBoxPlainStyle* comboBox = nullptr;
+		FComboBoxStyle* comboBox = nullptr;
 
 		FIELD()
-		FComboBoxItemPlainStyle* comboBoxItem = nullptr;
+		FComboBoxItemStyle* comboBoxItem = nullptr;
 
 		FIELD()
-		FComboBoxPopupPlainStyle* comboBoxPopup = nullptr;
+		FComboBoxPopupStyle* comboBoxPopup = nullptr;
 
 		FIELD()
 		FTabViewStyle* tabView = nullptr;

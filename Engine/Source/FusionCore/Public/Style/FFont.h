@@ -30,13 +30,13 @@ namespace CE
 
         void SetFamily(const Name& family) { this->family = family; }
 
-        int GetFontSize() const { return fontSize; }
+        const int& GetFontSize() const { return fontSize; }
 
         void SetFontSize(int fontSize) { this->fontSize = fontSize; }
 
-        bool IsItalic() const { return isItalic; }
+        const bool& IsItalic() const { return isItalic; }
 
-        bool IsBold() const { return isBold; }
+        const bool& IsBold() const { return isBold; }
 
         void SetItalic(bool set) { isItalic = set; }
 

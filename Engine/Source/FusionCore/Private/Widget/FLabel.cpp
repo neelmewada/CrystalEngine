@@ -96,17 +96,17 @@ namespace CE
         return m_Font.GetFamily();
     }
 
-    int FLabel::FontSize()
+    const int& FLabel::FontSize()
     {
         return m_Font.GetFontSize();
     }
 
-    bool FLabel::Bold()
+    const bool& FLabel::Bold()
     {
         return m_Font.IsBold();
     }
 
-    bool FLabel::Italic()
+    const bool& FLabel::Italic()
     {
         return m_Font.IsItalic();
     }

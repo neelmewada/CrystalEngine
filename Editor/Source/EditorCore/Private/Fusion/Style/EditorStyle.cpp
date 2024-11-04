@@ -147,7 +147,7 @@ namespace CE::Editor
 			
 		if (!comboBox)
 		{
-			comboBox = CreateObject<FComboBoxPlainStyle>(this, "ComboBox");
+			comboBox = CreateObject<FComboBoxStyle>(this, "ComboBox");
 			Add(comboBox);
 		}
 
@@ -159,7 +159,7 @@ namespace CE::Editor
 
 		if (!comboBoxItem)
 		{
-			comboBoxItem = CreateObject<FComboBoxItemPlainStyle>(this, "ComboBoxItem");
+			comboBoxItem = CreateObject<FComboBoxItemStyle>(this, "ComboBoxItem");
 			Add(comboBoxItem);
 		}
 
@@ -168,7 +168,7 @@ namespace CE::Editor
 		comboBoxItem->selectedBackground = Color::Clear();
 		comboBoxItem->selectedShape = FShapeType::RoundedRect;
 		comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
-		comboBoxItem->selectedBorderColor = comboBoxItem->hoverBackground;
+		comboBoxItem->selectedBorderColor = highlightColor;
 		comboBoxItem->borderWidth = 1.0f;
 
 		GetDefaultWidget<FComboBox>()
@@ -177,7 +177,7 @@ namespace CE::Editor
 
 		if (!comboBoxPopup)
 		{
-			comboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(this, "ComboBoxPopup");
+			comboBoxPopup = CreateObject<FComboBoxPopupStyle>(this, "ComboBoxPopup");
 			Add(comboBoxPopup);
 		}
 

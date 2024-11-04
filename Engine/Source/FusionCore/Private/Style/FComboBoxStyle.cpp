@@ -11,30 +11,7 @@ namespace CE
 		return FComboBox::StaticType();
 	}
 
-	FComboBoxPopupStyle::FComboBoxPopupStyle()
-	{
-	}
-
-	SubClass<FWidget> FComboBoxPopupStyle::GetWidgetClass() const
-	{
-		return FComboBoxPopup::StaticType();
-	}
-
-	FComboBoxItemStyle::FComboBoxItemStyle()
-	{
-	}
-
-	SubClass<FWidget> FComboBoxItemStyle::GetWidgetClass() const
-	{
-		return FComboBoxItem::StaticType();
-	}
-
-	FComboBoxPlainStyle::FComboBoxPlainStyle()
-	{
-
-	}
-
-	void FComboBoxPlainStyle::MakeStyle(FWidget& widget)
+	void FComboBoxStyle::MakeStyle(FWidget& widget)
 	{
 		FComboBox& comboBox = widget.As<FComboBox>();
 
@@ -65,11 +42,16 @@ namespace CE
 			;
 	}
 
-	FComboBoxPopupPlainStyle::FComboBoxPopupPlainStyle()
+	FComboBoxPopupStyle::FComboBoxPopupStyle()
 	{
 	}
 
-	void FComboBoxPopupPlainStyle::MakeStyle(FWidget& widget)
+	SubClass<FWidget> FComboBoxPopupStyle::GetWidgetClass() const
+	{
+		return FComboBoxPopup::StaticType();
+	}
+
+	void FComboBoxPopupStyle::MakeStyle(FWidget& widget)
 	{
 		FComboBoxPopup& popup = widget.As<FComboBoxPopup>();
 
@@ -78,17 +60,24 @@ namespace CE
 			.BorderWidth(borderWidth)
 			.BorderColor(borderColor)
 			;
+
+
 	}
 
-	FComboBoxItemPlainStyle::FComboBoxItemPlainStyle()
+	FComboBoxItemStyle::FComboBoxItemStyle()
 	{
 	}
 
-	void FComboBoxItemPlainStyle::MakeStyle(FWidget& widget)
+	SubClass<FWidget> FComboBoxItemStyle::GetWidgetClass() const
+	{
+		return FComboBoxItem::StaticType();
+	}
+
+	void FComboBoxItemStyle::MakeStyle(FWidget& widget)
 	{
 		FComboBoxItem& item = widget.As<FComboBoxItem>();
 
-		Color bg = background;
+		FBrush bg = background;
 		Color border = borderColor;
 		FShapeType shapeType = shape;
 
@@ -104,7 +93,7 @@ namespace CE
 			border = selectedBorderColor;
 			shapeType = selectedShape;
 		}
-		
+
 		item
 			.Background(bg)
 			.Border(border, borderWidth)
@@ -116,7 +105,6 @@ namespace CE
 			item
 				.BackgroundShape(FRoundedRectangle(shapeCornerRadius));
 		}
-
 	}
 
 } // namespace CE
