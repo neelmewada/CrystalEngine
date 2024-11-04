@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API NumericInputField : public EditorField
+    class EDITORCORE_API NumericEditorField : public EditorField
     {
-        CE_CLASS(NumericInputField, EditorField)
+        CE_CLASS(NumericEditorField, EditorField)
     protected:
 
-        NumericInputField();
+        NumericEditorField();
 
         void Construct() override;
 
@@ -20,6 +20,13 @@ namespace CE::Editor
 
         void OnPaint(FPainter* painter) override;
 
+        bool CanBind(FieldType* field) override;
+
+        void UpdateValue() override;
+
+        FUNCTION()
+        void OnTextFieldEdited(FTextInput* field);
+
         FUNCTION()
         void OnFinishEdit(FTextInput* field);
 
@@ -28,11 +35,13 @@ namespace CE::Editor
 
     public: // - Fusion Properties - 
 
-        FUSION_PROPERTY(f32, RangeMin);
-        FUSION_PROPERTY(f32, RangeMax);
-
         FUSION_PROPERTY(bool, ColorTagVisible);
         FUSION_PROPERTY(Color, ColorTag);
+
+        FUSION_PROPERTY_WRAPPER(Text, input);
+
+        FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEdited);
+        FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEditingFinished);
 
         template<typename T> requires TIsNumericType<T>::Value
         Self& NumericType()
@@ -49,4 +58,4 @@ namespace CE::Editor
     
 }
 
-#include "NumericInputField.rtti.h"
+#include "NumericEditorField.rtti.h"

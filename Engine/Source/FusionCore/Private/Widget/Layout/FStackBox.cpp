@@ -84,11 +84,6 @@ namespace CE
 			return;
 		}
 
-		if (GetName() == "TestHStack")
-		{
-			String::IsAlphabet('a');
-		}
-
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
 		f32 crossAxisSize = 0;
 		f32 remainingSize = 0;

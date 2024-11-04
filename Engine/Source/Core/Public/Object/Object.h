@@ -178,6 +178,8 @@ namespace CE
 
         virtual void OnFieldChanged(const Name& fieldName);
 
+        virtual void OnFieldEdited(const Name& fieldName);
+
         virtual void OnFieldValidate() {}
 
     protected:

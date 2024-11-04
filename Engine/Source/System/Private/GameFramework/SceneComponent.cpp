@@ -107,7 +107,19 @@ namespace CE
 	{
 		Super::OnFieldChanged(fieldName);
 
-		thread_local const HashSet<CE::Name> transformFields = { NAMEOF(localPosition), NAMEOF(localEulerAngles), NAMEOF(localScale) };
+		thread_local const HashSet transformFields = { NAMEOF(localPosition), NAMEOF(localEulerAngles), NAMEOF(localScale) };
+
+		if (transformFields.Exists(fieldName))
+		{
+			SetDirty();
+		}
+	}
+
+	void SceneComponent::OnFieldEdited(const Name& fieldName)
+	{
+		Super::OnFieldEdited(fieldName);
+
+		thread_local const HashSet transformFields = { NAMEOF(localPosition), NAMEOF(localEulerAngles), NAMEOF(localScale) };
 
 		if (transformFields.Exists(fieldName))
 		{

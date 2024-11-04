@@ -86,6 +86,7 @@ namespace CE
 
 	void Object::RequestDestroy()
 	{
+		ObjectListener::RemoveAllListeners(this);
 
 		OnBeforeDestroy();
 
@@ -678,6 +679,11 @@ namespace CE
 			return;
 
 		ObjectListener::Trigger(this, fieldName);
+    }
+
+    void Object::OnFieldEdited(const Name& fieldName)
+    {
+
     }
 
     Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)

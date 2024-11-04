@@ -61,6 +61,8 @@ namespace CE
 
 		void OnFieldChanged(const Name& fieldName) override;
 
+		void OnFieldEdited(const Name& fieldName) override;
+
 		bool IsTransformUpdated() const { return transformUpdated; }
 
 		void OnEnabled() override;

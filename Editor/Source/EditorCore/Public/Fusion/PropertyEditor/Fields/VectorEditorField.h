@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API VectorInputField : public EditorField
+    class EDITORCORE_API VectorEditorField : public EditorField
     {
-        CE_CLASS(VectorInputField, EditorField)
+        CE_CLASS(VectorEditorField, EditorField)
     protected:
 
-        VectorInputField();
+        VectorEditorField();
 
         void Construct() override;
 
@@ -17,10 +17,22 @@ namespace CE::Editor
 
     protected: // - Internal -
 
-        NumericInputField* fieldX = nullptr;
-        NumericInputField* fieldY = nullptr;
-        NumericInputField* fieldZ = nullptr;
-        NumericInputField* fieldW = nullptr;
+        bool CanBind(FieldType* field) override;
+
+        void UpdateValue() override;
+
+        FUNCTION()
+        void OnTextEdited(NumericEditorField* input);
+
+        FUNCTION()
+        void OnTextEditingFinished(NumericEditorField* input);
+
+        void SetFieldValue();
+
+        NumericEditorField* fieldX = nullptr;
+        NumericEditorField* fieldY = nullptr;
+        NumericEditorField* fieldZ = nullptr;
+        NumericEditorField* fieldW = nullptr;
 
     public: // - Fusion Properties - 
 
@@ -93,4 +105,4 @@ namespace CE::Editor
     
 }
 
-#include "VectorInputField.rtti.h"
+#include "VectorEditorField.rtti.h"

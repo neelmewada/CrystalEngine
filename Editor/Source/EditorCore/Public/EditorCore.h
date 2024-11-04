@@ -38,8 +38,10 @@
 #include "Fusion/Style/EditorStyle.h"
 
 #include "Fusion/PropertyEditor/Fields/EditorField.h"
-#include "Fusion/PropertyEditor/Fields/NumericInputField.h"
-#include "Fusion/PropertyEditor/Fields/VectorInputField.h"
+#include "Fusion/PropertyEditor/Fields/EnumEditorField.h"
+#include "Fusion/PropertyEditor/Fields/BoolEditorField.h"
+#include "Fusion/PropertyEditor/Fields/NumericEditorField.h"
+#include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"

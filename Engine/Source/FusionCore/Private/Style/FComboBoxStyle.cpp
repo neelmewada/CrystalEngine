@@ -104,7 +104,6 @@ namespace CE
 			border = selectedBorderColor;
 			shapeType = selectedShape;
 		}
-
 		
 		item
 			.Background(bg)

@@ -217,10 +217,10 @@ namespace CE::Editor
                                             FNew(FCheckbox)
                                             .Name("DebugCheckbox"),
 
-                                            FNew(NumericInputField)
+                                            FNew(NumericEditorField)
                                             .Width(120),
 
-                                            FNew(VectorInputField)
+                                            FNew(VectorEditorField)
                                             .VectorType<Vec4>()
                                             .Width(200)
                                         )

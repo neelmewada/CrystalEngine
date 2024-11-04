@@ -9,7 +9,7 @@ namespace CE
     class FComboBoxItemStyle;
     class FComboBoxStyle;
 
-    typedef ScriptEvent<void(int)> FComboBoxSelectionEvent;
+    typedef ScriptEvent<void(FComboBox*)> FComboBoxEvent;
 
     ENUM(Flags)
     enum class FComboBoxState
@@ -83,7 +83,7 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        FUSION_EVENT(FComboBoxSelectionEvent, OnSelectionChanged);
+        FUSION_EVENT(FComboBoxEvent, OnSelectionChanged);
 
         FUSION_PROPERTY_WRAPPER(Font, selectionText);
         FUSION_PROPERTY_WRAPPER(FontSize, selectionText);
@@ -98,7 +98,7 @@ namespace CE
 
         FUSION_DATA_PROPERTY(Array<String>, Items);
 
-        template<typename... TArgs>
+        template<typename... TArgs> requires (sizeof...(TArgs) > 0)
         Self& Items(const TArgs&... items)
         {
             using TupleType = std::tuple<const TArgs&...>;

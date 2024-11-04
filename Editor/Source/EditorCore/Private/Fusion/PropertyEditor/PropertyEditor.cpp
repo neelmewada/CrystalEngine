@@ -101,29 +101,38 @@ namespace CE::Editor
         if (fieldDeclType->IsVectorType())
         {
             right->AddChild(
-				FNew(VectorInputField)
+				FNew(VectorEditorField)
                 .VectorType(fieldDeclType->GetTypeId())
+                .BindField(field, targets[0])
                 .FillRatio(1.0f)
             );
         }
         else if (field->IsNumericField())
         {
             right->AddChild(
-                FNew(NumericInputField)
+                FNew(NumericEditorField)
                 .NumericType(fieldDeclType->GetTypeId())
                 .ColorTagVisible(false)
+                .BindField(field, targets[0])
                 .FillRatio(1.0f)
             );
         }
         else if (fieldDeclType->IsEnum())
         {
-	        auto enumType = static_cast<EnumType*>(fieldDeclType);
-
-            // TODO: Add combo box
+            right->AddChild(
+				FNew(EnumEditorField)
+                .BindField(field, targets[0])
+                .FillRatio(1.0f)
+            );
         }
         else if (field->GetDeclarationTypeId() == TYPEID(bool))
         {
-	        // TODO: Add check box
+            right->AddChild(
+				FNew(BoolEditorField)
+                .BindField(field, targets[0])
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
         }
     }
 

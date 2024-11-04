@@ -115,7 +115,7 @@ namespace CE
         {
 	        if (popupContent->GetChild(i) == item)
 	        {
-                m_OnSelectionChanged(i);
+                m_OnSelectionChanged(this);
 		        break;
 	        }
         }
@@ -163,6 +163,9 @@ namespace CE
                 .FontSize(13)
                 .Name("SelectionText")
                 .Margin(Vec4(0, 0, 5, 0)),
+
+                FNew(FTerminalWidget)
+                .FillRatio(1.0f),
 
                 FNew(FImage)
                 .Background(downwardArrow)

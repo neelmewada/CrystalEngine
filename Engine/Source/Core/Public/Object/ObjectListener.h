@@ -4,14 +4,14 @@ namespace CE
 {
     class Object;
 
-    struct IObjectUpdateListener
+    struct CORE_API IObjectUpdateListener
     {
         virtual ~IObjectUpdateListener() {}
 
         virtual void OnObjectFieldChanged(Object* object, const Name& fieldName) {}
     };
 
-    class ObjectListener
+    class CORE_API ObjectListener
     {
         CE_STATIC_CLASS(ObjectListener)
     public:
