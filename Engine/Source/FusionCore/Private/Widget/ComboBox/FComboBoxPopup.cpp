@@ -7,6 +7,7 @@ namespace CE
     {
         m_AutoClose = true;
         m_BlockInteraction = false;
+        m_Padding = Vec4(1, 1, 1, 1);
     }
 
     void FComboBoxPopup::Construct()

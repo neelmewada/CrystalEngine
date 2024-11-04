@@ -175,6 +175,19 @@ namespace CE::Editor
 			.ItemStyle(comboBoxItem)
 			.Style(this, comboBox->GetName());
 
+		if (!comboBoxPopup)
+		{
+			comboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(this, "ComboBoxPopup");
+			Add(comboBoxPopup);
+		}
+
+		comboBoxPopup->background = Color::RGBA(15, 15, 15);
+		comboBoxPopup->borderColor = Color::RGBA(60, 60, 60);
+		comboBoxPopup->borderWidth = 1.0f;
+
+		GetDefaultWidget<FComboBoxPopup>()
+			.Style(this, comboBoxPopup->GetName());
+
 		if (!checkbox)
 		{
 			checkbox = CreateObject<FCheckboxStyle>(this, "Checkbox");

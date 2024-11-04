@@ -54,6 +54,9 @@ namespace CE::Editor
 		FComboBoxItemPlainStyle* comboBoxItem = nullptr;
 
 		FIELD()
+		FComboBoxPopupPlainStyle* comboBoxPopup = nullptr;
+
+		FIELD()
 		FTabViewStyle* tabView = nullptr;
 
 		FIELD()
