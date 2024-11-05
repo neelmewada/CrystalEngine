@@ -378,6 +378,20 @@ namespace CE::Editor
 
                 FNew(FMenuItem)
                 .Text("Help")
+                .SubMenu(
+					FNew(EditorMenuPopup)
+                    .Name("HelpMenu")
+                    .As<EditorMenuPopup>()
+                    .Gap(0)
+                    .Content(
+						FNew(FMenuItem)
+                        .Text("About")
+                        .OnClick([this]
+                        {
+                            AboutWindow::Show();
+                        })
+                    )
+                )
                 .Name("HelpMenuItem")
             )
             ;
