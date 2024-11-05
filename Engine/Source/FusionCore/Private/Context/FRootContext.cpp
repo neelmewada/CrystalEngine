@@ -90,10 +90,6 @@ namespace CE
 		}
 
 		PlatformWindow* window = nativeContext->GetPlatformWindow();
-		if (window->IsFocused())
-		{
-			CE_LOG(Info, All, "Window Focused: {}", window->GetTitle());
-		}
 
 		FWidget* hoveredWidget = nativeContext->HitTest(mousePos);
 

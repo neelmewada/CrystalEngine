@@ -217,9 +217,15 @@ namespace CE
 
 	    Super::OnBeforeDestroy();
 
+        FusionApplication* app = FusionApplication::TryGet();
+
         if (GetContext())
         {
             GetContext()->OnWidgetDestroyed(this);
+        }
+        else if (app)
+        {
+            app->GetRootContext()->OnWidgetDestroyed(this);
         }
 
         if (parent)

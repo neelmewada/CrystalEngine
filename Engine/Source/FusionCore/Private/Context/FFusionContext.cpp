@@ -112,6 +112,16 @@ namespace CE
 
 	void FFusionContext::OnWidgetDestroyed(FWidget* widget)
 	{
+		if (hoveredWidgetStack.Exists(widget))
+		{
+			hoveredWidgetStack.Remove(widget);
+		}
+
+		if (!IsRootContext())
+		{
+			FusionApplication::Get()->GetRootContext()->OnWidgetDestroyed(widget);
+		}
+
 		if (owningWidget == widget)
 		{
 			owningWidget = nullptr;
@@ -120,6 +130,11 @@ namespace CE
 		if (curFocusWidget == widget)
 		{
 			curFocusWidget = nullptr;
+		}
+
+		if (widgetToFocus == widget)
+		{
+			widgetToFocus = nullptr;
 		}
 	}
 

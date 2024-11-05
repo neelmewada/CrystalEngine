@@ -63,6 +63,8 @@ namespace CE
 
         void QueueDestroy();
 
+        const auto& GetChildContexts() const { return childContexts; }
+
         void AddChildContext(FFusionContext* context);
 
         void RemoveChildContext(FFusionContext* context);

@@ -757,6 +757,11 @@ namespace CE
 				shapeItem.brushColor = currentBrush.GetTintColor().ToVec4();
 
 				RHI::Texture* image = app->FindImage(imageName);
+				if (image == nullptr)
+				{
+					app->LoadImageAsset(imageName);
+					image = app->FindImage(imageName);
+				}
 				int imageIndex = app->FindImageIndex(imageName);
 				if (image && imageIndex >= 0)
 				{
