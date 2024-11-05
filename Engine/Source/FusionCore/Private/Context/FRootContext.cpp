@@ -19,13 +19,15 @@ namespace CE
 
 	    Super::TickInput();
 
-        for (FFusionContext* childContext : childContexts)
+        for (int i = childContexts.GetSize() - 1; i >= 0; --i)
         {
-            if (!childContext->IsOfType<FNativeContext>())
-                continue;
+			FFusionContext* childContext = childContexts[i];
+			if (!childContext->IsOfType<FNativeContext>())
+				continue;
 
-            TickNativeContextInput(static_cast<FNativeContext*>(childContext));
+			TickNativeContextInput(static_cast<FNativeContext*>(childContext));
         }
+
     }
 
 	void FRootContext::TickNativeContextInput(FNativeContext* nativeContext)
@@ -85,6 +87,12 @@ namespace CE
 			{
 				keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
 			}
+		}
+
+		PlatformWindow* window = nativeContext->GetPlatformWindow();
+		if (window->IsFocused())
+		{
+			CE_LOG(Info, All, "Window Focused: {}", window->GetTitle());
 		}
 
 		FWidget* hoveredWidget = nativeContext->HitTest(mousePos);

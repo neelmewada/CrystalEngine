@@ -8,8 +8,8 @@
 
 #include <SDL_syswm.h>
 
-#define MOUSE_GRAB_PADDING 8
-#define WINDOW_DRAG_PADDING 50
+constexpr auto MouseGrabPadding = 8;
+constexpr auto WindowDragPadding = 50;
 
 namespace CE
 {
@@ -30,13 +30,13 @@ namespace CE
 		
 		if (platformWindow->IsResizable())
 		{
-			if (area->y < MOUSE_GRAB_PADDING)
+			if (area->y < MouseGrabPadding)
 			{
-				if (area->x < MOUSE_GRAB_PADDING)
+				if (area->x < MouseGrabPadding)
 				{
 					return SDL_HITTEST_RESIZE_TOPLEFT;
 				}
-				else if (area->x > Width - MOUSE_GRAB_PADDING)
+				else if (area->x > Width - MouseGrabPadding)
 				{
 					return SDL_HITTEST_RESIZE_TOPRIGHT;
 				}
@@ -45,13 +45,13 @@ namespace CE
 					return SDL_HITTEST_RESIZE_TOP;
 				}
 			}
-			else if (area->y > Height - MOUSE_GRAB_PADDING)
+			else if (area->y > Height - MouseGrabPadding)
 			{
-				if (area->x < MOUSE_GRAB_PADDING)
+				if (area->x < MouseGrabPadding)
 				{
 					return SDL_HITTEST_RESIZE_BOTTOMLEFT;
 				}
-				else if (area->x > Width - MOUSE_GRAB_PADDING)
+				else if (area->x > Width - MouseGrabPadding)
 				{
 					return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
 				}
@@ -60,11 +60,11 @@ namespace CE
 					return SDL_HITTEST_RESIZE_BOTTOM;
 				}
 			}
-			else if (area->x < MOUSE_GRAB_PADDING)
+			else if (area->x < MouseGrabPadding)
 			{
 				return SDL_HITTEST_RESIZE_LEFT;
 			}
-			else if (area->x > Width - MOUSE_GRAB_PADDING)
+			else if (area->x > Width - MouseGrabPadding)
 			{
 				return SDL_HITTEST_RESIZE_RIGHT;
 			}
@@ -74,7 +74,7 @@ namespace CE
 		{
 			return platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y)) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
 		}
-		else if (area->y < WINDOW_DRAG_PADDING)
+		else if (area->y < WindowDragPadding)
 		{
 			return SDL_HITTEST_DRAGGABLE;
 		}
