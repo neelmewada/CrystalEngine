@@ -98,6 +98,7 @@ namespace CE
 			PlatformApplication::Get()->AddMessageHandler(this);
 
 			FusionInitInfo initInfo{};
+			initInfo.assetLoader = gEngine->GetAssetManager();
 
 			FusionApplication::Get()->Initialize(initInfo);
 

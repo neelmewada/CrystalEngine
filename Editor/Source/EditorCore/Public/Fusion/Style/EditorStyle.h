@@ -33,6 +33,9 @@ namespace CE::Editor
 		FCustomButtonStyle* button = nullptr;
 
 		FIELD()
+		FCustomButtonStyle* clearButton = nullptr;
+
+		FIELD()
 		FCustomButtonStyle* highlightedButton = nullptr;
 
 		FIELD()

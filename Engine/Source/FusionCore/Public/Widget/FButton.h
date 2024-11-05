@@ -47,9 +47,15 @@ namespace CE
         FIELD(NonSerialized)
         FButtonState buttonState = FButtonState::Default;
 
+    private:
+
+        bool cursorPushed = false;
+
     public: // - Fusion Properties -
 
         FUSION_EVENT(FVoidEvent, OnPressed);
+
+        FUSION_PROPERTY(SystemCursor, Cursor);
 
         bool Interactable() const { return !IsInteractionDisabled(); }
 

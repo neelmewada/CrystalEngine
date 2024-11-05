@@ -12,8 +12,8 @@ namespace CE
 
         FStackBox* GetContentBox() const { return content; }
 
-        void SetMaximizeButton(bool enabled);
-        void SetMinimizeButton(bool enabled);
+        void SetMaximizeButton(bool interactable);
+        void SetMinimizeButton(bool interactable);
 
     protected:
 
@@ -41,6 +41,11 @@ namespace CE
         FUSION_PROPERTY_WRAPPER2(FillRatio, content, ContentFillRatio);
 
         FUSION_PROPERTY_WRAPPER2(Text, titleBarLabel, Title);
+
+        Self& MinimizeEnabled(bool enabled);
+        Self& MinimizeInteractable(bool interactable);
+        Self& MaximizeEnabled(bool enabled);
+        Self& MaximizeInteractable(bool interactable);
 
         FStackBoxDirection ContentDirection()
         {

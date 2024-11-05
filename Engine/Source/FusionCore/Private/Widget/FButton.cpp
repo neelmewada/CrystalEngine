@@ -5,7 +5,7 @@ namespace CE
 
     FButton::FButton()
     {
-
+        m_Cursor = SystemCursor::Default;
     }
 
     void FButton::SetInteractionEnabled(bool enabled)
@@ -19,6 +19,12 @@ namespace CE
         }
         else
         {
+            if (cursorPushed)
+            {
+                cursorPushed = false;
+                FusionApplication::Get()->PopCursor();
+            }
+
             buttonState = FButtonState::InteractionDisabled;
         }
 
@@ -37,6 +43,12 @@ namespace CE
 	            {
                     buttonState |= FButtonState::Hovered;
                     ApplyStyle();
+
+                    if (!cursorPushed)
+                    {
+                        cursorPushed = true;
+                        FusionApplication::Get()->PushCursor(m_Cursor);
+                    }
 	            }
                 event->Consume(this);
             }
@@ -46,6 +58,12 @@ namespace CE
 	            {
                     buttonState &= ~FButtonState::Hovered;
                     ApplyStyle();
+
+                    if (cursorPushed)
+                    {
+                        cursorPushed = false;
+                        FusionApplication::Get()->PopCursor();
+                    }
 	            }
                 event->Consume(this);
             }

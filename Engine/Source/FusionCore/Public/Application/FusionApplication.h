@@ -12,9 +12,17 @@ namespace CE
     class FStyleManager;
     class FGameWindow;
 
+    struct IFusionAssetLoader
+    {
+        virtual ~IFusionAssetLoader() = default;
+
+        virtual RHI::Texture* LoadTextureAtPath(const Name& path) = 0;
+
+    };
+
     struct FusionInitInfo
     {
-        
+        IFusionAssetLoader* assetLoader = nullptr;
     };
 
     CLASS()
@@ -46,6 +54,7 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
+        int LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
         int RegisterImage(const Name& imageName, RHI::Texture* image);
         void DeregisterImage(const Name& imageName);
@@ -121,6 +130,8 @@ namespace CE
 
         FIELD()
         FStyleManager* styleManager = nullptr;
+
+        IFusionAssetLoader* assetLoader = nullptr;
 
         StableDynamicArray<SystemCursor, 32, false> cursorStack;
 

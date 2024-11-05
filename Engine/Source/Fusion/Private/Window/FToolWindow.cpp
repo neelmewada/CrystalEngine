@@ -8,20 +8,20 @@ namespace CE
 	    
     }
 
-    void FToolWindow::SetMaximizeButton(bool enabled)
+    void FToolWindow::SetMaximizeButton(bool interactable)
     {
-        Color tintColor = enabled ? Color::White() : Color::RGBA(255, 255, 255, 80);
+        Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
 
         maximizeIcon->Background(maximizeIcon->Background().WithTint(tintColor));
-        maximizeButton->SetInteractionEnabled(enabled);
+        maximizeButton->SetInteractionEnabled(interactable);
     }
 
-    void FToolWindow::SetMinimizeButton(bool enabled)
+    void FToolWindow::SetMinimizeButton(bool interactable)
     {
-        Color tintColor = enabled ? Color::White() : Color::RGBA(255, 255, 255, 80);
+        Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
 
         minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
-        minimizeButton->SetInteractionEnabled(enabled);
+        minimizeButton->SetInteractionEnabled(interactable);
     }
 
     void FToolWindow::Construct()
@@ -87,7 +87,7 @@ namespace CE
                                 .Style("Button.WindowControl")
                                 .VAlign(VAlign::Top)
                                 (
-                                    FNew(FImage)
+                                    FAssignNew(FImage, minimizeIcon)
                                     .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
                                     .Width(11)
                                     .Height(11)
@@ -131,7 +131,7 @@ namespace CE
                                 .Style("Button.WindowClose")
                                 .VAlign(VAlign::Top)
                                 (
-                                    FAssignNew(FImage, minimizeIcon)
+                                    FNew(FImage)
                                     .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
                                     .Width(10)
                                     .Height(10)
@@ -159,6 +159,30 @@ namespace CE
         );
 
         this->Style("ToolWindow");
+    }
+
+    FToolWindow::Self& FToolWindow::MinimizeEnabled(bool enabled)
+    {
+        minimizeButton->Enabled(enabled);
+        return *this;
+    }
+
+    FToolWindow::Self& FToolWindow::MinimizeInteractable(bool interactable)
+    {
+        SetMinimizeButton(interactable);
+        return *this;
+    }
+
+    FToolWindow::Self& FToolWindow::MaximizeEnabled(bool enabled)
+    {
+        maximizeButton->Enabled(enabled);
+        return *this;
+    }
+
+    FToolWindow::Self& FToolWindow::MaximizeInteractable(bool interactable)
+    {
+        SetMaximizeButton(interactable);
+        return *this;
     }
 
 } // namespace CE

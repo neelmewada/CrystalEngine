@@ -36,6 +36,7 @@ namespace CE::Editor
                     .ContentHAlign(HAlign::Left)
                     .VAlign(VAlign::Top)
                     .HAlign(HAlign::Fill)
+                    .Padding(Vec4(0, 10, 0, 10))
                 ),
 
                 FNew(FStyledWidget)
@@ -59,7 +60,7 @@ namespace CE::Editor
             )
         );
 
-        const auto& settingsClasses = Settings::GetAllSettingsClasses();
+        const Array<ClassType*>& settingsClasses = Settings::GetAllSettingsClasses();
 
         for (int i = 0; i < settingsClasses.GetSize(); ++i)
         {
@@ -70,7 +71,9 @@ namespace CE::Editor
                 .Text(clazz->GetDisplayName())
                 .FontSize(13)
                 .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+                .Cursor(SystemCursor::Hand)
                 .ClipChildren(true)
+                .Style("Button.Clear")
             );
         }
     }

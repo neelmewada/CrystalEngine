@@ -51,7 +51,6 @@ namespace CE::Editor
 		button->cornerRadius = Vec4(1, 1, 1, 1) * 5;
 		button->borderColor = 
 			button->hoveredBorderColor = 
-			
 			button->pressedBorderColor = Color::RGBA(24, 24, 24);
 		button->borderWidth = 1.0f;
 
@@ -63,6 +62,23 @@ namespace CE::Editor
 			.Padding(Vec4(10, 5, 10, 5))
 			.Style(this, button->GetName())
 			;
+
+		if (!clearButton)
+		{
+			clearButton = CreateObject<FCustomButtonStyle>(this, "Button_Clear");
+			Add("Button.Clear", clearButton);
+		}
+
+		clearButton->background = 
+			clearButton->hoveredBackground =
+			clearButton->pressedBackground = 
+			clearButton->disabledBackground = Color::Clear();
+		clearButton->cornerRadius = Vec4(0, 0, 0, 0);
+		clearButton->borderColor = 
+			clearButton->hoveredBorderColor =
+			clearButton->pressedBorderColor = Color::Clear();
+		clearButton->borderWidth = 0.0f;
+		clearButton->contentMoveY = 0;
 
 		if (!highlightedButton)
 		{

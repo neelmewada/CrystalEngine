@@ -5,7 +5,7 @@ namespace CE
 	// TODO: Implement CWidgetResourceLoader in AssetManager
 
 	CLASS()
-	class SYSTEM_API AssetManager : public Object
+	class SYSTEM_API AssetManager : public Object, public IFusionAssetLoader
 	{
 		CE_CLASS(AssetManager, Object)
 	public:
@@ -26,6 +26,8 @@ namespace CE
 		Array<AssetData*> GetAssetsDataAtPath(const Name& path);
 
 		Asset* LoadAssetAtPath(const Name& path);
+
+		RHI::Texture* LoadTextureAtPath(const Name& path) override;
 
 		Array<Asset*> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
 

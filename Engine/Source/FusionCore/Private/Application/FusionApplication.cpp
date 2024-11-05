@@ -43,6 +43,8 @@ namespace CE
 
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
+        assetLoader = initInfo.assetLoader;
+
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShaders();
@@ -136,6 +138,18 @@ namespace CE
         {
             PlatformApplication::Get()->SetSystemCursor(cursorStack.Last());
         }
+    }
+
+    int FusionApplication::LoadImageAsset(const Name& assetPath)
+    {
+        if (!assetPath.IsValid() || !assetLoader)
+            return -1;
+
+        RHI::Texture* texture = assetLoader->LoadTextureAtPath(assetPath);
+        if (!texture)
+            return -1;
+
+        return RegisterImage(assetPath, texture);
     }
 
     int FusionApplication::LoadImageResource(const IO::Path& resourcePath, const Name& imageName)

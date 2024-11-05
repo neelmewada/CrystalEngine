@@ -179,4 +179,16 @@ namespace CE
 		return (Asset*)object;
 	}
 
+	RHI::Texture* AssetManager::LoadTextureAtPath(const Name& path)
+	{
+		CE::Texture2D* texture = LoadAssetAtPath<CE::Texture2D>(path);
+		if (!texture)
+			return nullptr;
+
+		RPI::Texture* rpiTexture = texture->GetRpiTexture();
+		if (!rpiTexture)
+			return nullptr;
+
+		return rpiTexture->GetRhiTexture();
+	}
 } // namespace CE
