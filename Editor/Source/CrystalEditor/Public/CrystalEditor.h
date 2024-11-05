@@ -29,6 +29,10 @@
 
 #include "CrystalEditor/Editor/DockTabs/Details/DetailsTab.h"
 
+// - Project Settings Editor -
+
+#include "CrystalEditor/Editor/ProjectSettingsEditor/ProjectSettingsEditor.h"
+
 // - Scene Editor -
 
 #include "CrystalEditor/Editor/SceneEditor/SceneOutliner/SceneTreeViewModel.h"

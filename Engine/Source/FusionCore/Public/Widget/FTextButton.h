@@ -28,6 +28,7 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(Font, label);
         FUSION_PROPERTY_WRAPPER(FontFamily, label);
         FUSION_PROPERTY_WRAPPER(FontSize, label);
+        FUSION_PROPERTY_WRAPPER(Underline, label);
         FUSION_PROPERTY_WRAPPER(Bold, label);
         FUSION_PROPERTY_WRAPPER(Italic, label);
         FUSION_PROPERTY_WRAPPER(WordWrap, label);

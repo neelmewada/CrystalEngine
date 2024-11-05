@@ -24,9 +24,8 @@ namespace CE::Editor
         FAssignNew(SceneEditor, sceneEditor);
         AddDockTab(sceneEditor);
 
-        EditorDockTab* projectSettingsTab = nullptr;
-        FAssignNew(EditorDockTab, projectSettingsTab);
-        projectSettingsTab->Title("Project Settings");
+        ProjectSettingsEditor* projectSettingsTab = nullptr;
+        FAssignNew(ProjectSettingsEditor, projectSettingsTab);
         AddDockTab(projectSettingsTab);
 
         ProjectSettings* projectSettings = GetSettings<ProjectSettings>();

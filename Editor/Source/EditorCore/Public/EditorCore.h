@@ -39,6 +39,7 @@
 
 #include "Fusion/PropertyEditor/Fields/EditorField.h"
 #include "Fusion/PropertyEditor/Fields/EnumEditorField.h"
+#include "Fusion/PropertyEditor/Fields/TextEditorField.h"
 #include "Fusion/PropertyEditor/Fields/BoolEditorField.h"
 #include "Fusion/PropertyEditor/Fields/NumericEditorField.h"
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"

@@ -22,6 +22,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(FWordWrap, WordWrap);
 
     	FUSION_PROPERTY(Color, Foreground);
+        FUSION_PROPERTY(FPen, Underline);
 
         Self& FontFamily(const CE::Name& fontFamily);
         Self& FontSize(int fontSize);
@@ -32,6 +33,10 @@ namespace CE
         const int& FontSize();
         const bool& Bold();
         const bool& Italic();
+
+    protected:
+
+        Array<Rect> charRects;
 
         FUSION_WIDGET;
     };

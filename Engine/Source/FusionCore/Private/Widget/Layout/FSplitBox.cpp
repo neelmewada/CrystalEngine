@@ -183,14 +183,16 @@ namespace CE
 
 		if (hoveredSplitIndex >= 0 && isCursorPushed)
 		{
+			f32 offset = (1.0f - m_SplitterDrawRatio) * m_SplitterSize * 0.5f;
+
 			FWidget* left = children[hoveredSplitIndex];
 			Vec2 splitterPos = left->GetComputedPosition() + 
 				(m_Direction == FSplitDirection::Horizontal 
-					? Vec2(left->computedSize.width, 0)
-					: Vec2(0, left->computedSize.height));
+					? Vec2(left->computedSize.width + offset, 0)
+					: Vec2(0, left->computedSize.height + offset));
 			Vec2 splitterSize = m_Direction == FSplitDirection::Horizontal
-				? Vec2(m_SplitterSize, availableSize.y)
-				: Vec2(availableSize.x, m_SplitterSize);
+				? Vec2(m_SplitterSize * m_SplitterDrawRatio, availableSize.y)
+				: Vec2(availableSize.x, m_SplitterSize * m_SplitterDrawRatio);
 
 			if (m_SplitterHoverBackground.a > 0)
 			{

@@ -97,6 +97,8 @@ namespace CE::Editor
             printError("Cannot find field type!");
 	        return;
         }
+
+        TypeId fieldDeclId = fieldDeclType->GetTypeId();
         
         if (fieldDeclType->IsVectorType())
         {
@@ -129,6 +131,15 @@ namespace CE::Editor
         {
             right->AddChild(
 				FNew(BoolEditorField)
+                .BindField(field, targets[0])
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
+        }
+        else if (fieldDeclId == TYPEID(String) || fieldDeclId == TYPEID(CE::Name))
+        {
+            right->AddChild(
+                FNew(TextEditorField)
                 .BindField(field, targets[0])
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)

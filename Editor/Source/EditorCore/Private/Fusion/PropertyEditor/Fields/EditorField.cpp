@@ -5,7 +5,8 @@ namespace CE::Editor
 
     EditorField::EditorField()
     {
-
+        m_HAlign = HAlign::Left;
+        m_VAlign = VAlign::Center;
     }
 
     void EditorField::Construct()

@@ -1,8 +1,8 @@
 # Crystal Engine
 
-A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a Widget library that uses CSS & Yoga Layout engine.
+A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a declarative syntax Widget GUI framework that is used by the editor.
 
-![](./Screenshots/ColorPicker.png)
+![](./Screenshots/NewEditor.png)
 
 ### Check more [screenshots below](#screenshots).
 
@@ -25,8 +25,8 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Frame graph based GPU scheduling with automatic resource dependencies.
-- **CrystalWidgets** framework for GUI apps with SDF text & geometry rendering.
-- **CrystalWidgets** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
+- **Fusion** framework for declarative GUI apps with text & SDF geometry rendering.
+- **Fusion** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
 ## Modules Overview
 

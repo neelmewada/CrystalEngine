@@ -290,7 +290,8 @@ namespace CE
 
 	Vec2 FusionRenderer::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
-		Array<Rect> offsets{};
+		static Array<Rect> offsets{};
+		offsets.Reserve(512);
 		return CalculateCharacterOffsets(offsets, text, font, width, wordWrap);
 	}
 
@@ -349,7 +350,7 @@ namespace CE
 			{
 				breakCharIdx = -1;
 				curPos.x = startX;
-				curPos.y += metrics.lineHeight * fontSize;
+				curPos.y += metrics.lineHeight * (f32)fontSize;
 				continue;
 			}
 
