@@ -17,12 +17,16 @@ namespace CE::Editor
         titleBarLabel->FontSize(13);
 
         FBrush splash = FBrush("/Editor/Assets/Images/Splash");
-        splash.SetBrushTiling(FBrushTiling::TileXY);
+        splash.SetBrushTiling(FBrushTiling::None);
         splash.SetHAlign(HAlign::Center);
-        splash.SetVAlign(VAlign::Center);
+        splash.SetVAlign(VAlign::Fill);
+        //splash.SetBrushSize(Vec2(-1, 350));
+
+        // Factors:
+        // VAlign, HAlign, TileX, TileY, Width, Height
 
         (*this)
-	        .Title("About Crystal editor")
+	        .Title("About Crystal Editor")
 	        .MinimizeEnabled(false)
 			.MaximizeEnabled(false)
 			.ContentPadding(Vec4(1, 1, 1, 1) * 20)
@@ -30,7 +34,7 @@ namespace CE::Editor
                 FNew(FImage)
                 .Background(splash)
                 .HAlign(HAlign::Fill)
-                .Height(300)
+                .Height(350)
                 .Margin(Vec4(0, 0, 0, 10)),
 
                 FNew(FLabel)

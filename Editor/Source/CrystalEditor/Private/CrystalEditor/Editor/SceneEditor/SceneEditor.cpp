@@ -102,9 +102,18 @@ namespace CE::Editor
             {
                 StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
                 meshComponent->SetStaticMesh(cubeMesh);
-                meshComponent->SetLocalPosition(Vec3(0, -2, 5));
+                meshComponent->SetLocalPosition(Vec3(0, -1, 5));
                 meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
+            }
+
+            DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "Sun");
+            scene->AddActor(lightActor);
+            {
+                DirectionalLightComponent* directionalLight = lightActor->GetDirectionalLightComponent();
+                directionalLight->SetLocalEulerAngles(Vec3(30, 0, 0));
+                directionalLight->SetIntensity(10);
+                directionalLight->SetLightColor(Color::White());
             }
 
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");

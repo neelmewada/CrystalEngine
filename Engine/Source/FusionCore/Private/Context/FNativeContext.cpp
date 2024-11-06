@@ -118,6 +118,8 @@ namespace CE
 	{
 		Super::OnBeforeDestroy();
 
+		PlatformApplication::Get()->RemoveMessageHandler(this);
+
 		availableWindowIds.Add(windowId);
 		windowId = -1;
 

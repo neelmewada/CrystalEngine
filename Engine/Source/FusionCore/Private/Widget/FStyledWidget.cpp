@@ -17,11 +17,6 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
-        if (IsOfType<FTitleBar>())
-        {
-	        String::IsAlphabet('a');
-        }
-
         if (m_Opacity < 0.0001f)
             return;
 
@@ -63,7 +58,7 @@ namespace CE
                 break;
             case FBrushStyle::SolidFill:
                 break;
-            case FBrushStyle::Texture:
+            case FBrushStyle::Image:
                 break;
             case FBrushStyle::LinearGradient:
                 break;
