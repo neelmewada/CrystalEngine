@@ -9,6 +9,7 @@ namespace CE
 		, imageName(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
+		, imageFit(FImageFit::Fill)
 	{
 
 	}
@@ -16,6 +17,7 @@ namespace CE
 	FBrush::FBrush(const Color& fillColor, FBrushStyle brushStyle)
 		: fillColor(fillColor)
 		, brushStyle(brushStyle)
+		, imageFit(FImageFit::Fill)
 	{
 
 	}
@@ -24,7 +26,8 @@ namespace CE
 		: tintColor(tintColor)
 		, imageName(imageName)
 		, tiling(FBrushTiling::None)
-		, brushStyle(FBrushStyle::Texture)
+		, brushStyle(FBrushStyle::Image)
+		, imageFit(FImageFit::Fill)
 	{
 		
 	}
@@ -33,7 +36,7 @@ namespace CE
 	{
 		switch (brushStyle)
 		{
-		case FBrushStyle::Texture:
+		case FBrushStyle::Image:
 			imageName.~Name();
 			break;
 		default:
@@ -71,7 +74,7 @@ namespace CE
 			return false;
 		case FBrushStyle::SolidFill:
 			return fillColor.a > 0;
-		case FBrushStyle::Texture:
+		case FBrushStyle::Image:
 			return tintColor.a > 0 && imageName.IsValid();
 		case FBrushStyle::LinearGradient:
 			break;
@@ -86,9 +89,9 @@ namespace CE
 			return false;
 		if (tiling != rhs.tiling)
 			return false;
-		if (hAlign != rhs.hAlign)
+		if (imageFit != rhs.imageFit)
 			return false;
-		if (vAlign != rhs.vAlign)
+		if (brushPos != rhs.brushPos)
 			return false;
 		if (brushSize != rhs.brushSize)
 			return false;
@@ -99,7 +102,7 @@ namespace CE
 			return fillColor == rhs.fillColor;
 		case FBrushStyle::LinearGradient:
 			break;
-		case FBrushStyle::Texture:
+		case FBrushStyle::Image:
 			return tintColor == rhs.tintColor && imageName == rhs.imageName;
 		case FBrushStyle::None:
 			break;
@@ -127,15 +130,15 @@ namespace CE
 			    break;
 		    case FBrushStyle::LinearGradient:
 			    break;
-		    case FBrushStyle::Texture:
+		    case FBrushStyle::Image:
 				imageName.~Name();
 			    break;
 		    }
 	    }
 
 		brushSize = from.brushSize;
-		hAlign = from.hAlign;
-		vAlign = from.vAlign;
+		imageFit = from.imageFit;
+		brushPos = from.brushPos;
 		brushStyle = from.brushStyle;
 		tiling = from.tiling;
 
@@ -148,7 +151,7 @@ namespace CE
 			break;
 		case FBrushStyle::LinearGradient:
 			break;
-		case FBrushStyle::Texture:
+		case FBrushStyle::Image:
 			tintColor = from.tintColor;
 			imageName = from.imageName;
 			break;
@@ -163,6 +166,9 @@ namespace CE
 		move.fillColor = {};
 		move.tintColor = {};
 		move.tiling = {};
+		move.brushPos = {};
+		move.brushSize = {};
+		move.imageFit = {};
 		move.imageName.~Name();
     }
 

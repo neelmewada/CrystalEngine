@@ -16,11 +16,15 @@ namespace CE::Editor
         titleBar->Height(30);
         titleBarLabel->FontSize(13);
 
-        FBrush splash = FBrush("/Editor/Assets/Images/Splash");
+        constexpr auto splashImage = "/Editor/Assets/Images/Splash";
+        constexpr auto gridImage = "/Editor/Assets/Images/GridSmall";
+
+        instance = this;
+
+        FBrush splash = FBrush(splashImage);
         splash.SetBrushTiling(FBrushTiling::None);
-        splash.SetHAlign(HAlign::Center);
-        splash.SetVAlign(VAlign::Fill);
-        //splash.SetBrushSize(Vec2(-1, 350));
+        splash.SetImageFit(FImageFit::Cover);
+        splash.SetBrushPosition(Vec2(0.5f, 0.5f));
 
         // Factors:
         // VAlign, HAlign, TileX, TileY, Width, Height

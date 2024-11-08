@@ -8,7 +8,7 @@ namespace CE
     {
 	    None = 0,
         SolidFill,
-        Texture,
+        Image,
         LinearGradient
     };
     ENUM_CLASS(FBrushStyle);
@@ -22,6 +22,15 @@ namespace CE
         TileXY
     };
     ENUM_CLASS(FBrushTiling);
+
+    ENUM()
+    enum class FImageFit : u8
+    {
+        None = 0,
+	    Fill,
+        Contain,
+        Cover
+    };
 
     STRUCT()
     struct FUSIONCORE_API FBrush final
@@ -56,14 +65,14 @@ namespace CE
         const Color& GetTintColor() const { return tintColor; }
         const Name& GetImageName() const { return imageName; }
 
+        FImageFit GetImageFit() const { return imageFit; }
+        void SetImageFit(FImageFit imageFit) { this->imageFit = imageFit; }
+
         const Vec2& GetBrushSize() const { return brushSize; }
         void SetBrushSize(Vec2 brushSize) { this->brushSize = brushSize; }
 
-        HAlign GetHAlign() const { return hAlign; }
-        VAlign GetVAlign() const { return vAlign; }
-
-        void SetHAlign(HAlign hAlign) { this->hAlign = hAlign; }
-        void SetVAlign(VAlign vAlign) { this->vAlign = vAlign; }
+        const Vec2& GetBrushPosition() const { return brushPos; }
+        void SetBrushPosition(Vec2 brushPos) { this->brushPos = brushPos; }
 
         bool operator==(const FBrush& rhs) const;
 
@@ -96,10 +105,10 @@ namespace CE
         };
 
         Vec2 brushSize = Vec2(-1, -1); // -1 means auto size
-        HAlign hAlign = HAlign::Fill;
-        VAlign vAlign = VAlign::Fill;
+        Vec2 brushPos = Vec2(0.5f, 0.5f); // 50% means centered
         FBrushTiling tiling = FBrushTiling::None;
         FBrushStyle brushStyle = FBrushStyle::None;
+        FImageFit imageFit = FImageFit::None;
 
         friend class FPainter;
         friend class FusionRenderer;

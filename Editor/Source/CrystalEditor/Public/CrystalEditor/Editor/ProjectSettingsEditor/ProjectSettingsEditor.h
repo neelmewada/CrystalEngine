@@ -14,11 +14,14 @@ namespace CE::Editor
 
     public: // - Public API -
 
-
     protected: // - Internal -
+
+        void OnSettingsItemClicked(int index);
 
         FVerticalStack* left = nullptr;
         FVerticalStack* right = nullptr;
+
+        Array<ClassType*> settingsClasses;
 
     public: // - Fusion Properties - 
 

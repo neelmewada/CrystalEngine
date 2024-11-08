@@ -5,7 +5,7 @@ namespace CE
 
     MainRenderPipeline::MainRenderPipeline()
     {
-        
+        msaa = MSAA4;
     }
 
     MainRenderPipeline::~MainRenderPipeline()

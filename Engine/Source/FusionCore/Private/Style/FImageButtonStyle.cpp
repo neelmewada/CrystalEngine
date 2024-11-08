@@ -19,7 +19,7 @@ namespace CE
 
         FBrush bg = button.Image();
 
-        if (bg.GetBrushStyle() == FBrushStyle::Texture)
+        if (bg.GetBrushStyle() == FBrushStyle::Image)
         {
             bg = bg.WithTint(button.GetButtonState() == FButtonState::Pressed 
                 ? pressedTintColor

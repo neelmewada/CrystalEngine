@@ -60,11 +60,12 @@ namespace CE::Editor
             )
         );
 
-        const Array<ClassType*>& settingsClasses = Settings::GetAllSettingsClasses();
+    	settingsClasses = Settings::GetAllSettingsClasses();
 
         for (int i = 0; i < settingsClasses.GetSize(); ++i)
         {
             ClassType* clazz = settingsClasses[i];
+            int index = i;
 
             left->AddChild(
                 FNew(FTextButton)
@@ -72,11 +73,28 @@ namespace CE::Editor
                 .FontSize(13)
                 .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
                 .Cursor(SystemCursor::Hand)
+                .OnPressed([this, index]
+                {
+                    OnSettingsItemClicked(index);
+                })
                 .ClipChildren(true)
                 .Style("Button.Clear")
             );
         }
     }
-    
+
+    void ProjectSettingsEditor::OnSettingsItemClicked(int index)
+    {
+        if (index < 0 || index >= settingsClasses.GetSize())
+            return;
+
+        right->DestroyAllChildren();
+
+        Settings* target = Settings::LoadSettings(settingsClasses[index]);
+
+        ObjectEditor* editor = ObjectEditorRegistry::Get().FindOrCreate(target);
+
+        right->AddChild(editor);
+    }
 }
 

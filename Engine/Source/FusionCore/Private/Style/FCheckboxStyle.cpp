@@ -29,7 +29,7 @@ namespace CE
             tint = foregroundHoverColor;
 
         FBrush bg = checkmark.Background();
-        if (bg.GetBrushStyle() == FBrushStyle::Texture)
+        if (bg.GetBrushStyle() == FBrushStyle::Image)
         {
             bg = bg.WithTint(tint);
             checkmark.Background(bg);

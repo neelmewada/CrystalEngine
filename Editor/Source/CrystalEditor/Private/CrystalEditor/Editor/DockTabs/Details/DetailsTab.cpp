@@ -60,7 +60,6 @@ namespace CE::Editor
                             .HAlign(HAlign::Fill)
                             .FillRatio(0.7f)
                             .Margin(Vec4(0, 5, 0, 0))
-                            .Name("DebugScrollBox")
                             (
                                 FAssignNew(FStyledWidget, editorContainer)
                                 .HAlign(HAlign::Fill)

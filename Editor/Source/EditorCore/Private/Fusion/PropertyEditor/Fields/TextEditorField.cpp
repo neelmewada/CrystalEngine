@@ -16,7 +16,7 @@ namespace CE::Editor
             FAssignNew(FTextInput, input)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
-            .Width(100)
+            .MinWidth(120)
             .VAlign(VAlign::Center)
         );
     }

@@ -749,7 +749,7 @@ namespace CE
 			shapeItem.brushType = BRUSH_Solid;
 			shapeItem.brushColor = currentBrush.GetFillColor().ToVec4();
 		}
-		else if (currentBrush.GetBrushStyle() == FBrushStyle::Texture)
+		else if (currentBrush.GetBrushStyle() == FBrushStyle::Image)
 		{
 			const Name& imageName = currentBrush.GetImageName();
 			if (imageName.IsValid())
@@ -762,7 +762,9 @@ namespace CE
 					app->LoadImageAsset(imageName);
 					image = app->FindImage(imageName);
 				}
+
 				int imageIndex = app->FindImageIndex(imageName);
+
 				if (image && imageIndex >= 0)
 				{
 					shapeItem.brushType = BRUSH_Texture;
@@ -770,79 +772,105 @@ namespace CE
 
 					Vec2 imageSize = Vec2(image->GetWidth(), image->GetHeight());
 					Vec2 brushSize = currentBrush.GetBrushSize();
-					HAlign hAlign = currentBrush.GetHAlign();
-					VAlign vAlign = currentBrush.GetVAlign();
+					FImageFit imageFit = currentBrush.GetImageFit();
+					Vec2 brushPos = currentBrush.GetBrushPosition();
 					FBrushTiling tiling = currentBrush.GetBrushTiling();
-					if (hAlign == HAlign::Auto)
-						hAlign = HAlign::Center;
-					if (vAlign == VAlign::Auto)
-						vAlign = VAlign::Center;
+
 					f32 imageAspect = imageSize.width / imageSize.height;
 					bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
 					bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+					bool autoSizeX = brushSize.x < 0;
+					bool autoSizeY = brushSize.y < 0;
 
-					if (brushSize.y < 0)
-						brushSize.y = imageSize.height;
-					if (brushSize.x < 0)
-						brushSize.x = imageSize.width;
-
-					if (tiledY)
+					switch (imageFit)
 					{
-						vAlign = VAlign::Fill;
-					}
-					if (tiledX)
-					{
-						hAlign = HAlign::Fill;
-					}
+					case FImageFit::None:
+						if (autoSizeX)
+							brushSize.x = imageSize.x;
+						if (autoSizeY)
+							brushSize.y = imageSize.y;
 
-					shapeItem.uvMin.y = 0;
-					shapeItem.uvMin.x = 0;
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
 
-					switch (vAlign)
-					{
-					case VAlign::Auto:
-						break;
-					case VAlign::Fill:
-						shapeItem.uvMax.y = 1.0f;
-						if (tiledY)
-						{
-							shapeItem.uvMax.y = Math::Max(brushSize.y, 0.001f) / quadSize.y;
-						}
-						break;
-					case VAlign::Top:
-						shapeItem.uvMax.y = brushSize.y / quadSize.y;
-						break;
-					case VAlign::Center:
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * 0.5f / quadSize.y;
+						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
 						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
 						break;
-					case VAlign::Bottom:
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * 1.0f / quadSize.y;
+					case FImageFit::Fill:
+						if (autoSizeX)
+							brushSize.x = quadSize.x;
+						if (autoSizeY)
+							brushSize.y = quadSize.y;
+
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
+
+						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
 						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
 						break;
-					}
-
-					switch (hAlign)
-					{
-					case HAlign::Auto:
-						break;
-					case HAlign::Fill:
-						shapeItem.uvMax.x = 1.0f;
-						if (tiledX)
+					case FImageFit::Contain:
+						if (autoSizeX && autoSizeY)
 						{
-							shapeItem.uvMax.x = Math::Max(brushSize.x, 0.001f) / quadSize.x;
+							float scale = Math::Min(quadSize.width / imageSize.width, quadSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
 						}
-						break;
-					case HAlign::Left:
-						shapeItem.uvMax.x = brushSize.x / quadSize.x;
-						break;
-					case HAlign::Center:
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * 0.5f / quadSize.x;
+						else if (autoSizeX)
+						{
+							float scale = Math::Min(quadSize.width / imageSize.width, brushSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+						else if (autoSizeY)
+						{
+							float scale = Math::Min(brushSize.width / imageSize.width, quadSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+						else
+						{
+							float scale = Math::Min(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
+
 						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
+						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
 						break;
-					case HAlign::Right:
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * 1.0f / quadSize.x;
+					case FImageFit::Cover:
+						if (autoSizeX && autoSizeY)
+						{
+							float scale = Math::Max(quadSize.width / imageSize.width, quadSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+						else if (autoSizeX)
+						{
+							float scale = Math::Max(quadSize.width / imageSize.width, brushSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+						else if (autoSizeY)
+						{
+							float scale = Math::Max(brushSize.width / imageSize.width, quadSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+						else
+						{
+							float scale = Math::Max(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
+							brushSize.x = imageSize.width * scale;
+							brushSize.y = imageSize.height * scale;
+						}
+
+						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
+						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
+
 						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
+						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
 						break;
 					}
 
@@ -852,20 +880,13 @@ namespace CE
 					sampler.enableAnisotropy = false;
 					sampler.samplerFilterMode = FilterMode::Linear;
 
-					switch (tiling)
+					if (tiledX)
 					{
-					case FBrushTiling::None:
-						break;
-					case FBrushTiling::TileX:
 						sampler.addressModeU = SamplerAddressMode::Repeat;
-						break;
-					case FBrushTiling::TileY:
+					}
+					if (tiledY)
+					{
 						sampler.addressModeV = SamplerAddressMode::Repeat;
-						break;
-					case FBrushTiling::TileXY:
-						sampler.addressModeU = SamplerAddressMode::Repeat;
-						sampler.addressModeV = SamplerAddressMode::Repeat;
-						break;
 					}
 
 					shapeItem.samplerIndex = app->FindOrCreateSampler(sampler);
