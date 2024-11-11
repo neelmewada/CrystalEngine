@@ -47,6 +47,11 @@ namespace CE::Editor
         return *this;
     }
 
+    EditorField& EditorField::FixedInputWidth(f32 width)
+    {
+        return *this;
+    }
+
     void EditorField::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
     {
         if (!IsBound())

@@ -22,6 +22,12 @@ namespace CE::Editor
         input->Text("0");
     }
 
+    EditorField& NumericEditorField::FixedInputWidth(f32 width)
+    {
+        input->Width(width);
+        return *this;
+    }
+
 #define FIELD_SET_IF(type)\
 	if (fieldDeclId == TYPEID(type))\
 	{\

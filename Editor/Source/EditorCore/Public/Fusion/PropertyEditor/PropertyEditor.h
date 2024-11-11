@@ -22,6 +22,12 @@ namespace CE::Editor
 
         FSplitBox* GetSplitBox() const { return splitBox; }
 
+        f32 GetSplitRatio() const;
+
+        void SetSplitRatio(f32 ratio);
+
+        Self& FixedInputWidth(f32 width);
+
         //! @brief This function will be called on the class' CDI to check if this property editor
         //! supports multi object editing.
         virtual bool SupportsMultiObjectEditing() const { return false; }
@@ -34,6 +40,7 @@ namespace CE::Editor
         FHorizontalStack* right = nullptr;
 
         FLabel* fieldNameLabel = nullptr;
+        EditorField* editorField = nullptr;
 
     public: // - Fusion Properties - 
 

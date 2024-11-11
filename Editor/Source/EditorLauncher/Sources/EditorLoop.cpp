@@ -240,8 +240,6 @@ void EditorLoop::PostInit()
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
-
-		AboutWindow::Show();
 	}
 }
 

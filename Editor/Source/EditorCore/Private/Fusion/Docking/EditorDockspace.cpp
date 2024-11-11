@@ -145,7 +145,6 @@ namespace CE::Editor
                         .ContentVAlign(VAlign::Center)
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
-                        .Name("TestHStack")
                         (
                             // - Logo -
 

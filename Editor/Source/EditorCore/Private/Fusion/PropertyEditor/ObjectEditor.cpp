@@ -1,6 +1,6 @@
 #include "EditorCore.h"
 
-namespace CE
+namespace CE::Editor
 {
 
     ObjectEditor::ObjectEditor()
@@ -35,6 +35,33 @@ namespace CE
             {
 	            ObjectEditorRegistry::Get().objectEditorsByInstances.Remove(target->GetUuid());
             }
+        }
+    }
+
+    ObjectEditor::Self& ObjectEditor::FixedInputWidth(f32 width)
+    {
+        for (PropertyEditor* propertyEditor : propertyEditors)
+        {
+            propertyEditor->FixedInputWidth(width);
+        }
+
+        return *this;
+    }
+
+    f32 ObjectEditor::GetSplitRatio()
+    {
+        if (propertyEditors.NonEmpty())
+        {
+            return propertyEditors[0]->GetSplitRatio();
+        }
+        return 0.35f;
+    }
+
+    void ObjectEditor::SetSplitRatio(f32 ratio)
+    {
+        for (PropertyEditor* propertyEditor : propertyEditors)
+        {
+            propertyEditor->SetSplitRatio(ratio);
         }
     }
 
@@ -129,6 +156,8 @@ namespace CE
                 return false;
             });
 
+        propertyEditors.Clear();
+
         for (int i = 0; i < categories.GetSize(); ++i)
         {
             const CE::Name& category = categories[i];
@@ -168,6 +197,8 @@ namespace CE
                 targetsArray[0] = target;
 
                 propertyEditor->SetTarget(field, targetsArray);
+
+                propertyEditors.Add(propertyEditor);
             }
 
             if (expandContent->GetChildCount() == 0)

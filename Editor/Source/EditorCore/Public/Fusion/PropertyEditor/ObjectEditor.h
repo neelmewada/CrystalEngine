@@ -1,7 +1,9 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
+    class PropertyEditor;
+
     CLASS()
     class EDITORCORE_API ObjectEditor : public FStyledWidget
     {
@@ -20,6 +22,12 @@ namespace CE
 
         virtual bool SupportsMultiObjectEditing() const { return false; }
 
+        Self& FixedInputWidth(f32 width);
+
+        f32 GetSplitRatio();
+
+        void SetSplitRatio(f32 ratio);
+
     protected:
 
         void CreateGUI();
@@ -30,6 +38,7 @@ namespace CE
         FVerticalStack* content = nullptr;
 
         Array<FSplitBox*> splitters;
+        Array<PropertyEditor*> propertyEditors;
 
         FIELD(ReadOnly)
         Array<Object*> targets;

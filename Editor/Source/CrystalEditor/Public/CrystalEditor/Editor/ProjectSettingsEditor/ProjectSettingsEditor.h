@@ -21,7 +21,11 @@ namespace CE::Editor
         FVerticalStack* left = nullptr;
         FVerticalStack* right = nullptr;
 
+        ObjectEditor* editor = nullptr;
+
         Array<ClassType*> settingsClasses;
+
+        f32 splitRatio = 0.2f;
 
     public: // - Fusion Properties - 
 

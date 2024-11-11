@@ -14,6 +14,7 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        EditorField& FixedInputWidth(f32 width) override;
 
     protected: // - Internal -
 

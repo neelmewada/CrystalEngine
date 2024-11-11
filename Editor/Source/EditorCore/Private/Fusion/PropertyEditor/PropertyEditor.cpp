@@ -51,6 +51,9 @@ namespace CE::Editor
 
     bool PropertyEditor::IsFieldSupported(FieldType* field)
     {
+        if (field->IsArrayField())
+            return false;
+
         thread_local HashSet<TypeId> supportedFields = {
             
         };
@@ -105,6 +108,7 @@ namespace CE::Editor
             right->AddChild(
 				FNew(VectorEditorField)
                 .VectorType(fieldDeclType->GetTypeId())
+                .Assign(editorField)
                 .BindField(field, targets[0])
                 .FillRatio(1.0f)
             );
@@ -115,6 +119,7 @@ namespace CE::Editor
                 FNew(NumericEditorField)
                 .NumericType(fieldDeclType->GetTypeId())
                 .ColorTagVisible(false)
+                .Assign(editorField)
                 .BindField(field, targets[0])
                 .FillRatio(1.0f)
             );
@@ -123,6 +128,7 @@ namespace CE::Editor
         {
             right->AddChild(
 				FNew(EnumEditorField)
+                .Assign(editorField)
                 .BindField(field, targets[0])
                 .FillRatio(1.0f)
             );
@@ -131,6 +137,7 @@ namespace CE::Editor
         {
             right->AddChild(
 				FNew(BoolEditorField)
+                .Assign(editorField)
                 .BindField(field, targets[0])
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
@@ -140,6 +147,7 @@ namespace CE::Editor
         {
             right->AddChild(
                 FNew(TextEditorField)
+                .Assign(editorField)
                 .BindField(field, targets[0])
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
@@ -159,6 +167,28 @@ namespace CE::Editor
         Vec2 size = Vec2(computedSize.width, height);
 
         painter->DrawLine(pos, pos + Vec2(size.x, 0));
+    }
+
+    f32 PropertyEditor::GetSplitRatio() const
+    {
+        return left->FillRatio();
+    }
+
+    void PropertyEditor::SetSplitRatio(f32 ratio)
+    {
+        ratio = Math::Clamp(ratio, 0.01f, 0.99f);
+        left->FillRatio(ratio);
+        right->FillRatio(1.0f - ratio);
+    }
+
+    PropertyEditor::Self& PropertyEditor::FixedInputWidth(f32 width)
+    {
+        if (editorField != nullptr)
+        {
+	        editorField->FixedInputWidth(width);
+        }
+
+        return *this;
     }
 }
 

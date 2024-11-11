@@ -22,6 +22,8 @@ namespace CE::Editor
 
         bool IsBound() const { return field != nullptr && targets.NonEmpty(); }
 
+        virtual EditorField& FixedInputWidth(f32 width);
+
     protected: // - Internal -
 
         void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override final;

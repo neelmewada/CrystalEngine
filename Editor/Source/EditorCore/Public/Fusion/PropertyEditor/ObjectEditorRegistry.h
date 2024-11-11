@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
     
     class EDITORCORE_API ObjectEditorRegistry final
@@ -58,5 +58,5 @@ namespace CE
         friend class ObjectEditor;
     };
     
-} // namespace CE
+} // namespace CE::Editor
 

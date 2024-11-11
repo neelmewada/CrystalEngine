@@ -30,7 +30,7 @@ namespace CE::Editor
                 .VerticalScroll(true)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
-                .FillRatio(0.3f)
+                .FillRatio(0.2f)
                 (
                     FAssignNew(FVerticalStack, left)
                     .ContentHAlign(HAlign::Left)
@@ -56,7 +56,7 @@ namespace CE::Editor
                 )
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
-                .FillRatio(0.7f)
+                .FillRatio(0.8f)
             )
         );
 
@@ -70,7 +70,7 @@ namespace CE::Editor
             left->AddChild(
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
-                .FontSize(13)
+                .FontSize(14)
                 .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
                 .Cursor(SystemCursor::Hand)
                 .OnPressed([this, index]
@@ -88,11 +88,19 @@ namespace CE::Editor
         if (index < 0 || index >= settingsClasses.GetSize())
             return;
 
+        if (editor)
+        {
+            splitRatio = editor->GetSplitRatio();
+        }
+
         right->DestroyAllChildren();
 
         Settings* target = Settings::LoadSettings(settingsClasses[index]);
 
-        ObjectEditor* editor = ObjectEditorRegistry::Get().FindOrCreate(target);
+        editor = ObjectEditorRegistry::Get().FindOrCreate(target);
+
+        editor->FixedInputWidth(180);
+        editor->SetSplitRatio(splitRatio);
 
         right->AddChild(editor);
     }

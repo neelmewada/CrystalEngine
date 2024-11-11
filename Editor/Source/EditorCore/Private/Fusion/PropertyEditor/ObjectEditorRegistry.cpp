@@ -1,6 +1,6 @@
 #include "EditorCore.h"
 
-namespace CE
+namespace CE::Editor
 {
 
     ObjectEditorRegistry::ObjectEditorRegistry()

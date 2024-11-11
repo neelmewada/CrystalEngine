@@ -16,9 +16,15 @@ namespace CE::Editor
             FAssignNew(FTextInput, input)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
-            .MinWidth(120)
+            .Width(100)
             .VAlign(VAlign::Center)
         );
+    }
+
+    EditorField& TextEditorField::FixedInputWidth(f32 width)
+    {
+        input->Width(width);
+        return *this;
     }
 
     bool TextEditorField::CanBind(FieldType* field)
