@@ -5,7 +5,7 @@ namespace CE::Editor
 
     PropertyEditorRegistry::PropertyEditorRegistry()
     {
-
+        
     }
 
     PropertyEditorRegistry::~PropertyEditorRegistry()
@@ -17,6 +17,16 @@ namespace CE::Editor
     {
         static PropertyEditorRegistry instance{};
         return instance;
+    }
+
+    void PropertyEditorRegistry::Register(TypeId fieldTypeId, SubClass<PropertyEditor> editorType)
+    {
+        customEditorRegistry[fieldTypeId] = editorType;
+    }
+
+    void PropertyEditorRegistry::Deregister(TypeId fieldTypeId)
+    {
+        customEditorRegistry.Remove(fieldTypeId);
     }
 
     PropertyEditor* PropertyEditorRegistry::Create(FieldType* field, Object* target)

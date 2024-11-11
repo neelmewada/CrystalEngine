@@ -12,6 +12,10 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void ConstructDefaultEditor();
+
+        virtual void ConstructEditor();
+
         virtual bool IsFieldSupported(FieldType* field);
 
         virtual void SetTarget(FieldType* field, const Array<Object*>& targets);

@@ -16,6 +16,9 @@ namespace CE::Editor
 
         static PropertyEditorRegistry& Get();
 
+        void Register(TypeId fieldTypeId, SubClass<PropertyEditor> editorType);
+        void Deregister(TypeId fieldTypeId);
+
         PropertyEditor* Create(FieldType* field, Object* target);
         PropertyEditor* Create(FieldType* field, const Array<Object*>& targets);
 

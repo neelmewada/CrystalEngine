@@ -12,6 +12,21 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructEditor();
+
+        if (splitBox)
+        {
+            (*splitBox)
+                .SplitterHoverBackground(Color::Clear())
+                .SplitterBackground(Color::RGBA(26, 26, 26))
+                .SplitterSize(4.0f)
+                .SplitterDrawRatio(0.25f)
+        	;
+        }
+    }
+
+    void PropertyEditor::ConstructDefaultEditor()
+    {
         Child(
             FAssignNew(FSplitBox, splitBox)
             .Direction(FSplitDirection::Horizontal)
@@ -46,7 +61,11 @@ namespace CE::Editor
                 )
             )
         );
+    }
 
+    void PropertyEditor::ConstructEditor()
+    {
+        ConstructDefaultEditor();
     }
 
     bool PropertyEditor::IsFieldSupported(FieldType* field)

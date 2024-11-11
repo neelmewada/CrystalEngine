@@ -47,6 +47,7 @@
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
 #include "Fusion/PropertyEditor/PropertyEditor.h"
+#include "Fusion/PropertyEditor/ArrayPropertyEditor.h"
 #include "Fusion/PropertyEditor/PropertyEditorRegistry.h"
 
 #include "Fusion/Widget/EditorToolBar.h"
