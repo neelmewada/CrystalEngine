@@ -30,7 +30,7 @@ namespace CE::Editor
 
     protected:
 
-        void CreateGUI();
+        virtual void CreateGUI();
 
         FUNCTION()
         void OnSplitterDragged(FSplitBox* splitBox);
