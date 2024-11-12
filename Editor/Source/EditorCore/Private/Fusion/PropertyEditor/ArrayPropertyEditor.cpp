@@ -27,6 +27,7 @@ namespace CE::Editor
         (*expansionStack)
             (
                 FNew(FLabel)
+                .Text("Expanded")
             );
     }
 

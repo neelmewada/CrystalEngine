@@ -29,19 +29,19 @@ namespace CE::Editor
     {
         FBrush caretDown = FBrush("/Engine/Resources/Icons/CaretDown");
 
+
         Child(
-            FNew(FButton)
-            .OnDoubleClicked(FUNCTION_BINDING(this, ToggleExpansion))
+            FAssignNew(FVerticalStack, contentStack)
+            .Padding(Vec4())
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
-            .Padding(Vec4())
-            .Style("Button.DetailsRow")
-            .Name("DetailsRow")
             (
-                FAssignNew(FVerticalStack, contentStack)
-                .Padding(Vec4())
+                FNew(FButton)
+                .OnDoubleClicked(FUNCTION_BINDING(this, ToggleExpansion))
                 .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Fill)
+                .Padding(Vec4())
+                .Style("Button.DetailsRow")
+                .Name("DetailsRow")
                 (
                     FAssignNew(FSplitBox, splitBox)
                     .Direction(FSplitDirection::Horizontal)
@@ -80,13 +80,13 @@ namespace CE::Editor
                         .FillRatio(0.65f)
                         .Padding(Vec4(2, 1, 2, 1) * 5)
                         .MinHeight(20)
-                    ),
+                    )
+                ),
 
-                    FAssignNew(FVerticalStack, expansionStack)
-                    .HAlign(HAlign::Fill)
-                    .Padding(Vec4())
-                    .Enabled(IsExpandable() && isExpanded)
-                )
+                FAssignNew(FVerticalStack, expansionStack)
+                .HAlign(HAlign::Fill)
+                .Padding(Vec4())
+                .Enabled(IsExpandable() && isExpanded)
             )
         );
 
@@ -273,6 +273,7 @@ namespace CE::Editor
             return;
 
         expansionArrow->GetImage()->Angle(isExpanded ? 0 : -90);
+        expansionStack->Enabled(isExpanded);
     }
 
     
