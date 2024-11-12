@@ -17,7 +17,7 @@ namespace RenderingTests
             .Padding(Vec4(1, 1, 1, 1) * 20)
             (
                 FNew(FButton)
-                .OnPressed([this, popup]
+                .OnClicked([this, popup]
                 {
                     popup->ClosePopup();
                 })
@@ -126,7 +126,7 @@ namespace RenderingTests
                                 .FillRatio(1.0f),
 
                                 FNew(FButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         static_cast<FNativeContext*>(GetContext())->Minimize();
                                     })
@@ -144,7 +144,7 @@ namespace RenderingTests
                                 ),
 
                                 FNew(FButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
                                         if (nativeContext->IsMaximized())
@@ -170,7 +170,7 @@ namespace RenderingTests
                                 ),
 
                                 FNew(FButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         GetContext()->QueueDestroy();
                                     })
@@ -210,7 +210,7 @@ namespace RenderingTests
                         .Margin(Vec4(0, 0, 0, 5)),
 
                         FAssignNew(FButton, button)
-                        .OnPressed([this]
+                        .OnClicked([this]
                             {
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
                             })
@@ -222,7 +222,7 @@ namespace RenderingTests
                         ),
 
                         FAssignNew(FButton, openPopupBtn)
-                        .OnPressed([this, openPopupBtn]
+                        .OnClicked([this, openPopupBtn]
                             {
                                 GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
                             })
@@ -235,7 +235,7 @@ namespace RenderingTests
 
                         FAssignNew(FTextButton, nativePopupBtn)
                         .Text("Open Native Popup")
-                        .OnPressed([this, nativePopupBtn]
+                        .OnClicked([this, nativePopupBtn]
                             {
                                 GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
                             })
@@ -291,7 +291,7 @@ namespace RenderingTests
 
                             FNew(FTextButton)
                             .Text("Add Item")
-                            .OnPressed([this]
+                            .OnClicked([this]
                                 {
                                     auto items = model->GetComboItems();
                                     items.Add({ String::Format("Combo Item {}", items.GetSize()) });
@@ -300,7 +300,7 @@ namespace RenderingTests
 
                             FNew(FTextButton)
                             .Text("Print Memory Footprint")
-                            .OnPressed([this]
+                            .OnClicked([this]
                                 {
                                     model->UpdateMemoryFootprint();
                                 }),
@@ -322,7 +322,7 @@ namespace RenderingTests
                             FNew(FTextButton)
                             .FontSize(13)
                             .Text("Randomize")
-                            .OnPressed([this]
+                            .OnClicked([this]
 	                            {
 	                                model->ModifyTextInCode();
 	                            }),
@@ -333,7 +333,7 @@ namespace RenderingTests
 
                             FNew(FTextButton)
                             .Text("Show/Hide SplitBox")
-                            .OnPressed([this]
+                            .OnClicked([this]
 	                            {
 	                                splitBox->Enabled(!splitBox->Enabled());
 	                            })

@@ -73,7 +73,7 @@ namespace CE::Editor
                 .FontSize(14)
                 .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
                 .Cursor(SystemCursor::Hand)
-                .OnPressed([this, index]
+                .OnClicked([this, index]
                 {
                     OnSettingsItemClicked(index);
                 })

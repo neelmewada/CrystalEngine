@@ -381,13 +381,6 @@ namespace CE
 						event.sender = event.sender->parent;
 					}
 
-					if (event.sender != nullptr)
-					{
-						widgetsPressedPerMouseButton[i] = event.sender;
-
-						event.sender->HandleEvent(&event);
-					}
-
 					FWidget* dragEventWidget = hoveredWidgetStack.Top();
 
 					while (dragEventWidget != nullptr)
@@ -410,12 +403,22 @@ namespace CE
 							if (dragEvent.isConsumed)
 							{
 								draggedWidget = dragEvent.draggedWidget;
+
+								event.consumer = dragEventWidget;
+								event.isConsumed = true;
 							}
 
 							break;
 						}
 
 						dragEventWidget = dragEventWidget->parent;
+					}
+
+					if (event.sender != nullptr)
+					{
+						widgetsPressedPerMouseButton[i] = event.sender;
+
+						event.sender->HandleEvent(&event);
 					}
 				}
 			}

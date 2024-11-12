@@ -41,6 +41,7 @@ namespace CE
         void SetState(FButtonState newState);
 
         virtual void OnClick() {}
+        virtual void OnDoubleClick() {}
 
     protected: // - Fields -
 
@@ -53,7 +54,8 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        FUSION_EVENT(FVoidEvent, OnPressed);
+        FUSION_EVENT(FVoidEvent, OnClicked);
+        FUSION_EVENT(FVoidEvent, OnDoubleClicked);
 
         FUSION_PROPERTY(SystemCursor, Cursor);
 

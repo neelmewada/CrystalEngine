@@ -10,40 +10,47 @@ namespace CE::Editor
 
     void ArrayPropertyEditor::ConstructEditor()
     {
-        Child(
-            FAssignNew(FSplitBox, splitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .SplitterHoverBackground(Color::Clear())
-            .SplitterBackground(Color::RGBA(26, 26, 26))
-            .SplitterSize(4.0f)
-            .SplitterDrawRatio(0.25f)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FAssignNew(FHorizontalStack, left)
-                .ContentHAlign(HAlign::Left)
-                .ContentVAlign(VAlign::Center)
-                .ClipChildren(true)
-                .FillRatio(0.35f)
-                .Padding(Vec4(2, 1, 2, 1) * 5)
-                (
-                    FAssignNew(FLabel, fieldNameLabel)
-                    .Text("Field Name")
-                ),
+        ConstructDefaultEditor();
 
-                FAssignNew(FHorizontalStack, right)
-                .ContentHAlign(HAlign::Left)
-                .ContentVAlign(VAlign::Center)
-                .ClipChildren(true)
-                .FillRatio(0.65f)
-                .Padding(Vec4(2, 1, 2, 1) * 5)
-                (
-                    FNew(FTextInput)
-                    .Text("Field Editor")
-                    .FontSize(13)
-                )
-            )
+        expansionArrow->Visible(true);
+    }
+
+    bool ArrayPropertyEditor::IsFieldSupported(FieldType* field) const
+    {
+        if (!field->IsArrayField())
+            return false;
+
+        TypeId underlyingTypeId = field->GetUnderlyingTypeId();
+
+        if (underlyingTypeId == TYPEID(Array<>)) // Array of array is not supported
+            return false;
+
+        return PropertyEditorRegistry::Get().IsFieldSupported(underlyingTypeId);
+    }
+
+    bool ArrayPropertyEditor::IsFieldSupported(TypeId fieldTypeId) const
+    {
+        return fieldTypeId == TYPEID(Array<>);
+    }
+
+    void ArrayPropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
+    {
+        FieldNameText(field->GetDisplayName());
+
+        Object* target = targets[0];
+
+        right->DestroyAllChildren();
+
+        right->AddChild(
+            FNew(FLabel)
+            .Text(String::Format("{} Elements", field->GetArraySize(target)))
         );
+
+    }
+
+    bool ArrayPropertyEditor::IsExpandable()
+    {
+        return true;
     }
 
 }

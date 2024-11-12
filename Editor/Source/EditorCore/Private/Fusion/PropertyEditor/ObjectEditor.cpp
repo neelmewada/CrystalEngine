@@ -188,6 +188,8 @@ namespace CE::Editor
                 if (propertyEditor == nullptr)
                     continue;
 
+                propertyEditor->objectEditor = this;
+
             	splitters.Add(propertyEditor->GetSplitBox());
                 splitters.Top()->OnSplitterDragged(FUNCTION_BINDING(this, OnSplitterDragged));
                 

@@ -50,11 +50,11 @@
 #include "Fusion/PropertyEditor/ArrayPropertyEditor.h"
 #include "Fusion/PropertyEditor/PropertyEditorRegistry.h"
 
-#include "Fusion/Widget/EditorToolBar.h"
-#include "Fusion/Widget/EditorMenuBar.h"
-#include "Fusion/Widget/EditorMenuPopup.h"
-#include "Fusion/Widget/EditorViewport.h"
-#include "Fusion/Widget/EditorWindow.h"
+#include "Fusion/Widget/Editor/EditorToolBar.h"
+#include "Fusion/Widget/Editor/EditorMenuBar.h"
+#include "Fusion/Widget/Editor/EditorMenuPopup.h"
+#include "Fusion/Widget/Editor/EditorViewport.h"
+#include "Fusion/Widget/Editor/EditorWindow.h"
 
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeItem.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeViewRow.h"

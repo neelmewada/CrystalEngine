@@ -431,6 +431,19 @@ namespace CE::Editor
 
 		GetDefaultWidget<FTreeView>()
 			.Style(this, treeView->GetName());
+
+		if (!detailsRow)
+		{
+			detailsRow = CreateObject<FCustomButtonStyle>(this, "Button_DetailsRow");
+			Add("Button.DetailsRow", detailsRow);
+		}
+
+		detailsRow->background = detailsRow->disabledBackground = Color::Clear();
+		detailsRow->hoveredBackground = detailsRow->pressedBackground = Color::RGBA(47, 47, 47);
+		detailsRow->cornerRadius = Vec4();
+		detailsRow->contentMoveY = 0;
+		detailsRow->borderColor = Color::Clear();
+		detailsRow->borderWidth = 0;
     }
 
 } // namespace CE::Editor

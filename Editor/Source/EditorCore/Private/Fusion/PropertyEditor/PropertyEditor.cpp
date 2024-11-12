@@ -5,7 +5,7 @@ namespace CE::Editor
 
     PropertyEditor::PropertyEditor()
     {
-
+        m_HoverRowBackground = Color::RGBA(47, 47, 47);
     }
 
     void PropertyEditor::Construct()
@@ -27,40 +27,66 @@ namespace CE::Editor
 
     void PropertyEditor::ConstructDefaultEditor()
     {
+        FBrush caretDown = FBrush("/Engine/Resources/Icons/CaretDown");
+
         Child(
-            FAssignNew(FSplitBox, splitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .SplitterHoverBackground(Color::Clear())
-            .SplitterBackground(Color::RGBA(26, 26, 26))
-            .SplitterSize(4.0f)
-            .SplitterDrawRatio(0.25f)
+            FNew(FButton)
+            .OnDoubleClicked(FUNCTION_BINDING(this, ToggleExpansion))
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
+            .Padding(Vec4())
+            .Style("Button.DetailsRow")
+            .Name("DetailsRow")
             (
-                FAssignNew(FHorizontalStack, left)
-                .ContentHAlign(HAlign::Left)
-                .ContentVAlign(VAlign::Center)
-                .ClipChildren(true)
-                .FillRatio(0.35f)
-                .Padding(Vec4(2, 1, 2, 1) * 5)
+                FAssignNew(FVerticalStack, contentStack)
+                .Padding(Vec4())
+                .HAlign(HAlign::Fill)
+                .VAlign(VAlign::Fill)
                 (
-                    FAssignNew(FLabel, fieldNameLabel)
-                    .Text("Field Name")
-                ),
+                    FAssignNew(FSplitBox, splitBox)
+                    .Direction(FSplitDirection::Horizontal)
+                    .SplitterHoverBackground(Color::Clear())
+                    .SplitterBackground(Color::RGBA(26, 26, 26))
+                    .SplitterSize(4.0f)
+                    .SplitterDrawRatio(0.25f)
+                    .HAlign(HAlign::Fill)
+                    (
+                        FAssignNew(FHorizontalStack, left)
+                        .ContentHAlign(HAlign::Left)
+                        .ContentVAlign(VAlign::Center)
+                        .ClipChildren(true)
+                        .FillRatio(0.35f)
+                        .Padding(Vec4(2, 1.0f, 2, 1.0f) * 5)
+                        .MinHeight(20)
+                        (
+                            FAssignNew(FImageButton, expansionArrow)
+                            .Image(caretDown)
+                            .ImageWidth(11)
+                            .ImageHeight(11)
+                            .OnClicked(FUNCTION_BINDING(this, ToggleExpansion))
+                            .VAlign(VAlign::Center)
+                            .Margin(Vec4(0, 0, 5, 0))
+                            .Style("ExpandCaretButton")
+                            .Visible(IsExpandable()),
 
-                FAssignNew(FHorizontalStack, right)
-                .ContentHAlign(HAlign::Left)
-                .ContentVAlign(VAlign::Center)
-                .ClipChildren(true)
-                .FillRatio(0.65f)
-                .Padding(Vec4(2, 1, 2, 1) * 5)
-                (
-                    FNew(FTextInput)
-                    .Text("Field Editor")
-                    .FontSize(13)
+                            FAssignNew(FLabel, fieldNameLabel)
+                            .Text("Field Name")
+                        ),
+
+                        FAssignNew(FHorizontalStack, right)
+                        .ContentHAlign(HAlign::Left)
+                        .ContentVAlign(VAlign::Center)
+                        .ClipChildren(true)
+                        .FillRatio(0.65f)
+                        .Padding(Vec4(2, 1, 2, 1) * 5)
+                        .MinHeight(20)
+
+                    )
                 )
             )
         );
+
+        UpdateExpansion();
     }
 
     void PropertyEditor::ConstructEditor()
@@ -68,22 +94,42 @@ namespace CE::Editor
         ConstructDefaultEditor();
     }
 
-    bool PropertyEditor::IsFieldSupported(FieldType* field)
+    bool PropertyEditor::IsFieldSupported(FieldType* field) const
     {
-        if (field->IsArrayField())
+        return IsFieldSupported(field->GetDeclarationTypeId());
+    }
+
+    bool PropertyEditor::IsFieldSupported(TypeId fieldTypeId) const
+    {
+        if (fieldTypeId == TYPEID(Array<>))
             return false;
 
-        thread_local HashSet<TypeId> supportedFields = {
-            
+        thread_local HashSet supportedFields = {
+            TYPEID(bool),
+            TYPEID(s8), TYPEID(u8),
+            TYPEID(s16), TYPEID(u16),
+            TYPEID(s32), TYPEID(u32),
+            TYPEID(s64), TYPEID(u64),
+            TYPEID(f32), TYPEID(f64),
+            TYPEID(String), TYPEID(CE::Name),
+            TYPEID(Vec2), TYPEID(Vec2i),
+            TYPEID(Vec3), TYPEID(Vec3i),
+            TYPEID(Vec4), TYPEID(Vec4i),
         };
 
-        if (field->GetDeclarationType() == nullptr)
+        if (supportedFields.Exists(fieldTypeId))
+            return true;
+
+        TypeInfo* type = GetTypeInfo(fieldTypeId);
+        if (type == nullptr)
             return false;
 
-        return field->IsNumericField() || field->IsStringField() ||
-            field->GetDeclarationType()->IsVectorType() || field->IsEnumField() ||
-            field->GetDeclarationTypeId() == TYPEID(bool) ||
-            supportedFields.Exists(field->GetDeclarationTypeId());
+        return type->IsEnum();
+    }
+
+    bool PropertyEditor::IsExpandable()
+    {
+        return false;
     }
 
     void PropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
@@ -209,5 +255,21 @@ namespace CE::Editor
 
         return *this;
     }
+
+    void PropertyEditor::ToggleExpansion()
+    {
+        isExpanded = !isExpanded;
+
+        UpdateExpansion();
+    }
+
+    void PropertyEditor::UpdateExpansion()
+    {
+        if (!IsExpandable())
+            return;
+
+        expansionArrow->GetImage()->Angle(isExpanded ? 0 : -90);
+    }
+
 }
 

@@ -244,37 +244,6 @@ namespace CE::Editor
                         .DockTabs(
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
-                            .Content(
-                                FNew(FVerticalStack)
-                                .HAlign(HAlign::Fill)
-                                .VAlign(VAlign::Fill)
-                                (
-                                    FNew(FExpandableSection)
-                                    .Title("Section Title")
-                                    .ExpandableContent(
-                                        FNew(FVerticalStack)
-                                        .ContentVAlign(VAlign::Top)
-                                        .ContentHAlign(HAlign::Left)
-                                        (
-                                            FNew(FLabel)
-                                            .Text("This is the content!")
-                                            .FontSize(18),
-
-                                            FNew(FCheckbox)
-                                            .Name("DebugCheckbox"),
-
-                                            FNew(NumericEditorField)
-                                            .Width(120),
-
-                                            FNew(VectorEditorField)
-                                            .VectorType<Vec4>()
-                                            .Width(200)
-                                        )
-                                    )
-                                    .HAlign(HAlign::Fill)
-                                    .VAlign(VAlign::Top)
-                                )
-                            )
 
                         )
                         .HAlign(HAlign::Fill)

@@ -67,13 +67,18 @@ namespace CE
 	            }
                 event->Consume(this);
             }
-            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left && !mouseEvent->isConsumed)
             {
 	            if (!EnumHasFlag(buttonState, FButtonState::Pressed))
 	            {
                     buttonState |= FButtonState::Pressed;
                     ApplyStyle();
 	            }
+                if (mouseEvent->isDoubleClick)
+                {
+                    OnDoubleClick();
+                    m_OnDoubleClicked();
+                }
                 event->Consume(this);
             }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
@@ -83,10 +88,10 @@ namespace CE
                     buttonState &= ~FButtonState::Pressed;
                     ApplyStyle();
 
-                    if (mouseEvent->isInside)
+                    if (mouseEvent->isInside && !mouseEvent->isDoubleClick)
                     {
                         OnClick();
-                        m_OnPressed();
+                        m_OnClicked();
                     }
                 }
                 event->Consume(this);

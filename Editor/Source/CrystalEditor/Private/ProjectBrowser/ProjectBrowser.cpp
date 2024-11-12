@@ -82,7 +82,7 @@ namespace CE::Editor
 
                                 FNew(FTextButton)
                                 .Text("...")
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     String openLocation = EditorPlatform::ShowFileSelectionDialog(defaultOpenProjectLocation, fileTypes)
                                         .GetString()
@@ -129,7 +129,7 @@ namespace CE::Editor
                                 .TextHAlign(HAlign::Center)
                                 .Text("Open")
                                 .FontSize(13)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     OpenProject();
                                 })
@@ -139,7 +139,7 @@ namespace CE::Editor
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
                                 .FontSize(13)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     CloseWindow();
                                 })
@@ -189,7 +189,7 @@ namespace CE::Editor
 
                                 FNew(FTextButton)
                                 .Text("...")
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     String newLocation = EditorPlatform::ShowSelectDirectoryDialog(defaultNewProjectLocation)
                                         .GetString()
@@ -250,7 +250,7 @@ namespace CE::Editor
                                 .TextHAlign(HAlign::Center)
                                 .Text("Create")
                                 .FontSize(13)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     CreateProject();
                                 })
@@ -260,7 +260,7 @@ namespace CE::Editor
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
                                 .FontSize(13)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                 {
                                     CloseWindow();
                                 })

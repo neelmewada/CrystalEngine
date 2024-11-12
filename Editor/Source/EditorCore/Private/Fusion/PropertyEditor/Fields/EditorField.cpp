@@ -57,7 +57,7 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        if (object == targets[0])
+        if (object == targets[0] && fieldName == field->GetName())
         {
             UpdateValue();
         }

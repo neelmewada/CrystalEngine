@@ -25,7 +25,7 @@ namespace CE::Editor
                 .Image(arrowImage)
                 .ImageWidth(10)
                 .ImageHeight(10)
-                .OnPressed([this]
+                .OnClicked([this]
                 {
                     owner->ToggleExpand(this);
                 })

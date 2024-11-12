@@ -19,6 +19,8 @@ namespace CE::Editor
         void Register(TypeId fieldTypeId, SubClass<PropertyEditor> editorType);
         void Deregister(TypeId fieldTypeId);
 
+        bool IsFieldSupported(TypeId fieldTypeId);
+
         PropertyEditor* Create(FieldType* field, Object* target);
         PropertyEditor* Create(FieldType* field, const Array<Object*>& targets);
 

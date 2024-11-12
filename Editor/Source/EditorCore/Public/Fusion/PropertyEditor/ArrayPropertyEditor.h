@@ -12,8 +12,15 @@ namespace CE::Editor
 
         void ConstructEditor() override;
 
+        bool IsFieldSupported(FieldType* field) const override;
+
+        bool IsFieldSupported(TypeId fieldTypeId) const override;
+
+        void SetTarget(FieldType* field, const Array<Object*>& targets) override;
+
     public: // - Public API -
 
+        bool IsExpandable() override;
 
     protected: // - Internal -
 

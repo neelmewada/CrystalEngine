@@ -117,6 +117,9 @@ namespace CE::Editor
 		FIELD()
 		FTreeViewStyle* treeView = nullptr;
 
+		FIELD()
+		FCustomButtonStyle* detailsRow = nullptr;
+
 	};
 
 } // namespace CE::Editor

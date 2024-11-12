@@ -29,6 +29,14 @@ namespace CE::Editor
         customEditorRegistry.Remove(fieldTypeId);
     }
 
+    bool PropertyEditorRegistry::IsFieldSupported(TypeId fieldTypeId)
+    {
+        if (customEditorRegistry.KeyExists(fieldTypeId))
+            return true;
+
+        return GetDefaults<PropertyEditor>()->IsFieldSupported(fieldTypeId);
+    }
+
     PropertyEditor* PropertyEditorRegistry::Create(FieldType* field, Object* target)
     {
         thread_local Array targets = { target };
@@ -77,13 +85,12 @@ namespace CE::Editor
             propertyEditorClass = PropertyEditor::StaticType();
         }
 
-        editor = CreateObject<PropertyEditor>(transient, "PropertyEditor", OF_NoFlags, propertyEditorClass);
-
-        if (!editor->IsFieldSupported(field))
+        if (!static_cast<const PropertyEditor*>(propertyEditorClass->GetDefaultInstance())->IsFieldSupported(field))
         {
-            editor->Destroy();
-            editor = nullptr;
+            return nullptr;
         }
+
+        editor = CreateObject<PropertyEditor>(transient, "PropertyEditor", OF_NoFlags, propertyEditorClass);
 
         return editor;
     }

@@ -78,7 +78,7 @@ namespace CE
                                 .FillRatio(1.0f),
 
                                 FAssignNew(FButton, minimizeButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         static_cast<FNativeContext*>(GetContext())->Minimize();
                                     })
@@ -96,7 +96,7 @@ namespace CE
                                 ),
 
                                 FAssignNew(FButton, maximizeButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
                                         if (nativeContext->IsMaximized())
@@ -122,7 +122,7 @@ namespace CE
                                 ),
 
                                 FNew(FButton)
-                                .OnPressed([this]
+                                .OnClicked([this]
                                     {
                                         GetContext()->QueueDestroy();
                                     })

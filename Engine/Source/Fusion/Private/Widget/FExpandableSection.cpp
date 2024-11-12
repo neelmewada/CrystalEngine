@@ -22,7 +22,7 @@ namespace CE
             .HAlign(HAlign::Fill)
             (
                 FAssignNew(FButton, header)
-                .OnPressed([this]
+                .OnClicked([this]
                 {
                     Expanded(!Expanded());
                 })

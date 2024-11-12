@@ -182,7 +182,7 @@ namespace CE::Editor
                             // - Window Controls -
 
                             FAssignNew(FButton, minimizeButton)
-                            .OnPressed([this]
+                            .OnClicked([this]
                                 {
                                     static_cast<FNativeContext*>(GetContext())->Minimize();
                                 })
@@ -200,7 +200,7 @@ namespace CE::Editor
                             ),
 
                             FAssignNew(FButton, maximizeButton)
-                            .OnPressed([this]
+                            .OnClicked([this]
                                 {
                                     FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
                                     if (nativeContext->IsMaximized())
@@ -226,7 +226,7 @@ namespace CE::Editor
                             ),
 
                             FNew(FButton)
-                            .OnPressed([this]
+                            .OnClicked([this]
                                 {
                                     GetContext()->QueueDestroy();
                                 })

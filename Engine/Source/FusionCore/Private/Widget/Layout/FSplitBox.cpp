@@ -360,6 +360,8 @@ namespace CE
 			}
 			else if (mouseEvent->type == FEventType::DragEnd)
 			{
+				FDragEvent* dragEvent = static_cast<FDragEvent*>(mouseEvent);
+
 				draggedSplitIndex = hoveredSplitIndex = -1;
 
 				if (isCursorPushed)
@@ -368,6 +370,8 @@ namespace CE
 					app->PopCursor();
 					isCursorPushed = false;
 				}
+
+				dragEvent->Consume(this);
 			}
 		}
 

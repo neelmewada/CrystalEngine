@@ -75,7 +75,7 @@ namespace CE
             isConsumed = stopPropagation = false;
         }
 
-        void Consume(FWidget* comsumer)
+        void Consume(FWidget* consumer)
         {
             if (isConsumed)
                 return;
