@@ -8,11 +8,26 @@ namespace CE::Editor
 
     }
 
+    void ArrayPropertyEditor::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (IsValidObject(target))
+        {
+            ObjectListener::RemoveListener(target, this);
+        }
+    }
+
     void ArrayPropertyEditor::ConstructEditor()
     {
         ConstructDefaultEditor();
 
         expansionArrow->Visible(true);
+
+        (*expansionStack)
+            (
+                FNew(FLabel)
+            );
     }
 
     bool ArrayPropertyEditor::IsFieldSupported(FieldType* field) const
@@ -37,7 +52,15 @@ namespace CE::Editor
     {
         FieldNameText(field->GetDisplayName());
 
-        Object* target = targets[0];
+        if (this->target != nullptr)
+        {
+            ObjectListener::RemoveListener(this->target, this);
+        }
+
+        this->field = field;
+        target = targets[0];
+
+        ObjectListener::AddListener(this->target, this);
 
         right->DestroyAllChildren();
 
@@ -46,6 +69,14 @@ namespace CE::Editor
             .Text(String::Format("{} Elements", field->GetArraySize(target)))
         );
 
+    }
+
+    void ArrayPropertyEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
+    {
+	    if (target != object || target == nullptr || field == nullptr || field->GetName() != fieldName)
+            return;
+
+        
     }
 
     bool ArrayPropertyEditor::IsExpandable()

@@ -4,7 +4,7 @@
 namespace CE
 {
 	// TODO: Temporary solution to check if object is destroyed
-	// TODO: Implement a garbage collector later and replace this code
+	// TODO: Implement a garbage collector OR reference counting later and replace this code
 	static HashSet<Object*> gDestroyedObjects{};
 	static SharedMutex gDestroyedObjectsMutex{};
 

@@ -15,6 +15,13 @@ namespace CE::Editor
         
     }
 
+    void EditorField::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        UnbindField();
+    }
+
     EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
     {
         if (!CanBind(field))

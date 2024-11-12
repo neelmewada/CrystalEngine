@@ -12,6 +12,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnBeforeDestroy() override;
+
     public: // - Public API -
 
         virtual bool CanBind(FieldType* field) = 0;

@@ -28,6 +28,8 @@ namespace CE::Editor
 
         virtual bool IsExpandable();
 
+        bool IsExpanded() const { return isExpanded; }
+
         FSplitBox* GetSplitBox() const { return splitBox; }
 
         f32 GetSplitRatio() const;
@@ -52,6 +54,7 @@ namespace CE::Editor
         FSplitBox* splitBox = nullptr;
 
         FVerticalStack* contentStack = nullptr;
+        FVerticalStack* expansionStack = nullptr;
 
         FImageButton* expansionArrow = nullptr;
         FHorizontalStack* left = nullptr;

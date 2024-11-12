@@ -80,8 +80,12 @@ namespace CE::Editor
                         .FillRatio(0.65f)
                         .Padding(Vec4(2, 1, 2, 1) * 5)
                         .MinHeight(20)
+                    ),
 
-                    )
+                    FAssignNew(FVerticalStack, expansionStack)
+                    .HAlign(HAlign::Fill)
+                    .Padding(Vec4())
+                    .Enabled(IsExpandable() && isExpanded)
                 )
             )
         );
@@ -271,5 +275,6 @@ namespace CE::Editor
         expansionArrow->GetImage()->Angle(isExpanded ? 0 : -90);
     }
 
+    
 }
 
