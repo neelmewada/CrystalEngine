@@ -31,6 +31,11 @@ namespace CE
     {
         ZoneScoped;
 
+        if (GetName() == "DebugSplitBox")
+        {
+            String::IsAlphabet('a');
+        }
+
         globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
     }
 

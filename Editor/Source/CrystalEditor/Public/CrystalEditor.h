@@ -17,11 +17,13 @@
 #include "ProjectBrowser/NewProjectListModel.h"
 #include "ProjectBrowser/ProjectBrowser.h"
 
+
 // ------------------------------------------------
 // Windows
 // ------------------------------------------------
 
 #include "CrystalEditor/Windows/Misc/AboutWindow.h"
+#include "CrystalEditor/Windows/Misc/SampleWidgetWindow.h"
 
 // ------------------------------------------------
 // Crystal Editor

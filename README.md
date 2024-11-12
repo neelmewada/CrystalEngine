@@ -6,6 +6,8 @@ A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based rende
 
 ### Check more [screenshots below](#screenshots).
 
+### Check out [Fusion widget library](./Docs/FusionWidgets.md).
+
 ## Requirements
 
 Only Windows is supported for now. Although, the Core libraries compile on macOS too.
@@ -44,7 +46,8 @@ All modules inside the core domain are at the low level of the engine.
 * **CoreRHI**: Rendering Hardware Interface. A graphics API abstraction layer that is used for low level GPU operations. Also implements frame graph rendering.
     * **VulkanRHI**: Vulkan implementation of the RHI layer.
 * **CoreRPI**: Render Pipeline Interface. Provides a render pipeline architecture layer on top of RHI, allowing engine to build complex render pipeline with many passes.
-* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
+* **FusionCore**: Widgets library used to build GUI applications with declarative syntax.
+* **Fusion**: Adds more high level Fusion widgets like TreeView, ListView and more.
 
 ### System domain
 
@@ -68,13 +71,6 @@ Contains all the editor modules.
 
 ![](./Screenshots/ProjectBrowser.png)
 
-### GIF:
-
-![](./Screenshots/EditorDemo.gif)
-
-### Project Settings window:
-
-![](./Screenshots/EditorWindow.png)
 
 ### PBR Demo:
 

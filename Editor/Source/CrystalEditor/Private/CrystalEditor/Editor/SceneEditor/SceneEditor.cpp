@@ -362,6 +362,13 @@ namespace CE::Editor
                     .As<EditorMenuPopup>()
                     .Gap(0)
                     .Content(
+                        FNew(FMenuItem)
+                        .Text("Fusion Sample")
+                        .OnClick([this]
+                        {
+                            SampleWidgetWindow::Show();
+                        }),
+
 						FNew(FMenuItem)
                         .Text("About")
                         .OnClick([this]
