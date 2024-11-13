@@ -263,6 +263,11 @@ namespace CE
 
 		if (renderer && dirty)
 		{
+			if (parentContext->IsNativeContext())
+			{
+				String::IsAlphabet('a');
+			}
+
 			renderer->Begin();
 
 			if (painter && owningWidget && owningWidget->Visible())

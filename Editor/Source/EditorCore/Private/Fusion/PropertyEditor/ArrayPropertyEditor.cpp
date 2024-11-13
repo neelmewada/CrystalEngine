@@ -86,8 +86,7 @@ namespace CE::Editor
         UpdateExpansion();
     }
 
-    void ArrayPropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets,
-	    const Array<void*>& instances)
+    void ArrayPropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
     {
         this->field = field;
         target = targets[0];

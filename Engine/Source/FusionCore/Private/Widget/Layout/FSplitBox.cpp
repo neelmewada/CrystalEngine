@@ -236,10 +236,6 @@ namespace CE
 				(mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseLeave))
 			{
 				bool isInside = false;
-				if (mouseEvent->type == FEventType::MouseEnter && GetName() == "DebugSplitBox")
-				{
-					String::IsAlphabet('a');
-				}
 
 				for (int i = 0; mouseEvent->type != FEventType::MouseLeave && i < children.GetSize() - 1; ++i)
 				{

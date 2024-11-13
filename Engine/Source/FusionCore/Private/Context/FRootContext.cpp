@@ -47,11 +47,15 @@ namespace CE
 
 		// - Event Handling -
 
+		Vec2 screenMousePos = InputManager::GetGlobalMousePosition().ToVec2();
+
 		Vec2 mousePos = nativeContext->ScreenToGlobalSpacePosition(InputManager::GetGlobalMousePosition().ToVec2());
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
 		Vec2 wheelDelta = InputManager::GetMouseWheelDelta();
 		if (prevMousePos.GetSqrMagnitude() == 0)
 			prevMousePos = mousePos;
+		if (prevScreenMousePos.GetSqrMagnitude() == 0)
+			prevScreenMousePos = screenMousePos;
 
 		MouseButtonMask curButtonMask = MouseButtonMask::None;
 		if (InputManager::IsMouseButtonHeld(MouseButton::Left))
@@ -114,6 +118,12 @@ namespace CE
 
 				if (event.sender->SupportsMouseEvents())
 				{
+					if (event.sender->GetContext() != nativeContext)
+					{
+						event.mousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+						event.prevMousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
+
 					event.sender->HandleEvent(&event);
 				}
 				hoveredWidgetStack.Pop();
@@ -152,6 +162,12 @@ namespace CE
 				event.sender = hoveredWidgetStack[i];
 				event.Reset();
 
+				if (event.sender->GetContext() != nativeContext)
+				{
+					event.mousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+					event.prevMousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+				}
+
 				event.sender->HandleEvent(&event);
 			}
 		}
@@ -182,6 +198,13 @@ namespace CE
 				if (sender)
 				{
 					mouseEvent.sender = sender;
+
+					if (mouseEvent.sender->GetContext() != nativeContext)
+					{
+						mouseEvent.mousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+						mouseEvent.prevMousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
+
 					sender->HandleEvent(&mouseEvent);
 				}
 			}
@@ -203,6 +226,13 @@ namespace CE
 			if (hoveredWidgetStack.NonEmpty())
 			{
 				mouseEvent.sender = hoveredWidgetStack.Top();
+
+				if (mouseEvent.sender->GetContext() != nativeContext)
+				{
+					mouseEvent.mousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+					mouseEvent.prevMousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+				}
+
 				hoveredWidgetStack.Top()->HandleEvent(&mouseEvent);
 			}
 
@@ -222,6 +252,12 @@ namespace CE
 				if (hoveredWidgetStack.NonEmpty())
 					dragEvent.sender = hoveredWidgetStack.Top();
 				dragEvent.draggedWidget = draggedWidget;
+
+				if (dragEvent.sender->GetContext() != nativeContext)
+				{
+					dragEvent.mousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+					dragEvent.prevMousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+				}
 
 				draggedWidget->HandleEvent(&dragEvent);
 
@@ -398,6 +434,13 @@ namespace CE
 
 							dragEvent.sender = dragEventWidget;
 							dragEvent.draggedWidget = dragEventWidget;
+
+							if (dragEvent.sender->GetContext() != nativeContext)
+							{
+								dragEvent.mousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+								dragEvent.prevMousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+							}
+
 							dragEvent.sender->HandleEvent(&dragEvent);
 
 							if (dragEvent.isConsumed)
@@ -417,6 +460,12 @@ namespace CE
 					if (event.sender != nullptr)
 					{
 						widgetsPressedPerMouseButton[i] = event.sender;
+
+						if (event.sender->GetContext() != nativeContext)
+						{
+							event.mousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+							event.prevMousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+						}
 
 						event.sender->HandleEvent(&event);
 					}
@@ -444,6 +493,12 @@ namespace CE
 
 					if (event.sender != nullptr)
 					{
+						if (event.sender->GetContext() != nativeContext)
+						{
+							event.mousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+							event.prevMousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+						}
+
 						event.sender->HandleEvent(&event);
 					}
 				}
@@ -452,6 +507,13 @@ namespace CE
 				{
 					event.Reset();
 					event.isInside = false;
+
+					if (widgetsPressedPerMouseButton[i]->GetContext() != nativeContext)
+					{
+						event.mousePosition = widgetsPressedPerMouseButton[i]->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+						event.prevMousePosition = widgetsPressedPerMouseButton[i]->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
+
 					widgetsPressedPerMouseButton[i]->HandleEvent(&event);
 				}
 
@@ -466,6 +528,12 @@ namespace CE
 
 					dragEvent.sender = draggedWidget;
 					dragEvent.draggedWidget = draggedWidget;
+
+					if (dragEvent.sender->GetContext() != nativeContext)
+					{
+						dragEvent.mousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+						dragEvent.prevMousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
 
 					dragEvent.sender->HandleEvent(&dragEvent);
 
@@ -538,6 +606,7 @@ namespace CE
 		}
 
 		prevMousePos = mousePos;
+		prevScreenMousePos = screenMousePos;
 	}
     
 } // namespace CE

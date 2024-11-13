@@ -161,6 +161,8 @@ namespace CE
         // Previous mouse position in window space
         Vec2 prevMousePos = Vec2();
 
+        Vec2 prevScreenMousePos = Vec2();
+
         // Non-native popups that are rendered inside a native window
         Array<FPopup*> localPopupStack;
 
