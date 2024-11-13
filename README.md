@@ -62,7 +62,7 @@ Contains all the editor modules.
 
 * **EditorCore**: Implements Asset processing and serves as the foundation of the editor & host tools.
 * **EditorSystem**: Host/editor implementation of the System module i.e. Engine.
-* **CrystalEditor**: Contains all the editor related GUI and features and uses CrystalWidgets.
+* **CrystalEditor**: Contains all the editor related GUI and features and uses Fusion for the widgets.
 
 # Screenshots
 
