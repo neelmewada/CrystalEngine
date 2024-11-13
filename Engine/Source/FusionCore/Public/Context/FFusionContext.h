@@ -69,7 +69,7 @@ namespace CE
 
         void RemoveChildContext(FFusionContext* context);
 
-        void PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2());
+        void PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2(), Vec2 controlSize = Vec2());
         virtual void PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2());
         bool ClosePopup(FPopup* popup);
 

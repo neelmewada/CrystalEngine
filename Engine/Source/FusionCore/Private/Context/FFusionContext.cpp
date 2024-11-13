@@ -66,6 +66,19 @@ namespace CE
 				popup->computedSize = size;
 
 				popup->PlaceSubWidgets();
+
+				if (!popup->positionFound)
+				{
+					Rect popupRect = Rect::FromSize(popup->computedPosition, popup->computedSize);
+					if (popupRect.max.y > availableSize.y) // Popup outside bottom
+					{
+						popup->computedPosition.y -= popup->computedSize.y + popup->controlSize.y;
+					}
+					popup->initialPos = popup->computedPosition;
+
+					MarkLayoutDirty();
+					popup->positionFound = true;
+				}
 			}
 		}
 
@@ -250,7 +263,7 @@ namespace CE
 		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
-	void FFusionContext::PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
+	void FFusionContext::PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size, Vec2 controlSize)
 	{
 		if (!popup)
 			return;
@@ -263,6 +276,8 @@ namespace CE
 		popup->initialSize = size;
 		popup->isShown = true;
 		popup->isNativePopup = false;
+		popup->positionFound = false;
+		popup->controlSize = controlSize;
 
 		MarkLayoutDirty();
 

@@ -220,7 +220,7 @@ namespace CE
                         popupPosition.y += computedSize.height;
                         popupMenu->MinWidth(GetComputedSize().width);
 
-                        GetContext()->PushLocalPopup(popupMenu, popupPosition);
+                        GetContext()->PushLocalPopup(popupMenu, popupPosition, Vec2(), computedSize);
                     }
 
                     ApplyStyle();

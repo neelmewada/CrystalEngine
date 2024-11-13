@@ -363,7 +363,7 @@ namespace CE::Editor
                     .Gap(0)
                     .Content(
                         FNew(FMenuItem)
-                        .Text("Fusion Sample")
+                        .Text("Fusion Samples")
                         .OnClick([this]
                         {
                             SampleWidgetWindow::Show();

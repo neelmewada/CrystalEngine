@@ -33,8 +33,10 @@ namespace CE
 
         Vec2 initialPos;
         Vec2 initialSize;
+        Vec2 controlSize;
         bool isNativePopup = false;
         bool isShown = false;
+        bool positionFound = false;
 
         FUSION_WIDGET;
     };
