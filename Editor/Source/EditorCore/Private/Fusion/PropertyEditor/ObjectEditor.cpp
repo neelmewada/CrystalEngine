@@ -22,12 +22,17 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
         );
-        
+
     }
 
     void ObjectEditor::OnBeforeDestroy()
     {
 	    Super::OnBeforeDestroy();
+
+        if (target)
+        {
+            ObjectListener::RemoveListener(target, this);
+        }
 
         for (Object* target : targets)
         {
@@ -36,6 +41,17 @@ namespace CE::Editor
 	            ObjectEditorRegistry::Get().objectEditorsByInstances.Remove(target->GetUuid());
             }
         }
+    }
+
+    void ObjectEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
+    {
+        if (object != target)
+            return;
+
+	    for (PropertyEditor* propertyEditor : propertyEditors)
+	    {
+            propertyEditor->UpdateValue();
+	    }
     }
 
     ObjectEditor::Self& ObjectEditor::FixedInputWidth(f32 width)
@@ -57,11 +73,22 @@ namespace CE::Editor
         return 0.35f;
     }
 
-    void ObjectEditor::SetSplitRatio(f32 ratio)
+    void ObjectEditor::SetSplitRatio(f32 ratio, FSplitBox* excluding)
     {
         for (PropertyEditor* propertyEditor : propertyEditors)
         {
-            propertyEditor->SetSplitRatio(ratio);
+            propertyEditor->SetSplitRatio(ratio, excluding);
+        }
+    }
+
+    void ObjectEditor::ApplySplitRatio(FSplitBox* excluding)
+    {
+        for (PropertyEditor* propertyEditor : propertyEditors)
+        {
+            if (propertyEditor->GetSplitBox() != excluding)
+            {
+                SetSplitRatio(propertyEditor->GetSplitRatio(), excluding);
+            }
         }
     }
 
@@ -70,9 +97,10 @@ namespace CE::Editor
         // Default ObjectEditor doesn't support multi-object editing yet.
         if (target == nullptr)
             return;
+
+        ObjectListener::AddListener(target, this);
         
         content->DestroyAllChildren();
-        splitters.Clear();
 
         // TODO: Create editors and bind them to respective fields of Object
         // Editor widget will hold reference to FieldType* (edited field) and Array<Object*> (array of target objects)
@@ -184,21 +212,21 @@ namespace CE::Editor
                 if (!field || !target)
                     continue;
 
-                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get().Create(field, target);
+                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(field, this);
                 if (propertyEditor == nullptr)
                     continue;
 
                 propertyEditor->objectEditor = this;
-
-            	splitters.Add(propertyEditor->GetSplitBox());
-                splitters.Top()->OnSplitterDragged(FUNCTION_BINDING(this, OnSplitterDragged));
                 
                 expandContent->AddChild(propertyEditor);
 
                 thread_local Array targetsArray = { target };
                 targetsArray[0] = target;
 
-                propertyEditor->SetTarget(field, targetsArray);
+                thread_local Array<void*> instancesArray = { target };
+                instancesArray[0] = target;
+
+                propertyEditor->InitTarget(field, targetsArray, instancesArray);
 
                 propertyEditors.Add(propertyEditor);
             }
@@ -207,20 +235,6 @@ namespace CE::Editor
             {
                 section->Destroy();
             }
-        }
-    }
-
-    void ObjectEditor::OnSplitterDragged(FSplitBox* splitBox)
-    {
-        f32 splitRatio = splitBox->GetChild(0)->FillRatio();
-
-        for (FSplitBox* splitter : splitters)
-        {
-	        if (splitter != splitBox)
-	        {
-                splitter->GetChild(0)->FillRatio(splitRatio);
-                splitter->GetChild(1)->FillRatio(1.0f - splitRatio);
-	        }
         }
     }
 

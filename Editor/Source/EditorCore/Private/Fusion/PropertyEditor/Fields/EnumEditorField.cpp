@@ -57,7 +57,7 @@ namespace CE::Editor
 
         Object* target = targets[0];
 
-        if (EnumConstant* constant = enumType->FindConstantWithValue(field->GetFieldEnumValue(target)))
+        if (EnumConstant* constant = enumType->FindConstantWithValue(field->GetFieldEnumValue(instances[0])))
         {
 	        for (int i = 0; i < enumType->GetConstantsCount(); ++i)
 	        {
@@ -71,7 +71,7 @@ namespace CE::Editor
         else
         {
             comboBox->SelectItem(0);
-            field->SetFieldEnumValue(target, enumType->GetConstant(0)->GetValue());
+            field->SetFieldEnumValue(instances[0], enumType->GetConstant(0)->GetValue());
             target->OnFieldEdited(field->GetName());
         }
     }
@@ -84,7 +84,7 @@ namespace CE::Editor
         if (selectedIndex < 0 || selectedIndex >= enumType->GetConstantsCount())
             return;
 
-        field->SetFieldEnumValue(targets[0], enumType->GetConstant(selectedIndex)->GetValue());
+        field->SetFieldEnumValue(instances[0], enumType->GetConstant(selectedIndex)->GetValue());
         targets[0]->OnFieldEdited(field->GetName());
     }
 }

@@ -2,10 +2,14 @@
 
 namespace CE::Editor
 {
+    static PropertyEditorRegistry* instance = nullptr;
 
     PropertyEditorRegistry::PropertyEditorRegistry()
     {
-        
+        if (!IsDefaultInstance())
+        {
+            instance = this;
+        }
     }
 
     PropertyEditorRegistry::~PropertyEditorRegistry()
@@ -13,9 +17,40 @@ namespace CE::Editor
         
     }
 
-    PropertyEditorRegistry& PropertyEditorRegistry::Get()
+    void PropertyEditorRegistry::OnAfterConstruct()
     {
-        static PropertyEditorRegistry instance{};
+	    Super::OnAfterConstruct();
+
+        if (IsDefaultInstance())
+            return;
+
+        expandedPropertiesHashed.Clear();
+
+        for (const Name& expandedProperty : expandedProperties)
+        {
+            expandedPropertiesHashed.Add(expandedProperty);
+        }
+    }
+
+    void PropertyEditorRegistry::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (this == instance)
+        {
+            expandedProperties.Clear();
+
+            for (const Name& fieldsHashed : expandedPropertiesHashed)
+            {
+                expandedProperties.Add(fieldsHashed);
+            }
+
+            instance = nullptr;
+        }
+    }
+
+    PropertyEditorRegistry* PropertyEditorRegistry::Get()
+    {
         return instance;
     }
 
@@ -37,15 +72,7 @@ namespace CE::Editor
         return GetDefaults<PropertyEditor>()->IsFieldSupported(fieldTypeId);
     }
 
-    PropertyEditor* PropertyEditorRegistry::Create(FieldType* field, Object* target)
-    {
-        thread_local Array targets = { target };
-        targets[0] = target;
-
-        return Create(field, targets);
-    }
-
-    PropertyEditor* PropertyEditorRegistry::Create(FieldType* field, const Array<Object*>& targets)
+    PropertyEditor* PropertyEditorRegistry::Create(FieldType* field, ObjectEditor* objectEditor)
     {
         TypeInfo* fieldDeclType = field->GetDeclarationType();
         if (!fieldDeclType)
@@ -57,7 +84,7 @@ namespace CE::Editor
 
         if (fieldDeclType->IsClass())
         {
-	        auto clazz = static_cast<ClassType*>(fieldDeclType);
+            auto clazz = static_cast<ClassType*>(fieldDeclType);
 
             while (clazz->GetTypeId() != TYPEID(Object))
             {
@@ -66,7 +93,7 @@ namespace CE::Editor
                     propertyEditorClass = customEditorRegistry[clazz->GetTypeId()];
                     if (propertyEditorClass != nullptr)
                     {
-	                    break;
+                        break;
                     }
                 }
 
@@ -91,8 +118,41 @@ namespace CE::Editor
         }
 
         editor = CreateObject<PropertyEditor>(transient, "PropertyEditor", OF_NoFlags, propertyEditorClass);
+        editor->objectEditor = objectEditor;
 
         return editor;
+    }
+
+    void PropertyEditorRegistry::ExpandField(FieldType* field)
+    {
+        if (field)
+        {
+            CE::Name fieldName = field->GetTypeName();
+
+            if (!expandedPropertiesHashed.Exists(fieldName))
+            {
+                expandedPropertiesHashed.Add(fieldName);
+            }
+        }
+    }
+
+    void PropertyEditorRegistry::CollapseField(FieldType* field)
+    {
+        if (field)
+        {
+            CE::Name fieldName = field->GetTypeName();
+
+            expandedPropertiesHashed.Remove(fieldName);
+        }
+    }
+
+    bool PropertyEditorRegistry::IsExpanded(FieldType* field)
+    {
+        if (field)
+        {
+            return expandedPropertiesHashed.Exists(field->GetTypeName());
+        }
+        return false;
     }
 
 } // namespace CE

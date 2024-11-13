@@ -31,9 +31,7 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
-
-        checkbox->Checked(field->GetFieldValue<bool>(target));
+        checkbox->Checked(field->GetFieldValue<bool>(instances[0]));
     }
 
     void BoolEditorField::OnCheckChanged(FCheckbox* checkbox)
@@ -43,7 +41,7 @@ namespace CE::Editor
 
         Object* target = targets[0];
 
-        field->SetFieldValue<bool>(target, checkbox->Checked());
+        field->SetFieldValue<bool>(instances[0], checkbox->Checked());
         target->OnFieldEdited(field->GetName());
     }
 }

@@ -30,6 +30,7 @@ namespace CE
         FShapeType GetShapeType() const { return shapeType; }
 
         const Vec4& GetCornerRadius() const { return cornerRadius; }
+        void SetCornerRadius(const Vec4& value) { cornerRadius = value; }
 
         bool operator==(const FShape& rhs) const;
 

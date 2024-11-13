@@ -3,7 +3,7 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API ArrayPropertyEditor : public PropertyEditor, IObjectUpdateListener
+    class EDITORCORE_API ArrayPropertyEditor : public PropertyEditor
     {
         CE_CLASS(ArrayPropertyEditor, PropertyEditor)
     protected:
@@ -14,11 +14,13 @@ namespace CE::Editor
 
         void ConstructEditor() override;
 
-        void SetTarget(FieldType* field, const Array<Object*>& targets) override;
+        void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances) override;
 
-        void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override;
+        void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances) override;
 
     public: // - Public API -
+
+        void SetSplitRatio(f32 ratio, FSplitBox* excluding) override;
 
         bool IsFieldSupported(FieldType* field) const override;
 
@@ -26,10 +28,27 @@ namespace CE::Editor
 
         bool IsExpandable() override;
 
+        void UpdateValue() override;
+
+        FUNCTION()
+        void InsertElement();
+
+        FUNCTION()
+        void DeleteAllElements();
+
+        FUNCTION()
+        void DeleteElement(u32 index);
+
+
     protected: // - Internal -
 
-        FieldType* field = nullptr;
+        FLabel* countLabel = nullptr;
+
         Object* target = nullptr;
+        void* instance = nullptr;
+
+        Array<FieldType> arrayElements;
+        Array<PropertyEditor*> elementEditors;
 
     public: // - Fusion Properties - 
 

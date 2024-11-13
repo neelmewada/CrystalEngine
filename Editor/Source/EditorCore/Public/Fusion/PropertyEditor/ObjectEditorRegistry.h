@@ -2,8 +2,9 @@
 
 namespace CE::Editor
 {
-    
-    class EDITORCORE_API ObjectEditorRegistry final
+	class PropertyEditorRegistry;
+
+	class EDITORCORE_API ObjectEditorRegistry final
     {
         CE_NO_COPY(ObjectEditorRegistry);
     private:
@@ -48,6 +49,8 @@ namespace CE::Editor
         }
 
     private:
+
+        PropertyEditorRegistry* propertyEditorRegistry = nullptr;
 
         SubClass<ObjectEditor> FindEditorClass(Object* targetObject);
 

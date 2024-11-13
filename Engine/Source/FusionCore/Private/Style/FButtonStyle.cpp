@@ -40,9 +40,15 @@ namespace CE
             border = hoveredBorderColor;
         }
 
+        FShape shape = backgroundShape;
+        if (backgroundShape == FShapeType::RoundedRect)
+        {
+            shape.SetCornerRadius(cornerRadius);
+        }
+
         button
             .Background(bg)
-            .BackgroundShape(FRoundedRectangle(cornerRadius))
+            .BackgroundShape(shape)
             .ClipShape(FShapeType::None)
             .BorderWidth(borderWidth)
             .BorderColor(border)

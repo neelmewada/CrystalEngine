@@ -16,11 +16,16 @@ namespace CE::Editor
 
         virtual void ConstructEditor();
 
-        virtual void SetTarget(FieldType* field, const Array<Object*>& targets);
-
         void OnPaint(FPainter* painter) override;
 
     public: // - Public API -
+
+        virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+
+        virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+
+        FHorizontalStack* GetLeft() const { return left; }
+        FHorizontalStack* GetRight() const { return right; }
 
         virtual bool IsFieldSupported(FieldType* field) const;
 
@@ -28,13 +33,21 @@ namespace CE::Editor
 
         virtual bool IsExpandable();
 
+        virtual void UpdateValue();
+
         bool IsExpanded() const { return isExpanded; }
+
+        int GetIndentationLevel() const { return indentation; }
+
+        void SetIndentationLevel(int value);
 
         FSplitBox* GetSplitBox() const { return splitBox; }
 
         f32 GetSplitRatio() const;
 
         void SetSplitRatio(f32 ratio);
+
+        virtual void SetSplitRatio(f32 ratio, FSplitBox* excluding);
 
         Self& FixedInputWidth(f32 width);
 
@@ -49,7 +62,11 @@ namespace CE::Editor
 
         void UpdateExpansion();
 
+        virtual void OnExpand() {}
+        virtual void OnCollapse() {}
+
         bool isExpanded = false;
+        int indentation = 0;
 
         FSplitBox* splitBox = nullptr;
 
@@ -63,6 +80,10 @@ namespace CE::Editor
         FLabel* fieldNameLabel = nullptr;
         EditorField* editorField = nullptr;
         ObjectEditor* objectEditor = nullptr;
+
+        FieldType* field = nullptr;
+        Object* target = nullptr;
+        void* instance = nullptr;
 
     public: // - Fusion Properties - 
 

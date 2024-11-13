@@ -16,12 +16,17 @@ namespace CE::Editor
 
     void ObjectEditorRegistry::Init()
     {
+        propertyEditorRegistry = CreateObject<PropertyEditorRegistry>(nullptr, "PropertyEditorRegistry");
 
+        propertyEditorRegistry->Register(GetTypeId<Array<>>(), GetStaticClass<ArrayPropertyEditor>());
     }
 
     void ObjectEditorRegistry::Shutdown()
     {
-        
+        PropertyEditorRegistry::Get()->Deregister(GetTypeId<Array<>>());
+
+        propertyEditorRegistry->Destroy();
+        propertyEditorRegistry = nullptr;
     }
 
     void ObjectEditorRegistry::RegisterCustomEditor(ClassType* targetClass, const SubClass<ObjectEditor>& editorClass)

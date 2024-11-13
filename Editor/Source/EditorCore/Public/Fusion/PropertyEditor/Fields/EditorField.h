@@ -3,7 +3,7 @@
 namespace CE::Editor
 {
     CLASS(Abstract)
-    class EDITORCORE_API EditorField : public FCompoundWidget, IObjectUpdateListener
+    class EDITORCORE_API EditorField : public FCompoundWidget
     {
         CE_CLASS(EditorField, FCompoundWidget)
     protected:
@@ -18,7 +18,8 @@ namespace CE::Editor
 
         virtual bool CanBind(FieldType* field) = 0;
 
-        virtual Self& BindField(FieldType* field, Object* target);
+        virtual Self& BindField(FieldType* field, Object* target, void* instance);
+        Self& BindField(FieldType* field, Object* target);
 
         virtual Self& UnbindField();
 
@@ -26,19 +27,20 @@ namespace CE::Editor
 
         virtual EditorField& FixedInputWidth(f32 width);
 
-    protected: // - Internal -
-
-        void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override final;
-
         virtual void UpdateValue() = 0;
+
+    protected: // - Internal -
 
         FieldType* field = nullptr;
         Array<Object*> targets;
+        Array<void*> instances;
 
     public: // - Fusion Properties - 
 
 
         FUSION_WIDGET;
+        friend class PropertyEditor;
+        friend class ArrayPropertyEditor;
     };
     
 }

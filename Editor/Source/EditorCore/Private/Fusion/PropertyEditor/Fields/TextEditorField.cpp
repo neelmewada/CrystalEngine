@@ -43,7 +43,7 @@ namespace CE::Editor
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
-        const String& string = field->GetFieldValueAsString(target);
+        const String& string = field->GetFieldValueAsString(instances[0]);
 
         input->Text(string);
     }
@@ -61,12 +61,12 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(String))
         {
-            field->SetFieldValue<String>(target, string);
+            field->SetFieldValue<String>(instances[0], string);
             target->OnFieldEdited(field->GetName());
         }
         else if (fieldDeclId == TYPEID(CE::Name))
         {
-            field->SetFieldValue<CE::Name>(target, string);
+            field->SetFieldValue<CE::Name>(instances[0], string);
             target->OnFieldEdited(field->GetName());
         }
     }
@@ -84,12 +84,12 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(String))
         {
-            field->SetFieldValue<String>(target, string);
+            field->SetFieldValue<String>(instances[0], string);
             target->OnFieldEdited(field->GetName());
         }
         else if (fieldDeclId == TYPEID(CE::Name))
         {
-            field->SetFieldValue<CE::Name>(target, string);
+            field->SetFieldValue<CE::Name>(instances[0], string);
             target->OnFieldEdited(field->GetName());
         }
     }

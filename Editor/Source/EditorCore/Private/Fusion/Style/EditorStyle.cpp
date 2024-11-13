@@ -254,6 +254,32 @@ namespace CE::Editor
 		expandCaretButton->hoverTintColor = Color::RGBA(180, 180, 180);
 		expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
 
+		if (!iconButton)
+		{
+			iconButton = CreateObject<FCustomButtonStyle>(this, "Button_Icon");
+			Add("Button.Icon", iconButton);
+		}
+
+		iconButton->background = iconButton->disabledBackground = Color::Clear();
+		iconButton->hoveredBackground = Color::RGBA(255, 255, 255, 60);
+		iconButton->pressedBackground = Color::RGBA(255, 255, 255, 30);
+		iconButton->borderColor = Color::Clear();
+		iconButton->borderWidth = 0;
+		iconButton->cornerRadius = Vec4(1, 1, 1, 1) * 4;
+
+		if (!circleIconButton)
+		{
+			circleIconButton = CreateObject<FCustomButtonStyle>(this, "Button_CircleIcon");
+			Add("Button.CircleIcon", circleIconButton);
+		}
+
+		circleIconButton->background = circleIconButton->disabledBackground = Color::Clear();
+		circleIconButton->hoveredBackground = Color::RGBA(255, 255, 255, 60);
+		circleIconButton->pressedBackground = Color::RGBA(255, 255, 255, 30);
+		circleIconButton->borderColor = Color::Clear();
+		circleIconButton->borderWidth = 0;
+		circleIconButton->backgroundShape = FShapeType::Circle;
+
 		if (!menuPopup)
 		{
 			menuPopup = CreateObject<FMenuPopupStyle>(this, "MenuPopup");

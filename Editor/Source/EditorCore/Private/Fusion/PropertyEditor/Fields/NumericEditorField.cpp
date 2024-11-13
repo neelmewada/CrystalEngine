@@ -34,7 +34,7 @@ namespace CE::Editor
 		type value = 0;\
 		if (String::TryParse(text, value))\
 		{\
-			field->SetFieldValue<type>(target, value);\
+			field->SetFieldValue<type>(instances[0], value);\
             target->OnFieldEdited(field->GetName());\
         }\
 	}
@@ -125,52 +125,52 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(u8))
         {
-            u8 value = field->GetFieldValue<u8>(target);
+            u8 value = field->GetFieldValue<u8>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s8))
         {
-            s8 value = field->GetFieldValue<s8>(target);
+            s8 value = field->GetFieldValue<s8>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u16))
         {
-            u16 value = field->GetFieldValue<u16>(target);
+            u16 value = field->GetFieldValue<u16>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s16))
         {
-            s16 value = field->GetFieldValue<s16>(target);
+            s16 value = field->GetFieldValue<s16>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u32))
         {
-            u32 value = field->GetFieldValue<u32>(target);
+            u32 value = field->GetFieldValue<u32>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s32))
         {
-            s32 value = field->GetFieldValue<s32>(target);
+            s32 value = field->GetFieldValue<s32>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u64))
         {
-            u64 value = field->GetFieldValue<u64>(target);
+            u64 value = field->GetFieldValue<u64>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s64))
         {
-            s64 value = field->GetFieldValue<s64>(target);
+            s64 value = field->GetFieldValue<s64>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(f32))
         {
-            f32 value = field->GetFieldValue<f32>(target);
+            f32 value = field->GetFieldValue<f32>(instances[0]);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(f64))
         {
-            f64 value = field->GetFieldValue<f64>(target);
+            f64 value = field->GetFieldValue<f64>(instances[0]);
             Text(String::Format("{}", value));
         }
     }

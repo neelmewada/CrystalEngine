@@ -72,33 +72,33 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(Vec2))
         {
-            Vec2 value = field->GetFieldValue<Vec2>(target);
+            Vec2 value = field->GetFieldValue<Vec2>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec2i))
         {
-            Vec2i value = field->GetFieldValue<Vec2i>(target);
+            Vec2i value = field->GetFieldValue<Vec2i>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec3))
         {
-            Vec3 value = field->GetFieldValue<Vec3>(target);
+            Vec3 value = field->GetFieldValue<Vec3>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec3i))
         {
-            Vec3i value = field->GetFieldValue<Vec3i>(target);
+            Vec3i value = field->GetFieldValue<Vec3i>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec4))
         {
-            Vec4 value = field->GetFieldValue<Vec4>(target);
+            Vec4 value = field->GetFieldValue<Vec4>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -106,7 +106,7 @@ namespace CE::Editor
         }
         else if (fieldDeclId == TYPEID(Vec4i))
         {
-            Vec4i value = field->GetFieldValue<Vec4i>(target);
+            Vec4i value = field->GetFieldValue<Vec4i>(instances[0]);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -147,7 +147,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2>(target, value);
+                field->SetFieldValue<Vec2>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -159,7 +159,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2i>(target, value);
+                field->SetFieldValue<Vec2i>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -173,7 +173,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3>(target, value);
+                field->SetFieldValue<Vec3>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -187,7 +187,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3i>(target, value);
+                field->SetFieldValue<Vec3i>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -203,7 +203,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4>(target, value);
+                field->SetFieldValue<Vec4>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -219,7 +219,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4i>(target, value);
+                field->SetFieldValue<Vec4i>(instances[0], value);
                 target->OnFieldEdited(field->GetName());
             }
         }

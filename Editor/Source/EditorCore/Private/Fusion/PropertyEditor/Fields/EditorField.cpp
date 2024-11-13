@@ -22,52 +22,36 @@ namespace CE::Editor
         UnbindField();
     }
 
-    EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
+    EditorField::Self& EditorField::BindField(FieldType* field, Object* target, void* instance)
     {
         if (!CanBind(field))
             return *this;
 
-        if (targets.NonEmpty())
-        {
-            ObjectListener::RemoveListener(targets[0], this);
-        }
-
         this->field = field;
         targets = { target };
-
-        ObjectListener::AddListener(targets[0], this);
+        instances = { instance };
 
         UpdateValue();
 
         return *this;
     }
 
+    EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
+    {
+        return BindField(field, target, target);
+    }
+
     EditorField::Self& EditorField::UnbindField()
     {
-        if (targets.NonEmpty())
-        {
-            ObjectListener::RemoveListener(targets[0], this);
-        }
-
         field = nullptr;
         targets.Clear();
+        instances.Clear();
         return *this;
     }
 
     EditorField& EditorField::FixedInputWidth(f32 width)
     {
         return *this;
-    }
-
-    void EditorField::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
-    {
-        if (!IsBound())
-            return;
-
-        if (object == targets[0] && fieldName == field->GetName())
-        {
-            UpdateValue();
-        }
     }
 
 }

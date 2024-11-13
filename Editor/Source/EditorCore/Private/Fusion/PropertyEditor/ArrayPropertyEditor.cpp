@@ -12,10 +12,7 @@ namespace CE::Editor
     {
 	    Super::OnBeforeDestroy();
 
-        if (IsValidObject(target))
-        {
-            ObjectListener::RemoveListener(target, this);
-        }
+
     }
 
     void ArrayPropertyEditor::ConstructEditor()
@@ -24,11 +21,7 @@ namespace CE::Editor
 
         expansionArrow->Visible(true);
 
-        (*expansionStack)
-            (
-                FNew(FLabel)
-                .Text("Expanded")
-            );
+        
     }
 
     bool ArrayPropertyEditor::IsFieldSupported(FieldType* field) const
@@ -41,7 +34,7 @@ namespace CE::Editor
         if (underlyingTypeId == TYPEID(Array<>)) // Array of array is not supported
             return false;
 
-        return PropertyEditorRegistry::Get().IsFieldSupported(underlyingTypeId);
+        return PropertyEditorRegistry::Get()->IsFieldSupported(underlyingTypeId);
     }
 
     bool ArrayPropertyEditor::IsFieldSupported(TypeId fieldTypeId) const
@@ -49,35 +42,66 @@ namespace CE::Editor
         return fieldTypeId == TYPEID(Array<>);
     }
 
-    void ArrayPropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
+    void ArrayPropertyEditor::InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
     {
         FieldNameText(field->GetDisplayName());
 
-        if (this->target != nullptr)
-        {
-            ObjectListener::RemoveListener(this->target, this);
-        }
-
         this->field = field;
         target = targets[0];
-
-        ObjectListener::AddListener(this->target, this);
+        instance = instances[0];
 
         right->DestroyAllChildren();
 
-        right->AddChild(
-            FNew(FLabel)
-            .Text(String::Format("{} Elements", field->GetArraySize(target)))
+        static FBrush deleteIcon = FBrush("/Engine/Resources/Icons/Delete");
+        static FBrush addIcon = FBrush("/Engine/Resources/Icons/Add");
+        constexpr f32 iconSize = 16;
+
+        (*right)
+        .Gap(10)
+        (
+            FAssignNew(FLabel, countLabel),
+
+            FNew(FImageButton)
+            .Image(addIcon)
+            .OnClicked(FUNCTION_BINDING(this, InsertElement))
+            .Width(iconSize)
+            .Height(iconSize)
+            .VAlign(VAlign::Center)
+            .Padding(Vec4(1, 1, 1, 1) * 3)
+            .Style("Button.Icon"),
+
+            FNew(FImageButton)
+            .Image(deleteIcon)
+            .OnClicked(FUNCTION_BINDING(this, DeleteAllElements))
+            .Width(iconSize)
+            .Height(iconSize)
+            .VAlign(VAlign::Center)
+            .Padding(Vec4(1, 1, 1, 1) * 3)
+            .Style("Button.Icon")
         );
 
+        UpdateValue();
+
+        isExpanded = PropertyEditorRegistry::Get()->IsExpanded(field);
+        UpdateExpansion();
     }
 
-    void ArrayPropertyEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
+    void ArrayPropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets,
+	    const Array<void*>& instances)
     {
-	    if (target != object || target == nullptr || field == nullptr || field->GetName() != fieldName)
-            return;
+        this->field = field;
+        target = targets[0];
+        instance = instances[0];
+    }
 
-        
+    void ArrayPropertyEditor::SetSplitRatio(f32 ratio, FSplitBox* excluding)
+    {
+	    Super::SetSplitRatio(ratio, excluding);
+
+        for (PropertyEditor* elementEditor : elementEditors)
+        {
+            elementEditor->SetSplitRatio(ratio, excluding);
+        }
     }
 
     bool ArrayPropertyEditor::IsExpandable()
@@ -85,5 +109,114 @@ namespace CE::Editor
         return true;
     }
 
+    void ArrayPropertyEditor::UpdateValue()
+    {
+	    Super::UpdateValue();
+
+        int arraySize = field->GetArraySize(target);
+
+        countLabel->Text(String::Format("{} Array elements", arraySize));
+
+        CE::Name fieldFullName = field->GetTypeName();
+
+        if (arraySize != arrayElements.GetSize())
+        {
+	        arrayElements = field->GetArrayFieldList(instance);
+        }
+
+        bool newElementsCreated = false;
+
+        static FBrush deleteIcon = FBrush("/Engine/Resources/Icons/Delete");
+        constexpr f32 iconSize = 16;
+
+	    for (int i = 0; i < arraySize; ++i)
+	    {
+            const Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(instance);
+            auto arrayInstance = (void*)arrayValue.GetData();
+
+            if (i >= elementEditors.GetSize())
+            {
+	            // Create editor
+                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(&arrayElements[i], objectEditor);
+
+                propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
+
+                propertyEditor->InitTarget(&arrayElements[i], { target }, { arrayInstance });
+
+            	FHorizontalStack& right = *propertyEditor->GetRight();
+
+                u32 curIndex = (u32)i;
+
+            	right
+                (
+                    FNew(FImageButton)
+                    .Image(deleteIcon)
+                    .OnClicked([this, curIndex]
+                    {
+                        DeleteElement(curIndex);
+                    })
+                    .Width(iconSize)
+                    .Height(iconSize)
+                    .VAlign(VAlign::Center)
+                    .Padding(Vec4(1, 1, 1, 1) * 3)
+                    .Margin(Vec4(5, 0, 5, 0))
+                    .Style("Button.Icon")
+                );
+
+                elementEditors.Add(propertyEditor);
+
+                expansionStack->AddChild(propertyEditor);
+
+                newElementsCreated = true;
+            }
+
+            // Use editor
+	    	elementEditors[i]->UpdateTarget(&arrayElements[i], { target }, { arrayInstance });
+
+	    	elementEditors[i]->FieldNameText(String::Format("Index {}", i));
+
+            elementEditors[i]->UpdateValue();
+	    }
+
+	    for (int i = (int)elementEditors.GetSize() - 1; i >= arraySize; i--)
+	    {
+            PropertyEditor* editor = elementEditors[i];
+            expansionStack->RemoveChild(editor);
+            editor->Destroy();
+            elementEditors.RemoveAt(i);
+	    }
+
+        if (newElementsCreated && objectEditor)
+        {
+            objectEditor->ApplySplitRatio(nullptr);
+        }
+    }
+
+    void ArrayPropertyEditor::InsertElement()
+    {
+        field->InsertArrayElement(instance);
+
+        UpdateValue();
+    }
+
+    void ArrayPropertyEditor::DeleteAllElements()
+    {
+        while (field->GetArraySize(instance) > 0)
+        {
+            field->DeleteArrayElement(instance, 0);
+        }
+
+        UpdateValue();
+    }
+
+    void ArrayPropertyEditor::DeleteElement(u32 index)
+    {
+        if (index < field->GetArraySize(instance))
+        {
+            field->DeleteArrayElement(instance, index);
+        }
+
+        UpdateValue();
+    }
 }
 

@@ -10,12 +10,11 @@ namespace CE::Editor
 
         void StartupModule() override
         {
-            PropertyEditorRegistry::Get().Register(GetTypeId<Array<u8>>(), GetStaticClass<ArrayPropertyEditor>());
+            
         }
 
         void ShutdownModule() override
         {
-            PropertyEditorRegistry::Get().Deregister(GetTypeId<Array<u8>>());
 
 			if (ProjectManager::TryGet())
 			{
@@ -32,6 +31,7 @@ namespace CE::Editor
         {
 
         }
+
     };
 
 } // namespace CE

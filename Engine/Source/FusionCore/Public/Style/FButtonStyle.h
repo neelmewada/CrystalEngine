@@ -25,6 +25,9 @@ namespace CE
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
+        FShapeType backgroundShape = FShapeType::RoundedRect;
+
+        FIELD()
         FBrush background{};
 
         FIELD()

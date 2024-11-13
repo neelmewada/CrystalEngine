@@ -3,28 +3,42 @@
 namespace CE::Editor
 {
 
-    class EDITORCORE_API PropertyEditorRegistry final
+    CLASS(Prefs = Editor)
+    class EDITORCORE_API PropertyEditorRegistry final : public Object
     {
-        CE_NO_COPY(PropertyEditorRegistry)
+        CE_CLASS(PropertyEditorRegistry, Object)
     private:
 
         PropertyEditorRegistry();
 
         ~PropertyEditorRegistry();
 
+        void OnAfterConstruct() override;
+
+        void OnBeforeDestroy() override;
+
     public: // - Public API -
 
-        static PropertyEditorRegistry& Get();
+        static PropertyEditorRegistry* Get();
 
         void Register(TypeId fieldTypeId, SubClass<PropertyEditor> editorType);
         void Deregister(TypeId fieldTypeId);
 
         bool IsFieldSupported(TypeId fieldTypeId);
 
-        PropertyEditor* Create(FieldType* field, Object* target);
-        PropertyEditor* Create(FieldType* field, const Array<Object*>& targets);
+        PropertyEditor* Create(FieldType* field, ObjectEditor* objectEditor = nullptr);
+
+        void ExpandField(FieldType* field);
+        void CollapseField(FieldType* field);
+
+        bool IsExpanded(FieldType* field);
 
     private:
+
+        FIELD(Prefs)
+        Array<Name> expandedProperties;
+
+        HashSet<Name> expandedPropertiesHashed;
 
         HashMap<TypeId, SubClass<PropertyEditor>> customEditorRegistry;
 
@@ -32,3 +46,5 @@ namespace CE::Editor
     };
     
 } // namespace CE
+
+#include "PropertyEditorRegistry.rtti.h"

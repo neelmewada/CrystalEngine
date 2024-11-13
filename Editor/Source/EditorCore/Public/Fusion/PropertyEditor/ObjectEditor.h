@@ -5,7 +5,7 @@ namespace CE::Editor
     class PropertyEditor;
 
     CLASS()
-    class EDITORCORE_API ObjectEditor : public FStyledWidget
+    class EDITORCORE_API ObjectEditor : public FStyledWidget, IObjectUpdateListener
     {
         CE_CLASS(ObjectEditor, FStyledWidget)
     protected:
@@ -18,6 +18,8 @@ namespace CE::Editor
 
         void OnBeforeDestroy() override;
 
+        void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override;
+
     public:
 
         virtual bool SupportsMultiObjectEditing() const { return false; }
@@ -26,18 +28,16 @@ namespace CE::Editor
 
         f32 GetSplitRatio();
 
-        void SetSplitRatio(f32 ratio);
+        void SetSplitRatio(f32 ratio, FSplitBox* excluding = nullptr);
+
+        void ApplySplitRatio(FSplitBox* excluding = nullptr);
 
     protected:
 
         virtual void CreateGUI();
 
-        FUNCTION()
-        void OnSplitterDragged(FSplitBox* splitBox);
-
         FVerticalStack* content = nullptr;
 
-        Array<FSplitBox*> splitters;
         Array<PropertyEditor*> propertyEditors;
 
         FIELD(ReadOnly)

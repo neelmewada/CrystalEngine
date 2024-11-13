@@ -44,6 +44,13 @@ namespace CE::Editor
                 .Name("DetailsRow")
                 (
                     FAssignNew(FSplitBox, splitBox)
+                    .OnSplitterDragged([this](FSplitBox*)
+                    {
+                        if (objectEditor)
+                        {
+                            objectEditor->SetSplitRatio(left->FillRatio(), splitBox);
+                        }
+                    })
                     .Direction(FSplitDirection::Horizontal)
                     .SplitterHoverBackground(Color::Clear())
                     .SplitterBackground(Color::RGBA(26, 26, 26))
@@ -136,7 +143,15 @@ namespace CE::Editor
         return false;
     }
 
-    void PropertyEditor::SetTarget(FieldType* field, const Array<Object*>& targets)
+    void PropertyEditor::UpdateValue()
+    {
+        if (editorField)
+        {
+            editorField->UpdateValue();
+        }
+    }
+
+    void PropertyEditor::InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
     {
         FieldNameText(field->GetDisplayName());
 
@@ -170,6 +185,13 @@ namespace CE::Editor
 	        return;
         }
 
+        this->field = field;
+        this->target = targets[0];
+        this->instance = instances[0];
+
+        isExpanded = PropertyEditorRegistry::Get()->IsExpanded(field);
+        UpdateExpansion();
+
         TypeId fieldDeclId = fieldDeclType->GetTypeId();
         
         if (fieldDeclType->IsVectorType())
@@ -178,7 +200,7 @@ namespace CE::Editor
 				FNew(VectorEditorField)
                 .VectorType(fieldDeclType->GetTypeId())
                 .Assign(editorField)
-                .BindField(field, targets[0])
+                .BindField(field, targets[0], instances[0])
                 .FillRatio(1.0f)
             );
         }
@@ -189,7 +211,7 @@ namespace CE::Editor
                 .NumericType(fieldDeclType->GetTypeId())
                 .ColorTagVisible(false)
                 .Assign(editorField)
-                .BindField(field, targets[0])
+                .BindField(field, targets[0], instances[0])
                 .FillRatio(1.0f)
             );
         }
@@ -198,7 +220,7 @@ namespace CE::Editor
             right->AddChild(
 				FNew(EnumEditorField)
                 .Assign(editorField)
-                .BindField(field, targets[0])
+                .BindField(field, targets[0], instances[0])
                 .FillRatio(1.0f)
             );
         }
@@ -207,7 +229,7 @@ namespace CE::Editor
             right->AddChild(
 				FNew(BoolEditorField)
                 .Assign(editorField)
-                .BindField(field, targets[0])
+                .BindField(field, targets[0], instances[0])
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
             );
@@ -217,10 +239,24 @@ namespace CE::Editor
             right->AddChild(
                 FNew(TextEditorField)
                 .Assign(editorField)
-                .BindField(field, targets[0])
+                .BindField(field, targets[0], instances[0])
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
             );
+        }
+    }
+
+    void PropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
+    {
+        this->field = field;
+        this->target = targets[0];
+        this->instance = instances[0];
+
+        if (editorField)
+        {
+            editorField->field = field;
+            editorField->targets = targets;
+            editorField->instances = instances;
         }
     }
 
@@ -232,10 +268,17 @@ namespace CE::Editor
         painter->SetBrush(FBrush());
 
         constexpr f32 height = 1.0f;
-        Vec2 pos = computedPosition + Vec2(0, computedSize.height - height);
+        Vec2 pos = computedPosition + Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height);
         Vec2 size = Vec2(computedSize.width, height);
 
         painter->DrawLine(pos, pos + Vec2(size.x, 0));
+    }
+
+    void PropertyEditor::SetIndentationLevel(int value)
+    {
+        indentation = value;
+
+        left->Translation(Vec2(indentation * 10, 0));
     }
 
     f32 PropertyEditor::GetSplitRatio() const
@@ -250,6 +293,14 @@ namespace CE::Editor
         right->FillRatio(1.0f - ratio);
     }
 
+    void PropertyEditor::SetSplitRatio(f32 ratio, FSplitBox* excluding)
+    {
+        if (splitBox != excluding)
+        {
+            SetSplitRatio(ratio);
+        }
+    }
+
     PropertyEditor::Self& PropertyEditor::FixedInputWidth(f32 width)
     {
         if (editorField != nullptr)
@@ -262,9 +313,23 @@ namespace CE::Editor
 
     void PropertyEditor::ToggleExpansion()
     {
+        if (!IsExpandable())
+            return;
+
         isExpanded = !isExpanded;
 
         UpdateExpansion();
+
+        if (isExpanded)
+        {
+            PropertyEditorRegistry::Get()->ExpandField(field);
+            OnExpand();
+        }
+        else
+        {
+            PropertyEditorRegistry::Get()->CollapseField(field);
+            OnCollapse();
+        }
     }
 
     void PropertyEditor::UpdateExpansion()

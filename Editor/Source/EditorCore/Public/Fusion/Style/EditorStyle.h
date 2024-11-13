@@ -78,6 +78,12 @@ namespace CE::Editor
 		FImageButtonStyle* expandCaretButton = nullptr;
 
 		FIELD()
+		FCustomButtonStyle* iconButton = nullptr;
+
+		FIELD()
+		FCustomButtonStyle* circleIconButton = nullptr;
+
+		FIELD()
 		FCheckboxStyle* checkbox = nullptr;
 
 		// - Project Browser Window -
