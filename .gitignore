@@ -4,6 +4,7 @@
 ThirdParty/*
 !ThirdParty/*.cmake
 !ThirdParty/cmake
+!ThirdParty/vendor
 
 # Prerequisites
 *.d

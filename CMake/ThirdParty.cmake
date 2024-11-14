@@ -13,14 +13,14 @@ list(APPEND CMAKE_MODULE_PATH ${CE_ROOT_DIR}/ThirdParty)
 set(FETCHCONTENT_QUIET FALSE)
 
 # \arg:TARGET_TYPE: SHARED; STATIC; MODULE; 
-function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
-    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_NAME}")
+function(ce_validate_package PACKAGE_FULL_NAME PACKAGE_SHORT_NAME)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME}")
         return()
     endif()
     
-    set(package_url "https://gitlab.com/neelrmewada/crystalengine-thirdparty/-/raw/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip?inline=false")
-    # set(package_url "https://github.com/neelmewada/CrystalEngine-ThirdParty/blob/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip?raw=true")
-    set(package_local_zip_path "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_NAME}.zip")
+    set(package_url "https://gitlab.com/neelrmewada/crystalengine-thirdparty/-/raw/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_FULL_NAME}.zip?inline=false")
+    # set(package_url "https://github.com/neelmewada/CrystalEngine-ThirdParty/blob/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_FULL_NAME}.zip?raw=true")
+    set(package_local_zip_path "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME}.zip")
 
     if(NOT EXISTS "${package_local_zip_path}")
         message("***********************************************************************************")

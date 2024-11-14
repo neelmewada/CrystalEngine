@@ -1,11 +1,17 @@
 include_guard(GLOBAL)
 
+find_package(Git REQUIRED)
+
+set(BUILD_SHARED_LIBS OFF)
 
 # 3rd Party Packages
-find_package(xxHash REQUIRED)
+#find_package(xxHash REQUIRED)
+
 find_package(spdlog REQUIRED)
-find_package(yaml REQUIRED)
-find_package(mINI REQUIRED)
+#find_package(yaml REQUIRED)
+#find_package(mINI REQUIRED)
+return()
+
 find_package(cxxopts REQUIRED)
 find_package(efsw REQUIRED)
 find_package(zip REQUIRED)
@@ -26,10 +32,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(tracy)
-
-
-# Yoga
-# find_package(yoga REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)
