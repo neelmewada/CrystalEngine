@@ -25,6 +25,30 @@ namespace CE::Editor
         }
     }
 
+    void EditorMinorDockspace::RemoveDockTab(EditorDockTab* tab)
+    {
+        if (tab == nullptr)
+            return;
+
+        int index = (int)dockedEditors.IndexOf(tab);
+        if (index < 0)
+            return;
+
+        dockedEditors.RemoveAt(index);
+
+        if (selectedTab == index && selectedTab > 0)
+        {
+            selectedTab--;
+        }
+
+        UpdateTabWell();
+
+        if (selectedTab < dockedEditors.GetSize() && selectedTab >= 0)
+        {
+            SelectTab(dockedEditors[selectedTab]);
+        }
+    }
+
     void EditorMinorDockspace::SelectTab(EditorDockTabItem* tabItem)
     {
         for (int i = 0; i < tabItems.GetSize(); ++i)
@@ -77,9 +101,7 @@ namespace CE::Editor
             tabWell->RemoveChild(child);
             child->Destroy();
 
-            EditorDockTabItem* tabItem = tabItems.GetLast();
-            tabItems.Remove(tabItem);
-            tabItem->Destroy();
+            tabItems.RemoveAt(tabItems.GetSize() - 1);
         }
 
         for (int i = 0; i < dockedEditors.GetSize(); ++i)
@@ -99,10 +121,10 @@ namespace CE::Editor
                 EditorDockTabItem* child = nullptr;
 
                 FAssignNew(EditorDockTabItem, child)
-					.ContentPadding(Vec4(1, 0, 1, 0) * 10)
-                    .Text(dockedEditors[i]->Title())
-                    .VAlign(VAlign::Fill)
-                    ;
+				.ContentPadding(Vec4(1, 0, 1, 0) * 10)
+                .Text(dockedEditors[i]->Title())
+                .VAlign(VAlign::Fill)
+            	;
 
                 child->dockTab = dockedEditors[i];
 

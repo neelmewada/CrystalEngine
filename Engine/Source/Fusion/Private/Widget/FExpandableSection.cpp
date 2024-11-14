@@ -47,7 +47,7 @@ namespace CE
                         .Text("Section")
                         .VAlign(VAlign::Center),
 
-                        FNew(FTerminalWidget)
+                        FNew(FWidget)
                         .HAlign(HAlign::Fill)
                         .FillRatio(1.0f)
                     )

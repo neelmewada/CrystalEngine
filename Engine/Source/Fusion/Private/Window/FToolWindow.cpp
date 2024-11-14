@@ -57,7 +57,7 @@ namespace CE
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
                             (
-                                FNew(FTerminalWidget)
+                                FNew(FWidget)
                                 .FillRatio(1.0f),
 
                                 FAssignNew(FLabel, titleBarLabel)
@@ -66,7 +66,7 @@ namespace CE
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
 
-                                FNew(FTerminalWidget)
+                                FNew(FWidget)
                                 .FillRatio(1.0f)
                             ),
 
@@ -74,7 +74,7 @@ namespace CE
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
                             (
-                                FNew(FTerminalWidget)
+                                FNew(FWidget)
                                 .FillRatio(1.0f),
 
                                 FAssignNew(FButton, minimizeButton)

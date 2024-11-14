@@ -24,9 +24,12 @@ namespace CE::Editor
 
         void OnPostComputeLayout() override;
 
+    private:
+
         FLabel* label = nullptr;
         FHorizontalStack* content = nullptr;
         EditorDockTab* dockTab = nullptr;
+        FImageButton* closeButton = nullptr;
 
         bool isActive = false;
         bool isHovered = false;
@@ -36,6 +39,8 @@ namespace CE::Editor
         FUSION_PROPERTY_WRAPPER(Text, label);
 
         FUSION_PROPERTY_WRAPPER2(Padding, content, ContentPadding);
+
+        FUSION_PROPERTY_WRAPPER2(Enabled, closeButton, CloseButtonEnabled);
 
         FUSION_WIDGET;
         friend class EditorDockspace;

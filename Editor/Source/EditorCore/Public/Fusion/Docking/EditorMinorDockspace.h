@@ -11,6 +11,7 @@ namespace CE::Editor
         // - Public API -
 
         void AddDockTab(EditorDockTab* tab);
+        void RemoveDockTab(EditorDockTab* tab);
 
         void SelectTab(EditorDockTabItem* tabItem);
         void SelectTab(EditorDockTab* tab);

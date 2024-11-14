@@ -30,6 +30,8 @@ namespace CE::Editor
 
         void UpdateValue() override;
 
+        PropertyEditor& FixedInputWidth(f32 width) override;
+
         FUNCTION()
         void InsertElement();
 

@@ -9,7 +9,7 @@ namespace CE
         FWidgetBuilder() {}
     };
 
-    CLASS(Abstract)
+    CLASS()
     class FUSIONCORE_API FWidget : public Object
     {
         CE_CLASS(FWidget, Object)

@@ -26,6 +26,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnBeforeDestroy() override;
+
         EditorMenuBar* menuBar = nullptr;
         EditorToolBar* toolBar = nullptr;
         FStyledWidget* content = nullptr;

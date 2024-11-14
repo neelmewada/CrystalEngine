@@ -29,7 +29,6 @@ namespace CE::Editor
     {
         FBrush caretDown = FBrush("/Engine/Resources/Icons/CaretDown");
 
-
         Child(
             FAssignNew(FVerticalStack, contentStack)
             .Padding(Vec4())
@@ -212,7 +211,7 @@ namespace CE::Editor
                 .ColorTagVisible(false)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
-                .FillRatio(1.0f)
+                .Width(100)
             );
         }
         else if (fieldDeclType->IsEnum())
@@ -301,7 +300,7 @@ namespace CE::Editor
         }
     }
 
-    PropertyEditor::Self& PropertyEditor::FixedInputWidth(f32 width)
+    PropertyEditor& PropertyEditor::FixedInputWidth(f32 width)
     {
         if (editorField != nullptr)
         {

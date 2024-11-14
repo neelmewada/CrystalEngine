@@ -12,6 +12,9 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        static FBrush cross = FBrush("/Engine/Resources/Icons/CrossIcon");
+        constexpr f32 crossSize = 10;
+
         Child(
             FAssignNew(FHorizontalStack, content)
             .HAlign(HAlign::Fill)
@@ -22,7 +25,21 @@ namespace CE::Editor
                 .FontSize(14)
                 .VAlign(VAlign::Center)
                 .HAlign(HAlign::Left)
-                .MinWidth(140)
+                .MinWidth(140),
+
+                FNew(FWidget)
+                .FillRatio(1.0f),
+
+                FAssignNew(FImageButton, closeButton)
+                .Image(cross)
+                .ImageWidth(crossSize)
+                .ImageHeight(crossSize)
+                .OnClicked([this]
+                {
+                    dockTab->QueueDestroy();
+                })
+                .VAlign(VAlign::Center)
+                .Style("Button.CloseTab")
             )
         );
     }
@@ -31,10 +48,6 @@ namespace CE::Editor
     {
         Super::OnPostComputeLayout();
 
-        Vec2 size = GetComputedSize();
-        Vec2 pos = GetComputedPosition();
-
-        String::IsAlphabet('a');
     }
 
     void EditorDockTabItem::HandleEvent(FEvent* event)
@@ -56,7 +69,7 @@ namespace CE::Editor
 
                 dockspace->ApplyStyle();
             }
-            else if (mouseEvent->type == FEventType::MousePress)
+            else if (mouseEvent->type == FEventType::MousePress && event->sender == this)
             {
                 if (dockspace->IsOfType<EditorDockspace>())
                 {

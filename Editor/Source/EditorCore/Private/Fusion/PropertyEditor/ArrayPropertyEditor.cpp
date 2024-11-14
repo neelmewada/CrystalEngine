@@ -142,9 +142,12 @@ namespace CE::Editor
 
                 propertyEditor->InitTarget(&arrayElements[i], { target }, { arrayInstance });
 
+                FHorizontalStack& left = *propertyEditor->GetLeft();
             	FHorizontalStack& right = *propertyEditor->GetRight();
 
                 u32 curIndex = (u32)i;
+
+                
 
             	right
                 (
@@ -189,6 +192,18 @@ namespace CE::Editor
         {
             objectEditor->ApplySplitRatio(nullptr);
         }
+    }
+
+    PropertyEditor& ArrayPropertyEditor::FixedInputWidth(f32 width)
+    {
+	    Super::FixedInputWidth(width);
+
+        for (PropertyEditor* elementEditor : elementEditors)
+        {
+            elementEditor->FixedInputWidth(width);
+        }
+
+        return *this;
     }
 
     void ArrayPropertyEditor::InsertElement()

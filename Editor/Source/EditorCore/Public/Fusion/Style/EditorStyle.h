@@ -78,6 +78,9 @@ namespace CE::Editor
 		FImageButtonStyle* expandCaretButton = nullptr;
 
 		FIELD()
+		FImageButtonStyle* tabCloseButton = nullptr;
+
+		FIELD()
 		FCustomButtonStyle* iconButton = nullptr;
 
 		FIELD()

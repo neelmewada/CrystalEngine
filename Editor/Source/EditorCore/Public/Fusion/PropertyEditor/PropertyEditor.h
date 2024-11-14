@@ -49,7 +49,7 @@ namespace CE::Editor
 
         virtual void SetSplitRatio(f32 ratio, FSplitBox* excluding);
 
-        Self& FixedInputWidth(f32 width);
+        virtual PropertyEditor& FixedInputWidth(f32 width);
 
         //! @brief This function will be called on the class' CDI to check if this property editor
         //! supports multi object editing.

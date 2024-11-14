@@ -32,6 +32,27 @@ namespace CE::Editor
         );
     }
 
+    void EditorDockTab::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (dockspace)
+        {
+	        if (dockspace->IsOfType<EditorDockspace>())
+	        {
+                auto editorDockspace = static_cast<EditorDockspace*>(dockspace);
+
+                editorDockspace->RemoveDockTab(this);
+	        }
+            else if (dockspace->IsOfType<EditorMinorDockspace>())
+            {
+                auto editorMinorDockspace = static_cast<EditorMinorDockspace*>(dockspace);
+
+                editorMinorDockspace->RemoveDockTab(this);
+            }
+        }
+    }
+
     EditorDockTab& EditorDockTab::Content(FWidget& widget)
     {
         content->Child(widget);

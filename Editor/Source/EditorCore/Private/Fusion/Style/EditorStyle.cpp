@@ -254,6 +254,16 @@ namespace CE::Editor
 		expandCaretButton->hoverTintColor = Color::RGBA(180, 180, 180);
 		expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
 
+		if (!tabCloseButton)
+		{
+			tabCloseButton = CreateObject<FImageButtonStyle>(this, "Button_CloseTab");
+			Add("Button.CloseTab", tabCloseButton);
+		}
+
+		tabCloseButton->tintColor = Color::RGBA(120, 120, 120);
+		tabCloseButton->hoverTintColor = Color::RGBA(180, 180, 180);
+		tabCloseButton->pressedTintColor = tabCloseButton->tintColor;
+
 		if (!iconButton)
 		{
 			iconButton = CreateObject<FCustomButtonStyle>(this, "Button_Icon");

@@ -164,7 +164,7 @@ namespace CE
                 .Name("SelectionText")
                 .Margin(Vec4(0, 0, 5, 0)),
 
-                FNew(FTerminalWidget)
+                FNew(FWidget)
                 .FillRatio(1.0f),
 
                 FNew(FImage)
