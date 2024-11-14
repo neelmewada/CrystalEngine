@@ -46,6 +46,9 @@ private:
 	clock_t previousTime{};
 	f32 deltaTime = 0.0f;
 
+	int frameCounter = 0;
+	f32 frameTimer = 0;
+
 	DelegateHandle tickDelegateHandle = 0;
 };
 

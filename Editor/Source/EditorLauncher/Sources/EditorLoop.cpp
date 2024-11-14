@@ -268,6 +268,13 @@ void EditorLoop::RunLoop()
 	{
 		FusionApplication::Get()->ResetExposed();
 
+		if (frameTimer >= 1.0f)
+		{
+
+			frameTimer = 0;
+			frameCounter = 0;
+		}
+
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
@@ -279,6 +286,9 @@ void EditorLoop::RunLoop()
 		gEngine->Tick(deltaTime);
 
 		previousTime = curTime;
+
+		frameTimer += deltaTime;
+		frameCounter++;
 	}
 }
 
