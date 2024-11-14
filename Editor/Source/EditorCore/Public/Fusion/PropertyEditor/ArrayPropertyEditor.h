@@ -45,6 +45,7 @@ namespace CE::Editor
     protected: // - Internal -
 
         FLabel* countLabel = nullptr;
+        f32 fixedInputWidth = -1;
 
         Object* target = nullptr;
         void* instance = nullptr;

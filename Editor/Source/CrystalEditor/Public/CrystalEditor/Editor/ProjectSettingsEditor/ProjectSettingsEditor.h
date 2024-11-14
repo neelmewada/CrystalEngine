@@ -20,6 +20,9 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        FUNCTION()
+        void ShowAllSettings();
+
         void OnSettingsItemClicked(int index);
 
         FVerticalStack* left = nullptr;
@@ -27,6 +30,7 @@ namespace CE::Editor
 
         ObjectEditor* editor = nullptr;
 
+        Array<ObjectEditor*> editors;
         Array<ClassType*> settingsClasses;
 
         f32 splitRatio = 0.2f;

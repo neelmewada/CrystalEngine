@@ -147,7 +147,10 @@ namespace CE::Editor
 
                 u32 curIndex = (u32)i;
 
-                
+                if (fixedInputWidth > 0)
+                {
+                    propertyEditor->FixedInputWidth(fixedInputWidth);
+                }
 
             	right
                 (
@@ -184,7 +187,7 @@ namespace CE::Editor
 	    {
             PropertyEditor* editor = elementEditors[i];
             expansionStack->RemoveChild(editor);
-            editor->Destroy();
+            editor->QueueDestroy();
             elementEditors.RemoveAt(i);
 	    }
 
@@ -197,6 +200,8 @@ namespace CE::Editor
     PropertyEditor& ArrayPropertyEditor::FixedInputWidth(f32 width)
     {
 	    Super::FixedInputWidth(width);
+
+        fixedInputWidth = width;
 
         for (PropertyEditor* elementEditor : elementEditors)
         {

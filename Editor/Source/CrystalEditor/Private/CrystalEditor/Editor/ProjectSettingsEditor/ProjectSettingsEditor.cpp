@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     static ProjectSettingsEditor* instance = nullptr;
+    constexpr f32 headerGap = 20;
 
     ProjectSettingsEditor::ProjectSettingsEditor()
     {
@@ -65,6 +66,18 @@ namespace CE::Editor
 
     	settingsClasses = Settings::GetAllSettingsClasses();
 
+        left->AddChild(
+            FNew(FTextButton)
+            .Text("All Settings")
+            .FontSize(14)
+            .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+            .Cursor(SystemCursor::Hand)
+            .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
+            .ClipChildren(true)
+            .Style("Button.Clear")
+            .Margin(Vec4(0, 0, 0, headerGap))
+        );
+
         for (int i = 0; i < settingsClasses.GetSize(); ++i)
         {
             ClassType* clazz = settingsClasses[i];
@@ -107,6 +120,43 @@ namespace CE::Editor
         }
 
         editor->SelectTab(instance);
+    }
+
+    void ProjectSettingsEditor::ShowAllSettings()
+    {
+        if (editor)
+        {
+            splitRatio = editor->GetSplitRatio();
+            editor = nullptr;
+        }
+
+        editors.Clear();
+        right->DestroyAllChildren();
+
+        for (ClassType* settingsClass : settingsClasses)
+        {
+            Settings* target = Settings::LoadSettings(settingsClass);
+            if (!target)
+                continue;
+
+            ObjectEditor* curEditor = ObjectEditorRegistry::Get().FindOrCreate(target);
+            editors.Add(curEditor);
+
+            if (this->editor == nullptr)
+            {
+                this->editor = curEditor;
+            }
+
+            curEditor->FixedInputWidth(180);
+            curEditor->SetSplitRatio(splitRatio);
+
+            right->AddChild(curEditor);
+        }
+
+        for (ObjectEditor* editor : editors)
+        {
+            editor->SetEditorGroup(editors);
+        }
     }
 
     void ProjectSettingsEditor::OnSettingsItemClicked(int index)

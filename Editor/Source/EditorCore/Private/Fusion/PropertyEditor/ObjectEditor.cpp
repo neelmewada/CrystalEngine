@@ -54,6 +54,19 @@ namespace CE::Editor
 	    }
     }
 
+    void ObjectEditor::SetSplitRatioInternal(f32 ratio, FSplitBox* excluding)
+    {
+        for (PropertyEditor* propertyEditor : propertyEditors)
+        {
+            propertyEditor->SetSplitRatio(ratio, excluding);
+        }
+    }
+
+    void ObjectEditor::SetEditorGroup(const Array<ObjectEditor*>& group)
+    {
+        this->editorGroup = group;
+    }
+
     ObjectEditor::Self& ObjectEditor::FixedInputWidth(f32 width)
     {
         for (PropertyEditor* propertyEditor : propertyEditors)
@@ -75,9 +88,14 @@ namespace CE::Editor
 
     void ObjectEditor::SetSplitRatio(f32 ratio, FSplitBox* excluding)
     {
-        for (PropertyEditor* propertyEditor : propertyEditors)
+        SetSplitRatioInternal(ratio, excluding);
+
+        for (ObjectEditor* editor : editorGroup)
         {
-            propertyEditor->SetSplitRatio(ratio, excluding);
+	        if (this != editor)
+	        {
+                editor->SetSplitRatioInternal(ratio, excluding);
+	        }
         }
     }
 
@@ -88,6 +106,7 @@ namespace CE::Editor
             if (propertyEditor->GetSplitBox() != excluding)
             {
                 SetSplitRatio(propertyEditor->GetSplitRatio(), excluding);
+                return;
             }
         }
     }

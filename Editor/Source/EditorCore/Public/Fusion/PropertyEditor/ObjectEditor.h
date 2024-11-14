@@ -20,7 +20,11 @@ namespace CE::Editor
 
         void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override;
 
+        void SetSplitRatioInternal(f32 ratio, FSplitBox* excluding = nullptr);
+
     public:
+
+        void SetEditorGroup(const Array<ObjectEditor*>& group);
 
         virtual bool SupportsMultiObjectEditing() const { return false; }
 
@@ -45,6 +49,10 @@ namespace CE::Editor
 
         FIELD(ReadOnly)
         Object* target = nullptr;
+
+        Array<ObjectEditor*> editorGroup;
+
+    public:
 
         friend class ObjectEditorRegistry;
     };
