@@ -12,12 +12,10 @@ find_package(zip REQUIRED)
 find_package(crcpp REQUIRED)
 find_package(stb REQUIRED)
 find_package(dxcompiler REQUIRED)
-#find_package(compressonator REQUIRED)
 find_package(miniz REQUIRED)
 find_package(ispctexturecompressor REQUIRED)
 find_package(assimp REQUIRED)
 find_package(freetype REQUIRED)
-#find_package(mono REQUIRED)
 
 FetchContent_Declare(
     tracy
