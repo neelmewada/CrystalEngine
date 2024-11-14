@@ -24,10 +24,6 @@ namespace CE::Editor
         FAssignNew(SceneEditor, sceneEditor);
         AddDockTab(sceneEditor);
 
-        ProjectSettingsEditor* projectSettingsTab = nullptr;
-        FAssignNew(ProjectSettingsEditor, projectSettingsTab);
-        AddDockTab(projectSettingsTab);
-
         ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 
         projectLabelParent->Enabled(true);

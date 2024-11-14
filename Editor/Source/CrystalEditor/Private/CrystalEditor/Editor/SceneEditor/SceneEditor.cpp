@@ -346,7 +346,11 @@ namespace CE::Editor
                     .Gap(0)
                     .Content(
                         FNew(FMenuItem)
-                        .Text("Project Settings"),
+                        .Text("Project Settings")
+                        .OnClick([this]
+                        {
+                            ProjectSettingsEditor::Show();
+                        }),
 
                         FNew(FMenuItem)
                         .Text("Editor Settings")

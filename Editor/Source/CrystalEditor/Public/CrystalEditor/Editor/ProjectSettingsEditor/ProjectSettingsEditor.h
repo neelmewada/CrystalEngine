@@ -12,7 +12,11 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnBeforeDestroy() override;
+
     public: // - Public API -
+
+        static void Show();
 
     protected: // - Internal -
 

@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+    static ProjectSettingsEditor* instance = nullptr;
 
     ProjectSettingsEditor::ProjectSettingsEditor()
     {
@@ -11,6 +12,8 @@ namespace CE::Editor
     void ProjectSettingsEditor::Construct()
     {
         Super::Construct();
+
+        instance = this;
 
         Title("Project Settings");
 
@@ -81,6 +84,29 @@ namespace CE::Editor
                 .Style("Button.Clear")
             );
         }
+    }
+
+    void ProjectSettingsEditor::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+        if (this == instance)
+        {
+            instance = nullptr;
+        }
+    }
+
+    void ProjectSettingsEditor::Show()
+    {
+        CrystalEditorWindow* editor = CrystalEditorWindow::Get();
+
+        if (instance == nullptr)
+        {
+            FAssignNewOwned(ProjectSettingsEditor, instance, editor);
+            editor->AddDockTab(instance);
+        }
+
+        editor->SelectTab(instance);
     }
 
     void ProjectSettingsEditor::OnSettingsItemClicked(int index)
