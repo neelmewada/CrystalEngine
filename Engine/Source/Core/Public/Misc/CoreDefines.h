@@ -24,8 +24,8 @@
 #	define __CE_DLL_EXPORT __declspec(dllexport)
 #	define __CE_DLL_IMPORT __declspec(dllimport)
 #else
-#	define DLL_EXPORT 
-#	define DLL_IMPORT 
+#	define __CE_DLL_EXPORT 
+#	define __CE_DLL_IMPORT 
 #endif
 
 #define BIT(x) (1 << x)
