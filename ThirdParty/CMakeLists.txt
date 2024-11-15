@@ -13,7 +13,7 @@ include(Findminiz.cmake)
 include(Findfreetype.cmake)
 include(Findassimp.cmake)
 include(Findsdl.cmake)
-include(Finddxcompiler.cmake)
+#include(Finddxcompiler.cmake)
 include(Findispctexturecompressor.cmake)
 
 # Linux packages
