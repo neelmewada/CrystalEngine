@@ -62,11 +62,11 @@ function(ce_add_rt_deps NAME)
         message(FATAL_ERROR "ROOT_PATH not supplied to ce_add_rt_deps ${NAME}")
     endif()
 
-    if(ce_add_rt_deps_MAC_ROOT_PATH AND ${PAL_PLATFORM_IS_MAC})
+    if(ce_add_rt_deps_MAC_ROOT_PATH AND PAL_PLATFORM_IS_MAC)
         set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_MAC_ROOT_PATH}")
     endif()
 
-    if (${PAL_PLATFORM_IS_LINUX} AND ce_add_rt_deps_LINUX_ROOT_PATH)
+    if (PAL_PLATFORM_IS_LINUX AND ce_add_rt_deps_LINUX_ROOT_PATH)
         set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_LINUX_ROOT_PATH}")
     endif()
 

@@ -93,7 +93,7 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
             $<${PAL_PLATFORM_IS_MAC}:libSPIRV-Tools-shared.dylib>
-            $<${PAL_PLATFORM_IS_LINUX}:libSPIRV-Tools-shared.dylib>
+            $<${PAL_PLATFORM_IS_LINUX}:libSPIRV-Tools-shared.so>
             
     )
 
@@ -107,11 +107,12 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.dll>
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.pdb>
             $<${PAL_PLATFORM_IS_LINUX}:libdxcompiler.so>
+            $<${PAL_PLATFORM_IS_MAC}:libdxcompiler.dylib>
     )
     
 endif()
 
 # Metal
 if(${PAL_TRAIT_METAL_SUPPORTED})
-    find_package(metalcpp)
+    #find_package(metalcpp)
 endif()

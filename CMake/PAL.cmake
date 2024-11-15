@@ -2,6 +2,7 @@
 include_guard(GLOBAL)
 
 # Set defaults before loading any PAL_*.cmake
+ce_set(PAL_PLATFORM_IS_LINUX 0)
 ce_set(PAL_PLATFORM_IS_MAC 0)
 ce_set(PAL_PLATFORM_IS_WINDOWS 0)
 

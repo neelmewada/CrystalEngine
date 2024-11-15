@@ -99,7 +99,7 @@ namespace CE
 			SetInternalValue(value);
 		}
 
-		template<typename TStruct> requires TStruct::IsStruct and TIsCopyable<TStruct>::Value
+		template<typename TStruct> requires (not std::is_same_v<TStruct, Variant>) and TStruct::IsStruct and TIsCopyable<TStruct>::Value
 		Variant(const TStruct& value)
 		{
 			SetStructValue(value);

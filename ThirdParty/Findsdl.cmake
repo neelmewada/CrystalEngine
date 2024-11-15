@@ -34,7 +34,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 
 if(${PAL_PLATFORM_IS_MAC})
-    target_link_libraries(${TARGET_WITH_NAMESPACE}
+    target_link_libraries(SDL2main
         INTERFACE
             "-framework Cocoa"
             "-framework CoreAudio"
