@@ -1,6 +1,10 @@
 
 ce_set(PAL_EXECUTABLE_APPLICATION_FLAG MACOSX_BUNDLE)
 
+# Required on linux or else build fails.
+ce_set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ce_set(CMAKE_DEBUG_POSTFIX "")
+
 if(${CE_STANDALONE})
     ce_set(PAL_TRAIT_BUILD_EDITOR 0)
     ce_set(PAL_TRAIT_BUILD_HOST_TOOLS 0)

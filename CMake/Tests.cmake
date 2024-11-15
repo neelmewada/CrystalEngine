@@ -3,17 +3,15 @@ if(NOT ${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
     return()
 endif()
 
-include(FetchContent)
-
 FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.11.0
 )
 FetchContent_MakeAvailable(googletest)
 
-add_library(GTest::GTest INTERFACE IMPORTED)
-target_link_libraries(GTest::GTest INTERFACE gtest_main)
+add_library(GoogleTest INTERFACE IMPORTED)
+target_link_libraries(GoogleTest INTERFACE gtest_main)
 
 
 function(ce_add_test NAME)
@@ -78,7 +76,8 @@ function(ce_add_test NAME)
     
     target_link_libraries(${NAME}
         PRIVATE
-            GTest::GTest
+            #GTest::GTest
+            GoogleTest
             ${ce_add_test_TARGET}
     )
 

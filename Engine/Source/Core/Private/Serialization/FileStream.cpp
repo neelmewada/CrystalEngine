@@ -9,7 +9,7 @@ namespace CE
         ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!");
 
         this->openMode = openMode;
-        std::ios::openmode mode = 0;
+        std::ios::openmode mode = static_cast<std::ios::openmode>(0);
 
         if (openMode == Permissions::ReadOnly)
         {

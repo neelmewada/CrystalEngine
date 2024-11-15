@@ -24,4 +24,6 @@ namespace CE
 #include "PAL/Windows/WindowsMisc.h"
 #elif PLATFORM_MAC
 #include "PAL/Mac/MacMisc.h"
+#elif PLATFORM_LINUX
+#include "PAL/Linux/LinuxMisc.h"
 #endif

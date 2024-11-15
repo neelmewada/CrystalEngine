@@ -10,7 +10,6 @@
 #include "Function.h"
 #include "Class.h"
 #include "Enum.h"
-#include "Signal.h"
 #include "SubClassType.h"
 
 #include "ObjectCreationContext.h"

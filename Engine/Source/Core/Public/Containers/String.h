@@ -16,8 +16,6 @@
 #include <string>
 #include <ostream>
 
-#define YAML_CPP_API
-#include "yaml-cpp/yaml.h"
 
 namespace CE
 {
@@ -431,9 +429,3 @@ template <> struct fmt::formatter<CE::String> {
     }
 };
 
-namespace YAML
-{
-    inline Emitter& operator<<(Emitter& emitter, CE::String string) {
-        return emitter.Write(std::string(string.GetCString()));
-    }
-}

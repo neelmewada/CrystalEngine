@@ -1,9 +1,6 @@
 
 #include "CoreMinimal.h"
 
-#define MINI_CASE_SENSITIVE
-#include "mini/ini.h"
-
 namespace CE
 {
 

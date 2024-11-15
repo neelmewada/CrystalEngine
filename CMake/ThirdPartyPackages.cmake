@@ -3,25 +3,22 @@ include_guard(GLOBAL)
 find_package(Git REQUIRED)
 
 set(BUILD_SHARED_LIBS OFF)
+option(BUILD_SHARED_LIBS OFF)
 
 # 3rd Party Packages
 #find_package(xxHash REQUIRED)
+#find_package(spdlog REQUIRED)
+#find_package(efsw REQUIRED)
+#find_package(zip REQUIRED)
+#find_package(crcpp REQUIRED)
+#find_package(stb REQUIRED)
+#find_package(miniz REQUIRED)
+#find_package(freetype REQUIRED)
+#find_package(assimp REQUIRED)
 
-find_package(spdlog REQUIRED)
-#find_package(yaml REQUIRED)
-#find_package(mINI REQUIRED)
-return()
-
-find_package(cxxopts REQUIRED)
-find_package(efsw REQUIRED)
-find_package(zip REQUIRED)
-find_package(crcpp REQUIRED)
-find_package(stb REQUIRED)
-find_package(dxcompiler REQUIRED)
-find_package(miniz REQUIRED)
-find_package(ispctexturecompressor REQUIRED)
-find_package(assimp REQUIRED)
-find_package(freetype REQUIRED)
+# Enable these
+#find_package(dxcompiler REQUIRED)
+#find_package(ispctexturecompressor REQUIRED)
 
 FetchContent_Declare(
     tracy
@@ -34,7 +31,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tracy)
 
 # SDL2
-find_package(sdl REQUIRED)
+#find_package(sdl REQUIRED)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
@@ -82,4 +79,3 @@ endif()
 if(${PAL_TRAIT_METAL_SUPPORTED})
     find_package(metalcpp)
 endif()
-

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include <map>
+#include <condition_variable>
 
 namespace CE
 {

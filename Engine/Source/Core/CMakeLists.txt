@@ -24,12 +24,10 @@ ce_add_target(Core SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::xxHash
-            #ThirdParty::mINI
             ThirdParty::zip
             ThirdParty::crcpp
         PUBLIC
             ThirdParty::spdlog
-            ThirdParty::yaml
             ThirdParty::efsw
             CE::CoreTracy
         TARGETS Config
