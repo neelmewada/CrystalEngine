@@ -35,9 +35,25 @@ FetchContent_MakeAvailable(tracy)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
+#    set(_Vulkan_hint_library_search_paths
+#            "$ENV{VULKAN_SDK}/lib"
+#            "$ENV{VULKAN_SDK}/bin"
+#    )
+#
+#    find_library(Vulkan_dxc_LIBRARY
+#            NAMES dxcompiler
+#            HINTS
+#            ${_Vulkan_hint_library_search_paths})
+#
+#    message("Vulkan Dxc: ${Vulkan_dxc_LIBRARY} || $ENV{VULKAN_SDK}")
+#    message(FATAL_ERROR "End!")
+#    unset(_Vulkan_hint_library_search_paths)
+
     find_package(Vulkan REQUIRED
         COMPONENTS SPIRV-Tools dxc
     )
+
+    message(STATUS "Vulkan SDK: $ENV{VULKAN_SDK}")
 
     set(Vulkan_RUNTIME_DEPS "")
 
@@ -73,20 +89,24 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
     ce_add_rt_deps(SpirvTools
         ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
         MAC_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
+        LINUX_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
         COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
             $<${PAL_PLATFORM_IS_MAC}:libSPIRV-Tools-shared.dylib>
-            #$<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler$<$<CONFIG:Debug>:d>.dll>
+            $<${PAL_PLATFORM_IS_LINUX}:libSPIRV-Tools-shared.dylib>
+            
     )
 
     ce_add_rt_deps(dxcompiler
         ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
         MAC_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
+        LINUX_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
         COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompilerd.dll>
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompilerd.pdb>
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.dll>
             $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.pdb>
+            $<${PAL_PLATFORM_IS_LINUX}:libdxcompiler.so>
     )
     
 endif()

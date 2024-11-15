@@ -66,6 +66,10 @@ function(ce_add_rt_deps NAME)
         set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_MAC_ROOT_PATH}")
     endif()
 
+    if (${PAL_PLATFORM_IS_LINUX} AND ce_add_rt_deps_LINUX_ROOT_PATH)
+        set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_LINUX_ROOT_PATH}")
+    endif()
+
     set_target_properties(${target} PROPERTIES ROOT_PATH "${ce_add_rt_deps_ROOT_PATH}")
 
     if(ce_add_rt_deps_COPY_DIRS)

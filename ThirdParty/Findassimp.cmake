@@ -14,7 +14,13 @@ add_subdirectory(vendor/${PACKAGE_NAME})
 add_library(${TARGET_WITH_NAMESPACE} ALIAS assimp)
 
 set_target_properties(assimp PROPERTIES FOLDER "ThirdParty")
-set_target_properties(zlibstatic PROPERTIES FOLDER "ThirdParty")
-set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "ThirdParty")
+
+if(TARGET zlibstatic)
+    set_target_properties(zlibstatic PROPERTIES FOLDER "ThirdParty")
+endif()
+
+if(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs)
+    set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "ThirdParty")
+endif()
 
 

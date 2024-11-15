@@ -38,6 +38,23 @@ if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
             ${LIB_NAME}
     )
 
+elseif (${PAL_PLATFORM_NAME} STREQUAL "Linux")
+
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEBUG   ${${PACKAGE_NAME}_LIBS_DIR}/Debug/lib${LIB_NAME}.so)
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_DEV     ${${PACKAGE_NAME}_LIBS_DIR}/Development/lib${LIB_NAME}.so)
+    set(${PACKAGE_NAME}_STATIC_LIBRARY_RELEASE ${${PACKAGE_NAME}_LIBS_DIR}/Release/lib${LIB_NAME}.so)
+
+    set_target_properties(${TARGET_WITH_NAMESPACE}
+        PROPERTIES
+            IMPORTED_LOCATION "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${LIB_NAME}.so"
+    )
+
+    ce_add_rt_deps(ispctexturecompressor
+        ROOT_PATH "${${PACKAGE_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>"
+        COPY_LIBS
+            ${LIB_NAME}
+    )
+
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
     set(${PACKAGE_NAME}_STATIC_LIBRARY_DEBUG   ${${PACKAGE_NAME}_LIBS_DIR}/Debug/${LIB_NAME}.lib)
     set(${PACKAGE_NAME}_STATIC_LIBRARY_DEV     ${${PACKAGE_NAME}_LIBS_DIR}/Development/${LIB_NAME}.lib)
