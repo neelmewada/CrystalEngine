@@ -54,7 +54,7 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
     # Vulkan SpirV Tools
     add_library(SpirvTools ALIAS Vulkan::SPIRV-Tools)
     add_library(ThirdParty::SpirvTools ALIAS Vulkan::SPIRV-Tools)
-    add_library(ThirdParty::dxcompiler ALIAS Vulkan::dxc_lib)
+    #add_library(ThirdParty::dxcompiler ALIAS Vulkan::dxc_lib)
 
     target_link_libraries(Vulkan::SPIRV-Tools
         INTERFACE 
@@ -75,8 +75,8 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         MAC_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
         COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
-            $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler$<$<CONFIG:Debug>:d>.dll>
             $<${PAL_PLATFORM_IS_MAC}:libSPIRV-Tools-shared.dylib>
+            #$<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler$<$<CONFIG:Debug>:d>.dll>
     )
     
 endif()

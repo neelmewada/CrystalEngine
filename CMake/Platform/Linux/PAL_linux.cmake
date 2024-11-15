@@ -43,19 +43,13 @@ if(${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
     add_compile_definitions(PAL_TRAIT_BUILD_TESTS=1)
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    ce_set(PAL_TRAIT_COMPILER_ID GNU)
-    ce_set(PAL_TRAIT_COMPILER_ID_LOWERCASE gnu)
-    add_compile_definitions(COMPILER_GNU=1)
-    add_compile_definitions(COMPILER_GCC=1)
-
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     ce_set(PAL_TRAIT_COMPILER_ID Clang)
     ce_set(PAL_TRAIT_COMPILER_ID_LOWERCASE clang)
     add_compile_definitions(COMPILER_CLANG=1)
 
 else()
-    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in ${PAL_PLATFORM_NAME}")
+    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in ${PAL_PLATFORM_NAME}. Only clang is supported on linux!")
 endif()
 
 
