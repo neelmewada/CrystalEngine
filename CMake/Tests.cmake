@@ -13,6 +13,10 @@ FetchContent_MakeAvailable(googletest)
 add_library(GoogleTest INTERFACE IMPORTED)
 target_link_libraries(GoogleTest INTERFACE gtest_main)
 
+set_target_properties(gmock PROPERTIES FOLDER "Tests")
+set_target_properties(gmock_main PROPERTIES FOLDER "Tests")
+set_target_properties(gtest PROPERTIES FOLDER "Tests")
+set_target_properties(gtest_main PROPERTIES FOLDER "Tests")
 
 function(ce_add_test NAME)
     if(NOT ${CE_BUILD_TESTS})

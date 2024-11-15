@@ -13,4 +13,5 @@ add_subdirectory(vendor/${LIB_NAME}/cmake_unofficial)
 add_library(${TARGET_WITH_NAMESPACE} ALIAS xxhash)
 
 set_target_properties(xxhash PROPERTIES FOLDER "ThirdParty")
+set_target_properties(xxhsum PROPERTIES FOLDER "ThirdParty")
 

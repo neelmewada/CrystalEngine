@@ -36,7 +36,7 @@ FetchContent_MakeAvailable(tracy)
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     find_package(Vulkan REQUIRED
-        COMPONENTS SPIRV-Tools
+        COMPONENTS SPIRV-Tools dxc
     )
 
     set(Vulkan_RUNTIME_DEPS "")
@@ -53,6 +53,8 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
 
     # Vulkan SpirV Tools
     add_library(SpirvTools ALIAS Vulkan::SPIRV-Tools)
+    add_library(ThirdParty::SpirvTools ALIAS Vulkan::SPIRV-Tools)
+    add_library(ThirdParty::dxcompiler ALIAS Vulkan::dxc_lib)
 
     target_link_libraries(Vulkan::SPIRV-Tools
         INTERFACE 
@@ -65,11 +67,15 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
             "spirv-cross-hlsl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
     )
 
+    get_target_property(dxc_lib_path Vulkan::dxc_lib IMPORTED_LOCATION_RELEASE)
+    get_filename_component(dxc_lib_dir "${dxc_lib_path}" DIRECTORY)
+
     ce_add_rt_deps(SpirvTools
         ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
         MAC_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
         COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
+            $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler$<$<CONFIG:Debug>:d>.dll>
             $<${PAL_PLATFORM_IS_MAC}:libSPIRV-Tools-shared.dylib>
     )
     

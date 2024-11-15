@@ -8,7 +8,7 @@ include_guard(GLOBAL)
 #     list(APPEND CMAKE_MODULE_PATH ${THIRD_PARTY_CMAKE_FILE_DIRECTORY})
 # endforeach()
 
-list(APPEND CMAKE_MODULE_PATH ${CE_ROOT_DIR}/ThirdParty)
+#list(APPEND CMAKE_MODULE_PATH ${CE_ROOT_DIR}/ThirdParty)
 
 set(FETCHCONTENT_QUIET FALSE)
 
@@ -66,10 +66,6 @@ function(ce_add_rt_deps NAME)
         set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_MAC_ROOT_PATH}")
     endif()
 
-    if(ce_add_rt_deps_LINUX_ROOT_PATH AND ${PAL_PLATFORM_IS_LINUX})
-        set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_LINUX_ROOT_PATH}")
-    endif()
-    
     set_target_properties(${target} PROPERTIES ROOT_PATH "${ce_add_rt_deps_ROOT_PATH}")
 
     if(ce_add_rt_deps_COPY_DIRS)

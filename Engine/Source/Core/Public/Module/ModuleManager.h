@@ -118,34 +118,34 @@ namespace CE
 #else
 
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
-extern "C" DLL_EXPORT CE::Module* CELoadModule()\
+extern "C" __CE_DLL_EXPORT CE::Module* CELoadModule()\
 {\
     return new ModuleImplClass();\
 }\
-extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
+extern "C" __CE_DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
 {\
     delete modulePtr;\
 }\
-extern "C" DLL_EXPORT void CELoadResources()\
+extern "C" __CE_DLL_EXPORT void CELoadResources()\
 {\
 	CE_EXPAND(CE_CONCATENATE(__CE_RESOURCES_REGISTER_, _RESOURCES))();\
 }\
-extern "C" DLL_EXPORT void CEUnloadResources()\
+extern "C" __CE_DLL_EXPORT void CEUnloadResources()\
 {\
 	CE_EXPAND(CE_CONCATENATE(__CE_RESOURCES_DEREGISTER_, _RESOURCES))();\
 }\
-extern "C" DLL_EXPORT void CELoadTypes()\
+extern "C" __CE_DLL_EXPORT void CELoadTypes()\
 {\
 	CE_EXPAND(CE_CONCATENATE(__CE_AUTORTTI_REGISTER_, _AUTORTTI))();\
 }
 
 #define CE_IMPLEMENT_MODULE_AUTORTTI(ModuleName, ModuleImplClass)\
-extern "C" DLL_EXPORT CE::Module* CELoadModule()\
+extern "C" __CE_DLL_EXPORT CE::Module* CELoadModule()\
 {\
     CERegisterModuleTypes();\
     return new ModuleImplClass();\
 }\
-extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
+extern "C" __CE_DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
 {\
     delete modulePtr;\
 }

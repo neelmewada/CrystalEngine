@@ -13,6 +13,6 @@ add_subdirectory(vendor/${PACKAGE_NAME})
 add_library(${TARGET_WITH_NAMESPACE} ALIAS zip)
 
 set_target_properties(zip PROPERTIES FOLDER "ThirdParty")
-
+set_target_properties(uninstall PROPERTIES FOLDER "ThirdParty")
 
 

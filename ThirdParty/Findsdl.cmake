@@ -19,8 +19,15 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 add_subdirectory(vendor/${PACKAGE_NAME})
 
 add_library(${TARGET_WITH_NAMESPACE} ALIAS SDL2main)
+target_link_libraries(SDL2main
+    INTERFACE 
+        SDL2
+)
 
 set_target_properties(SDL2main PROPERTIES FOLDER "ThirdParty")
+set_target_properties(SDL2 PROPERTIES FOLDER "ThirdParty")
+set_target_properties(SDL2_test PROPERTIES FOLDER "ThirdParty")
+set_target_properties(sdl_headers_copy PROPERTIES FOLDER "ThirdParty")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 

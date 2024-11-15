@@ -13,6 +13,7 @@ add_subdirectory(vendor/${PACKAGE_NAME})
 add_library(${TARGET_WITH_NAMESPACE} ALIAS efsw)
 
 set_target_properties(efsw PROPERTIES FOLDER "ThirdParty")
+set_target_properties(efsw-static PROPERTIES FOLDER "ThirdParty")
 
 
 
