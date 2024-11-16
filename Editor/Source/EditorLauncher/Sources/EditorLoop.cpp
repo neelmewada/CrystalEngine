@@ -269,6 +269,7 @@ void EditorLoop::RunLoop()
 
 		if (frameTimer >= 1.0f)
 		{
+			//CE_LOG(Info, All, "FPS: {}", frameCounter);
 
 			frameTimer = 0;
 			frameCounter = 0;

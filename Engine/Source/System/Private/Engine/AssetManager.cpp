@@ -36,7 +36,7 @@ namespace CE
 	void AssetManager::Shutdown()
 	{
 		{
-			LockGuard<SharedMutex> lock{ loadedAssetsMutex };
+			LockGuard lock{ loadedAssetsMutex };
 
 			for (auto [uuid, bundle] : loadedAssetsByUuid)
 			{
