@@ -14,6 +14,8 @@ namespace CE
 
         static void SaveSettings();
 
+        virtual String GetTitleName();
+
 #if PAL_TRAIT_BUILD_EDITOR
         static void SaveSettings(const IO::Path& customPath);
 #endif

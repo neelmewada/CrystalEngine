@@ -47,6 +47,11 @@ namespace CE
 		Bundle::SaveBundleToDisk(settingsBundle, nullptr);
 	}
 
+	String Settings::GetTitleName()
+	{
+		return GetClass()->GetDisplayName();
+	}
+
 #if PAL_TRAIT_BUILD_EDITOR
 	void Settings::SaveSettings(const IO::Path& customPath)
 	{

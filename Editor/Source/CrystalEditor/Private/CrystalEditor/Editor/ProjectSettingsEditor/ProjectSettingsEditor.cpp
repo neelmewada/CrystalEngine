@@ -139,7 +139,7 @@ namespace CE::Editor
             if (!target)
                 continue;
 
-            ObjectEditor* curEditor = ObjectEditorRegistry::Get().FindOrCreate(target);
+            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target);
             editors.Add(curEditor);
 
             if (this->editor == nullptr)
@@ -173,10 +173,17 @@ namespace CE::Editor
 
         Settings* target = Settings::LoadSettings(settingsClasses[index]);
 
-        editor = ObjectEditorRegistry::Get().FindOrCreate(target);
+        editor = ObjectEditorRegistry::Get().Create(target);
 
         editor->FixedInputWidth(180);
         editor->SetSplitRatio(splitRatio);
+
+        right->AddChild(
+            FNew(FLabel)
+            .FontSize(18)
+            .Text(target->GetTitleName())
+            .Margin(Vec4(10, 10, 0, 15))
+        );
 
         right->AddChild(editor);
     }

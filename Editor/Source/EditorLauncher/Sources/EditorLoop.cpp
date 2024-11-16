@@ -439,7 +439,6 @@ void EditorLoop::AppInit()
 	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
 
-	//mainWindow->Show();
 }
 
 void EditorLoop::AppPreShutdown()

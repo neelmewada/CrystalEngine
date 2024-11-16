@@ -33,11 +33,11 @@ namespace CE::Editor
             UnregisterCustomEditor(TClass::StaticType());
         }
 
-        ObjectEditor* FindOrCreate(Object* targetObject);
-        ObjectEditor* FindOrCreate(const Array<Object*>& targetObjects);
+        ObjectEditor* Create(Object* targetObject);
+        ObjectEditor* Create(const Array<Object*>& targetObjects);
 
         template<typename T> requires (not TIsSameType<Object, T>::Value) and TIsBaseClassOf<Object, T>::Value
-        ObjectEditor* FindOrCreate(const Array<T*>& targetObjects)
+        ObjectEditor* Create(const Array<T*>& targetObjects)
         {
             Array<Object*> objects;
             objects.Resize(targetObjects.GetSize());
@@ -45,7 +45,7 @@ namespace CE::Editor
             {
                 objects[i] = targetObjects[i];
             }
-            return FindOrCreate(objects);
+            return Create(objects);
         }
 
     private:
@@ -55,8 +55,6 @@ namespace CE::Editor
         SubClass<ObjectEditor> FindEditorClass(Object* targetObject);
 
         HashMap<TypeId, SubClass<ObjectEditor>> customEditorRegistry;
-
-        HashMap<Uuid, ObjectEditor*> objectEditorsByInstances;
 
         friend class ObjectEditor;
     };

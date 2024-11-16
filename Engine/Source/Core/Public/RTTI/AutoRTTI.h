@@ -8,6 +8,8 @@ enum AttributeSpecifiers
 	//! @brief Set the user-friendly name for the editor.
 	DisplayName,
 
+	SettingsCategory,
+
 	//! @brief Set the category of the field.
 	Category,
 

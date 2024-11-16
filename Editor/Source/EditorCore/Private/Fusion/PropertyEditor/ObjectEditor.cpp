@@ -33,14 +33,6 @@ namespace CE::Editor
         {
             ObjectListener::RemoveListener(target, this);
         }
-
-        for (Object* target : targets)
-        {
-            if (ObjectEditorRegistry::Get().objectEditorsByInstances[target->GetUuid()] == this)
-            {
-	            ObjectEditorRegistry::Get().objectEditorsByInstances.Remove(target->GetUuid());
-            }
-        }
     }
 
     void ObjectEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)

@@ -89,7 +89,7 @@ namespace CE::Editor
 
         if (item && item->GetActor())
         {
-            editor = ObjectEditorRegistry::Get().FindOrCreate(item->GetActor());
+            editor = ObjectEditorRegistry::Get().Create(item->GetActor());
             editorContainer->Child(*editor);
         }
     }

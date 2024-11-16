@@ -25,8 +25,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             
     BUILD_DEPENDENCIES
-        PRIVATE
-            ThirdParty::cxxopts
         PUBLIC
             CE::FusionCore
             CE::EditorCore
