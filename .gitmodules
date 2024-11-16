@@ -31,6 +31,3 @@
 [submodule "ThirdParty/vendor/sdl"]
 	path = ThirdParty/vendor/sdl
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "ThirdParty/vendor/dxcompiler"]
-	path = ThirdParty/vendor/dxcompiler
-	url = https://github.com/microsoft/DirectXShaderCompiler.git
