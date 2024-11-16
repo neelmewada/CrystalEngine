@@ -67,7 +67,7 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
     IO::Path LinuxDirectories::GetEditorAppDataDir()
     {
-        return IO::Path("~/.local/share") / "CrystalEngine";
+        return IO::Path("~/.local/share") / "CrystalEditor";
     }
 #endif
 }

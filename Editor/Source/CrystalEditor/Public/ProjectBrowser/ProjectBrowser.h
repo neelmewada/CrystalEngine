@@ -40,8 +40,6 @@ namespace CE::Editor
         FUNCTION()
         void OpenProject();
 
-        Array<IO::Path> recentProjectPaths{};
-
         FIELD()
         RecentProjectsListModel* recentProjectsModel = nullptr;
 

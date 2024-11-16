@@ -26,6 +26,11 @@ namespace CE::Editor
 
         void ModelReset();
 
+        const IO::Path& GetRecentProjectsPath(int index) const
+        {
+            return recentProjectPaths[index];
+        }
+
     private:
 
         Array<IO::Path> recentProjectPaths{};

@@ -20,7 +20,7 @@ namespace CE
     {
         if (event->IsMouseEvent() && listView && listView->SelectionMode() != FSelectionMode::None)
         {
-            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+            auto mouseEvent = static_cast<FMouseEvent*>(event);
 
             if (mouseEvent->type == FEventType::MouseEnter && !IsHovered())
             {

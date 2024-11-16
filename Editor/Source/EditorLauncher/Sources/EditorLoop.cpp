@@ -223,7 +223,6 @@ void EditorLoop::PostInit()
 		projectBrowser->SetMinimizeButton(true);
 
 		mainWindow->SetResizable(false);
-
 		mainWindow->Show();
 	}
 	else
@@ -423,11 +422,14 @@ void EditorLoop::AppInit()
 	windowInfo.maximised = windowInfo.fullscreen = false;
 	windowInfo.resizable = true;
 	windowInfo.hidden = true;
+#if PLATFORM_LINUX
+	windowInfo.hidden = false; // Weird behaviour on linux: Window doesn't show when called Show() if hidden is true on initialization.
+#endif
 	windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 	if (projectPath.IsEmpty())
 	{
 		isProjectBrowsingMode = true;
-		windowInfo.windowFlags |= PlatformWindowFlags::Utility;
+		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
 		gDefaultWindowWidth = 1024;
 		gDefaultWindowHeight = 640;
 	}

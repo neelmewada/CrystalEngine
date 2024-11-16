@@ -61,6 +61,17 @@ namespace CE::Editor
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateRecentProjectRow, this))
                             .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
+                            .OnSelectionChanged([this](FListView*)
+                            {
+                                int index = recentsList->GetSelectedItemIndex();
+                                if (index >= 0)
+                                {
+                                    IO::Path path = recentProjectsModel->GetRecentProjectsPath(index);
+                                    openProjectLocation->Text(path.GetString());
+
+                                    ValidateInputFields(nullptr);
+                                }
+                            })
                             .HAlign(HAlign::Fill)
                             .Height(400)
                             .Style("ProjectBrowserWindow.ListView")
