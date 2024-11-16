@@ -1,0 +1,8 @@
+//
+// Created by neel on 16/11/24.
+//
+
+#ifndef LINUXSDLAPPLICATION_H
+#define LINUXSDLAPPLICATION_H
+
+#endif //LINUXSDLAPPLICATION_H
