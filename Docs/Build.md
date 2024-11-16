@@ -30,6 +30,8 @@ Clone the repo recursively:
 
 ```sh
 git clone --recursive https://github.com/neelmewada/CrystalEngine.git
+git checkout linux-port
+git submodule update --init --recursive
 ```
 
 ## Building Editor (required)
