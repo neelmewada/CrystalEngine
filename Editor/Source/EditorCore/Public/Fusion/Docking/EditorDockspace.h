@@ -19,6 +19,14 @@ namespace CE::Editor
         void SelectTab(EditorDockTabItem* tabItem);
         void SelectTab(EditorDockTab* tab);
 
+        FStyledWidget* GetProjectLabelParent() const { return projectLabelParent; }
+
+        int GetTabItemCount() const { return tabItems.GetSize(); }
+        EditorDockTabItem* GetTabItem(int index) const { return tabItems[index]; }
+
+        int GetDockedEditorCount() const { return dockedEditors.GetSize(); }
+        EditorDockTab* GetDockedEditor(int index) const { return dockedEditors[index]; }
+
     protected:
 
         EditorDockspace();

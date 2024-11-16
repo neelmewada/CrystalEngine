@@ -36,7 +36,7 @@ namespace CE::Editor
         ObjectEditor* FindOrCreate(Object* targetObject);
         ObjectEditor* FindOrCreate(const Array<Object*>& targetObjects);
 
-        template<typename T> requires !TIsSameType<Object, T>::Value and TIsBaseClassOf<Object, T>::Value
+        template<typename T> requires (not TIsSameType<Object, T>::Value) and TIsBaseClassOf<Object, T>::Value
         ObjectEditor* FindOrCreate(const Array<T*>& targetObjects)
         {
             Array<Object*> objects;

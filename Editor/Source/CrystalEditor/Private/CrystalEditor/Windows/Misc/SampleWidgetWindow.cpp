@@ -120,7 +120,7 @@ namespace CE::Editor
                     }),
 
                     FNew(FComboBox)
-                    .Bind_Items(BIND_PROPERTY_R(model, ItemList))
+                    //.Bind_Items(BIND_PROPERTY_R(model, ItemList))
                     .MinWidth(60)
                 ),
 
@@ -129,7 +129,7 @@ namespace CE::Editor
                 .ContentHAlign(HAlign::Left)
                 (
                     FNew(FTextInput)
-                    .Bind_Text(BIND_PROPERTY_RW(model, Text))
+                    //.Bind_Text(BIND_PROPERTY_RW(model, Text))
                     .FontSize(13)
                     .Width(180)
                     .Margin(Vec4(0, 0, 10, 0)),
@@ -144,7 +144,7 @@ namespace CE::Editor
 
                     FNew(FLabel)
                     .FontSize(13)
-                    .Bind_Text(BIND_PROPERTY_R(model, Text))
+                    //.Bind_Text(BIND_PROPERTY_R(model, Text))
                 ),
 
                 FNew(FScrollBox)

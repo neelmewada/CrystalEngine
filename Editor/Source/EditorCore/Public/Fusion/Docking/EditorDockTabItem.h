@@ -14,6 +14,9 @@ namespace CE::Editor
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool IsActive() const { return isActive; }
+        bool IsHovered() const { return isHovered; }
+
     protected:
 
         EditorDockTabItem();

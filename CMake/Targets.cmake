@@ -284,10 +284,21 @@ function(ce_add_target NAME TARGET_TYPE)
     if(${ce_add_target_AUTORTTI})
         target_compile_definitions(${NAME} PRIVATE _AUTORTTI=1)
 
+        add_custom_target(${NAME}_AutoRtti
+            COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
+            VERBATIM
+        )
+
+        set_target_properties(${NAME}_AutoRtti PROPERTIES FOLDER "AutoRTTI")
+
+        add_dependencies(${NAME} ${NAME}_AutoRtti)
+
+#[[============= PRE_BUILD events not supported on all generators
         add_custom_command(TARGET ${NAME} PRE_BUILD
             COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
+]]#
 
     else()
         target_compile_definitions(${NAME} PRIVATE _AUTORTTI=0)

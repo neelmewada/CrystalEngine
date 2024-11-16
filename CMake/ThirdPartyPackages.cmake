@@ -35,25 +35,11 @@ FetchContent_MakeAvailable(tracy)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
-#    set(_Vulkan_hint_library_search_paths
-#            "$ENV{VULKAN_SDK}/lib"
-#            "$ENV{VULKAN_SDK}/bin"
-#    )
-#
-#    find_library(Vulkan_dxc_LIBRARY
-#            NAMES dxcompiler
-#            HINTS
-#            ${_Vulkan_hint_library_search_paths})
-#
-#    message("Vulkan Dxc: ${Vulkan_dxc_LIBRARY} || $ENV{VULKAN_SDK}")
-#    message(FATAL_ERROR "End!")
-#    unset(_Vulkan_hint_library_search_paths)
+    message(STATUS "Vulkan SDK: $ENV{VULKAN_SDK}")
 
     find_package(Vulkan REQUIRED
         COMPONENTS SPIRV-Tools dxc
     )
-
-    message(STATUS "Vulkan SDK: $ENV{VULKAN_SDK}")
 
     set(Vulkan_RUNTIME_DEPS "")
 

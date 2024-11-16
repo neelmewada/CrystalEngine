@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+    class EditorDockTabItem;
+
     CLASS()
     class EDITORCORE_API EditorMinorDockspace : public FStyledWidget
     {
@@ -16,6 +18,11 @@ namespace CE::Editor
         void SelectTab(EditorDockTabItem* tabItem);
         void SelectTab(EditorDockTab* tab);
 
+        FVerticalStack* GetRootBox() const { return rootBox; }
+
+        int GetTabItemCount() const { return tabItems.GetSize(); }
+        EditorDockTabItem* GetTabItem(int index) const { return tabItems[index]; }
+
     protected:
 
         EditorMinorDockspace();
@@ -23,6 +30,8 @@ namespace CE::Editor
         void Construct() override;
 
         void UpdateTabWell();
+
+    private:
 
         FVerticalStack* rootBox = nullptr;
         FStyledWidget* titleBar = nullptr;

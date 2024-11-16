@@ -6,6 +6,14 @@ ce_set(PAL_PLATFORM_IS_LINUX 0)
 ce_set(PAL_PLATFORM_IS_MAC 0)
 ce_set(PAL_PLATFORM_IS_WINDOWS 0)
 
+ce_set(PAL_TRAIT_PREBUILD_SUPPORTED 0)
+
+if (${CMAKE_GENERATOR} MATCHES "Visual Studio")
+    ce_set(PAL_TRAIT_PREBUILD_SUPPORTED 1)
+elseif (${CMAKE_GENERATOR} MATCHES "Xcode")
+    ce_set(PAL_TRAIT_PREBUILD_SUPPORTED 1)
+endif()
+
 # Get platform name maps
 file(GLOB detection_files "CMake/Platform/*/PALDetection_*.cmake")
 foreach(detection_file ${detection_files})

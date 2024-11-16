@@ -290,12 +290,19 @@ namespace CE
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
         SDL_GetWindowWMInfo(handle, &wmInfo);
+
 #if PLATFORM_WINDOWS
-		return wmInfo.info.win.window;
+		return (WindowHandle)wmInfo.info.win.window;
 #elif PLATFORM_MAC
-        return wmInfo.info.cocoa.window;
+        return (WindowHandle)wmInfo.info.cocoa.window;
+#elif PLATFORM_LINUX
+		if (wmInfo.subsystem == SDL_SYSWM_X11)
+			return wmInfo.info.x11.window;
+		if (wmInfo.subsystem == SDL_SYSWM_WAYLAND)
+			return (WindowHandle)wmInfo.info.wl.egl_window;
+		return 0;
 #else
-#   error Platform window handle not specified
+#   error Platform specific window handle not specified for the current platform
 #endif
 	}
 

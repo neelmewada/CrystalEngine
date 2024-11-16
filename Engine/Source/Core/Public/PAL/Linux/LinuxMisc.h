@@ -21,6 +21,13 @@ namespace CE
         {
             return PlatformName::Linux;
         }
+
+        static String GetOSVersionString();
+
+        inline static String GetSystemFileExplorerDisplayName()
+        {
+            return "Files";
+        }
     };
 
     typedef LinuxMisc PlatformMisc;

@@ -53,7 +53,7 @@ namespace CE::RHI
 
 		ScopeAttachment* FindScopeAttachment(const Name& id);
 
-		template<typename ScopeAttachmentType, typename DescriptorType = ScopeAttachmentType::DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
+		template<typename ScopeAttachmentType, typename DescriptorType = typename ScopeAttachmentType::DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
 		ScopeAttachmentType* EmplaceScopeAttachment(FrameAttachment* attachment,
 			ScopeAttachmentUsage usage,
 			ScopeAttachmentAccess access,

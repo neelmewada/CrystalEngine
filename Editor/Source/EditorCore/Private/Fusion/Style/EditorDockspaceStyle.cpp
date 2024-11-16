@@ -29,21 +29,21 @@ namespace CE
 			.TitleBarBackground(titleBarBackground)
     	;
 
-        dockspace.projectLabelParent->Background(projectLabelBackground);
+        dockspace.GetProjectLabelParent()->Background(projectLabelBackground);
 
-        for (int i = 0; i < dockspace.tabItems.GetSize(); ++i)
+        for (int i = 0; i < dockspace.GetTabItemCount(); ++i)
         {
-            EditorDockTabItem& tab = *dockspace.tabItems[i];
+            EditorDockTabItem& tab = *dockspace.GetTabItem(i);
 
             FBrush bg = inactiveTabBackground;
             Color tabBorder = inactiveTabBorder;
 
-            if (tab.isActive)
+            if (tab.IsActive())
             {
 	            bg = activeTabBackground;
                 tabBorder = activeTabBorder;
             }
-            else if (tab.isHovered)
+            else if (tab.IsHovered())
             {
                 bg = hoveredTabBackground;
                 tabBorder = hoveredTabBorder;

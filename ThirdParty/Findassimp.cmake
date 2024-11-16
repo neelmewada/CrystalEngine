@@ -8,6 +8,7 @@ endif()
 set(PACKAGE_NAME "assimp")
 
 set(ASSIMP_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 
 add_subdirectory(vendor/${PACKAGE_NAME})
 

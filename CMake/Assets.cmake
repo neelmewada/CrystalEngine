@@ -93,16 +93,25 @@ function(ce_add_assets NAME)
         endif()
     endforeach()
 
-    add_custom_target(${NAME}
-        DEPENDS ${DEST_ASSET_FILES}
-        VERBATIM
-        SOURCES ${ASSET_FILES}
-    )
-    
-    add_custom_command(TARGET ${NAME}
-        PRE_BUILD
-        COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" --temp "${TEMP_DIR}" --project "${CE_OUTPUT_DIR}"
-    )
+    if (PAL_TRAIT_PREBUILD_SUPPORTED)
+        add_custom_target(${NAME}
+            DEPENDS ${DEST_ASSET_FILES}
+            VERBATIM
+            SOURCES ${ASSET_FILES}
+        )
+
+        add_custom_command(TARGET ${NAME}
+            PRE_BUILD
+            COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" --temp "${TEMP_DIR}" --project "${CE_OUTPUT_DIR}"
+        )
+    else()
+        add_custom_target(${NAME}
+            COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" --temp "${TEMP_DIR}" --project "${CE_OUTPUT_DIR}"
+            #DEPENDS ${DEST_ASSET_FILES}
+            VERBATIM
+            SOURCES ${ASSET_FILES}
+        )
+    endif ()
 
     set_target_properties(${NAME} 
         PROPERTIES
