@@ -1516,9 +1516,32 @@ TEST(Object, Lifecycle)
         EXPECT_EQ(weakRef1->GetName(), "TestBundle");
         EXPECT_EQ(weakRef3->GetName(), "TestObj");
         
+        if (Ref<Object> obj = weakRef1.Lock())
+        {
+            
+        }
+        else
+        {
+            FAIL();
+        }
+        
         object = nullptr;
         bundle = nullptr;
         object2 = nullptr;
+        
+        try {
+            weakRef1->GetName();
+        } catch (const NullPointerException& exc) {
+            exception = true;
+        }
+        
+        EXPECT_TRUE(exception);
+        exception = false;
+        
+        if (Ref<Object> obj = weakRef1.Lock())
+        {
+            FAIL();
+        }
     }
     
     // 2. Multithreading

@@ -146,14 +146,19 @@ namespace CE
             Object* object = nullptr;
             if (control == nullptr)
             {
-                throw NullPointerException("Reference is NULL!");
+                return nullptr;
             }
             object = control->GetObject();
             if (object == nullptr)
             {
-                throw NullPointerException("Object is destroyed!");
+                return nullptr;
             }
             return (T*)object;
+        }
+        
+        Ref<T> Lock() const
+        {
+            return Ref<T>(Get());
         }
         
         inline operator T*() const
@@ -163,12 +168,32 @@ namespace CE
         
         inline T& operator*() const
         {
-            return *Get();
+            Object* object = nullptr;
+            if (control == nullptr)
+            {
+                throw NullPointerException("Reference is NULL!");
+            }
+            object = control->GetObject();
+            if (object == nullptr)
+            {
+                throw NullPointerException("Object is destroyed!");
+            }
+            return *(T*)object;
         }
         
         inline T* operator->() const
         {
-            return Get();
+            Object* object = nullptr;
+            if (control == nullptr)
+            {
+                throw NullPointerException("Reference is NULL!");
+            }
+            object = control->GetObject();
+            if (object == nullptr)
+            {
+                throw NullPointerException("Object is destroyed!");
+            }
+            return (T*)object;
         }
         
         inline bool operator!() const
