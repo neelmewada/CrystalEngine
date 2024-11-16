@@ -27,6 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::sdl
+            $<${PAL_PLATFORM_IS_LINUX}:X11>
         PUBLIC
             CE::Core
     RUNTIME_DEPENDENCIES

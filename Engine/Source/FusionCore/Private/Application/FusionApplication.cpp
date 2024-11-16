@@ -44,11 +44,12 @@ namespace CE
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
         assetLoader = initInfo.assetLoader;
+        scaling = PlatformApplication::Get()->GetDisplayScaling();
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShaders();
-        
+
         fontManager->Init();
 
         IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";

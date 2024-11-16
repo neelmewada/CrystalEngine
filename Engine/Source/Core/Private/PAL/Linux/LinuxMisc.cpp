@@ -5,6 +5,7 @@
 
 namespace CE
 {
+
     String LinuxMisc::GetOSVersionString()
     {
         utsname info;

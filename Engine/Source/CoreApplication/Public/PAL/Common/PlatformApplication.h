@@ -67,6 +67,8 @@ namespace CE
 
         virtual ~PlatformApplication();
 
+        virtual float GetDisplayScaling() { return 1.0f; }
+
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
             this->messageHandlers.Add(handler);

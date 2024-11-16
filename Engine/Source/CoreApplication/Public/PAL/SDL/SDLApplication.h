@@ -88,7 +88,5 @@ namespace CE
 
         StaticArray<SDL_Cursor*, (SIZE_T)SystemCursor::COUNT> systemCursors{};
     };
-
-    typedef SDLApplication PlatformApplicationImpl;
     
 } // namespace CE

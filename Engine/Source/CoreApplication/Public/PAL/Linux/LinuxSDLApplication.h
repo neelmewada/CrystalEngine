@@ -1,8 +1,30 @@
-//
-// Created by neel on 16/11/24.
-//
+#pragma once
 
-#ifndef LINUXSDLAPPLICATION_H
-#define LINUXSDLAPPLICATION_H
+#include "PAL/SDL/SDLApplication.h"
 
-#endif //LINUXSDLAPPLICATION_H
+namespace CE
+{
+
+    class COREAPPLICATION_API LinuxSDLApplication final : public SDLApplication
+    {
+    public:
+        typedef SDLApplication Super;
+
+        static LinuxSDLApplication* Create();
+
+        void Initialize() override;
+
+        float GetDisplayScaling() override { return displayScaling; }
+
+    private:
+
+        LinuxSDLApplication();
+
+        void CalculateDPI();
+
+        float displayScaling = 1;
+    };
+
+    typedef LinuxSDLApplication PlatformApplicationImpl;
+
+}
