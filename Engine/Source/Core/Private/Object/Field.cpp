@@ -58,7 +58,7 @@ namespace CE
 		{
 			Object* object = (Object*)fieldInstance;
 			if (object != nullptr)
-				object->Destroy();
+				object->BeginDestroy();
 			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
 			return;
 		}

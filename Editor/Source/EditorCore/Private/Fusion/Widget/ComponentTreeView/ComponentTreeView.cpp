@@ -32,7 +32,7 @@ namespace CE::Editor
 
         for (ComponentTreeItem* item : items)
         {
-            item->Destroy();
+            item->BeginDestroy();
         }
         items.Clear();
         expandedItems.Clear();

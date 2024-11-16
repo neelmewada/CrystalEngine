@@ -68,7 +68,7 @@ namespace CE
 	        
             atlas->ft = nullptr;
 
-            atlas->Destroy();
+            atlas->BeginDestroy();
         }
 
         FT_Done_FreeType(ft);
@@ -173,7 +173,7 @@ namespace CE
 
         if (font)
         {
-            font->Destroy();
+            font->BeginDestroy();
             return true;
         }
 

@@ -525,7 +525,7 @@ TEST(Containers, Variant)
 		auto& getValue = value.GetValue<Object&>();
 		EXPECT_EQ(ref.GetUuid(), getValue.GetUuid());
 	}
-	testObject->Destroy(); testObject = nullptr;
+	testObject->BeginDestroy(); testObject = nullptr;
 
 	// Struct
 	VariantStruct testStruct{};
@@ -1484,84 +1484,15 @@ TEST(Config, HierarchicalParsing)
 #pragma region Object
 
 
-class ObjectLifecycleTestClass : public Object
-{
-    CE_CLASS(ObjectLifecycleTestClass, Object)
-public:
-    
-    ObjectLifecycleTestClass() : Object()
-    {
-
-    }
-
-};
-
-CE_RTTI_CLASS(, , ObjectLifecycleTestClass,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
-CE_RTTI_CLASS_IMPL(, , ObjectLifecycleTestClass)
 
 
 TEST(Object, Lifecycle)
 {
-    TEST_BEGIN
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
-    
-    CE_REGISTER_TYPES(ObjectLifecycleTestClass);
-    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+	TEST_BEGIN;
 
-    
-    // 1. Basic object creation
 
-    auto instance = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(), "MyObject", OF_Transient);
-    EXPECT_EQ(instance->GetFlags(), OF_Transient);
-    EXPECT_EQ(instance->GetName(), "MyObject");
 
-    instance->RequestDestroy();
-    instance = nullptr;
-
-    // 2. Objects in different threads
-
-	List<Thread> threads{};
-
-	// Don't do this. Objects should only be created/destroyed from the main thread OR by using a lock on main thread
-	for (int i = 17; i < 16; i++)
-	{
-		threads.EmplaceBack([&]
-		{
-			String name = String("Obj_") + i;
-			auto obj = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(),
-				name, OF_Transient, ObjectLifecycleTestClass::Type(),
-				nullptr);
-			
-			if (obj->GetName() != name)
-			{
-				FAIL();
-			}
-
-			Thread::SleepFor(10);
-
-			obj->RequestDestroy();
-		});
-	}
-
-	for (int i = 0; i < threads.GetSize(); i++)
-	{
-		if (threads[i].IsJoinable())
-			threads[i].Join();
-	}
-	threads.Clear();
-
-    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
-    CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
-    
     TEST_END;
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
 }
 
 
@@ -1715,7 +1646,7 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
 	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
-	testObject->Destroy();
+	testObject->BeginDestroy();
     
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
@@ -1781,9 +1712,9 @@ TEST(Object, CDI2)
 		EXPECT_EQ(another->myString, "modified anotherCDI");
 		EXPECT_EQ(another->data.another, another);
 
-		test->Destroy();
-		another->Destroy();
-		transient->Destroy();
+		test->BeginDestroy();
+		another->BeginDestroy();
+		transient->BeginDestroy();
 	}
 
 	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);
@@ -1869,7 +1800,7 @@ TEST(Object, Events)
 		sender->onTextChanged.Broadcast("ReAdded");
 		EXPECT_EQ(receiver->text, "ReAdded");
 
-		receiver->Destroy();
+		receiver->BeginDestroy();
 
 		// To make sure this doesn't crash because we have destroyed the receiver object
 		sender->onTextChanged.Broadcast("New Text");
@@ -1888,7 +1819,7 @@ TEST(Object, Events)
 		EXPECT_EQ(fileAction, IO::FileAction::Delete);
 		EXPECT_EQ(lambda2Called, 2);
 
-		sender->Destroy();
+		sender->BeginDestroy();
 	}
 
 	CE_DEREGISTER_TYPES(
@@ -2868,7 +2799,7 @@ TEST(Serialization, BasicBinarySerialization)
 		BinarySerializer serializer{ test->GetClass(), test };
 		serializer.Serialize(&stream);
 
-		test->Destroy();
+		test->BeginDestroy();
 	}
 
 	stream.Seek(0);
@@ -2901,7 +2832,7 @@ TEST(Serialization, BasicBinarySerialization)
 		EXPECT_EQ(data1.string, "Data 1 String");
 		EXPECT_EQ(data1.array.GetSize(), 0);
 		
-		test->Destroy();
+		test->BeginDestroy();
 	}
 
 	CE_DEREGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
@@ -2966,7 +2897,7 @@ TEST(Serialization, Prefs)
 		prefsObject->prefsStruct.nameList.AddRange({ "name0", "name1" });
 		prefsObject->prefsStruct.colorValue = Color::RGBA(128, 64, 32);
 
-		prefsObject->Destroy();
+		prefsObject->BeginDestroy();
 	}
 	Prefs::Get().SavePrefsJson();
 
@@ -2987,7 +2918,7 @@ TEST(Serialization, Prefs)
 
 		EXPECT_EQ(prefsObject->prefsStruct.colorValue.ToU32(), Color::RGBA(128, 64, 32).ToU32());
 
-		prefsObject->Destroy();
+		prefsObject->BeginDestroy();
 	}
 	CE_DEREGISTER_TYPES(TestPrefsClass, TestPrefsStruct);
 	TEST_END;

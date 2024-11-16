@@ -244,7 +244,7 @@ namespace CE::Editor
 
             if (expandContent->GetChildCount() == 0)
             {
-                section->Destroy();
+                section->BeginDestroy();
             }
         }
     }

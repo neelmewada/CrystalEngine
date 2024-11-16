@@ -83,7 +83,7 @@ namespace CE::Editor
 
         if (editor)
         {
-            editor->Destroy();
+            editor->BeginDestroy();
             editor = nullptr;
         }
 

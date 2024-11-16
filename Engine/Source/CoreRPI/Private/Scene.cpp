@@ -25,7 +25,7 @@ namespace CE::RPI
 
 		for (FeatureProcessor* fp : featureProcessors)
 		{
-			fp->Destroy();
+			fp->BeginDestroy();
 		}
 		featureProcessors.Clear();
 

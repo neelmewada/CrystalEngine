@@ -84,7 +84,7 @@ namespace CE
 
 		if (!loadedBundles.KeyExists(bundleName))
 			return false;
-		loadedBundles[bundleName]->Destroy(); // Destroying bundle automatically removes it from the HashMap.
+		loadedBundles[bundleName]->BeginDestroy(); // Destroying bundle automatically removes it from the HashMap.
 		return true;
 	}
 
@@ -94,7 +94,7 @@ namespace CE
 		{
 			Object* subobject = GetSubobject(i);
 			DetachSubobject(subobject);
-			subobject->Destroy();
+			subobject->BeginDestroy();
 		}
 
 		loadedObjects.Clear();
@@ -112,7 +112,7 @@ namespace CE
 		}
 		for (auto bundle : bundlesToDestroy)
 		{
-			bundle->Destroy();
+			bundle->BeginDestroy();
 		}
 		bundlesToDestroy.Clear();
 		loadedBundles.Clear();

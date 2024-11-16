@@ -98,7 +98,7 @@ namespace CE
 	{
 		if (gSettingsBundle != nullptr)
 		{
-			gSettingsBundle->Destroy();
+			gSettingsBundle->BeginDestroy();
 			gSettingsBundle = nullptr;
 		}
 	}

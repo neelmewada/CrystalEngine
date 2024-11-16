@@ -21,10 +21,10 @@ namespace CE::Editor
 
         virtual void ShutdownModule() override
         {
-			gAssetDefinitionRegistry->Destroy();
+			gAssetDefinitionRegistry->BeginDestroy();
 			gAssetDefinitionRegistry = nullptr;
 
-			gEngine->Destroy();
+			gEngine->BeginDestroy();
 			gEngine = nullptr;
             gEditor = nullptr;
         }

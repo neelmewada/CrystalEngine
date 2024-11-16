@@ -119,7 +119,7 @@ namespace CE
 			PlatformApplication::Get()->RemoveMessageHandler(this);
 
 			app->Shutdown();
-			app->Destroy();
+			app->BeginDestroy();
 		}
 
 		delete scheduler; scheduler = nullptr;

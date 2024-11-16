@@ -521,7 +521,7 @@ namespace CE
 
                 if (clazz->defaultInstance != nullptr)
 				{
-					clazz->defaultInstance->Destroy();
+					clazz->defaultInstance->BeginDestroy();
                 	clazz->defaultInstance = nullptr;
 				}
 			}

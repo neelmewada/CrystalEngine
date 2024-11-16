@@ -209,7 +209,7 @@ namespace CE::Editor
 		if (!success)
 		{
 			if (bundle)
-				bundle->Destroy();
+				bundle->BeginDestroy();
 			return;
 		}
 
@@ -256,7 +256,7 @@ namespace CE::Editor
 		}
 
 		auto saveResult = Bundle::SaveBundleToDisk(bundle, nullptr, productPath);
-		bundle->Destroy();
+		bundle->BeginDestroy();
 
 		if (saveResult != BundleSaveResult::Success)
 		{

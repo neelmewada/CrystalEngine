@@ -42,7 +42,7 @@ namespace CE
 			{
 				if (bundle != nullptr)
 				{
-					bundle->Destroy();
+					bundle->BeginDestroy();
 				}
 			}
 
@@ -136,7 +136,7 @@ namespace CE
 
 		loadedAssetsByPath.Remove(bundle->GetBundleName());
 		loadedAssetsByUuid.Remove(bundle->GetBundleUuid());
-		bundle->Destroy();
+		bundle->BeginDestroy();
 	}
 
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)

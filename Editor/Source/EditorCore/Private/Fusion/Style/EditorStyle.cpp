@@ -31,7 +31,7 @@ namespace CE::Editor
     {
 		if (gEditorStyle)
 		{
-			gEditorStyle->Destroy();
+			gEditorStyle->BeginDestroy();
 			gEditorStyle = nullptr;
 		}
     }

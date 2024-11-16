@@ -275,7 +275,7 @@ namespace CE
 
         for (FWidget* widget : itemsToDestroy)
         {
-            widget->Destroy();
+            widget->BeginDestroy();
         }
     }
 

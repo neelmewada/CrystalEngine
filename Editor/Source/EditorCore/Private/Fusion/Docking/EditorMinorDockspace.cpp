@@ -99,7 +99,7 @@ namespace CE::Editor
         {
             FWidget* child = tabWell->GetChild(tabWell->GetChildCount() - 1);
             tabWell->RemoveChild(child);
-            child->Destroy();
+            child->BeginDestroy();
 
             tabItems.RemoveAt(tabItems.GetSize() - 1);
         }

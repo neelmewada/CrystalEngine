@@ -100,7 +100,7 @@ namespace CE
 
         while (content->GetChildCount() > 0)
         {
-            content->GetChild(0)->Destroy();
+            content->GetChild(0)->BeginDestroy();
         }
 
         itemWidgets.Clear();

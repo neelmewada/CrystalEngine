@@ -108,6 +108,11 @@ namespace CE
             return HasAnyObjectFlags(OF_TemplateInstance);
         }
 
+        bool IsPendingDestruction() const
+        {
+            return HasAnyObjectFlags(OF_PendingDestroy);
+        }
+
 		bool IsTransient() const;
 
 		inline u32 GetSubObjectCount() const { return attachedObjects.GetObjectCount(); }
@@ -124,12 +129,7 @@ namespace CE
 
 		bool IsObjectPresentInHierarchy(Object* searchObject);
 
-        void RequestDestroy();
-
-		FORCE_INLINE void Destroy()
-		{
-			RequestDestroy();
-		}
+        void BeginDestroy();
 
         // - Public API -
 
@@ -239,7 +239,7 @@ namespace CE
 
 		void FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance);
 
-    private:
+        void DestroyImmediate();
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class ::Bundle_WriteRead_Test;
@@ -255,6 +255,11 @@ namespace CE
 
         template<typename T>
         friend struct Internal::TypeInfoImpl;
+
+        template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
+        friend class Ref;
+
+        friend class Internal::RefCountControl;
         
         /*
          *  Fields
@@ -267,6 +272,7 @@ namespace CE
 		ObjectMap attachedObjects{};
         
         Object* outer = nullptr;
+        Internal::RefCountControl* control = nullptr;
 
         ObjectFlags objectFlags = OF_NoFlags;
 

@@ -96,6 +96,7 @@
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Interface.h"
+#include "Object/Lifecycle/RefCounting.h"
 #include "Object/Object.h"
 #include "Object/Serialization.h"
 #include "Object/FieldSerializer.h"

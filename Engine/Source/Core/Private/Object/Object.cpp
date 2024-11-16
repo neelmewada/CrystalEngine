@@ -84,8 +84,57 @@ namespace CE
 		}
 	}
 
-	void Object::RequestDestroy()
+	void Object::DestroyImmediate()
 	{
+		if (!IsPendingDestruction())
+		{
+			objectFlags |= OF_PendingDestroy;
+
+			ObjectListener::RemoveAllListeners(this);
+
+			{
+				LockGuard lock{ gDestroyedObjectsMutex };
+				gDestroyedObjects.Add(this);
+			}
+
+			if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
+			{
+				Prefs::Get().SavePrefs(this);
+			}
+
+			auto bundle = GetBundle();
+			if (bundle != nullptr)
+			{
+				bundle->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+			}
+
+			// Detach this object from outer
+			if (outer != nullptr)
+			{
+				outer->DetachSubobject(this);
+			}
+			outer = nullptr;
+
+			// Delete all attached subobjects
+			if (attachedObjects.GetObjectCount() > 0)
+			{
+				for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
+				{
+					auto subobject = attachedObjects.GetObjectAt(i);
+					subobject->outer = nullptr;
+					subobject->BeginDestroy();
+				}
+			}
+			attachedObjects.RemoveAll();
+		}
+
+		delete this;
+	}
+
+	void Object::BeginDestroy()
+	{
+		objectFlags |= OF_PendingDestroy;
+
 		ObjectListener::RemoveAllListeners(this);
 
 		OnBeforeDestroy();
@@ -93,11 +142,6 @@ namespace CE
 		{
 			LockGuard lock{ gDestroyedObjectsMutex };
 			gDestroyedObjects.Add(this);
-		}
-
-		//if (!IsDefaultInstance())
-		{
-			//UnbindAllEvents();
 		}
 
 		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
@@ -121,18 +165,19 @@ namespace CE
 		// Delete all attached subobjects
 		if (attachedObjects.GetObjectCount() > 0)
 		{
-            int totalCount = attachedObjects.GetObjectCount();
-            
 			for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
 			{
 				auto subobject = attachedObjects.GetObjectAt(i);
 				subobject->outer = nullptr;
-				subobject->RequestDestroy();
+				subobject->BeginDestroy();
 			}
 		}
 		attachedObjects.RemoveAll();
 		
-		delete this;
+		if (control == nullptr)
+		{
+			delete this;
+		}
 	}
 
 	bool Object::IsOfType(ClassType* classType) const
@@ -446,7 +491,7 @@ namespace CE
 		}
 	}
 
-    void Object::LoadConfig(ClassType* configClass, String fileName)
+	void Object::LoadConfig(ClassType* configClass, String fileName)
     {
         if (configClass == NULL)
             configClass = GetClass();
@@ -754,7 +799,7 @@ namespace CE
 				{
 					auto objectToDelete = *(destMap.begin() + i);
 					if (objectToDelete != nullptr)
-						objectToDelete->Destroy();
+						objectToDelete->BeginDestroy();
 				}
 				destMap.RemoveAll();
 

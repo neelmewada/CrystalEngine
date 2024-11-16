@@ -16,7 +16,7 @@ namespace CE::RPI
     {
 		for (Pass* pass : rootPass->passes)
 		{
-			pass->Destroy();
+			pass->BeginDestroy();
 		}
 		
         rootPass->passes.Clear();

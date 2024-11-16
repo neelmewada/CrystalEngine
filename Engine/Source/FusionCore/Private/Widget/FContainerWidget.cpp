@@ -113,7 +113,7 @@ namespace CE
 	    {
             FWidget* child = children[i];
             RemoveChild(child);
-            child->Destroy();
+            child->BeginDestroy();
 	    }
     }
 

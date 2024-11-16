@@ -91,7 +91,7 @@ namespace CE
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
-            destructionQueue[i].object->Destroy();
+            destructionQueue[i].object->BeginDestroy();
             destructionQueue.RemoveAt(i);
         }
     }
@@ -304,7 +304,7 @@ namespace CE
         {
             //if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
             {
-                destructionQueue[i].object->Destroy();
+                destructionQueue[i].object->BeginDestroy();
                 destructionQueue.RemoveAt(i);
                 continue;
             }
@@ -514,7 +514,7 @@ namespace CE
             if (window->IsMainWindow() || nativeContext->GetPlatformWindow() == window)
             {
                 if (nativeContext->owningWidget)
-                    nativeContext->owningWidget->Destroy();
+                    nativeContext->owningWidget->BeginDestroy();
                 nativeContext->owningWidget = nullptr;
 
                 if (!nativeContext->isDestroyed)

@@ -17,6 +17,8 @@ namespace CE
 		OF_SubobjectPending = BIT(4),
 		// Internal flag!
 		OF_InsideConstructor = BIT(5),
+		// Internal flag!
+		OF_PendingDestroy = BIT(6)
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 

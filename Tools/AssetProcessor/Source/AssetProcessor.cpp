@@ -326,7 +326,7 @@ namespace CE
 		for (auto importer : importers)
 		{
 			assetImportResults.AddRange(importer->GetResults());
-			importer->Destroy();
+			importer->BeginDestroy();
 		}
 		importers.Clear();
 

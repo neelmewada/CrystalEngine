@@ -18,7 +18,7 @@ namespace CE::Editor
 
 			if (ProjectManager::TryGet())
 			{
-                ProjectManager::TryGet()->Destroy();
+                ProjectManager::TryGet()->BeginDestroy();
 			}
         }
 

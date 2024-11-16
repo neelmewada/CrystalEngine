@@ -25,7 +25,7 @@ namespace CE::Editor
     {
         PropertyEditorRegistry::Get()->Deregister(GetTypeId<Array<>>());
 
-        propertyEditorRegistry->Destroy();
+        propertyEditorRegistry->BeginDestroy();
         propertyEditorRegistry = nullptr;
     }
 

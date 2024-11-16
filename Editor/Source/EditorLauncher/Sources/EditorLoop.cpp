@@ -300,7 +300,7 @@ void EditorLoop::PreShutdown()
 	// Destroy the project manager, which consequently saves it's Preferences to disk.
 	if (auto projectManager = ProjectManager::TryGet())
 	{
-		projectManager->Destroy();
+		projectManager->BeginDestroy();
 	}
 
 	// Save project & settings, and unload
@@ -317,7 +317,7 @@ void EditorLoop::PreShutdown()
 	EditorStyle::Shutdown();
 
 	fApp->Shutdown();
-	fApp->Destroy();
+	fApp->BeginDestroy();
 
 	gEngine->PreShutdown();
 

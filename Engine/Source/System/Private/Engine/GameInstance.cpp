@@ -82,7 +82,7 @@ namespace CE
 		}
 		for (auto subsystem : subsystems)
 		{
-			subsystem->Destroy();
+			subsystem->BeginDestroy();
 		}
 		subsystems.Clear();
 	}
