@@ -57,12 +57,16 @@ namespace CE
 
 	Object::Object() : name("Object"), uuid(Uuid())
     {
+        control = new Internal::RefCountControl();
+        control->object = this;
+        control->objectState = Internal::RefCountControl::Alive;
+        
         ConstructInternal();
     }
 
 	Object::~Object()
 	{
-		// Never call delete directly. Use Destroy() instead.
+        delete control; control = nullptr;
 	}
 
 	void Object::UnbindAllEvents()
@@ -174,7 +178,7 @@ namespace CE
 		}
 		attachedObjects.RemoveAll();
 		
-		if (control == nullptr)
+        if (control == nullptr || control->GetNumStrongRefs() == 0)
 		{
 			delete this;
 		}
@@ -337,6 +341,10 @@ namespace CE
     u64 Object::ComputeMemoryFootprint()
     {
 		u64 totalSize = GetClass()->GetSize();
+        if (control != nullptr)
+        {
+            totalSize += sizeof(Internal::RefCountControl);
+        }
 
 		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
 		{

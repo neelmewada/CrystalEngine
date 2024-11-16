@@ -5,38 +5,13 @@ namespace CE
 	class Object;
 	namespace Internal { class RefCountControl; }
 
-	template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
-	class Ref final
-	{
-	public:
-
-
-	private:
-
-		Internal::RefCountControl* control = nullptr;
-	};
-
-	template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
-	class WeakRef final
-	{
-	public:
-
-
-	private:
-
-		Internal::RefCountControl* control = nullptr;
-	};
-
 	namespace Internal
 	{
 		class CORE_API RefCountControl
 		{
 		public:
 
-			int AddStrongRef()
-			{
-				return strongReferences.fetch_add(1) + 1;
-			}
+            int AddStrongRef();
 
 			int AddWeakRef()
 			{
@@ -63,7 +38,7 @@ namespace CE
 
 			void SelfDestroy();
 
-			enum class ObjectState : int
+			enum ObjectState : int
 			{
 				NotInitialized,
 				Alive,
@@ -76,6 +51,8 @@ namespace CE
 			SharedMutex lock{};
 
 			ObjectState objectState = ObjectState::NotInitialized;
+            
+            friend class CE::Object;
 		};
 	}
 

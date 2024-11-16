@@ -110,7 +110,7 @@ namespace CE
 		// Delete transient bundle
 		if (info->transientBundle != nullptr)
 		{
-			info->transientBundle->RequestDestroy();
+			info->transientBundle->BeginDestroy();
 			info->transientBundle = nullptr;
 		}
 

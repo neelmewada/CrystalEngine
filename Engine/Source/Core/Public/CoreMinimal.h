@@ -98,6 +98,8 @@
 #include "Object/Interface.h"
 #include "Object/Lifecycle/RefCounting.h"
 #include "Object/Object.h"
+#include "Object/Lifecycle/Ref.h"
+#include "Object/Lifecycle/WeakRef.h"
 #include "Object/Serialization.h"
 #include "Object/FieldSerializer.h"
 #include "Object/JsonSerializer.h"

@@ -50,13 +50,13 @@ namespace CE
     {
 		if (gResourceManager != nullptr)
 		{
-			gResourceManager->RequestDestroy();
+			gResourceManager->BeginDestroy();
 		}
         gResourceManager = nullptr;
 
 		if (gSettingsBundle != nullptr)
 		{
-			gSettingsBundle->RequestDestroy();
+			gSettingsBundle->BeginDestroy();
 		}
         gSettingsBundle = nullptr;
 

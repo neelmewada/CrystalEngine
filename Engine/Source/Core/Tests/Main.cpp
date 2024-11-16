@@ -1243,7 +1243,7 @@ TEST(Reflection, SubClassType)
 				serializer.WriteNext(&stream);
 			}
 
-			object->RequestDestroy();
+			object->BeginDestroy();
 		}
 
 		stream.Seek(0);
@@ -1264,7 +1264,7 @@ TEST(Reflection, SubClassType)
 			EXPECT_EQ(object->derivedClassType, nullptr);
 			EXPECT_EQ(object->string, "some string");
 
-			object->RequestDestroy();
+			object->BeginDestroy();
 		}
 
 		stream.Close();
@@ -1483,14 +1483,48 @@ TEST(Config, HierarchicalParsing)
 
 #pragma region Object
 
-
-
-
 TEST(Object, Lifecycle)
 {
 	TEST_BEGIN;
 
-
+    Object* rawRef = nullptr;
+    
+    // 1. Simple ref counting
+    {
+        Ref<Object> object = CreateObject<Bundle>(nullptr, "TestBundle");
+        rawRef = object.Get();
+        
+        Ref<Bundle> bundle = Object::CastTo<Bundle>(object);
+        
+        Ref<Object> object2 = CreateObject<Object>(nullptr, "TestObj");
+        
+        Ref<Object> nullRef = nullptr;
+        bool exception = false;
+        
+        try {
+            nullRef->BeginDestroy();
+        } catch (const NullPointerException& exc) {
+            exception = true;
+        }
+        
+        EXPECT_TRUE(exception);
+        exception = false;
+        
+        WeakRef<Object> weakRef1 = object;
+        WeakRef<Bundle> weakRef2 = bundle;
+        WeakRef<Object> weakRef3 = object2;
+        EXPECT_EQ(weakRef1->GetName(), "TestBundle");
+        EXPECT_EQ(weakRef3->GetName(), "TestObj");
+        
+        object = nullptr;
+        bundle = nullptr;
+        object2 = nullptr;
+    }
+    
+    // 2. Multithreading
+    {
+        
+    }
 
     TEST_END;
 }
@@ -1596,7 +1630,7 @@ TEST(Object, CDI)
 		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
 		EXPECT_EQ(testSubClass->subString, "String from ini");
 
-		testSubClass->RequestDestroy();
+		testSubClass->BeginDestroy();
 	}
 	
 	CDITest* cdi = GetMutableDefaults<CDITest>();
@@ -2681,7 +2715,7 @@ TEST(Serialization, BinaryBlob)
 				serializer.WriteNext(&stream);
 			}
 
-			write->RequestDestroy();
+			write->BeginDestroy();
 		}
 
 		stream.Seek(0);
@@ -2705,7 +2739,7 @@ TEST(Serialization, BinaryBlob)
 				EXPECT_EQ((u8)read->blob.GetDataPtr()[i], (u8)data[i]);
 			}
 
-			read->RequestDestroy();
+			read->BeginDestroy();
 		}
 	}
 
@@ -3160,9 +3194,9 @@ TEST(Bundle, WriteRead)
 
 		auto result = Bundle::SaveBundleToDisk(writeBundle, nullptr, bundlePath);
 
-		obj1->RequestDestroy(); // Automatically destroys children
-		obj2->RequestDestroy();
-		writeBundle->RequestDestroy();
+		obj1->BeginDestroy(); // Automatically destroys children
+		obj2->BeginDestroy();
+		writeBundle->BeginDestroy();
 	}
 
 	// Read
@@ -3223,10 +3257,10 @@ TEST(Bundle, WriteRead)
 		EXPECT_EQ(readBundle->LoadObject(obj1_1Uuid), nullptr);
 
 		EXPECT_TRUE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
-		obj1_0->RequestDestroy();
+		obj1_0->BeginDestroy();
 		EXPECT_FALSE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
 
-		readBundle->RequestDestroy();
+		readBundle->BeginDestroy();
 	}
     
     if (bundlePath.Exists())
@@ -3270,9 +3304,9 @@ TEST(Resource, Manipulation)
 	String textResource = GetResourceManager()->LoadTextResource("/Core_Test/Resources/Text/Entry0.txt");
 	EXPECT_EQ(textResource, "resource_text");
 
-	cssResource->RequestDestroy();
+	cssResource->BeginDestroy();
 	cssResource = nullptr;
-	resource->RequestDestroy();
+	resource->BeginDestroy();
 	resource = nullptr;
 
 	GetResourceManager()->DeregisterResource("Core_Test", "Text/Entry0.txt");

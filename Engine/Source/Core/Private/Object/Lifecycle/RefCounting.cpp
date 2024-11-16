@@ -2,13 +2,17 @@
 
 namespace CE::Internal
 {
+    int RefCountControl::AddStrongRef()
+    {
+        return strongReferences.fetch_add(1) + 1;
+    }
 
 	int RefCountControl::ReleaseStrongRef()
 	{
 		// No lock needed to decrement atomic counter
 		int refCount = strongReferences.fetch_sub(1) - 1;
 
-		if (refCount == 0) // If no strong references remaining
+		if (refCount == 0) // If no strong references are remaining
 		{
 			bool destroyThis = false;
 
@@ -53,10 +57,10 @@ namespace CE::Internal
 
 	Object* RefCountControl::GetObject()
 	{
+        LockGuard guard{ lock };
+        
 		if (objectState != ObjectState::Alive)
 			return nullptr;
-
-		LockGuard guard{ lock };
 
 		Object* retVal = nullptr;
 
