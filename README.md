@@ -10,9 +10,17 @@ A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based rende
 
 ## Requirements
 
-Only Windows is supported for now. Although, the Core libraries compile on macOS too.
+Both the engine and editor compiles on **Windows** and **Linux** (Ubuntu). However, Windows is the main platform and things might break on linux.
+
+Core libraries compile on **macOS** universal too.
 
 ## Building
+
+Clone the repo using following command:
+
+```
+git clone --recursive https://github.com/neelmewada/CrystalEngine.git
+```
 
 Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies required to build.
 
