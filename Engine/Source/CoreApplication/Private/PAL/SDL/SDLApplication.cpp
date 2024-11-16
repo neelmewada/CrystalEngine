@@ -199,8 +199,8 @@ namespace CE
 		}
 
 		float scaling = GetDisplayScaling();
-		width = (u32)(gDefaultWindowWidth * scaling);
-		height = (u32)(gDefaultWindowHeight * scaling);
+		width = (u32)(width * scaling);
+		height = (u32)(height * scaling);
 
 		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen, false, hidden);
 		windowList.Add(window);
@@ -220,8 +220,8 @@ namespace CE
 		}
 
 		float scaling = GetDisplayScaling();
-		width = (u32)(gDefaultWindowWidth * scaling);
-		height = (u32)(gDefaultWindowHeight * scaling);
+		width = (u32)(width * scaling);
+		height = (u32)(height * scaling);
 
 		auto window = new SDLPlatformWindow(title, width, height, info);
 		windowList.Add(window);
