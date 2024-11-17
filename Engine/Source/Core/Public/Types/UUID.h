@@ -16,68 +16,25 @@ namespace CE
     {
     public:
         Uuid();
-        
-        Uuid(u64 value);
+
+        Uuid(u64 low, u64 high);
+
+        static Uuid Null();
         
         Uuid(const Uuid&) = default;
         
-        CE_INLINE operator u64() const
+        bool operator==(const Uuid& other) const
         {
-            return uuid;
+            return uuid[0] == other.uuid[0] && uuid[1] == other.uuid[1];
         }
         
-        CE_INLINE bool operator==(const Uuid& other) const
+        bool operator!=(const Uuid& other) const
         {
-            return uuid == other.uuid;
-        }
-        
-        CE_INLINE bool operator!=(const Uuid& other) const
-        {
-            return uuid != other.uuid;
-        }
-        
-        CE_INLINE bool operator==(const s64& other) const
-        {
-            return uuid == other;
-        }
-        
-        CE_INLINE bool operator==(const u64& other) const
-        {
-            return uuid == other;
-        }
-        
-        CE_INLINE bool operator!=(const s64& other) const
-        {
-            return uuid != other;
-        }
-        
-        CE_INLINE bool operator!=(const u64& other) const
-        {
-            return uuid != other;
-        }
-        
-        CE_INLINE bool operator==(const s32& other) const
-        {
-            return uuid == other;
-        }
-        
-        CE_INLINE bool operator==(const u32& other) const
-        {
-            return uuid == other;
-        }
-        
-        CE_INLINE bool operator!=(const s32& other) const
-        {
-            return uuid != other;
-        }
-        
-        CE_INLINE bool operator!=(const u32& other) const
-        {
-            return uuid != other;
+            return !operator==(other);
         }
         
     private:
-        u64 uuid;
+        u64 uuid[2] = { 0, 0 };
     };
 
     /// A 32-bit unique identifier

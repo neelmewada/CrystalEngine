@@ -13,17 +13,22 @@ namespace CE
     static std::mt19937 gRandomEngine32(gRandomDevice32());
     static std::uniform_int_distribution<u32> gUniformDistribution32;
 
-    Uuid::Uuid()
-        : uuid(gUniformDistribution(gRandomEngine))
+    Uuid::Uuid() : Uuid(gUniformDistribution(gRandomEngine), gUniformDistribution(gRandomEngine))
     {
         
     }
 
-    Uuid::Uuid(u64 value) : uuid(value)
+    Uuid::Uuid(u64 low, u64 high)
     {
-        
+        uuid[0] = low;
+        uuid[1] = high;
     }
-    
+
+    Uuid Uuid::Null()
+    {
+        return Uuid(0, 0);
+    }
+
     CORE_API u64 GenerateRandomU64()
     {
         return gUniformDistribution(gRandomEngine);
