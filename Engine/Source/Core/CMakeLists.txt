@@ -27,6 +27,7 @@ ce_add_target(Core SHARED
             ThirdParty::zip
             ThirdParty::crcpp
         PUBLIC
+            ThirdParty::cpptrace
             ThirdParty::spdlog
             ThirdParty::efsw
             CE::CoreTracy

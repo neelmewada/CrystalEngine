@@ -1570,11 +1570,22 @@ TEST(Object, Lifecycle)
 		Ref<LifecycleSubObject> subObject = object->subobject;
 		WeakRef<LifecycleClass> weak1 = object;
 		WeakRef<LifecycleSubObject> weak2 = subObject;
+		Ref<LifecycleSubObject> strongRefToChild = nullptr;
+		WeakRef<LifecycleSubObject> weakRefToChild = nullptr;
 
 		for (int i = 0; i < 4; ++i)
 		{
 			Ref<LifecycleSubObject> child = CreateObject<LifecycleSubObject>(object, String::Format("Array_{}", i));
 			rawRef = child.Get();
+
+			if (i == 0)
+			{
+				strongRefToChild = child;
+			}
+			else if (i == 1)
+			{
+				weakRefToChild = child;
+			}
 
 			if (i % 2 == 0) // 2 different ways to insert array elements
 			{
@@ -1593,8 +1604,14 @@ TEST(Object, Lifecycle)
 		// Destroy object
 		object = nullptr;
 
+		if (Ref<LifecycleSubObject> lock = weakRefToChild.Lock())
+		{
+			FAIL();
+		}
+
 		EXPECT_TRUE(lifecycleClassDestroyed);
 		EXPECT_TRUE(subObject->IsPendingDestruction());
+		EXPECT_TRUE(strongRefToChild->IsPendingDestruction());
 	}
 	EXPECT_TRUE(lifecycleSubObjectDestroyed);
 	EXPECT_TRUE(lifecycleClassDestroyed);

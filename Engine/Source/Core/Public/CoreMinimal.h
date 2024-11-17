@@ -41,6 +41,8 @@
 
 // *********************************
 
+#include <cpptrace/cpptrace.hpp>
+
 // Module
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"

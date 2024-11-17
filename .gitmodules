@@ -31,3 +31,6 @@
 [submodule "ThirdParty/vendor/sdl"]
 	path = ThirdParty/vendor/sdl
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "ThirdParty/vendor/cpptrace"]
+	path = ThirdParty/vendor/cpptrace
+	url = https://github.com/jeremy-rifkin/cpptrace.git
