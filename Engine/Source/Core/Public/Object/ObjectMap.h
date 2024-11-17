@@ -23,9 +23,9 @@ namespace CE
             return (u32)objects.GetSize();
         }
         
-		Object* FindObject(Uuid uuid) const;
+		Ref<Object> FindObject(Uuid uuid) const;
 
-		Object* FindObject(const Name& objectName, ClassType* classType = nullptr) const;
+		Ref<Object> FindObject(const Name& objectName, ClassType* classType = nullptr) const;
 
 		Object* GetObjectAt(u32 index) const;
         

@@ -3,12 +3,11 @@
 
 namespace CE
 {
-    Object* ObjectMap::FindObject(Uuid uuid) const
-    {
-		for (const auto& objectRef : objects)
-		{
-			Object* object = objectRef.Get();
 
+	Ref<Object> ObjectMap::FindObject(Uuid uuid) const
+    {
+		for (const auto& object : objects)
+		{
 			if (object != nullptr && object->GetUuid() == uuid)
 			{
 				return object;
@@ -17,12 +16,10 @@ namespace CE
 		return nullptr;
     }
 
-	Object* ObjectMap::FindObject(const Name& name, ClassType* classType) const
+	Ref<Object> ObjectMap::FindObject(const Name& name, ClassType* classType) const
 	{
-		for (const auto& objectRef : objects)
+		for (const auto& object : objects)
 		{
-			Object* object = objectRef.Get();
-
 			if (object != nullptr && object->GetName() == name && (classType == nullptr || classType == object->GetClass()))
 			{
 				return object;
@@ -31,7 +28,7 @@ namespace CE
 		return nullptr;
 	}
 
-    Object* ObjectMap::GetObjectAt(u32 index) const
+	Object* ObjectMap::GetObjectAt(u32 index) const
     {
 		if (index >= objects.GetSize())
 			return nullptr;

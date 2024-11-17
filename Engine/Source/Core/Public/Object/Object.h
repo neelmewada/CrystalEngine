@@ -71,7 +71,7 @@ namespace CE
             return objectFlags;
         }
 
-		INLINE Object* GetOuter() const
+		INLINE const WeakRef<Object>& GetOuter() const
 		{
 			return outer;
 		}
@@ -168,8 +168,6 @@ namespace CE
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
 		void FetchObjectReferences(HashMap<Uuid, Object*>& outReferences);
 
-		Object* Clone(String cloneName = "", bool deepClone = true);
-
 		void LoadFromTemplate(Object* templateObject);
 
         // - Config API -
@@ -190,8 +188,6 @@ namespace CE
 
 		void LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap,
 			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
-
-		Object* CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
 
 		// Lifecycle
 
@@ -259,10 +255,10 @@ namespace CE
         template<typename T>
         friend struct Internal::TypeInfoImpl;
 
-        template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
+        template<typename TObject>
         friend class Ref;
 
-        template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
+        template<typename TObject>
         friend class WeakRef;
 
         friend class Internal::RefCountControl;
@@ -277,7 +273,7 @@ namespace CE
         // Subobject Lifecycle
 		ObjectMap attachedObjects{};
         
-        Object* outer = nullptr;
+        WeakRef<Object> outer = nullptr;
         Internal::RefCountControl* control = nullptr;
 
         ObjectFlags objectFlags = OF_NoFlags;

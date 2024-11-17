@@ -10,7 +10,7 @@ namespace CE
         
         Settings() = default;
         
-        static Settings* LoadSettings(ClassType* settingsClass, String settingsName = "");
+        static Ref<Settings> LoadSettings(ClassType* settingsClass, String settingsName = "");
 
         static void SaveSettings();
 

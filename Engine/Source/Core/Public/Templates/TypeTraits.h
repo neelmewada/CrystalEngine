@@ -249,10 +249,10 @@ namespace CE
 		typedef __underlying_type(T) Type;
 	};
 
-	template<typename T> requires TIsBaseClassOf<Object, T>::Value
+	template<typename T>
 	class Ref;
 
-	template<typename T> requires TIsBaseClassOf<Object, T>::Value
+	template<typename T>
 	class WeakRef;
 
 	template<typename T>

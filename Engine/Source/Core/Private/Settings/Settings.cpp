@@ -4,14 +4,14 @@ namespace CE
 {
 	Array<ClassType*> Settings::settingsClasses{};
 
-	static Settings* LoadSettingsFromBundle(ClassType* settingsClass)
+	static Ref<Settings> LoadSettingsFromBundle(ClassType* settingsClass)
 	{
 		if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
 			return nullptr;
-		return (Settings*)GetSettingsBundle()->LoadObject(settingsClass->GetTypeName());
+		return (Ref<Settings>)GetSettingsBundle()->LoadObject(settingsClass->GetTypeName());
 	}
 
-    Settings* Settings::LoadSettings(ClassType* settingsClass, String settingsName)
+    Ref<Settings> Settings::LoadSettings(ClassType* settingsClass, String settingsName)
     {
         if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
             return nullptr;

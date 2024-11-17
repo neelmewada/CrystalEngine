@@ -3,7 +3,7 @@
 namespace CE
 {
 
-    template<typename T = Object> requires TIsBaseClassOf<Object, T>::Value
+    template<typename T = Object>
 	class Ref final
 	{
 	public:
@@ -68,10 +68,6 @@ namespace CE
 #endif
             return *this;
         }
-
-        Ref(const WeakRef<T>& weakRef);
-
-        Ref& operator=(const WeakRef<T>& weakRef);
         
         Ref& operator=(T* newObject)
         {
@@ -138,6 +134,12 @@ namespace CE
             move.ptr = nullptr;
 #endif
         }
+
+        template<class U> requires TIsBaseClassOf<Object, U>::Value and (not std::is_same_v<T, U>)
+        explicit operator Ref<U>() const
+        {
+            return Ref<U>((U*)Get());
+        }
         
         ~Ref()
         {
@@ -200,15 +202,33 @@ namespace CE
             }
             return (T*)object;
         }
+
+        bool IsNull() const
+        {
+            Object* object = nullptr;
+            if (control == nullptr)
+            {
+                return true;
+            }
+
+            object = control->GetObject();
+
+            return object == nullptr;
+        }
+
+        bool IsValid() const
+        {
+            return !IsNull();
+        }
         
         inline bool operator!() const
         {
-            return Get() == nullptr;
+            return !IsValid();
         }
         
         inline operator bool() const
         {
-            return Get() != nullptr;
+            return IsValid();
         }
 
         inline bool operator==(T* object) const
@@ -231,6 +251,34 @@ namespace CE
             return control != rhs.control;
         }
 
+        bool operator==(const WeakRef<T>& rhs) const;
+
+        inline bool operator!=(const WeakRef<T>& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator==(const Ref<U>& rhs) const
+        {
+            return control == rhs.control;
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator!=(const Ref<U>& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator==(const WeakRef<U>& rhs) const;
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator!=(const WeakRef<U>& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
         SIZE_T GetHash() const
         {
             return (SIZE_T)control;
@@ -243,10 +291,10 @@ namespace CE
 #endif
 		Internal::RefCountControl* control = nullptr;
 
-        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        template<typename U>
         friend class WeakRef;
 
-        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        template<typename U>
         friend class Ref;
 	};
 

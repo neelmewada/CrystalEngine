@@ -23,6 +23,7 @@ namespace CE
 	{
 		Success = 0,
 		UnknownError,
+		InvalidStream,
 		InvalidPath,
 		InvalidBundle,
 		AssetNotInBundle,
@@ -30,6 +31,8 @@ namespace CE
 
 	struct IBundleResolver
 	{
+		virtual ~IBundleResolver() = default;
+
 		virtual Name ResolveBundlePath(Uuid bundleUuid) = 0;
 	};
 
@@ -56,23 +59,25 @@ namespace CE
 			return nullptr;
 		}
 
-		static Bundle* LoadBundleByUuid(Uuid bundleUuid, LoadFlags loadFlags = LOAD_Default);
+		static Ref<Bundle> LoadBundleByUuid(Uuid bundleUuid, LoadFlags loadFlags = LOAD_Default);
 
 		static IO::Path GetBundlePath(const Name& bundleName);
 
 		static bool DestroyLoadedBundle(const Name& bundleName);
 		static void DestroyAllBundles();
 
-		static Bundle* LoadBundleFromDisk(Bundle* outer, const Name& bundleName, LoadFlags loadFlags = LOAD_Default);
-		static Bundle* LoadBundleFromDisk(Bundle* outer, const IO::Path& fullBundleFilePath, LoadFlags loadFlags = LOAD_Default);
-		static Bundle* LoadBundleFromDisk(Bundle* outer, const IO::Path& fullBundleFilePath, BundleLoadResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Ref<Bundle> LoadBundleFromDisk(const Ref<Bundle>& outer, const Name& bundleName, LoadFlags loadFlags = LOAD_Default);
+		static Ref<Bundle> LoadBundleFromDisk(const Ref<Bundle>& outer, const IO::Path& fullBundleFilePath,
+		                                      LoadFlags loadFlags = LOAD_Default);
+		static Ref<Bundle> LoadBundleFromDisk(const Ref<Bundle>& outer, const IO::Path& fullBundleFilePath,
+		                                      BundleLoadResult& outResult, LoadFlags loadFlags = LOAD_Default);
         
         // Always prefer using paths than streams
-		static Bundle* LoadBundleFromDisk(Bundle* outer, Stream* inStream, IO::Path fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Ref<Bundle> LoadBundleFromDisk(const Ref<Bundle>& outer, Stream* inStream, const IO::Path& fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static BundleSaveResult SaveBundleToDisk(Bundle* bundle, Object* asset);
-		static BundleSaveResult SaveBundleToDisk(Bundle* bundle, Object* asset, const IO::Path& fullBundleFilePath);
-		static BundleSaveResult SaveBundleToDisk(Bundle* bundle, Object* asset, Stream* outputStream);
+		static BundleSaveResult SaveBundleToDisk(const WeakRef<Bundle>& bundle, Object* asset);
+		static BundleSaveResult SaveBundleToDisk(const WeakRef<Bundle>& bundle, Object* asset, const IO::Path& fullBundleFilePath);
+		static BundleSaveResult SaveBundleToDisk(const WeakRef<Bundle>& bundle, Object* asset, Stream* outputStream);
 
 		// - Public API -
 
@@ -96,9 +101,9 @@ namespace CE
         
         void LoadFully();
         void LoadFully(Stream* originalStream);
-        
-        Object* LoadObject(Uuid objectUuid);
-		Object* LoadObject(const Name& objectClassName);
+
+		Ref<Object> LoadObject(Uuid objectUuid);
+		Ref<Object> LoadObject(const Name& objectClassName);
 
 		void DestroyAllSubobjects();
 
@@ -126,8 +131,8 @@ namespace CE
 		void OnSubobjectDetached(Object* subobject) override;
 
 		void OnAfterDeserialize() override;
-        
-        Object* LoadObjectFromEntry(Stream* originalStream, Uuid objectUuid);
+
+		Ref<Object> LoadObjectFromEntry(Stream* originalStream, Uuid objectUuid);
 
 		// Internal use only! Marks the passed object as 'unloaded'
 		void OnObjectUnloaded(Object* object);

@@ -139,7 +139,7 @@ namespace BundleTests
 		String stringValue = "struct default";
 
 		FIELD()
-		Object* owner = nullptr;
+		WeakRef<Object> owner = nullptr;
 	};
 
 	STRUCT()
@@ -149,7 +149,7 @@ namespace BundleTests
 	public:
 
 		FIELD()
-		WritingTestObj1* obj1Ptr = nullptr;
+		WeakRef<WritingTestObj1> obj1Ptr = nullptr;
 	};
 	
 	CLASS()
@@ -168,7 +168,7 @@ namespace BundleTests
 		Array<String> stringArray{};
 
 		FIELD()
-		Object* objPtr = nullptr;
+		WeakRef<Object> objPtr = nullptr;
 	};
 
 	CLASS()
@@ -181,7 +181,7 @@ namespace BundleTests
 		WritingTestStruct1 testStruct{};
 
 		FIELD()
-		Array<Object*> objectArray{};
+		Array<WeakRef<Object>> objectArray{};
 
 		FIELD()
 		u32 value;

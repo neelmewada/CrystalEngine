@@ -323,14 +323,28 @@ namespace CE
 		}
 		else if (fieldDeclType->IsObject())
 		{
-			Object* object = field->GetFieldValue<Object*>(instance);
-			if (object == nullptr || object->IsTransient())
+			WeakRef<Object> object = nullptr;
+
+			if (field->IsStrongRefCounted())
+			{
+				object = field->GetFieldValue<Ref<Object>>(instance);
+			}
+			else if (field->IsWeakRefCounted())
+			{
+				object = field->GetFieldValue<WeakRef<Object>>(instance);
+			}
+			else
+			{
+				object = field->GetFieldValue<Object*>(instance);
+			}
+
+			if (object.IsNull() || object->IsTransient())
 			{
 				*stream << (u8)0; // NULL field type byte
 				return true;
 			}
 
-			auto bundle = object->GetBundle();
+			WeakRef<Bundle> bundle = object->GetBundle();
 			if (bundle != nullptr && bundle->IsTransient()) // Do NOT save Transient object references
 			{
 				*stream << (u8)0; // NULL field type byte
@@ -513,7 +527,18 @@ namespace CE
 			}
 			else if (field->IsObjectField())
 			{
-				field->ForceSetFieldValue<Object*>(instance, nullptr);
+				if (field->IsStrongRefCounted())
+				{
+					field->ForceSetFieldValue<Ref<Object>>(instance, nullptr);
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					field->ForceSetFieldValue<WeakRef<Object>>(instance, nullptr);
+				}
+				else
+				{
+					field->ForceSetFieldValue<Object*>(instance, nullptr);
+				}
 			}
 			else if (fieldDeclType->IsEnum())
 			{
@@ -1018,16 +1043,38 @@ namespace CE
 			// TODO: Better loading mechanism for external object references?
 			if (bundleUuid != 0 && field->IsObjectField())
 			{
-				Bundle* refBundle = Bundle::LoadBundleByUuid(bundleUuid);
+				Ref<Bundle> refBundle = Bundle::LoadBundleByUuid(bundleUuid);
 				if (refBundle != nullptr)
 				{
 					Object* object = refBundle->LoadObject(objectUuid);
-					field->ForceSetFieldValue<Object*>(instance, object);
+					if (field->IsStrongRefCounted())
+					{
+						field->ForceSetFieldValue<Ref<Object>>(instance, object);
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						field->ForceSetFieldValue<WeakRef<Object>>(instance, object);
+					}
+					else
+					{
+						field->ForceSetFieldValue<Object*>(instance, object);
+					}
 					return true;
 				}
 				else
 				{
-					field->ForceSetFieldValue<Object*>(instance, nullptr);
+					if (field->IsStrongRefCounted())
+					{
+						field->ForceSetFieldValue<Ref<Object>>(instance, nullptr);
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						field->ForceSetFieldValue<WeakRef<Object>>(instance, nullptr);
+					}
+					else
+					{
+						field->ForceSetFieldValue<Object*>(instance, nullptr);
+					}
 					return true;
 				}
 			}
@@ -1081,10 +1128,10 @@ namespace CE
 
 					if (bundleUuid != 0)
 					{
-						Bundle* refBundle = Bundle::LoadBundleByUuid(bundleUuid);
+						Ref<Bundle> refBundle = Bundle::LoadBundleByUuid(bundleUuid);
 						if (refBundle != nullptr)
 						{
-							Object* object = refBundle->LoadObject(uuid);
+							Ref<Object> object = refBundle->LoadObject(uuid);
 							array.AddObject(object);
 						}
 					}

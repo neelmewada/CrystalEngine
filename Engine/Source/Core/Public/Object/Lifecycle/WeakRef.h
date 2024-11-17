@@ -3,7 +3,7 @@
 namespace CE
 {
     
-    template<typename T = Object> requires TIsBaseClassOf<Object, T>::Value
+    template<typename T = Object>
     class WeakRef final
     {
     public:
@@ -191,6 +191,12 @@ namespace CE
             move.ptr = nullptr;
 #endif
         }
+
+        template<class U> requires TIsBaseClassOf<Object, U>::Value and (not std::is_same_v<T, U>)
+        explicit operator WeakRef<U>() const
+        {
+            return WeakRef<U>((U*)Get());
+        }
         
         ~WeakRef()
         {
@@ -218,15 +224,28 @@ namespace CE
             }
             return (T*)object;
         }
-        
+
+        bool IsNull() const
+        {
+            Object* object = nullptr;
+            if (control == nullptr)
+            {
+                return true;
+            }
+
+            object = control->GetObject();
+
+            return object == nullptr;
+        }
+
+        bool IsValid() const
+        {
+            return !IsNull();
+        }
+
         Ref<T> Lock() const
         {
             return Ref<T>(Get());
-        }
-        
-    	operator T*() const
-        {
-            return Get();
         }
         
         T& operator*() const
@@ -286,7 +305,41 @@ namespace CE
         
         inline bool operator!=(const WeakRef& rhs) const
         {
-            return control != rhs.control;
+            return !operator==(rhs);
+        }
+
+        inline bool operator==(const Ref<T>& rhs) const
+        {
+            return control == rhs.control;
+        }
+
+        inline bool operator!=(const Ref<T>& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator==(const WeakRef<U>& rhs) const
+        {
+            return control == rhs.control;
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator!=(const WeakRef<U>& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator==(const Ref<U>& rhs) const
+        {
+            return control == rhs.control;
+        }
+
+        template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+        bool operator!=(const Ref<U>& rhs) const
+        {
+            return !operator==(rhs);
         }
 
         SIZE_T GetHash() const
@@ -296,10 +349,10 @@ namespace CE
         
     private:
 
-        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        template<typename U>
         friend class WeakRef;
 
-        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        template<typename U>
         friend class Ref;
 
 #if CE_BUILD_DEBUG
@@ -308,35 +361,17 @@ namespace CE
         Internal::RefCountControl* control = nullptr;
     };
 
-    template <typename T> requires TIsBaseClassOf<Object, T>::Value
-    Ref<T>::Ref(const WeakRef<T>& weakRef)
+    template <typename T>
+    bool Ref<T>::operator==(const WeakRef<T>& rhs) const
     {
-        control = weakRef.control;
-        if (control)
-        {
-            control->AddStrongRef();
-        }
-#if CE_BUILD_DEBUG
-        ptr = (T*)weakRef.ptr;
-#endif
+        return control == rhs.control;
     }
 
-    template <typename T> requires TIsBaseClassOf<Object, T>::Value
-    Ref<T>& Ref<T>::operator=(const WeakRef<T>& weakRef)
+    template <typename T>
+    template<typename U> requires TIsBaseClassOf<T, U>::Value or TIsBaseClassOf<U, T>::Value
+    bool Ref<T>::operator==(const WeakRef<U>& rhs) const
     {
-        if (control)
-        {
-            control->ReleaseStrongRef();
-        }
-        control = weakRef.control;
-        if (control)
-        {
-            control->AddStrongRef();
-        }
-#if CE_BUILD_DEBUG
-        ptr = (T*)weakRef.ptr;
-#endif
-        return *this;
+        return control == rhs.control;
     }
 
 } // namespace CE

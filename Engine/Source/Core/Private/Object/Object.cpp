@@ -322,7 +322,7 @@ namespace CE
 
 	bool Object::ParentExistsInChain(Object* parent) const
 	{
-		Object* outer = GetOuter();
+		WeakRef<Object> outer = GetOuter();
 
 		while (outer != nullptr)
 		{
@@ -342,7 +342,7 @@ namespace CE
     Bundle* Object::GetBundle()
     {
 		if (GetClass()->IsSubclassOf<Bundle>())
-			return (Bundle*)this;
+			return Object::CastTo<Bundle>(this);
 
         auto outerObject = outer;
         if (outerObject == nullptr)
@@ -351,7 +351,7 @@ namespace CE
         while (outerObject != nullptr)
         {
             if (outerObject->GetClass()->IsSubclassOf<Bundle>())
-                return (Bundle*)outerObject;
+                return Object::CastTo<Bundle>(outerObject.Get());
             outerObject = outerObject->outer;
         }
         
@@ -437,7 +437,20 @@ namespace CE
 		{
 			if (field->IsObjectField())
 			{
-				Object* value = field->GetFieldValue<Object*>(this);
+				Object* value = nullptr;
+				if (field->IsStrongRefCounted())
+				{
+					value = field->GetFieldValue<Ref<Object>>(this).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					value = field->GetFieldValue<WeakRef<Object>>(this).Get();
+				}
+				else
+				{
+					value = field->GetFieldValue<Object*>(this);
+				}
+				
 				if (value != nullptr && !outReferences.KeyExists(value->uuid))
 				{
 					outReferences[value->uuid] = value;
@@ -461,12 +474,37 @@ namespace CE
 				auto underlyingType = field->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsObject())
 				{
-					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
-					for (Object* object : array)
+					if (field->IsStrongRefCounted())
 					{
-						if (object != nullptr)
+						const Array<Ref<Object>>& array = field->GetFieldValue<Array<Ref<Object>>>(this);
+						for (const auto& object : array)
 						{
-							outReferences[object->uuid] = object;
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						const Array<WeakRef<Object>>& array = field->GetFieldValue<Array<WeakRef<Object>>>(this);
+						for (const auto& object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else
+					{
+						const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
+						for (Object* object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object;
+							}
 						}
 					}
 				}
@@ -491,7 +529,21 @@ namespace CE
 		{
 			if (field->IsObjectField())
 			{
-				Object* value = field->GetFieldValue<Object*>(structInstance);
+				Object* value = nullptr;
+
+				if (field->IsStrongRefCounted())
+				{
+					value = field->GetFieldValue<Ref<Object>>(structInstance).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					value = field->GetFieldValue<WeakRef<Object>>(structInstance).Get();
+				}
+				else
+				{
+					value = field->GetFieldValue<Object*>(structInstance);
+				}
+				
 				if (value != nullptr && !outReferences.KeyExists(value->uuid))
 				{
 					outReferences[value->uuid] = value;
@@ -502,12 +554,37 @@ namespace CE
 				auto underlyingType = field->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsObject())
 				{
-					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(structInstance);
-					for (Object* object : array)
+					if (field->IsStrongRefCounted())
 					{
-						if (object != nullptr)
+						const Array<Ref<Object>>& array = field->GetFieldValue<Array<Ref<Object>>>(structInstance);
+						for (const auto& object : array)
 						{
-							outReferences[object->uuid] = object;
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						const Array<WeakRef<Object>>& array = field->GetFieldValue<Array<WeakRef<Object>>>(structInstance);
+						for (const auto& object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else
+					{
+						const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(structInstance);
+						for (Object* object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object;
+							}
 						}
 					}
 				}
@@ -778,116 +855,6 @@ namespace CE
 		return nullptr;
 	}
 
-	Object* Object::CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
-	{
-		auto thisClass = GetClass();
-
-		if (cloneName.IsEmpty())
-			cloneName = GetName().GetString() + "_Copy";
-
-		Object* clone = CreateObject<Object>(outer, cloneName, OF_NoFlags, thisClass);
-		originalToClonedObjectMap[this->GetUuid()] = clone;
-
-		for (auto field = thisClass->GetFirstField(); field != nullptr; field = field->GetNext())
-		{
-			if (field->GetName() == "name" && field->GetDeclarationTypeId() == TYPEID(Name))
-				continue;
-			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(Uuid))
-				continue;
-			if (field->IsInternal())
-				continue;
-
-			if (field->IsObjectField()) // Deep copy object fields
-			{
-				Object* objectToCopy = field->GetFieldValue<Object*>(this);
-				if (objectToCopy == nullptr)
-				{
-					field->ForceSetFieldValue<Object*>(clone, nullptr);
-				}
-				else
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						field->ForceSetFieldValue<Object*>(clone, deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						field->ForceSetFieldValue<Object*>(clone, originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-					else
-					{
-						// Shallow copy external object reference
-						field->ForceSetFieldValue<Object*>(clone, objectToCopy);
-					}
-				}
-			}
-			else if (field->IsObjectStoreType())
-			{
-				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(this);
-				ObjectMap& destMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(clone));
-				for (int i = destMap.GetObjectCount() - 1; i >= 0; i--)
-				{
-					Object* objectToDelete = (destMap.begin() + i)->Get();
-					if (objectToDelete != nullptr)
-						objectToDelete->BeginDestroy();
-				}
-				destMap.RemoveAll();
-
-				for (auto objectToCopy : srcMap)
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						destMap.AddObject(deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						destMap.AddObject(originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-				}
-			}
-			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsClass())
-			{
-				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(this);
-				Array<Object*>& destArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(clone));
-				destArray.Clear();
-				for (auto objectToCopy : srcArray)
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						destArray.Add(deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						destArray.Add(originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-					else
-					{
-						// Shallow copy external object reference
-						destArray.Add(objectToCopy);
-					}
-				}
-			}
-			else
-			{
-				field->CopyTo(this, field, clone);
-			}
-		}
-
-		return clone;
-	}
-
-	Object* Object::Clone(String cloneName, bool deepClone)
-	{
-		HashMap<Uuid, Object*> originalToCloneMap{};
-		return CloneHelper(originalToCloneMap, outer, cloneName, deepClone);
-	}
-
 	void Object::LoadFromTemplate(Object* templateObject)
 	{
 		HashMap<Uuid, Object*> originalToCloneMap{};
@@ -900,12 +867,11 @@ namespace CE
                 if (src != nullptr && dst != nullptr)
                     originalToCloneMap[src->GetUuid()] = dst;
                 
-				for (const auto& srcObjectRef : src->attachedObjects)
+				for (const auto& srcObject : src->attachedObjects)
 				{
-					Object* srcObject = srcObjectRef.Get();
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Ref<Object> dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
 					if (dstObject == nullptr)
 						continue;
 
@@ -964,13 +930,13 @@ namespace CE
 			}
 			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsObject())
 			{
-				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(templateObject);
-				Array<Object*>& dstArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(this));
+				//const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(templateObject);
+				//Array<Object*>& dstArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(this));
 
-				for (auto srcObject : srcArray)
+				//for (auto srcObject : srcArray)
 				{
-					if (srcObject == nullptr)
-						continue;
+					//if (srcObject == nullptr)
+					//	continue;
 
 					// TODO: LoadFromTemplateHelper from Array
 				}
@@ -999,7 +965,20 @@ namespace CE
 			}
 			else if (field->IsObjectField()) // Deep copy object fields
 			{
-				Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				Object* objectToCopy = nullptr;
+
+				if (field->IsStrongRefCounted())
+				{
+					objectToCopy = field->GetFieldValue<Ref<Object>>(templateObject).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					objectToCopy = field->GetFieldValue<WeakRef<Object>>(templateObject).Get();
+				}
+				else
+				{
+					objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				}
 				
 				if (objectToCopy == nullptr)
 				{
@@ -1007,14 +986,28 @@ namespace CE
 				}
 				else
 				{
+					Object* valueToSet = nullptr;
 					if (originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
-						destField->SetFieldValue<Object*>(this, originalToClonedObjectMap[objectToCopy->GetUuid()]);
+						valueToSet = originalToClonedObjectMap[objectToCopy->GetUuid()];
 					}
 					else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
 						// Shallow copy external object references
-						destField->SetFieldValue<Object*>(this, objectToCopy);
+						valueToSet = objectToCopy;
+					}
+
+					if (destField->IsStrongRefCounted())
+					{
+						destField->SetFieldValue<Ref<Object>>(this, valueToSet);
+					}
+					else if (destField->IsWeakRefCounted())
+					{
+						destField->SetFieldValue<WeakRef<Object>>(this, valueToSet);
+					}
+					else
+					{
+						destField->SetFieldValue<Object*>(this, valueToSet);
 					}
 				}
 			}
@@ -1139,7 +1132,20 @@ namespace CE
 		}
 		else if (fieldDeclType->IsObject())
 		{
-			Object* original = srcField->GetFieldValue<Object*>(srcInstance);
+			Object* original = nullptr;
+
+			if (srcField->IsStrongRefCounted())
+			{
+				original = srcField->GetFieldValue<Ref<Object>>(srcInstance).Get();
+			}
+			else if (srcField->IsWeakRefCounted())
+			{
+				original = srcField->GetFieldValue<WeakRef<Object>>(srcInstance).Get();
+			}
+			else
+			{
+				original = srcField->GetFieldValue<Object*>(srcInstance);
+			}
 
 			if (original == nullptr)
 			{
@@ -1148,13 +1154,27 @@ namespace CE
 			else
 			{
 				Object* parent = nullptr;
+				Object* valueToSet = nullptr;
 				if (originalToClonedObjectMap.KeyExists(original->GetUuid()))
 				{
-					dstField->SetFieldValue<Object*>(dstInstance, originalToClonedObjectMap[original->GetUuid()]);
+					valueToSet = originalToClonedObjectMap[original->GetUuid()];
 				}
 				else
 				{
-                    dstField->SetFieldValue<Object*>(dstInstance, original);
+					valueToSet = original;
+				}
+
+				if (dstField->IsStrongRefCounted())
+				{
+					dstField->SetFieldValue<Ref<Object>>(dstInstance, valueToSet);
+				}
+				else if (dstField->IsWeakRefCounted())
+				{
+					dstField->SetFieldValue<WeakRef<Object>>(dstInstance, valueToSet);
+				}
+				else
+				{
+					dstField->SetFieldValue<Object*>(dstInstance, valueToSet);
 				}
 			}
 		}

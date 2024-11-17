@@ -1619,7 +1619,46 @@ TEST(Object, Lifecycle)
     
     // 3. Multithreading
     {
-        
+		lifecycleSubObjectDestroyed = lifecycleClassDestroyed = false;
+		lifecycleSubObjectDestroyCount = 0;
+
+		Ref<LifecycleClass> rootObject = CreateObject<LifecycleClass>(nullptr, "Lifecycle");
+		WeakRef<LifecycleClass> weakRef = rootObject;
+		constexpr int NumThreads = 16;
+		StaticArray<Thread, NumThreads> threads;
+		std::atomic<int> counter = 0;
+
+		for (int i = 0; i < NumThreads; ++i)
+		{
+			int idx = i;
+			threads[i] = [weakRef, &counter, idx, &rootObject]
+				{
+					if (idx >= NumThreads / 2)
+					{
+						Thread::SleepFor(Random::Range(50, 100));
+					}
+
+					// ReSharper disable once CppTooWideScope
+					Ref<LifecycleClass> strongRef = weakRef.Lock();
+					if (idx == 2)
+					{
+						rootObject = nullptr;
+					}
+					if (strongRef)
+					{
+						++counter;
+					}
+				};
+		}
+
+		for (int i = 0; i < NumThreads; ++i)
+		{
+			threads[i].Join();
+		}
+
+		int count = counter;
+		EXPECT_LE(count, NumThreads);
+		EXPECT_TRUE(weakRef.IsNull());
     }
 
 	CE_DEREGISTER_TYPES(LifecycleClass, LifecycleSubObject);
@@ -3246,17 +3285,19 @@ TEST(Bundle, WriteRead)
     IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "TestBundle.casset";
 
 	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, bundleUuid;
+	Bundle* rawRef = nullptr;
 
 	// Write
 	{
-		Bundle* writeBundle = CreateObject<Bundle>(nullptr, "/TestBundle");
+		Ref<Bundle> writeBundle = CreateObject<Bundle>(nullptr, "/TestBundle");
+		rawRef = writeBundle.Get();
 		EXPECT_EQ(writeBundle->GetName(), "/TestBundle");
 
-		auto obj1 = CreateObject<WritingTestObj1>(writeBundle, TEXT("TestObj1"));
-		auto obj2 = CreateObject<WritingTestObj2>(writeBundle, TEXT("TestObj2"));
-		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
+		Ref<WritingTestObj1> obj1 = CreateObject<WritingTestObj1>(writeBundle, TEXT("TestObj1"));
+		Ref<WritingTestObj2> obj2 = CreateObject<WritingTestObj2>(writeBundle, TEXT("TestObj2"));
+		Ref<WritingTestObj1> obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
         // Outside the bundle & transient
-		auto obj1_1 = CreateObject<WritingTestObj1>(GetGlobalTransient(), TEXT("Child1_TestObj1"));
+		Ref<WritingTestObj1> obj1_1 = CreateObject<WritingTestObj1>(GetGlobalTransient(), TEXT("Child1_TestObj1"));
 
 		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
 		EXPECT_TRUE(writeBundle->GetPrimaryObjectName() == "TestObj1" || writeBundle->GetPrimaryObjectName() == "TestObj2");
@@ -3313,9 +3354,9 @@ TEST(Bundle, WriteRead)
 		EXPECT_EQ(readBundle->attachedObjects.GetObjectCount(), 2);
 		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj1Uuid));
 		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj2Uuid));
-
+		
 		// TestObj1
-		WritingTestObj1* obj1 = (WritingTestObj1*)readBundle->attachedObjects.FindObject(obj1Uuid);
+		Ref<WritingTestObj1> obj1 = (Ref<WritingTestObj1>)readBundle->attachedObjects.FindObject(obj1Uuid);
 		EXPECT_NE(obj1, nullptr);
 		EXPECT_EQ(obj1->GetName(), "TestObj1");
 		EXPECT_EQ(obj1->outer, readBundle);
@@ -3332,13 +3373,13 @@ TEST(Bundle, WriteRead)
 		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
 
 		// Child0_TestObj1
-		WritingTestObj1* obj1_0 = (WritingTestObj1*)readBundle->LoadObject(obj1_0Uuid);
+		Ref<WritingTestObj1> obj1_0 = (Ref<WritingTestObj1>)readBundle->LoadObject(obj1_0Uuid);
 		EXPECT_NE(obj1_0, nullptr);
 		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
 		EXPECT_EQ(obj1_0->outer, obj1);
 
 		// TestObj2
-		WritingTestObj2* obj2 = (WritingTestObj2*)readBundle->attachedObjects.FindObject(obj2Uuid);
+		Ref<WritingTestObj2> obj2 = (Ref<WritingTestObj2>)readBundle->attachedObjects.FindObject(obj2Uuid);
 		EXPECT_NE(obj2, nullptr);
 		EXPECT_EQ(obj2->GetName(), "TestObj2");
 		EXPECT_EQ(obj2->outer, readBundle);

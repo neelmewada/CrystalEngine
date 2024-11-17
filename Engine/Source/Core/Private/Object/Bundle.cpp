@@ -26,7 +26,7 @@ namespace CE
 		loadedBundleUuidToPath.Remove(GetUuid());
 	}
 
-	Bundle* Bundle::LoadBundleByUuid(Uuid bundleUuid, LoadFlags loadFlags)
+	Ref<Bundle> Bundle::LoadBundleByUuid(Uuid bundleUuid, LoadFlags loadFlags)
 	{
 		LockGuard<SharedMutex> lock{ bundleRegistryMutex };
 
@@ -40,7 +40,7 @@ namespace CE
 			Name bundlePath = bundleResolvers[i]->ResolveBundlePath(bundleUuid);
 			if (!bundlePath.IsValid())
 				continue;
-			Bundle* bundle = Bundle::LoadBundleFromDisk(nullptr, bundlePath, loadFlags);
+			Ref<Bundle> bundle = Bundle::LoadBundleFromDisk(nullptr, bundlePath, loadFlags);
 			if (bundle != nullptr)
 				return bundle;
 		}
@@ -118,18 +118,19 @@ namespace CE
 		loadedBundles.Clear();
 	}
 
-	Bundle* Bundle::LoadBundleFromDisk(Bundle* outer, const Name& bundleName, LoadFlags loadFlags)
+	Ref<Bundle> Bundle::LoadBundleFromDisk(const Ref<Bundle>& outer, const Name& bundleName, LoadFlags loadFlags)
 	{
 		return LoadBundleFromDisk(outer, GetBundlePath(bundleName), loadFlags);
 	}
 
-	Bundle* Bundle::LoadBundleFromDisk(Bundle* bundle, const IO::Path& fullBundlePath, LoadFlags loadFlags)
+	Ref<Bundle> Bundle::LoadBundleFromDisk(const Ref<Bundle>& bundle, const IO::Path& fullBundlePath, LoadFlags loadFlags)
 	{
 		BundleLoadResult result{};
 		return LoadBundleFromDisk(bundle, fullBundlePath, result, loadFlags);
 	}
 
-	Bundle* Bundle::LoadBundleFromDisk(Bundle* bundle, const IO::Path& fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags)
+	Ref<Bundle> Bundle::LoadBundleFromDisk(const Ref<Bundle>& bundle, const IO::Path& fullBundlePath, BundleLoadResult& outResult,
+	                                       LoadFlags loadFlags)
 	{
 		auto path = fullBundlePath;
 		if (path.GetExtension().IsEmpty()) // Add extension if one doesn't exist
@@ -154,29 +155,32 @@ namespace CE
 		return LoadBundleFromDisk(bundle, &stream, path, outResult, loadFlags);
 	}
 
-	BundleSaveResult Bundle::SaveBundleToDisk(Bundle* bundle, Object* asset)
+	BundleSaveResult Bundle::SaveBundleToDisk(const WeakRef<Bundle>& bundleRef, Object* asset)
 	{
-		if (bundle == nullptr)
+		if (Ref<Bundle> bundle = bundleRef.Lock())
 		{
-			CE_LOG(Error, All, "SaveBundleToDisk() passed with NULL bundle!");
+			if (bundle->IsTransient())
+			{
+				CE_LOG(Error, All, "Could not save a transient bundle: {}", bundle->GetBundleName());
+				return BundleSaveResult::InvalidBundle;
+			}
+
+			IO::Path bundlePath = GetBundlePath(bundle->GetBundleName());
+			if (bundlePath.GetExtension().IsEmpty())
+			{
+				bundlePath = bundlePath.GetString() + ".casset";
+			}
+
+			return SaveBundleToDisk(bundle, asset, bundlePath);
+		}
+		else
+		{
+			CE_LOG(Error, All, "SaveBundleToDisk() passed with NULL or destroyed bundle!");
 			return BundleSaveResult::InvalidBundle;
 		}
-		if (bundle->IsTransient())
-		{
-			CE_LOG(Error, All, "Could not save a transient bundle: {}", bundle->GetBundleName());
-			return BundleSaveResult::InvalidBundle;
-		}
-
-		IO::Path bundlePath = GetBundlePath(bundle->GetBundleName());
-		if (bundlePath.GetExtension().IsEmpty())
-		{
-			bundlePath = bundlePath.GetString() + ".casset";
-		}
-
-		return SaveBundleToDisk(bundle, asset, bundlePath);
 	}
 
-	BundleSaveResult Bundle::SaveBundleToDisk(Bundle* bundle, Object* asset, const IO::Path& fullBundlePath)
+	BundleSaveResult Bundle::SaveBundleToDisk(const WeakRef<Bundle>& bundleRef, Object* asset, const IO::Path& fullBundlePath)
 	{
 		auto path = fullBundlePath;
 		if (path.GetExtension().IsEmpty())
@@ -189,32 +193,36 @@ namespace CE
 			IO::Path::CreateDirectories(path.GetParentPath());
 		}
 
-		if (bundle == nullptr)
+		if (Ref<Bundle> bundle = bundleRef.Lock())
+		{
+			if (bundle->IsTransient())
+			{
+				CE_LOG(Error, All, "SaveBundleToDisk() passed with a transient bundle named: {}", bundle->GetBundleName());
+				return BundleSaveResult::InvalidBundle;
+			}
+
+			if (path.IsDirectory())
+			{
+				CE_LOG(Error, All, "SaveBundleToDisk() passed with a bundle path that is a directory!");
+				return BundleSaveResult::InvalidPath;
+			}
+			if (asset != nullptr && asset->GetBundle() != bundle)
+			{
+				CE_LOG(Error, All, "SaveBundleToDisk() passed with an asset object that is not part of the bundle!");
+				return BundleSaveResult::AssetNotInBundle;
+			}
+
+			bundle->fullBundlePath = path;
+
+			FileStream stream = FileStream(path, Stream::Permissions::WriteOnly);
+
+			return SaveBundleToDisk(bundle, asset, &stream);
+		}
+		else
 		{
 			CE_LOG(Error, All, "SaveBundleToDisk() passed with NULL bundle!");
 			return BundleSaveResult::InvalidBundle;
 		}
-		if (bundle->IsTransient())
-		{
-			CE_LOG(Error, All, "SaveBundleToDisk() passed with a transient bundle named: {}", bundle->GetBundleName());
-			return BundleSaveResult::InvalidBundle;
-		}
-		if (path.IsDirectory())
-		{
-			CE_LOG(Error, All, "SaveBundleToDisk() passed with a bundle path that is a directory!");
-			return BundleSaveResult::InvalidPath;
-		}
-		if (asset != nullptr && asset->GetBundle() != bundle)
-		{
-			CE_LOG(Error, All, "SaveBundleToDisk() passed with an asset object that is not part of the bundle!");
-			return BundleSaveResult::AssetNotInBundle;
-		}
-        
-        bundle->fullBundlePath = path;
-
-		FileStream stream = FileStream(path, Stream::Permissions::WriteOnly);
-		
-		return SaveBundleToDisk(bundle, asset, &stream);
 	}
 
 	bool Bundle::ContainsObject(Object* object)
