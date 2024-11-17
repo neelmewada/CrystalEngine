@@ -3275,6 +3275,16 @@ TEST(Delegates, ModuleCallbacks)
 
 #pragma region Bundle
 
+TEST(Bundle, Simple)
+{
+    TEST_BEGIN;
+    using namespace BundleTests;
+    CERegisterModuleTypes();
+    
+    CEDeregisterModuleTypes();
+    TEST_END;
+}
+
 
 TEST(Bundle, WriteRead)
 {

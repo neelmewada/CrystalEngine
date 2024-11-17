@@ -149,7 +149,7 @@ namespace CE
 		}
 
 		template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
-		FORCE_INLINE static TClass* CastTo(Object* instance)
+		static TClass* CastTo(Object* instance)
 		{
 			if (instance == nullptr || !instance->IsOfType<TClass>())
 			{

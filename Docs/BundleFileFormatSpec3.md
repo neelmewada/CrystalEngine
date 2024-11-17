@@ -46,7 +46,7 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | | | | |
 | | | | |
 |  |  | **<-- Entry #0 -->** |  |
-| +0C | 4B | `xx xx xx xx` | Size of 1-st schema entry in bytes. (excluding this field) |
+| +0C | 4B | `xx xx xx xx` | Size of 1-st schema entry in bytes. (including this field) |
 | +10 | 1B | `00/01` | 0 = Class ; 1 = Struct |
 | +11 | \0 | `/Code/Core.CE::SomeClass\0` | Full type name of the class or struct |
 | +xx | 4B | `00 00 00 00` | Class/Struct Version (Unused) |
@@ -64,7 +64,7 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | | | | |
 | | | | |
 |  |  | **<-- Entry #1 -->** |  |
-| +xx | 4B | `xx xx xx xx` | Size of 2-nd schema entry in bytes. (excluding this field) |
+| +xx | 4B | `xx xx xx xx` | Size of 2-nd schema entry in bytes. (including this field) |
 | +04 | 1B | `00/01` | 0 = Class ; 1 = Struct |
 | +05 | \0 | `/Code/Core.CE::SomeStruct\0` | Full type name of the class or struct |
 | +xx | 4B | `00 00 00 00` | Class/Struct Version (Unused) |
@@ -122,7 +122,7 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | | | | |
 | | | | |
 |  |  | **<-- Entry #0 -->** |  |
-| +0C | 4B | `xx xx xx xx` | Size of 1-st entry in bytes. (excluding this field) |
+| +0C | 4B | `xx xx xx xx` | Size of 1-st entry in bytes. (including this field) |
 | +10 | 4B | `00 00 00 04` | Data start offset **after** this field. |
 | +14 | 16B | 128 bit Uuid | Object Instance UUID. |
 | +20 | 1B | `00/01` | Is Asset? `0` or `1` |
