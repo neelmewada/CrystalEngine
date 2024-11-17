@@ -109,8 +109,9 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | `12` | Array\<[FieldType](#field-type)\> | Array | **Optional_2** |
 | `13` | [Binary](#binary-data-type) | Raw binary data |
 | `14` | [Object Ref](#object-reference) | Object reference |
-| `15` | [Fucntion Binding](#function-binding) | Function binding to an object (ScriptDelegate). |
-| `16` | Array\<[Binding](#function-binding)\> | Array of function bindings (ScriptEvent). |
+| `15` | [Function Binding](#function-binding) | Function binding to an object (ScriptDelegate). |
+| `16` | Array\<[Function Binding](#function-binding)\> | Array of function bindings (ScriptEvent). |
+| `17` | [Struct](#struct) | Struct field. | **Optional_1** |
 
 ## **Serialized Data**
 
@@ -129,7 +130,7 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | +25 | \0 | `MySkybox.Irradiance.Diffuse\0` | Path to this object within the bundle |
 | +xx | \0 | `MyObjectName\0` | Object name (CE::Name) |
 | - | - | New header fields can be added here | - |
-|  |  | Field #0 |  |
+|  |  | Field #0 | Number of fields can be inferred from Schema Table. |
 | +xx | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
 | +04 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 | | | | |
@@ -170,6 +171,20 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | +00 | 16B | 128 bit Uuid | UUID of the bound **object**. |
 | +10 | 16B | 128 bit Uuid | UUID of the **bundle** the bound object is in. |
 | +20 | \0 | `FunctionName\0` | Exact name of function as in C++. |
+
+### Struct
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 4B | `00 00 00 04` | Size in bytes of this struct value. (including this field) |
+| +04 | 4B | `00 00 00 00` | | |
+
+### Array
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 |  |  |  |
+
 
 ------------
 ------------
