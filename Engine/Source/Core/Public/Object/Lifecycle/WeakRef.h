@@ -217,6 +217,12 @@ namespace CE
         }
         
     private:
+
+        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        friend class WeakRef;
+
+        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        friend class Ref;
         
         Internal::RefCountControl* control = nullptr;
     };

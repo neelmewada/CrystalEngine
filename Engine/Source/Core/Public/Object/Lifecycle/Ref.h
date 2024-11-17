@@ -194,6 +194,9 @@ namespace CE
         
         template<typename _T> requires TIsBaseClassOf<Object, _T>::Value
         friend class WeakRef;
+
+        template<typename U> requires TIsBaseClassOf<Object, U>::Value
+        friend class Ref;
 	};
 
 	

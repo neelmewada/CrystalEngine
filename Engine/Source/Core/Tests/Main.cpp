@@ -1488,6 +1488,7 @@ TEST(Object, Lifecycle)
 	TEST_BEGIN;
 
     Object* rawRef = nullptr;
+	Object* rawRef2 = nullptr;
     
     // 1. Simple ref counting
     {
@@ -1497,6 +1498,7 @@ TEST(Object, Lifecycle)
         Ref<Bundle> bundle = Object::CastTo<Bundle>(object);
         
         Ref<Object> object2 = CreateObject<Object>(nullptr, "TestObj");
+		rawRef2 = object2.Get();
         
         Ref<Object> nullRef = nullptr;
         bool exception = false;
@@ -1516,7 +1518,7 @@ TEST(Object, Lifecycle)
         EXPECT_EQ(weakRef1->GetName(), "TestBundle");
         EXPECT_EQ(weakRef3->GetName(), "TestObj");
         
-        if (Ref<Object> obj = weakRef1.Lock())
+        if (Ref<Object> obj = weakRef2.Lock())
         {
             
         }
@@ -1538,7 +1540,7 @@ TEST(Object, Lifecycle)
         EXPECT_TRUE(exception);
         exception = false;
         
-        if (Ref<Object> obj = weakRef1.Lock())
+        if (Ref<Object> obj = weakRef2.Lock())
         {
             FAIL();
         }
