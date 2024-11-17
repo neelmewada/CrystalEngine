@@ -32,9 +32,9 @@ namespace CE::Editor
         Style("EditorDockspace");
     }
 
-    void CrystalEditorWindow::OnBeforeDestroy()
+    void CrystalEditorWindow::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

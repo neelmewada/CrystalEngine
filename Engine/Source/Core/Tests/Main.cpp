@@ -1483,9 +1483,18 @@ TEST(Config, HierarchicalParsing)
 
 #pragma region Object
 
+
+
 TEST(Object, Lifecycle)
 {
+	using namespace LifecycleTests;
+
 	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+
+	EXPECT_EQ(TYPEID(Ref<LifecycleClass>), TYPEID(LifecycleClass));
+	EXPECT_EQ(TYPEID(WeakRef<LifecycleClass>), TYPEID(LifecycleClass));
+	EXPECT_EQ(TYPEID(WeakRef<LifecycleClass>), TYPEID(Ref<LifecycleClass>));
 
     Object* rawRef = nullptr;
 	Object* rawRef2 = nullptr;
@@ -1532,7 +1541,7 @@ TEST(Object, Lifecycle)
         object2 = nullptr;
         
         try {
-            weakRef1->GetName();
+            weakRef1->AddToRoot();
         } catch (const NullPointerException& exc) {
             exception = true;
         }
@@ -1544,13 +1553,59 @@ TEST(Object, Lifecycle)
         {
             FAIL();
         }
+
+		weakRef1 = nullptr;
+		weakRef2 = nullptr;
+		weakRef3 = nullptr;
     }
+
+	// 2. Complex test
+	{
+		lifecycleSubObjectDestroyed = lifecycleClassDestroyed = false;
+		lifecycleSubObjectDestroyCount = 0;
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(nullptr, "LifecycleClass");
+		rawRef = object.Get();
+
+		Ref<LifecycleSubObject> subObject = object->subobject;
+		WeakRef<LifecycleClass> weak1 = object;
+		WeakRef<LifecycleSubObject> weak2 = subObject;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			Ref<LifecycleSubObject> child = CreateObject<LifecycleSubObject>(object, String::Format("Array_{}", i));
+			rawRef = child.Get();
+
+			if (i % 2 == 0) // 2 different ways to insert array elements
+			{
+				object->childArray.Add(child);
+			}
+			else
+			{
+				FieldType* arrayField = object->GetClass()->FindField("childArray");
+				EXPECT_TRUE(arrayField->IsWeakRefCounted());
+				EXPECT_TRUE(arrayField->IsRefCounted());
+				arrayField->InsertArrayElement(object);
+				arrayField->SetArrayElementValueAt<WeakRef<Object>>(i, object, child);
+			}
+		}
+		
+		// Destroy object
+		object = nullptr;
+
+		EXPECT_TRUE(lifecycleClassDestroyed);
+		EXPECT_TRUE(subObject->IsPendingDestruction());
+	}
+	EXPECT_TRUE(lifecycleSubObjectDestroyed);
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	EXPECT_EQ(lifecycleSubObjectDestroyCount, 5);
     
-    // 2. Multithreading
+    // 3. Multithreading
     {
         
     }
 
+	CE_DEREGISTER_TYPES(LifecycleClass, LifecycleSubObject);
     TEST_END;
 }
 

@@ -210,7 +210,7 @@ namespace CE
 
 		virtual TypeInfo* GetUnderlyingType() { return nullptr; }
 
-		/// Memory foot-print of `this` type as a member field. For ex: All Objects have a FieldSize of u64 (pointer size).
+		/// Memory foot-print of `this` type as a member field.
 		virtual u32 GetFieldSize();
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }

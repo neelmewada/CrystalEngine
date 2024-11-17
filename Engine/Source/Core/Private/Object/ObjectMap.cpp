@@ -5,8 +5,10 @@ namespace CE
 {
     Object* ObjectMap::FindObject(Uuid uuid) const
     {
-		for (auto object : objects)
+		for (const auto& objectRef : objects)
 		{
+			Object* object = objectRef.Get();
+
 			if (object != nullptr && object->GetUuid() == uuid)
 			{
 				return object;
@@ -17,8 +19,10 @@ namespace CE
 
 	Object* ObjectMap::FindObject(const Name& name, ClassType* classType) const
 	{
-		for (auto object : objects)
+		for (const auto& objectRef : objects)
 		{
+			Object* object = objectRef.Get();
+
 			if (object != nullptr && object->GetName() == name && (classType == nullptr || classType == object->GetClass()))
 			{
 				return object;
@@ -46,7 +50,7 @@ namespace CE
 
     void ObjectMap::AddObject(Object* object)
 	{
-        if (object == nullptr || objects.Exists(object))
+        if (object == nullptr || objects.Exists([&](const Ref<Object>& obj) { return obj.Get() == object; }))
             return;
         objects.Add(object);
 	}

@@ -4,6 +4,88 @@
 
 using namespace CE;
 
+namespace LifecycleTests
+{
+	static std::atomic<bool> lifecycleClassDestroyed = false;
+	static std::atomic<bool> lifecycleSubObjectDestroyed = false;
+	static std::atomic<int> lifecycleSubObjectDestroyCount = 0;
+
+	CLASS()
+	class LifecycleSubObject : public Object
+	{
+		CE_CLASS(LifecycleSubObject, Object)
+	public:
+
+		LifecycleSubObject()
+		{
+			
+		}
+
+		~LifecycleSubObject()
+		{
+			if (IsDefaultInstance())
+				return;
+
+			++lifecycleSubObjectDestroyCount;
+
+			if (GetName() == "SubObject")
+			{
+				lifecycleSubObjectDestroyed = true;
+			}
+		}
+	};
+
+	CLASS()
+	class LifecycleClass : public Object
+	{
+		CE_CLASS(LifecycleClass, Object)
+	public:
+
+		LifecycleClass()
+		{
+			subobject = CreateDefaultSubobject<LifecycleSubObject>("SubObject");
+			
+		}
+
+		~LifecycleClass()
+		{
+			if (!IsDefaultInstance())
+			{
+				lifecycleClassDestroyed = true;
+			}
+		}
+
+		Ref<LifecycleSubObject> subobject = nullptr;
+
+		Array<WeakRef<LifecycleSubObject>> childArray;
+
+	};
+}
+
+CE_RTTI_CLASS(, LifecycleTests, LifecycleSubObject,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, LifecycleTests, LifecycleSubObject)
+
+CE_RTTI_CLASS(, LifecycleTests, LifecycleClass,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(subobject)
+		CE_FIELD(childArray)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, LifecycleTests, LifecycleClass)
+
 namespace VariantTests
 {
 	STRUCT()

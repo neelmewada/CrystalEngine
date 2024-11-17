@@ -3,7 +3,7 @@
 namespace CE
 {
     
-    template<typename T> requires TIsBaseClassOf<Object, T>::Value
+    template<typename T = Object> requires TIsBaseClassOf<Object, T>::Value
     class WeakRef final
     {
     public:
@@ -19,10 +19,12 @@ namespace CE
                 control = object->control;
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = object;
+#endif
         }
         
-        template<class U> requires TIsBaseClassOf<T, U>::Value and TIsBaseClassOf<Object, U>::Value and
-            (not std::is_same_v<T, U>)
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         WeakRef(U* object)
         {
             if (object != nullptr)
@@ -30,6 +32,9 @@ namespace CE
                 control = object->control;
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)object;
+#endif
         }
         
         WeakRef(const WeakRef& copy)
@@ -39,6 +44,9 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = copy.ptr;
+#endif
         }
         
         WeakRef& operator=(const WeakRef& copy)
@@ -52,6 +60,9 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = copy.ptr;
+#endif
             return *this;
         }
         
@@ -70,11 +81,13 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = newObject;
+#endif
             return *this;
         }
         
-        template<class U> requires TIsBaseClassOf<T, U>::Value and TIsBaseClassOf<Object,U>::Value and
-            (not std::is_same_v<T, U>)
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         WeakRef& operator=(U* newObject)
         {
             if (control)
@@ -90,6 +103,9 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)newObject;
+#endif
             return *this;
         }
         
@@ -101,6 +117,9 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = copy.ptr;
+#endif
         }
         
         WeakRef(const Ref<T>& from)
@@ -110,6 +129,9 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = from.ptr;
+#endif
         }
         
         WeakRef& operator=(const Ref<T>& from)
@@ -123,6 +145,40 @@ namespace CE
             {
                 control->AddWeakRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = from.ptr;
+#endif
+            return *this;
+        }
+
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
+        WeakRef(const Ref<U>& from)
+        {
+            control = from.control;
+            if (control)
+            {
+                control->AddWeakRef();
+            }
+#if CE_BUILD_DEBUG
+            ptr = from.ptr;
+#endif
+        }
+
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
+        WeakRef& operator=(const Ref<U>& from)
+        {
+            if (control)
+            {
+                control->ReleaseWeakRef();
+            }
+            control = from.control;
+            if (control)
+            {
+                control->AddWeakRef();
+            }
+#if CE_BUILD_DEBUG
+            ptr = from.ptr;
+#endif
             return *this;
         }
         
@@ -130,6 +186,10 @@ namespace CE
         {
             control = move.control;
             move.control = nullptr;
+#if CE_BUILD_DEBUG
+            ptr = move.ptr;
+            move.ptr = nullptr;
+#endif
         }
         
         ~WeakRef()
@@ -139,9 +199,12 @@ namespace CE
                 control->ReleaseWeakRef();
                 control = nullptr;
             }
+#if CE_BUILD_DEBUG
+            ptr = nullptr;
+#endif
         }
         
-        inline T* Get() const
+        T* Get() const
         {
             Object* object = nullptr;
             if (control == nullptr)
@@ -161,12 +224,12 @@ namespace CE
             return Ref<T>(Get());
         }
         
-        inline operator T*() const
+    	operator T*() const
         {
             return Get();
         }
         
-        inline T& operator*() const
+        T& operator*() const
         {
             Object* object = nullptr;
             if (control == nullptr)
@@ -205,6 +268,16 @@ namespace CE
         {
             return Get() != nullptr;
         }
+
+        inline bool operator==(T* object) const
+        {
+            return (control == nullptr && object == nullptr) || (control->GetObject() == object);
+        }
+
+        inline bool operator!=(T* object) const
+        {
+            return !operator==(object);
+        }
         
         inline bool operator==(const WeakRef& rhs) const
         {
@@ -215,6 +288,11 @@ namespace CE
         {
             return control != rhs.control;
         }
+
+        SIZE_T GetHash() const
+        {
+            return (SIZE_T)control;
+        }
         
     private:
 
@@ -223,8 +301,42 @@ namespace CE
 
         template<typename U> requires TIsBaseClassOf<Object, U>::Value
         friend class Ref;
-        
+
+#if CE_BUILD_DEBUG
+        T* ptr = nullptr;
+#endif
         Internal::RefCountControl* control = nullptr;
     };
+
+    template <typename T> requires TIsBaseClassOf<Object, T>::Value
+    Ref<T>::Ref(const WeakRef<T>& weakRef)
+    {
+        control = weakRef.control;
+        if (control)
+        {
+            control->AddStrongRef();
+        }
+#if CE_BUILD_DEBUG
+        ptr = (T*)weakRef.ptr;
+#endif
+    }
+
+    template <typename T> requires TIsBaseClassOf<Object, T>::Value
+    Ref<T>& Ref<T>::operator=(const WeakRef<T>& weakRef)
+    {
+        if (control)
+        {
+            control->ReleaseStrongRef();
+        }
+        control = weakRef.control;
+        if (control)
+        {
+            control->AddStrongRef();
+        }
+#if CE_BUILD_DEBUG
+        ptr = (T*)weakRef.ptr;
+#endif
+        return *this;
+    }
 
 } // namespace CE

@@ -49,7 +49,7 @@ namespace CE
 
     private:
         
-		Array<Object*> objects{};
+		Array<Ref<Object>> objects{};
     };
     
 } // namespace CE

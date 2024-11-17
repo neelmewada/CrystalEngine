@@ -384,8 +384,10 @@ namespace CE
 			}
 		}
 
-		for (auto subobject : GetSubObjectMap())
+		for (const auto& subobjectRef : GetSubObjectMap())
 		{
+			Object* subobject = subobjectRef.Get();
+
 			if (subobject != nullptr && subobject->GetClass()->GetTypeName() == objectClassName)
 				return subobject;
 		}

@@ -26,7 +26,7 @@ namespace CE
 
 			GetObjectCreationContext()->GetStorage().Push(&createInfo);
 
-			auto instance = params.objectClass->CreateInstance(); // The constructor automatically pops ObjectCreateParams from stack
+			Object* instance = params.objectClass->CreateInstance(); // The constructor automatically pops ObjectCreateParams from stack
 			if (instance == nullptr)
             {
 				GetObjectCreationContext()->GetStorage().Pop();

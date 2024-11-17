@@ -258,8 +258,10 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& object : map)
+				for (const auto& objectRef : map)
 				{
+					Object* object = objectRef.Get();
+
 					if (object == nullptr)
 						continue;
 
@@ -307,8 +309,9 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& object : map)
+				for (const auto& objectRef : map)
 				{
+					Object* object = objectRef.Get();
 					if (object == nullptr)
 						continue;
 
@@ -354,8 +357,9 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& object : map)
+				for (const auto& objectRef : map)
 				{
+					Object* object = objectRef.Get();
 					if (object == nullptr)
 						continue;
 
@@ -400,8 +404,10 @@ namespace CE
 
 		if (isFullyLoaded && GetSubObjectCount() > 0)
 		{
-			for (const auto& object : map)
+			for (const auto& objectRef : map)
 			{
+				Object* object = objectRef.Get();
+
 				if (object != nullptr && object->IsOfType<Asset>())
 					return ((Asset*)object)->GetSourceAssetRelativePath();
 			}
@@ -480,6 +486,7 @@ namespace CE
 	{
 		if (object == nullptr)
 			return;
+		LockGuard lock{ loadedObjectsMutex };
 		loadedObjects.Remove(object->GetUuid());
 	}
 

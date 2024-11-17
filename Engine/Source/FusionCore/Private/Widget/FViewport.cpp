@@ -25,9 +25,9 @@ namespace CE
         }
     }
 
-    void FViewport::OnBeforeDestroy()
+    void FViewport::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (IsDefaultInstance())
             return;

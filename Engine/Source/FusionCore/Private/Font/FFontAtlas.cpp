@@ -185,9 +185,9 @@ namespace CE
         fontSrg->FlushBindings();
     }
 
-    void FFontAtlas::OnBeforeDestroy()
+    void FFontAtlas::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         glyphBuffer.Shutdown();
 

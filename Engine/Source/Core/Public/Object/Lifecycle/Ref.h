@@ -2,7 +2,8 @@
 
 namespace CE
 {
-    template<typename T> requires TIsBaseClassOf<Object, T>::Value
+
+    template<typename T = Object> requires TIsBaseClassOf<Object, T>::Value
 	class Ref final
 	{
 	public:
@@ -18,17 +19,24 @@ namespace CE
             {
                 control = object->control;
                 control->AddStrongRef();
+
+#if CE_BUILD_DEBUG
+                ptr = object;
+#endif
             }
         }
         
-        template<class U> requires TIsBaseClassOf<T, U>::Value and TIsBaseClassOf<Object, U>::Value and
-            (not std::is_same_v<T, U>)
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         Ref(U* object)
         {
             if (object != nullptr)
             {
                 control = object->control;
                 control->AddStrongRef();
+
+#if CE_BUILD_DEBUG
+                ptr = (T*)object;
+#endif
             }
         }
         
@@ -39,6 +47,9 @@ namespace CE
             {
                 control->AddStrongRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)copy.ptr;
+#endif
         }
         
         Ref& operator=(const Ref& copy)
@@ -52,8 +63,15 @@ namespace CE
             {
                 control->AddStrongRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)copy.ptr;
+#endif
             return *this;
         }
+
+        Ref(const WeakRef<T>& weakRef);
+
+        Ref& operator=(const WeakRef<T>& weakRef);
         
         Ref& operator=(T* newObject)
         {
@@ -70,11 +88,13 @@ namespace CE
             {
                 control->AddStrongRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)newObject;
+#endif
             return *this;
         }
         
-        template<class U> requires TIsBaseClassOf<T, U>::Value and TIsBaseClassOf<Object,U>::Value and
-            (not std::is_same_v<T, U>)
+        template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         Ref& operator=(U* newObject)
         {
             if (control)
@@ -90,6 +110,9 @@ namespace CE
             {
                 control->AddStrongRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)newObject;
+#endif
             return *this;
         }
         
@@ -101,12 +124,19 @@ namespace CE
             {
                 control->AddStrongRef();
             }
+#if CE_BUILD_DEBUG
+            ptr = (T*)copy.ptr;
+#endif
         }
         
         Ref(Ref&& move)
         {
             control = move.control;
             move.control = nullptr;
+#if CE_BUILD_DEBUG
+            ptr = (T*)move.ptr;
+            move.ptr = nullptr;
+#endif
         }
         
         ~Ref()
@@ -116,6 +146,9 @@ namespace CE
                 control->ReleaseStrongRef();
                 control = nullptr;
             }
+#if CE_BUILD_DEBUG
+            ptr = nullptr;
+#endif
         }
         
         inline T* Get() const
@@ -177,6 +210,16 @@ namespace CE
         {
             return Get() != nullptr;
         }
+
+        inline bool operator==(T* object) const
+        {
+            return (control == nullptr && object == nullptr) || (control->GetObject() == object);
+        }
+
+        inline bool operator!=(T* object) const
+        {
+            return !operator==(object);
+        }
         
         inline bool operator==(const Ref& rhs) const
         {
@@ -188,16 +231,25 @@ namespace CE
             return control != rhs.control;
         }
 
+        SIZE_T GetHash() const
+        {
+            return (SIZE_T)control;
+        }
+
 	private:
 
+#if CE_BUILD_DEBUG
+        T* ptr = nullptr;
+#endif
 		Internal::RefCountControl* control = nullptr;
-        
-        template<typename _T> requires TIsBaseClassOf<Object, _T>::Value
+
+        template<typename U> requires TIsBaseClassOf<Object, U>::Value
         friend class WeakRef;
 
         template<typename U> requires TIsBaseClassOf<Object, U>::Value
         friend class Ref;
 	};
 
-	
+    
 } // namespace CE
+

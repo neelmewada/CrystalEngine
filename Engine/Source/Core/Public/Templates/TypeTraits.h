@@ -6,6 +6,16 @@
 
 namespace CE
 {
+	class Object;
+
+	enum class RefType
+	{
+		None = 0,
+		Strong,
+		Weak
+	};
+	ENUM_CLASS(RefType);
+
 	template<typename T>
 	struct TIsIntegralType : TFalseType {};
 
@@ -239,6 +249,76 @@ namespace CE
 		typedef __underlying_type(T) Type;
 	};
 
+	template<typename T> requires TIsBaseClassOf<Object, T>::Value
+	class Ref;
+
+	template<typename T> requires TIsBaseClassOf<Object, T>::Value
+	class WeakRef;
+
+	template<typename T>
+	struct TIsRef : TFalseType
+	{
+		typedef void Type;
+	};
+
+	template<typename T>
+	struct TIsRef<Ref<T>> : TTrueType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TIsWeakRef : TFalseType
+	{
+		typedef void Type;
+	};
+
+	template<typename T>
+	struct TIsWeakRef<WeakRef<T>> : TTrueType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TRefCounted : TFalseType
+	{
+		typedef void ReferencedType;
+
+		static RefType GetRefType() { return RefType::None; }
+	};
+
+	template<typename T>
+	struct TRefCounted<Ref<T>> : TTrueType
+	{
+		typedef T ReferencedType;
+		
+		static RefType GetRefType() { return RefType::Strong; }
+	};
+
+	template<typename T>
+	struct TRefCounted<WeakRef<T>> : TTrueType
+	{
+		typedef T ReferencedType;
+
+		static RefType GetRefType() { return RefType::Weak; }
+	};
+
+	template<typename T>
+	struct TRefCounted<Array<Ref<T>>> : TTrueType
+	{
+		typedef T ReferencedType;
+
+		static RefType GetRefType() { return RefType::Strong; }
+	};
+
+	template<typename T>
+	struct TRefCounted<Array<WeakRef<T>>> : TTrueType
+	{
+		typedef T ReferencedType;
+
+		static RefType GetRefType() { return RefType::Weak; }
+	};
+
 	template<typename T, bool IsEnum = TIsEnum<T>::Value, bool IsArray = TIsArray<T>::Value>
 	struct TGetUnderlyingType : TFalseType
 	{
@@ -255,6 +335,18 @@ namespace CE
 	struct TGetUnderlyingType<Array<T>, false, true> : TTrueType // Array<T>
 	{
 		typedef T Type;
+	};
+
+	template<typename T>
+	struct TGetUnderlyingType<Ref<T>, false, false> : TTrueType // Ref<T>
+	{
+		typedef void Type;
+	};
+
+	template<typename T>
+	struct TGetUnderlyingType<WeakRef<T>, false, false> : TTrueType // WeakRef<T>
+	{
+		typedef void Type;
 	};
 
 	template<typename T>

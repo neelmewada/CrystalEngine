@@ -99,9 +99,9 @@ namespace CE::Editor
         }
     }
 
-    void ProjectSettingsEditor::OnBeforeDestroy()
+    void ProjectSettingsEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

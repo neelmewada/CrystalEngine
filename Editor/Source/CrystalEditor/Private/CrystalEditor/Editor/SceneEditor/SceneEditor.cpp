@@ -176,9 +176,9 @@ namespace CE::Editor
         LoadSandboxScene();
     }
 
-    void SceneEditor::OnBeforeDestroy()
+    void SceneEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (SceneSubsystem* sceneSubsystem = gEngine->GetSceneSubsystem())
         {

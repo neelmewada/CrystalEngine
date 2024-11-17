@@ -64,9 +64,9 @@ namespace CE::Editor
         ;
     }
 
-    void AboutWindow::OnBeforeDestroy()
+    void AboutWindow::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

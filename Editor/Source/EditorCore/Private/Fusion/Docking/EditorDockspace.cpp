@@ -283,9 +283,9 @@ namespace CE::Editor
         );
     }
 
-    void EditorDockspace::OnBeforeDestroy()
+    void EditorDockspace::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         
     }

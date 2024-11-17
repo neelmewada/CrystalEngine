@@ -32,9 +32,9 @@ namespace CE::Editor
         }
     }
 
-    void PropertyEditorRegistry::OnBeforeDestroy()
+    void PropertyEditorRegistry::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

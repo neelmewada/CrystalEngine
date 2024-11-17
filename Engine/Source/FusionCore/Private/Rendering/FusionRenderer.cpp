@@ -65,9 +65,9 @@ namespace CE
 		drawItemSrg->FlushBindings();
 	}
 
-	void FusionRenderer::OnBeforeDestroy()
+	void FusionRenderer::OnBeginDestroy()
 	{
-		Super::OnBeforeDestroy();
+		Super::OnBeginDestroy();
 
 		drawItemsBuffer.Shutdown();
 		clipItemsBuffer.Shutdown();

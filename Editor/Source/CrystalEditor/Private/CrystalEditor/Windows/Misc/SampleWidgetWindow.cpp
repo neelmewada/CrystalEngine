@@ -176,9 +176,9 @@ namespace CE::Editor
             );
     }
 
-    void SampleWidgetWindow::OnBeforeDestroy()
+    void SampleWidgetWindow::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

@@ -93,13 +93,15 @@
 // Json
 #include "Json/Json.h"
 
+// Reference counting
+#include "Object/Lifecycle/RefCounting.h"
+#include "Object/Lifecycle/Ref.h"
+#include "Object/Lifecycle/WeakRef.h"
+
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Interface.h"
-#include "Object/Lifecycle/RefCounting.h"
 #include "Object/Object.h"
-#include "Object/Lifecycle/Ref.h"
-#include "Object/Lifecycle/WeakRef.h"
 #include "Object/Serialization.h"
 #include "Object/FieldSerializer.h"
 #include "Object/JsonSerializer.h"

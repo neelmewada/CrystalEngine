@@ -584,7 +584,11 @@ namespace CE
 		// Only fire registration event for types that are registered outside any module
 		// Types that are registered within a module will fire only after all types within that module are fully loaded
 		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+		{
+            type->GetDefaultInstance();
+
 			CoreObjectDelegates::onClassRegistered.Broadcast(type);
+		}
     }
 
     void ClassType::DeregisterClassType(ClassType* type)
@@ -593,7 +597,7 @@ namespace CE
             return;
 
         CoreObjectDelegates::onClassDeregistered.Broadcast(type);
-        
+
         type->defaultInstance = nullptr;
         type->fieldsCached = false;
         type->attributesCached = false;
@@ -601,6 +605,12 @@ namespace CE
 
         registeredClasses.Remove(type->GetTypeId());
         registeredClassesByName.Remove(type->GetTypeName());
+
+        if (TypeInfo::currentlyLoadingModuleStack.IsEmpty() && type->defaultInstance.Get())
+        {
+            type->defaultInstance->BeginDestroy();
+            type->defaultInstance = nullptr;
+        }
     }
 
 	void ClassType::CreateDefaultInstancesForCurrentModule()

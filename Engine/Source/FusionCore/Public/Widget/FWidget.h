@@ -170,7 +170,7 @@ namespace CE
 
         void OnAfterConstruct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         virtual void Construct();
 

@@ -26,7 +26,7 @@ namespace CE
 
         ~FViewport();
 
-		void OnBeforeDestroy() override;
+		void OnBeginDestroy() override;
 
         void Construct() override;
 

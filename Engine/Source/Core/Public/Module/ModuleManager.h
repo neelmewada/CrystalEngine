@@ -35,7 +35,7 @@ namespace CE
         bool isPlugin = false;
         Module* moduleImpl; // nullptr if not loaded
 
-		Bundle* transientBundle = nullptr;
+        Bundle* transientBundle = nullptr;
     };
 
     enum class ModuleLoadResult
@@ -67,20 +67,16 @@ namespace CE
 
         CE_SINGLETON_CLASS(ModuleManager);
 
-        static ModuleManager& Get()
-        {
-            static ModuleManager instance;
-            return instance;
-        }
+        static ModuleManager& Get();
 
-        Module* LoadModule(String moduleName, ModuleLoadResult& result);
-        void UnloadModule(String moduleName);
+        Module* LoadModule(const String& moduleName, ModuleLoadResult& result);
+        void UnloadModule(const String& moduleName);
 
-        Module* LoadModule(String moduleName);
+        Module* LoadModule(const String& moduleName);
 
         Name GetLoadedModuleName(Module* modulePtr);
         
-        bool IsModuleLoaded(String moduleName);
+        bool IsModuleLoaded(const String& moduleName);
 
 		Module* GetLoadedModule(const String& moduleName);
 
@@ -89,9 +85,9 @@ namespace CE
 
     private:
 
-        ModuleInfo* AddModule(String moduleName, ModuleLoadResult& result);
+        ModuleInfo* AddModule(const String& moduleName, ModuleLoadResult& result);
 
-        ModuleInfo* FindModuleInfo(String moduleName);
+        ModuleInfo* FindModuleInfo(const String& moduleName);
 
         HashMap<Name, ModuleInfo> ModuleMap{};
     };

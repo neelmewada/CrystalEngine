@@ -34,13 +34,16 @@ namespace CE
     class CORE_API FieldType : public TypeInfo
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) 
+        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, 
+            const TypeInfo* owner = nullptr, 
+            RefType refType = RefType::None) 
 			: TypeInfo(name, attributes)
             , fieldTypeId(fieldTypeId)
             , underlyingTypeId(underlyingTypeId)
             , size(size), offset(offset)
 			, owner(const_cast<TypeInfo*>(owner))
 			, instanceOwner(const_cast<TypeInfo*>(owner))
+			, refType(refType)
         {
             ConstructInternal();
         }
@@ -90,6 +93,10 @@ namespace CE
 
         bool IsObjectField() const;
 		bool IsStructField();
+
+        bool IsRefCounted() const;
+        bool IsStrongRefCounted() const;
+        bool IsWeakRefCounted() const;
 
         bool HasAnyFieldFlags(FieldFlags flags) const
         {
@@ -201,15 +208,24 @@ namespace CE
 		void DeleteArrayElement(void* instance, u32 deletePosition);
 
 		template<typename T>
-		const T& GetArrayElementValueAt(u32 index, void* instance)
+		const T& GetArrayElementValueAt(u32 index, void* instance) const
 		{
 			if (!IsArrayField())
 				return {};
 
-			const auto& array = GetFieldValue<Array<u8>>(instance);
-			const u8* address = array.begin() + index;
-			return *(T*)address;
+			const Array<T>& array = GetFieldValue<Array<T>>(instance);
+            return array[index];
 		}
+
+        template<typename T>
+        void SetArrayElementValueAt(u32 index, void* instance, const T& value)
+        {
+            if (!IsArrayField())
+                return;
+
+            Array<T>& array = const_cast<Array<T>&>(GetFieldValue<Array<T>>(instance));
+            array[index] = value;
+        }
 
 		Array<FieldType> GetArrayFieldList(void* instance);
 
@@ -232,6 +248,7 @@ namespace CE
         FieldType* next = nullptr;
         TypeInfo* owner = nullptr;
 		TypeInfo* instanceOwner = nullptr;
+        RefType refType = RefType::None;
 
         friend class StructType;
         friend class ClassType;

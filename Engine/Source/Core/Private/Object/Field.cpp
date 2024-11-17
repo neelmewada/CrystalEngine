@@ -244,6 +244,21 @@ namespace CE
 		return structType != nullptr;
 	}
 
+	bool FieldType::IsRefCounted() const
+	{
+		return IsStrongRefCounted() || IsWeakRefCounted();
+	}
+
+	bool FieldType::IsStrongRefCounted() const
+	{
+		return refType == RefType::Strong;
+	}
+
+	bool FieldType::IsWeakRefCounted() const
+	{
+		return refType == RefType::Weak;
+	}
+
 	TypeInfo* FieldType::GetUnderlyingType()
 	{
 		if (underlyingTypeInfo == nullptr && underlyingTypeId != 0)
@@ -683,15 +698,25 @@ namespace CE
 		TypeInfo* underlyingType = GetUnderlyingType();
 		if (underlyingType == nullptr)
 			return 0;
+
 		auto underlyingTypeSize = underlyingType->GetSize();
 
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
 		}
 		if (underlyingType->IsTypeInfo())
 		{
-			underlyingTypeSize = sizeof(TypeInfo*); // Reflection types are always stored as pointers
+			underlyingTypeSize = sizeof(TypeInfo*); // Reflection types are always stored as raw pointers
 		}
 
 		return array.GetSize() / underlyingTypeSize;
@@ -718,6 +743,16 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
+
 			array.Resize(numElements * underlyingTypeSize, 0);
 		}
 		else
@@ -775,6 +810,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+				Array<Ref<Object>>& refArray = const_cast<Array<Ref<Object>>&>(GetFieldValue<Array<Ref<Object>>>(instance));
+				refArray.InsertAt(insertPosition, Ref<Object>(nullptr));
+
+				return;
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+				Array<WeakRef<Object>>& refArray = const_cast<Array<WeakRef<Object>>&>(GetFieldValue<Array<WeakRef<Object>>>(instance));
+				refArray.InsertAt(insertPosition, WeakRef<Object>(nullptr));
+
+				return;
+			}
 		}
 
 		auto insertBytePos = insertPosition * underlyingTypeSize;
@@ -782,7 +834,7 @@ namespace CE
 		Array<u8> insertionValues = Array<u8>(underlyingTypeSize, 0);
 		array.InsertRange(insertBytePos, insertionValues); // Insert an array of zeroes
 
-		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
+		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes (aka Objects). They're just null pointers by default.
 			return;
 
 		void* elementInstance = &array[insertBytePos];
@@ -814,6 +866,24 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+				Array<Ref<Object>>& refArray = (Array<Ref<Object>>&)array;
+				refArray.RemoveAt(deletePosition);
+
+				return;
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+				Array<WeakRef<Object>>& refArray = (Array<WeakRef<Object>>&)array;
+				refArray.RemoveAt(deletePosition);
+
+				return;
+			}
+
 			deletionBytePos = deletePosition * underlyingTypeSize;
 		}
 		else
@@ -846,13 +916,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
 		}
 
 		Array<FieldType> array{};
 
 		for (int i = 0; i < arraySize; i++)
 		{
-			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 0, underlyingTypeSize, i * underlyingTypeSize, "", this));
+			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 
+				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
 		}
 
 		return array;

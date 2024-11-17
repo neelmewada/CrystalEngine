@@ -2,8 +2,8 @@
 
 namespace CE
 {
+
 	class Object;
-	namespace Internal { class RefCountControl; }
 
 	namespace Internal
 	{

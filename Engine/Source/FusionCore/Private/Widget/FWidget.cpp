@@ -216,11 +216,11 @@ namespace CE
         Construct();
     }
 
-    void FWidget::OnBeforeDestroy()
+    void FWidget::OnBeginDestroy()
     {
         ZoneScoped;
 
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         FusionApplication* app = FusionApplication::TryGet();
 

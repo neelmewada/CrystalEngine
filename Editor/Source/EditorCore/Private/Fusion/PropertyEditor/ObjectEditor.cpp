@@ -25,9 +25,9 @@ namespace CE::Editor
 
     }
 
-    void ObjectEditor::OnBeforeDestroy()
+    void ObjectEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (target)
         {

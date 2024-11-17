@@ -121,6 +121,9 @@ namespace CE
 
         // Lifecycle
 
+        void AddToRoot();
+        void RemoveFromRoot();
+
         virtual void AttachSubobject(Object* subobject);
         
         virtual void DetachSubobject(Object* subobject);
@@ -193,7 +196,7 @@ namespace CE
 		// Lifecycle
 
 		virtual void OnAfterConstruct() {}
-		virtual void OnBeforeDestroy() {}
+		virtual void OnBeginDestroy() {}
 
 		virtual void OnSubobjectAttached(Object* subobject) {}
 
@@ -258,6 +261,9 @@ namespace CE
 
         template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
         friend class Ref;
+
+        template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
+        friend class WeakRef;
 
         friend class Internal::RefCountControl;
         

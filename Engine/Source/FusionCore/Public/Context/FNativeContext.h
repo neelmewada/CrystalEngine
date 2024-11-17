@@ -72,7 +72,7 @@ namespace CE
 
 		void OnQueuedDestroy() override;
 
-		void OnBeforeDestroy() override;
+		void OnBeginDestroy() override;
 
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 		void OnWindowExposed(PlatformWindow* window) override;

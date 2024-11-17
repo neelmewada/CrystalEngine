@@ -114,9 +114,9 @@ namespace CE
 		}
 	}
 
-	void FNativeContext::OnBeforeDestroy()
+	void FNativeContext::OnBeginDestroy()
 	{
-		Super::OnBeforeDestroy();
+		Super::OnBeginDestroy();
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 

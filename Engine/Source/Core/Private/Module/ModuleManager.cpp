@@ -14,7 +14,13 @@ namespace CE
 
 	}
 
-	Module* ModuleManager::LoadModule(String moduleName, ModuleLoadResult& result)
+	ModuleManager& ModuleManager::Get()
+	{
+		static ModuleManager instance{};
+		return instance;
+	}
+
+	Module* ModuleManager::LoadModule(const String& moduleName, ModuleLoadResult& result)
 	{
 		ZoneScoped;
 
@@ -59,9 +65,11 @@ namespace CE
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
 
+		Ref<Bundle> transient = nullptr;
+
 		// Create transient bundle if NOT Core module
 		if (moduleName != "Core")
-			info->transientBundle = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+			transient = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		// Register manually reflected types
 		modulePtr->RegisterTypes();
@@ -73,7 +81,10 @@ namespace CE
 		modulePtr->StartupModule();
 
 		if (moduleName == "Core")
-			info->transientBundle = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+			transient = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+
+		transient->AddToRoot();
+		info->transientBundle = transient;
 
 		// RTTI setup
 		ClassType::CacheTypesForCurrentModule();
@@ -91,7 +102,7 @@ namespace CE
 		return modulePtr;
 	}
 
-	void ModuleManager::UnloadModule(String moduleName)
+	void ModuleManager::UnloadModule(const String& moduleName)
 	{
 		auto info = FindModuleInfo(moduleName);
 
@@ -111,6 +122,7 @@ namespace CE
 		if (info->transientBundle != nullptr)
 		{
 			info->transientBundle->BeginDestroy();
+			info->transientBundle->RemoveFromRoot();
 			info->transientBundle = nullptr;
 		}
 
@@ -140,7 +152,7 @@ namespace CE
 		TypeInfo::currentlyUnloadingModuleStack.Pop();
 	}
 
-	Module* ModuleManager::LoadModule(String moduleName)
+	Module* ModuleManager::LoadModule(const String& moduleName)
 	{
 		ModuleLoadResult result;
 		return LoadModule(moduleName, result);
@@ -162,7 +174,7 @@ namespace CE
 		return NAME_None;
 	}
 
-    bool ModuleManager::IsModuleLoaded(String moduleName)
+    bool ModuleManager::IsModuleLoaded(const String& moduleName)
     {
         auto info = FindModuleInfo(moduleName);
         if (info == nullptr)
@@ -189,7 +201,7 @@ namespace CE
 		return info->transientBundle;
 	}
 
-	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
+	ModuleInfo* ModuleManager::AddModule(const String& moduleName, ModuleLoadResult& result)
 	{
 		IO::Path moduleDllPath = PlatformProcess::GetModuleDllPath(moduleName);
 		if (moduleDllPath.IsEmpty() || !moduleDllPath.Exists())
@@ -259,7 +271,7 @@ namespace CE
 		return ptr;
 	}
 
-	ModuleInfo* ModuleManager::FindModuleInfo(String moduleName)
+	ModuleInfo* ModuleManager::FindModuleInfo(const String& moduleName)
 	{
 		if (!ModuleMap.KeyExists(moduleName))
 			return nullptr;

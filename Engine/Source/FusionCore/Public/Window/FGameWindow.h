@@ -22,7 +22,7 @@ namespace CE
 
         void Construct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         RPI::Scene* scene = nullptr;
 

@@ -8,6 +8,9 @@ namespace CE
 	static HashSet<Object*> gDestroyedObjects{};
 	static SharedMutex gDestroyedObjectsMutex{};
 
+	static HashSet<Ref<Object>> gRootObjects{};
+	static SharedMutex gRootObjectsMutex{};
+
 	CORE_API bool IsValidObject(Object* object)
 	{
 		if (object == nullptr)
@@ -137,11 +140,14 @@ namespace CE
 
 	void Object::BeginDestroy()
 	{
+		if (IsPendingDestruction())
+			return;
+
 		objectFlags |= OF_PendingDestroy;
 
 		ObjectListener::RemoveAllListeners(this);
 
-		OnBeforeDestroy();
+		OnBeginDestroy();
 
 		{
 			LockGuard lock{ gDestroyedObjectsMutex };
@@ -222,6 +228,20 @@ namespace CE
 		{
 			this->name = newName;
 		}
+    }
+
+    void Object::AddToRoot()
+    {
+		LockGuard lock{ gRootObjectsMutex };
+
+		gRootObjects.Add(this);
+    }
+
+    void Object::RemoveFromRoot()
+    {
+		LockGuard lock{ gRootObjectsMutex };
+
+		gRootObjects.Remove(this);
     }
 
     void Object::AttachSubobject(Object* subobject)
@@ -401,8 +421,10 @@ namespace CE
 
 	void Object::FetchObjectReferences(HashMap<Uuid, Object*>& outReferences)
 	{
-		for (const auto& subobject : attachedObjects)
+		for (const auto& subobjectRef : attachedObjects)
 		{
+			Object* subobject = subobjectRef.Get();
+
 			if (subobject == nullptr || uuid == 0)
 				continue;
 
@@ -424,8 +446,10 @@ namespace CE
 			else if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
 			{
 				const auto& objectMap = field->GetFieldValue<ObjectMap>(this);
-				for (const auto& object : objectMap)
+				for (const auto& objectRef : objectMap)
 				{
+					Object* object = objectRef.Get();
+
 					if (object != nullptr)
 					{
 						outReferences[object->uuid] = object;
@@ -805,7 +829,7 @@ namespace CE
 				ObjectMap& destMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(clone));
 				for (int i = destMap.GetObjectCount() - 1; i >= 0; i--)
 				{
-					auto objectToDelete = *(destMap.begin() + i);
+					Object* objectToDelete = (destMap.begin() + i)->Get();
 					if (objectToDelete != nullptr)
 						objectToDelete->BeginDestroy();
 				}
@@ -876,8 +900,9 @@ namespace CE
                 if (src != nullptr && dst != nullptr)
                     originalToCloneMap[src->GetUuid()] = dst;
                 
-				for (auto srcObject : src->attachedObjects)
+				for (const auto& srcObjectRef : src->attachedObjects)
 				{
+					Object* srcObject = srcObjectRef.Get();
 					if (srcObject == nullptr)
 						continue;
 					Object* dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
@@ -925,8 +950,9 @@ namespace CE
 				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(templateObject);
 				ObjectMap& dstMap = const_cast<ObjectMap&>(destField->GetFieldValue<ObjectMap>(this));
 
-				for (auto srcObject : srcMap)
+				for (const auto& srcObjectRef : srcMap)
 				{
+					Object* srcObject = srcObjectRef.Get();
 					if (srcObject == nullptr)
 						continue;
 					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass());

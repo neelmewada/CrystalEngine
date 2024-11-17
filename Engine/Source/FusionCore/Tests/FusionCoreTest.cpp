@@ -503,9 +503,9 @@ namespace RenderingTests
         );
     }
 
-    void RenderingTestWidget::OnBeforeDestroy()
+    void RenderingTestWidget::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         PlatformApplication::Get()->RemoveMessageHandler(this);
     }

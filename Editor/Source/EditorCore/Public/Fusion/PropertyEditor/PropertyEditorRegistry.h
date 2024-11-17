@@ -15,7 +15,7 @@ namespace CE::Editor
 
         void OnAfterConstruct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
     public: // - Public API -
 

@@ -10,7 +10,7 @@ namespace CE::Editor
 
         ArrayPropertyEditor();
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         void ConstructEditor() override;
 

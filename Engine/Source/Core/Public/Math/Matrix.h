@@ -45,13 +45,13 @@ namespace CE
             memcpy(rows, copy.rows, sizeof(rows));
         }
 
-		static Matrix4x4 PerspectiveProjection(float aspect, float fieldOfView, float near, float far);
+		static Matrix4x4 PerspectiveProjection(float aspect, float fieldOfView, float nearPlane, float farPlane);
 
-		static Matrix4x4 OrthographicProjection(float left, float right, float top, float bottom, float near, float far);
+		static Matrix4x4 OrthographicProjection(float left, float right, float top, float bottom, float nearPlane, float farPlane);
 
-		inline static Matrix4x4 OrthographicProjection(float aspect, float near, float far)
+		inline static Matrix4x4 OrthographicProjection(float aspect, float nearPlane, float farPlane)
 		{
-			return OrthographicProjection(-aspect, aspect, -1, 1, near, far);
+			return OrthographicProjection(-aspect, aspect, -1, 1, nearPlane, farPlane);
 		}
 
         inline static Matrix4x4 Translation(const Vec3& translation)

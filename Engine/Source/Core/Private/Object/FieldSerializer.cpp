@@ -234,8 +234,9 @@ namespace CE
 
 			*stream << mapSize;
 
-            for (const auto& object : map)
+            for (const auto& objectRef : map)
             {
+                Object* object = objectRef.Get();
                 if (object == nullptr)
                     continue;
 
