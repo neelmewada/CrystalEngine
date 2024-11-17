@@ -133,6 +133,9 @@ Schema table stores the layout and offsets of each object and struct that is ser
 |  |  | Field #0 | Number of fields can be inferred from Schema Table. |
 | +xx | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
 | +04 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
+|  |  | Field #1 | Number of fields can be inferred from Schema Table. |
+| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
+| +04 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 | | | | |
 | | | | |
 | | 4B | `00 00 00 00` | **End of data** |
@@ -151,7 +154,7 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | Flags | 8B | `xx xx xx xx xx xx xx xx` | BinaryBlob flags value. |
 | xx | xx |  | Raw binary data. |
 
-### Valid Object Reference
+### Object Reference
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
@@ -172,18 +175,31 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | +10 | 16B | 128 bit Uuid | UUID of the **bundle** the bound object is in. |
 | +20 | \0 | `FunctionName\0` | Exact name of function as in C++. |
 
+### NULL Function Binding
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 16B | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` | 0 Uuid. |
+
 ### Struct
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 4B | `00 00 00 04` | Size in bytes of this struct value. (including this field) |
-| +04 | 4B | `00 00 00 00` | | |
+| +00 | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
+| +04 | xx | [Field Value](#field-value) | Value of 1st field |
+| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
+| +04 | xx | [Field Value](#field-value) | Value of 2nd field |
 
 ### Array
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 |  |  |  |
+| +00 | 4B | `00 00 00 02` | Number of elements in array  |
+| +04 | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
+| +08 | xx | [Field Value](#field-value) | Value of 1st field |
+| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
+| +04 | xx | [Field Value](#field-value) | Value of 2nd field |
+
 
 
 ------------
