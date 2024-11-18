@@ -3,6 +3,15 @@
 namespace CE
 {
 
+    enum class BundleLoadResult
+    {
+        Success = 0,
+        UnknownError,
+        BundleNotFound,
+        InvalidBundle,
+        UnsupportedBundleVersion,
+    };
+
     enum class BundleSaveResult
 	{
 		Success = 0,
@@ -32,6 +41,8 @@ namespace CE
         // - Static API -
 
         static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
+        
+        
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
@@ -85,7 +96,7 @@ namespace CE
 
         // If this bundle was created from deserialization
         b8 wasDeserialized = false;
-
+        b8 isFullyLoaded = false;
 
         Array<SchemaEntry> schemaTable;
 

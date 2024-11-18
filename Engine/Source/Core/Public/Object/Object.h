@@ -162,6 +162,8 @@ namespace CE
 
 		Name GetPathInBundle();
         
+        Name GetPathInBundle(Bundle* bundle);
+        
 		// Returns the bundle this object belongs to.
         Bundle* GetBundle();
 

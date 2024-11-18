@@ -398,7 +398,7 @@ namespace CE
 
         *stream << schemaIndex;
 
-        *stream << target->GetPathInBundle();
+        *stream << target->GetPathInBundle(bundle.Get());
 
         *stream << target->GetName();
 

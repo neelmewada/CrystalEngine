@@ -404,6 +404,26 @@ namespace CE
         return IsOfType<Bundle>();
     }
 
+    Name Object::GetPathInBundle(Bundle* bundle)
+    {
+        if (this == bundle || bundle == nullptr)
+            return "";
+        
+        String path = name.GetString();
+        
+        auto outerObject = outer;
+        
+        while (outerObject != nullptr && outerObject != bundle)
+        {
+            auto outerPathName = outerObject->GetName();
+            if (outerPathName.IsValid())
+                path = outerPathName.GetString() + "." + path;
+            outerObject = outerObject->outer;
+        }
+        
+        return path;
+    }
+
 	Name Object::GetPathInBundle()
 	{
         if (IsBundle())
