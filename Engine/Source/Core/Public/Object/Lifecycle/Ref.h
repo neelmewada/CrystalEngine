@@ -124,6 +124,24 @@ namespace CE
             ptr = (T*)copy.ptr;
 #endif
         }
+
+        template<class U> requires TIsBaseClassOf<T, U>::Value
+        Ref& operator=(const Ref<U>& copy)
+        {
+            if (control)
+            {
+                control->ReleaseStrongRef();
+            }
+            control = copy.control;
+            if (control)
+            {
+                control->AddStrongRef();
+            }
+#if CE_BUILD_DEBUG
+            ptr = (T*)copy.ptr;
+#endif
+            return *this;
+        }
         
         Ref(Ref&& move)
         {
@@ -166,11 +184,6 @@ namespace CE
                 return nullptr;
             }
             return (T*)object;
-        }
-        
-        inline operator T*() const
-        {
-            return Get();
         }
         
         inline T& operator*() const

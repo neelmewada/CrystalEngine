@@ -1,12 +1,14 @@
 #include "CoreMinimal.h"
 
+#if false
+
 namespace CE
 {
 	static HashMap<TypeId, u8> typeIdToFieldTypeMap{
 		{ 0, 0x00 }, // Null value
 		{ TYPEID(u8), 0x01 }, { TYPEID(c8), 0x01 },
 		{ TYPEID(u16), 0x02 },
-		{ TYPEID(u32), 0x03 }, { TYPEID(UUID32), 0x04 },
+		{ TYPEID(u32), 0x03 },
 		{ TYPEID(u64), 0x04 }, { TYPEID(Uuid), 0x04 },
 		{ TYPEID(s8), 0x05 },
 		{ TYPEID(s16), 0x06 },
@@ -169,7 +171,7 @@ namespace CE
 				*stream << field->GetFieldValue<u16>(instance);
 			else if (fieldDeclId == TYPEID(s32))
 				*stream << field->GetFieldValue<s32>(instance);
-			else if (fieldDeclId == TYPEID(u32) || fieldDeclId == TYPEID(UUID32))
+			else if (fieldDeclId == TYPEID(u32))
 				*stream << field->GetFieldValue<u32>(instance);
 			else if (fieldDeclId == TYPEID(s64))
 				*stream << field->GetFieldValue<s64>(instance);
@@ -309,10 +311,10 @@ namespace CE
 					}
 					auto bundle = object->GetBundle();
 					*stream << typeIdToFieldTypeMap[TYPEID(Object)]; // ObjectRef field type byte
-					*stream << (u64)object->GetUuid();
-					*stream << ((bundle != nullptr) ? (u64)bundle->GetUuid() : 0);
+					*stream << object->GetUuid();
+					*stream << ((bundle != nullptr) ? bundle->GetUuid() : Uuid::Zero());
 				}
-
+				
 				auto curPos = stream->GetCurrentPosition();
 				stream->Seek(headerPos);
 				*stream << (u64)(curPos - headerPos - sizeof(u64));
@@ -352,8 +354,8 @@ namespace CE
 			}
 
 			*stream << typeIdToFieldTypeMap[TYPEID(Object)]; // Field Type byte
-			*stream << (u64)object->GetUuid();
-			*stream << ((bundle != nullptr) ? (u64)bundle->GetUuid() : 0);
+			*stream << object->GetUuid();
+			*stream << ((bundle != nullptr) ? bundle->GetUuid() : Uuid::Zero());
 			return true;
 		}
 		else if (fieldDeclType->IsStruct())
@@ -586,11 +588,7 @@ namespace CE
 			}
 			else if (fieldDeclId == TYPEID(Uuid))
 			{
-				field->ForceSetFieldValue<Uuid>(instance, 0);
-			}
-			else if (fieldDeclId == TYPEID(UUID32))
-			{
-				field->ForceSetFieldValue<UUID32>(instance, 0);
+				field->ForceSetFieldValue<Uuid>(instance, Uuid::Zero());
 			}
 			else if (fieldDeclId == TYPEID(f32))
 			{
@@ -763,14 +761,6 @@ namespace CE
 			else if (fieldDeclId == TYPEID(f64))
 			{
 				field->ForceSetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-			}
-			else if (fieldDeclId == TYPEID(Uuid))
-			{
-				field->ForceSetFieldValue<Uuid>(instance, unsignedInt);
-			}
-			else if (fieldDeclId == TYPEID(UUID32))
-			{
-				field->ForceSetFieldValue<UUID32>(instance, (u32)unsignedInt);
 			}
 			else if (fieldDeclId == TYPEID(String))
 			{
@@ -1261,3 +1251,4 @@ namespace CE
 
 } // namespace CE
 
+#endif

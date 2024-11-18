@@ -98,6 +98,7 @@ namespace CE\
 				: Type(fullName, impl, size, Attributes "")\
 				, TypeData(typeData)\
             {\
+				static_assert(std::is_same_v<Namespace::Class::Self, Namespace::Class>, "Reflected class must have CE_CLASS() in body!");\
 				Type.AddSuper<SuperClasses>();\
 				FieldList\
 				FunctionList\

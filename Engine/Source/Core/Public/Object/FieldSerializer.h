@@ -1,5 +1,7 @@
 #pragma once
 
+#if false
+
 namespace CE
 {
     class FieldType;
@@ -65,3 +67,5 @@ namespace CE
     };
     
 }
+
+#endif

@@ -18,8 +18,17 @@ namespace CE
         Uuid();
 
         Uuid(u64 low, u64 high);
+        Uuid(Hash128 hash);
+
+        static Uuid Random();
 
         static Uuid Null();
+        static Uuid Zero();
+
+        static Uuid FromString(const String& uuidString);
+
+        bool IsNull() const;
+        bool IsValid() const { return !IsNull(); }
         
         Uuid(const Uuid&) = default;
         
@@ -32,85 +41,18 @@ namespace CE
         {
             return !operator==(other);
         }
+
+        SIZE_T GetHash() const;
+
+        String ToString() const;
+
+        CORE_API friend inline Stream& operator<<(Stream& stream, const Uuid& uuid);
+
+        CORE_API friend inline Stream& operator>>(Stream& stream, Uuid& uuid);
         
     private:
         u64 uuid[2] = { 0, 0 };
     };
-
-    /// A 32-bit unique identifier
-    class CORE_API UUID32
-    {
-    public:
-        UUID32();
-
-        UUID32(u32 value);
-
-        UUID32(const UUID32&) = default;
-
-        CE_INLINE operator u32() const
-        {
-            return uuid;
-        }
-
-        CE_INLINE bool operator==(const UUID32& other) const
-        {
-            return uuid == other.uuid;
-        }
-
-        CE_INLINE bool operator!=(const UUID32& other) const
-        {
-            return uuid != other.uuid;
-        }
-
-        CE_INLINE bool operator==(const s64& other) const
-        {
-            return uuid == other;
-        }
-
-        CE_INLINE bool operator==(const u64& other) const
-        {
-            return uuid == other;
-        }
-
-        CE_INLINE bool operator!=(const s64& other) const
-        {
-            return uuid != other;
-        }
-
-        CE_INLINE bool operator!=(const u64& other) const
-        {
-            return uuid != other;
-        }
-
-        CE_INLINE bool operator==(const s32& other) const
-        {
-            return uuid == other;
-        }
-
-        CE_INLINE bool operator==(const u32& other) const
-        {
-            return uuid == other;
-        }
-
-        CE_INLINE bool operator!=(const s32& other) const
-        {
-            return uuid != other;
-        }
-
-        CE_INLINE bool operator!=(const u32& other) const
-        {
-            return uuid != other;
-        }
-
-    private:
-        u32 uuid;
-    };
-
-    template<>
-    inline SIZE_T GetHash<Uuid>(const Uuid& value)\
-    {
-        return (u64)value;
-    }
     
 } // namespace CE
 
@@ -127,6 +69,6 @@ template <> struct fmt::formatter<CE::Uuid> {
     template <typename FormatContext>
     auto format(const CE::Uuid& value, FormatContext& ctx) const -> decltype(ctx.out()) {
         // ctx.out() is an output iterator to write to.
-        return fmt::format_to(ctx.out(), "{}", (u64)value);
+        return fmt::format_to(ctx.out(), "{}", value.ToString());
     }
 };

@@ -3,6 +3,8 @@
 
 #include "Bundle.inl"
 
+#if false
+
 namespace CE
 {
 	static HashMap<TypeId, u8> typeIdToFieldTypeMap{
@@ -680,3 +682,5 @@ namespace CE
     }
 
 }
+
+#endif

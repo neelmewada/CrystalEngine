@@ -105,19 +105,6 @@ namespace CE
         return *this;
     }
 
-    Stream& Stream::operator<<(const Uuid& uuid)
-    {
-        return *this << (u64)uuid;
-    }
-
-    Stream& Stream::operator>>(Uuid& uuid)
-    {
-        u64 value = 0;
-        *this >> value;
-        uuid = value;
-        return *this;
-    }
-
 	Stream& Stream::operator<<(char ch)
 	{
 		return *this << (u8)ch;

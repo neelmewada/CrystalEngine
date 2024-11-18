@@ -301,11 +301,7 @@ namespace CE
 			}
 			else if (fieldTypeId == TYPEID(Uuid))
 			{
-				return String::Format("{}", (u64)GetFieldValue<Uuid>(instance));
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				return String::Format("{}", (u32)GetFieldValue<UUID32>(instance));
+				return String::Format("{}", GetFieldValue<Uuid>(instance));
 			}
 			else if (fieldTypeId == TYPEID(c8))
 			{
@@ -444,14 +440,6 @@ namespace CE
 					return value;
 				}
 			}
-			else if (fieldTypeId == TYPEID(Uuid))
-			{
-				return (u64)GetFieldValue<Uuid>(instance);
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				return (u32)GetFieldValue<UUID32>(instance);
-			}
 			else if (fieldTypeId == TYPEID(c8))
 			{
 				return (int)GetFieldValue<c8>(instance);
@@ -536,11 +524,6 @@ namespace CE
 			else if (fieldTypeId == TYPEID(Uuid))
 			{
 				const Uuid& value = GetFieldValue<Uuid>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				const UUID32& value = GetFieldValue<UUID32>(srcInstance);
 				destField->SetFieldValue(destInstance, value);
 			}
 			else if (IsArrayField()) // Array

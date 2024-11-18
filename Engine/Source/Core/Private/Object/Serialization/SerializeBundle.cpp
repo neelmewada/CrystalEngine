@@ -1,10 +1,9 @@
-#pragma once
 
 #include "CoreMinimal.h"
 
 #include "../Bundle.inl"
 
-
+#if false
 
 namespace CE
 {
@@ -461,3 +460,5 @@ namespace CE
     }
     
 } // namespace CE
+
+#endif

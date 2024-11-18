@@ -80,7 +80,9 @@ namespace CE
 
 	static Bundle* LoadSettingsBundle()
 	{
-		return Bundle::LoadBundleFromDisk(nullptr, Name("/Game/Settings"), LOAD_Full);
+		// TODO: Fix
+		return nullptr;
+		//return Bundle::LoadBundleFromDisk(nullptr, Name("/Game/Settings"), LOAD_Full);
 	}
 
 	CORE_API Bundle* GetSettingsBundle()

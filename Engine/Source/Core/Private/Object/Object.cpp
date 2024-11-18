@@ -58,7 +58,7 @@ namespace CE
 		}
 	}
 
-	Object::Object() : name("Object"), uuid(Uuid())
+	Object::Object() : name("Object"), uuid(Uuid::Random())
     {
         control = new Internal::RefCountControl();
         control->object = this;
@@ -212,7 +212,7 @@ namespace CE
 		CE_ASSERT(parameters->objectClass != nullptr, "Object initializer passed with null objectClass!");
 
         this->objectFlags = parameters->objectFlags;
-        if (parameters->uuid != 0)
+        if (parameters->uuid.IsValid())
             this->uuid = parameters->uuid;
         this->name = parameters->name;
 
@@ -260,7 +260,7 @@ namespace CE
 		if (bundle != nullptr)
 		{
 			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
-			bundle->loadedObjects[subobject->GetUuid()] = subobject;
+			bundle->loadedObjectsByUuid[subobject->GetUuid()] = subobject;
 		}
 		
 		if (EnumHasFlag(subobject->objectFlags, OF_DefaultSubobject) && 
@@ -287,7 +287,7 @@ namespace CE
 		if (bundle != nullptr)
 		{
 			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
-			bundle->loadedObjects.Remove(subobject->GetUuid());
+			bundle->loadedObjectsByUuid.Remove(subobject->GetUuid());
 		}
 
 		OnSubobjectDetached(subobject);
@@ -391,7 +391,7 @@ namespace CE
 			}
 		}
 
-		for (Object* object : attachedObjects)
+		for (const auto& object : attachedObjects)
 		{
 			totalSize += object->ComputeMemoryFootprint();
 		}
@@ -425,7 +425,7 @@ namespace CE
 		{
 			Object* subobject = subobjectRef.Get();
 
-			if (subobject == nullptr || uuid == 0)
+			if (subobject == nullptr || uuid.IsNull())
 				continue;
 
 			if (!outReferences.KeyExists(subobject->uuid))
@@ -707,20 +707,8 @@ namespace CE
 			}
             else if (fieldTypeId == TYPEID(Uuid))
             {
-                u64 uuid = 0;
-                if (String::TryParse(stringValue, uuid))
-                {
-                    field->SetFieldValue<Uuid>(this, Uuid(uuid));
-                }
+				field->SetFieldValue<Uuid>(this, Uuid::FromString(stringValue));
             }
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				u32 uuid = 0;
-				if (String::TryParse(stringValue, uuid))
-				{
-					field->SetFieldValue<UUID32>(this, UUID32(uuid));
-				}
-			}
             else if (field->IsIntegerField())
             {
                 s64 value = 0;
@@ -847,10 +835,10 @@ namespace CE
 
 	Object* Object::GetDefaultSubobject(ClassType* classType, const String& name)
 	{
-		for (auto object : attachedObjects)
+		for (const auto& object : attachedObjects)
 		{
 			if (object->GetName() == name && object->GetClass() == classType)
-				return object;
+				return object.Get();
 		}
 		return nullptr;
 	}
@@ -875,7 +863,7 @@ namespace CE
 					if (dstObject == nullptr)
 						continue;
 
-					fetchSubobjects(srcObject, dstObject);
+					fetchSubobjects(srcObject.Get(), dstObject.Get());
 				}
 			};
 
@@ -921,7 +909,7 @@ namespace CE
 					Object* srcObject = srcObjectRef.Get();
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass()).Get();
 					if (dstObject == nullptr)
 						return;
 
@@ -1062,11 +1050,6 @@ namespace CE
 			else if (fieldDeclId == TYPEID(Uuid))
 			{
 				Uuid value = srcField->GetFieldValue<Uuid>(srcInstance);
-				dstField->ForceSetFieldValue(dstInstance, value);
-			}
-			else if (fieldDeclId == TYPEID(UUID32))
-			{
-				UUID32 value = srcField->GetFieldValue<UUID32>(srcInstance);
 				dstField->ForceSetFieldValue(dstInstance, value);
 			}
 			else if (srcField->IsArrayField())
@@ -1279,20 +1262,8 @@ namespace CE
 		}
         else if (field->GetTypeId() == TYPEID(Uuid))
         {
-            u64 intValue = 0;
-            if (String::TryParse(value, intValue))
-            {
-                field->SetFieldValue(instance, Uuid(intValue));
-            }
+			field->SetFieldValue(instance, Uuid::FromString(value));
         }
-		else if (field->GetTypeId() == TYPEID(UUID32))
-		{
-			u32 intValue = 0;
-			if (String::TryParse(value, intValue))
-			{
-				field->SetFieldValue(instance, UUID32(intValue));
-			}
-		}
         else if (field->IsIntegerField())
         {
             s64 intValue = 0;
@@ -1368,7 +1339,7 @@ namespace CE
 			}
 		}
 
-		for (Object* subObject : attachedObjects)
+		for (const auto& subObject : attachedObjects)
 		{
 			if (!subObject)
 				continue;
@@ -1376,7 +1347,7 @@ namespace CE
 			if ((subObject->objectFlags & OF_SubobjectPending) != 0)
 			{
 				subObject->objectFlags &= ~OF_SubobjectPending;
-				OnSubobjectAttached(subObject);
+				OnSubobjectAttached(subObject.Get());
 				subObject->OnAfterConstructInternal();
 			}
 		}

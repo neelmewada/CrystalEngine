@@ -33,15 +33,16 @@ This document describes the file format specification of `.casset` files. The cu
 | - | - | *newly added header fields go here* | - |
 | - | - | *schema table goes here* | - |
 | - | - | *serialized data goes here* | - |
+| +xx | 8B | `00 00 00 00 00 00 00 00` | EOF - End of file |
 
 
 ## **Schema Table**
 
-Schema table stores the layout and offsets of each object and struct that is serialized in this bundle.
+Schema table stores the layout of each object and struct that is serialized in this bundle.
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of this table in bytes (excluding this field but including End of schema table) |
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of this table in bytes (including this field and End of schema table) |
 | +08 | 4B | N | Number of entries in schema |
 | | | | |
 | | | | |
@@ -104,14 +105,17 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | `0D` | Vec2 | Vec2 |
 | `0E` | Vec3 | Vec3 |
 | `0F` | Vec4 | Vec4 |
-| `10` | Array\<Object\> | Array of objects |
-| `11` | Array\<Struct\> | Array of struct types | **Optional_1** |
-| `12` | Array\<[FieldType](#field-type)\> | Array | **Optional_2** |
-| `13` | [Binary](#binary-data-type) | Raw binary data |
-| `14` | [Object Ref](#object-reference) | Object reference |
-| `15` | [Function Binding](#function-binding) | Function binding to an object (ScriptDelegate). |
-| `16` | Array\<[Function Binding](#function-binding)\> | Array of function bindings (ScriptEvent). |
-| `17` | [Struct](#struct) | Struct field. | **Optional_1** |
+| `10` | Vec2i | Vec2i |
+| `11` | Vec3i | Vec3i |
+| `12` | Vec4i | Vec4i |
+| `13` | Array\<Object\> | Array of objects |
+| `14` | Array\<Struct\> | Array of struct types | **Optional_1** |
+| `15` | Array\<[FieldType](#field-type)\> | Array of simple types | **Optional_2** |
+| `16` | [Binary](#binary-data-type) | Raw binary data |
+| `17` | [Object Ref](#object-reference) | Object reference |
+| `18` | [Function Binding](#function-binding) | Function binding to an object (ScriptDelegate). |
+| `19` | Array\<[Function Binding](#function-binding)\> | Array of function bindings (ScriptEvent). |
+| `1A` | [Struct](#struct) | Struct field. | **Optional_1** |
 
 ## **Serialized Data**
 
@@ -199,101 +203,6 @@ Schema table stores the layout and offsets of each object and struct that is ser
 | +08 | xx | [Field Value](#field-value) | Value of 1st field |
 | +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
 | +04 | xx | [Field Value](#field-value) | Value of 2nd field |
-
-
-
-------------
-------------
-------------
-------------
-
-## **Object Entry**
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +00 | 8B | `00 4f 42 4a 45 43 54 00` | Magic Number: `. O B J E C T .` |
-| +08 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
-| +10 | 1B | `01` | Is Asset? `0` or `1` |
-| +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the Bundle. |
-| +xx | \0 | `/Engine/Core.CE::Texture\0` | Object class TypeName |
-| +10 | \0 | `SomeObjectName\0` | Object name (CE::Name) |
-| +xx | \0 | `/Textures/SomeTexture.png` | Source asset path relative to project (exists only if **Is Asset?**) |
-| +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
-| +xx | xx | | Newly added header fields |
-| +xx | 1B | `10` | [Field Type](#field-type): Map. |
-| +xx | xx | | A **[Map](#map)** of fields. |
-| +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
-
-
-## **Field Value**
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +xx | 1B | `00` | [Field Type](#field-type) |
-| +xx | xx |  | [Field Data](#field-data) (if NOT null) |
-
-## Field Type
-| Type byte | Type | Description |
-|---|---|---|
-| 00 | null | Null value |
-| 01 | u8 | uint8 |
-| 02 | u16 | uint16 |
-| 03 | u32 | uint32 |
-| 04 | u64 | uint64 |
-| 05 | s8 | int8 |
-| 06 | s16 | int16 |
-| 07 | s32 | int32 |
-| 08 | s64 | int64 |
-| 09 | f32 | float |
-| 0A | f64 | double |
-| 0B | b8 | boolean |
-| 0C | String | String |
-| 0D | [Binary](#binary-data-type) | Raw binary data |
-| 0E | [Object Ref](#object-reference) | Object reference |
-| 10 | [Map](#map) | map |
-| 11 | [Array](#array) | array |
-| Extension types--> |
-| 81 | Vec2 | Vec2 |
-| 82 | Vec3 | Vec3 |
-| 83 | Vec4 | Vec4 |
-| 84 | Matrix4x4 | Matrix4x4 |
-
-
-## Field Data (DEPRECATED)
-
-### Plain old data types
-
-| Field Type | Size | Format | Desc |
-|---|---|---|---|
-| null | 0B | | No data for null value |
-| u32 | 4B | `00 00 00 00` | 4 bytes |
-| String | \0 | StringValue\0 | Null terminated string |
-
-### Binary data type (Deprecated)
-| Field Type | Size | Format | Desc |
-|---|---|---|---|
-| Byte size | 8B | `xx xx xx xx xx xx xx xx` | `0` is valid size. |
-| Flags | 8B | `xx xx xx xx xx xx xx xx` | BinaryBlob flags value. |
-| xx | xx |  | Raw binary data. |
-
-### Map
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Length of the **map** in bytes excluding **this**. Minimun is `4`. |
-| +08 | 4B | `xx xx xx xx` | Total number of elements |
-| +10 | \0 | keyName\0 | Key name |
-| +xx | xx |  | [Field Value](#field-value) |
-| +08 | \0 | keyName2\0 | Key name |
-| +xx | xx |  | [Field Value](#field-value) |
-|...|
-
-### Array
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of **array** in bytes excluding **this**. Minimum is `4`. |
-| +08 | 4B | | Total number of elements |
-| +xx | xx |  | [Field Value](#field-value) 0 |
-| +xx | xx |  | [Field Value](#field-value) 1 |
-| +xx | xx |  | [Field Value](#field-value) 2 |
-|...|
 
 
 

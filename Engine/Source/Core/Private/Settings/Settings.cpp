@@ -8,15 +8,17 @@ namespace CE
 	{
 		if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
 			return nullptr;
-		return (Ref<Settings>)GetSettingsBundle()->LoadObject(settingsClass->GetTypeName());
+		return nullptr;
+		// TODO: Fix
+		//return (Ref<Settings>)GetSettingsBundle()->LoadObject(settingsClass->GetTypeName());
 	}
 
     Ref<Settings> Settings::LoadSettings(ClassType* settingsClass, String settingsName)
     {
         if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
             return nullptr;
-		
-		Settings* settings = LoadSettingsFromBundle(settingsClass);
+
+		Ref<Settings> settings = LoadSettingsFromBundle(settingsClass);
 
 		if (settings == nullptr)
 		{
@@ -41,10 +43,11 @@ namespace CE
 		if (settingsBundle == nullptr)
 			return;
 
-		if (!settingsBundle->IsFullyLoaded())
-			settingsBundle->LoadFully();
+		// TODO: Fix
+		//if (!settingsBundle->IsFullyLoaded())
+		//	settingsBundle->LoadFully();
 
-		Bundle::SaveBundleToDisk(settingsBundle, nullptr);
+		//Bundle::SaveToDisk(settingsBundle, nullptr);
 	}
 
 	String Settings::GetTitleName()
@@ -59,10 +62,11 @@ namespace CE
 		if (settingsBundle == nullptr)
 			return;
 
-		if (!settingsBundle->IsFullyLoaded())
-			settingsBundle->LoadFully();
+		// TODO: Fix
+		//if (!settingsBundle->IsFullyLoaded())
+		//	settingsBundle->LoadFully();
 
-		Bundle::SaveBundleToDisk(settingsBundle, nullptr, customPath);
+		//Bundle::SaveToDisk(settingsBundle, nullptr, customPath);
 	}
 #endif
 

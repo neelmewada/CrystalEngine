@@ -113,6 +113,7 @@
 #include "Object/BasePrefs.h"
 #include "Object/Prefs.h"
 #include "Object/Bundle.h"
+#include "Object/Serialization/BundleSerializer.h"
 
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"

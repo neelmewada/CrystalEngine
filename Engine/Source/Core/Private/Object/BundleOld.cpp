@@ -1,6 +1,7 @@
 
 #include "Core.h"
 
+#if false
 
 namespace CE
 {
@@ -92,7 +93,7 @@ namespace CE
 	{
 		for (int i = 0; i < GetSubObjectCount(); i++)
 		{
-			Object* subobject = GetSubobject(i);
+			Object* subobject = GetSubObject(i);
 			DetachSubobject(subobject);
 			subobject->BeginDestroy();
 		}
@@ -503,3 +504,4 @@ namespace CE
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Bundle)
 
 
+#endif

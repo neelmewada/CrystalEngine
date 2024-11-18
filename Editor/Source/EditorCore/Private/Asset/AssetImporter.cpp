@@ -247,7 +247,7 @@ namespace CE::Editor
 
 					for (int i = 0; i < object->GetSubObjectCount(); ++i)
 					{
-						Object* subObject = object->GetSubobject(i);
+						Object* subObject = object->GetSubObject(i);
 						visitorFunc(subObject);
 					}
 				};

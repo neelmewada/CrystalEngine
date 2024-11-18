@@ -116,7 +116,7 @@ namespace CE
 		bool IsTransient() const;
 
 		inline u32 GetSubObjectCount() const { return attachedObjects.GetObjectCount(); }
-        inline Object* GetSubobject(int index) const { return attachedObjects.GetObjectAt(index); }
+        inline Object* GetSubObject(int index) const { return attachedObjects.GetObjectAt(index); }
 		inline const ObjectMap& GetSubObjectMap() const { return attachedObjects; }
 
         // Lifecycle

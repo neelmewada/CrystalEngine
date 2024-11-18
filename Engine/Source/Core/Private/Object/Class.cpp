@@ -565,7 +565,7 @@ namespace CE
 			defaultInstance = CreateObject<Object>(transientBundle, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
 		}
 		
-		return defaultInstance;
+		return defaultInstance.Get();
 	}
 
     void ClassType::RegisterClassType(ClassType* type)

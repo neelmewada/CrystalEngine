@@ -135,6 +135,8 @@ namespace BundleTests
 		CE_STRUCT(WritingTestStructBase)
 	public:
 
+		virtual ~WritingTestStructBase() = default;
+
 		FIELD()
 		String stringValue = "struct default";
 
@@ -150,6 +152,18 @@ namespace BundleTests
 
 		FIELD()
 		WeakRef<WritingTestObj1> obj1Ptr = nullptr;
+	};
+
+	STRUCT()
+	struct WritingTestStruct2 : WritingTestStructBase
+	{
+		CE_STRUCT(WritingTestStruct2, WritingTestStructBase)
+	public:
+
+
+		FIELD()
+		WritingTestStructBase anotherBase{};
+
 	};
 	
 	CLASS()
@@ -576,6 +590,16 @@ CE_RTTI_STRUCT(, BundleTests, WritingTestStruct1,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(obj1Ptr)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+
+CE_RTTI_STRUCT(, BundleTests, WritingTestStruct2,
+    CE_SUPER(WritingTestStructBase),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(anotherBase)
     ),
     CE_FUNCTION_LIST(
     )

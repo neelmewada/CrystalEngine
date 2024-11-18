@@ -15,13 +15,26 @@ namespace CE
 
     class CORE_API Bundle : public Object
     {
+        CE_CLASS(Bundle, Object)
     public:
 
         // - Static API -
 
-        static BundleSaveResult SaveToDisk(const WeakRef<Bundle>& bundle, const Ref<Object>& asset, const IO::Path& fullBundleFilePath);
+        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream);
 
     private:
+
+        Bundle();
+
+        void OnObjectUnloaded(Object* object);
+
+        static bool IsFieldSerialized(FieldType* field, StructType* schemaType);
+
+        static void SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes, const HashMap<StructType*, int>& schemaTypeToIndex);
+
+        static void SerializeFieldSchema(FieldType* field, Stream* stream, const HashMap<StructType*, int>& schemaTypeToIndex);
+
+        void FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs);
 
         struct FieldSchema
         {
@@ -52,10 +65,19 @@ namespace CE
             b8 isLoaded = false;
         };
 
+        //Name bundleName{};
+
+        // If this bundle was created from deserialization
+        b8 wasDeserialized = false;
+
+
         Array<SchemaEntry> schemaTable;
-        HashMap<Uuid, Ref<Object>> loadedObjectsByUuid;
-        HashMap<Uuid, SerializedObjectEntry> objectEntriesByUuid;
-        
+
+        SharedMutex loadedObjectsMutex{};
+        HashMap<Uuid, Object*> loadedObjectsByUuid{};
+
+
+        friend class Object;
     };
 
 }

@@ -84,7 +84,7 @@ namespace CE
 			transient = CreateObject<Bundle>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		transient->AddToRoot();
-		info->transientBundle = transient;
+		info->transientBundle = transient.Get();
 
 		// RTTI setup
 		ClassType::CacheTypesForCurrentModule();

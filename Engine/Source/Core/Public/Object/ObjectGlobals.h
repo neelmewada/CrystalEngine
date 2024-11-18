@@ -48,7 +48,7 @@ namespace CE
 			String name{};
 			Object* templateObject = nullptr;
 			ObjectFlags objectFlags{};
-			Uuid uuid = 0;
+			Uuid uuid = Uuid::Zero();
 		};
 
 		/// For internal use only
@@ -65,7 +65,7 @@ namespace CE
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
 		Object* templateObject = NULL,
-		Uuid uuid = 0)
+		Uuid uuid = Uuid::Random())
 	{
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
