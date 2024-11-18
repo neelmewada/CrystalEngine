@@ -168,6 +168,8 @@ namespace CE
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
 		void FetchObjectReferences(HashMap<Uuid, Object*>& outReferences);
 
+        void FetchSubObjectsRecursive(Array<Object*>& outSubObjects);
+
 		void LoadFromTemplate(Object* templateObject);
 
         // - Config API -

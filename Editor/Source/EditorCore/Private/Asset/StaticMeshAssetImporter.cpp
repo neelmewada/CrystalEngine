@@ -148,7 +148,7 @@ namespace CE::Editor
 
 			if (colors0Ptr != nullptr && totalColorCount > 0)
 			{
-				if (mesh.colors.NonEmpty())
+				if (mesh.colors.NotEmpty())
 					memcpy(colors0Ptr + vec4Offset, mesh.colors.GetData(), numVertices * sizeof(Vec4));
 				else
 					memset(colors0Ptr + vec4Offset, 0, numVertices * sizeof(Vec4));
@@ -156,7 +156,7 @@ namespace CE::Editor
 
 			if (uv0Ptr != nullptr && totalUVCounts[0] > 0)
 			{
-				if (mesh.uvs[0].NonEmpty())
+				if (mesh.uvs[0].NotEmpty())
 					memcpy(uv0Ptr + vec2Offset, mesh.uvs[0].GetData(), numVertices * sizeof(Vec2));
 				else
 					memset(uv0Ptr + vec2Offset, 0, numVertices * sizeof(Vec2));

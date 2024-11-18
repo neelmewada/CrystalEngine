@@ -19,7 +19,7 @@ namespace CE
 
 		inline bool IsValid() const
 		{
-			return srgLayouts.NonEmpty();
+			return srgLayouts.NotEmpty();
 		}
 
 		RHI::ShaderResourceGroupLayout& FindOrAdd(RHI::SRGType srgType);

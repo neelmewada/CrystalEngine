@@ -3189,7 +3189,17 @@ TEST(Bundle, Basic)
 
 	// 1. Write
     {
-	    
+	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
+
+		Ref<WritingTestObj2> testObject = CreateObject<WritingTestObj2>(bundle, "TestObject2");
+		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->objectArray.Add(bundle);
+		testObject->value = 123;
+		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->testStruct.owner = bundle;
+		testObject->testStruct.stringValue = "string value";
+
+		Bundle::SaveToDisk(bundle, nullptr);
     }
     
     CEDeregisterModuleTypes();

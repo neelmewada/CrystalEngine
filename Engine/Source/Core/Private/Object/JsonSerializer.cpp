@@ -26,7 +26,7 @@ namespace CE
     
     bool JsonFieldSerializer::HasNext()
     {
-        return fields.NonEmpty() && IsValid();
+        return fields.NotEmpty() && IsValid();
     }
 
 	int JsonFieldSerializer::Serialize(Stream* stream)
@@ -828,7 +828,7 @@ namespace CE
 
 	bool JsonFieldDeserializer::HasNext()
 	{
-		return fields.NonEmpty();
+		return fields.NotEmpty();
 	}
 
 	int JsonFieldDeserializer::Deserialize(Stream* stream)

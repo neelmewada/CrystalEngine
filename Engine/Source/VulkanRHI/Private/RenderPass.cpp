@@ -112,7 +112,7 @@ namespace CE::Vulkan
 		renderPassCI.pSubpasses = subpasses.GetData();
 
 		renderPassCI.dependencyCount = desc.dependencies.GetSize();
-		if (desc.dependencies.NonEmpty())
+		if (desc.dependencies.NotEmpty())
 			renderPassCI.pDependencies = desc.dependencies.GetData();
 
 		auto result = vkCreateRenderPass(device->GetHandle(), &renderPassCI, VULKAN_CPU_ALLOCATOR, &renderPass);

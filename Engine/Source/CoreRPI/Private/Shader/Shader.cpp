@@ -25,7 +25,7 @@ namespace CE::RPI
 
 	Name Shader::GetName()
 	{
-		if (variants.NonEmpty())
+		if (variants.NotEmpty())
 		{
 			return variants[0]->pipelineDesc.name;
 		}

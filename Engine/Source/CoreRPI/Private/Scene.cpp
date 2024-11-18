@@ -253,7 +253,7 @@ namespace CE::RPI
 
 					SceneViewTag viewTag = pass->GetViewTag();
 
-					if (pass->IsOfType<GpuPass>() && viewsByTag.KeyExists(viewTag) && viewsByTag[viewTag].views.NonEmpty())
+					if (pass->IsOfType<GpuPass>() && viewsByTag.KeyExists(viewTag) && viewsByTag[viewTag].views.NotEmpty())
 					{
 						GpuPass* gpuPass = static_cast<GpuPass*>(pass);
 

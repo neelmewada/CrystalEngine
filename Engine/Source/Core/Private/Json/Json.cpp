@@ -171,7 +171,7 @@ namespace CE
                         rootValue = new JsonValue(JsonObject());
                         stack.Push(rootValue);
                     }
-                    else if (stack.NonEmpty())
+                    else if (stack.NotEmpty())
                     {
                         auto objectValue = new JsonValue(JsonObject());
                         if (stack.Top()->IsObjectValue())
@@ -217,7 +217,7 @@ namespace CE
                         rootValue = new JsonValue(JsonArray());
                         stack.Push(rootValue);
                     }
-                    else if (stack.NonEmpty())
+                    else if (stack.NotEmpty())
                     {
                         auto arrayValue = new JsonValue(JsonArray());
                         if (stack.Top()->IsObjectValue())
@@ -374,7 +374,7 @@ namespace CE
 						out = JValue(JObject());
                         stack.Push(&out);
                     }
-                    else if (stack.NonEmpty())
+                    else if (stack.NotEmpty())
                     {
                         auto objectValue = JValue(JObject());
                         if (stack.Top()->IsObjectValue())
@@ -417,7 +417,7 @@ namespace CE
 						out = JValue(JArray());
                         stack.Push(&out);
                     }
-                    else if (stack.NonEmpty())
+                    else if (stack.NotEmpty())
                     {
                         auto arrayValue = JValue(JArray());
                         if (stack.Top()->IsObjectValue())

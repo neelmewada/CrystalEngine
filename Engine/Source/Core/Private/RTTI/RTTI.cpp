@@ -310,7 +310,7 @@ namespace CE
         registeredTypesByName.Add({ type->GetTypeName(), type});
         registeredTypeById.Add({ type->GetTypeId(), type });
 
-        if (currentlyLoadingModuleStack.NonEmpty())
+        if (currentlyLoadingModuleStack.NotEmpty())
         {
             if (!registeredTypesByModuleName.KeyExists(currentlyLoadingModuleStack.Top()))
                 registeredTypesByModuleName.Add({ currentlyLoadingModuleStack.Top(), {} });
@@ -342,7 +342,7 @@ namespace CE
             return;
 
         if ((currentlyUnloadingModuleStack.IsEmpty() && type->registeredModuleName.IsValid()) ||
-            (currentlyUnloadingModuleStack.NonEmpty() && currentlyUnloadingModuleStack.Top() == type->registeredModuleName))
+            (currentlyUnloadingModuleStack.NotEmpty() && currentlyUnloadingModuleStack.Top() == type->registeredModuleName))
         {
             return;
         }

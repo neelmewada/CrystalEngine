@@ -520,6 +520,19 @@ namespace CE
 		}
 	}
 
+	void Object::FetchSubObjectsRecursive(Array<Object*>& outSubObjects)
+	{
+		outSubObjects.Add(this);
+
+		for (const auto& subObject : attachedObjects)
+		{
+			if (subObject)
+			{
+				subObject->FetchSubObjectsRecursive(outSubObjects);
+			}
+		}
+	}
+
 	void Object::FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance)
 	{
 		if (structType == nullptr || structInstance == nullptr)

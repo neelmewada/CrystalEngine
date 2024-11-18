@@ -132,7 +132,7 @@ namespace CE
 
 		TypeInfo* GetUnderlyingType() override;
 
-        TypeInfo* GetDeclarationType();
+        TypeInfo* GetDeclarationType() const;
 
         TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
@@ -239,7 +239,7 @@ namespace CE
         TypeId fieldTypeId;
         TypeId underlyingTypeId;
 
-		TypeInfo* declarationType = nullptr;
+		mutable TypeInfo* declarationType = nullptr;
 		TypeInfo* underlyingTypeInfo = nullptr;
 
         SIZE_T offset;

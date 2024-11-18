@@ -15,7 +15,7 @@ namespace CE::RPI
 			CacheGlyphLayouts();
 		}
 
-		if (!characterLayoutBuffer && glyphLayouts.NonEmpty())
+		if (!characterLayoutBuffer && glyphLayouts.NotEmpty())
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.name = "Character Buffer";

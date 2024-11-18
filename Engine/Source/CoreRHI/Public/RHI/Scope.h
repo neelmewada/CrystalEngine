@@ -59,7 +59,7 @@ namespace CE::RHI
 			ScopeAttachmentAccess access,
 			const DescriptorType& descriptor);
 
-		inline bool PresentsSwapChain() const { return presentSwapChains.NonEmpty(); }
+		inline bool PresentsSwapChain() const { return presentSwapChains.NotEmpty(); }
 
 		bool Compile(const FrameGraphCompileRequest& compileRequest);
 

@@ -413,7 +413,7 @@ namespace CE
 		return *this;
 	}
 
-    void Stream::SwapBytes(void* value, u32 length)
+	void Stream::SwapBytes(void* value, u32 length)
     {
         u8* ptr = (u8*)value;
         s32 top = length - 1;

@@ -111,7 +111,7 @@ namespace CE
 			event.keyModifiers = keyModifierStates;
 
 			//while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
-			while (hoveredWidgetStack.NonEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
+			while (hoveredWidgetStack.NotEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
 			{
 				event.sender = hoveredWidgetStack.Top();
 				event.Reset();
@@ -146,7 +146,7 @@ namespace CE
 
 			int idx = hoveredWidgetStack.GetSize();
 			FWidget* basePrevWidget = nullptr;
-			if (hoveredWidgetStack.NonEmpty())
+			if (hoveredWidgetStack.NotEmpty())
 				basePrevWidget = hoveredWidgetStack.Top();
 
 			auto widget = hoveredWidget;
@@ -186,7 +186,7 @@ namespace CE
 			mouseEvent.wheelDelta = wheelDelta;
 			mouseEvent.keyModifiers = keyModifierStates;
 
-			if (hoveredWidgetStack.NonEmpty())
+			if (hoveredWidgetStack.NotEmpty())
 			{
 				FWidget* sender = hoveredWidgetStack.Top();
 
@@ -223,7 +223,7 @@ namespace CE
 			mouseEvent.wheelDelta = wheelDelta;
 			mouseEvent.keyModifiers = keyModifierStates;
 
-			if (hoveredWidgetStack.NonEmpty())
+			if (hoveredWidgetStack.NotEmpty())
 			{
 				mouseEvent.sender = hoveredWidgetStack.Top();
 
@@ -249,7 +249,7 @@ namespace CE
 				dragEvent.keyModifiers = keyModifierStates;
 
 				dragEvent.sender = draggedWidget;
-				if (hoveredWidgetStack.NonEmpty())
+				if (hoveredWidgetStack.NotEmpty())
 					dragEvent.sender = hoveredWidgetStack.Top();
 				dragEvent.draggedWidget = draggedWidget;
 
@@ -407,7 +407,7 @@ namespace CE
 				event.keyModifiers = keyModifierStates;
 				event.isDoubleClick = InputManager::GetMouseButtonClicks(mouseButton) == 2;
 
-				if (hoveredWidgetStack.NonEmpty())
+				if (hoveredWidgetStack.NotEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
 					widgetToFocus = event.sender;
@@ -483,7 +483,7 @@ namespace CE
 				event.isInside = true;
 				event.keyModifiers = keyModifierStates;
 
-				if (hoveredWidgetStack.NonEmpty())
+				if (hoveredWidgetStack.NotEmpty())
 				{
 					event.sender = hoveredWidgetStack.Top();
 					while (event.sender != nullptr && !event.sender->SupportsMouseEvents())

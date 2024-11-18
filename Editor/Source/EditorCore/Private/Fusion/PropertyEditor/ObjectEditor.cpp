@@ -71,7 +71,7 @@ namespace CE::Editor
 
     f32 ObjectEditor::GetSplitRatio()
     {
-        if (propertyEditors.NonEmpty())
+        if (propertyEditors.NotEmpty())
         {
             return propertyEditors[0]->GetSplitRatio();
         }

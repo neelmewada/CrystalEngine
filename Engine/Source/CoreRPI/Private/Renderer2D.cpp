@@ -274,7 +274,7 @@ namespace CE::RPI
 			clipRects.Resize(clipRectCount + 1);
 		}
 
-		if (clipRectStack.NonEmpty())
+		if (clipRectStack.NotEmpty())
 		{
 			clipRect.min.y = Math::Max(clipRect.min.y, clipRects[clipRectStack.Top()].rect.min.y);
 			clipRect.max.y = Math::Min(clipRect.max.y, clipRects[clipRectStack.Top()].rect.max.y);
@@ -289,13 +289,13 @@ namespace CE::RPI
 
 	void Renderer2D::PopClipRect()
 	{
-		if (clipRectStack.NonEmpty())
+		if (clipRectStack.NotEmpty())
 			clipRectStack.Pop();
 	}
 
 	bool Renderer2D::ClipRectExists()
 	{
-		return clipRectStack.NonEmpty();
+		return clipRectStack.NotEmpty();
 	}
 
 	Rect Renderer2D::GetLastClipRect()
@@ -1409,7 +1409,7 @@ namespace CE::RPI
 		{
 			const DrawBatch& drawBatch = drawBatches[i];
 
-			if (oldPackets.NonEmpty()) // Reuse draw packet
+			if (oldPackets.NotEmpty()) // Reuse draw packet
 			{
 				drawPacket = oldPackets[0];
 				oldPackets.RemoveAt(0);
@@ -1458,7 +1458,7 @@ namespace CE::RPI
 			}
 		}
 
-		while (oldPackets.NonEmpty())
+		while (oldPackets.NotEmpty())
 		{
 			delete oldPackets[0];
 			oldPackets.RemoveAt(0);

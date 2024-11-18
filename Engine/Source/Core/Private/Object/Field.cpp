@@ -234,14 +234,14 @@ namespace CE
 
 	bool FieldType::IsObjectField() const
     {
-		Class* classType = ClassType::FindClass(fieldTypeId);
-        return classType != nullptr && classType->IsObject();
+		TypeInfo* declType = GetDeclarationType();
+		return declType != nullptr && declType->IsClass();
     }
 
 	bool FieldType::IsStructField()
 	{
-		Struct* structType = StructType::FindStruct(fieldTypeId);
-		return structType != nullptr;
+		TypeInfo* declType = GetDeclarationType();
+		return declType != nullptr && declType->IsStruct();
 	}
 
 	bool FieldType::IsRefCounted() const
@@ -268,7 +268,7 @@ namespace CE
 		return underlyingTypeInfo;
 	}
 
-	TypeInfo* FieldType::GetDeclarationType()
+	TypeInfo* FieldType::GetDeclarationType() const
     {
 		if (declarationType == nullptr)
 		{

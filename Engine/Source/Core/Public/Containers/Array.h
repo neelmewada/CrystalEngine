@@ -550,7 +550,7 @@ namespace CE
             return Super::Impl.empty();
         }
 
-        INLINE bool NonEmpty() const
+        INLINE bool NotEmpty() const
         {
             return !IsEmpty();
         }

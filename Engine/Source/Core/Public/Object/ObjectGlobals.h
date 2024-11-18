@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "Object.h"
 
 namespace CE
 {
@@ -43,7 +44,7 @@ namespace CE
 				: objectClass(objectClass)
 			{}
 
-			Object* outer = nullptr;
+			Ref<Object> outer = nullptr;
 			ClassType* objectClass = nullptr;
 			String name{};
 			Object* templateObject = nullptr;
@@ -60,7 +61,7 @@ namespace CE
 	CORE_API String FixObjectName(const String& name);
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	TClass* CreateObject(Object* outer = (Object*)GetGlobalTransient(),
+	TClass* CreateObject(Ref<Object> outer = (Object*)GetGlobalTransient(),
 		String objectName = "",
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
@@ -92,12 +93,14 @@ namespace CE
 
 		if (IsFunction())
 		{
-			if (!IsValidObject(dstObject))
+			if (Ref<Object> object = dstObject.Lock())
 			{
-				isBound = false;
-				return nullptr;
+				return dstFunction->Invoke(object.Get(), args);
 			}
-			return dstFunction->Invoke(dstObject, args);
+
+			// Object was destroyed
+			isBound = false;
+			return nullptr;
 		}
 
 		if (IsLambda())

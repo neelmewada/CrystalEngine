@@ -46,7 +46,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (availableWindowIds.NonEmpty())
+		if (availableWindowIds.NotEmpty())
 		{
 			windowId = availableWindowIds[0];
 			availableWindowIds.RemoveAt(0);

@@ -20,7 +20,7 @@ This document describes the file format specification of `.casset` files. The cu
 | +08 | 4B | `00 00 00 00` | Header checksum |
 | +0C | 4B | 3 | Major Version (u32) |
 | +10 | 4B | 0 | Minor Version (u32) |
-| +14 | 4B | 0 | Patch Version (u32) |
+| +14 | 4B | 0 | Patch Version (u32) (Unused) |
 | +1C | 8B | `00 00 00 00 00 00 00 00` | [Schema Table](#schema-table) start offset (from start of file) |
 | +24 | 8B | `00 00 00 00 00 00 00 00` | [Serialized Data](#serialized-data) start offset (from start of file) |
 |  | | **<-- Header fields start below -->** |  |
@@ -108,25 +108,27 @@ Schema table stores the layout of each object and struct that is serialized in t
 | `10` | Vec2i | Vec2i |
 | `11` | Vec3i | Vec3i |
 | `12` | Vec4i | Vec4i |
-| `13` | Array\<Object\> | Array of objects |
+| `13` | Array\<Object\> | [Array](#array) of objects |
 | `14` | Array\<Struct\> | Array of struct types | **Optional_1** |
 | `15` | Array\<[FieldType](#field-type)\> | Array of simple types | **Optional_2** |
 | `16` | [Binary](#binary-data-type) | Raw binary data |
 | `17` | [Object Ref](#object-reference) | Object reference |
 | `18` | [Function Binding](#function-binding) | Function binding to an object (ScriptDelegate). |
-| `19` | Array\<[Function Binding](#function-binding)\> | Array of function bindings (ScriptEvent). |
+| `19` | [Array\<Function Binding\>](#array-of-function-binding) | Array of function bindings (ScriptEvent). |
 | `1A` | [Struct](#struct) | Struct field. | **Optional_1** |
+| `1B` | Uuid | Uuid |
+| `1C` | [Object Store](#object-store) | Array of attached objects |
 
 ## **Serialized Data**
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of this table in bytes (excluding this field but including **End of data** field) |
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of this table in bytes (including this field but including **End of data** field) |
 | +08 | 4B | N | Number of entries in this list. i.e. number of all serialized objects. |
 | | | | |
 | | | | |
 |  |  | **<-- Entry #0 -->** |  |
-| +0C | 4B | `xx xx xx xx` | Size of 1-st entry in bytes. (including this field) |
+| +0C | 8B | `xx xx xx xx xx xx xx xx` | Size of 1-st entry in bytes. (including this field) (>= 8) |
 | +10 | 4B | `00 00 00 04` | Data start offset **after** this field. |
 | +14 | 16B | 128 bit Uuid | Object Instance UUID. |
 | +20 | 1B | `00/01` | Is Asset? `0` or `1` |
@@ -134,12 +136,13 @@ Schema table stores the layout of each object and struct that is serialized in t
 | +25 | \0 | `MySkybox.Irradiance.Diffuse\0` | Path to this object within the bundle |
 | +xx | \0 | `MyObjectName\0` | Object name (CE::Name) |
 | - | - | New header fields can be added here | - |
+| +xx | 8B | `00 00 00 00 00 00 00 08` | Size of ALL the fields in bytes including this. (>= 8) |
 |  |  | Field #0 | Number of fields can be inferred from Schema Table. |
-| +xx | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
-| +04 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
+| +xx | 8B | `00 00 00 00 00 00 00 08` | Size of 1st field including itself. (>= 8) |
+| +08 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 |  |  | Field #1 | Number of fields can be inferred from Schema Table. |
-| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
-| +04 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
+| +xx | 8B | `00 00 00 00 00 00 00 08` | Size of 2nd field including itself. (>= 8) |
+| +08 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 | | | | |
 | | | | |
 | | 4B | `00 00 00 00` | **End of data** |
@@ -171,6 +174,16 @@ Schema table stores the layout of each object and struct that is serialized in t
 |---|---|---|---|
 | +00 | 16B | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` | 0 Uuid |
 
+### Object Store
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 4B | `00 00 00 02` | Number of sub-objects.  |
+| +04 | 16B | 128 bit Uuid | 1st Object UUID. |
+| +14 | 16B | 128 bit Uuid | 1st Bundle UUID the referenced object belongs to. |
+| +24 | 16B | 128 bit Uuid | 2nd Object UUID. |
+| +34 | 16B | 128 bit Uuid | 2nd Bundle UUID the referenced object belongs to. |
+
 ### Function Binding
 
 | Offset | Size | Value | Description |
@@ -185,24 +198,44 @@ Schema table stores the layout of each object and struct that is serialized in t
 |---|---|---|---|
 | +00 | 16B | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` | 0 Uuid. |
 
+### Array of Function Binding
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +xx | 4B | `00 00 00 02` | Number of bindings.  |
+| +xx | 16B | 128 bit Uuid | 1st. Object UUID. |
+| +xx | 16B | 128 bit Uuid | 1st. Bundle UUID the referenced object belongs to. |
+| +xx | \0 | `FunctionName\0` | 1st. Exact name of function as in C++. |
+| +xx | 16B | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` | 2nd. NULL binding. |
+| +xx | 16B | 128 bit Uuid | 3rd. Object UUID. |
+| +xx | 16B | 128 bit Uuid | 3rd. Bundle UUID the referenced object belongs to. |
+| +xx | \0 | `FunctionName\0` | 3rd. Exact name of function as in C++. |
+
 ### Struct
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
-| +04 | xx | [Field Value](#field-value) | Value of 1st field |
-| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
-| +04 | xx | [Field Value](#field-value) | Value of 2nd field |
+| +00 | 8B | `00 00 00 00 00 00 00 04` | Size of 1st field including itself. (>= 8) |
+| +08 | xx | [Field Value](#field-value) | Value of 1st field |
+| +xx | 8B | `00 00 00 00 00 00 00 04` | Size of 2nd field including itself. (>= 8) |
+| +08 | xx | [Field Value](#field-value) | Value of 2nd field |
 
 ### Array
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 4B | `00 00 00 02` | Number of elements in array  |
-| +04 | 4B | `00 00 00 04` | Size of 1st field including itself. (>= 4) |
+| +04 | 8B | `00 00 00 00 00 00 00 04` | Size of 1st field including itself. (>= 8) |
 | +08 | xx | [Field Value](#field-value) | Value of 1st field |
-| +xx | 4B | `00 00 00 04` | Size of 2nd field including itself. (>= 4) |
+| +xx | 8B | `00 00 00 00 00 00 00 04` | Size of 2nd field including itself. (>= 8) |
 | +04 | xx | [Field Value](#field-value) | Value of 2nd field |
 
+## Field Serializer
 
+Object, struct fields and array elements have the same format:
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +04 | 8B | `00 00 00 00 00 00 00 04` | Size of field including itself. (>= 8) |
+| +08 | xx | [Field Value](#field-value) | Value of field |
 

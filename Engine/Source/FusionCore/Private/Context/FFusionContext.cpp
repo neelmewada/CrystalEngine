@@ -321,7 +321,7 @@ namespace CE
 
 		if (curFocusWidget != nullptr && curFocusWidget->ParentExistsRecursive(popup))
 		{
-			if (localPopupStack.NonEmpty())
+			if (localPopupStack.NotEmpty())
 			{
 				SetFocusWidget(localPopupStack.Top());
 			}

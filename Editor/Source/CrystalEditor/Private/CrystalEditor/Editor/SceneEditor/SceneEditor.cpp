@@ -206,7 +206,7 @@ namespace CE::Editor
             selectedActors.Add(actor);
         }
 
-        if (selectedActors.NonEmpty())
+        if (selectedActors.NotEmpty())
         {
             // TODO: Create and set object editor
             detailsTab->SetSelectedActor(selectedActors.GetLast());

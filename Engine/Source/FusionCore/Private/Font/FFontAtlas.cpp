@@ -22,7 +22,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (atlasImageMips.NonEmpty())
+        if (atlasImageMips.NotEmpty())
             return;
         if (regular == nullptr)
             return;

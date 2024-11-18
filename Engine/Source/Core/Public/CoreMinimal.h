@@ -38,6 +38,7 @@
 #include "IO/Stream/MemoryStream.h"
 #include "IO/Stream/FileStream.h"
 #include "IO/Archive.h"
+#include "IO/EngineDirectories.h"
 
 // *********************************
 
@@ -113,7 +114,7 @@
 #include "Object/BasePrefs.h"
 #include "Object/Prefs.h"
 #include "Object/Bundle.h"
-#include "Object/Serialization/BundleSerializer.h"
+#include "Object/Serialization/ObjectSerializer.h"
 
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"

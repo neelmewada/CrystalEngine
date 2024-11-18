@@ -144,7 +144,7 @@ namespace CE
 		{
 			const FDrawBatch& drawBatch = drawBatches[i];
 
-			if (oldPackets.NonEmpty()) // Reuse draw packet
+			if (oldPackets.NotEmpty()) // Reuse draw packet
 			{
 				drawPacket = oldPackets[0];
 				oldPackets.RemoveAt(0);
@@ -192,7 +192,7 @@ namespace CE
 
 		// Cleanup unused draw packets
 
-		while (oldPackets.NonEmpty())
+		while (oldPackets.NotEmpty())
 		{
 			delete oldPackets[0];
 			oldPackets.RemoveAt(0);

@@ -13,6 +13,17 @@ namespace CE
 		AssetNotInBundle,
 	};
 
+    class SerializationException : public Exception
+    {
+    public:
+
+        SerializationException() : Exception("Serialization Error")
+		{}
+
+        SerializationException(const String& msg) : Exception("Serialization Error: " + msg)
+		{}
+    };
+
     class CORE_API Bundle : public Object
     {
         CE_CLASS(Bundle, Object)
@@ -20,6 +31,10 @@ namespace CE
 
         // - Static API -
 
+        static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
+
+        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset);
+        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream);
 
     private:
@@ -30,7 +45,8 @@ namespace CE
 
         static bool IsFieldSerialized(FieldType* field, StructType* schemaType);
 
-        static void SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes, const HashMap<StructType*, int>& schemaTypeToIndex);
+        static void SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes, 
+            const HashMap<StructType*, int>& schemaTypeToIndex);
 
         static void SerializeFieldSchema(FieldType* field, Stream* stream, const HashMap<StructType*, int>& schemaTypeToIndex);
 
@@ -40,7 +56,7 @@ namespace CE
         {
             Name fieldName{};
             u8 typeByte = 0;
-            int schemaIndex = 0;
+            int schemaIndexOfFieldType = 0;
             u8 underlyingTypeByte = 0;
         };
 
@@ -65,7 +81,7 @@ namespace CE
             b8 isLoaded = false;
         };
 
-        //Name bundleName{};
+        IO::Path fullBundlePath{};
 
         // If this bundle was created from deserialization
         b8 wasDeserialized = false;
@@ -76,7 +92,7 @@ namespace CE
         SharedMutex loadedObjectsMutex{};
         HashMap<Uuid, Object*> loadedObjectsByUuid{};
 
-
+        friend class ObjectSerializer;
         friend class Object;
     };
 

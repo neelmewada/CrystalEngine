@@ -99,7 +99,7 @@ namespace CE::Editor
 
         FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
         FFusionContext* parentContext = rootContext;
-        if (rootContext->GetChildContexts().NonEmpty())
+        if (rootContext->GetChildContexts().NotEmpty())
         {
             // FRootContext should have only 1 NativeContext which is the primary Native Window
             parentContext = rootContext->GetChildContexts().GetFirst();

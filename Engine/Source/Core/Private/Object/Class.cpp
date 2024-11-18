@@ -184,7 +184,7 @@ namespace CE
             CacheAllFunctions();
         }
 
-        return cachedFunctions.NonEmpty();
+        return cachedFunctions.NotEmpty();
     }
 
     FunctionType* StructType::FindFunctionWithName(const Name& name)
@@ -585,8 +585,6 @@ namespace CE
 		// Types that are registered within a module will fire only after all types within that module are fully loaded
 		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
 		{
-            type->GetDefaultInstance();
-
 			CoreObjectDelegates::onClassRegistered.Broadcast(type);
 		}
     }

@@ -122,7 +122,7 @@ namespace CE
 		allSourceAssetPaths.Clear();
 		allProductAssetPaths.Clear();
 
-		if (individualAssetPaths.NonEmpty())
+		if (individualAssetPaths.NotEmpty())
 		{
 			allSourceAssetPaths.AddRange(individualAssetPaths);
 		}
