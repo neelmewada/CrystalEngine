@@ -265,11 +265,11 @@ namespace CE
 		}
 		else if constexpr (isRef)
 		{
-			return typeid(TIsRef<Type>::Type).hash_code();
+			return typeid(typename TIsRef<Type>::Type).hash_code();
 		}
 		else if constexpr (isWeakRef)
 		{
-			return typeid(TIsWeakRef<Type>::Type).hash_code();
+			return typeid(typename TIsWeakRef<Type>::Type).hash_code();
 		}
 		else if constexpr (isObjectStore) // ObjectMap type
 		{

@@ -92,7 +92,7 @@ namespace CE
             CE_LOG(Error, All, "SaveToDisk() passed with a bundle path that is a directory!");
             return BundleSaveResult::InvalidPath;
         }
-        if (asset != nullptr && asset->GetBundle() != bundle)
+        if (asset != nullptr && asset->GetBundle() != bundle.Get())
         {
             CE_LOG(Error, All, "SaveToDisk() passed with an asset object that is not part of the bundle!");
             return BundleSaveResult::AssetNotInBundle;

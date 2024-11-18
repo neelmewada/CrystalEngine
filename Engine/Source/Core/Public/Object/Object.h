@@ -138,7 +138,7 @@ namespace CE
 
         virtual bool IsAsset() const { return false; }
 
-        virtual bool IsBundle() const { return false; }
+        bool IsBundle() const;
 
 		bool IsOfType(ClassType* classType) const;
 

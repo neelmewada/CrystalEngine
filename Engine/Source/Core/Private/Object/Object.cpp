@@ -399,6 +399,11 @@ namespace CE
 		return totalSize;
     }
 
+    bool Object::IsBundle() const
+    {
+        return IsOfType<Bundle>();
+    }
+
 	Name Object::GetPathInBundle()
 	{
         if (IsBundle())

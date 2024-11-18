@@ -170,6 +170,11 @@ namespace CE
 
                 serializer.Serialize(stream);
             }
+            
+            curLocation = stream->GetCurrentPosition();
+            stream->Seek(serializedDataSize_Location);
+            *stream << (curLocation - serializedDataSize_Location);
+            stream->Seek(curLocation);
         }
 
         // - EOF -
@@ -485,19 +490,31 @@ namespace CE
             {
                 const auto& objectStore = field->GetFieldValue<ObjectMap>(instance);
 
-                *stream << (u32)objectStore.GetObjectCount();
+                int objectCounter = 0;
+                
+                for (int i = 0; i < objectStore.GetObjectCount(); ++i)
+                {
+                    Ref<Object> object = objectStore.GetObjectAt(i);
+                    Ref<Bundle> objectBundle = object->GetBundle();
+
+                    if (object.IsValid() && objectBundle.IsValid() && !objectBundle->IsTransient())
+                    {
+                        objectCounter++;
+                    }
+                }
+                
+                *stream << (u32)objectCounter;
 
                 for (int i = 0; i < objectStore.GetObjectCount(); ++i)
                 {
                     Ref<Object> object = objectStore.GetObjectAt(i);
-                    if (object.IsNull())
-                        continue;
                     Ref<Bundle> objectBundle = object->GetBundle();
-                    if (objectBundle.IsNull())
-                        continue;
-
-                    *stream << object->GetUuid();
-                    *stream << objectBundle->GetUuid();
+                    
+                    if (object.IsValid() && objectBundle.IsValid() && !objectBundle->IsTransient())
+                    {
+                        *stream << object->GetUuid();
+                        *stream << objectBundle->GetUuid();
+                    }
                 }
             }
             else if (fieldTypeId == TYPEID(String) || fieldTypeId == TYPEID(Name) || fieldTypeId == TYPEID(IO::Path))

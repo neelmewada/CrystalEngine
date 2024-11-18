@@ -46,9 +46,9 @@ namespace CE
 
         String ToString() const;
 
-        CORE_API friend inline Stream& operator<<(Stream& stream, const Uuid& uuid);
+        CORE_API friend Stream& operator<<(Stream& stream, const Uuid& uuid);
 
-        CORE_API friend inline Stream& operator>>(Stream& stream, Uuid& uuid);
+        CORE_API friend Stream& operator>>(Stream& stream, Uuid& uuid);
         
     private:
         u64 uuid[2] = { 0, 0 };
