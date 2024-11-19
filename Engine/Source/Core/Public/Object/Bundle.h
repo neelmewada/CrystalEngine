@@ -34,6 +34,26 @@ namespace CE
 		{}
     };
 
+    struct LoadBundleArgs
+    {
+        bool loadFully = true;
+
+        //! @brief If the bundle should forcefully be deserialized even if it is already fully loaded.
+        bool forceReload = false;
+
+        //! @brief If objects that are no longer part of the bundle should be destroyed.
+        //! This might happen when you load a bundle again after it was fully loaded.
+        bool destroyOutdatedObjects = true;
+    };
+
+    struct IBundleResolver
+    {
+        virtual ~IBundleResolver() = default;
+
+        virtual Name ResolveBundlePath(const Uuid& uuid) = 0;
+
+    };
+
     class CORE_API Bundle : public Object
     {
         CE_CLASS(Bundle, Object)
@@ -41,14 +61,26 @@ namespace CE
 
         // - Static API -
 
+        static void PushBundleResolver(IBundleResolver* resolver);
+        static void PopBundleResolver(IBundleResolver* resolver);
+
         static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
+
+        static Ref<Bundle> LoadFromDisk(const Name& path, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadFromDisk(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
 
+        // - Public API -
+
+        Ref<Object> LoadObject(Uuid objectUuid);
+
     protected:
 
-        static Ref<Bundle> LoadFromDisk(Stream* stream, BundleLoadResult& outResult, bool loadFully = true);
+        Ref<Object> LoadObject(Stream* stream, Uuid objectUuid);
+
+        static Ref<Bundle> LoadFromDisk(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream);
 
         void OnAfterConstruct() override;
@@ -63,9 +95,9 @@ namespace CE
         static bool IsFieldSerialized(FieldType* field, StructType* schemaType);
 
         static void SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes, 
-            const HashMap<StructType*, int>& schemaTypeToIndex);
+            const HashMap<StructType*, u32>& schemaTypeToIndex);
 
-        static void SerializeFieldSchema(FieldType* field, Stream* stream, const HashMap<StructType*, int>& schemaTypeToIndex);
+        static void SerializeFieldSchema(FieldType* field, Stream* stream, const HashMap<StructType*, u32>& schemaTypeToIndex);
 
         void FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs);
 
@@ -87,7 +119,7 @@ namespace CE
 
         struct SerializedObjectEntry
         {
-            u64 offsetInFile = 0;
+            u64 dataStartOffset = 0;
             Uuid instanceUuid = Uuid::Null();
             b8 isAsset = false;
             u32 schemaIndex = 0;
@@ -101,6 +133,7 @@ namespace CE
         };
 
         IO::Path fullBundlePath{};
+        Stream* readerStream = nullptr;
 
         u32 majorVersion = 0;
         u32 minorVersion = 0;
@@ -113,8 +146,9 @@ namespace CE
         Array<Uuid> dependencies;
 
         Array<SerializedObjectEntry> serializedObjectEntries;
+        HashMap<Uuid, SerializedObjectEntry> serializedObjectsByUuid;
 
-        // Used to prevent bundle simultaneous Load and Store operations.
+        // Used to prevent simultaneous bundle Load and Store operations.
         SharedMutex bundleMutex{};
 
         SharedMutex loadedObjectsMutex{};
@@ -122,6 +156,8 @@ namespace CE
 
         static SharedMutex bundleRegistryMutex;
         static HashMap<Uuid, WeakRef<Bundle>> loadedBundlesByUuid;
+
+        static Array<IBundleResolver*> bundleResolvers;
 
         friend class ObjectSerializer;
         friend class Object;

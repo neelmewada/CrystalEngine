@@ -6,6 +6,8 @@ namespace CE
     SharedMutex Bundle::bundleRegistryMutex{};
     HashMap<Uuid, WeakRef<Bundle>> Bundle::loadedBundlesByUuid{};
 
+    Array<IBundleResolver*> Bundle::bundleResolvers{};
+
     Bundle::Bundle()
     {
 
@@ -37,6 +39,16 @@ namespace CE
         }
     }
 
+    void Bundle::PushBundleResolver(IBundleResolver* resolver)
+    {
+        bundleResolvers.Add(resolver);
+    }
+
+    void Bundle::PopBundleResolver(IBundleResolver* resolver)
+    {
+        bundleResolvers.Remove(resolver);
+    }
+
     IO::Path Bundle::GetAbsoluteBundlePath(const Name& bundlePath)
     {
         if (!bundlePath.IsValid())
@@ -51,7 +63,7 @@ namespace CE
             }
             return gProjectPath / (bundleNameStr.GetSubstring(1) + ".casset");
         }
-        else if (bundleNameStr.StartsWith("/Game/") || bundleNameStr == "/Game")
+        else if (bundleNameStr.StartsWith("/Game/") || bundleNameStr == "/Game") // Example: /Game/Assets/Textures/SomeTexture
         {
             return gProjectPath / (bundleNameStr.GetSubstring(1) + ".casset");
         }
@@ -70,6 +82,29 @@ namespace CE
         }
 
         return PlatformDirectories::GetLaunchDir() / (bundleNameStr.GetSubstring(1) + ".casset");
+    }
+
+    Ref<Bundle> Bundle::LoadFromDisk(const Name& path, const LoadBundleArgs& loadArgs)
+    {
+        BundleLoadResult result;
+        return LoadFromDisk(path, result, loadArgs);
+    }
+
+    Ref<Bundle> Bundle::LoadFromDisk(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
+    {
+        IO::Path absolutePath = GetAbsoluteBundlePath(path);
+
+        if (!absolutePath.Exists())
+        {
+            CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
+            outResult = BundleLoadResult::BundleNotFound;
+            return nullptr;
+        }
+
+        FileStream stream = FileStream(absolutePath, Stream::Permissions::ReadOnly);
+        stream.SetBinaryMode(true);
+
+        return LoadFromDisk(&stream, outResult, loadArgs);
     }
 
     BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset)
@@ -129,8 +164,49 @@ namespace CE
         bundle->fullBundlePath = path;
 
         FileStream stream = FileStream(path, Stream::Permissions::WriteOnly, true, true);
+        stream.SetBinaryMode(true);
 
         return SaveToDisk(bundle, asset, &stream);
+    }
+
+    Ref<Object> Bundle::LoadObject(Uuid objectUuid)
+    {
+        if (objectUuid.IsNull())
+        {
+            return nullptr;
+        }
+
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            if (loadedObjectsByUuid.KeyExists(objectUuid))
+            {
+                if (Ref<Object> object = loadedObjectsByUuid[objectUuid].Lock())
+                {
+                    return object;
+                }
+            }
+        }
+
+        if (readerStream != nullptr)
+        {
+            return LoadObject(readerStream, objectUuid);
+        }
+
+        if (fullBundlePath.Exists())
+        {
+            FileStream stream = FileStream(fullBundlePath, Stream::Permissions::ReadOnly);
+            stream.SetBinaryMode(true);
+
+            readerStream = &stream;
+
+            Ref<Object> object = LoadObject(&stream, objectUuid);
+
+            readerStream = nullptr;
+            return object;
+        }
+
+        return nullptr;
     }
 
     void Bundle::FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs)

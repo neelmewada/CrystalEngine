@@ -3221,6 +3221,11 @@ TEST(Bundle, Basic)
 
 		Bundle::SaveToDisk(bundle, nullptr);
     }
+
+	// 2. Read
+    {
+	    Ref<Bundle> bundle = Bundle::LoadFromDisk()
+    }
     
     CEDeregisterModuleTypes();
     TEST_END;

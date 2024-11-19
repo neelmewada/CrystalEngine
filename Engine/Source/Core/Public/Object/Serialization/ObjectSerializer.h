@@ -7,17 +7,23 @@ namespace CE
 	{
 	public:
 
-		ObjectSerializer(const Ref<Bundle>& bundle, Object* target, const HashMap<StructType*, int>& schemaTypeToIndex);
+		ObjectSerializer(const Ref<Bundle>& bundle, Object* target, u32 schemaIndex);
 
 		void Serialize(Stream* stream);
 
+		void Deserialize(Stream* stream);
+
 	private:
 
-		void SerializeField(FieldType* field, void* instance, Stream* stream, bool storeByteSize = true);
+		void SerializeField(FieldType* field, void* instance, Stream* stream);
+
+		void DeserializeField(FieldType* field, void* instance, Stream* stream, const Bundle::FieldSchema& fieldSchema);
+
+		Ref<Object> LoadObjectReference(Uuid objectUuid, Uuid bundleUuid);
 
 		Ref<Bundle> bundle = nullptr;
 		Object* target = nullptr;
-		const HashMap<StructType*, int>& schemeTypeToIndex;
+		u32 schemaIndex = 0;
 
 		friend class Bundle;
 	};

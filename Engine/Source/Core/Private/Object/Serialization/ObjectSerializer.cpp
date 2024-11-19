@@ -2,6 +2,8 @@
 #include "Core.h"
 
 #include "../Bundle.inl"
+#include "Json/json.hpp"
+#include "spdlog/fmt/bundled/compile.h"
 
 namespace CE
 {
@@ -51,9 +53,7 @@ namespace CE
         }
     }
 
-    Ref<Bundle> Bundle::LoadFromDisk(Stream* stream,
-                                     BundleLoadResult& outResult,
-                                     bool loadFully)
+    Ref<Bundle> Bundle::LoadFromDisk(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         ZoneScoped;
 
@@ -143,10 +143,21 @@ namespace CE
             }
         }
 
+        if (bundle->isFullyLoaded && !loadArgs.forceReload)
+        {
+            return bundle;
+        }
+
         LockGuard bundleLock{ bundle->bundleMutex };
+
+        bundle->readerStream = stream;
+        defer(
+            bundle->readerStream = nullptr;
+        );
 
         {
             LockGuard loadedObjectsLock{ bundle->loadedObjectsMutex };
+            bundle->loadedObjectsByUuid.Clear();
 	        bundle->loadedObjectsByUuid[bundleUuid] = bundle;
         }
 
@@ -231,8 +242,9 @@ namespace CE
         *stream >> endOfSchema;
 
         bundle->serializedObjectEntries.Clear();
+        bundle->serializedObjectsByUuid.Clear();
 
-        // 2. Serialized Data
+        // 2. Serialized Data (Load only the meta-data)
 
         {
             u64 serializedDataSize = 0;
@@ -266,6 +278,8 @@ namespace CE
                 *stream >> objName;
                 serializedObject.objectName = objName;
 
+                serializedObject.dataStartOffset = dataStartOffset;
+
                 stream->Seek(dataStartOffset);
 
                 u64 byteSizeOfSerializedFields = 0;
@@ -274,10 +288,91 @@ namespace CE
                 serializedObject.objectSerializedDataSize = byteSizeOfSerializedFields - sizeof(u64);
 
                 stream->Seek(byteSizeOfSerializedFields - sizeof(u64), SeekMode::Current);
+
+                bundle->serializedObjectsByUuid[serializedObject.instanceUuid] = serializedObject;
+            }
+        }
+
+        if (loadArgs.destroyOutdatedObjects)
+        {
+	        // TODO: Implement this logic later
+            // Destroy objects that are no longer present in the bundle
+
+        }
+
+        if (loadArgs.loadFully && !bundle->isFullyLoaded)
+        {
+            bundle->isFullyLoaded = true;
+
+            for (const auto& serializedObject : bundle->serializedObjectEntries)
+            {
+                bundle->LoadObject(stream, serializedObject.instanceUuid);
             }
         }
 
         return bundle;
+    }
+
+    Ref<Object> Bundle::LoadObject(Stream* stream, Uuid objectUuid)
+    {
+        ZoneScoped;
+
+        if (!serializedObjectsByUuid.KeyExists(objectUuid))
+        {
+            return nullptr;
+        }
+
+        Ref<Object> object = nullptr;
+
+        // 1. Find or instantiate the Object
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            if (loadedObjectsByUuid.KeyExists(objectUuid))
+            {
+                object = loadedObjectsByUuid[objectUuid].Lock();
+            }
+
+            if (object.IsNull())
+            {
+                ClassType* clazz = ClassType::FindClass(serializedObjectsByUuid[objectUuid].objectClassName);
+                if (clazz != nullptr)
+                {
+                    Internal::ObjectCreateParams params{};
+                    params.objectClass = clazz;
+                    params.outer = nullptr;
+                    params.uuid = objectUuid;
+                    params.objectFlags = OF_NoFlags;
+                    params.templateObject = nullptr;
+
+                    object = Internal::CreateObjectInternal(params);
+
+                    loadedObjectsByUuid[objectUuid] = object;
+                }
+                else
+                {
+                    return nullptr;
+                }
+            }
+        }
+
+        // 2. Deserialize
+        {
+            SerializedObjectEntry& serializedObject = serializedObjectsByUuid[objectUuid];
+
+            stream->Seek(serializedObject.dataStartOffset);
+
+            u64 serializedDataSize = 0;
+            *stream >> serializedDataSize;
+
+            const auto& schema = schemaTable[serializedObject.schemaIndex];
+
+            ObjectSerializer deserializer{ this, object.Get(), serializedObject.schemaIndex };
+
+            deserializer.Deserialize(stream);
+        }
+
+        return object;
     }
 
     BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream)
@@ -311,7 +406,7 @@ namespace CE
         bundle->FetchAllSchemaTypes(schemaClasses, schemaStructs);
 
         Array<StructType*> schemaTypes;
-        HashMap<StructType*, int> schemaTypeToIndex;
+        HashMap<StructType*, u32> schemaTypeToIndex;
 
         for (ClassType* schemaClass : schemaClasses)
         {
@@ -321,7 +416,7 @@ namespace CE
 
         for (int i = 0; i < schemaTypes.GetSize(); ++i)
         {
-            schemaTypeToIndex[schemaTypes[i]] = i;
+            schemaTypeToIndex[schemaTypes[i]] = (u32)i;
         }
 
         Array<Object*> objectsToSerialize{};
@@ -400,7 +495,8 @@ namespace CE
 
             for (int i = 0; i < objectsToSerialize.GetSize(); ++i)
             {
-                ObjectSerializer serializer{ bundle, objectsToSerialize[i], schemaTypeToIndex };
+                ClassType* targetClass = objectsToSerialize[i]->GetClass();
+                ObjectSerializer serializer{ bundle, objectsToSerialize[i], (u32)schemaTypeToIndex[targetClass] };
 
                 serializer.Serialize(stream);
             }
@@ -473,7 +569,7 @@ namespace CE
     }
 
     void Bundle::SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes,
-        const HashMap<StructType*, int>& schemaTypeToIndex)
+        const HashMap<StructType*, u32>& schemaTypeToIndex)
     {
         u64 tableSize_Location = stream->GetCurrentPosition();
         *stream << (u64)0; // Placeholder
@@ -539,7 +635,7 @@ namespace CE
     }
 
     void Bundle::SerializeFieldSchema(FieldType* field, Stream* stream, 
-                                      const HashMap<StructType*, int>& schemaTypeToIndex)
+                                      const HashMap<StructType*, u32>& schemaTypeToIndex)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         u8 typeByte = 0;
@@ -610,8 +706,8 @@ namespace CE
     // --------------------------------------------------------
     // ObjectSerializer
 
-    ObjectSerializer::ObjectSerializer(const Ref<Bundle>& bundle, Object* target, const HashMap<StructType*, int>& schemaTypeToIndex)
-	    : bundle(bundle), target(target), schemeTypeToIndex(schemaTypeToIndex)
+    ObjectSerializer::ObjectSerializer(const Ref<Bundle>& bundle, Object* target, u32 schemaIndex)
+	    : bundle(bundle), target(target), schemaIndex(schemaIndex)
     {
 	    
     }
@@ -629,8 +725,6 @@ namespace CE
         *stream << target->IsAsset();
 
         ClassType* classType = target->GetClass();
-
-        u32 schemaIndex = schemeTypeToIndex.Get(classType);
 
         *stream << schemaIndex;
 
@@ -670,22 +764,546 @@ namespace CE
         stream->Seek(curLocation);
     }
 
+    void ObjectSerializer::Deserialize(Stream* stream)
+    {
+        const auto& schema = bundle->schemaTable[schemaIndex];
+        ClassType* classType = target->GetClass();
+
+        for (int i = 0; i < schema.fields.GetSize(); ++i)
+        {
+            const Bundle::FieldSchema& fieldSchema = schema.fields[i];
+            const Name& fieldName = fieldSchema.fieldName;
+
+            FieldType* field = classType->FindField(fieldName);
+
+            DeserializeField(field, target, stream, fieldSchema);
+        }
+    }
+
+    void ObjectSerializer::DeserializeField(FieldType* field, void* instance, Stream* stream,
+        const Bundle::FieldSchema& fieldSchema)
+    {
+        TypeId fieldTypeId = 0;
+        if (field != nullptr)
+        {
+            fieldTypeId = field->GetTypeId();
+        }
+
+        u64 unsignedInteger = 0;
+        s64 signedInteger = 0;
+        f32 f32Value = 0;
+        f64 f64Value = 0;
+
+        switch (fieldSchema.typeByte)
+        {
+            case 0x01: // u8
+            {
+                u8 value = 0;
+                *stream >> value;
+                unsignedInteger = value;
+                break;
+            }
+            case 0x02: // u16
+            {
+                u16 value = 0;
+                *stream >> value;
+                unsignedInteger = value;
+                break;
+            }
+            case 0x03: // u32
+            {
+                u32 value = 0;
+                *stream >> value;
+                unsignedInteger = value;
+                break;
+            }
+            case 0x04: // u64
+            {
+                u64 value = 0;
+                *stream >> value;
+                unsignedInteger = value;
+                break;
+            }
+            case 0x05: // s8
+            {
+                s8 value = 0;
+                *stream >> value;
+                signedInteger = value;
+                break;
+            }
+            case 0x06: // s16
+            {
+                s16 value = 0;
+                *stream >> value;
+                signedInteger = value;
+                break;
+            }
+            case 0x07: // s32
+            {
+                s32 value = 0;
+                *stream >> value;
+                signedInteger = value;
+                break;
+            }
+            case 0x08: // s64
+            {
+                s64 value = 0;
+                *stream >> value;
+                signedInteger = value;
+                break;
+            }
+            case 0x09: // f32
+            {
+                *stream >> f32Value;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(f32))
+                    {
+                        field->SetFieldValue<f32>(instance, f32Value);
+                    }
+                    else if (fieldTypeId == TYPEID(f64))
+                    {
+                        field->SetFieldValue<f64>(instance, f32Value);
+                    }
+                }
+                break;
+            }
+            case 0x0A: // f64
+            {
+                *stream >> f64Value;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(f32))
+                    {
+                        field->SetFieldValue<f32>(instance, (f32)f64Value);
+                    }
+                    else if (fieldTypeId == TYPEID(f64))
+                    {
+                        field->SetFieldValue<f64>(instance, f64Value);
+                    }
+                }
+                break;
+            }
+            case 0x0B:
+            {
+                bool boolValue = 0;
+                *stream >> boolValue;
+                if (field != nullptr && fieldTypeId == TYPEID(bool))
+                {
+                    field->SetFieldValue<bool>(instance, boolValue);
+                }
+                break;
+            }
+            case 0x0C:
+            {
+                String strValue;
+                *stream >> strValue;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(String))
+                    {
+                        field->SetFieldValue<String>(instance, strValue);
+                    }
+                    else if (fieldTypeId == TYPEID(Name))
+                    {
+                        field->SetFieldValue<Name>(instance, strValue);
+                    }
+                    else if (fieldTypeId == TYPEID(IO::Path))
+                    {
+                        field->SetFieldValue<IO::Path>(instance, strValue);
+                    }
+                }
+                break;
+            }
+            case 0x0D:
+            {
+                Vec2 value;
+                *stream >> value.x;
+                *stream >> value.y;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2))
+                        field->SetFieldValue<Vec2>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3))
+                        field->SetFieldValue<Vec3>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4>(instance, value);
+                }
+                break;
+            }
+            case 0x0E:
+            {
+                Vec3 value;
+                *stream >> value.x;
+                *stream >> value.y;
+                *stream >> value.z;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2))
+                        field->SetFieldValue<Vec2>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3))
+                        field->SetFieldValue<Vec3>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4>(instance, value);
+                }
+                break;
+            }
+            case 0x0F:
+            {
+                Vec4 value;
+                *stream >> value.x;
+                *stream >> value.y;
+                *stream >> value.z;
+                *stream >> value.w;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2))
+                        field->SetFieldValue<Vec2>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3))
+                        field->SetFieldValue<Vec3>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4>(instance, value);
+                }
+                break;
+            }
+            case 0x10:
+            {
+                Vec2i value;
+                *stream >> value.x;
+                *stream >> value.y;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2i))
+                        field->SetFieldValue<Vec2i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3i))
+                        field->SetFieldValue<Vec3i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4i>(instance, value);
+                }
+                break;
+            }
+            case 0x11:
+            {
+                Vec3i value;
+                *stream >> value.x;
+                *stream >> value.y;
+                *stream >> value.z;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2i))
+                        field->SetFieldValue<Vec2i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3i))
+                        field->SetFieldValue<Vec3i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4i>(instance, value);
+                }
+                break;
+            }
+            case 0x12:
+            {
+                Vec4i value;
+                *stream >> value.x;
+                *stream >> value.y;
+                *stream >> value.z;
+                *stream >> value.w;
+                if (field != nullptr)
+                {
+                    if (fieldTypeId == TYPEID(Vec2i))
+                        field->SetFieldValue<Vec2i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec3i))
+                        field->SetFieldValue<Vec3i>(instance, value);
+                    else if (fieldTypeId == TYPEID(Vec4))
+                        field->SetFieldValue<Vec4i>(instance, value);
+                }
+                break;
+            }
+            case 0x13: // Array of objects
+            {
+                u32 numElements = 0;
+                *stream >> numElements;
+
+                Array<FieldType> elements;
+                void* arrayInstance = nullptr;
+
+                if (field != nullptr && field->GetUnderlyingType() != nullptr &&
+                    field->GetUnderlyingType()->IsObject())
+                {
+                    field->ResizeArray(instance, numElements);
+
+                    elements = field->GetArrayFieldList(instance);
+
+                    if (numElements > 0)
+                    {
+                        const Array<u8>& rawArray = field->GetFieldValue<Array<u8>>(instance);
+                        arrayInstance = (void*)rawArray.GetData();
+                    }
+                }
+
+                for (int i = 0; i < numElements; ++i)
+                {
+                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream, Bundle::FieldSchema{ .typeByte = FieldTypeBytes[TYPEID(Object)] });
+                }
+
+                break;
+            }
+            case 0x14: // Array of structs
+            {
+                u32 numElements = 0;
+                *stream >> numElements;
+
+                Array<FieldType> elements;
+                void* arrayInstance = nullptr;
+
+                if (field != nullptr && field->GetUnderlyingType() != nullptr &&
+                    field->GetUnderlyingType()->IsStruct())
+                {
+                    field->ResizeArray(instance, numElements);
+
+                    elements = field->GetArrayFieldList(instance);
+
+                    if (numElements > 0)
+                    {
+                        const Array<u8>& rawArray = field->GetFieldValue<Array<u8>>(instance);
+                        arrayInstance = (void*)rawArray.GetData();
+                    }
+                }
+
+                for (int i = 0; i < numElements; ++i)
+                {
+                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream,
+                        Bundle::FieldSchema{ .typeByte = StructFieldType, .schemaIndexOfFieldType = fieldSchema.schemaIndexOfFieldType });
+                }
+
+                break;
+            }
+            case 0x15: // Array of POD types
+            {
+                u32 numElements = 0;
+                *stream >> numElements;
+
+                Array<FieldType> elements;
+                void* arrayInstance = nullptr;
+
+                if (field != nullptr && FieldTypeBytes.KeyExists(fieldTypeId))
+                {
+                    field->ResizeArray(instance, numElements);
+
+                    elements = field->GetArrayFieldList(instance);
+
+                    if (numElements > 0)
+                    {
+                        const Array<u8>& rawArray = field->GetFieldValue<Array<u8>>(instance);
+                        arrayInstance = (void*)rawArray.GetData();
+                    }
+                }
+
+                for (int i = 0; i < numElements; ++i)
+                {
+                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream,
+                        Bundle::FieldSchema{ .typeByte = fieldSchema.underlyingTypeByte });
+                }
+
+                break;
+            }
+            case 0x16: // BinaryBlob
+            {
+                if (field != nullptr && fieldTypeId == TYPEID(BinaryBlob))
+                {
+                    *stream >> const_cast<BinaryBlob&>(field->GetFieldValue<BinaryBlob>(instance));
+                }
+                else
+                {
+                    BinaryBlob buffer;
+                    *stream >> buffer;
+                }
+
+                break;
+            }
+            case 0x17: // Object Ref
+            {
+                Uuid objectUuid;
+                *stream >> objectUuid;
+                Uuid bundleUuid = Uuid::Zero();
+
+                if (objectUuid.IsValid())
+                {
+                    *stream >> bundleUuid;
+                }
+
+                if (field != nullptr && field->IsObjectField())
+                {
+                    Ref<Object> referencedObject = LoadObjectReference(objectUuid, bundleUuid);
+                    if (field->IsStrongRefCounted())
+                    {
+                        field->SetFieldValue<Ref<Object>>(instance, referencedObject);
+                    }
+                    else if (field->IsWeakRefCounted())
+                    {
+                        field->SetFieldValue<WeakRef<Object>>(instance, referencedObject);
+                    }
+                    else
+                    {
+                        field->SetFieldValue<Object*>(instance, referencedObject.Get());
+                    }
+                }
+
+                break;
+            }
+            case 0x18: // Function Binding
+            {
+                Uuid objectUuid;
+                *stream >> objectUuid;
+                Uuid bundleUuid;
+                String functionName;
+
+                if (objectUuid.IsValid())
+                {
+                    *stream >> bundleUuid;
+                    *stream >> functionName;
+                }
+
+                // TODO
+
+                break;
+            }
+            case 0x19: // Array of Function Binding
+            {
+                u32 numBindings = 0;
+                *stream >> numBindings;
+
+                for (int i = 0; i < numBindings; ++i)
+                {
+                    Uuid objectUuid;
+                    Uuid bundleUuid;
+                    String functionName;
+
+                    *stream >> objectUuid;
+
+                    if (objectUuid.IsValid())
+                    {
+                        *stream >> bundleUuid;
+                        *stream >> functionName;
+                    }
+                }
+
+                // TODO
+
+                break;
+            }
+            case 0x1A: // Struct
+            {
+                int schemaIndexOfStruct = fieldSchema.schemaIndexOfFieldType;
+
+                const auto& structSchema = bundle->schemaTable[schemaIndexOfStruct];
+                StructType* structType = nullptr;
+                void* structInstance = nullptr;
+
+                if (field != nullptr && field->IsStructField() && field->GetDeclarationType()->GetTypeName() == structSchema.fullTypeName)
+                {
+                    structType = (StructType*)field->GetDeclarationType();
+
+                    structInstance = field->GetFieldInstance(instance);
+                }
+
+                for (int i = 0; i < structSchema.fields.GetSize(); ++i)
+                {
+                    FieldType* structField = structType != nullptr
+                        ? structType->FindField(structSchema.fields[i].fieldName)
+                        : nullptr;
+
+                    DeserializeField(structField, structInstance, stream, structSchema.fields[i]);
+                }
+
+                break;
+            }
+            case 0x1B: // Uuid
+            {
+                Uuid uuid;
+                *stream >> uuid;
+
+                if (field != nullptr && fieldTypeId == TYPEID(Uuid))
+                {
+                    field->SetFieldValue<Uuid>(instance, uuid);
+                }
+
+                break;
+            }
+            case 0x1C: // Object Store
+            {
+                u32 numElements = 0;
+                *stream >> numElements;
+
+                if (field != nullptr && field->GetDeclarationTypeId() == TYPEID(ObjectMap))
+                {
+                    ObjectMap& objectMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(instance));
+
+                    objectMap.RemoveAll();
+                }
+
+                for (int i = 0; i < numElements; ++i)
+                {
+                    Uuid objectUuid;
+                    Uuid bundleUuid;
+
+                    *stream >> objectUuid;
+                    *stream >> bundleUuid;
+
+                    if (field != nullptr && field->GetDeclarationTypeId() == TYPEID(ObjectMap))
+                    {
+                        ObjectMap& objectMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(instance));
+
+                        Ref<Object> referencedObject = LoadObjectReference(objectUuid, bundleUuid);
+                        if (referencedObject.IsValid())
+                        {
+                            objectMap.AddObject(referencedObject.Get());
+                        }
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if (field != nullptr && fieldSchema.typeByte >= 0x01 && fieldSchema.typeByte <= 0x08)
+        {
+            if (fieldTypeId == TYPEID(u8))
+                field->SetFieldValue(instance, (u8)unsignedInteger);
+            else if (fieldTypeId == TYPEID(u16))
+                field->SetFieldValue(instance, (u16)unsignedInteger);
+            else if (fieldTypeId == TYPEID(u32))
+                field->SetFieldValue(instance, (u32)unsignedInteger);
+            else if (fieldTypeId == TYPEID(u64))
+                field->SetFieldValue(instance, (u64)unsignedInteger);
+            else if (fieldTypeId == TYPEID(s8))
+                field->SetFieldValue(instance, (s8)signedInteger);
+            else if (fieldTypeId == TYPEID(s16))
+                field->SetFieldValue(instance, (s16)signedInteger);
+            else if (fieldTypeId == TYPEID(s32))
+                field->SetFieldValue(instance, (s32)signedInteger);
+            else if (fieldTypeId == TYPEID(s64))
+                field->SetFieldValue(instance, (s64)signedInteger);
+            else if (fieldTypeId == TYPEID(f32))
+                field->SetFieldValue(instance, (f32)signedInteger);
+            else if (fieldTypeId == TYPEID(f64))
+                field->SetFieldValue(instance, (f64)signedInteger);
+        }
+    }
+
+    Ref<Object> ObjectSerializer::LoadObjectReference(Uuid objectUuid, Uuid bundleUuid)
+    {
+        // TODO: Load object reference
+
+        return nullptr;
+    }
+
 #define SERIALIZE_POD_FIELD_CHAIN(PodType) \
     if (fieldTypeId == TYPEID(PodType))\
     {\
         *stream << field->GetFieldValue<PodType>(instance);\
     }
 
-    void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream, bool storeByteSize)
+    void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream)
     {
-        storeByteSize = false;
-
-        u64 fieldSize_Location = stream->GetCurrentPosition();
-        if (storeByteSize)
-        {
-			*stream << (u64)8; // Size of field in bytes (including 8 bytes for itself)
-        }
-
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         TypeInfo* fieldType = field->GetUnderlyingType();
 
@@ -926,28 +1544,28 @@ namespace CE
                 {
 	                for (int i = 0; i < elementList.GetSize(); ++i)
 	                {
-                        SerializeField(&elementList[i], arrayInstance, stream, false);
+                        SerializeField(&elementList[i], arrayInstance, stream);
 	                }
                 }
                 else if (FieldTypeBytes.KeyExists(underlyingTypeId))
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream, false);
+                        SerializeField(&elementList[i], arrayInstance, stream);
                     }
                 }
                 else if (underlyingType->IsStruct())
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream, false);
+                        SerializeField(&elementList[i], arrayInstance, stream);
                     }
                 }
                 else if (underlyingType->IsEnum())
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream, false);
+                        SerializeField(&elementList[i], arrayInstance, stream);
                     }
                 }
                 else
@@ -959,15 +1577,6 @@ namespace CE
                 }
             }
         }
-
-        if (storeByteSize)
-	    {
-		    u64 curLocation = stream->GetCurrentPosition();
-        	stream->Seek(fieldSize_Location);
-        	*stream << (u64)(curLocation - fieldSize_Location);
-        	stream->Seek(curLocation);
-	    }
-
     }
 
 } // namespace CE
