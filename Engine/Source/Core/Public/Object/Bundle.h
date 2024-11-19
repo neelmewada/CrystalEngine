@@ -124,7 +124,6 @@ namespace CE
             b8 isAsset = false;
             u32 schemaIndex = 0;
 			String pathInBundle{};
-            Name objectClassName{};
             Name objectName{};
             u64 objectSerializedDataSize = 0;
 
@@ -154,7 +153,7 @@ namespace CE
         SharedMutex loadedObjectsMutex{};
         HashMap<Uuid, WeakRef<Object>> loadedObjectsByUuid{};
 
-        static SharedMutex bundleRegistryMutex;
+        static SharedRecursiveMutex bundleRegistryMutex;
         static HashMap<Uuid, WeakRef<Bundle>> loadedBundlesByUuid;
 
         static Array<IBundleResolver*> bundleResolvers;

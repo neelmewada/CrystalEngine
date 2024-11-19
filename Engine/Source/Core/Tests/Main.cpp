@@ -3224,7 +3224,11 @@ TEST(Bundle, Basic)
 
 	// 2. Read
     {
-	    Ref<Bundle> bundle = Bundle::LoadFromDisk()
+    	LoadBundleArgs args{};
+
+	    Ref<Bundle> bundle = Bundle::LoadFromDisk("/BasicTestBundle", args);
+
+    	EXPECT_EQ(bundle->GetSubObjectCount(), 1);
     }
     
     CEDeregisterModuleTypes();

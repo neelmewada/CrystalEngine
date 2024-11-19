@@ -335,7 +335,9 @@ namespace CE
 
             if (object.IsNull())
             {
-                ClassType* clazz = ClassType::FindClass(serializedObjectsByUuid[objectUuid].objectClassName);
+                const auto& schema = schemaTable[serializedObjectsByUuid[objectUuid].schemaIndex];
+
+                ClassType* clazz = ClassType::FindClass(schema.fullTypeName);
                 if (clazz != nullptr)
                 {
                     Internal::ObjectCreateParams params{};
@@ -344,6 +346,7 @@ namespace CE
                     params.uuid = objectUuid;
                     params.objectFlags = OF_NoFlags;
                     params.templateObject = nullptr;
+                    params.name = serializedObjectsByUuid[objectUuid].objectName.GetString();
 
                     object = Internal::CreateObjectInternal(params);
 
@@ -1292,6 +1295,18 @@ namespace CE
     Ref<Object> ObjectSerializer::LoadObjectReference(Uuid objectUuid, Uuid bundleUuid)
     {
         // TODO: Load object reference
+
+        LockGuard lock{ Bundle::bundleRegistryMutex };
+
+        if (Bundle::loadedBundlesByUuid.KeyExists(bundleUuid))
+        {
+            Ref<Bundle> targetBundle = Bundle::loadedBundlesByUuid[bundleUuid].Lock();
+
+            if (targetBundle.IsValid())
+            {
+                return targetBundle->LoadObject(objectUuid);
+            }
+        }
 
         return nullptr;
     }

@@ -3,7 +3,7 @@
 
 namespace CE
 {
-    SharedMutex Bundle::bundleRegistryMutex{};
+    SharedRecursiveMutex Bundle::bundleRegistryMutex{};
     HashMap<Uuid, WeakRef<Bundle>> Bundle::loadedBundlesByUuid{};
 
     Array<IBundleResolver*> Bundle::bundleResolvers{};
