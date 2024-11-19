@@ -7,6 +7,7 @@ namespace CE
     {
         Success = 0,
         UnknownError,
+        InvalidStream,
         BundleNotFound,
         InvalidBundle,
         UnsupportedBundleVersion,
@@ -41,12 +42,17 @@ namespace CE
         // - Static API -
 
         static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
-        
-        
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
+
+    protected:
+
+        static Ref<Bundle> LoadFromDisk(Stream* stream, BundleLoadResult& outResult, bool loadFully = true);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream);
+
+        void OnAfterConstruct() override;
+        void OnBeginDestroy() override;
 
     private:
 
@@ -67,7 +73,7 @@ namespace CE
         {
             Name fieldName{};
             u8 typeByte = 0;
-            int schemaIndexOfFieldType = 0;
+            u32 schemaIndexOfFieldType = 0;
             u8 underlyingTypeByte = 0;
         };
 
@@ -84,24 +90,38 @@ namespace CE
             u64 offsetInFile = 0;
             Uuid instanceUuid = Uuid::Null();
             b8 isAsset = false;
+            u32 schemaIndex = 0;
 			String pathInBundle{};
             Name objectClassName{};
             Name objectName{};
-            u32 objectDataSize = 0;
+            u64 objectSerializedDataSize = 0;
 
             b8 isLoaded = false;
+            b8 isDeserialized = false;
         };
 
         IO::Path fullBundlePath{};
 
+        u32 majorVersion = 0;
+        u32 minorVersion = 0;
+
         // If this bundle was created from deserialization
-        b8 wasDeserialized = false;
+        b8 isLoadedFromDisk = false;
         b8 isFullyLoaded = false;
 
         Array<SchemaEntry> schemaTable;
+        Array<Uuid> dependencies;
+
+        Array<SerializedObjectEntry> serializedObjectEntries;
+
+        // Used to prevent bundle simultaneous Load and Store operations.
+        SharedMutex bundleMutex{};
 
         SharedMutex loadedObjectsMutex{};
-        HashMap<Uuid, Object*> loadedObjectsByUuid{};
+        HashMap<Uuid, WeakRef<Object>> loadedObjectsByUuid{};
+
+        static SharedMutex bundleRegistryMutex;
+        static HashMap<Uuid, WeakRef<Bundle>> loadedBundlesByUuid;
 
         friend class ObjectSerializer;
         friend class Object;

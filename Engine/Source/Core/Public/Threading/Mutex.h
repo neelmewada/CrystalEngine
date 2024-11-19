@@ -80,7 +80,7 @@ namespace CE
 		std::recursive_mutex mut{};
 	};
 
-    struct SharedRecursiveMutex
+	class SharedRecursiveMutex
     {
     public:
 

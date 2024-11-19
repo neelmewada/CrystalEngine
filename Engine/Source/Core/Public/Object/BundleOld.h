@@ -135,7 +135,7 @@ namespace CE
 		Ref<Object> LoadObjectFromEntry(Stream* originalStream, Uuid objectUuid);
 
 		// Internal use only! Marks the passed object as 'unloaded'
-		void OnObjectUnloaded(Object* object);
+		void OnObjectUnloaded(const Ref<Object>& object);
         
 		friend class Object;
 		friend class AssetRegistry;
@@ -177,6 +177,7 @@ namespace CE
 			String sourceAssetRelativePath{};
             
             b8 isLoaded = false;
+			b8 isDeserialized = false;
 		};
 
 		SharedMutex loadedObjectsMutex{};

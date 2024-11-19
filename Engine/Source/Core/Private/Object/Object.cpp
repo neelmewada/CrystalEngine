@@ -99,6 +99,8 @@ namespace CE
 
 			ObjectListener::RemoveAllListeners(this);
 
+			OnBeginDestroy();
+
 			{
 				LockGuard lock{ gDestroyedObjectsMutex };
 				gDestroyedObjects.Add(this);
@@ -134,6 +136,8 @@ namespace CE
 			}
 			attachedObjects.RemoveAll();
 		}
+
+		OnBeforeDestroy();
 
 		delete this;
 	}
@@ -186,6 +190,8 @@ namespace CE
 		
         if (control == nullptr || control->GetNumStrongRefs() == 0)
 		{
+			OnBeforeDestroy();
+
 			delete this;
 		}
 	}

@@ -25,7 +25,12 @@ static void CERegisterModuleTypes()
     CE_REGISTER_TYPES(
 		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
-        BundleTests::WritingTestObj2,
+		BundleTests::WritingTestObj2,
+		BundleTests::MyMaterial,
+		BundleTests::MyScript,
+		BundleTests::MyMesh,
+		BundleTests::MyTexture,
+		BundleTests::FilterMode,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
@@ -45,6 +50,13 @@ static void CEDeregisterModuleTypes()
 		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
+		BundleTests::MyMaterial,
+		BundleTests::MyScript,
+		BundleTests::MyMesh,
+		BundleTests::MyTexture,
+		BundleTests::MyTextureDescriptor,
+		BundleTests::MyMaterialProperty,
+		BundleTests::FilterMode,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
@@ -3198,6 +3210,14 @@ TEST(Bundle, Basic)
 		testObject->testStruct.obj1Ptr = nullptr;
 		testObject->testStruct.owner = bundle;
 		testObject->testStruct.stringValue = "string value";
+
+		testObject->arrayOfStruct.Resize(2);
+		testObject->arrayOfStruct[0].owner = testObject;
+		testObject->arrayOfStruct[0].stringValue = "Item 0";
+		testObject->arrayOfStruct[0].anotherBase.stringValue = "internal 0";
+		testObject->arrayOfStruct[1].owner = bundle;
+		testObject->arrayOfStruct[1].stringValue = "Item 1";
+		testObject->arrayOfStruct[1].anotherBase.stringValue = "internal 1";
 
 		Bundle::SaveToDisk(bundle, nullptr);
     }

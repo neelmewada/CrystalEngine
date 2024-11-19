@@ -14,7 +14,7 @@ namespace CE
         
         WeakRef(T* object)
         {
-            if (object != nullptr)
+            if (object != nullptr && object->control != nullptr)
             {
                 control = object->control;
                 control->AddWeakRef();
@@ -27,7 +27,7 @@ namespace CE
         template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         WeakRef(U* object)
         {
-            if (object != nullptr)
+            if (object != nullptr && object->control != nullptr)
             {
                 control = object->control;
                 control->AddWeakRef();

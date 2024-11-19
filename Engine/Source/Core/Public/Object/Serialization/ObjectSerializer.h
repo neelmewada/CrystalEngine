@@ -13,7 +13,7 @@ namespace CE
 
 	private:
 
-		void SerializeField(FieldType* field, void* instance, Stream* stream);
+		void SerializeField(FieldType* field, void* instance, Stream* stream, bool storeByteSize = true);
 
 		Ref<Bundle> bundle = nullptr;
 		Object* target = nullptr;

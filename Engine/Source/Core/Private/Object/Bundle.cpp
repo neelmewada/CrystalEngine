@@ -3,10 +3,38 @@
 
 namespace CE
 {
+    SharedMutex Bundle::bundleRegistryMutex{};
+    HashMap<Uuid, WeakRef<Bundle>> Bundle::loadedBundlesByUuid{};
 
     Bundle::Bundle()
     {
 
+    }
+
+    void Bundle::OnAfterConstruct()
+    {
+        Super::OnAfterConstruct();
+
+        LockGuard lock{ bundleRegistryMutex };
+        loadedBundlesByUuid[GetUuid()] = this;
+    }
+
+    void Bundle::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
+        LockGuard lock{ bundleRegistryMutex };
+        loadedBundlesByUuid.Remove(GetUuid());
+    }
+
+    void Bundle::OnObjectUnloaded(Object* object)
+    {
+        if (object != nullptr)
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            loadedObjectsByUuid.Remove(object->GetUuid());
+        }
     }
 
     IO::Path Bundle::GetAbsoluteBundlePath(const Name& bundlePath)
@@ -29,7 +57,7 @@ namespace CE
         }
         else if (bundleNameStr.StartsWith("/Editor/") || bundleNameStr == "/Editor")
         {
-            return PlatformDirectories::GetLaunchDir() / (bundleNameStr.GetSubstring(1) + ".casset");
+            return EngineDirectories::GetEngineInstallDirectory() / (bundleNameStr.GetSubstring(1) + ".casset");
         }
         else if (bundleNameStr.StartsWith("/Temp/") || bundleNameStr == "/Temp")
         {
@@ -100,7 +128,7 @@ namespace CE
 
         bundle->fullBundlePath = path;
 
-        FileStream stream = FileStream(path, Stream::Permissions::WriteOnly);
+        FileStream stream = FileStream(path, Stream::Permissions::WriteOnly, true, true);
 
         return SaveToDisk(bundle, asset, &stream);
     }
@@ -146,6 +174,16 @@ namespace CE
                         Struct* structType = StructType::FindStruct(field->GetDeclarationTypeId());
 
                         fetchInternalStructs(structType);
+                    }
+                    else if (field->IsArrayField())
+                    {
+                        TypeInfo* underlyingType = field->GetUnderlyingType();
+                        if (underlyingType != nullptr && underlyingType->IsStruct())
+                        {
+                            StructType* structType = static_cast<StructType*>(underlyingType);
+
+                            fetchInternalStructs(structType);
+                        }
                     }
                 }
             };

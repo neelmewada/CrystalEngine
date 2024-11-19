@@ -13,7 +13,7 @@ namespace CE
      */
 
     /**
-     * \brief In editor, it is the absolute path to project.
+     * \brief In editor, it is the absolute path to project directory.
      * At runtime, it is the path to root installation directory.
      */
     extern CORE_API IO::Path gProjectPath;

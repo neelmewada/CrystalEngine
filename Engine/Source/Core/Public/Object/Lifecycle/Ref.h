@@ -15,7 +15,7 @@ namespace CE
         
         Ref(T* object)
         {
-            if (object != nullptr)
+            if (object != nullptr && object->control != nullptr)
             {
                 control = object->control;
                 control->AddStrongRef();
@@ -29,7 +29,7 @@ namespace CE
         template<class U> requires TIsBaseClassOf<T, U>::Value and (not std::is_same_v<T, U>)
         Ref(U* object)
         {
-            if (object != nullptr)
+            if (object != nullptr && object->control != nullptr)
             {
                 control = object->control;
                 control->AddStrongRef();

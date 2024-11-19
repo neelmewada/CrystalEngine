@@ -108,7 +108,7 @@ Schema table stores the layout of each object and struct that is serialized in t
 | `10` | Vec2i | Vec2i |
 | `11` | Vec3i | Vec3i |
 | `12` | Vec4i | Vec4i |
-| `13` | Array\<Object\> | [Array](#array) of objects |
+| `13` | Array\<Object\> | [Array of Objects](#array-of-objects) |
 | `14` | Array\<Struct\> | Array of struct types | **Optional_1** |
 | `15` | Array\<[FieldType](#field-type)\> | Array of simple types | **Optional_2** |
 | `16` | [Binary](#binary-data-type) | Raw binary data |
@@ -129,19 +129,18 @@ Schema table stores the layout of each object and struct that is serialized in t
 | | | | |
 |  |  | **<-- Entry #0 -->** |  |
 | +0C | 8B | `xx xx xx xx xx xx xx xx` | Size of 1-st entry in bytes. (including this field) (>= 8) |
-| +10 | 4B | `00 00 00 04` | Data start offset **after** this field. |
+| +10 | 4B | `xx xx xx xx` | Data start offset **after** this field. |
 | +14 | 16B | 128 bit Uuid | Object Instance UUID. |
 | +20 | 1B | `00/01` | Is Asset? `0` or `1` |
 | +21 | 4B | Index into [Schema Table](#schema-table) | Index of this class layout in Schema Table. |
 | +25 | \0 | `MySkybox.Irradiance.Diffuse\0` | Path to this object within the bundle |
 | +xx | \0 | `MyObjectName\0` | Object name (CE::Name) |
 | - | - | New header fields can be added here | - |
+| - | - | Data starts from below | - |
 | +xx | 8B | `00 00 00 00 00 00 00 08` | Size of ALL the fields in bytes including this. (>= 8) |
 |  |  | Field #0 | Number of fields can be inferred from Schema Table. |
-| +xx | 8B | `00 00 00 00 00 00 00 08` | Size of 1st field including itself. (>= 8) |
 | +08 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 |  |  | Field #1 | Number of fields can be inferred from Schema Table. |
-| +xx | 8B | `00 00 00 00 00 00 00 08` | Size of 2nd field including itself. (>= 8) |
 | +08 | xx | [Field Value](#field-value) | [Field Value](#field-value) depending on the [Field Type](#field-type) found in Schema Table. |
 | | | | |
 | | | | |
@@ -215,20 +214,16 @@ Schema table stores the layout of each object and struct that is serialized in t
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `00 00 00 00 00 00 00 04` | Size of 1st field including itself. (>= 8) |
-| +08 | xx | [Field Value](#field-value) | Value of 1st field |
-| +xx | 8B | `00 00 00 00 00 00 00 04` | Size of 2nd field including itself. (>= 8) |
-| +08 | xx | [Field Value](#field-value) | Value of 2nd field |
+| +xx | xx | [Field Value](#field-value) | Value of 1st field |
+| +xx | xx | [Field Value](#field-value) | Value of 2nd field |
 
 ### Array
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 4B | `00 00 00 02` | Number of elements in array  |
-| +04 | 8B | `00 00 00 00 00 00 00 04` | Size of 1st field including itself. (>= 8) |
-| +08 | xx | [Field Value](#field-value) | Value of 1st field |
-| +xx | 8B | `00 00 00 00 00 00 00 04` | Size of 2nd field including itself. (>= 8) |
-| +04 | xx | [Field Value](#field-value) | Value of 2nd field |
+| +04 | xx | [Field Value](#field-value) | Value of 1st element |
+| +xx | xx | [Field Value](#field-value) | Value of 2nd element |
 
 ## Field Serializer
 
@@ -236,6 +231,5 @@ Object, struct fields and array elements have the same format:
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +04 | 8B | `00 00 00 00 00 00 00 04` | Size of field including itself. (>= 8) |
 | +08 | xx | [Field Value](#field-value) | Value of field |
 

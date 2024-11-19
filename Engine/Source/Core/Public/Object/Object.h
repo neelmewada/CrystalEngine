@@ -54,7 +54,7 @@ namespace CE
             return name;
         }
 
-        virtual void SetName(const Name& newName);
+        void SetName(const Name& newName);
         
         INLINE Uuid GetUuid() const
         {
@@ -197,6 +197,7 @@ namespace CE
 
 		virtual void OnAfterConstruct() {}
 		virtual void OnBeginDestroy() {}
+        virtual void OnBeforeDestroy() {}
 
 		virtual void OnSubobjectAttached(Object* subobject) {}
 
@@ -252,8 +253,7 @@ namespace CE
 		friend class SaveBundleContext;
         friend class BinaryDeserializer;
         friend class FieldType;
-        
-        friend class EventBus;
+
         friend Object* Internal::CreateObjectInternal(const Internal::ObjectCreateParams& params);
 
         template<typename T>

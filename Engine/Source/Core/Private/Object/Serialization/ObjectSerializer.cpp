@@ -51,8 +51,239 @@ namespace CE
         }
     }
 
+    Ref<Bundle> Bundle::LoadFromDisk(Stream* stream,
+                                     BundleLoadResult& outResult,
+                                     bool loadFully)
+    {
+        ZoneScoped;
+
+        if (stream == nullptr || !stream->CanRead())
+        {
+            CE_LOG(Error, All, "Failed to load bundle: Stream is either NULL or not readable!");
+            outResult = BundleLoadResult::InvalidStream;
+            return nullptr;
+        }
+
+        stream->SetBinaryMode(true);
+
+        u64 magicNumber = 0;
+        *stream >> magicNumber;
+
+        if (magicNumber != BUNDLE_MAGIC_NUMBER)
+        {
+            outResult = BundleLoadResult::InvalidBundle;
+            return nullptr;
+        }
+
+        u32 headerChecksum = 0;
+        *stream >> headerChecksum;
+
+        u32 majorVersion = 0;
+        u32 minorVersion = 0;
+        u32 patchVersion = 0;
+
+        *stream >> majorVersion;
+        *stream >> minorVersion;
+        *stream >> patchVersion;
+
+        if (majorVersion > BUNDLE_VERSION_MAJOR)
+        {
+            outResult = BundleLoadResult::UnsupportedBundleVersion;
+            return nullptr;
+        }
+
+        u64 schemaTableStartOffset = 0;
+        *stream >> schemaTableStartOffset;
+        u64 serializedDataStartOffset = 0;
+        *stream >> serializedDataStartOffset;
+
+        Uuid bundleUuid = Uuid::Zero();
+        *stream >> bundleUuid;
+        String bundleName = "";
+        *stream >> bundleName;
+
+        u32 numBundleDependencies = 0;
+        *stream >> numBundleDependencies;
+        Array<Uuid> externalBundleUuids;
+
+        for (int i = 0; i < numBundleDependencies; ++i)
+        {
+            Uuid uuid;
+            *stream >> uuid;
+            externalBundleUuids.Add(uuid);
+        }
+
+        u8 isCooked = 0;
+        *stream >> isCooked;
+
+        Ref<Bundle> bundle = nullptr;
+
+        {
+            LockGuard lock{ bundleRegistryMutex };
+
+            if (loadedBundlesByUuid.KeyExists(bundleUuid)) // Bundle is already loaded
+            {
+                bundle = loadedBundlesByUuid[bundleUuid].Lock();
+            }
+
+            if (bundle.IsNull())
+            {
+                Internal::ObjectCreateParams params{ Bundle::Type() };
+                params.name = bundleName;
+                params.uuid = bundleUuid;
+                params.templateObject = nullptr;
+                params.objectFlags = OF_NoFlags;
+                params.outer = nullptr;
+
+                bundle = (Bundle*)Internal::CreateObjectInternal(params);
+                bundle->isFullyLoaded = false;
+                bundle->isLoadedFromDisk = true;
+
+                loadedBundlesByUuid[bundleUuid] = bundle;
+            }
+        }
+
+        LockGuard bundleLock{ bundle->bundleMutex };
+
+        {
+            LockGuard loadedObjectsLock{ bundle->loadedObjectsMutex };
+	        bundle->loadedObjectsByUuid[bundleUuid] = bundle;
+        }
+
+    	bundle->majorVersion = majorVersion;
+        bundle->minorVersion = minorVersion;
+
+        bundle->dependencies = externalBundleUuids;
+
+        stream->Seek(schemaTableStartOffset);
+
+        // 1. Load Schema Table
+
+        {
+            u64 schemaTableSize = 0;
+            *stream >> schemaTableSize;
+
+            u32 numSchemaEntries = 0;
+            *stream >> numSchemaEntries;
+
+            bundle->schemaTable.Resize(numSchemaEntries);
+
+            for (int i = 0; i < numSchemaEntries; ++i)
+            {
+                SchemaEntry& entry = bundle->schemaTable[i];
+
+                u32 entryByteSize = 0;
+                *stream >> entryByteSize;
+
+                u8 struct1_class0 = 0;
+                *stream >> struct1_class0;
+
+                entry.isStruct = struct1_class0 == 1;
+                entry.isClass = !entry.isStruct;
+
+                String typeName = "";
+                *stream >> typeName;
+
+                entry.fullTypeName = typeName;
+
+                u32 classVersion = 0;
+                *stream >> classVersion;
+
+                u32 numFields = 0;
+                *stream >> numFields;
+
+                entry.fields.Resize(numFields);
+
+                for (int j = 0; j < numFields; ++j)
+                {
+                    String fieldName = "";
+                    *stream >> fieldName;
+
+                    FieldSchema& field = entry.fields[j];
+
+                    field.fieldName = fieldName;
+
+                    u8 typeByte = 0;
+                    *stream >> typeByte;
+
+                    field.typeByte = typeByte;
+
+                    if (Optional1Requirement.Exists(typeByte))
+                    {
+                        u32 schemaIndex = 0;
+                        *stream >> schemaIndex;
+
+                        field.schemaIndexOfFieldType = schemaIndex;
+                    }
+
+                    if (Optional2Requirement.Exists(typeByte))
+                    {
+                        u8 underlyingTypeByte = 0;
+                        *stream >> underlyingTypeByte;
+
+                        field.underlyingTypeByte = underlyingTypeByte;
+                    }
+                }
+            }
+        }
+
+        u32 endOfSchema = 0;
+        *stream >> endOfSchema;
+
+        bundle->serializedObjectEntries.Clear();
+
+        // 2. Serialized Data
+
+        {
+            u64 serializedDataSize = 0;
+            *stream >> serializedDataSize;
+
+            u32 numEntries = 0;
+            *stream >> numEntries;
+
+            bundle->serializedObjectEntries.Resize(numEntries);
+
+            for (int i = 0; i < numEntries; ++i)
+            {
+                SerializedObjectEntry& serializedObject = bundle->serializedObjectEntries[i];
+
+                u64 entryByteSize = 0;
+                *stream >> entryByteSize;
+
+                u32 dataOffsetAfter = 0;
+                *stream >> dataOffsetAfter;
+
+                u64 dataStartOffset = stream->GetCurrentPosition() + (u64)dataOffsetAfter;
+
+                *stream >> serializedObject.instanceUuid;
+                *stream >> serializedObject.isAsset;
+
+                *stream >> serializedObject.schemaIndex;
+
+                *stream >> serializedObject.pathInBundle;
+
+                String objName;
+                *stream >> objName;
+                serializedObject.objectName = objName;
+
+                stream->Seek(dataStartOffset);
+
+                u64 byteSizeOfSerializedFields = 0;
+                *stream >> byteSizeOfSerializedFields;
+
+                serializedObject.objectSerializedDataSize = byteSizeOfSerializedFields - sizeof(u64);
+
+                stream->Seek(byteSizeOfSerializedFields - sizeof(u64), SeekMode::Current);
+            }
+        }
+
+        return bundle;
+    }
+
     BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream)
     {
+        ZoneScoped;
+
         if (bundle.IsNull())
         {
             CE_LOG(Error, All, "Failed to save bundle: Bundle is NULL!");
@@ -68,6 +299,9 @@ namespace CE
             CE_LOG(Error, All, "Failed to save bundle: Stream is either NULL or not writeable!");
             return BundleSaveResult::InvalidStream;
         }
+
+        // Prevent bundle Read-Write and Write-Write scenarios.
+        LockGuard bundleLock{ bundle->bundleMutex };
 
         // 1. Fetch all object and struct types
 
@@ -170,7 +404,9 @@ namespace CE
 
                 serializer.Serialize(stream);
             }
-            
+
+            *stream << (u32)0; // End of data
+
             curLocation = stream->GetCurrentPosition();
             stream->Seek(serializedDataSize_Location);
             *stream << (curLocation - serializedDataSize_Location);
@@ -182,11 +418,6 @@ namespace CE
         *stream << (u64)0; // End Of File
 
         return BundleSaveResult::Success;
-    }
-
-    void Bundle::OnObjectUnloaded(Object* object)
-    {
-
     }
 
     bool Bundle::IsFieldSerialized(FieldType* field, StructType* schemaType)
@@ -213,6 +444,11 @@ namespace CE
             if (underlyingType == nullptr)
             {
                 return false;
+            }
+
+            if (underlyingType->IsEnum())
+            {
+                return true;
             }
 
             if (FieldTypeBytes.KeyExists(underlyingTypeId))
@@ -394,7 +630,7 @@ namespace CE
 
         ClassType* classType = target->GetClass();
 
-        int schemaIndex = schemeTypeToIndex.Get(classType);
+        u32 schemaIndex = schemeTypeToIndex.Get(classType);
 
         *stream << schemaIndex;
 
@@ -440,10 +676,15 @@ namespace CE
         *stream << field->GetFieldValue<PodType>(instance);\
     }
 
-    void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream)
+    void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream, bool storeByteSize)
     {
+        storeByteSize = false;
+
         u64 fieldSize_Location = stream->GetCurrentPosition();
-        *stream << (u64)8; // Size of field in bytes (including 8 bytes for itself)
+        if (storeByteSize)
+        {
+			*stream << (u64)8; // Size of field in bytes (including 8 bytes for itself)
+        }
 
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         TypeInfo* fieldType = field->GetUnderlyingType();
@@ -681,25 +922,32 @@ namespace CE
                 const Array<u8>& rawArray = field->GetFieldValue<Array<u8>>(instance);
                 auto arrayInstance = (void*)&rawArray[0];
 
-                if (underlyingType->IsObject())
+                if (underlyingType->IsObject()) // Array of objects
                 {
 	                for (int i = 0; i < elementList.GetSize(); ++i)
 	                {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(&elementList[i], arrayInstance, stream, false);
 	                }
                 }
                 else if (FieldTypeBytes.KeyExists(underlyingTypeId))
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(&elementList[i], arrayInstance, stream, false);
                     }
                 }
                 else if (underlyingType->IsStruct())
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(&elementList[i], arrayInstance, stream, false);
+                    }
+                }
+                else if (underlyingType->IsEnum())
+                {
+                    for (int i = 0; i < elementList.GetSize(); ++i)
+                    {
+                        SerializeField(&elementList[i], arrayInstance, stream, false);
                     }
                 }
                 else
@@ -712,10 +960,13 @@ namespace CE
             }
         }
 
-        u64 curLocation = stream->GetCurrentPosition();
-        stream->Seek(fieldSize_Location);
-        *stream << (u64)(curLocation - fieldSize_Location);
-        stream->Seek(curLocation);
+        if (storeByteSize)
+	    {
+		    u64 curLocation = stream->GetCurrentPosition();
+        	stream->Seek(fieldSize_Location);
+        	*stream << (u64)(curLocation - fieldSize_Location);
+        	stream->Seek(curLocation);
+	    }
 
     }
 
