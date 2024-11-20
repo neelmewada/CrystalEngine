@@ -84,7 +84,7 @@ namespace CE
         return PlatformDirectories::GetLaunchDir() / (bundleNameStr.GetSubstring(1) + ".casset");
     }
 
-    Ref<Bundle> Bundle::LoadBundle(const Uuid& bundleUuid, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Uuid& bundleUuid, const LoadBundleArgs& loadArgs)
     {
         {
             LockGuard lock{ bundleRegistryMutex };
@@ -105,7 +105,7 @@ namespace CE
         {
             Name bundlePath = bundleResolvers[i]->ResolveBundlePath(bundleUuid);
 
-            Ref<Bundle> bundle = LoadBundle(bundlePath, loadArgs);
+            Ref<Bundle> bundle = LoadBundle(outer, bundlePath, loadArgs);
             if (bundle.IsValid())
             {
                 return bundle;
@@ -115,13 +115,13 @@ namespace CE
         return nullptr;
     }
 
-    Ref<Bundle> Bundle::LoadBundle(const Name& path, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, const LoadBundleArgs& loadArgs)
     {
         BundleLoadResult result;
-        return LoadBundle(path, result, loadArgs);
+        return LoadBundle(outer, path, result, loadArgs);
     }
 
-    Ref<Bundle> Bundle::LoadBundle(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         IO::Path absolutePath = GetAbsoluteBundlePath(path);
 
@@ -135,7 +135,7 @@ namespace CE
         FileStream stream = FileStream(absolutePath, Stream::Permissions::ReadOnly);
         stream.SetBinaryMode(true);
 
-        Ref<Bundle> bundle = LoadBundle(&stream, outResult, loadArgs);
+        Ref<Bundle> bundle = LoadBundle(outer, &stream, outResult, loadArgs);
         if (bundle.IsValid())
         {
             bundle->fullBundlePath = absolutePath;

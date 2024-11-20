@@ -287,6 +287,8 @@ namespace CE
 
         virtual void CopyFrom(IScriptEvent* other) = 0;
 
+        virtual u32 GetInvocationListCount() = 0;
+
         virtual void Bind(const Ref<Object>& object, FunctionType* function) = 0;
         virtual void Bind(const FunctionBinding& binding) = 0;
         virtual void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) = 0;
@@ -492,6 +494,11 @@ namespace CE
             }
 
             return result;
+        }
+
+        u32 GetInvocationListCount() override
+        {
+            return invocationList.GetSize();
         }
 
         ScriptEvent() = default;

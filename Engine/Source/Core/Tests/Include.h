@@ -231,10 +231,6 @@ namespace BundleTests
 		{
 			Super::OnBeforeDestroy();
 
-			if (!IsDefaultInstance())
-			{
-				String::IsAlphabet('a');
-			}
 		}
 
 		Ref<MyMaterial> material;
@@ -424,7 +420,7 @@ namespace EventTests
 		}
 
 		String text{};
-		Object* object = nullptr;
+		WeakRef<Object> object = nullptr;
 		IO::FileAction fileAction = IO::FileAction::Add;
 	};
 	

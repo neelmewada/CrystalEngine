@@ -53,7 +53,7 @@ namespace CE
         }
     }
 
-    Ref<Bundle> Bundle::LoadBundle(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         ZoneScoped;
 
@@ -133,7 +133,7 @@ namespace CE
                 params.uuid = bundleUuid;
                 params.templateObject = nullptr;
                 params.objectFlags = OF_NoFlags;
-                params.outer = nullptr;
+                params.outer = outer.Get();
 
                 bundle = (Bundle*)Internal::CreateObjectInternal(params);
                 bundle->isFullyLoaded = false;
@@ -353,9 +353,9 @@ namespace CE
                     params.templateObject = nullptr;
                     params.name = serializedObjectsByUuid[objectUuid].objectName.GetString();
 
-                    if (params.name == "MyMesh")
+                    if (params.name == "MyTexture")
                     {
-                        DEBUG_BREAK();
+                        //DEBUG_BREAK();
                     }
 
                     object = Internal::CreateObjectInternal(params);
@@ -783,11 +783,6 @@ namespace CE
     {
         const auto& schema = bundle->schemaTable[schemaIndex];
         ClassType* classType = target->GetClass();
-
-        if (target->GetName() == "MyMesh")
-        {
-            //DEBUG_BREAK();
-        }
 
         for (int i = 0; i < schema.fields.GetSize(); ++i)
         {
@@ -1380,7 +1375,9 @@ namespace CE
             .destroyOutdatedObjects = true
         };
 
-        referencedBundle = Bundle::LoadBundle(bundleUuid, loadArgs);
+        Ref<Object> outer = bundle->GetOuter().Lock();
+
+        referencedBundle = Bundle::LoadBundle(outer, bundleUuid, loadArgs);
         if (referencedBundle.IsValid())
         {
             return referencedBundle->LoadObject(objectUuid);
