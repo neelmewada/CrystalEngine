@@ -400,31 +400,31 @@ namespace CE
 
 	Vec3 Quat::ToEulerRadians() const
 	{
-		const Quat& q = *this;
+		//const Quat& q = *this;
 
-		double sqw = q.w * q.w;
-		double sqx = q.x * q.x;
-		double sqy = q.y * q.y;
-		double sqz = q.z * q.z;
+		double sqw = w * w;
+		double sqx = x * x;
+		double sqy = y * y;
+		double sqz = z * z;
 		double unit = sqx + sqy + sqz + sqw;
-		double test = q.x * q.y + q.z * q.w;
+		double test = x * y + z * w;
 		Vec3 euler;
 
 		if (test > 0.499 * unit) { // Singularity at north pole
-			euler.y = 2 * atan2(q.x, q.w);
+			euler.y = 2 * atan2(x, w);
 			euler.x = M_PI / 2;
 			euler.z = 0;
 			return euler;
 		}
 		if (test < -0.499 * unit) { // Singularity at south pole
-			euler.y = -2 * atan2(q.x, q.w);
+			euler.y = -2 * atan2(x, w);
 			euler.x = -M_PI / 2;
 			euler.z = 0;
 			return euler;
 		}
-		euler.y = atan2(2 * q.y * q.w + 2 * q.x * q.z, sqw - sqx - sqy + sqz); // Yaw
-		euler.x = asin(-2 * (q.x * q.z - q.y * q.w) / unit); // Pitch
-		euler.z = atan2(2 * q.x * q.w + 2 * q.y * q.z, sqw + sqx - sqy - sqz); // Roll
+		euler.y = atan2(2 * y * w + 2 * x * z, sqw - sqx - sqy + sqz); // Yaw
+		euler.x = asin(-2 * (x * z - y * w) / unit); // Pitch
+		euler.z = atan2(2 * x * w + 2 * y * z, sqw + sqx - sqy - sqz); // Roll
 
 		return euler;
 	}

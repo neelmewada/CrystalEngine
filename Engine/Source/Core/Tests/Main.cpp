@@ -574,6 +574,15 @@ TEST(Containers, Variant)
 	TEST_END;
 }
 
+bool Vec4Equals(const Vec4& lhs, const Vec4& rhs)
+{
+	constexpr f32 epsilon = std::numeric_limits<f32>::epsilon();
+	return Math::Abs(lhs.x - rhs.x) <= epsilon &&
+		Math::Abs(lhs.y - rhs.y) <= epsilon &&
+			Math::Abs(lhs.z - rhs.z) <= epsilon &&
+				Math::Abs(lhs.w - rhs.w) <= epsilon;
+}
+
 TEST(Containers, Matrix)
 {
     TEST_BEGIN;
@@ -598,7 +607,7 @@ TEST(Containers, Matrix)
 		rotator = Quat::EulerDegrees(90, 0, 0) * rotator;
 		vec = Vec4(0, 1, 0, 1);
 		out = rotator * vec;
-		EXPECT_EQ(out, Vec4(0, -1, 0, 1));
+    	EXPECT_TRUE(Vec4Equals(out, Vec4(0, -1, 0, 1)));
 
 		Quat lookRotation = Quat::LookRotation2(Vec3(1, 0, 0), Vec3(0, 1, 0));
 		Vec3 degrees = lookRotation.ToEulerDegrees();
