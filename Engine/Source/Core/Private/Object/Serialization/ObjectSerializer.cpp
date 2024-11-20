@@ -53,7 +53,7 @@ namespace CE
         }
     }
 
-    Ref<Bundle> Bundle::LoadFromDisk(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         ZoneScoped;
 
@@ -308,6 +308,9 @@ namespace CE
 
             for (const auto& serializedObject : bundle->serializedObjectEntries)
             {
+                if (bundle->serializedObjectsByUuid[serializedObject.instanceUuid].isLoaded)
+                    continue;
+
                 bundle->LoadObject(stream, serializedObject.instanceUuid);
             }
         }
@@ -350,6 +353,11 @@ namespace CE
                     params.templateObject = nullptr;
                     params.name = serializedObjectsByUuid[objectUuid].objectName.GetString();
 
+                    if (params.name == "MyMesh")
+                    {
+                        DEBUG_BREAK();
+                    }
+
                     object = Internal::CreateObjectInternal(params);
 
                     loadedObjectsByUuid[objectUuid] = object;
@@ -375,6 +383,8 @@ namespace CE
             ObjectSerializer deserializer{ this, object.Get(), serializedObject.schemaIndex };
 
             deserializer.Deserialize(stream);
+
+            serializedObject.isLoaded = true;
         }
 
         return object;
@@ -774,6 +784,11 @@ namespace CE
         const auto& schema = bundle->schemaTable[schemaIndex];
         ClassType* classType = target->GetClass();
 
+        if (target->GetName() == "MyMesh")
+        {
+            //DEBUG_BREAK();
+        }
+
         for (int i = 0; i < schema.fields.GetSize(); ++i)
         {
             const Bundle::FieldSchema& fieldSchema = schema.fields[i];
@@ -1167,7 +1182,24 @@ namespace CE
                     *stream >> functionName;
                 }
 
-                // TODO
+                if (field != nullptr && field->IsDelegateField() && objectUuid.IsValid() && bundleUuid.IsValid() && functionName.NotEmpty())
+                {
+                    Ref<Object> referencedObject = LoadObjectReference(objectUuid, bundleUuid);
+                    if (referencedObject.IsValid())
+                    {
+                        IScriptDelegate* delegate = field->GetFieldDelegateValue(instance);
+                        Array<FunctionType*> functions = referencedObject->GetClass()->FindAllFunctions(functionName);
+
+                        for (FunctionType* function : functions)
+                        {
+                            if (delegate->GetSignature() == function->GetFunctionSignature())
+                            {
+                                delegate->Bind(referencedObject, function);
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 break;
             }
@@ -1184,14 +1216,37 @@ namespace CE
 
                     *stream >> objectUuid;
 
+                    if (field != nullptr && field->IsEventField() && objectUuid.IsValid())
+                    {
+                        IScriptEvent* event = field->GetFieldEventValue(instance);
+                        event->UnbindAll();
+                    }
+
                     if (objectUuid.IsValid())
                     {
                         *stream >> bundleUuid;
                         *stream >> functionName;
+
+                        if (field != nullptr && field->IsEventField() && objectUuid.IsValid() && bundleUuid.IsValid() && functionName.NotEmpty())
+                        {
+                            Ref<Object> referencedObject = LoadObjectReference(objectUuid, bundleUuid);
+                            if (referencedObject.IsValid())
+                            {
+                                IScriptEvent* event = field->GetFieldEventValue(instance);
+                                Array<FunctionType*> functions = referencedObject->GetClass()->FindAllFunctions(functionName);
+
+                                for (FunctionType* function : functions)
+                                {
+                                    if (event->GetSignature() == function->GetFunctionSignature())
+                                    {
+                                        event->Bind(referencedObject, function);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-
-                // TODO
 
                 break;
             }
@@ -1298,18 +1353,37 @@ namespace CE
 
     Ref<Object> ObjectSerializer::LoadObjectReference(Uuid objectUuid, Uuid bundleUuid)
     {
-        // TODO: Load object reference
-
-        LockGuard lock{ Bundle::bundleRegistryMutex };
-
-        if (Bundle::loadedBundlesByUuid.KeyExists(bundleUuid))
+        if (objectUuid.IsNull() || bundleUuid.IsNull())
         {
-            Ref<Bundle> targetBundle = Bundle::loadedBundlesByUuid[bundleUuid].Lock();
+            return nullptr;
+        }
 
-            if (targetBundle.IsValid())
+        Ref<Bundle> referencedBundle = nullptr;
+
+        {
+            LockGuard lock{ Bundle::bundleRegistryMutex };
+
+            if (Bundle::loadedBundlesByUuid.KeyExists(bundleUuid))
             {
-                return targetBundle->LoadObject(objectUuid);
+                referencedBundle = Bundle::loadedBundlesByUuid[bundleUuid].Lock();
             }
+        }
+
+        if (referencedBundle.IsValid())
+        {
+            return referencedBundle->LoadObject(objectUuid);
+        }
+
+        LoadBundleArgs loadArgs{
+            .loadFully = false,
+            .forceReload = false,
+            .destroyOutdatedObjects = true
+        };
+
+        referencedBundle = Bundle::LoadBundle(bundleUuid, loadArgs);
+        if (referencedBundle.IsValid())
+        {
+            return referencedBundle->LoadObject(objectUuid);
         }
 
         return nullptr;

@@ -147,7 +147,7 @@ namespace CE
 		assetData->sourceAssetPath = sourceAssetRelativePath;
 #endif
 		
-		if (newEntry && relativePathStr.NonEmpty())
+		if (newEntry && relativePathStr.NotEmpty())
 		{
 			AddAssetEntry(relativePathStr, assetData);
 		}

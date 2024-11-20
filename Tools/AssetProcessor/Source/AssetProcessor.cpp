@@ -115,7 +115,7 @@ namespace CE
 		}
 
 		gProjectPath = PlatformDirectories::GetLaunchDir();
-		if (projectPath.NonEmpty())
+		if (projectPath.NotEmpty())
 			gProjectPath = projectPath;
 		gProjectName = "AssetProcessor";
 	

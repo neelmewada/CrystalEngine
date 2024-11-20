@@ -66,10 +66,12 @@ namespace CE
 
         static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
 
-        static Ref<Bundle> LoadFromDisk(const Name& path, const LoadBundleArgs& loadArgs = LoadBundleArgs());
-        static Ref<Bundle> LoadFromDisk(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundle(const Uuid& bundleUuid, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
-        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset);
+        static Ref<Bundle> LoadBundle(const Name& path, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundle(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+
+        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset = nullptr);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
 
         // - Public API -
@@ -82,7 +84,7 @@ namespace CE
 
         Ref<Object> LoadObject(Stream* stream, Uuid objectUuid);
 
-        static Ref<Bundle> LoadFromDisk(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundle(Stream* stream, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, Stream* stream);
 
         void OnAfterConstruct() override;

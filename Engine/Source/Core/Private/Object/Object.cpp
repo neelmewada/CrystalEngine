@@ -3,23 +3,9 @@
 
 namespace CE
 {
-	// TODO: Temporary solution to check if object is destroyed
-	// TODO: Implement a garbage collector OR reference counting later and replace this code
-	static HashSet<Object*> gDestroyedObjects{};
-	static SharedMutex gDestroyedObjectsMutex{};
 
 	static HashSet<Ref<Object>> gRootObjects{};
 	static SharedMutex gRootObjectsMutex{};
-
-	CORE_API bool IsValidObject(Object* object)
-	{
-		if (object == nullptr)
-			return false;
-
-		LockGuard lock{ gDestroyedObjectsMutex };
-
-		return !gDestroyedObjects.Exists(object);
-	}
 
 	SharedMutex ObjectListener::mutex{};
 	HashMap<Object*, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
@@ -101,11 +87,6 @@ namespace CE
 
 			OnBeginDestroy();
 
-			{
-				LockGuard lock{ gDestroyedObjectsMutex };
-				gDestroyedObjects.Add(this);
-			}
-
 			if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
 			{
 				Prefs::Get().SavePrefs(this);
@@ -118,9 +99,9 @@ namespace CE
 			}
 
 			// Detach this object from outer
-			if (outer != nullptr)
+			if (Ref<Object> outerObj = outer.Lock())
 			{
-				outer->DetachSubobject(this);
+				outerObj->DetachSubobject(this);
 			}
 			outer = nullptr;
 
@@ -149,14 +130,14 @@ namespace CE
 
 		objectFlags |= OF_PendingDestroy;
 
+		// Prevent this object from being destroyed immediately on outerObj->DetachSubobject(this) call.
+		// That can happen if the parent object has the ONLY strong reference to this object, which can
+		// destroy this object while we are in this function.
+		Ref<Object> strongRef = this;
+
 		ObjectListener::RemoveAllListeners(this);
 
 		OnBeginDestroy();
-
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-			gDestroyedObjects.Add(this);
-		}
 
 		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
 		{
@@ -170,9 +151,9 @@ namespace CE
 		}
 
 		// Detach this object from outer
-		if (outer != nullptr)
+		if (Ref<Object> outerObj = outer.Lock())
 		{
-			outer->DetachSubobject(this);
+			outerObj->DetachSubobject(this);
 		}
 		outer = nullptr;
 
@@ -221,11 +202,6 @@ namespace CE
         if (parameters->uuid.IsValid())
             this->uuid = parameters->uuid;
         this->name = parameters->name;
-
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-			gDestroyedObjects.Remove(this);
-		}
     }
 
     void Object::SetName(const Name& newName)
@@ -1371,16 +1347,6 @@ namespace CE
 		if (EnumHasFlag(objectFlags, OF_SubobjectPending))
 		{
 			return;
-		}
-
-		// Remove this object from destroyed objects list if the address exists in it
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-
-			if (gDestroyedObjects.Exists(this))
-			{
-				gDestroyedObjects.Remove(this);
-			}
 		}
 
 		for (const auto& subObject : attachedObjects)

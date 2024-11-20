@@ -48,7 +48,7 @@ namespace CE::Editor
 		
 		preprocessor.PreprocessShader(&preprocessData);
 
-		if (preprocessor.GetErrorMessage().NonEmpty())
+		if (preprocessor.GetErrorMessage().NotEmpty())
 		{
 			errorMessage = preprocessor.GetErrorMessage();
 			shader->BeginDestroy();

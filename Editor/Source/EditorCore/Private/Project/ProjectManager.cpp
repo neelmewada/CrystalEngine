@@ -84,7 +84,7 @@ namespace CE::Editor
 
 		stream.Close();
 
-		return project.engineVersion.NonEmpty();
+		return project.engineVersion.NotEmpty();
 	}
 
 	bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, String projectName)

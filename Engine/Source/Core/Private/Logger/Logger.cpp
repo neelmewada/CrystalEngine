@@ -58,7 +58,7 @@ namespace CE
         GSystemConsoleSink->set_pattern("[%^%l%$] %v");
 
         String logName = "Log";
-        if (gProjectName.NonEmpty())
+        if (gProjectName.NotEmpty())
         {
             logName = gProjectName;
         }

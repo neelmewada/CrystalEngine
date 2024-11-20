@@ -198,7 +198,7 @@ namespace CE
         return nullptr;
     }
 
-    CE::Array<FunctionType*> StructType::FindAllFunctionsWithName(const Name& name)
+    CE::Array<FunctionType*> StructType::FindAllFunctions(const Name& name)
     {
         if (!functionsCached)
             CacheAllFunctions();

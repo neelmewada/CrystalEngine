@@ -21,7 +21,7 @@ namespace CE
 		errorMessage = "";
 
 		defer(
-			if (errorMessage.NonEmpty())
+			if (errorMessage.NotEmpty())
 			{
 				CE_LOG(Error, All, "PreprocessShader failed: {}", errorMessage);
 			}

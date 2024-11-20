@@ -232,7 +232,7 @@ namespace CE::Editor
 					}
 
 					String pathInBundle = object->GetPathInBundle().GetString();
-					if (pathInBundle.NonEmpty())
+					if (pathInBundle.NotEmpty())
 						pathInBundle = "." + pathInBundle;
 					Name fullObjectPath = bundle->GetBundleName().GetString() + pathInBundle;
 					if (objectPathNameCounter[fullObjectPath] > 0)

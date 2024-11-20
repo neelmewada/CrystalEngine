@@ -84,13 +84,44 @@ namespace CE
         return PlatformDirectories::GetLaunchDir() / (bundleNameStr.GetSubstring(1) + ".casset");
     }
 
-    Ref<Bundle> Bundle::LoadFromDisk(const Name& path, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Uuid& bundleUuid, const LoadBundleArgs& loadArgs)
     {
-        BundleLoadResult result;
-        return LoadFromDisk(path, result, loadArgs);
+        {
+            LockGuard lock{ bundleRegistryMutex };
+
+            if (loadedBundlesByUuid.KeyExists(bundleUuid))
+            {
+                if (Ref<Bundle> bundle = loadedBundlesByUuid[bundleUuid].Lock())
+                {
+                    return bundle;
+                }
+            }
+        }
+
+        if (bundleResolvers.IsEmpty())
+            return nullptr;
+
+        for (int i = bundleResolvers.GetSize() - 1; i >= 0; --i)
+        {
+            Name bundlePath = bundleResolvers[i]->ResolveBundlePath(bundleUuid);
+
+            Ref<Bundle> bundle = LoadBundle(bundlePath, loadArgs);
+            if (bundle.IsValid())
+            {
+                return bundle;
+            }
+        }
+
+        return nullptr;
     }
 
-    Ref<Bundle> Bundle::LoadFromDisk(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
+    Ref<Bundle> Bundle::LoadBundle(const Name& path, const LoadBundleArgs& loadArgs)
+    {
+        BundleLoadResult result;
+        return LoadBundle(path, result, loadArgs);
+    }
+
+    Ref<Bundle> Bundle::LoadBundle(const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         IO::Path absolutePath = GetAbsoluteBundlePath(path);
 
@@ -104,7 +135,12 @@ namespace CE
         FileStream stream = FileStream(absolutePath, Stream::Permissions::ReadOnly);
         stream.SetBinaryMode(true);
 
-        return LoadFromDisk(&stream, outResult, loadArgs);
+        Ref<Bundle> bundle = LoadBundle(&stream, outResult, loadArgs);
+        if (bundle.IsValid())
+        {
+            bundle->fullBundlePath = absolutePath;
+        }
+        return bundle;
     }
 
     BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset)

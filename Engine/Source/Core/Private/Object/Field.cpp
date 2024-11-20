@@ -370,7 +370,7 @@ namespace CE
 						for (int i = 0; i < arraySize; i++)
 						{
 							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
-							if (result.NonEmpty())
+							if (result.NotEmpty())
 								result += ",";
 							result += str;
 						}

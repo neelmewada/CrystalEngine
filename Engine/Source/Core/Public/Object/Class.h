@@ -202,12 +202,12 @@ namespace CE
 		bool HasFunctions();
 
 		FunctionType* FindFunctionWithName(const Name& name);
-		CE::Array<FunctionType*> FindAllFunctionsWithName(const Name& name);
+		CE::Array<FunctionType*> FindAllFunctions(const Name& name);
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
 		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...))
 		{
-			auto functions = FindAllFunctionsWithName(name);
+			auto functions = FindAllFunctions(name);
 			
 			TypeId signature = CE::GetFunctionSignature(function);
 
@@ -225,7 +225,7 @@ namespace CE
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
 		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...) const)
 		{
-			auto functions = FindAllFunctionsWithName(name);
+			auto functions = FindAllFunctions(name);
 
 			TypeId signature = CE::GetFunctionSignature(function);
 

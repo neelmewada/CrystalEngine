@@ -17,9 +17,6 @@ namespace CE
 	*	Global Functions
 	*/
 
-	//! @brief Returns true if the given object pointer is valid and not destroyed! 
-	CORE_API bool IsValidObject(Object* object);
-
 	/// Transient Bundle: Same lifetime as Core Module.
 	///	Used to store temporary objects that are not saved to disk.
 	CORE_API Bundle* GetGlobalTransient();
@@ -44,7 +41,7 @@ namespace CE
 				: objectClass(objectClass)
 			{}
 
-			Ref<Object> outer = nullptr;
+			Object* outer = nullptr;
 			ClassType* objectClass = nullptr;
 			String name{};
 			Object* templateObject = nullptr;
@@ -61,7 +58,7 @@ namespace CE
 	CORE_API String FixObjectName(const String& name);
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	TClass* CreateObject(Ref<Object> outer = (Object*)GetGlobalTransient(),
+	TClass* CreateObject(Object* outer = (Object*)GetGlobalTransient(),
 		String objectName = "",
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 

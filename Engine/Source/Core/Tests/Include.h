@@ -218,12 +218,24 @@ namespace BundleTests
 	public:
 
 		Ref<MyMesh> meshAsset;
+
+		ScriptEvent<void(Object*)> scriptEvent;
 	};
 
 	class MyMesh : public Object
 	{
 		CE_CLASS(MyMesh, Object)
 	public:
+
+		void OnBeforeDestroy() override
+		{
+			Super::OnBeforeDestroy();
+
+			if (!IsDefaultInstance())
+			{
+				String::IsAlphabet('a');
+			}
+		}
 
 		Ref<MyMaterial> material;
 
@@ -255,6 +267,8 @@ namespace BundleTests
 		Array<Ref<MyTexture>> textures;
 
 		Ref<MyTexture> fallbackTexture;
+
+		Array<WeakRef<MyMesh>> usedInMeshes;
 
 	};
 
@@ -325,6 +339,7 @@ CE_RTTI_CLASS(,BundleTests, MyScript,
 	CE_ATTRIBS(),
 	CE_FIELD_LIST(
 		CE_FIELD(meshAsset)
+		CE_FIELD(scriptEvent)
 	),
 	CE_FUNCTION_LIST(
 	)
@@ -352,6 +367,7 @@ CE_RTTI_CLASS(, BundleTests, MyMaterial,
 		CE_FIELD(properties)
 		CE_FIELD(textures)
 		CE_FIELD(fallbackTexture)
+		CE_FIELD(usedInMeshes)
 	),
 	CE_FUNCTION_LIST(
 	)

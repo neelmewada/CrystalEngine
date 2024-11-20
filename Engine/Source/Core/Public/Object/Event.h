@@ -51,6 +51,8 @@ namespace CE
 
         virtual void CopyFrom(IScriptDelegate* other) = 0;
 
+        virtual void Bind(const Ref<Object>& object, FunctionType* function) = 0;
+
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
         virtual bool IsLambda() const = 0;
@@ -164,7 +166,7 @@ namespace CE
 
         SIZE_T GetSignature() const override
         {
-            return CE::GetCombinedHash(CE::GetFunctionSignature<TArgs...>(), CE::GetTypeId<TRetType>());
+            return CE::GetFunctionSignature<TArgs...>();
         }
 
         Array<TypeId> GetParamterTypes() override
@@ -216,6 +218,19 @@ namespace CE
             if (!isBound)
                 return FunctionBinding();
             return FunctionBinding(dstObject, dstFunction);
+        }
+
+        void Bind(const Ref<Object>& object, FunctionType* function) override
+        {
+            if (object == nullptr || function == nullptr)
+                return;
+            if (this->GetSignature() != function->GetFunctionSignature())
+                return;
+
+            dstObject = object;
+            dstFunction = function;
+
+            isBound = true;
         }
 
     private:

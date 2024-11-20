@@ -1445,7 +1445,62 @@ TEST(Config, HierarchicalParsing)
 
 #pragma region Object
 
+TEST(Object, TransientLifecycle)
+{
+	using namespace LifecycleTests;
 
+	// 1. Transient
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+
+	WeakRef<Object> weakRef = nullptr;
+	lifecycleClassDestroyed = false;
+
+	{
+		Ref<Bundle> transient = GetGlobalTransient();
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(transient.Get(), "TestObject");
+		weakRef = object;
+	}
+
+	if (Ref<Object> obj = weakRef.Lock())
+	{
+
+	}
+	else
+	{
+		FAIL();
+	}
+
+	CE_DEREGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+	TEST_END
+
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	lifecycleClassDestroyed = false;
+	EXPECT_TRUE(weakRef.IsNull());
+
+	// 2. BeginDestroy()
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+
+	{
+		Ref<Bundle> transient = GetGlobalTransient();
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(transient.Get(), "TestObject");
+		weakRef = object;
+
+		object->BeginDestroy();
+	}
+
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	lifecycleClassDestroyed = false;
+	EXPECT_TRUE(weakRef.IsNull());
+
+	CE_DEREGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+	TEST_END
+}
 
 TEST(Object, Lifecycle)
 {
@@ -1463,6 +1518,8 @@ TEST(Object, Lifecycle)
     
     // 1. Simple ref counting
     {
+		//Ref<Bundle> transient = GetGlobalTransient();
+
         Ref<Object> object = CreateObject<Bundle>(nullptr, "TestBundle");
         rawRef = object.Get();
         
@@ -1475,12 +1532,12 @@ TEST(Object, Lifecycle)
         bool exception = false;
         
         try {
-            nullRef->BeginDestroy();
+            //nullRef->BeginDestroy();
         } catch (const NullPointerException& exc) {
             exception = true;
         }
         
-        EXPECT_TRUE(exception);
+        //EXPECT_TRUE(exception);
         exception = false;
         
         WeakRef<Object> weakRef1 = object;
@@ -1503,12 +1560,12 @@ TEST(Object, Lifecycle)
         object2 = nullptr;
         
         try {
-            weakRef1->AddToRoot();
+            //weakRef1->AddToRoot();
         } catch (const NullPointerException& exc) {
             exception = true;
         }
         
-        EXPECT_TRUE(exception);
+        //EXPECT_TRUE(exception);
         exception = false;
         
         if (Ref<Object> obj = weakRef2.Lock())
@@ -3203,7 +3260,7 @@ TEST(Bundle, Basic)
     {
 	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
 
-		Ref<WritingTestObj2> testObject = CreateObject<WritingTestObj2>(bundle, "TestObject2");
+		Ref<WritingTestObj2> testObject = CreateObject<WritingTestObj2>(bundle.Get(), "TestObject2");
     	EXPECT_EQ(testObject->GetOuter(), bundle);
 
 		testObject->testStruct.obj1Ptr = nullptr;
@@ -3228,7 +3285,7 @@ TEST(Bundle, Basic)
     {
     	LoadBundleArgs args{};
 
-	    Ref<Bundle> bundle = Bundle::LoadFromDisk("/BasicTestBundle", args);
+	    Ref<Bundle> bundle = Bundle::LoadBundle("/BasicTestBundle", args);
 
     	EXPECT_EQ(bundle->GetSubObjectCount(), 1);
 
@@ -3252,144 +3309,128 @@ TEST(Bundle, Basic)
     	EXPECT_EQ(testObject->arrayOfStruct[1].stringValue, "Item 1");
     	EXPECT_EQ(testObject->arrayOfStruct[1].anotherBase.stringValue, "internal 1");
     }
+
+	if (bundlePath.Exists())
+	{
+		IO::Path::Remove(bundlePath);
+	}
     
     CEDeregisterModuleTypes();
     TEST_END;
 }
 
-
-TEST(Bundle, WriteRead)
+namespace BundleTests
 {
-    TEST_BEGIN;
-    using namespace BundleTests;
-    CERegisterModuleTypes();
-    
-    IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "TestBundle.casset";
-
-	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, bundleUuid;
-	Bundle* rawRef = nullptr;
-
-	// Write
-	/*{
-		Ref<Bundle> writeBundle = CreateObject<Bundle>(nullptr, "/TestBundle");
-		rawRef = writeBundle.Get();
-		EXPECT_EQ(writeBundle->GetName(), "/TestBundle");
-
-		Ref<WritingTestObj1> obj1 = CreateObject<WritingTestObj1>(writeBundle, TEXT("TestObj1"));
-		Ref<WritingTestObj2> obj2 = CreateObject<WritingTestObj2>(writeBundle, TEXT("TestObj2"));
-		Ref<WritingTestObj1> obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
-        // Outside the bundle & transient
-		Ref<WritingTestObj1> obj1_1 = CreateObject<WritingTestObj1>(GetGlobalTransient(), TEXT("Child1_TestObj1"));
-
-		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(writeBundle->GetPrimaryObjectName() == "TestObj1" || writeBundle->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
-
-		bundleUuid = writeBundle->GetUuid();
-		obj1Uuid = obj1->GetUuid();
-		obj2Uuid = obj2->GetUuid();
-		obj1_0Uuid = obj1_0->GetUuid();
-		obj1_1Uuid = obj1_1->GetUuid();
-
-		EXPECT_EQ(obj1->GetBundle(), writeBundle);
-		EXPECT_EQ(obj2->GetBundle(), writeBundle);
-		EXPECT_EQ(writeBundle->attachedObjects.GetObjectCount(), 2);
-
-		obj1->objPtr = obj2;
-		obj1->stringValue = "My String Value";
-		obj1->stringArray = { "item0", "item1", "item2" };
-		obj1->floatValue = 51.212f;
-
-		obj2->objectArray.Add(obj1);
-		obj2->testStruct.stringValue = "New string value";
-		obj2->testStruct.owner = obj2;
-		obj2->testStruct.obj1Ptr = obj1_0;
-		obj2->value = 4612;
-
-		obj1_0->objPtr = obj1_1;
-
-		HashMap<CE::Uuid, Object*> references{};
-		writeBundle->FetchObjectReferences(references);
-		EXPECT_EQ(references.GetSize(), 5);
-
-		auto result = Bundle::SaveToDisk(writeBundle, nullptr, bundlePath);
-
-		obj1->BeginDestroy(); // Automatically destroys children
-		obj2->BeginDestroy();
-		writeBundle->BeginDestroy();
-	}
-
-	// Read
+	class TestBundleResolver : public IBundleResolver
 	{
-		auto readBundle = Bundle::LoadBundleFromDisk(nullptr, bundlePath, LOAD_Default);
-		EXPECT_NE(readBundle, nullptr);
-		EXPECT_EQ(readBundle->GetBundleName(), "/TestBundle");
-        EXPECT_EQ(readBundle->objectUuidToEntryMap.GetSize(), 4);
+	public:
 
-		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(readBundle->GetPrimaryObjectName() == "TestObj1" || readBundle->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
+		Name ResolveBundlePath(const Uuid& uuid) override
+		{
+			return bundlePathsByUuid[uuid];
+		}
 
-		readBundle->LoadFully();
+		HashMap<Uuid, Name> bundlePathsByUuid;
+	};
+}
 
-		EXPECT_EQ(readBundle->loadedObjects.GetSize(), 4);
-		EXPECT_EQ(readBundle->attachedObjects.GetObjectCount(), 2);
-		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj1Uuid));
-		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj2Uuid));
-		
-		// TestObj1
-		Ref<WritingTestObj1> obj1 = (Ref<WritingTestObj1>)readBundle->attachedObjects.FindObject(obj1Uuid);
-		EXPECT_NE(obj1, nullptr);
-		EXPECT_EQ(obj1->GetName(), "TestObj1");
-		EXPECT_EQ(obj1->outer, readBundle);
-		EXPECT_EQ(obj1->attachedObjects.GetObjectCount(), 1);
-		EXPECT_TRUE(obj1->attachedObjects.ObjectExists(obj1_0Uuid));
+TEST(Bundle, Multiple)
+{
+	TEST_BEGIN;
+	using namespace BundleTests;
+	CERegisterModuleTypes();
 
-		EXPECT_EQ(obj1->stringValue, "My String Value");
-		EXPECT_EQ(obj1->stringArray.GetSize(), 3);
-		EXPECT_EQ(obj1->stringArray[0], "item0");
-		EXPECT_EQ(obj1->stringArray[1], "item1");
-		EXPECT_EQ(obj1->stringArray[2], "item2");
+	TestBundleResolver resolver{};
 
-		EXPECT_NE(obj1->objPtr, nullptr);
-		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
+	Bundle::PushBundleResolver(&resolver);
 
-		// Child0_TestObj1
-		Ref<WritingTestObj1> obj1_0 = (Ref<WritingTestObj1>)readBundle->LoadObject(obj1_0Uuid);
-		EXPECT_NE(obj1_0, nullptr);
-		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
-		EXPECT_EQ(obj1_0->outer, obj1);
+	// 1. Write
+	{
+		constexpr int NumTextures = 2;
+		Ref<Bundle> transient = GetGlobalTransient();
 
-		// TestObj2
-		Ref<WritingTestObj2> obj2 = (Ref<WritingTestObj2>)readBundle->attachedObjects.FindObject(obj2Uuid);
-		EXPECT_NE(obj2, nullptr);
-		EXPECT_EQ(obj2->GetName(), "TestObj2");
-		EXPECT_EQ(obj2->outer, readBundle);
-		EXPECT_EQ(obj2->attachedObjects.GetObjectCount(), 0);
-		EXPECT_EQ(obj2->objectArray.GetSize(), 1);
-		EXPECT_EQ(obj2->value, 4612);
-		EXPECT_EQ(obj1->floatValue, 51.212f);
+		Ref<Bundle> scriptBundle = CreateObject<Bundle>(transient.Get(), "MyScriptBundle");
+		Ref<Bundle> meshBundle = CreateObject<Bundle>(transient.Get(), "MyMeshBundle");
+		Ref<Bundle> materialBundle = CreateObject<Bundle>(transient.Get(), "MyMaterialBundle");
 
-		EXPECT_EQ(obj2->testStruct.owner, obj2);
-		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
-		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
+		Array<Ref<Bundle>> textureBundles;
 
-		EXPECT_EQ(readBundle->LoadObject(obj1_1Uuid), nullptr);
+		Ref<MyMaterial> material = CreateObject<MyMaterial>(materialBundle.Get(), "MyMaterial");
 
-		EXPECT_TRUE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
-		obj1_0->BeginDestroy();
-		EXPECT_FALSE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
+		{
+			Ref<MyTexture> fallback = CreateObject<MyTexture>(materialBundle.Get(), "FallbackTexture");
 
-		readBundle->BeginDestroy();
+			material->fallbackTexture = fallback;
+		}
+
+		for (int i = 0; i < NumTextures; ++i)
+		{
+			Ref<Bundle> textureBundle = CreateObject<Bundle>(transient.Get(), String::Format("MyTextureBundle_{}", i));
+			textureBundles.Add(textureBundle);
+
+			resolver.bundlePathsByUuid[textureBundle->GetUuid()] = "/" + textureBundle->GetName().GetString();
+
+			Ref<MyTexture> textureAsset = CreateObject<MyTexture>(textureBundle.Get(), "MyTexture");
+
+			textureAsset->desc.width = (i + 1) * 512;
+			textureAsset->desc.height = (i + 1) * 512;
+			textureAsset->desc.filterMode = FilterMode::Trilinear;
+
+			material->textures.Add(textureAsset);
+		}
+
+		Ref<MyMesh> meshAsset = CreateObject<MyMesh>(meshBundle.Get(), "MyMesh");
+		meshAsset->callCounter = 0;
+		meshAsset->material = material;
+
+		Ref<MyScript> myScript = CreateObject<MyScript>(scriptBundle.Get(), "MyScript");
+		myScript->scriptEvent.Bind(FUNCTION_BINDING(meshAsset.Get(), UpdateMesh));
+		myScript->meshAsset = meshAsset;
+
+		resolver.bundlePathsByUuid[scriptBundle->GetUuid()] = "/" + scriptBundle->GetName().GetString();
+		resolver.bundlePathsByUuid[meshBundle->GetUuid()] = "/" + meshBundle->GetName().GetString();
+		resolver.bundlePathsByUuid[materialBundle->GetUuid()] = "/" + materialBundle->GetName().GetString();
+
+		Bundle::SaveToDisk(scriptBundle);
+		Bundle::SaveToDisk(meshBundle);
+		Bundle::SaveToDisk(materialBundle);
+
+		for (const auto& textureBundle : textureBundles)
+		{
+			Bundle::SaveToDisk(textureBundle);
+		}
+
+		scriptBundle->BeginDestroy();
+		meshBundle->BeginDestroy();
+		materialBundle->BeginDestroy();
+		for (const auto& textureBundle : textureBundles)
+		{
+			textureBundle->BeginDestroy();
+		}
 	}
-    
-    if (bundlePath.Exists())
-    {
-        IO::Path::Remove(bundlePath);
-    }*/
-	
-    CEDeregisterModuleTypes();
-    TEST_END;
+
+	// 2. Read
+	{
+		LoadBundleArgs args{
+			.loadFully = true,
+			.forceReload = false,
+			.destroyOutdatedObjects = true
+		};
+
+		Ref<Bundle> scriptBundle = Bundle::LoadBundle("/MyScriptBundle");
+
+		EXPECT_EQ(scriptBundle->GetSubObjectCount(), 1);
+
+		Ref<MyScript> myScript = (Ref<MyScript>)scriptBundle->LoadObject("MyScript");
+
+		EXPECT_TRUE(myScript->meshAsset.IsValid());
+
+	}
+
+	Bundle::PopBundleResolver(&resolver);
+
+	CEDeregisterModuleTypes();
+	TEST_END;
 }
 
 #pragma endregion

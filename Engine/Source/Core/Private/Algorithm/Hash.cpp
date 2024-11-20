@@ -35,7 +35,7 @@ namespace CE
 		return CRC::Calculate(data, size, CRC::CRC_32(), crc);
 	}
 
-	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes)
+	CORE_API SIZE_T GetCombinedHashes(const CE::Array<SIZE_T>& hashes)
 	{
 		if (hashes.GetSize() == 0)
 			return 0;

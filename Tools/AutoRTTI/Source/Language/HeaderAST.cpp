@@ -681,7 +681,7 @@ namespace CE
                     if (parenScope == 1 && paramIndex == 1)
                     {
                         const String& lexeme = tokens->tokens[i].lexeme;
-                        if (name.IsEmpty() && lexeme.NonEmpty() && String::IsUpper(lexeme[0]))
+                        if (name.IsEmpty() && lexeme.NotEmpty() && String::IsUpper(lexeme[0]))
                         {
                             name = tokens->tokens[i].lexeme;
                         }
@@ -694,7 +694,7 @@ namespace CE
                     i++;
                 }
 
-                if (name.NonEmpty())
+                if (name.NotEmpty())
                 {
                     String fieldName = "m_" + name;
 
@@ -728,7 +728,7 @@ namespace CE
                     if (parenScope == 1 && paramIndex == 1)
                     {
                         const String& lexeme = tokens->tokens[i].lexeme;
-                        if (name.IsEmpty() && lexeme.NonEmpty() && String::IsUpper(lexeme[0]))
+                        if (name.IsEmpty() && lexeme.NotEmpty() && String::IsUpper(lexeme[0]))
                         {
                             name = tokens->tokens[i].lexeme;
                         }
@@ -741,7 +741,7 @@ namespace CE
                     i++;
                 }
 
-                if (name.NonEmpty())
+                if (name.NotEmpty())
                 {
                     String fieldName = "m_" + name;
 
@@ -798,7 +798,7 @@ namespace CE
                     if (parenScope == 1 && paramIndex == 1)
                     {
                         const String& lexeme = tokens->tokens[i].lexeme;
-	                    if (name.IsEmpty() && lexeme.NonEmpty() && String::IsUpper(lexeme[0]))
+	                    if (name.IsEmpty() && lexeme.NotEmpty() && String::IsUpper(lexeme[0]))
 	                    {
                             name = tokens->tokens[i].lexeme;
 	                    }
@@ -811,7 +811,7 @@ namespace CE
                     i++;
                 }
 
-                if (name.NonEmpty())
+                if (name.NotEmpty())
                 {
                     String fieldName = "m_" + name;
 
