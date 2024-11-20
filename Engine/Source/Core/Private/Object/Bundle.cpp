@@ -209,6 +209,32 @@ namespace CE
         return nullptr;
     }
 
+    Ref<Object> Bundle::LoadObject(const Name& pathInBundle)
+    {
+        if (!pathInBundle.IsValid())
+        {
+            return nullptr;
+        }
+
+        Uuid objectUuid = Uuid::Zero();
+
+        for (const auto& serializedObjectEntry : serializedObjectEntries)
+        {
+            if (pathInBundle == serializedObjectEntry.pathInBundle)
+            {
+                objectUuid = serializedObjectEntry.instanceUuid;
+                break;
+            }
+        }
+
+        if (objectUuid.IsNull())
+        {
+            return nullptr;
+        }
+
+        return LoadObject(objectUuid);
+    }
+
     void Bundle::FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs)
     {
         HashSet<ClassType*> classes;

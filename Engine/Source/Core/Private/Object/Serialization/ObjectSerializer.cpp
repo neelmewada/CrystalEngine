@@ -151,7 +151,7 @@ namespace CE
         LockGuard bundleLock{ bundle->bundleMutex };
 
         bundle->readerStream = stream;
-        defer(
+        defer_copy(
             bundle->readerStream = nullptr;
         );
 
@@ -272,7 +272,9 @@ namespace CE
 
                 *stream >> serializedObject.schemaIndex;
 
-                *stream >> serializedObject.pathInBundle;
+                String pathInBundle;
+                *stream >> pathInBundle;
+                serializedObject.pathInBundle = pathInBundle;
 
                 String objName;
                 *stream >> objName;
@@ -862,11 +864,11 @@ namespace CE
                 {
                     if (fieldTypeId == TYPEID(f32))
                     {
-                        field->SetFieldValue<f32>(instance, f32Value);
+                        field->ForceSetFieldValue<f32>(instance, f32Value);
                     }
                     else if (fieldTypeId == TYPEID(f64))
                     {
-                        field->SetFieldValue<f64>(instance, f32Value);
+                        field->ForceSetFieldValue<f64>(instance, f32Value);
                     }
                 }
                 break;
@@ -878,11 +880,11 @@ namespace CE
                 {
                     if (fieldTypeId == TYPEID(f32))
                     {
-                        field->SetFieldValue<f32>(instance, (f32)f64Value);
+                        field->ForceSetFieldValue<f32>(instance, (f32)f64Value);
                     }
                     else if (fieldTypeId == TYPEID(f64))
                     {
-                        field->SetFieldValue<f64>(instance, f64Value);
+                        field->ForceSetFieldValue<f64>(instance, f64Value);
                     }
                 }
                 break;
@@ -893,7 +895,7 @@ namespace CE
                 *stream >> boolValue;
                 if (field != nullptr && fieldTypeId == TYPEID(bool))
                 {
-                    field->SetFieldValue<bool>(instance, boolValue);
+                    field->ForceSetFieldValue<bool>(instance, boolValue);
                 }
                 break;
             }
@@ -905,15 +907,15 @@ namespace CE
                 {
                     if (fieldTypeId == TYPEID(String))
                     {
-                        field->SetFieldValue<String>(instance, strValue);
+                        field->ForceSetFieldValue<String>(instance, strValue);
                     }
                     else if (fieldTypeId == TYPEID(Name))
                     {
-                        field->SetFieldValue<Name>(instance, strValue);
+                        field->ForceSetFieldValue<Name>(instance, strValue);
                     }
                     else if (fieldTypeId == TYPEID(IO::Path))
                     {
-                        field->SetFieldValue<IO::Path>(instance, strValue);
+                        field->ForceSetFieldValue<IO::Path>(instance, strValue);
                     }
                 }
                 break;
@@ -926,11 +928,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2))
-                        field->SetFieldValue<Vec2>(instance, value);
+                        field->ForceSetFieldValue<Vec2>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3))
-                        field->SetFieldValue<Vec3>(instance, value);
+                        field->ForceSetFieldValue<Vec3>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4>(instance, value);
+                        field->ForceSetFieldValue<Vec4>(instance, value);
                 }
                 break;
             }
@@ -943,11 +945,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2))
-                        field->SetFieldValue<Vec2>(instance, value);
+                        field->ForceSetFieldValue<Vec2>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3))
-                        field->SetFieldValue<Vec3>(instance, value);
+                        field->ForceSetFieldValue<Vec3>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4>(instance, value);
+                        field->ForceSetFieldValue<Vec4>(instance, value);
                 }
                 break;
             }
@@ -961,11 +963,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2))
-                        field->SetFieldValue<Vec2>(instance, value);
+                        field->ForceSetFieldValue<Vec2>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3))
-                        field->SetFieldValue<Vec3>(instance, value);
+                        field->ForceSetFieldValue<Vec3>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4>(instance, value);
+                        field->ForceSetFieldValue<Vec4>(instance, value);
                 }
                 break;
             }
@@ -977,11 +979,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2i))
-                        field->SetFieldValue<Vec2i>(instance, value);
+                        field->ForceSetFieldValue<Vec2i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3i))
-                        field->SetFieldValue<Vec3i>(instance, value);
+                        field->ForceSetFieldValue<Vec3i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4i>(instance, value);
+                        field->ForceSetFieldValue<Vec4i>(instance, value);
                 }
                 break;
             }
@@ -994,11 +996,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2i))
-                        field->SetFieldValue<Vec2i>(instance, value);
+                        field->ForceSetFieldValue<Vec2i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3i))
-                        field->SetFieldValue<Vec3i>(instance, value);
+                        field->ForceSetFieldValue<Vec3i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4i>(instance, value);
+                        field->ForceSetFieldValue<Vec4i>(instance, value);
                 }
                 break;
             }
@@ -1012,11 +1014,11 @@ namespace CE
                 if (field != nullptr)
                 {
                     if (fieldTypeId == TYPEID(Vec2i))
-                        field->SetFieldValue<Vec2i>(instance, value);
+                        field->ForceSetFieldValue<Vec2i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec3i))
-                        field->SetFieldValue<Vec3i>(instance, value);
+                        field->ForceSetFieldValue<Vec3i>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
-                        field->SetFieldValue<Vec4i>(instance, value);
+                        field->ForceSetFieldValue<Vec4i>(instance, value);
                 }
                 break;
             }
@@ -1138,15 +1140,15 @@ namespace CE
                     Ref<Object> referencedObject = LoadObjectReference(objectUuid, bundleUuid);
                     if (field->IsStrongRefCounted())
                     {
-                        field->SetFieldValue<Ref<Object>>(instance, referencedObject);
+                        field->ForceSetFieldValue<Ref<Object>>(instance, referencedObject);
                     }
                     else if (field->IsWeakRefCounted())
                     {
-                        field->SetFieldValue<WeakRef<Object>>(instance, referencedObject);
+                        field->ForceSetFieldValue<WeakRef<Object>>(instance, referencedObject);
                     }
                     else
                     {
-                        field->SetFieldValue<Object*>(instance, referencedObject.Get());
+                        field->ForceSetFieldValue<Object*>(instance, referencedObject.Get());
                     }
                 }
 
@@ -1226,7 +1228,7 @@ namespace CE
 
                 if (field != nullptr && fieldTypeId == TYPEID(Uuid))
                 {
-                    field->SetFieldValue<Uuid>(instance, uuid);
+                    field->ForceSetFieldValue<Uuid>(instance, uuid);
                 }
 
                 break;
@@ -1269,26 +1271,28 @@ namespace CE
 
         if (field != nullptr && fieldSchema.typeByte >= 0x01 && fieldSchema.typeByte <= 0x08)
         {
-            if (fieldTypeId == TYPEID(u8))
-                field->SetFieldValue(instance, (u8)unsignedInteger);
+            if (field->IsEnumField())
+                field->SetFieldEnumValue(instance, signedInteger);
+            else if (fieldTypeId == TYPEID(u8))
+                field->ForceSetFieldValue(instance, (u8)unsignedInteger);
             else if (fieldTypeId == TYPEID(u16))
-                field->SetFieldValue(instance, (u16)unsignedInteger);
+                field->ForceSetFieldValue(instance, (u16)unsignedInteger);
             else if (fieldTypeId == TYPEID(u32))
-                field->SetFieldValue(instance, (u32)unsignedInteger);
+                field->ForceSetFieldValue(instance, (u32)unsignedInteger);
             else if (fieldTypeId == TYPEID(u64))
-                field->SetFieldValue(instance, (u64)unsignedInteger);
+                field->ForceSetFieldValue(instance, (u64)unsignedInteger);
             else if (fieldTypeId == TYPEID(s8))
-                field->SetFieldValue(instance, (s8)signedInteger);
+                field->ForceSetFieldValue(instance, (s8)signedInteger);
             else if (fieldTypeId == TYPEID(s16))
-                field->SetFieldValue(instance, (s16)signedInteger);
+                field->ForceSetFieldValue(instance, (s16)signedInteger);
             else if (fieldTypeId == TYPEID(s32))
-                field->SetFieldValue(instance, (s32)signedInteger);
+                field->ForceSetFieldValue(instance, (s32)signedInteger);
             else if (fieldTypeId == TYPEID(s64))
-                field->SetFieldValue(instance, (s64)signedInteger);
+                field->ForceSetFieldValue(instance, (s64)signedInteger);
             else if (fieldTypeId == TYPEID(f32))
-                field->SetFieldValue(instance, (f32)signedInteger);
+                field->ForceSetFieldValue(instance, (f32)signedInteger);
             else if (fieldTypeId == TYPEID(f64))
-                field->SetFieldValue(instance, (f64)signedInteger);
+                field->ForceSetFieldValue(instance, (f64)signedInteger);
         }
     }
 

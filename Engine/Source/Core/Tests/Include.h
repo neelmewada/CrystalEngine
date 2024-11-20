@@ -227,6 +227,13 @@ namespace BundleTests
 
 		Ref<MyMaterial> material;
 
+		void UpdateMesh(Object* caller)
+		{
+			callCounter++;
+		}
+
+		int callCounter = 0;
+
 	};
 
 	struct MyMaterialProperty final
@@ -332,6 +339,7 @@ CE_RTTI_CLASS(, BundleTests, MyMesh,
 		CE_FIELD(material)
 	),
 	CE_FUNCTION_LIST(
+		CE_FUNCTION(UpdateMesh)
 	)
 )
 CE_RTTI_CLASS_IMPL(, BundleTests, MyMesh)

@@ -3204,6 +3204,8 @@ TEST(Bundle, Basic)
 	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
 
 		Ref<WritingTestObj2> testObject = CreateObject<WritingTestObj2>(bundle, "TestObject2");
+    	EXPECT_EQ(testObject->GetOuter(), bundle);
+
 		testObject->testStruct.obj1Ptr = nullptr;
 		testObject->objectArray.Add(bundle);
 		testObject->value = 123;
@@ -3229,6 +3231,26 @@ TEST(Bundle, Basic)
 	    Ref<Bundle> bundle = Bundle::LoadFromDisk("/BasicTestBundle", args);
 
     	EXPECT_EQ(bundle->GetSubObjectCount(), 1);
+
+    	Ref<WritingTestObj2> testObject = (Ref<WritingTestObj2>)bundle->LoadObject("TestObject2");
+
+    	EXPECT_EQ(testObject->GetSubObjectCount(), 0);
+    	EXPECT_EQ(testObject->GetOuter(), bundle);
+
+    	EXPECT_EQ(testObject->value, 123);
+    	EXPECT_EQ(testObject->objectArray.GetSize(), 1);
+    	EXPECT_EQ(testObject->objectArray[0], bundle);
+    	EXPECT_EQ(testObject->testStruct.owner, bundle);
+    	EXPECT_EQ(testObject->testStruct.stringValue, "string value");
+    	EXPECT_EQ(testObject->testStruct.obj1Ptr, nullptr);
+
+    	EXPECT_EQ(testObject->arrayOfStruct.GetSize(), 2);
+    	EXPECT_EQ(testObject->arrayOfStruct[0].owner, testObject);
+    	EXPECT_EQ(testObject->arrayOfStruct[0].stringValue, "Item 0");
+    	EXPECT_EQ(testObject->arrayOfStruct[0].anotherBase.stringValue, "internal 0");
+    	EXPECT_EQ(testObject->arrayOfStruct[1].owner, bundle);
+    	EXPECT_EQ(testObject->arrayOfStruct[1].stringValue, "Item 1");
+    	EXPECT_EQ(testObject->arrayOfStruct[1].anotherBase.stringValue, "internal 1");
     }
     
     CEDeregisterModuleTypes();

@@ -76,6 +76,8 @@ namespace CE
 
         Ref<Object> LoadObject(Uuid objectUuid);
 
+        Ref<Object> LoadObject(const Name& pathInBundle);
+
     protected:
 
         Ref<Object> LoadObject(Stream* stream, Uuid objectUuid);
@@ -123,7 +125,7 @@ namespace CE
             Uuid instanceUuid = Uuid::Null();
             b8 isAsset = false;
             u32 schemaIndex = 0;
-			String pathInBundle{};
+			Name pathInBundle{};
             Name objectName{};
             u64 objectSerializedDataSize = 0;
 
