@@ -3409,6 +3409,24 @@ TEST(Bundle, Multiple)
 
 	Bundle::PopBundleResolver(&resolver);
 
+	{
+		IO::Path launchPath = PlatformDirectories::GetLaunchDir();
+		Array<IO::Path> pathsToRemove;
+
+		launchPath.IterateChildren([&](const IO::Path& path)
+			{
+				if (!path.IsDirectory() && path.GetExtension() == ".casset")
+				{
+					pathsToRemove.Add(path);
+				}
+			});
+
+		for (const auto& path : pathsToRemove)
+		{
+			IO::Path::Remove(path);
+		}
+	}
+
 	CEDeregisterModuleTypes();
 	TEST_END;
 }
