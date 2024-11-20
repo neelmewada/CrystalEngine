@@ -53,7 +53,7 @@ namespace CE::Editor
 		return dependencies;
 	}
 
-	bool FontAssetImportJob::ProcessAsset(Bundle* bundle)
+	bool FontAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
 	{
 		if (bundle == nullptr)
 			return false; // Should never happen
@@ -61,7 +61,7 @@ namespace CE::Editor
 			return false;
 
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
-		bundle->DestroyAllSubobjects();
+		bundle->DestroyAllSubObjects();
 
 		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
@@ -91,8 +91,8 @@ namespace CE::Editor
 		///////////////////////////////////////////////////
 		// - Setup objects -
 
-		Font* font = CreateObject<Font>(bundle, fileName);
-		font->atlasAsset = CreateObject<RPI::FontAtlasAsset>(font, "AtlasData");
+		Ref<Font> font = CreateObject<Font>(bundle.Get(), fileName);
+		font->atlasAsset = CreateObject<RPI::FontAtlasAsset>(font.Get(), "AtlasData");
 		RPI::FontAtlasAsset* atlasAsset = font->atlasAsset;
 		atlasAsset->fontAtlasTexture = CreateObject<TextureAsset>(atlasAsset, "AtlasTexture");
 
@@ -252,7 +252,7 @@ namespace CE::Editor
 		/////////////////////////////////////////
 		// - Setup shaders & materials -
 
-		CE::Shader* sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/UI/SDFTextGen");
+		Ref<CE::Shader> sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/UI/SDFTextGen");
 		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetShaderCollection()->At(0).shader);
 		sdfGenMaterial->SetPropertyValue("_FontAtlas", rasterizedAtlasRpi);
 		sdfGenMaterial->SetPropertyValue("_Spread", spread);
@@ -262,7 +262,7 @@ namespace CE::Editor
 			delete sdfGenMaterial;
 		);
 
-		CE::Shader* mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
+		Ref<CE::Shader> mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 		Array<RPI::Material*> mipMapMaterials{};
 
 		for (int i = 1; i < mipLevels; i++)

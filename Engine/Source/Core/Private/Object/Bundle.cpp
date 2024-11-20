@@ -115,6 +115,13 @@ namespace CE
         return nullptr;
     }
 
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath,
+        const LoadBundleArgs& loadArgs)
+    {
+        BundleLoadResult result;
+        return LoadBundle(outer, absolutePath, result, loadArgs);
+    }
+
     Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, const LoadBundleArgs& loadArgs)
     {
         BundleLoadResult result;
@@ -124,7 +131,12 @@ namespace CE
     Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         IO::Path absolutePath = GetAbsoluteBundlePath(path);
+        return LoadBundle(outer, absolutePath, outResult, loadArgs);
+    }
 
+    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult,
+        const LoadBundleArgs& loadArgs)
+    {
         if (!absolutePath.Exists())
         {
             CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
@@ -269,6 +281,103 @@ namespace CE
         }
 
         return LoadObject(objectUuid);
+    }
+
+    void Bundle::SetObjectUuid(const Ref<Object>& object, const Uuid& newUuid)
+    {
+        if (object == nullptr)
+            return;
+
+        Uuid oldUuid = object->GetUuid();
+
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            if (serializedObjectsByUuid.KeyExists(oldUuid))
+            {
+                serializedObjectsByUuid[newUuid] = serializedObjectsByUuid[oldUuid];
+                serializedObjectsByUuid.Remove(oldUuid);
+
+                serializedObjectsByUuid[newUuid].instanceUuid = newUuid;
+            }
+
+            if (loadedObjectsByUuid.KeyExists(oldUuid))
+            {
+                loadedObjectsByUuid[newUuid] = loadedObjectsByUuid[oldUuid];
+                loadedObjectsByUuid.Remove(oldUuid);
+            }
+        }
+
+        if (object->IsBundle())
+        {
+            LockGuard lock{ bundleRegistryMutex };
+
+            Ref<Bundle> bundle = (Ref<Bundle>)object;
+
+            if (loadedBundlesByUuid.KeyExists(oldUuid))
+            {
+                loadedBundlesByUuid[newUuid] = loadedBundlesByUuid[oldUuid];
+                loadedBundlesByUuid.Remove(oldUuid);
+            }
+
+            if (loadedBundlesByUuid.KeyExists(oldUuid))
+            {
+                loadedBundlesByUuid[newUuid] = loadedBundlesByUuid[oldUuid];
+                loadedBundlesByUuid.Remove(oldUuid);
+            }
+        }
+
+        object->uuid = newUuid;
+    }
+
+    Bundle::ObjectData Bundle::GetPrimaryObjectData()
+    {
+        ObjectData defaultData = ObjectData();
+
+        for (const auto& serializedObject : serializedObjectEntries)
+        {
+            if (!serializedObject.pathInBundle.GetString().Contains('.'))
+            {
+                // A top-level object
+                if (serializedObject.isAsset)
+                {
+                    return ObjectData{
+                        .name = serializedObject.objectName,
+                        .uuid = serializedObject.instanceUuid,
+                        .pathInBundle = serializedObject.pathInBundle,
+                        .typeName = schemaTable[serializedObject.schemaIndex].fullTypeName
+                    };
+                }
+
+                if (!defaultData.name.IsValid())
+                {
+                    defaultData.name = serializedObject.objectName;
+                    defaultData.uuid = serializedObject.instanceUuid;
+                    defaultData.pathInBundle = serializedObject.pathInBundle;
+                    defaultData.typeName = schemaTable[serializedObject.schemaIndex].fullTypeName;
+                }
+            }
+        }
+
+        return defaultData;
+    }
+
+    void Bundle::DestroyAllSubObjects()
+    {
+        for (int i = 0; i < GetSubObjectCount(); i++)
+        {
+            Ref<Object> subobject = GetSubObject(i);
+            DetachSubobject(subobject.Get());
+            subobject->BeginDestroy();
+        }
+
+        LockGuard lock{ loadedObjectsMutex };
+
+        serializedObjectEntries.Clear();
+        serializedObjectsByUuid.Clear();
+        loadedObjectsByUuid.Clear();
+
+        dependencies.Clear();
     }
 
     void Bundle::FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs)

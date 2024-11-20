@@ -49,7 +49,7 @@ namespace CE::Editor
 
 		}
 
-		virtual bool ProcessAsset(Bundle* bundle) override;
+		virtual bool ProcessAsset(const Ref<Bundle>& bundle) override;
 
 		bool ProcessTex2D(const String& name, Bundle* bundle, const CMImage& image, TextureFormat pixelFormat, 
 			TextureSourceCompressionFormat compressionFormat,

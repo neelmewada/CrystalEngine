@@ -19,7 +19,7 @@ namespace CE::Editor
         return jobs;
     }
 
-    bool StaticMeshAssetImportJob::ProcessAsset(Bundle* bundle)
+    bool StaticMeshAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
     {
 		if (bundle == nullptr)
 			return false;
@@ -27,7 +27,7 @@ namespace CE::Editor
 			return false;
 
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
-		bundle->DestroyAllSubobjects();
+		bundle->DestroyAllSubObjects();
 
 		String extension = sourcePath.GetFileName().GetExtension().GetString().ToLower();
 		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
@@ -71,9 +71,9 @@ namespace CE::Editor
 			delete scene;
 		);
 
-		StaticMesh* staticMesh = CreateObject<StaticMesh>(bundle, fileName);
+		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName);
 
-		RPI::ModelAsset* modelAsset = CreateObject<RPI::ModelAsset>(staticMesh, "ModelAsset");
+		RPI::ModelAsset* modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset");
 		staticMesh->modelAsset = modelAsset;
 
 		RPI::ModelLodAsset* lod = CreateObject<RPI::ModelLodAsset>(modelAsset, "Lod0");

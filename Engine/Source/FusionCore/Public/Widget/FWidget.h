@@ -41,7 +41,7 @@ namespace CE
         bool AddChild(FWidget& child);
         void RemoveChild(FWidget* child);
 
-        FWidget* GetParent() const { return parent; }
+        FWidget* GetParent() const { return parent.Get(); }
 
         virtual void ApplyStyle();
 
@@ -196,7 +196,7 @@ namespace CE
         FFusionContext* context = nullptr;
 
         FIELD()
-        FWidget* parent = nullptr;
+        WeakRef<FWidget> parent = nullptr;
 
         // - Flags -
 

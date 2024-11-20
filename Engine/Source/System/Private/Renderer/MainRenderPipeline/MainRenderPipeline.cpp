@@ -286,7 +286,7 @@ namespace CE
         // Apply Shader Layout
         // -------------------------------
 
-        CE::Shader* standardShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+        Ref<CE::Shader> standardShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         RPI::ShaderCollection* shaderCollection = standardShader->GetShaderCollection();
 
         renderPipeline->ApplyShaderLayout(shaderCollection);

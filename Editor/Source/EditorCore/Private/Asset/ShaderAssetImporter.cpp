@@ -15,7 +15,7 @@ namespace CE::Editor
 		return jobs;
 	}
 
-	bool ShaderAssetImportJob::ProcessAsset(Bundle* bundle)
+	bool ShaderAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
 	{
 		if (bundle == nullptr)
 			return false;
@@ -27,12 +27,12 @@ namespace CE::Editor
 		// It is responsibility of the derived asset importer to clear the old objects or just modify them as per need.
 		
 		// Clear the bundle of any subobjects, we will build the asset from scratch
-		bundle->DestroyAllSubobjects();
+		bundle->DestroyAllSubObjects();
 
 		Array<IO::Path> includePaths = this->includePaths;
 		includePaths.Add(sourcePath.GetParentPath());
 
-		CE::Shader* shader = bundle->LoadObject<CE::Shader>();
+		Ref<CE::Shader> shader = bundle->LoadObject<CE::Shader>();
 
 		if (shader == nullptr) // Create new object from scratch
 		{

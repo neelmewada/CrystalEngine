@@ -95,11 +95,11 @@ namespace CE
 
 		PlatformWindow* window = nativeContext->GetPlatformWindow();
 
-		FWidget* hoveredWidget = nativeContext->HitTest(mousePos);
+		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			//(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
-			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top())))
+			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{
 			FMouseEvent event{};
 			event.type = FEventType::MouseLeave;
@@ -111,9 +111,9 @@ namespace CE
 			event.keyModifiers = keyModifierStates;
 
 			//while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
-			while (hoveredWidgetStack.NotEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top()))
+			while (hoveredWidgetStack.NotEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get()))
 			{
-				event.sender = hoveredWidgetStack.Top();
+				event.sender = hoveredWidgetStack.Top().Get();
 				event.Reset();
 
 				if (event.sender->SupportsMouseEvents())
@@ -133,7 +133,7 @@ namespace CE
 		if (hoveredWidget != nullptr &&
 			(hoveredWidgetStack.IsEmpty() || hoveredWidgetStack.Top() != hoveredWidget) &&
 			//(hoveredWidgetStack.IsEmpty() || !hoveredWidget->ChildExistsRecursive(hoveredWidgetStack.Top())))
-			(hoveredWidgetStack.IsEmpty() || !hoveredWidgetStack.Top()->ParentExistsRecursive(hoveredWidget)))
+			(hoveredWidgetStack.IsEmpty() || !hoveredWidgetStack.Top()->ParentExistsRecursive(hoveredWidget.Get())))
 		{
 			FMouseEvent event{};
 			event.type = FEventType::MouseEnter;
@@ -147,19 +147,19 @@ namespace CE
 			int idx = hoveredWidgetStack.GetSize();
 			FWidget* basePrevWidget = nullptr;
 			if (hoveredWidgetStack.NotEmpty())
-				basePrevWidget = hoveredWidgetStack.Top();
+				basePrevWidget = hoveredWidgetStack.Top().Get();
 
 			auto widget = hoveredWidget;
 
 			while ((hoveredWidgetStack.IsEmpty() || widget != basePrevWidget) && widget != nullptr)
 			{
 				hoveredWidgetStack.InsertAt(idx, widget);
-				widget = widget->parent;
+				widget = widget->parent.Get();
 			}
 
 			for (int i = idx; i < hoveredWidgetStack.GetSize(); ++i)
 			{
-				event.sender = hoveredWidgetStack[i];
+				event.sender = hoveredWidgetStack[i].Get();
 				event.Reset();
 
 				if (event.sender->GetContext() != nativeContext)
@@ -188,11 +188,11 @@ namespace CE
 
 			if (hoveredWidgetStack.NotEmpty())
 			{
-				FWidget* sender = hoveredWidgetStack.Top();
+				FWidget* sender = hoveredWidgetStack.Top().Get();
 
 				while (sender != nullptr && !sender->CapturesMouseWheel())
 				{
-					sender = sender->parent;
+					sender = sender->parent.Get();
 				}
 
 				if (sender)
@@ -225,7 +225,7 @@ namespace CE
 
 			if (hoveredWidgetStack.NotEmpty())
 			{
-				mouseEvent.sender = hoveredWidgetStack.Top();
+				mouseEvent.sender = hoveredWidgetStack.Top().Get();
 
 				if (mouseEvent.sender->GetContext() != nativeContext)
 				{
@@ -248,10 +248,10 @@ namespace CE
 				dragEvent.isInside = true;
 				dragEvent.keyModifiers = keyModifierStates;
 
-				dragEvent.sender = draggedWidget;
+				dragEvent.sender = draggedWidget.Get();
 				if (hoveredWidgetStack.NotEmpty())
-					dragEvent.sender = hoveredWidgetStack.Top();
-				dragEvent.draggedWidget = draggedWidget;
+					dragEvent.sender = hoveredWidgetStack.Top().Get();
+				dragEvent.draggedWidget = draggedWidget.Get();
 
 				if (dragEvent.sender->GetContext() != nativeContext)
 				{
@@ -282,9 +282,9 @@ namespace CE
 				if (!localPopupStack[i]->AutoClose())
 					continue;
 
-				if (hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(localPopupStack[i]))
+				if (hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(localPopupStack[i].Get()))
 				{
-					popupsToClose.Add(localPopupStack[i]);
+					popupsToClose.Add(localPopupStack[i].Get());
 				}
 			}
 
@@ -340,25 +340,25 @@ namespace CE
 
 		if (widgetToFocus != curFocusWidget)
 		{
-			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->FocusParentExistsRecursive(curFocusWidget)))
+			if (curFocusWidget != nullptr && (widgetToFocus == nullptr || !widgetToFocus->FocusParentExistsRecursive(curFocusWidget.Get())))
 			{
-				FWidget* base = curFocusWidget;
+				Ref<FWidget> base = curFocusWidget.Lock();
 
 				while (base != nullptr)
 				{
-					if (base->parent != nullptr && widgetToFocus->FocusParentExistsRecursive(base->parent))
+					if (base->parent != nullptr && widgetToFocus->FocusParentExistsRecursive(base->parent.Get()))
 					{
 						break;
 					}
-					base = base->parent;
+					base = base->parent.Get();
 				}
 
 				if (base != nullptr)
 				{
 					FFocusEvent focusEvent{};
 					focusEvent.type = FEventType::FocusChanged;
-					focusEvent.sender = base;
-					focusEvent.focusedWidget = widgetToFocus;
+					focusEvent.sender = base.Get();
+					focusEvent.focusedWidget = widgetToFocus.Get();
 					focusEvent.gotFocus = false;
 					focusEvent.direction = FEventDirection::TopToBottom;
 
@@ -368,8 +368,8 @@ namespace CE
 				{
 					FFocusEvent focusEvent{};
 					focusEvent.type = FEventType::FocusChanged;
-					focusEvent.sender = curFocusWidget;
-					focusEvent.focusedWidget = widgetToFocus;
+					focusEvent.sender = curFocusWidget.Get();
+					focusEvent.focusedWidget = widgetToFocus.Get();
 					focusEvent.gotFocus = false;
 					focusEvent.direction = FEventDirection::BottomToTop;
 
@@ -381,7 +381,7 @@ namespace CE
 			{
 				FFocusEvent focusEvent{};
 				focusEvent.type = FEventType::FocusChanged;
-				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus;
+				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus.Get();
 				focusEvent.gotFocus = true;
 				focusEvent.direction = FEventDirection::BottomToTop;
 
@@ -409,15 +409,15 @@ namespace CE
 
 				if (hoveredWidgetStack.NotEmpty())
 				{
-					event.sender = hoveredWidgetStack.Top();
+					event.sender = hoveredWidgetStack.Top().Get();
 					widgetToFocus = event.sender;
 
 					while (event.sender != nullptr && !event.sender->SupportsMouseEvents())
 					{
-						event.sender = event.sender->parent;
+						event.sender = event.sender->parent.Get();
 					}
 
-					FWidget* dragEventWidget = hoveredWidgetStack.Top();
+					FWidget* dragEventWidget = hoveredWidgetStack.Top().Get();
 
 					while (dragEventWidget != nullptr)
 					{
@@ -454,7 +454,7 @@ namespace CE
 							break;
 						}
 
-						dragEventWidget = dragEventWidget->parent;
+						dragEventWidget = dragEventWidget->parent.Get();
 					}
 
 					if (event.sender != nullptr)
@@ -485,10 +485,10 @@ namespace CE
 
 				if (hoveredWidgetStack.NotEmpty())
 				{
-					event.sender = hoveredWidgetStack.Top();
+					event.sender = hoveredWidgetStack.Top().Get();
 					while (event.sender != nullptr && !event.sender->SupportsMouseEvents())
 					{
-						event.sender = event.sender->parent;
+						event.sender = event.sender->parent.Get();
 					}
 
 					if (event.sender != nullptr)
@@ -526,8 +526,8 @@ namespace CE
 					dragEvent.buttons = (MouseButtonMask)BIT((int)mouseButton);
 					dragEvent.keyModifiers = keyModifierStates;
 
-					dragEvent.sender = draggedWidget;
-					dragEvent.draggedWidget = draggedWidget;
+					dragEvent.sender = draggedWidget.Get();
+					dragEvent.draggedWidget = draggedWidget.Get();
 
 					if (dragEvent.sender->GetContext() != nativeContext)
 					{
@@ -546,16 +546,11 @@ namespace CE
 
 		static String lastFocusName = "";
 
-		// TODO: Temporary fix. Need to implement Object reference counting.
-		if (!IsValidObject(curFocusWidget))
-		{
-			curFocusWidget = nullptr;
-		}
 
-		FWidget* keyEventWidget = curFocusWidget;
+		Ref<FWidget> keyEventWidget = curFocusWidget.Lock();
 		while (keyEventWidget != nullptr && !keyEventWidget->SupportsKeyboardEvents())
 		{
-			keyEventWidget = keyEventWidget->parent;
+			keyEventWidget = keyEventWidget->parent.Get();
 		}
 
 		if (curFocusWidget != nullptr)
@@ -577,7 +572,7 @@ namespace CE
 				FKeyEvent keyEvent{};
 				keyEvent.modifiers = keyModifierStates;
 				keyEvent.key = keyCode;
-				keyEvent.sender = keyEventWidget;
+				keyEvent.sender = keyEventWidget.Get();
 
 				if (isDown && !keyPressStates.Test(i))
 				{

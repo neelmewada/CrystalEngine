@@ -520,7 +520,7 @@ namespace CE
 				return true;
 			}
 
-			hitWidget = hitWidget->parent;
+			hitWidget = hitWidget->parent.Get();
 		}
 
 		return hitWidget != nullptr && hitWidget->IsOfType<FTitleBar>();

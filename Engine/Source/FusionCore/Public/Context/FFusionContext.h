@@ -141,22 +141,22 @@ namespace CE
         bool isDestroyed = false;
         bool isRootContext = false;
 
-        FWidget* curFocusWidget = nullptr;
-        FWidget* widgetToFocus = nullptr;
+        WeakRef<FWidget> curFocusWidget = nullptr;
+        WeakRef<FWidget> widgetToFocus = nullptr;
 
         Vec2 availableSize{};
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
 
-        Array<FWidget*> hoveredWidgetStack;
+        Array<WeakRef<FWidget>> hoveredWidgetStack;
 
         KeyModifier keyModifierStates{};
         BitSet<128> keyPressStates{};
 
-        FWidget* draggedWidget = nullptr;
-        FWidget* prevHoveredWidget = nullptr;
-        StaticArray<FWidget*, 6> widgetsPressedPerMouseButton{};
+        WeakRef<FWidget> draggedWidget = nullptr;
+        WeakRef<FWidget> prevHoveredWidget = nullptr;
+        StaticArray<WeakRef<FWidget>, 6> widgetsPressedPerMouseButton{};
 
         // Previous mouse position in window space
         Vec2 prevMousePos = Vec2();
@@ -164,7 +164,7 @@ namespace CE
         Vec2 prevScreenMousePos = Vec2();
 
         // Non-native popups that are rendered inside a native window
-        Array<FPopup*> localPopupStack;
+        Array<Ref<FPopup>> localPopupStack;
 
         FUSION_FRIENDS;
     };

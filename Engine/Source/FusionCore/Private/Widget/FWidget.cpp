@@ -157,7 +157,7 @@ namespace CE
         FFusionContext* context = GetContext();
         if (IsFocused() && context)
         {
-            context->SetFocusWidget(parent);
+            context->SetFocusWidget(parent.Get());
         }
     }
 

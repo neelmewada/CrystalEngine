@@ -52,7 +52,7 @@ namespace CE
 			
 			owningWidget->PlaceSubWidgets();
 
-			for (FPopup* popup : localPopupStack)
+			for (const auto& popup : localPopupStack)
 			{
 				popup->CalculateIntrinsicSize();
 
@@ -323,7 +323,7 @@ namespace CE
 		{
 			if (localPopupStack.NotEmpty())
 			{
-				SetFocusWidget(localPopupStack.Top());
+				SetFocusWidget(localPopupStack.Top().Get());
 			}
 			else if (owningWidget)
 			{

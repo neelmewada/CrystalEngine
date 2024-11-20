@@ -59,6 +59,14 @@ namespace CE
         CE_CLASS(Bundle, Object)
     public:
 
+        struct ObjectData
+        {
+            Name name;
+            Name typeName;
+            Uuid uuid;
+            Name pathInBundle;
+        };
+
         // - Static API -
 
         static void PushBundleResolver(IBundleResolver* resolver);
@@ -68,8 +76,11 @@ namespace CE
 
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Uuid& bundleUuid, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
+        static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Name& path, const LoadBundleArgs& loadArgs = LoadBundleArgs());
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset = nullptr);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
@@ -79,6 +90,12 @@ namespace CE
         Ref<Object> LoadObject(Uuid objectUuid);
 
         Ref<Object> LoadObject(const Name& pathInBundle);
+
+        void SetObjectUuid(const Ref<Object>& object, const Uuid& uuid);
+
+        ObjectData GetPrimaryObjectData();
+
+        void DestroyAllSubObjects();
 
     protected:
 
