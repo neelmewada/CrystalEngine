@@ -13,7 +13,7 @@ namespace CE
     {
 	    Super::SetContextRecursively(context);
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             child->SetContextRecursively(context);
         }
@@ -36,7 +36,7 @@ namespace CE
         
 	    for (int i = children.GetSize() - 1; i >= 0; --i)
 	    {
-            FWidget* child = children[i];
+            Ref<FWidget> child = children[i].Get();
             if (!child->Enabled())
                 continue;
 
@@ -55,7 +55,7 @@ namespace CE
         if (this == child)
             return true;
 
-        for (FWidget* widget : children)
+        for (const auto& widget : children)
         {
 	        if (widget->ChildExistsRecursive(child))
                 return true;
@@ -68,7 +68,7 @@ namespace CE
     {
 	    Super::ApplyStyleRecursively();
 
-        for (FWidget* widget : children)
+        for (const auto& widget : children)
         {
             widget->ApplyStyleRecursively();
         }
@@ -81,7 +81,7 @@ namespace CE
 
         if (event->direction == FEventDirection::TopToBottom)
         {
-            for (FWidget* child : children)
+            for (const auto& child : children)
             {
                 if (!child->Enabled())
                     continue;
@@ -111,8 +111,10 @@ namespace CE
     {
 	    for (int i = children.GetSize() - 1; i >= 0; --i)
 	    {
-            FWidget* child = children[i];
-            RemoveChild(child);
+            Ref<FWidget> child = children[i].Lock();
+	        if (child == nullptr)
+	            continue;
+            RemoveChild(child.Get());
             child->BeginDestroy();
 	    }
     }
@@ -121,8 +123,10 @@ namespace CE
     {
         for (int i = children.GetSize() - 1; i >= 0; --i)
         {
-            FWidget* child = children[i];
-            RemoveChild(child);
+            Ref<FWidget> child = children[i].Lock();
+            if (child == nullptr)
+                continue;
+            RemoveChild(child.Get());
             child->QueueDestroy();
         }
     }
@@ -131,8 +135,10 @@ namespace CE
     {
         for (int i = children.GetSize() - 1; i >= 0; --i)
         {
-            FWidget* child = children[i];
-            RemoveChild(child);
+            Ref<FWidget> child = children[i].Lock();
+            if (child == nullptr)
+                continue;
+            RemoveChild(child.Get());
         }
     }
 
@@ -153,7 +159,7 @@ namespace CE
     {
 	    Super::ClearStyle();
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             child->ClearStyle();
         }
