@@ -255,7 +255,7 @@ namespace CE
         propertyMap[name] = prop;
     }
 
-    void CE::Material::SetProperty(const Name& name, CE::Texture* value, const Vec2& offset, const Vec2& scaling)
+    void CE::Material::SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset, const Vec2& scaling)
     {
         valuesModified = true;
 

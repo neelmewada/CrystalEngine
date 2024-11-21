@@ -37,11 +37,11 @@ namespace CE
         static FusionApplication* Get();
         static FusionApplication* TryGet();
 
-        FFontManager* GetFontManager() const { return fontManager; }
+        FFontManager* GetFontManager() const { return fontManager.Get(); }
 
-        FStyleManager* GetStyleManager() const { return styleManager; }
+        FStyleManager* GetStyleManager() const { return styleManager.Get(); }
 
-        FRootContext* GetRootContext() const { return rootContext; }
+        FRootContext* GetRootContext() const { return rootContext.Get(); }
 
         f32 GetScaling() const { return scaling; }
 
@@ -125,13 +125,13 @@ namespace CE
         bool isExposed = false;
 
         FIELD()
-        FRootContext* rootContext = nullptr;
+        Ref<FRootContext> rootContext = nullptr;
 
         FIELD()
-        FFontManager* fontManager = nullptr;
+        Ref<FFontManager> fontManager = nullptr;
 
         FIELD()
-        FStyleManager* styleManager = nullptr;
+        Ref<FStyleManager> styleManager = nullptr;
 
         IFusionAssetLoader* assetLoader = nullptr;
 

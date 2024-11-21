@@ -35,7 +35,7 @@ namespace CE
 
         if (styleSet)
         {
-            FFusionContext* rootContext = FusionApplication::Get()->rootContext;
+            FFusionContext* rootContext = FusionApplication::Get()->rootContext.Get();
             rootContext->OnStyleSetDeregistered(styleSet);
         }
 

@@ -5,7 +5,7 @@ namespace CE
     using namespace CE::RHI;
     using namespace CE::RPI;
 
-    static FusionApplication* gInstance = nullptr;
+    static WeakRef<FusionApplication> gInstance = nullptr;
 
     extern RawData GetFusionShaderVert();
     extern RawData GetFusionShaderFrag();
@@ -21,10 +21,7 @@ namespace CE
 
     FusionApplication::~FusionApplication()
     {
-        if (gInstance == this)
-        {
-            gInstance = nullptr;
-        }
+
     }
 
     FusionApplication* FusionApplication::Get()
@@ -33,12 +30,12 @@ namespace CE
         {
             gInstance = CreateObject<FusionApplication>(GetTransient(MODULE_NAME), "FusionApplication");
         }
-        return gInstance;
+        return gInstance.Get();
     }
 
     FusionApplication* FusionApplication::TryGet()
     {
-        return gInstance;
+        return gInstance.Get();
     }
 
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
@@ -280,6 +277,11 @@ namespace CE
         }
 
         int index = samplerArray.GetCount();
+        if (index > 15)
+        {
+            CE_LOG(Error, All, "Out of sampler slots!");
+        }
+
         samplerIndices[sampler] = index;
         samplerArray.Insert(sampler);
         samplersUpdated = true;

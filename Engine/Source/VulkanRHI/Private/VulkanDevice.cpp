@@ -483,6 +483,11 @@ namespace CE::Vulkan
 				primaryTransferQueue = queuesByFamily[familyIdx][queueCount - 2];
 			}
 		}
+
+		if (primaryTransferQueue == nullptr)
+		{
+			primaryTransferQueue = primaryGraphicsQueue;
+		}
 	}
 
 	bool VulkanDevice::QueryGpu(u32 gpuIndex)

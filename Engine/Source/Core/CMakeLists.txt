@@ -31,6 +31,7 @@ ce_add_target(Core SHARED
             ThirdParty::spdlog
             ThirdParty::efsw
             CE::CoreTracy
+        MAC_FRAMEWORKS CoreServices
         TARGETS Config
     RUNTIME_DEPENDENCIES
         

@@ -10,6 +10,11 @@
 namespace CE::Editor
 {
 
+    IO::Path MacEditorPlatform::GetEditorExecutablePath()
+    {
+        return PlatformDirectories::GetLaunchDir() / GetEditorExecutableName();
+    }
+
     IO::Path MacEditorPlatform::ShowSelectDirectoryDialog(const IO::Path& defaultPath)
     {
         IO::Path result{};

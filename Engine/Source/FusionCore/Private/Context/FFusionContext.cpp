@@ -101,7 +101,7 @@ namespace CE
 
 	FFusionContext* FFusionContext::GetRootContext() const
 	{
-		return FusionApplication::Get()->rootContext;
+		return FusionApplication::Get()->rootContext.Get();
 	}
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)

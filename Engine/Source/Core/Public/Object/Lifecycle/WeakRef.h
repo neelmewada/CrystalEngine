@@ -290,7 +290,8 @@ namespace CE
 
         inline bool operator==(T* object) const
         {
-            return (control == nullptr && object == nullptr) || (control->GetObject() == object);
+            return (control == nullptr && object == nullptr) ||
+                (control != nullptr && control->GetObject() == object);
         }
 
         inline bool operator!=(T* object) const

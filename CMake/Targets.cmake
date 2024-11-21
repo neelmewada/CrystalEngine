@@ -214,15 +214,15 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # BUILD_DEPENDENCIES
 
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MACFRAMEWORKS)
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MAC_FRAMEWORKS)
     cmake_parse_arguments(ce_add_target_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_BUILD_DEPENDENCIES})
 
     if(${PAL_PLATFORM_IS_MAC})
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++")
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "-framework CoreServices")
-        if(ce_add_target_BUILD_DEPENDENCIES_MACFRAMEWORKS)
-            foreach(framework ${ce_add_target_BUILD_DEPENDENCIES_MACFRAMEWORKS})
+        if(ce_add_target_BUILD_DEPENDENCIES_MAC_FRAMEWORKS)
+            foreach(framework ${ce_add_target_BUILD_DEPENDENCIES_MAC_FRAMEWORKS})
                 list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "-framework ${framework}")
             endforeach()
         endif()

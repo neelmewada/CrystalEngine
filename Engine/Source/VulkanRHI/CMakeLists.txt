@@ -37,7 +37,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreRHI
             CE::CoreMedia
         TARGETS Config
-        MACFRAMEWORKS
+        MAC_FRAMEWORKS
             QuartzCore
     RUNTIME_DEPENDENCIES
         Vulkan

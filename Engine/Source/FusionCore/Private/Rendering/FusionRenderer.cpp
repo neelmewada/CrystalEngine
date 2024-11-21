@@ -98,7 +98,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		currentBrush = FBrush();
 		currentPen = FPen();
@@ -206,7 +206,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();
@@ -301,7 +301,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = font.GetFamily();
 		int fontSize = font.GetFontSize();
@@ -413,7 +413,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();
@@ -437,7 +437,7 @@ namespace CE
 		if (text.IsEmpty())
 			return {};
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();

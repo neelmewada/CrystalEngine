@@ -139,7 +139,7 @@ namespace CE
 				IO::Path::Remove(moduleGenFilePath);
 			}
 
-			std::ofstream moduleImplFile{ moduleGenFilePath, std::ios::out | std::ios::trunc };
+			std::ofstream moduleImplFile{ (fs::path)moduleGenFilePath, std::ios::out | std::ios::trunc };
 			if (moduleImplFile.is_open())
 			{
 				moduleImplFile << "#pragma once\n\n";

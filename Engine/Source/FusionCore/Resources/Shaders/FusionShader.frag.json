@@ -369,7 +369,7 @@
             "type" : "texture2D",
             "name" : "_Textures",
             "array" : [
-                100000
+                127
             ],
             "array_size_is_literal" : [
                 true
@@ -389,7 +389,7 @@
             "type" : "sampler",
             "name" : "_TextureSamplers",
             "array" : [
-                128
+                15
             ],
             "array_size_is_literal" : [
                 true

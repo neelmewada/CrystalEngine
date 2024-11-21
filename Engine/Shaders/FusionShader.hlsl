@@ -135,8 +135,8 @@ Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
 StructuredBuffer<GlyphItem> _GlyphItems : SRG_PerMaterial(t1);
 SamplerState _FontAtlasSampler : SRG_PerMaterial(s2);
 
-#define MAX_TEXTURE_COUNT 100000 // 100k Texture limit
-#define MAX_SAMPLER_COUNT 128    // 128 Sampler limit
+#define MAX_TEXTURE_COUNT 127 // 100k Texture limit
+#define MAX_SAMPLER_COUNT 15    // 128 Sampler limit
 
 Texture2D _Textures[MAX_TEXTURE_COUNT] : SRG_PerObject(t0);
 SamplerState _TextureSamplers[MAX_SAMPLER_COUNT] : SRG_PerObject(s1);

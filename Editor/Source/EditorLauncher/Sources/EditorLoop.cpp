@@ -232,10 +232,10 @@ void EditorLoop::PostInit()
 		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
 		rootContext->AddChildContext(crystalEditorCtx);
 
-		CrystalEditorWindow* crystalEditor = nullptr;
+		Ref<CrystalEditorWindow> crystalEditor = nullptr;
 
 		FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
-		crystalEditorCtx->SetOwningWidget(crystalEditor);
+		crystalEditorCtx->SetOwningWidget(crystalEditor.Get());
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
