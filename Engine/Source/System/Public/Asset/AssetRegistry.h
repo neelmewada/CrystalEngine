@@ -70,7 +70,7 @@ namespace CE
 
 		// - Internal API -
 
-		void OnAssetImported(const Name& bundleName, const Name& sourcePath = "");
+		void OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath = "");
 
 		void OnAssetDeleted(const Name& bundleName);
 

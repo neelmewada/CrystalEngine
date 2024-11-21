@@ -35,7 +35,7 @@ namespace CE
 
         void OnAfterDeserialize() override;
 
-        CE::Shader* GetShader() override
+        const Ref<CE::Shader>& GetShader() override
         {
             return shader;
         }
@@ -47,7 +47,7 @@ namespace CE
         RPI::Material* material = nullptr;
 
         FIELD()
-        CE::Shader* shader = nullptr;
+        Ref<CE::Shader> shader = nullptr;
 
         FIELD()
         Array<MaterialProperty> properties{};

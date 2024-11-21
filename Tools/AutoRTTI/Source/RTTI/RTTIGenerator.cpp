@@ -27,10 +27,15 @@ namespace CE
 
 		bool anyHeaderModified = false;
 
-		for (auto entry : fs::directory_iterator((fs::path)outputPath))
-		{
-			filesToRemove.Add(entry.path());
-		}
+		outputPath.IterateChildren([&](const IO::Path& entry)
+			{
+				if (entry.GetFileName().GetString().EndsWith(".private.h"))
+				{
+					return;
+				}
+
+				filesToRemove.Add(entry);
+			});
 
 		for (auto entry : fs::recursive_directory_iterator(modulePath))
 		{
@@ -124,12 +129,17 @@ namespace CE
 		}
 		filesToRemove.Clear();
 
-		fs::path moduleGenFilePath = (fs::path)outputPath / (moduleName.ToStdString() + ".private.h");
+		IO::Path moduleGenFilePath = outputPath / (moduleName + ".private.h");
 
 		// Generate module file ONLY if either a header was modified or if it doesn't exist
-		if (anyHeaderModified || !fs::exists(moduleGenFilePath))
+		if (anyHeaderModified || !moduleGenFilePath.Exists())
 		{
-			std::ofstream moduleImplFile{ moduleGenFilePath, std::ios_base::out };
+			if (moduleGenFilePath.Exists())
+			{
+				IO::Path::Remove(moduleGenFilePath);
+			}
+
+			std::ofstream moduleImplFile{ moduleGenFilePath, std::ios::out | std::ios::trunc };
 			if (moduleImplFile.is_open())
 			{
 				moduleImplFile << "#pragma once\n\n";

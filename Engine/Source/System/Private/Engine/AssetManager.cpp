@@ -155,27 +155,28 @@ namespace CE
 		
 		Ref<Bundle> bundle = nullptr;
 
-		loadedAssetsMutex.Lock();
-		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 		{
-			bundle = loadedAssetsByPath[path];
-			loadedAssetsMutex.Unlock();
-		}
-		else
-		{
-			LoadBundleArgs args{
-				.loadFully = true
-			};
-
-			bundle = Bundle::LoadBundle(this, path, args);
-			if (bundle == nullptr)
+			LockGuard lock{ loadedAssetsMutex };
+			
+			if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 			{
-				loadedAssetsMutex.Unlock();
-				return nullptr;
+				bundle = loadedAssetsByPath[path];
 			}
-			loadedAssetsByPath[path] = bundle;
-			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
-			loadedAssetsMutex.Unlock();
+			else
+			{
+				LoadBundleArgs args{
+					.loadFully = true
+				};
+
+				bundle = Bundle::LoadBundle(this, path, args);
+				if (bundle == nullptr)
+				{
+					return nullptr;
+				}
+				loadedAssetsByPath[path] = bundle;
+				loadedAssetsByUuid[bundle->GetUuid()] = bundle;
+			
+			}
 		}
 		
 		if (!bundle)

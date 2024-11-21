@@ -110,7 +110,7 @@ namespace CE
 
         virtual RPI::Material* GetRpiMaterial() = 0;
 
-        virtual CE::Shader* GetShader() = 0;
+        virtual const Ref<CE::Shader>& GetShader() = 0;
 
     protected:
 

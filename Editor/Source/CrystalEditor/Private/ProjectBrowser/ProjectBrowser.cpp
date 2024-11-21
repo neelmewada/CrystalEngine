@@ -59,7 +59,7 @@ namespace CE::Editor
                         (
                             FAssignNew(FListView, recentsList)
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateRecentProjectRow, this))
-                            .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
+                            //.Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
                             .OnSelectionChanged([this](FListView*)
                             {
@@ -175,7 +175,7 @@ namespace CE::Editor
                         (
                             FAssignNew(FListView, newProjectList)
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateNewProjectRow, this))
-                            .Bind_ItemList(BIND_PROPERTY_R(newProjectModel, ItemList))
+                            //.Bind_ItemList(BIND_PROPERTY_R(newProjectModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
                             .HAlign(HAlign::Fill)
                             .Height(400)

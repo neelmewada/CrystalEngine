@@ -125,11 +125,11 @@ namespace CE
 
         if (shader != nullptr)
         {
-            CE::Shader* resetShader = shader;
+            Ref<CE::Shader> resetShader = shader;
             shaderCollection = nullptr;
             this->shader = nullptr;
 
-            SetShader(resetShader);
+            SetShader(resetShader.Get());
         }
         else
         {

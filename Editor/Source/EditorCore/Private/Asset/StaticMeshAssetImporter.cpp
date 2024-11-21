@@ -38,9 +38,10 @@ namespace CE::Editor
 		fileStream.SetBinaryMode(true);
 		u8* data = (u8*)malloc(fileStream.GetLength());
 		fileStream.Read(data, fileStream.GetLength());
-		defer(
-			free(data);
-		);
+    	defer(&)
+    	{
+    		free(data);
+    	};
 
 		ModelImporter importer{};
 		ModelLoadConfig config{};
@@ -67,16 +68,17 @@ namespace CE::Editor
 			return false;
 		}
 
-		defer(
+    	defer(&)
+		{
 			delete scene;
-		);
+		};
 
 		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName);
 
-		RPI::ModelAsset* modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset");
+		Ref<RPI::ModelAsset> modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset");
 		staticMesh->modelAsset = modelAsset;
 
-		RPI::ModelLodAsset* lod = CreateObject<RPI::ModelLodAsset>(modelAsset, "Lod0");
+		Ref<RPI::ModelLodAsset> lod = CreateObject<RPI::ModelLodAsset>(modelAsset.Get(), "Lod0");
 		modelAsset->lods.Add(lod);
 		
 		const Array<CMMesh>& meshes = scene->GetMeshes();

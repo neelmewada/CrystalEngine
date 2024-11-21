@@ -55,9 +55,10 @@ namespace CE::Editor
 		if (!image.IsValid())
 			return false;
 
-		defer(
+		defer(&)
+		{
 			image.Free();
-		);
+		};
 		
 		bool isCubeMap = false;
 		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)

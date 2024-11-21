@@ -36,7 +36,7 @@ namespace CE::Editor
 
 		if (shader == nullptr) // Create new object from scratch
 		{
-			shader = CreateObject<CE::Shader>(bundle, TEXT("Shader"));
+			shader = CreateObject<CE::Shader>(bundle.Get(), TEXT("Shader"));
 		}
 
 		FileStream fileReader = FileStream(sourcePath, Stream::Permissions::ReadOnly);
@@ -90,8 +90,8 @@ namespace CE::Editor
 
 				CE::ShaderVariant& variant = pass.variants[0];
 				variant.variantHash = 0;
-				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, String("VertexBlob_") + passIndex));
-				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, String("FragmentBlob_") + passIndex));
+				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader.Get(), String("VertexBlob_") + passIndex));
+				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader.Get(), String("FragmentBlob_") + passIndex));
 
 				// - Vertex -
 

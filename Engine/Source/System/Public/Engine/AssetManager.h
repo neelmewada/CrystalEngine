@@ -32,7 +32,7 @@ namespace CE
 		Array<Ref<Asset>> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
 
 		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
-		inline Array<TAsset*> LoadAssetsAtPath(const Name& path)
+		inline Array<Ref<TAsset>> LoadAssetsAtPath(const Name& path)
 		{
 			Array<Asset*> assets = LoadAssetsAtPath(path, TAsset::StaticType());
 			Array<TAsset*> outAssets{};

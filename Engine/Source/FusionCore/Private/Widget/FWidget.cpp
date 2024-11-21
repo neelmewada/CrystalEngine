@@ -308,6 +308,11 @@ namespace CE
     {
         ZoneScoped;
 
+        if (child == nullptr)
+            return false;
+
+        Ref<FWidget> strongRef = child;
+
         if (TryAddChild(child))
         {
             if (child->GetOuter() == nullptr)
@@ -336,6 +341,11 @@ namespace CE
     void FWidget::RemoveChild(FWidget* child)
     {
         ZoneScoped;
+
+        if (child == nullptr)
+            return;
+
+        Ref<FWidget> strongRef = child;
 
         if (TryRemoveChild(child))
         {

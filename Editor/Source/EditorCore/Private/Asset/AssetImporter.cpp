@@ -113,7 +113,7 @@ namespace CE::Editor
 
 		if (job->success)
 		{
-			AssetManager::GetRegistry()->OnAssetImported(job->bundleName);
+			AssetManager::GetRegistry()->OnAssetImported(job->productPath);
 		}
 
 		importResults.Add(importResult);
@@ -205,7 +205,7 @@ namespace CE::Editor
     	};
 
 		if (productPath.Exists())
-			bundle = Bundle::LoadBundle(transient, productPath, args);
+			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
 		else
 			bundle = CreateObject<Bundle>(transient.Get(), bundleName);
 

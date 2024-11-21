@@ -115,11 +115,11 @@ namespace CE
         return nullptr;
     }
 
-    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath,
+    Ref<Bundle> Bundle::LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath,
         const LoadBundleArgs& loadArgs)
     {
         BundleLoadResult result;
-        return LoadBundle(outer, absolutePath, result, loadArgs);
+        return LoadBundleAbsolute(outer, absolutePath, result, loadArgs);
     }
 
     Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, const LoadBundleArgs& loadArgs)
@@ -131,10 +131,10 @@ namespace CE
     Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs)
     {
         IO::Path absolutePath = GetAbsoluteBundlePath(path);
-        return LoadBundle(outer, absolutePath, outResult, loadArgs);
+        return LoadBundleAbsolute(outer, absolutePath, outResult, loadArgs);
     }
 
-    Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult,
+    Ref<Bundle> Bundle::LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult,
         const LoadBundleArgs& loadArgs)
     {
         if (!absolutePath.Exists())
@@ -238,7 +238,10 @@ namespace CE
 
         if (readerStream != nullptr)
         {
-            return LoadObject(readerStream, objectUuid);
+            u64 curPos = readerStream->GetCurrentPosition();
+            Ref<Object> retVal = LoadObject(readerStream, objectUuid);
+            readerStream->Seek(curPos, SeekMode::Begin);
+            return retVal;
         }
 
         if (fullBundlePath.Exists())
@@ -283,6 +286,22 @@ namespace CE
         return LoadObject(objectUuid);
     }
 
+    Ref<Object> Bundle::LoadObject(ClassType* objectClass)
+    {
+        if (objectClass == nullptr)
+            return nullptr;
+
+        for (const auto& serializedObjectEntry : serializedObjectEntries)
+        {
+            if (schemaTable[serializedObjectEntry.schemaIndex].fullTypeName == objectClass->GetTypeName())
+            {
+                return LoadObject(serializedObjectEntry.instanceUuid);
+            }
+        }
+
+        return nullptr;
+    }
+
     void Bundle::SetObjectUuid(const Ref<Object>& object, const Uuid& newUuid)
     {
         if (object == nullptr)
@@ -303,7 +322,8 @@ namespace CE
 
             if (loadedObjectsByUuid.KeyExists(oldUuid))
             {
-                loadedObjectsByUuid[newUuid] = loadedObjectsByUuid[oldUuid];
+                WeakRef<Object> oldRef = loadedObjectsByUuid[oldUuid];
+                loadedObjectsByUuid[newUuid] = oldRef.Get();
                 loadedObjectsByUuid.Remove(oldUuid);
             }
         }
@@ -322,7 +342,8 @@ namespace CE
 
             if (loadedBundlesByUuid.KeyExists(oldUuid))
             {
-                loadedBundlesByUuid[newUuid] = loadedBundlesByUuid[oldUuid];
+                WeakRef<Bundle> oldRef = loadedBundlesByUuid[oldUuid];
+                loadedBundlesByUuid[newUuid] = oldRef;
                 loadedBundlesByUuid.Remove(oldUuid);
             }
         }
@@ -343,9 +364,9 @@ namespace CE
                 {
                     return ObjectData{
                         .name = serializedObject.objectName,
+                        .typeName = schemaTable[serializedObject.schemaIndex].fullTypeName,
                         .uuid = serializedObject.instanceUuid,
                         .pathInBundle = serializedObject.pathInBundle,
-                        .typeName = schemaTable[serializedObject.schemaIndex].fullTypeName
                     };
                 }
 
@@ -401,6 +422,16 @@ namespace CE
                         Struct* childStruct = StructType::FindStruct(field->GetDeclarationTypeId());
 
                         fetchInternalStructs(childStruct);
+                    }
+                    else if (field->IsArrayField())
+                    {
+                        TypeInfo* underlyingType = field->GetUnderlyingType();
+                        if (underlyingType != nullptr && underlyingType->IsStruct())
+                        {
+                            StructType* underlyingStructType = static_cast<StructType*>(underlyingType);
+
+                            fetchInternalStructs(underlyingStructType);
+                        }
                     }
                 }
             };

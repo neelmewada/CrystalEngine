@@ -135,11 +135,11 @@ namespace CE::Editor
 
         for (ClassType* settingsClass : settingsClasses)
         {
-            Settings* target = Settings::LoadSettings(settingsClass);
+            Ref<Settings> target = Settings::LoadSettings(settingsClass);
             if (!target)
                 continue;
 
-            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target);
+            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target.Get());
             editors.Add(curEditor);
 
             if (this->editor == nullptr)
@@ -171,9 +171,9 @@ namespace CE::Editor
 
         right->DestroyAllChildren();
 
-        Settings* target = Settings::LoadSettings(settingsClasses[index]);
+        Ref<Settings> target = Settings::LoadSettings(settingsClasses[index]);
 
-        editor = ObjectEditorRegistry::Get().Create(target);
+        editor = ObjectEditorRegistry::Get().Create(target.Get());
 
         editor->FixedInputWidth(180);
         editor->SetSplitRatio(splitRatio);

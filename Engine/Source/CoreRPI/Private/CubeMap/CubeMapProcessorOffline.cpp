@@ -529,7 +529,8 @@ namespace CE::RPI
 			diffuseConvolutionRTB = gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { diffuseIrradiance });
 		}
 
-		defer(
+		defer(&)
+		{
 			delete hdrRenderTarget;
 			for (int i = 0; i < 6; i++)
 			{
@@ -573,7 +574,7 @@ namespace CE::RPI
 			delete cdfConditionalInverseRTB;
 
 			delete diffuseConvolutionRTB;
-		);
+		};
 
 		/////////////////////////////////////////////
 		// - Materials & Data -

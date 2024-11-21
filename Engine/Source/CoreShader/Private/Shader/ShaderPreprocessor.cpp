@@ -20,12 +20,13 @@ namespace CE
 	{
 		errorMessage = "";
 
-		defer(
+		defer(&)
+		{
 			if (errorMessage.NotEmpty())
 			{
 				CE_LOG(Error, All, "PreprocessShader failed: {}", errorMessage);
 			}
-		);
+		};
 
 		if (stream == nullptr || !stream->CanRead())
 		{
@@ -47,9 +48,10 @@ namespace CE
 
 		int passIndex = 0;
 
-		defer(
+		defer(&)
+		{
 			passSources.Clear();
-		);
+		};
 
 		ShaderPropertyEntry currentProperty{};
 		int defaultValueIdx = 0;

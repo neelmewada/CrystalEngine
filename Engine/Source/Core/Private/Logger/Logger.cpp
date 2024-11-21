@@ -118,14 +118,15 @@ namespace CE
 
         String fullMsg = message;
 
+        Log(level, fullMsg, target);
+
 #if !CE_BUILD_RELEASE // For Non-release builds
         if (level == LogLevel::Error || level == LogLevel::Critical)
         {
-            fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
+            //fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
+            cpptrace::generate_trace().print();
         }
 #endif
-
-        Log(level, fullMsg, target);
     }
 
     std::shared_ptr<spdlog::logger> Logger::GetConsoleLogger()

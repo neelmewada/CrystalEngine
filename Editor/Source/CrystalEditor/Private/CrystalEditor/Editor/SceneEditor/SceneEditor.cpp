@@ -17,31 +17,31 @@ namespace CE::Editor
 
         auto assetManager = gEngine->GetAssetManager();
 
-        TextureCube* skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
-        CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
-        CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
+        Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+        Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+        Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
-        CE::Texture* albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
-        CE::Texture* normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
-        CE::Texture* metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
-        CE::Texture* roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
+    	Ref<CE::Texture> albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
+        Ref<CE::Texture> normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
+        Ref<CE::Texture> metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
+        Ref<CE::Texture> roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
 
-        CE::Texture* plasticAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/albedo");
-        CE::Texture* plasticNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/normal");
-        CE::Texture* plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
-        CE::Texture* plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
+    	Ref<CE::Texture> plasticAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/albedo");
+        Ref<CE::Texture> plasticNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/normal");
+        Ref<CE::Texture> plasticMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/metallic");
+        Ref<CE::Texture> plasticRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Plastic/roughness");
 
-        CE::Texture* woodAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/albedo");
-        CE::Texture* woodNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/normal");
-        CE::Texture* woodMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/metallic");
-        CE::Texture* woodRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/roughness");
+    	Ref<CE::Texture> woodAlbedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/albedo");
+        Ref<CE::Texture> woodNormalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/normal");
+        Ref<CE::Texture> woodMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/metallic");
+        Ref<CE::Texture> woodRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/roughness");
 
 
-        scene->SetSkyboxCubeMap(skybox);
+        scene->SetSkyboxCubeMap(skybox.Get());
 
         {
             CE::Material* material = CreateObject<CE::Material>(scene, "Material");
-            material->SetShader(standardShader);
+            material->SetShader(standardShader.Get());
 
             material->SetProperty("_AlbedoTex", albedoTex);
             material->SetProperty("_NormalTex", normalTex);
@@ -50,7 +50,7 @@ namespace CE::Editor
             material->ApplyProperties();
 
             CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
-            plasticMaterial->SetShader(standardShader);
+            plasticMaterial->SetShader(standardShader.Get());
 	        {
 		        plasticMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
             	plasticMaterial->SetProperty("_NormalTex", plasticNormalTex);
@@ -60,7 +60,7 @@ namespace CE::Editor
 	        }
 
             CE::Material* woodMaterial = CreateObject<CE::Material>(scene, "WoodMaterial");
-            woodMaterial->SetShader(standardShader);
+            woodMaterial->SetShader(standardShader.Get());
         	{
                 woodMaterial->SetProperty("_AlbedoTex", woodAlbedoTex);
                 woodMaterial->SetProperty("_NormalTex", woodNormalTex);
@@ -134,7 +134,7 @@ namespace CE::Editor
 
             {
                 CE::Material* skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Material");
-                skyboxMaterial->SetShader(skyboxShader);
+                skyboxMaterial->SetShader(skyboxShader.Get());
                 skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
 
                 skyboxMaterial->SetProperty("_CubeMap", skybox);

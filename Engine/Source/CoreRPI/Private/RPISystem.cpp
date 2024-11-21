@@ -176,10 +176,11 @@ namespace CE::RPI
             brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
         }
 
-        defer(
+        defer(&)
+        {
             delete brdfLutRT;
-			delete brdfLutRTB;
-        );
+            delete brdfLutRTB;
+        };
 
         auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
         auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);

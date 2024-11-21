@@ -92,17 +92,15 @@ namespace CE
 		return assetData->bundleName;
 	}
 
-	void AssetRegistry::OnAssetImported(const Name& bundleName, const Name& sourcePath)
+	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
-		IO::Path bundlePath = Bundle::GetAbsoluteBundlePath(bundleName);
-
 		LoadBundleArgs args{
 			.loadFully = false,
 			.forceReload = false,
 			.destroyOutdatedObjects = false
 		};
 
-		Ref<Bundle> load = Bundle::LoadBundle(nullptr, bundleName, args);
+		Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, bundleAbsolutePath, args);
 		if (load == nullptr)
 			return;
 
@@ -110,13 +108,13 @@ namespace CE
 		String relativePathStr = "";
 		String parentRelativePathStr = "";
 
-		if (IO::Path::IsSubDirectory(bundlePath, projectAssetsPath))
+		if (IO::Path::IsSubDirectory(bundleAbsolutePath, projectAssetsPath))
 		{
-			relativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
+			relativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePathStr.StartsWith("/"))
 				relativePathStr = "/" + relativePathStr;
 
-			parentRelativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			parentRelativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
@@ -158,6 +156,8 @@ namespace CE
 		{
 			AddAssetEntry(relativePathStr, assetData);
 		}
+
+		Name bundleName = assetData->bundleName;
 
 		load->BeginDestroy();
 		load = nullptr;
@@ -253,7 +253,7 @@ namespace CE
                     		.destroyOutdatedObjects = false
                     	};
 
-						Ref<Bundle> load = Bundle::LoadBundle(nullptr, item, args);
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
@@ -327,7 +327,7 @@ namespace CE
 							.loadFully = false
 						};
 
-						Ref<Bundle> load = Bundle::LoadBundle(nullptr, item, args);
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
@@ -389,7 +389,7 @@ namespace CE
 							.loadFully = false
 						};
 
-						Ref<Bundle> load = Bundle::LoadBundle(nullptr, item, args);
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();

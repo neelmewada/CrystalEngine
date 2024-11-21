@@ -35,9 +35,9 @@ namespace CE
     };
 
 	template<typename TSettings> requires TIsBaseClassOf<Settings, TSettings>::Value
-	TSettings* GetSettings()
+	Ref<TSettings> GetSettings()
 	{
-		return (TSettings*)Settings::LoadSettings(TSettings::Type());
+		return (Ref<TSettings>)Settings::LoadSettings(TSettings::Type());
 	}
     
 	FORCE_INLINE void SaveSettings()

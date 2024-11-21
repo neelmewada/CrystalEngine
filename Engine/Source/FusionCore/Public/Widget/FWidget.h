@@ -273,6 +273,13 @@ namespace CE
             return *out;
         }
 
+        template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
+        TWidget& Assign(Ref<TWidget>& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
         template<typename T>
         struct TValidate_IfTrue
         {

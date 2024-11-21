@@ -266,7 +266,7 @@ namespace CE
 			Array<IO::Path> productDependencies{};
 			for (const Name& productAssetName : productAssetDependencies)
 			{
-				IO::Path assetPath = Bundle::GetBundlePath(productAssetName);
+				IO::Path assetPath = Bundle::GetAbsoluteBundlePath(productAssetName);
 				if (productAssetPaths.Exists(assetPath))
 				{
 					productDependencies.Add(assetPath);

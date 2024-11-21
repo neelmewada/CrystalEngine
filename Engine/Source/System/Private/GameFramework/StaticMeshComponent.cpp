@@ -101,7 +101,7 @@ namespace CE
 
             RPI::ModelHandleDescriptor descriptor{};
             descriptor.model = model;
-            descriptor.originalModel = staticMesh->GetModelAsset();
+            descriptor.originalModel = staticMesh->GetModelAsset().Get();
 
             meshHandle = fp->AcquireMesh(descriptor, materialMap);
         }

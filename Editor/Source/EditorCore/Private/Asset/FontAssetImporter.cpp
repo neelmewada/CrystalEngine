@@ -77,9 +77,10 @@ namespace CE::Editor
 			return false;
 		}
 
-		defer(
+		defer(&)
+		{
 			delete cmFontAtlas;
-		);
+		};
 
 		const CMImage& fontAtlasImage = cmFontAtlas->GetAtlas();
 		if (!fontAtlasImage.IsValid())
@@ -203,12 +204,13 @@ namespace CE::Editor
 			sdfFontAtlasMipViews.Add(RHI::gDynamicRHI->CreateTextureView(view));
 		}
 
-		defer(
+		defer(&)
+		{
 			for (int i = 0; i < mipLevels; i++)
 			{
 				delete sdfFontAtlasMipViews[i];
 			}
-		);
+		};
 
 		// - Intermediate resources -
 
@@ -242,12 +244,13 @@ namespace CE::Editor
 			outputBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 		}
 
-		defer(
+		defer(&)
+		{
 			delete rasterizedAtlasRpi;
 			delete sdfFontAtlasRpi;
 			delete inputBuffer;
 			delete outputBuffer;
-		);
+		};
 
 		/////////////////////////////////////////
 		// - Setup shaders & materials -
@@ -258,9 +261,10 @@ namespace CE::Editor
 		sdfGenMaterial->SetPropertyValue("_Spread", spread);
 		sdfGenMaterial->FlushProperties();
 
-		defer(
+		defer(&)
+		{
 			delete sdfGenMaterial;
-		);
+		};
 
 		Ref<CE::Shader> mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 		Array<RPI::Material*> mipMapMaterials{};
@@ -274,12 +278,13 @@ namespace CE::Editor
 			mipMapMaterials.Add(mipMapMaterial);
 		}
 
-		defer(
+		defer(&)
+		{
 			for (int i = 0; i < mipMapMaterials.GetSize(); i++)
 			{
 				delete mipMapMaterials[i];
 			}
-		);
+		};
 
 		////////////////////////////////////////
 		// - Setup RHI -
@@ -314,7 +319,8 @@ namespace CE::Editor
 			}
 		}
 
-		defer(
+		defer(&)
+		{
 			delete cmdList;
 			delete fence;
 			delete renderTarget;
@@ -323,7 +329,7 @@ namespace CE::Editor
 			{
 				delete sdfFontAtlasMipRTBs[i];
 			}
-		);
+		};
 
 		// - Record Commands -
 

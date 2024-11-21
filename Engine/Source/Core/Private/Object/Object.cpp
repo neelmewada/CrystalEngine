@@ -230,6 +230,8 @@ namespace CE
     {
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
+
+		Ref<Object> strongRef = subobject;
 		
 		// Detach the passed subobject from its parent first
 		if (subobject->outer != nullptr && subobject->outer != this)
@@ -261,6 +263,8 @@ namespace CE
     {
         if (subobject == nullptr || !attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
+
+		Ref<Object> strongRef = subobject;
 
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);

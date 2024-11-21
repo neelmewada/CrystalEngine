@@ -742,7 +742,7 @@ namespace CE
 		{
 			for (int i = numElements; i < curNumElements; i++) // Call destructor on elements that will be removed
 			{
-				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				void* elementInstance = array.GetData() + underlyingTypeSize * i;
 				underlyingType->CallDestructor(elementInstance);
 			}
 
@@ -750,7 +750,7 @@ namespace CE
 
 			for (int i = curNumElements; i < numElements; i++) // Initialize newly added elements if exists
 			{
-				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				void* elementInstance = array.GetData() + underlyingTypeSize * i;
 				underlyingType->InitializeDefaults(elementInstance);
 			}
 		}

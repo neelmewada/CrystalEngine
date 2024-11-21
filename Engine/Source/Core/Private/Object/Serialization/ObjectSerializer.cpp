@@ -148,12 +148,14 @@ namespace CE
             return bundle;
         }
 
+        // Only 1 thread can load/store the same bundle at once
         LockGuard bundleLock{ bundle->bundleMutex };
 
         bundle->readerStream = stream;
-        defer_copy(
+        defer(=)
+        {
             bundle->readerStream = nullptr;
-        );
+        };
 
         {
             LockGuard loadedObjectsLock{ bundle->loadedObjectsMutex };
@@ -352,11 +354,6 @@ namespace CE
                     params.objectFlags = OF_NoFlags;
                     params.templateObject = nullptr;
                     params.name = serializedObjectsByUuid[objectUuid].objectName.GetString();
-
-                    if (params.name == "MyTexture")
-                    {
-                        //DEBUG_BREAK();
-                    }
 
                     object = Internal::CreateObjectInternal(params);
 
@@ -1063,6 +1060,7 @@ namespace CE
             }
             case 0x14: // Array of structs
             {
+                u64 location = stream->GetCurrentPosition();
                 u32 numElements = 0;
                 *stream >> numElements;
 
@@ -1099,7 +1097,7 @@ namespace CE
                 Array<FieldType> elements;
                 void* arrayInstance = nullptr;
 
-                if (field != nullptr && FieldTypeBytes.KeyExists(fieldTypeId))
+                if (field != nullptr && FieldTypeBytes.KeyExists(field->GetUnderlyingTypeId()))
                 {
                     field->ResizeArray(instance, numElements);
 
@@ -1395,7 +1393,6 @@ namespace CE
     void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
-        TypeInfo* fieldType = field->GetUnderlyingType();
 
         if (field->IsObjectField())
         {

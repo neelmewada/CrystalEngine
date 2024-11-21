@@ -76,11 +76,11 @@ namespace CE
 
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Uuid& bundleUuid, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
-        static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Name& path, const LoadBundleArgs& loadArgs = LoadBundleArgs());
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Name& path, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
-        static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
+        static Ref<Bundle> LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset = nullptr);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
@@ -90,6 +90,14 @@ namespace CE
         Ref<Object> LoadObject(Uuid objectUuid);
 
         Ref<Object> LoadObject(const Name& pathInBundle);
+
+        Ref<Object> LoadObject(ClassType* objectClass);
+
+        template<typename TObject>
+        Ref<TObject> LoadObject()
+        {
+            return (Ref<TObject>)LoadObject(TObject::StaticClass());
+        }
 
         void SetObjectUuid(const Ref<Object>& object, const Uuid& uuid);
 
