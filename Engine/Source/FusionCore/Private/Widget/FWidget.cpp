@@ -157,7 +157,7 @@ namespace CE
         FFusionContext* context = GetContext();
         if (IsFocused() && context)
         {
-            context->SetFocusWidget(parent);
+            context->SetFocusWidget(parent.Get());
         }
     }
 
@@ -216,11 +216,11 @@ namespace CE
         Construct();
     }
 
-    void FWidget::OnBeforeDestroy()
+    void FWidget::OnBeginDestroy()
     {
         ZoneScoped;
 
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         FusionApplication* app = FusionApplication::TryGet();
 
@@ -308,6 +308,11 @@ namespace CE
     {
         ZoneScoped;
 
+        if (child == nullptr)
+            return false;
+
+        Ref<FWidget> strongRef = child;
+
         if (TryAddChild(child))
         {
             if (child->GetOuter() == nullptr)
@@ -336,6 +341,11 @@ namespace CE
     void FWidget::RemoveChild(FWidget* child)
     {
         ZoneScoped;
+
+        if (child == nullptr)
+            return;
+
+        Ref<FWidget> strongRef = child;
 
         if (TryRemoveChild(child))
         {

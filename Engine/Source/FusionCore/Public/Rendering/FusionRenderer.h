@@ -28,7 +28,7 @@ namespace CE
 
         void Init(const FusionRendererInitInfo& initInfo);
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         void Begin();
 

@@ -22,11 +22,11 @@ namespace CE
 
         for (int i = 0; i < popupContent->GetChildCount(); ++i)
         {
-            FWidget* child = popupContent->GetChild(i);
+            Ref<FWidget> child = popupContent->GetChild(i);
             if (!child->IsOfType<FComboBoxItem>())
                 continue;
 
-            FComboBoxItem* childItem = static_cast<FComboBoxItem*>(child);
+            FComboBoxItem* childItem = static_cast<FComboBoxItem*>(child.Get());
             if (childItem == item)
             {
                 childItem->state |= FComboBoxItemState::Selected;
@@ -47,11 +47,11 @@ namespace CE
         if (index < 0 || index >= popupContent->GetChildCount())
             return;
 
-        FWidget* child = popupContent->GetChild(index);
+        Ref<FWidget> child = popupContent->GetChild(index);
         if (!child->IsOfType<FComboBoxItem>())
             return;
 
-        SelectItem(static_cast<FComboBoxItem*>(child));
+        SelectItem(static_cast<FComboBoxItem*>(child.Get()));
     }
 
     int FComboBox::GetItemCount() const
@@ -66,7 +66,7 @@ namespace CE
         if (!popupContent->GetChild(index)->IsOfType<FComboBoxItem>())
             return nullptr;
 
-        return static_cast<FComboBoxItem*>(popupContent->GetChild(index));
+        return static_cast<FComboBoxItem*>(popupContent->GetChild(index).Get());
     }
 
     int FComboBox::GetSelectedItemIndex()
@@ -240,7 +240,7 @@ namespace CE
 
         for (int i = 0; i < popupContent->GetChildCount(); ++i)
         {
-            FWidget* child = popupContent->GetChild(i);
+            Ref<FWidget> child = popupContent->GetChild(i);
             child->Style(m_ItemStyle);
         }
 
@@ -266,16 +266,16 @@ namespace CE
 
         for (int i = 0; i < popupContent->GetChildCount(); ++i)
         {
-            FWidget* child = popupContent->GetChild(i);
+            Ref<FWidget> child = popupContent->GetChild(i);
             if (!child->IsOfType<FComboBoxItem>())
                 continue;
 
-            itemsToDestroy.Add(child);
+            itemsToDestroy.Add(child.Get());
         }
 
         for (FWidget* widget : itemsToDestroy)
         {
-            widget->Destroy();
+            widget->BeginDestroy();
         }
     }
 

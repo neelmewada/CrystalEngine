@@ -190,9 +190,9 @@ void EditorLoop::PostInit()
 
 	AssetManager* assetManager = AssetManager::Get();
 
-	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
-	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
-	CE::Shader* textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
+	Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	Ref<CE::Shader> iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+	Ref<CE::Shader> textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
 
 	RPI::RPISystemInitInfo rpiInitInfo{};
 	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
@@ -223,7 +223,6 @@ void EditorLoop::PostInit()
 		projectBrowser->SetMinimizeButton(true);
 
 		mainWindow->SetResizable(false);
-
 		mainWindow->Show();
 	}
 	else
@@ -233,10 +232,10 @@ void EditorLoop::PostInit()
 		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
 		rootContext->AddChildContext(crystalEditorCtx);
 
-		CrystalEditorWindow* crystalEditor = nullptr;
+		Ref<CrystalEditorWindow> crystalEditor = nullptr;
 
 		FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
-		crystalEditorCtx->SetOwningWidget(crystalEditor);
+		crystalEditorCtx->SetOwningWidget(crystalEditor.Get());
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
@@ -270,6 +269,7 @@ void EditorLoop::RunLoop()
 
 		if (frameTimer >= 1.0f)
 		{
+			//CE_LOG(Info, All, "FPS: {}", frameCounter);
 
 			frameTimer = 0;
 			frameCounter = 0;
@@ -300,7 +300,7 @@ void EditorLoop::PreShutdown()
 	// Destroy the project manager, which consequently saves it's Preferences to disk.
 	if (auto projectManager = ProjectManager::TryGet())
 	{
-		projectManager->Destroy();
+		projectManager->BeginDestroy();
 	}
 
 	// Save project & settings, and unload
@@ -317,7 +317,7 @@ void EditorLoop::PreShutdown()
 	EditorStyle::Shutdown();
 
 	fApp->Shutdown();
-	fApp->Destroy();
+	fApp->BeginDestroy();
 
 	gEngine->PreShutdown();
 
@@ -423,11 +423,14 @@ void EditorLoop::AppInit()
 	windowInfo.maximised = windowInfo.fullscreen = false;
 	windowInfo.resizable = true;
 	windowInfo.hidden = true;
+#if PLATFORM_LINUX
+	windowInfo.hidden = false; // Weird behaviour on linux: Window doesn't show when called Show() if hidden is true on initialization.
+#endif
 	windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 	if (projectPath.IsEmpty())
 	{
 		isProjectBrowsingMode = true;
-		windowInfo.windowFlags |= PlatformWindowFlags::Utility;
+		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
 		gDefaultWindowWidth = 1024;
 		gDefaultWindowHeight = 640;
 	}
@@ -437,7 +440,6 @@ void EditorLoop::AppInit()
 	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
 
-	//mainWindow->Show();
 }
 
 void EditorLoop::AppPreShutdown()

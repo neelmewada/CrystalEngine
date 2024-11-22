@@ -1,10 +1,9 @@
-#pragma once
 
 #include "CoreMinimal.h"
 
 #include "../Bundle.inl"
 
-
+#if false
 
 namespace CE
 {
@@ -20,12 +19,17 @@ namespace CE
 		}
 	}
 
-	BundleSaveResult Bundle::SaveBundleToDisk(Bundle* bundle, Object* asset, Stream* stream)
+	BundleSaveResult Bundle::SaveBundleToDisk(const WeakRef<Bundle>& bundleRef, Object* asset, Stream* stream)
 	{
-		if (bundle == nullptr)
+		Ref<Bundle> bundle = bundleRef.Lock();
+		if (!bundle)
 		{
 			return BundleSaveResult::InvalidBundle;
 		}
+
+		ZoneScoped;
+		ZoneTextF(bundle->GetName().GetCString());
+
 		if (bundle->IsTransient())
 		{
 			CE_LOG(Error, All, "Could not save a transient bundle: {}", bundle->GetBundleName());
@@ -33,11 +37,8 @@ namespace CE
 		}
 		if (stream == nullptr || !stream->CanWrite())
 		{
-			return BundleSaveResult::UnknownError;
+			return BundleSaveResult::InvalidStream;
 		}
-
-		ZoneScoped;
-		ZoneTextF(bundle->GetName().GetCString());
 
 		if (asset == nullptr)
 			asset = bundle;
@@ -145,7 +146,7 @@ namespace CE
 		}
 	}
 
-	Bundle* Bundle::LoadBundleFromDisk(Bundle* outer, Stream* stream, IO::Path fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags)
+	Ref<Bundle> Bundle::LoadBundleFromDisk(const Ref<Bundle>& outer, Stream* stream, const IO::Path& fullBundlePath, BundleLoadResult& outResult, LoadFlags loadFlags)
 	{
 		String pathStr = fullBundlePath.GetString();
 		ZoneScoped;
@@ -206,13 +207,13 @@ namespace CE
 			bundleName = actualBundleName;
 		}
 
-		Array<Name> bundleDependendies{};
-		LoadBundleDependencies(stream, bundleDependendies);
+		Array<Name> bundleDependencies{};
+		LoadBundleDependencies(stream, bundleDependencies);
 
 		u8 isCooked = 0;
 		*stream >> isCooked;
 
-		Bundle* bundle = nullptr;
+		Ref<Bundle> bundle = nullptr;
 
 		{
 			LockGuard<SharedMutex> lock{ Bundle::bundleRegistryMutex };
@@ -220,12 +221,12 @@ namespace CE
 			if (loadedBundles.KeyExists(bundleName)) // Bundle is already loaded
 			{
 				bundle = loadedBundles[bundleName];
-				bundle->bundleDependencies = bundleDependendies;
+				bundle->bundleDependencies = bundleDependencies;
 			}
 			else if (loadedBundlesByUuid.KeyExists(bundleUuid)) // Bundle is already loaded
 			{
 				bundle = loadedBundlesByUuid[bundleUuid];
-				bundle->bundleDependencies = bundleDependendies;
+				bundle->bundleDependencies = bundleDependencies;
 			}
 			else
 			{
@@ -238,7 +239,7 @@ namespace CE
 
 				bundle = (Bundle*)Internal::CreateObjectInternal(params);
 				bundle->fullBundlePath = fullBundlePath;
-				bundle->bundleDependencies = bundleDependendies;
+				bundle->bundleDependencies = bundleDependencies;
 				bundle->isFullyLoaded = false;
 				bundle->objectUuidToEntryMap.Clear();
 			}
@@ -344,16 +345,19 @@ namespace CE
 
         if (stream == nullptr)
             return;
+
+		int i = 0;
         
         for (auto& [uuid, objectEntry] : objectUuidToEntryMap)
         {
             LoadObjectFromEntry(stream, uuid);
+			++i;
         }
         
 		isFullyLoaded = true;
     }
 
-    Object* Bundle::LoadObject(Uuid objectUuid)
+    Ref<Object> Bundle::LoadObject(Uuid objectUuid)
     {
 		ZoneScoped;
 
@@ -367,7 +371,7 @@ namespace CE
         return LoadObjectFromEntry(&fileStream, objectUuid);
     }
 
-	Object* Bundle::LoadObject(const Name& objectClassName)
+    Ref<Object> Bundle::LoadObject(const Name& objectClassName)
 	{
 		ZoneScoped;
 
@@ -384,7 +388,7 @@ namespace CE
 			}
 		}
 
-		for (auto subobject : GetSubObjectMap())
+		for (const auto& subobject : GetSubObjectMap())
 		{
 			if (subobject != nullptr && subobject->GetClass()->GetTypeName() == objectClassName)
 				return subobject;
@@ -393,10 +397,10 @@ namespace CE
 		return nullptr;
 	}
 
-	Object* Bundle::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
+	Ref<Object> Bundle::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
     {
 		ZoneScoped;
-
+		
         if (loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
         if (!objectUuidToEntryMap.KeyExists(objectUuid))
@@ -414,7 +418,7 @@ namespace CE
         if (dataSize == 0 || objectClass == nullptr)
             return nullptr;
 
-		Object* objectInstance = nullptr;
+		Ref<Object> objectInstance = nullptr;
 
 		if (objectUuid == this->GetBundleUuid() && objectClass->IsSubclassOf<Bundle>())
 		{
@@ -456,3 +460,5 @@ namespace CE
     }
     
 } // namespace CE
+
+#endif

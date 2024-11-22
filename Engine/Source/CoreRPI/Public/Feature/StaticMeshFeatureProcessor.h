@@ -14,7 +14,7 @@ namespace CE::RPI
 
 		Model* model = nullptr;
 
-		ModelAsset* originalModel = nullptr;
+		WeakRef<ModelAsset> originalModel = nullptr;
 
 		Matrix4x4 localToWorldTransform{};
 
@@ -47,7 +47,7 @@ namespace CE::RPI
 	struct ModelHandleDescriptor
 	{
 		Model* model = nullptr;
-		ModelAsset* originalModel = nullptr;
+		Ref<ModelAsset> originalModel = nullptr;
 	};
 
 	CLASS()

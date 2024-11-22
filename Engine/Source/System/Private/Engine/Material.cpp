@@ -125,11 +125,11 @@ namespace CE
 
         if (shader != nullptr)
         {
-            CE::Shader* resetShader = shader;
+            Ref<CE::Shader> resetShader = shader;
             shaderCollection = nullptr;
             this->shader = nullptr;
 
-            SetShader(resetShader);
+            SetShader(resetShader.Get());
         }
         else
         {
@@ -255,7 +255,7 @@ namespace CE
         propertyMap[name] = prop;
     }
 
-    void CE::Material::SetProperty(const Name& name, CE::Texture* value, const Vec2& offset, const Vec2& scaling)
+    void CE::Material::SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset, const Vec2& scaling)
     {
         valuesModified = true;
 

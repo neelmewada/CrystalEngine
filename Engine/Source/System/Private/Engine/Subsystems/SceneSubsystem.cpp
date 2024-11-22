@@ -28,7 +28,7 @@ namespace CE
 	{
 		if (activeScene)
 		{
-			activeScene->Destroy();
+			activeScene->BeginDestroy();
 			activeScene = nullptr;
 		}
 

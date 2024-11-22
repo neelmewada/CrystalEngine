@@ -98,18 +98,28 @@ namespace CE
                 return impl(args...);
             }
 
+        private:
+
+#if PLATFORM_LINUX
+            template<int Num>
+            using Placeholder = std::_Placeholder<Num>;
+#else
+            template<int Num>
+            using Placeholder = std::_Ph<Num>;
+#endif
+
         protected:
 
             template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
             DelegateBase(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance, std::index_sequence<Is...>) : handle(GenerateRandomU64())
             {
-                impl = std::bind(function, instance, std::_Ph<Is + 1>()...);
+                impl = std::bind(function, instance, Placeholder<Is + 1>()...);
             }
 
             template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
             DelegateBase(ReturnType(ClassOrStruct::* function)(Args...) const, ClassOrStruct* instance, std::index_sequence<Is...>) : handle(GenerateRandomU64())
             {
-                impl = std::bind(function, instance, std::_Ph<Is + 1>()...);
+                impl = std::bind(function, instance, Placeholder<Is + 1>()...);
             }
 
             std::function<TRetType(TArgs...)> impl = nullptr;

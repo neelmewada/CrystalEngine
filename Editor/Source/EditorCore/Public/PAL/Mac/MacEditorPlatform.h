@@ -7,6 +7,8 @@ namespace CE::Editor
     {
         CE_STATIC_CLASS(MacEditorPlatform)
     public:
+
+        static IO::Path GetEditorExecutablePath();
         
         static IO::Path ShowSelectDirectoryDialog(const IO::Path& defaultPath);
 

@@ -8,9 +8,9 @@ namespace CE::Editor
 
     }
 
-    void ArrayPropertyEditor::OnBeforeDestroy()
+    void ArrayPropertyEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
 
     }

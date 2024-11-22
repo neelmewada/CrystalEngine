@@ -32,9 +32,9 @@ namespace CE::Editor
         );
     }
 
-    void EditorDockTab::OnBeforeDestroy()
+    void EditorDockTab::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (dockspace)
         {

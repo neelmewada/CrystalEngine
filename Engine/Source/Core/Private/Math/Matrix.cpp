@@ -15,12 +15,12 @@ namespace CE
 		});
     }
 
-	Matrix4x4 Matrix4x4::OrthographicProjection(float l, float r, float t, float b, float near, float far)
+	Matrix4x4 Matrix4x4::OrthographicProjection(float l, float r, float t, float b, float nearPlane, float farPlane)
 	{
 		return Matrix4x4({
 			{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
 			{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
-			{ 0, 0, 1 / (far - near), -near / (far - near) },
+			{ 0, 0, 1 / (farPlane - nearPlane), -nearPlane / (farPlane - nearPlane) },
 			{ 0, 0, 0, 1 }
 		});
 	}

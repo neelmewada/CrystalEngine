@@ -28,6 +28,8 @@ namespace CE
 
 		Name GetAttachmentId() const { return attachmentId; }
 
+		f32 GetScaling() const override;
+
 		bool IsFocused() const override;
 
 		bool IsShown() const override;
@@ -72,7 +74,7 @@ namespace CE
 
 		void OnQueuedDestroy() override;
 
-		void OnBeforeDestroy() override;
+		void OnBeginDestroy() override;
 
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 		void OnWindowExposed(PlatformWindow* window) override;
@@ -82,6 +84,7 @@ namespace CE
 		void UpdateViewConstants();
 
 		PlatformWindow* platformWindow = nullptr;
+		u32 windowDpi = 0;
 
 		RHI::SwapChain* swapChain = nullptr;
 		RHI::DrawListTag drawListTag = 0;

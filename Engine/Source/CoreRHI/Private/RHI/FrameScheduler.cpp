@@ -44,7 +44,7 @@ namespace CE::RHI
 
     void FrameScheduler::Compile()
     {
-		if (frameGraph->presentSwapChains.NonEmpty())
+		if (frameGraph->presentSwapChains.NotEmpty())
 		{
 			numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
 		}

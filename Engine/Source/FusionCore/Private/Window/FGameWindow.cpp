@@ -14,9 +14,9 @@ namespace CE
         
     }
 
-    void FGameWindow::OnBeforeDestroy()
+    void FGameWindow::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (!IsDefaultInstance())
         {

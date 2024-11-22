@@ -30,7 +30,7 @@ namespace CE
 
 		Vec2 contentSize = {};
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled())
 				continue;
@@ -107,7 +107,7 @@ namespace CE
 
 		f32 totalFillRatio = 0.0f;
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled())
 				continue;
@@ -144,7 +144,7 @@ namespace CE
 
 		//remainingSize = Math::Max(remainingSize, 0.0f);
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled())
 				continue;
@@ -252,7 +252,7 @@ namespace CE
 			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
 		}
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled() || !child->Visible())
 				continue;

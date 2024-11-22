@@ -12,7 +12,7 @@ namespace CE
 
         u32 GetChildCount() const { return children.GetSize(); }
 
-        FWidget* GetChild(u32 index) const { return children[index]; }
+        Ref<FWidget> GetChild(u32 index) const { return children[index].Lock(); }
 
         void SetContextRecursively(FFusionContext* context) override;
 
@@ -45,7 +45,7 @@ namespace CE
     protected: // - Fields -
 
         FIELD()
-        Array<FWidget*> children{};
+        Array<WeakRef<FWidget>> children{};
 
     public: // - Fusion Properties -
 

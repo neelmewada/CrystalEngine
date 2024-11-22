@@ -184,7 +184,7 @@ namespace CE
             CacheAllFunctions();
         }
 
-        return cachedFunctions.NonEmpty();
+        return cachedFunctions.NotEmpty();
     }
 
     FunctionType* StructType::FindFunctionWithName(const Name& name)
@@ -198,7 +198,7 @@ namespace CE
         return nullptr;
     }
 
-    CE::Array<FunctionType*> StructType::FindAllFunctionsWithName(const Name& name)
+    CE::Array<FunctionType*> StructType::FindAllFunctions(const Name& name)
     {
         if (!functionsCached)
             CacheAllFunctions();
@@ -521,7 +521,7 @@ namespace CE
 
                 if (clazz->defaultInstance != nullptr)
 				{
-					clazz->defaultInstance->Destroy();
+					clazz->defaultInstance->BeginDestroy();
                 	clazz->defaultInstance = nullptr;
 				}
 			}
@@ -565,7 +565,7 @@ namespace CE
 			defaultInstance = CreateObject<Object>(transientBundle, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
 		}
 		
-		return defaultInstance;
+		return defaultInstance.Get();
 	}
 
     void ClassType::RegisterClassType(ClassType* type)
@@ -584,7 +584,9 @@ namespace CE
 		// Only fire registration event for types that are registered outside any module
 		// Types that are registered within a module will fire only after all types within that module are fully loaded
 		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+		{
 			CoreObjectDelegates::onClassRegistered.Broadcast(type);
+		}
     }
 
     void ClassType::DeregisterClassType(ClassType* type)
@@ -593,7 +595,7 @@ namespace CE
             return;
 
         CoreObjectDelegates::onClassDeregistered.Broadcast(type);
-        
+
         type->defaultInstance = nullptr;
         type->fieldsCached = false;
         type->attributesCached = false;
@@ -601,6 +603,12 @@ namespace CE
 
         registeredClasses.Remove(type->GetTypeId());
         registeredClassesByName.Remove(type->GetTypeName());
+
+        if (TypeInfo::currentlyLoadingModuleStack.IsEmpty() && type->defaultInstance.Get())
+        {
+            type->defaultInstance->BeginDestroy();
+            type->defaultInstance = nullptr;
+        }
     }
 
 	void ClassType::CreateDefaultInstancesForCurrentModule()

@@ -47,9 +47,9 @@ namespace CE::Editor
         treeView->ApplyStyleRecursively();
     }
 
-    void SceneOutlinerTab::OnBeforeDestroy()
+    void SceneOutlinerTab::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (IsDefaultInstance())
             return;

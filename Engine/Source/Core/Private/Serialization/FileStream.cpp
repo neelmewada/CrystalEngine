@@ -3,13 +3,13 @@
 
 namespace CE
 {
-    FileStream::FileStream(const IO::Path& filePath, Permissions openMode, bool openAsBinary)
+    FileStream::FileStream(const IO::Path& filePath, Permissions openMode, bool openAsBinary, bool forceTruncate)
 		: filePath(filePath)
     {
         ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!");
 
         this->openMode = openMode;
-        std::ios::openmode mode = 0;
+        std::ios::openmode mode = static_cast<std::ios::openmode>(0);
 
         if (openMode == Permissions::ReadOnly)
         {
@@ -35,7 +35,7 @@ namespace CE
             return;
         }
 
-		if (filePath.Exists() && openMode == Permissions::WriteOnly)
+		if (filePath.Exists() && (openMode == Permissions::WriteOnly || forceTruncate))
 		{
 			mode |= std::ios::trunc;
 		}

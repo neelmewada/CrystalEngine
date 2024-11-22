@@ -13,7 +13,7 @@ namespace CE
 		if (componentType == nullptr)
 			return nullptr;
 		if (rootComponent)
-			rootComponent->Destroy();
+			rootComponent->BeginDestroy();
 		rootComponent = nullptr;
 		
 		if (name.IsEmpty())
@@ -39,7 +39,7 @@ namespace CE
 			// Otherwise, just detach the subobject without destroying it.
 			if (rootComponent->ParentExistsInChain(this))
 			{
-				rootComponent->Destroy();
+				rootComponent->BeginDestroy();
 			}
 			else
 			{

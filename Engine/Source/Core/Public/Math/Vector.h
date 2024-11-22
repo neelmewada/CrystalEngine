@@ -63,8 +63,8 @@ namespace CE
 		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
-				CE::GetHash(x), CE::GetHash(y)
-			});
+                CE::GetHash(x), CE::GetHash(y)
+            });
 		}
 
         Vec2 ToVec2() const
@@ -264,8 +264,8 @@ namespace CE
 		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
-				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z)
-			});
+                CE::GetHash(x), CE::GetHash(y), CE::GetHash(z)
+            });
 		}
 
         inline T operator[](int index) const
@@ -499,8 +499,8 @@ namespace CE
 		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
-				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z), CE::GetHash(w)
-			});
+                CE::GetHash(x), CE::GetHash(y), CE::GetHash(z), CE::GetHash(w)
+            });
 		}
 
         Vec4 ToVec4() const

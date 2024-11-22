@@ -13,6 +13,8 @@ namespace CE::Editor
         
         AssetDefinition();
         virtual ~AssetDefinition();
+
+    	virtual u32 GetAssetVersion() const { return 0; }
         
         /// Return an array of extensions of source files that produce this asset type.
         virtual const Array<String>& GetSourceExtensions() = 0;

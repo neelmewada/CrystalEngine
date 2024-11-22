@@ -3,6 +3,8 @@
 
 #include "Bundle.inl"
 
+#if false
+
 namespace CE
 {
 	static HashMap<TypeId, u8> typeIdToFieldTypeMap{
@@ -234,8 +236,9 @@ namespace CE
 
 			*stream << mapSize;
 
-            for (const auto& object : map)
+            for (const auto& objectRef : map)
             {
+                Object* object = objectRef.Get();
                 if (object == nullptr)
                     continue;
 
@@ -679,3 +682,5 @@ namespace CE
     }
 
 }
+
+#endif

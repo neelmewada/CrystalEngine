@@ -10,7 +10,6 @@
 #include "Function.h"
 #include "Class.h"
 #include "Enum.h"
-#include "Signal.h"
 #include "SubClassType.h"
 
 #include "ObjectCreationContext.h"
@@ -55,7 +54,7 @@ namespace CE
             return name;
         }
 
-        virtual void SetName(const Name& newName);
+        void SetName(const Name& newName);
         
         INLINE Uuid GetUuid() const
         {
@@ -72,7 +71,7 @@ namespace CE
             return objectFlags;
         }
 
-		INLINE Object* GetOuter() const
+		INLINE const WeakRef<Object>& GetOuter() const
 		{
 			return outer;
 		}
@@ -109,13 +108,21 @@ namespace CE
             return HasAnyObjectFlags(OF_TemplateInstance);
         }
 
+        bool IsPendingDestruction() const
+        {
+            return HasAnyObjectFlags(OF_PendingDestroy);
+        }
+
 		bool IsTransient() const;
 
 		inline u32 GetSubObjectCount() const { return attachedObjects.GetObjectCount(); }
-        inline Object* GetSubobject(int index) const { return attachedObjects.GetObjectAt(index); }
+        inline Object* GetSubObject(int index) const { return attachedObjects.GetObjectAt(index); }
 		inline const ObjectMap& GetSubObjectMap() const { return attachedObjects; }
 
         // Lifecycle
+
+        void AddToRoot();
+        void RemoveFromRoot();
 
         virtual void AttachSubobject(Object* subobject);
         
@@ -125,18 +132,13 @@ namespace CE
 
 		bool IsObjectPresentInHierarchy(Object* searchObject);
 
-        void RequestDestroy();
-
-		FORCE_INLINE void Destroy()
-		{
-			RequestDestroy();
-		}
+        void BeginDestroy();
 
         // - Public API -
 
         virtual bool IsAsset() const { return false; }
 
-        virtual bool IsBundle() const { return false; }
+        bool IsBundle() const;
 
 		bool IsOfType(ClassType* classType) const;
 
@@ -147,7 +149,7 @@ namespace CE
 		}
 
 		template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
-		FORCE_INLINE static TClass* CastTo(Object* instance)
+		static TClass* CastTo(Object* instance)
 		{
 			if (instance == nullptr || !instance->IsOfType<TClass>())
 			{
@@ -160,13 +162,15 @@ namespace CE
 
 		Name GetPathInBundle();
         
+        Name GetPathInBundle(Bundle* bundle);
+        
 		// Returns the bundle this object belongs to.
         Bundle* GetBundle();
 
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
 		void FetchObjectReferences(HashMap<Uuid, Object*>& outReferences);
 
-		Object* Clone(String cloneName = "", bool deepClone = true);
+        void FetchSubObjectsRecursive(Array<Object*>& outSubObjects);
 
 		void LoadFromTemplate(Object* templateObject);
 
@@ -189,12 +193,11 @@ namespace CE
 		void LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap,
 			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
 
-		Object* CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
-
 		// Lifecycle
 
 		virtual void OnAfterConstruct() {}
-		virtual void OnBeforeDestroy() {}
+		virtual void OnBeginDestroy() {}
+        virtual void OnBeforeDestroy() {}
 
 		virtual void OnSubobjectAttached(Object* subobject) {}
 
@@ -240,7 +243,7 @@ namespace CE
 
 		void FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance);
 
-    private:
+        void DestroyImmediate();
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class ::Bundle_WriteRead_Test;
@@ -250,12 +253,19 @@ namespace CE
 		friend class SaveBundleContext;
         friend class BinaryDeserializer;
         friend class FieldType;
-        
-        friend class EventBus;
+
         friend Object* Internal::CreateObjectInternal(const Internal::ObjectCreateParams& params);
 
         template<typename T>
         friend struct Internal::TypeInfoImpl;
+
+        template<typename TObject>
+        friend class Ref;
+
+        template<typename TObject>
+        friend class WeakRef;
+
+        friend class Internal::RefCountControl;
         
         /*
          *  Fields
@@ -267,7 +277,8 @@ namespace CE
         // Subobject Lifecycle
 		ObjectMap attachedObjects{};
         
-        Object* outer = nullptr;
+        WeakRef<Object> outer = nullptr;
+        Internal::RefCountControl* control = nullptr;
 
         ObjectFlags objectFlags = OF_NoFlags;
 

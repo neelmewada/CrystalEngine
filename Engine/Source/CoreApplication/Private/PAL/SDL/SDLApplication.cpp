@@ -3,14 +3,12 @@
 
 #include <SDL.h>
 
+
+
 namespace CE
 {
 	int SDLWindowEventWatch(void* data, SDL_Event* event);
 
-	SDLApplication* SDLApplication::Create()
-	{
-		return new SDLApplication();
-	}
 
 	SDLApplication* SDLApplication::Get()
 	{
@@ -31,16 +29,16 @@ namespace CE
 	{
 		Super::Initialize();
 		
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0)
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 		{
-			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
+			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
 		}
 
 		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
 
 		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "1");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "0");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
 
 #if PAL_TRAIT_BUILD_EDITOR
 		// Hints for editor window
@@ -167,6 +165,7 @@ namespace CE
 		{
 			return InitMainWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 		}
+
 		auto window = new SDLPlatformWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 		windowList.Add(window);
 		for (auto messageHandler : messageHandlers)
@@ -182,6 +181,7 @@ namespace CE
 		{
 			return InitMainWindow(title, width, height, maximised, fullscreen);
 		}
+
 		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen, false, hidden);
 		windowList.Add(window);
 		for (auto messageHandler : messageHandlers)
@@ -198,6 +198,7 @@ namespace CE
 		{
 			return InitMainWindow(title, width, height, info);
 		}
+
 		auto window = new SDLPlatformWindow(title, width, height, info);
 		windowList.Add(window);
 		for (auto messageHandler : messageHandlers)

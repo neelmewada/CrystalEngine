@@ -59,7 +59,7 @@ namespace CE::Editor
             {
                 RecentProjectItem* item = static_cast<RecentProjectItem*>(items[i]);
                 items.Remove(item);
-                item->Destroy();
+                item->BeginDestroy();
             }
         }
 

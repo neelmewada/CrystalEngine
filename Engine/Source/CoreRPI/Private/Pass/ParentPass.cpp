@@ -34,7 +34,7 @@ namespace CE::RPI
     {
 		for (Pass* pass : passes)
 		{
-			pass->Destroy();
+			pass->BeginDestroy();
 		}
 		passes.Clear();
     }

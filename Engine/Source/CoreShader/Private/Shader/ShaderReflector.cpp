@@ -25,9 +25,10 @@ namespace CE
 	{
 #if PLATFORM_DESKTOP
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
-		defer(
+		defer(&)
+		{
 			delete reflection;
-		);
+		};
 
 		auto resources = reflection->get_shader_resources();
 		

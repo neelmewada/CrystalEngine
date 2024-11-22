@@ -10,7 +10,7 @@ namespace CE
 
         auto curState = JsonValueType::None;
 
-        if (parserStack.NonEmpty())
+        if (parserStack.NotEmpty())
         {
             curState = parserStack.Top();
         }

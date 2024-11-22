@@ -64,7 +64,7 @@ namespace CE::Editor
 		gProjectName = projectFilePath.GetFileName().RemoveExtension().GetString();
 
 		// Load settings bundle
-		Bundle* settingsBundle = GetSettingsBundle();
+		Ref<Bundle> settingsBundle = GetSettingsBundle();
 		
 		return true;
     }
@@ -84,7 +84,7 @@ namespace CE::Editor
 
 		stream.Close();
 
-		return project.engineVersion.NonEmpty();
+		return project.engineVersion.NotEmpty();
 	}
 
 	bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, String projectName)
@@ -123,9 +123,9 @@ namespace CE::Editor
 		IO::Path::CreateDirectories(projectFolder / "Logs");
 		IO::Path::CreateDirectories(projectFolder / "Temp");
 
-		Bundle* settingsBundle = GetSettingsBundle();
+		//Bundle* settingsBundle = GetSettingsBundle();
 		
-		ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+		Ref<ProjectSettings> projectSettings = GetSettings<ProjectSettings>();
 		projectSettings->projectName = projectName;
 		projectSettings->projectVersion = CE_ENGINE_VERSION_STRING_SHORT;
 

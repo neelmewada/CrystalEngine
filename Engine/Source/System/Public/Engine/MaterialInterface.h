@@ -38,7 +38,7 @@ namespace CE
         Name textureName = "";
 
         FIELD()
-        CE::Texture* texture = nullptr;
+        WeakRef<CE::Texture> texture = nullptr;
 
         FIELD()
         Vec2 offset = Vec2(0, 0);
@@ -102,7 +102,7 @@ namespace CE
 
         virtual void SetProperty(const Name& name, const Matrix4x4& value) = 0;
 
-        virtual void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) = 0;
+        virtual void SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) = 0;
 
         virtual void ApplyProperties() = 0;
 
@@ -110,7 +110,7 @@ namespace CE
 
         virtual RPI::Material* GetRpiMaterial() = 0;
 
-        virtual CE::Shader* GetShader() = 0;
+        virtual const Ref<CE::Shader>& GetShader() = 0;
 
     protected:
 

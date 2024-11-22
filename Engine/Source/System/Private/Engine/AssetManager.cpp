@@ -36,13 +36,13 @@ namespace CE
 	void AssetManager::Shutdown()
 	{
 		{
-			LockGuard<SharedMutex> lock{ loadedAssetsMutex };
+			LockGuard lock{ loadedAssetsMutex };
 
 			for (auto [uuid, bundle] : loadedAssetsByUuid)
 			{
 				if (bundle != nullptr)
 				{
-					bundle->Destroy();
+					bundle->BeginDestroy();
 				}
 			}
 
@@ -72,7 +72,7 @@ namespace CE
 		return assetRegistry->GetAssetsByPath(path);
 	}
 
-	Array<Asset*> AssetManager::LoadAssetsAtPath(const Name& path, SubClass<Asset> classType)
+	Array<Ref<Asset>> AssetManager::LoadAssetsAtPath(const Name& path, SubClass<Asset> classType)
 	{
 		ZoneScoped;
 		ZoneTextF(path.GetCString());
@@ -81,7 +81,7 @@ namespace CE
 		if (assetDatas.IsEmpty())
 			return {};
 
-		Bundle* bundle = nullptr;
+		Ref<Bundle> bundle = nullptr;
 
 		loadedAssetsMutex.Lock();
 		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
@@ -91,7 +91,12 @@ namespace CE
 		}
 		else
 		{
-			bundle = Bundle::LoadBundleFromDisk(nullptr, path, LOAD_Full);
+			LoadBundleArgs args{
+				.loadFully = true,
+				.forceReload = false
+			};
+
+			bundle = Bundle::LoadBundle(this, path, args);
 			if (bundle == nullptr)
 			{
 				loadedAssetsMutex.Unlock();
@@ -105,17 +110,17 @@ namespace CE
 		if (!bundle)
 			return {};
 
-		Array<Asset*> assets{};
+		Array<Ref<Asset>> assets{};
 
 		if (classType == nullptr || !classType->IsSubclassOf<Asset>())
 			classType = Asset::StaticType();
 
 		for (auto assetData : assetDatas)
 		{
-			Object* object = bundle->LoadObject(assetData->assetUuid);
-			if (object && object->IsOfType(classType))
+			Ref<Object> object = bundle->LoadObject(assetData->assetUuid);
+			if (object.IsValid() && object->IsOfType(classType))
 			{
-				assets.Add((Asset*)object);
+				assets.Add((Ref<Asset>)object);
 			}
 		}
 
@@ -134,12 +139,12 @@ namespace CE
 
 		LockGuard lock{ loadedAssetsMutex };
 
-		loadedAssetsByPath.Remove(bundle->GetBundleName());
-		loadedAssetsByUuid.Remove(bundle->GetBundleUuid());
-		bundle->Destroy();
+		loadedAssetsByPath.Remove(bundle->GetName());
+		loadedAssetsByUuid.Remove(bundle->GetUuid());
+		bundle->BeginDestroy();
 	}
 
-	Asset* AssetManager::LoadAssetAtPath(const Name& path)
+	Ref<Asset> AssetManager::LoadAssetAtPath(const Name& path)
 	{
 		ZoneScoped;
 		ZoneTextF(path.GetCString());
@@ -148,40 +153,47 @@ namespace CE
 		if (!assetData)
 			return nullptr;
 		
-		Bundle* bundle = nullptr;
+		Ref<Bundle> bundle = nullptr;
 
-		loadedAssetsMutex.Lock();
-		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 		{
-			bundle = loadedAssetsByPath[path];
-			loadedAssetsMutex.Unlock();
-		}
-		else
-		{
-			bundle = Bundle::LoadBundleFromDisk(nullptr, path, LOAD_Full);
-			if (bundle == nullptr)
+			LockGuard lock{ loadedAssetsMutex };
+			
+			if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
 			{
-				loadedAssetsMutex.Unlock();
-				return nullptr;
+				bundle = loadedAssetsByPath[path];
 			}
-			loadedAssetsByPath[path] = bundle;
-			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
-			loadedAssetsMutex.Unlock();
+			else
+			{
+				LoadBundleArgs args{
+					.loadFully = true
+				};
+
+				bundle = Bundle::LoadBundle(this, path, args);
+				if (bundle == nullptr)
+				{
+					return nullptr;
+				}
+				loadedAssetsByPath[path] = bundle;
+				loadedAssetsByUuid[bundle->GetUuid()] = bundle;
+			
+			}
 		}
 		
 		if (!bundle)
 			return nullptr;
 
-		Object* object = bundle->LoadObject(bundle->GetPrimaryObjectUuid());
+		auto primaryObject = bundle->GetPrimaryObjectData();
+
+		Ref<Object> object = bundle->LoadObject(primaryObject.uuid);
 		if (!object || !object->IsOfType<Asset>())
 			return nullptr;
 		
-		return (Asset*)object;
+		return (Ref<Asset>)object;
 	}
 
 	RHI::Texture* AssetManager::LoadTextureAtPath(const Name& path)
 	{
-		CE::Texture2D* texture = LoadAssetAtPath<CE::Texture2D>(path);
+		Ref<CE::Texture2D> texture = LoadAssetAtPath<CE::Texture2D>(path);
 		if (!texture)
 			return nullptr;
 

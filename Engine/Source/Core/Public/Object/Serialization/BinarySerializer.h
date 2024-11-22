@@ -1,5 +1,7 @@
 #pragma once
 
+#if false
+
 namespace CE
 {
     
@@ -51,3 +53,4 @@ namespace CE
 
 } // namespace CE
 
+#endif

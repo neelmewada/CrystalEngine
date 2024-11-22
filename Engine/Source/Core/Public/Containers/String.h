@@ -16,8 +16,6 @@
 #include <string>
 #include <ostream>
 
-#define YAML_CPP_API
-#include "yaml-cpp/yaml.h"
 
 namespace CE
 {
@@ -158,7 +156,7 @@ namespace CE
         }
 
         inline bool IsEmpty() const { return StringLength == 0; }
-		inline bool NonEmpty() const { return StringLength > 0; }
+		inline bool NotEmpty() const { return StringLength > 0; }
 
         bool IsEmptyOrWhiteSpace() const;
 
@@ -431,9 +429,3 @@ template <> struct fmt::formatter<CE::String> {
     }
 };
 
-namespace YAML
-{
-    inline Emitter& operator<<(Emitter& emitter, CE::String string) {
-        return emitter.Write(std::string(string.GetCString()));
-    }
-}

@@ -246,6 +246,24 @@ namespace CE
             WriteValue(value);
         }
 
+        void WriteValue(Uuid value)
+		{
+            if (!CanWriteValueWithoutIdentifier())
+                return;
+
+            WriteCommaIfNeeded();
+
+            if (prevToken != JsonToken::Colon)
+            {
+                WritePolicy::WriteLineEnding(stream);
+                WritePolicy::WriteLineTabs(stream, indentLevel);
+            }
+
+            WriteStringValue(value.ToString());
+
+            prevToken = JsonToken::Number;
+		}
+
         template<typename TInt> requires TIsIntegralType<TInt>::Value
         void WriteValue(TInt value)
         {

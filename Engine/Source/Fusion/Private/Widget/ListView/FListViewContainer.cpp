@@ -27,7 +27,7 @@ namespace CE
 
         Vec2 contentSize = {};
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled())
                 continue;
@@ -74,7 +74,7 @@ namespace CE
 
         f32 remainingSize = availableSize.height;
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled())
                 continue;
@@ -110,7 +110,7 @@ namespace CE
             painter->PushClipShape(Matrix4x4::Identity(), computedSize);
         }
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled())
                 continue;

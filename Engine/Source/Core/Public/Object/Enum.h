@@ -231,7 +231,7 @@ template <> struct fmt::formatter<Namespace::Enum> {\
                 s64 constValue = enumType->GetConstant(i)->GetValue();\
                 if (constValue != 0 && EnumHasFlag(value, (Namespace::Enum)constValue))\
                 {\
-                    if (result.NonEmpty())\
+                    if (result.NotEmpty())\
                         result += "|";\
                     result += enumType->GetConstant(i)->GetName().GetString();\
                 }\

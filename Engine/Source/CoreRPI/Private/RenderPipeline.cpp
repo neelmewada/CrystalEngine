@@ -13,7 +13,7 @@ namespace CE::RPI
     {
 		if (passTree)
 		{
-			passTree->Destroy();
+			passTree->BeginDestroy();
 			passTree = nullptr;
 		}
     }

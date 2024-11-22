@@ -202,12 +202,12 @@ namespace CE
 		bool HasFunctions();
 
 		FunctionType* FindFunctionWithName(const Name& name);
-		CE::Array<FunctionType*> FindAllFunctionsWithName(const Name& name);
+		CE::Array<FunctionType*> FindAllFunctions(const Name& name);
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
 		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...))
 		{
-			auto functions = FindAllFunctionsWithName(name);
+			auto functions = FindAllFunctions(name);
 			
 			TypeId signature = CE::GetFunctionSignature(function);
 
@@ -225,7 +225,7 @@ namespace CE
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
 		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...) const)
 		{
-			auto functions = FindAllFunctionsWithName(name);
+			auto functions = FindAllFunctions(name);
 
 			TypeId signature = CE::GetFunctionSignature(function);
 
@@ -327,7 +327,11 @@ namespace CE
 		template<typename StructOrClass, typename Field>
 		void AddField(const char* name, Field StructOrClass::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
 		{
+			using RefCounted = TRefCounted<Field>;
+
 			constexpr bool isPointer = std::is_pointer_v<Field>;
+			constexpr bool isRef = TIsRef<Field>::Value;
+			constexpr bool isWeakRef = TIsWeakRef<Field>::Value;
 			typedef RemovePointerFromType<Field> _Type0;
 			typedef RemoveReferenceFromType<_Type0> _Type1;
 			typedef RemoveConstVolatileFromType<_Type1> FinalType;
@@ -336,10 +340,12 @@ namespace CE
 
 			static_assert(!isPointer || isObject || isTypeInfo, "Pointer types should only be used for object fields!");
 
+			RefType refType = RefCounted::GetRefType();
+
 			localFields.Add(FieldType(name,
                                       CE::GetTypeId<Field>(),
                                       underlyingTypeId,
-                                      sizeof(Field), offset, attributes, this));
+                                      sizeof(Field), offset, attributes, this, refType));
 		}
 
 	private:
@@ -629,7 +635,7 @@ namespace CE
 
 		Internal::IClassTypeImpl* Impl = nullptr;
 
-		Object* defaultInstance = nullptr;
+		Ref<Object> defaultInstance = nullptr;
 
 		bool superTypesCached = false;
 		Array<ClassType*> superClasses{};

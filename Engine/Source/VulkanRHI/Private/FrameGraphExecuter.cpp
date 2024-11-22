@@ -21,7 +21,7 @@ namespace CE::Vulkan
 		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-		bool swapChainExists = frameGraph->presentSwapChains.NonEmpty();
+		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
 
 		const Array<RHI::Scope*>& producers = frameGraph->producers;
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
@@ -116,7 +116,7 @@ namespace CE::Vulkan
 
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
-		bool swapChainExists = frameGraph->presentSwapChains.NonEmpty();
+		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
 
 		const Array<RHI::Scope*>& producers = frameGraph->producers;
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
@@ -242,7 +242,7 @@ namespace CE::Vulkan
 
 		while (scopeInChain != nullptr)
 		{
-			if (scopeInChain->swapChainsUsedByAttachments.NonEmpty())
+			if (scopeInChain->swapChainsUsedByAttachments.NotEmpty())
 			{
 				for (auto swapChain : scopeInChain->swapChainsUsedByAttachments)
 				{
@@ -300,7 +300,7 @@ namespace CE::Vulkan
 				commandList->currentPass = currentScope->renderPass;
 				commandList->currentSubpass = currentScope->subpassIndex;
 
-				bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NonEmpty();
+				bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 				HashSet<RHI::AttachmentID> clearedAttachments{};
@@ -344,7 +344,7 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (initial barriers)
-				if (currentScope->initialBarriers[currentImageIndex].NonEmpty())
+				if (currentScope->initialBarriers[currentImageIndex].NotEmpty())
 				{
 					for (const auto& barrier : currentScope->initialBarriers[currentImageIndex])
 					{
@@ -774,7 +774,7 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (exit barriers)
-				if (currentScope->barriers[currentImageIndex].NonEmpty())
+				if (currentScope->barriers[currentImageIndex].NotEmpty())
 				{
 					for (const auto& barrier : currentScope->barriers[currentImageIndex])
 					{
@@ -903,7 +903,7 @@ namespace CE::Vulkan
 		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 
-		if (presentRequired && scopeChain.Top()->presentSwapChains.NonEmpty())
+		if (presentRequired && scopeChain.Top()->presentSwapChains.NotEmpty())
 		{
 			List<VkSwapchainKHR> swapchainKhrs{};
 			List<u32> imageIndices{};

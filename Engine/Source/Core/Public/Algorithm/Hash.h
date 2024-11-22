@@ -64,7 +64,7 @@ namespace CE
 	CORE_API u32 CalculateCRC(const void* data, SIZE_T size);
 	CORE_API u32 CalculateCRC(const void* data, SIZE_T size, u32 crc);
 	
-	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes);
+	CORE_API SIZE_T GetCombinedHashes(const CE::Array<SIZE_T>& hashes);
 
 	template<typename... Args>
 	inline SIZE_T GetHashes(const Args&... values)

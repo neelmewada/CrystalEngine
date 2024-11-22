@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include <map>
+#include <condition_variable>
 
 namespace CE
 {
@@ -79,7 +80,7 @@ namespace CE
 		std::recursive_mutex mut{};
 	};
 
-    struct SharedRecursiveMutex
+	class SharedRecursiveMutex
     {
     public:
 

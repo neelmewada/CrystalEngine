@@ -27,7 +27,7 @@ namespace CE
 
 		Vec2 contentSize = {};
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled())
 				continue;
@@ -94,7 +94,7 @@ namespace CE
 
 		remainingSize -= m_SplitterSize * children.GetSize();
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled())
 				continue;
@@ -166,7 +166,7 @@ namespace CE
 			{
 				f32 offset = (1.0f - m_SplitterDrawRatio) * m_SplitterSize * 0.5f;
 
-				FWidget* left = children[i];
+				FWidget* left = children[i].Get();
 				Vec2 splitterPos = left->GetComputedPosition() +
 					(m_Direction == FSplitDirection::Horizontal
 						? Vec2(left->computedSize.width + offset, 0)
@@ -185,7 +185,7 @@ namespace CE
 		{
 			f32 offset = (1.0f - m_SplitterDrawRatio) * m_SplitterSize * 0.5f;
 
-			FWidget* left = children[hoveredSplitIndex];
+			FWidget* left = children[hoveredSplitIndex].Get();
 			Vec2 splitterPos = left->GetComputedPosition() + 
 				(m_Direction == FSplitDirection::Horizontal 
 					? Vec2(left->computedSize.width + offset, 0)
@@ -202,7 +202,7 @@ namespace CE
 			}
 		}
 
-		for (FWidget* child : children)
+		for (const auto& child : children)
 		{
 			if (!child->Enabled() || !child->Visible())
 				continue;
@@ -239,8 +239,8 @@ namespace CE
 
 				for (int i = 0; mouseEvent->type != FEventType::MouseLeave && i < children.GetSize() - 1; ++i)
 				{
-					FWidget* child = children[i];
-					FWidget* nextChild = children[i + 1];
+					FWidget* child = children[i].Get();
+					FWidget* nextChild = children[i + 1].Get();
 
 					if (m_Direction == FSplitDirection::Horizontal)
 					{
@@ -292,8 +292,8 @@ namespace CE
 
 				for (int i = 0; i < children.GetSize() - 1; ++i)
 				{
-					FWidget* child = children[i];
-					FWidget* nextChild = children[i + 1];
+					FWidget* child = children[i].Get();
+					FWidget* nextChild = children[i + 1].Get();
 
 					leftFillRatio = child->FillRatio();
 					rightFillRatio = nextChild->FillRatio();
@@ -336,8 +336,8 @@ namespace CE
 
 				if (draggedSplitIndex >= 0 && draggedSplitIndex < children.GetSize() - 1)
 				{
-					FWidget* left = children[draggedSplitIndex];
-					FWidget* right = children[draggedSplitIndex + 1];
+					FWidget* left = children[draggedSplitIndex].Get();
+					FWidget* right = children[draggedSplitIndex + 1].Get();
 
 					f32 leftRatio = leftFillRatio + mouseDelta / totalSize;
 					f32 rightRatio = rightFillRatio - mouseDelta / totalSize;

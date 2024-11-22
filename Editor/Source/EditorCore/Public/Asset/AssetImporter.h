@@ -86,7 +86,7 @@ namespace CE::Editor
 
 		void Process() override;
 
-		virtual bool ProcessAsset(Bundle* bundle) = 0;
+		virtual bool ProcessAsset(const Ref<Bundle>& bundle) = 0;
 
 		inline bool Succeeded() const { return success; }
 		inline const String& GetErrorMessage() const { return errorMessage; }

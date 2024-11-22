@@ -802,6 +802,7 @@ namespace CE
 	    Super::OnFusionPropertyModified(propertyName);
 
         thread_local const CE::Name validator = "Validator";
+        thread_local const CE::Name text = "Text";
 
         if (propertyName == validator)
         {
@@ -809,6 +810,10 @@ namespace CE
             {
                 Text("");
             }
+        }
+        else if (propertyName == text && inputLabel->IsEditing())
+        {
+            inputLabel->StopEditing();
         }
     }
 

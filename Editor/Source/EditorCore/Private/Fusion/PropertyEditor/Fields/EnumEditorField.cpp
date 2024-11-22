@@ -44,7 +44,7 @@ namespace CE::Editor
                 items[i] = enumType->GetConstant(i)->GetDisplayName();
 	        }
 
-            if (items.NonEmpty())
+            if (items.NotEmpty())
             {
                 comboBox->Items(items);
                 comboBox->SelectItem(0);

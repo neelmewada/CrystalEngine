@@ -8,6 +8,8 @@
 
 #include <SDL_syswm.h>
 
+#include "PAL/Common/PlatformWindowMisc.h"
+
 constexpr auto MouseGrabPadding = 8;
 constexpr auto WindowDragPadding = 50;
 
@@ -160,7 +162,6 @@ namespace CE
 	void SDLPlatformWindow::SetAlwaysOnTop(bool alwaysOnTop)
 	{
 		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop ? SDL_TRUE : SDL_FALSE);
-		SDL_GetWindowFlags(handle)& SDL_WINDOW_ALWAYS_ON_TOP;
 	}
 
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
@@ -290,18 +291,30 @@ namespace CE
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
         SDL_GetWindowWMInfo(handle, &wmInfo);
+
 #if PLATFORM_WINDOWS
-		return wmInfo.info.win.window;
+		return (WindowHandle)wmInfo.info.win.window;
 #elif PLATFORM_MAC
-        return wmInfo.info.cocoa.window;
+        return (WindowHandle)wmInfo.info.cocoa.window;
+#elif PLATFORM_LINUX
+		if (wmInfo.subsystem == SDL_SYSWM_X11)
+			return wmInfo.info.x11.window;
+		if (wmInfo.subsystem == SDL_SYSWM_WAYLAND)
+			return (WindowHandle)wmInfo.info.wl.egl_window;
+		return 0;
 #else
-#   error Platform window handle not specified
+#   error Platform specific window handle not specified for the current platform
 #endif
 	}
 
 	String SDLPlatformWindow::GetTitle()
 	{
 		return SDL_GetWindowTitle(handle);
+	}
+
+	u32 SDLPlatformWindow::GetWindowDpi()
+	{
+		return PlatformWindowMisc::GetDpiForWindow(this);
 	}
 
 	void SDLPlatformWindow::Show()

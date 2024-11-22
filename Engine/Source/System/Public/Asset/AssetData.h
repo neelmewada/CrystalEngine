@@ -37,8 +37,8 @@ namespace CE
 			assetData.bundleName.GetHashValue(), 
 			assetData.assetName.GetHashValue(), 
 			assetData.assetClassPath.GetHashValue(),
-			assetData.bundleUuid,
-			assetData.assetUuid,
+			assetData.bundleUuid.GetHash(),
+			assetData.assetUuid.GetHash(),
 			assetData.sourceAssetPath.GetHashValue()
 		});
 	}

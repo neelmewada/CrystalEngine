@@ -73,7 +73,7 @@ namespace CE
 			if (isSingleShot)
 			{
 				Stop();
-				Destroy();
+				BeginDestroy();
 			}
 		}
 

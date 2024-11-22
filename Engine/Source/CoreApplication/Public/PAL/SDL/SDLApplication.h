@@ -12,8 +12,6 @@ namespace CE
     public:
         typedef PlatformApplication Super;
 
-        static SDLApplication* Create();
-
         static SDLApplication* Get();
 
         virtual ~SDLApplication();
@@ -88,7 +86,5 @@ namespace CE
 
         StaticArray<SDL_Cursor*, (SIZE_T)SystemCursor::COUNT> systemCursors{};
     };
-
-    typedef SDLApplication PlatformApplicationImpl;
     
 } // namespace CE

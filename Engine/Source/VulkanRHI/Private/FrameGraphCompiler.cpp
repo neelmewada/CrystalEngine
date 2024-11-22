@@ -134,7 +134,7 @@ namespace CE::Vulkan
 		// If frame-graph presents at least 1 swap-chain
 		bool presentSwapChains = false;
 
-		if (frameGraph->presentSwapChains.NonEmpty())
+		if (frameGraph->presentSwapChains.NotEmpty())
 		{
 			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
 			numFramesInFlight = imageCount;

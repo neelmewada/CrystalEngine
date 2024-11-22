@@ -11,7 +11,7 @@ namespace CE
 
     String WindowsMisc::GetOSVersionString()
     {
-        if (osVersionString.NonEmpty())
+        if (osVersionString.NotEmpty())
             return osVersionString;
 
         NTSTATUS(WINAPI * RtlGetVersion)(LPOSVERSIONINFOEXW);

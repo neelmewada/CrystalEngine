@@ -57,8 +57,8 @@ namespace CE
 
 		Array<String> GetSubDirectoriesAtPath(const Name& path);
 		PathTreeNode* GetDirectoryNode(const Name& path);
-
-		virtual Name ResolveBundlePath(Uuid bundleUuid) override;
+		
+		Name ResolveBundlePath(const Uuid& uuid) override;
 
 	protected:
 
@@ -70,7 +70,7 @@ namespace CE
 
 		// - Internal API -
 
-		void OnAssetImported(const Name& bundleName, const Name& sourcePath = "");
+		void OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath = "");
 
 		void OnAssetDeleted(const Name& bundleName);
 

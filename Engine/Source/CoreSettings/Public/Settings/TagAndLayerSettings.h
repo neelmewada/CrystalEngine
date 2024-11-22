@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS(Settings = "TagAndLayerSettings", DisplayName = "Tags and Layers", SettingsCategory = "Project")
+    CLASS(Settings = "TagAndLayerSettings", DisplayName = "Tags and Layer Settings", SettingsCategory = "Project")
 	class CORESETTINGS_API TagAndLayerSettings : public Settings
 	{
 		CE_CLASS(TagAndLayerSettings, Settings)

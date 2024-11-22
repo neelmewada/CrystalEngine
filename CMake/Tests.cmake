@@ -3,18 +3,20 @@ if(NOT ${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
     return()
 endif()
 
-include(FetchContent)
-
 FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.11.0
 )
 FetchContent_MakeAvailable(googletest)
 
-add_library(GTest::GTest INTERFACE IMPORTED)
-target_link_libraries(GTest::GTest INTERFACE gtest_main)
+add_library(GoogleTest INTERFACE IMPORTED)
+target_link_libraries(GoogleTest INTERFACE gtest_main)
 
+set_target_properties(gmock PROPERTIES FOLDER "Tests")
+set_target_properties(gmock_main PROPERTIES FOLDER "Tests")
+set_target_properties(gtest PROPERTIES FOLDER "Tests")
+set_target_properties(gtest_main PROPERTIES FOLDER "Tests")
 
 function(ce_add_test NAME)
     if(NOT ${CE_BUILD_TESTS})
@@ -78,7 +80,8 @@ function(ce_add_test NAME)
     
     target_link_libraries(${NAME}
         PRIVATE
-            GTest::GTest
+            #GTest::GTest
+            GoogleTest
             ${ce_add_test_TARGET}
     )
 
@@ -160,15 +163,15 @@ function(ce_add_test NAME)
 
     # BUILD_DEPENDENCIES
 
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MACFRAMEWORKS)
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MAC_FRAMEWORKS)
     cmake_parse_arguments(ce_add_test_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_test_BUILD_DEPENDENCIES})
 
     if(${PAL_PLATFORM_IS_MAC})
         list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "c")
         list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "c++")
         list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "-framework CoreServices")
-        if(ce_add_test_BUILD_DEPENDENCIES_MACFRAMEWORKS)
-            foreach(framework ${ce_add_test_BUILD_DEPENDENCIES_MACFRAMEWORKS})
+        if(ce_add_test_BUILD_DEPENDENCIES_MAC_FRAMEWORKS)
+            foreach(framework ${ce_add_test_BUILD_DEPENDENCIES_MAC_FRAMEWORKS})
                 list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "-framework ${framework}")
             endforeach()
         endif()

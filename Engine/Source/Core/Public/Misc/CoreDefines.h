@@ -21,11 +21,11 @@
 #define CE_SINGLETON_CLASS(Class) Class(Class& Copy) = delete; Class operator=(Class& copy) = delete;
 
 #if PLATFORM_WINDOWS
-#	define DLL_EXPORT __declspec(dllexport)
-#	define DLL_IMPORT __declspec(dllimport)
+#	define __CE_DLL_EXPORT __declspec(dllexport)
+#	define __CE_DLL_IMPORT __declspec(dllimport)
 #else
-#	define DLL_EXPORT 
-#	define DLL_IMPORT 
+#	define __CE_DLL_EXPORT 
+#	define __CE_DLL_IMPORT 
 #endif
 
 #define BIT(x) (1 << x)

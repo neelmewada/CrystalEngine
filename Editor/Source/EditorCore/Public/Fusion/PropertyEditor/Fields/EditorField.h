@@ -12,7 +12,7 @@ namespace CE::Editor
 
         void Construct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
     public: // - Public API -
 
@@ -23,7 +23,7 @@ namespace CE::Editor
 
         virtual Self& UnbindField();
 
-        bool IsBound() const { return field != nullptr && targets.NonEmpty(); }
+        bool IsBound() const { return field != nullptr && targets.NotEmpty(); }
 
         virtual EditorField& FixedInputWidth(f32 width);
 

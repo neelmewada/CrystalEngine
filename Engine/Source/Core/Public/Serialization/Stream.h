@@ -65,9 +65,6 @@ namespace CE
 
         virtual Stream& operator<<(const char* cString);
 
-        virtual Stream& operator<<(const Uuid& uuid);
-        virtual Stream& operator>>(Uuid& uuid);
-
 		virtual Stream& operator<<(char ch);
 		virtual Stream& operator>>(char& ch);
 
@@ -103,6 +100,7 @@ namespace CE
 
 		virtual Stream& operator<<(f64 decimal);
 		virtual Stream& operator>>(f64& decimal);
+
 
 	private:
 

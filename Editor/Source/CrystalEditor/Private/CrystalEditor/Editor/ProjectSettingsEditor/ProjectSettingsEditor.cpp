@@ -99,9 +99,9 @@ namespace CE::Editor
         }
     }
 
-    void ProjectSettingsEditor::OnBeforeDestroy()
+    void ProjectSettingsEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {
@@ -135,11 +135,11 @@ namespace CE::Editor
 
         for (ClassType* settingsClass : settingsClasses)
         {
-            Settings* target = Settings::LoadSettings(settingsClass);
+            Ref<Settings> target = Settings::LoadSettings(settingsClass);
             if (!target)
                 continue;
 
-            ObjectEditor* curEditor = ObjectEditorRegistry::Get().FindOrCreate(target);
+            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target.Get());
             editors.Add(curEditor);
 
             if (this->editor == nullptr)
@@ -171,12 +171,19 @@ namespace CE::Editor
 
         right->DestroyAllChildren();
 
-        Settings* target = Settings::LoadSettings(settingsClasses[index]);
+        Ref<Settings> target = Settings::LoadSettings(settingsClasses[index]);
 
-        editor = ObjectEditorRegistry::Get().FindOrCreate(target);
+        editor = ObjectEditorRegistry::Get().Create(target.Get());
 
         editor->FixedInputWidth(180);
         editor->SetSplitRatio(splitRatio);
+
+        right->AddChild(
+            FNew(FLabel)
+            .FontSize(18)
+            .Text(target->GetTitleName())
+            .Margin(Vec4(10, 10, 0, 15))
+        );
 
         right->AddChild(editor);
     }

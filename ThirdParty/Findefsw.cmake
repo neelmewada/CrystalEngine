@@ -6,52 +6,14 @@ if (TARGET ${TARGET_WITH_NAMESPACE})
 endif()
 
 set(PACKAGE_NAME "efsw")
-set(PACKAGE_VERISON "1.0.0")
-set(PACKAGE_REVISION 1)
-
-set(PACKAGE_FULL_NAME "${PACKAGE_NAME}-${PACKAGE_VERISON}-rev${PACKAGE_REVISION}-${PAL_PLATFORM_NAME_LOWERCASE}")
-
-ce_validate_package(${PACKAGE_FULL_NAME} ${PACKAGE_NAME})
-
 set(LIB_NAME "efsw")
 
-set(${LIB_NAME}_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME})
+add_subdirectory(vendor/${PACKAGE_NAME})
 
-set(${LIB_NAME}_INCLUDE_DIR ${${LIB_NAME}_BASE_DIR}/${PACKAGE_NAME}/include)
-set(${LIB_NAME}_LIBS_DIR ${${LIB_NAME}_BASE_DIR}/${PACKAGE_NAME})
+add_library(${TARGET_WITH_NAMESPACE} ALIAS efsw)
 
-if (${PAL_PLATFORM_NAME} STREQUAL "Linux" OR ${PAL_PLATFORM_NAME} STREQUAL "Mac")
-    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/lib${LIB_NAME}.a)
-    set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/lib${LIB_NAME}.a)
-    set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/lib${LIB_NAME}.a)
-elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
-    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/${LIB_NAME}.lib)
-    set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/${LIB_NAME}.lib)
-    set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/${LIB_NAME}.lib)
-else()
-    error("${PACKAGE_NAME} build not found for platform: ${PAL_PLATFORM_NAME}")
-endif()
+set_target_properties(efsw PROPERTIES FOLDER "ThirdParty")
+set_target_properties(efsw-static PROPERTIES FOLDER "ThirdParty")
 
-add_library(${TARGET_WITH_NAMESPACE} STATIC IMPORTED GLOBAL)
-
-set_target_properties(${TARGET_WITH_NAMESPACE}
-    PROPERTIES
-        IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_STATIC_LIBRARY_DEBUG}
-        IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_STATIC_LIBRARY_DEV}
-        IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_STATIC_LIBRARY_DEV}
-        IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_STATIC_LIBRARY_RELEASE}
-)
-
-set_target_properties(${TARGET_WITH_NAMESPACE}
-    PROPERTIES
-        IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${LIB_NAME}.a"
-)
-
-target_include_directories(${TARGET_WITH_NAMESPACE}
-    INTERFACE
-        ${${LIB_NAME}_INCLUDE_DIR}
-)
-
-set(${LIB_NAME}_FOUND True)
 
 

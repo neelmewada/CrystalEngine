@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "Object.h"
 
 namespace CE
 {
@@ -16,9 +17,6 @@ namespace CE
 	*	Global Functions
 	*/
 
-	//! @brief Returns true if the given object pointer is valid and not destroyed! 
-	CORE_API bool IsValidObject(Object* object);
-
 	/// Transient Bundle: Same lifetime as Core Module.
 	///	Used to store temporary objects that are not saved to disk.
 	CORE_API Bundle* GetGlobalTransient();
@@ -26,7 +24,7 @@ namespace CE
 	/// @brief Returns the transient bundle of a specific module.
 	CORE_API Bundle* GetTransient(const String& moduleName);
 
-    CORE_API Bundle* GetSettingsBundle();
+    CORE_API Ref<Bundle> GetSettingsBundle();
 
 	/// Call this to unload all settings. Should be called in PreShutdown phase.
 	CORE_API void UnloadSettings();
@@ -48,7 +46,7 @@ namespace CE
 			String name{};
 			Object* templateObject = nullptr;
 			ObjectFlags objectFlags{};
-			Uuid uuid = 0;
+			Uuid uuid = Uuid::Zero();
 		};
 
 		/// For internal use only
@@ -65,7 +63,7 @@ namespace CE
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
 		Object* templateObject = NULL,
-		Uuid uuid = 0)
+		Uuid uuid = Uuid::Random())
 	{
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
@@ -92,12 +90,14 @@ namespace CE
 
 		if (IsFunction())
 		{
-			if (!IsValidObject(dstObject))
+			if (Ref<Object> object = dstObject.Lock())
 			{
-				isBound = false;
-				return nullptr;
+				return dstFunction->Invoke(object.Get(), args);
 			}
-			return dstFunction->Invoke(dstObject, args);
+
+			// Object was destroyed
+			isBound = false;
+			return nullptr;
 		}
 
 		if (IsLambda())

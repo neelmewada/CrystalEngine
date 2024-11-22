@@ -19,7 +19,7 @@ namespace CE::Editor
         return jobs;
     }
 
-    bool StaticMeshAssetImportJob::ProcessAsset(Bundle* bundle)
+    bool StaticMeshAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
     {
 		if (bundle == nullptr)
 			return false;
@@ -27,7 +27,7 @@ namespace CE::Editor
 			return false;
 
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
-		bundle->DestroyAllSubobjects();
+		bundle->DestroyAllSubObjects();
 
 		String extension = sourcePath.GetFileName().GetExtension().GetString().ToLower();
 		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
@@ -38,9 +38,10 @@ namespace CE::Editor
 		fileStream.SetBinaryMode(true);
 		u8* data = (u8*)malloc(fileStream.GetLength());
 		fileStream.Read(data, fileStream.GetLength());
-		defer(
-			free(data);
-		);
+    	defer(&)
+    	{
+    		free(data);
+    	};
 
 		ModelImporter importer{};
 		ModelLoadConfig config{};
@@ -67,16 +68,17 @@ namespace CE::Editor
 			return false;
 		}
 
-		defer(
+    	defer(&)
+		{
 			delete scene;
-		);
+		};
 
-		StaticMesh* staticMesh = CreateObject<StaticMesh>(bundle, fileName);
+		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName);
 
-		RPI::ModelAsset* modelAsset = CreateObject<RPI::ModelAsset>(staticMesh, "ModelAsset");
+		Ref<RPI::ModelAsset> modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset");
 		staticMesh->modelAsset = modelAsset;
 
-		RPI::ModelLodAsset* lod = CreateObject<RPI::ModelLodAsset>(modelAsset, "Lod0");
+		Ref<RPI::ModelLodAsset> lod = CreateObject<RPI::ModelLodAsset>(modelAsset.Get(), "Lod0");
 		modelAsset->lods.Add(lod);
 		
 		const Array<CMMesh>& meshes = scene->GetMeshes();
@@ -148,7 +150,7 @@ namespace CE::Editor
 
 			if (colors0Ptr != nullptr && totalColorCount > 0)
 			{
-				if (mesh.colors.NonEmpty())
+				if (mesh.colors.NotEmpty())
 					memcpy(colors0Ptr + vec4Offset, mesh.colors.GetData(), numVertices * sizeof(Vec4));
 				else
 					memset(colors0Ptr + vec4Offset, 0, numVertices * sizeof(Vec4));
@@ -156,7 +158,7 @@ namespace CE::Editor
 
 			if (uv0Ptr != nullptr && totalUVCounts[0] > 0)
 			{
-				if (mesh.uvs[0].NonEmpty())
+				if (mesh.uvs[0].NotEmpty())
 					memcpy(uv0Ptr + vec2Offset, mesh.uvs[0].GetData(), numVertices * sizeof(Vec2));
 				else
 					memset(uv0Ptr + vec2Offset, 0, numVertices * sizeof(Vec2));

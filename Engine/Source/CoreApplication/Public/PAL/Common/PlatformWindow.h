@@ -8,7 +8,7 @@ typedef VkSurfaceKHR_T* VkSurfaceKHR;
 
 namespace CE
 {
-	typedef void* WindowHandle;
+	typedef SIZE_T WindowHandle;
 	class PlatformWindow;
 
     typedef Delegate<bool(PlatformWindow* window, Vec2 position)> WindowDragHitTestDelegate;
@@ -25,6 +25,8 @@ namespace CE
         virtual void* GetUnderlyingHandle() = 0;
 
 		virtual WindowHandle GetOSNativeHandle() = 0;
+
+        virtual u32 GetWindowDpi() = 0;
 
         virtual String GetTitle() = 0;
 

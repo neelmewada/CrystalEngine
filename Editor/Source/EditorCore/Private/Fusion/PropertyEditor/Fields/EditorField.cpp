@@ -15,9 +15,9 @@ namespace CE::Editor
         
     }
 
-    void EditorField::OnBeforeDestroy()
+    void EditorField::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         UnbindField();
     }

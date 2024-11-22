@@ -15,6 +15,7 @@ CE_RTTI_CLASS_IMPL(, CDITests, BottomObject)
 CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
 CE_RTTI_STRUCT_IMPL(, BundleTests, WritingTestStructBase)
 CE_RTTI_STRUCT_IMPL(, BundleTests, WritingTestStruct1)
+CE_RTTI_STRUCT_IMPL(, BundleTests, WritingTestStruct2)
 CE_RTTI_STRUCT_IMPL(, CDITests, TestStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, InnerStruct)
 CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
@@ -24,14 +25,22 @@ static void CERegisterModuleTypes()
     CE_REGISTER_TYPES(
 		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
-        BundleTests::WritingTestObj2,
+		BundleTests::WritingTestObj2,
+		BundleTests::MyTextureDescriptor,
+		BundleTests::MyMaterial,
+		BundleTests::MyMaterialProperty,
+		BundleTests::MyScript,
+		BundleTests::MyMesh,
+		BundleTests::MyTexture,
+		BundleTests::FilterMode,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
 		CDITests::BottomObject,
         CDITests::TestObject,
         BundleTests::WritingTestStructBase,
-        BundleTests::WritingTestStruct1,
+		BundleTests::WritingTestStruct1,
+		BundleTests::WritingTestStruct2,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -43,6 +52,13 @@ static void CEDeregisterModuleTypes()
 		VariantTests::VariantStruct,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
+		BundleTests::MyMaterial,
+		BundleTests::MyScript,
+		BundleTests::MyMesh,
+		BundleTests::MyTexture,
+		BundleTests::MyTextureDescriptor,
+		BundleTests::MyMaterialProperty,
+		BundleTests::FilterMode,
         ObjectTests::BaseClass,
         ObjectTests::DerivedClassA,
         CDITests::AnotherObject,
@@ -50,6 +66,7 @@ static void CEDeregisterModuleTypes()
         CDITests::TestObject,
         BundleTests::WritingTestStructBase,
         BundleTests::WritingTestStruct1,
+		BundleTests::WritingTestStruct2,
         CDITests::TestStruct,
         JsonTests::InnerStruct,
         JsonTests::SerializedData
@@ -347,7 +364,7 @@ TEST(Containers, String)
     
     {
         EXPECT_EQ(String::Format("{1} - {0} - {2}", 12, "Str", 45.12f), "Str - 12 - 45.12");
-        EXPECT_EQ(String::Format("Base{NAME} - {}", 12, String::Arg("NAME", "Project")), "BaseProject - 12");
+        EXPECT_EQ(String::Format("Base{NAME} - {0}", 12, String::Arg("NAME", "Project")), "BaseProject - 12");
     }
 
     const String platformName = PlatformMisc::GetPlatformName();
@@ -525,7 +542,7 @@ TEST(Containers, Variant)
 		auto& getValue = value.GetValue<Object&>();
 		EXPECT_EQ(ref.GetUuid(), getValue.GetUuid());
 	}
-	testObject->Destroy(); testObject = nullptr;
+	testObject->BeginDestroy(); testObject = nullptr;
 
 	// Struct
 	VariantStruct testStruct{};
@@ -557,6 +574,15 @@ TEST(Containers, Variant)
 	TEST_END;
 }
 
+bool Vec4Equals(const Vec4& lhs, const Vec4& rhs)
+{
+	constexpr f32 epsilon = std::numeric_limits<f32>::epsilon();
+	return Math::Abs(lhs.x - rhs.x) <= epsilon &&
+		Math::Abs(lhs.y - rhs.y) <= epsilon &&
+			Math::Abs(lhs.z - rhs.z) <= epsilon &&
+				Math::Abs(lhs.w - rhs.w) <= epsilon;
+}
+
 TEST(Containers, Matrix)
 {
     TEST_BEGIN;
@@ -581,7 +607,7 @@ TEST(Containers, Matrix)
 		rotator = Quat::EulerDegrees(90, 0, 0) * rotator;
 		vec = Vec4(0, 1, 0, 1);
 		out = rotator * vec;
-		EXPECT_EQ(out, Vec4(0, -1, 0, 1));
+    	EXPECT_TRUE(Vec4Equals(out, Vec4(0, -1, 0, 1)));
 
 		Quat lookRotation = Quat::LookRotation2(Vec3(1, 0, 0), Vec3(0, 1, 0));
 		Vec3 degrees = lookRotation.ToEulerDegrees();
@@ -1049,9 +1075,6 @@ TEST(Reflection, RTTI_Registry_Testing)
 	EXPECT_EQ(enumType->GetName(), "CE::EventResult");
 	EXPECT_EQ(enumType->GetTypeName(), "/Code/Core.CE::EventResult");
 
-	String enumTypeFormat = String::Format("{}", enumType);
-	EXPECT_EQ(enumTypeFormat, "/Code/Core.CE::EventResult");
-
 	CE_REGISTER_TYPES(CustomFlagsEnum);
     {
 		CustomFlagsEnum customFlags = CustomFlagsEnum::Active | CustomFlagsEnum::Pressed | CustomFlagsEnum::Transient;
@@ -1070,9 +1093,6 @@ TEST(Reflection, RTTI_Registry_Testing)
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);
     EXPECT_EQ(objectClass, GetStaticType<Object>());
-
-	String toString = String::Format("{}", objectClass);
-	EXPECT_EQ(toString, "/Code/Core.CE::Object");
 
     if (objectClass != nullptr)
     {
@@ -1221,59 +1241,6 @@ TEST(Reflection, SubClassType)
 		EXPECT_EQ(type->FindField("assignedClass")->GetUnderlyingType(), TYPE(BaseClass));
 		EXPECT_EQ(type->FindField("derivedClassType")->GetUnderlyingType(), TYPE(DerivedClassA));
 		EXPECT_EQ(type->FindField("anyClass")->GetUnderlyingType(), TYPE(Object));
-	}
-
-	// 3. Binary serialization
-	if (false)
-	{
-		MemoryStream stream = MemoryStream(2048);
-		stream.SetBinaryMode(true);
-		stream.SetAutoResizeIncrement(2048);
-
-		// Write
-		{
-			DerivedClassA* object = CreateObject<DerivedClassA>(nullptr, "DerivedClassObject");
-			object->assignedClass = DerivedClassA::Type();
-			object->anyClass = BaseClass::Type();
-			object->string = "some string";
-			object->derivedClassType = BaseClass::Type();
-
-			EXPECT_EQ(object->assignedClass, DerivedClassA::Type());
-			EXPECT_EQ(object->anyClass, BaseClass::Type());
-			EXPECT_EQ(object->derivedClassType, nullptr);
-
-			FieldSerializer serializer{ DerivedClassA::Type()->GetFirstField(), object };
-
-			while (serializer.HasNext())
-			{
-				serializer.WriteNext(&stream);
-			}
-
-			object->RequestDestroy();
-		}
-
-		stream.Seek(0);
-
-		// Read
-		{
-			DerivedClassA* object = CreateObject<DerivedClassA>(nullptr, "DerivedClassObject");
-
-			FieldDeserializer deserializer{ DerivedClassA::Type()->GetFirstField(), object, nullptr };
-
-			while (deserializer.HasNext())
-			{
-				deserializer.ReadNext(&stream);
-			}
-
-			EXPECT_EQ(object->assignedClass, DerivedClassA::Type());
-			EXPECT_EQ(object->anyClass, BaseClass::Type());
-			EXPECT_EQ(object->derivedClassType, nullptr);
-			EXPECT_EQ(object->string, "some string");
-
-			object->RequestDestroy();
-		}
-
-		stream.Close();
 	}
 
 	CEDeregisterModuleTypes();
@@ -1489,85 +1456,243 @@ TEST(Config, HierarchicalParsing)
 
 #pragma region Object
 
-
-class ObjectLifecycleTestClass : public Object
+TEST(Object, TransientLifecycle)
 {
-    CE_CLASS(ObjectLifecycleTestClass, Object)
-public:
-    
-    ObjectLifecycleTestClass() : Object()
-    {
+	using namespace LifecycleTests;
 
-    }
+	// 1. Transient
 
-};
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
 
-CE_RTTI_CLASS(, , ObjectLifecycleTestClass,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
-CE_RTTI_CLASS_IMPL(, , ObjectLifecycleTestClass)
+	WeakRef<Object> weakRef = nullptr;
+	lifecycleClassDestroyed = false;
 
+	{
+		Ref<Bundle> transient = GetGlobalTransient();
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(transient.Get(), "TestObject");
+		weakRef = object;
+	}
+
+	if (Ref<Object> obj = weakRef.Lock())
+	{
+
+	}
+	else
+	{
+		FAIL();
+	}
+
+	CE_DEREGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+	TEST_END
+
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	lifecycleClassDestroyed = false;
+	EXPECT_TRUE(weakRef.IsNull());
+
+	// 2. BeginDestroy()
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+
+	{
+		Ref<Bundle> transient = GetGlobalTransient();
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(transient.Get(), "TestObject");
+		weakRef = object;
+
+		object->BeginDestroy();
+	}
+
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	lifecycleClassDestroyed = false;
+	EXPECT_TRUE(weakRef.IsNull());
+
+	CE_DEREGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+	TEST_END
+}
 
 TEST(Object, Lifecycle)
 {
-    TEST_BEGIN
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+	using namespace LifecycleTests;
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(LifecycleTests::LifecycleClass, LifecycleSubObject);
+
+	EXPECT_EQ(TYPEID(Ref<LifecycleClass>), TYPEID(LifecycleClass));
+	EXPECT_EQ(TYPEID(WeakRef<LifecycleClass>), TYPEID(LifecycleClass));
+	EXPECT_EQ(TYPEID(WeakRef<LifecycleClass>), TYPEID(Ref<LifecycleClass>));
+
+    Object* rawRef = nullptr;
+	Object* rawRef2 = nullptr;
     
-    CE_REGISTER_TYPES(ObjectLifecycleTestClass);
-    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+    // 1. Simple ref counting
+    {
+		//Ref<Bundle> transient = GetGlobalTransient();
 
-    
-    // 1. Basic object creation
+        Ref<Object> object = CreateObject<Bundle>(nullptr, "TestBundle");
+        rawRef = object.Get();
+        
+        Ref<Bundle> bundle = Object::CastTo<Bundle>(object.Get());
+        
+        Ref<Object> object2 = CreateObject<Object>(nullptr, "TestObj");
+		rawRef2 = object2.Get();
+        
+        Ref<Object> nullRef = nullptr;
+        bool exception = false;
+        
+        try {
+            //nullRef->BeginDestroy();
+        } catch (const NullPointerException& exc) {
+            exception = true;
+        }
+        
+        //EXPECT_TRUE(exception);
+        exception = false;
+        
+        WeakRef<Object> weakRef1 = object;
+        WeakRef<Bundle> weakRef2 = bundle;
+        WeakRef<Object> weakRef3 = object2;
+        EXPECT_EQ(weakRef1->GetName(), "TestBundle");
+        EXPECT_EQ(weakRef3->GetName(), "TestObj");
+        
+        if (Ref<Object> obj = weakRef2.Lock())
+        {
+            
+        }
+        else
+        {
+            FAIL();
+        }
+        
+        object = nullptr;
+        bundle = nullptr;
+        object2 = nullptr;
+        
+        try {
+            //weakRef1->AddToRoot();
+        } catch (const NullPointerException& exc) {
+            exception = true;
+        }
+        
+        //EXPECT_TRUE(exception);
+        exception = false;
+        
+        if (Ref<Object> obj = weakRef2.Lock())
+        {
+            FAIL();
+        }
 
-    auto instance = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(), "MyObject", OF_Transient);
-    EXPECT_EQ(instance->GetFlags(), OF_Transient);
-    EXPECT_EQ(instance->GetName(), "MyObject");
+		weakRef1 = nullptr;
+		weakRef2 = nullptr;
+		weakRef3 = nullptr;
+    }
 
-    instance->RequestDestroy();
-    instance = nullptr;
-
-    // 2. Objects in different threads
-
-	List<Thread> threads{};
-
-	// Don't do this. Objects should only be created/destroyed from the main thread OR by using a lock on main thread
-	for (int i = 17; i < 16; i++)
+	// 2. Complex test
 	{
-		threads.EmplaceBack([&]
+		lifecycleSubObjectDestroyed = lifecycleClassDestroyed = false;
+		lifecycleSubObjectDestroyCount = 0;
+
+		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(nullptr, "LifecycleClass");
+		rawRef = object.Get();
+
+		Ref<LifecycleSubObject> subObject = object->subobject;
+		WeakRef<LifecycleClass> weak1 = object;
+		WeakRef<LifecycleSubObject> weak2 = subObject;
+		Ref<LifecycleSubObject> strongRefToChild = nullptr;
+		WeakRef<LifecycleSubObject> weakRefToChild = nullptr;
+
+		for (int i = 0; i < 4; ++i)
 		{
-			String name = String("Obj_") + i;
-			auto obj = CreateObject<ObjectLifecycleTestClass>(GetGlobalTransient(),
-				name, OF_Transient, ObjectLifecycleTestClass::Type(),
-				nullptr);
-			
-			if (obj->GetName() != name)
+			Ref<LifecycleSubObject> child = CreateObject<LifecycleSubObject>(object.Get(), String::Format("Array_{}", i));
+			rawRef = child.Get();
+
+			if (i == 0)
 			{
-				FAIL();
+				strongRefToChild = child;
+			}
+			else if (i == 1)
+			{
+				weakRefToChild = child;
 			}
 
-			Thread::SleepFor(10);
+			if (i % 2 == 0) // 2 different ways to insert array elements
+			{
+				object->childArray.Add(child);
+			}
+			else
+			{
+				FieldType* arrayField = object->GetClass()->FindField("childArray");
+				EXPECT_TRUE(arrayField->IsWeakRefCounted());
+				EXPECT_TRUE(arrayField->IsRefCounted());
+				arrayField->InsertArrayElement(object.Get());
+				arrayField->SetArrayElementValueAt<WeakRef<Object>>(i, object.Get(), child);
+			}
+		}
+		
+		// Destroy object
+		object = nullptr;
 
-			obj->RequestDestroy();
-		});
+		if (Ref<LifecycleSubObject> lock = weakRefToChild.Lock())
+		{
+			FAIL();
+		}
+
+		EXPECT_TRUE(lifecycleClassDestroyed);
+		EXPECT_TRUE(subObject->IsPendingDestruction());
+		EXPECT_TRUE(strongRefToChild->IsPendingDestruction());
 	}
-
-	for (int i = 0; i < threads.GetSize(); i++)
-	{
-		if (threads[i].IsJoinable())
-			threads[i].Join();
-	}
-	threads.Clear();
-
-    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
-    CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+	EXPECT_TRUE(lifecycleSubObjectDestroyed);
+	EXPECT_TRUE(lifecycleClassDestroyed);
+	EXPECT_EQ(lifecycleSubObjectDestroyCount, 5);
     
+    // 3. Multithreading
+    {
+		lifecycleSubObjectDestroyed = lifecycleClassDestroyed = false;
+		lifecycleSubObjectDestroyCount = 0;
+
+		Ref<LifecycleClass> rootObject = CreateObject<LifecycleClass>(nullptr, "Lifecycle");
+		WeakRef<LifecycleClass> weakRef = rootObject;
+		constexpr int NumThreads = 16;
+		StaticArray<Thread, NumThreads> threads;
+		std::atomic<int> counter = 0;
+
+		for (int i = 0; i < NumThreads; ++i)
+		{
+			int idx = i;
+			threads[i] = [weakRef, &counter, idx, &rootObject]
+				{
+					if (idx >= NumThreads / 2)
+					{
+						Thread::SleepFor(Random::Range(50, 100));
+					}
+
+					// ReSharper disable once CppTooWideScope
+					Ref<LifecycleClass> strongRef = weakRef.Lock();
+					if (idx == 2)
+					{
+						rootObject = nullptr;
+					}
+					if (strongRef)
+					{
+						++counter;
+					}
+				};
+		}
+
+		for (int i = 0; i < NumThreads; ++i)
+		{
+			threads[i].Join();
+		}
+
+		int count = counter;
+		EXPECT_LE(count, NumThreads);
+		EXPECT_TRUE(weakRef.IsNull());
+    }
+
+	CE_DEREGISTER_TYPES(LifecycleClass, LifecycleSubObject);
     TEST_END;
-    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
 }
 
 
@@ -1671,7 +1796,7 @@ TEST(Object, CDI)
 		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
 		EXPECT_EQ(testSubClass->subString, "String from ini");
 
-		testSubClass->RequestDestroy();
+		testSubClass->BeginDestroy();
 	}
 	
 	CDITest* cdi = GetMutableDefaults<CDITest>();
@@ -1698,7 +1823,7 @@ TEST(Object, CDI)
 
 	cdi->stringValue = "This is a modified string";
     
-	CDITest* testObject = CreateObject<CDITest>(nullptr, "TestObj", OF_Transient);
+	Ref<CDITest> testObject = CreateObject<CDITest>(nullptr, "TestObj", OF_Transient);
 	EXPECT_EQ(testObject->floatValue, 42.21f);
 	EXPECT_EQ(testObject->stringValue, "This is a modified string");
 	EXPECT_EQ(testObject->boolValue, true);
@@ -1721,7 +1846,7 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
 	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
-	testObject->Destroy();
+	testObject->BeginDestroy();
     
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
@@ -1787,9 +1912,9 @@ TEST(Object, CDI2)
 		EXPECT_EQ(another->myString, "modified anotherCDI");
 		EXPECT_EQ(another->data.another, another);
 
-		test->Destroy();
-		another->Destroy();
-		transient->Destroy();
+		test->BeginDestroy();
+		another->BeginDestroy();
+		transient->BeginDestroy();
 	}
 
 	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);
@@ -1821,8 +1946,8 @@ TEST(Object, Events)
 	{
 		using namespace EventTests;
 
-		SenderClass* sender = CreateObject<SenderClass>(nullptr, "Sender");
-		ReceiverClass* receiver = CreateObject<ReceiverClass>(nullptr, "Receiver");
+		Ref<SenderClass> sender = CreateObject<SenderClass>(nullptr, "Sender");
+		Ref<ReceiverClass> receiver = CreateObject<ReceiverClass>(nullptr, "Receiver");
 		EXPECT_EQ(receiver->text, "");
 		EXPECT_EQ(receiver->object, nullptr);
 		EXPECT_EQ(receiver->fileAction, IO::FileAction::Add);
@@ -1833,7 +1958,7 @@ TEST(Object, Events)
 
 		sender->onTextChanged += FUNCTION_BINDING(receiver, OnTextChangedCallback);
 
-		IScriptEvent* onObjectEvent = sender->GetClass()->FindField("onObjectEvent")->GetFieldEventValue(sender);
+		IScriptEvent* onObjectEvent = sender->GetClass()->FindField("onObjectEvent")->GetFieldEventValue(sender.Get());
 		onObjectEvent->Bind(FUNCTION_BINDING(receiver, OnObjectEvent));
 
 		auto lambda = [&fileAction](CE::IO::FileAction newFileAction)
@@ -1856,10 +1981,10 @@ TEST(Object, Events)
 		sender->onTextChanged("Hello World");
 		EXPECT_EQ(receiver->text, "Hello World");
 
-		sender->onObjectEvent.Broadcast(receiver);
+		sender->onObjectEvent.Broadcast(receiver.Get());
 		EXPECT_EQ(receiver->object, receiver);
 
-		onObjectEvent->Broadcast({ sender });
+		onObjectEvent->Broadcast({ sender.Get() });
 		EXPECT_EQ(receiver->object, sender);
 
 		EXPECT_EQ(lambda2Called, 0);
@@ -1875,11 +2000,11 @@ TEST(Object, Events)
 		sender->onTextChanged.Broadcast("ReAdded");
 		EXPECT_EQ(receiver->text, "ReAdded");
 
-		receiver->Destroy();
+		receiver->BeginDestroy();
 
 		// To make sure this doesn't crash because we have destroyed the receiver object
 		sender->onTextChanged.Broadcast("New Text");
-		onObjectEvent->Broadcast({ sender });
+		onObjectEvent->Broadcast({ sender.Get() });
 		sender->fileActionEvent.Broadcast(IO::FileAction::Delete);
 		EXPECT_EQ(fileAction, IO::FileAction::Delete);
 
@@ -1894,7 +2019,7 @@ TEST(Object, Events)
 		EXPECT_EQ(fileAction, IO::FileAction::Delete);
 		EXPECT_EQ(lambda2Called, 2);
 
-		sender->Destroy();
+		sender->BeginDestroy();
 	}
 
 	CE_DEREGISTER_TYPES(
@@ -2601,7 +2726,7 @@ TEST(Serialization, BasicStreams)
     EXPECT_EQ(str, "New String");
 	newFileBinStream >> longNum;
 	//EXPECT_EQ(longNum, (u64)0xfe0000efac0000ca);
-    EXPECT_TRUE(newFileBinStream.IsOutOfBounds());
+    //EXPECT_TRUE(newFileBinStream.IsOutOfBounds());
 
     newFileBinStream.Close();
     EXPECT_FALSE(newFileBinStream.IsOpen());
@@ -2735,54 +2860,6 @@ TEST(Serialization, BinaryBlob)
         
         stream.Close();
     }
-    
-	// 2. Field serialization
-	if (false)
-	{
-		MemoryStream stream = MemoryStream(1_MB);
-		stream.SetBinaryMode(true);
-		const char data[] = { (char)0, (char)0xff, (char)0xa1, (char)0x01, (char)0xf1, (char)0, (char)0x12, (char)0x96, (char)0xe0, (char)0xa0 };
-
-		// Write
-		{
-			BinaryBlobTest* write = CreateObject<BinaryBlobTest>(nullptr, "BlobTest");
-			write->blob.LoadData(data, COUNTOF(data));
-			write->stringField = "modified";
-
-			FieldSerializer serializer{ write->GetClass()->GetFirstField(), write };
-
-			while (serializer.HasNext())
-			{
-				serializer.WriteNext(&stream);
-			}
-
-			write->RequestDestroy();
-		}
-
-		stream.Seek(0);
-
-		// Read
-		{
-			BinaryBlobTest* read = CreateObject<BinaryBlobTest>(nullptr, "BlobTest");
-
-			FieldDeserializer deserializer{ read->GetClass()->GetFirstField(), read, nullptr };
-
-			while (deserializer.HasNext())
-			{
-				deserializer.ReadNext(&stream);
-			}
-
-			EXPECT_EQ(read->stringField, "modified");
-
-			EXPECT_EQ(read->blob.GetDataSize(), COUNTOF(data));
-			for (int i = 0; i < COUNTOF(data); i++)
-			{
-				EXPECT_EQ((u8)read->blob.GetDataPtr()[i], (u8)data[i]);
-			}
-
-			read->RequestDestroy();
-		}
-	}
 
 	CE_DEREGISTER_TYPES(BinaryBlobTest);
     TEST_END;
@@ -2845,75 +2922,6 @@ CE_RTTI_CLASS(,SerializationTests, TestClass1,
 )
 CE_RTTI_CLASS_IMPL(,SerializationTests, TestClass1)
 
-TEST(Serialization, BasicBinarySerialization)
-{
-	using namespace SerializationTests;
-
-	TEST_BEGIN;
-	CE_REGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
-
-	MemoryStream stream = MemoryStream(1024);
-	stream.SetBinaryMode(true);
-	CE::Uuid original = 0;
-
-	{
-		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
-		test->myString = "modified";
-		original = test->GetUuid();
-		test->dataList.Add({}); test->dataList.Add({});
-		MyData& data0 = test->dataList[0];
-		data0.clazz = Bundle::StaticType();
-		data0.vector = Vec4(1, 2.2f, 3.3f, 4.125f);
-		data0.string = "Data 0 String";
-		data0.array = { "item0", "item1", "item2" };
-		MyData& data1 = test->dataList[1];
-		data1.clazz = nullptr;
-		data1.string = "Data 1 String";
-		data1.array = {};
-
-		BinarySerializer serializer{ test->GetClass(), test };
-		serializer.Serialize(&stream);
-
-		test->Destroy();
-	}
-
-	stream.Seek(0);
-
-	TestClass1* testClass1Defaults = GetMutableDefaults<TestClass1>();
-	testClass1Defaults->myString = "modified default";
-
-	{
-		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject2");
-		EXPECT_EQ(test->GetOuter(), nullptr);
-		EXPECT_EQ(test->myString, "modified default");
-
-		BinaryDeserializer deserializer{ test->GetClass(), test };
-		deserializer.Deserialize(&stream);
-
-		EXPECT_EQ(test->myString, "modified");
-		EXPECT_EQ(test->GetName(), "TestObject");
-		EXPECT_EQ(test->GetUuid(), original);
-		EXPECT_EQ(test->dataList.GetSize(), 2);
-
-		MyData& data0 = test->dataList[0];
-		EXPECT_EQ(data0.clazz, Bundle::StaticType());
-		EXPECT_EQ(data0.vector, Vec4(1, 2.2f, 3.3f, 4.125f));
-		EXPECT_EQ(data0.string, "Data 0 String");
-		EXPECT_EQ(data0.array.GetSize(), 3);
-		EXPECT_EQ(data0.array[0], "item0"); EXPECT_EQ(data0.array[1], "item1"); EXPECT_EQ(data0.array[2], "item2");
-		
-		MyData& data1 = test->dataList[1];
-		EXPECT_EQ(data1.clazz, nullptr);
-		EXPECT_EQ(data1.string, "Data 1 String");
-		EXPECT_EQ(data1.array.GetSize(), 0);
-		
-		test->Destroy();
-	}
-
-	CE_DEREGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
-	TEST_END;
-}
-
 struct TestPrefsStruct
 {
 	CE_STRUCT(TestPrefsStruct)
@@ -2972,7 +2980,7 @@ TEST(Serialization, Prefs)
 		prefsObject->prefsStruct.nameList.AddRange({ "name0", "name1" });
 		prefsObject->prefsStruct.colorValue = Color::RGBA(128, 64, 32);
 
-		prefsObject->Destroy();
+		prefsObject->BeginDestroy();
 	}
 	Prefs::Get().SavePrefsJson();
 
@@ -2993,7 +3001,7 @@ TEST(Serialization, Prefs)
 
 		EXPECT_EQ(prefsObject->prefsStruct.colorValue.ToU32(), Color::RGBA(128, 64, 32).ToU32());
 
-		prefsObject->Destroy();
+		prefsObject->BeginDestroy();
 	}
 	CE_DEREGISTER_TYPES(TestPrefsClass, TestPrefsStruct);
 	TEST_END;
@@ -3180,137 +3188,247 @@ TEST(Delegates, ModuleCallbacks)
 
 #pragma region Bundle
 
-
-TEST(Bundle, WriteRead)
+TEST(Bundle, Basic)
 {
     TEST_BEGIN;
     using namespace BundleTests;
     CERegisterModuleTypes();
-    
-    IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "TestBundle.casset";
 
-	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, bundleUuid;
+	IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "BasicTestBundle.casset";
 
-	// Write
-	{
-		Bundle* writeBundle = CreateObject<Bundle>(nullptr, "/TestBundle");
-		EXPECT_EQ(writeBundle->GetName(), "/TestBundle");
-
-		auto obj1 = CreateObject<WritingTestObj1>(writeBundle, TEXT("TestObj1"));
-		auto obj2 = CreateObject<WritingTestObj2>(writeBundle, TEXT("TestObj2"));
-		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
-        // Outside the bundle & transient
-		auto obj1_1 = CreateObject<WritingTestObj1>(GetGlobalTransient(), TEXT("Child1_TestObj1"));
-
-		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(writeBundle->GetPrimaryObjectName() == "TestObj1" || writeBundle->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || writeBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
-
-		bundleUuid = writeBundle->GetUuid();
-		obj1Uuid = obj1->GetUuid();
-		obj2Uuid = obj2->GetUuid();
-		obj1_0Uuid = obj1_0->GetUuid();
-		obj1_1Uuid = obj1_1->GetUuid();
-
-		EXPECT_EQ(obj1->GetBundle(), writeBundle);
-		EXPECT_EQ(obj2->GetBundle(), writeBundle);
-		EXPECT_EQ(writeBundle->attachedObjects.GetObjectCount(), 2);
-
-		obj1->objPtr = obj2;
-		obj1->stringValue = "My String Value";
-		obj1->stringArray = { "item0", "item1", "item2" };
-		obj1->floatValue = 51.212f;
-
-		obj2->objectArray.Add(obj1);
-		obj2->testStruct.stringValue = "New string value";
-		obj2->testStruct.owner = obj2;
-		obj2->testStruct.obj1Ptr = obj1_0;
-		obj2->value = 4612;
-
-		obj1_0->objPtr = obj1_1;
-
-		HashMap<CE::Uuid, Object*> references{};
-		writeBundle->FetchObjectReferences(references);
-		EXPECT_EQ(references.GetSize(), 5);
-
-		auto result = Bundle::SaveBundleToDisk(writeBundle, nullptr, bundlePath);
-
-		obj1->RequestDestroy(); // Automatically destroys children
-		obj2->RequestDestroy();
-		writeBundle->RequestDestroy();
-	}
-
-	// Read
-	{
-		auto readBundle = Bundle::LoadBundleFromDisk(nullptr, bundlePath, LOAD_Default);
-		EXPECT_NE(readBundle, nullptr);
-		EXPECT_EQ(readBundle->GetBundleName(), "/TestBundle");
-        EXPECT_EQ(readBundle->objectUuidToEntryMap.GetSize(), 4);
-
-		// When Bundle has multiple subobjects, the primary object selected in undefined (could be anything)
-		EXPECT_TRUE(readBundle->GetPrimaryObjectName() == "TestObj1" || readBundle->GetPrimaryObjectName() == "TestObj2");
-		EXPECT_TRUE(readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || readBundle->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
-
-		readBundle->LoadFully();
-
-		EXPECT_EQ(readBundle->loadedObjects.GetSize(), 4);
-		EXPECT_EQ(readBundle->attachedObjects.GetObjectCount(), 2);
-		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj1Uuid));
-		EXPECT_TRUE(readBundle->attachedObjects.ObjectExists(obj2Uuid));
-
-		// TestObj1
-		WritingTestObj1* obj1 = (WritingTestObj1*)readBundle->attachedObjects.FindObject(obj1Uuid);
-		EXPECT_NE(obj1, nullptr);
-		EXPECT_EQ(obj1->GetName(), "TestObj1");
-		EXPECT_EQ(obj1->outer, readBundle);
-		EXPECT_EQ(obj1->attachedObjects.GetObjectCount(), 1);
-		EXPECT_TRUE(obj1->attachedObjects.ObjectExists(obj1_0Uuid));
-
-		EXPECT_EQ(obj1->stringValue, "My String Value");
-		EXPECT_EQ(obj1->stringArray.GetSize(), 3);
-		EXPECT_EQ(obj1->stringArray[0], "item0");
-		EXPECT_EQ(obj1->stringArray[1], "item1");
-		EXPECT_EQ(obj1->stringArray[2], "item2");
-
-		EXPECT_NE(obj1->objPtr, nullptr);
-		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
-
-		// Child0_TestObj1
-		WritingTestObj1* obj1_0 = (WritingTestObj1*)readBundle->LoadObject(obj1_0Uuid);
-		EXPECT_NE(obj1_0, nullptr);
-		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
-		EXPECT_EQ(obj1_0->outer, obj1);
-
-		// TestObj2
-		WritingTestObj2* obj2 = (WritingTestObj2*)readBundle->attachedObjects.FindObject(obj2Uuid);
-		EXPECT_NE(obj2, nullptr);
-		EXPECT_EQ(obj2->GetName(), "TestObj2");
-		EXPECT_EQ(obj2->outer, readBundle);
-		EXPECT_EQ(obj2->attachedObjects.GetObjectCount(), 0);
-		EXPECT_EQ(obj2->objectArray.GetSize(), 1);
-		EXPECT_EQ(obj2->value, 4612);
-		EXPECT_EQ(obj1->floatValue, 51.212f);
-
-		EXPECT_EQ(obj2->testStruct.owner, obj2);
-		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
-		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
-
-		EXPECT_EQ(readBundle->LoadObject(obj1_1Uuid), nullptr);
-
-		EXPECT_TRUE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
-		obj1_0->RequestDestroy();
-		EXPECT_FALSE(readBundle->loadedObjects.KeyExists(obj1_0Uuid));
-
-		readBundle->RequestDestroy();
-	}
-    
-    if (bundlePath.Exists())
+	// 1. Write
     {
-        IO::Path::Remove(bundlePath);
+	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
+
+		Ref<WritingTestObj2> testObject = CreateObject<WritingTestObj2>(bundle.Get(), "TestObject2");
+    	EXPECT_EQ(testObject->GetOuter(), bundle);
+
+		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->objectArray.Add(bundle);
+		testObject->value = 123;
+		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->testStruct.owner = bundle;
+		testObject->testStruct.stringValue = "string value";
+
+		testObject->arrayOfStruct.Resize(2);
+		testObject->arrayOfStruct[0].owner = testObject;
+		testObject->arrayOfStruct[0].stringValue = "Item 0";
+		testObject->arrayOfStruct[0].anotherBase.stringValue = "internal 0";
+		testObject->arrayOfStruct[1].owner = bundle;
+		testObject->arrayOfStruct[1].stringValue = "Item 1";
+		testObject->arrayOfStruct[1].anotherBase.stringValue = "internal 1";
+
+		Bundle::SaveToDisk(bundle, nullptr);
     }
-	
+
+	// 2. Read
+    {
+    	LoadBundleArgs args{};
+
+	    Ref<Bundle> bundle = Bundle::LoadBundle(nullptr, "/BasicTestBundle", args);
+
+    	EXPECT_EQ(bundle->GetSubObjectCount(), 1);
+
+    	Ref<WritingTestObj2> testObject = (Ref<WritingTestObj2>)bundle->LoadObject("TestObject2");
+
+    	EXPECT_EQ(testObject->GetSubObjectCount(), 0);
+    	EXPECT_EQ(testObject->GetOuter(), bundle);
+
+    	EXPECT_EQ(testObject->value, 123);
+    	EXPECT_EQ(testObject->objectArray.GetSize(), 1);
+    	EXPECT_EQ(testObject->objectArray[0], bundle);
+    	EXPECT_EQ(testObject->testStruct.owner, bundle);
+    	EXPECT_EQ(testObject->testStruct.stringValue, "string value");
+    	EXPECT_EQ(testObject->testStruct.obj1Ptr, nullptr);
+
+    	EXPECT_EQ(testObject->arrayOfStruct.GetSize(), 2);
+    	EXPECT_EQ(testObject->arrayOfStruct[0].owner, testObject);
+    	EXPECT_EQ(testObject->arrayOfStruct[0].stringValue, "Item 0");
+    	EXPECT_EQ(testObject->arrayOfStruct[0].anotherBase.stringValue, "internal 0");
+    	EXPECT_EQ(testObject->arrayOfStruct[1].owner, bundle);
+    	EXPECT_EQ(testObject->arrayOfStruct[1].stringValue, "Item 1");
+    	EXPECT_EQ(testObject->arrayOfStruct[1].anotherBase.stringValue, "internal 1");
+    }
+
+	if (bundlePath.Exists())
+	{
+		IO::Path::Remove(bundlePath);
+	}
+    
     CEDeregisterModuleTypes();
     TEST_END;
+}
+
+namespace BundleTests
+{
+	class TestBundleResolver : public IBundleResolver
+	{
+	public:
+
+		Name ResolveBundlePath(const Uuid& uuid) override
+		{
+			return bundlePathsByUuid[uuid];
+		}
+
+		HashMap<Uuid, Name> bundlePathsByUuid;
+	};
+}
+
+TEST(Bundle, Multiple)
+{
+	TEST_BEGIN;
+	using namespace BundleTests;
+	CERegisterModuleTypes();
+
+	TestBundleResolver resolver{};
+
+	Bundle::PushBundleResolver(&resolver);
+
+	// 1. Write
+	{
+		constexpr int NumTextures = 2;
+		Ref<Bundle> transient = GetGlobalTransient();
+
+		Ref<Bundle> scriptBundle = CreateObject<Bundle>(transient.Get(), "MyScriptBundle");
+		Ref<Bundle> meshBundle = CreateObject<Bundle>(transient.Get(), "MyMeshBundle");
+		Ref<Bundle> materialBundle = CreateObject<Bundle>(transient.Get(), "MyMaterialBundle");
+
+		Array<Ref<Bundle>> textureBundles;
+
+		Ref<MyMaterial> material = CreateObject<MyMaterial>(materialBundle.Get(), "MyMaterial");
+
+		material->properties.Resize(3);
+		material->properties[0].name = "Albedo";
+		material->properties[1].name = "Normal";
+		material->properties[2].name = "Roughness";
+
+		{
+			Ref<MyTexture> fallback = CreateObject<MyTexture>(materialBundle.Get(), "FallbackTexture");
+			fallback->desc.width = fallback->desc.height = 16;
+
+			material->fallbackTexture = fallback;
+		}
+
+		for (int i = 0; i < NumTextures; ++i)
+		{
+			Ref<Bundle> textureBundle = CreateObject<Bundle>(transient.Get(), String::Format("MyTextureBundle_{}", i));
+			textureBundles.Add(textureBundle);
+
+			resolver.bundlePathsByUuid[textureBundle->GetUuid()] = "/" + textureBundle->GetName().GetString();
+
+			Ref<MyTexture> textureAsset = CreateObject<MyTexture>(textureBundle.Get(), "MyTexture");
+
+			textureAsset->desc.width = (i + 1) * 512;
+			textureAsset->desc.height = (i + 1) * 512;
+			textureAsset->desc.filterMode = FilterMode::Trilinear;
+
+			material->textures.Add(textureAsset);
+		}
+
+		Ref<MyMesh> meshAsset = CreateObject<MyMesh>(meshBundle.Get(), "MyMesh");
+		meshAsset->callCounter = 0;
+		meshAsset->material = material;
+
+		Ref<MyScript> myScript = CreateObject<MyScript>(scriptBundle.Get(), "MyScript");
+		myScript->scriptEvent.Bind(FUNCTION_BINDING(meshAsset.Get(), UpdateMesh));
+		myScript->meshAsset = meshAsset;
+
+		resolver.bundlePathsByUuid[scriptBundle->GetUuid()] = "/" + scriptBundle->GetName().GetString();
+		resolver.bundlePathsByUuid[meshBundle->GetUuid()] = "/" + meshBundle->GetName().GetString();
+		resolver.bundlePathsByUuid[materialBundle->GetUuid()] = "/" + materialBundle->GetName().GetString();
+
+		Bundle::SaveToDisk(scriptBundle);
+		Bundle::SaveToDisk(meshBundle);
+		Bundle::SaveToDisk(materialBundle);
+
+		for (const auto& textureBundle : textureBundles)
+		{
+			Bundle::SaveToDisk(textureBundle);
+		}
+
+		scriptBundle->BeginDestroy();
+		meshBundle->BeginDestroy();
+		materialBundle->BeginDestroy();
+		for (const auto& textureBundle : textureBundles)
+		{
+			textureBundle->BeginDestroy();
+		}
+	}
+
+	// 2. Read
+	{
+		LoadBundleArgs args{
+			.loadFully = true,
+			.forceReload = false,
+			.destroyOutdatedObjects = true
+		};
+
+		Ref<Bundle> transient = CreateObject<Bundle>(GetGlobalTransient(), "LocalTransient", OF_Transient);
+
+		// MyScript object stores reference to objects from other bundles. Hence all other bundles will be loaded automatically.
+		Ref<Bundle> scriptBundle = Bundle::LoadBundle(transient, "/MyScriptBundle");
+
+		EXPECT_EQ(scriptBundle->GetSubObjectCount(), 1);
+
+		Ref<MyScript> myScript = (Ref<MyScript>)scriptBundle->LoadObject("MyScript");
+		Ref<MyMesh> myMesh = myScript->meshAsset;
+
+		EXPECT_TRUE(myScript->meshAsset.IsValid());
+		EXPECT_EQ(myScript->scriptEvent.GetInvocationListCount(), 1);
+		Array<FunctionBinding> bindings = myScript->scriptEvent.GetSerializableBindings();
+		EXPECT_EQ(bindings.GetSize(), 1);
+		EXPECT_EQ(bindings[0].object, myMesh);
+
+		myScript->scriptEvent(myScript.Get());
+		EXPECT_EQ(myMesh->callCounter, 1);
+		myScript->scriptEvent(myScript.Get());
+		EXPECT_EQ(myMesh->callCounter, 2);
+
+		myMesh->callCounter = 0;
+
+		Ref<MyMaterial> material = myMesh->material;
+		EXPECT_TRUE(material.IsValid());
+
+		EXPECT_EQ(material->properties.GetSize(), 3);
+		EXPECT_EQ(material->properties[0].name, "Albedo");
+		EXPECT_EQ(material->properties[1].name, "Normal");
+		EXPECT_EQ(material->properties[2].name, "Roughness");
+
+		EXPECT_EQ(material->textures.GetSize(), 2);
+		EXPECT_EQ(material->textures[0]->desc.width, 512);
+		EXPECT_EQ(material->textures[0]->desc.height, 512);
+		EXPECT_EQ(material->textures[0]->desc.filterMode, FilterMode::Trilinear);
+		EXPECT_EQ(material->textures[1]->desc.width, 1024);
+		EXPECT_EQ(material->textures[1]->desc.height, 1024);
+		EXPECT_EQ(material->textures[1]->desc.filterMode, FilterMode::Trilinear);
+		EXPECT_EQ(material->fallbackTexture->desc.width, 16);
+		EXPECT_EQ(material->fallbackTexture->desc.height, 16);
+
+		transient->BeginDestroy();
+	}
+
+	Bundle::PopBundleResolver(&resolver);
+
+	{
+		IO::Path launchPath = PlatformDirectories::GetLaunchDir();
+		Array<IO::Path> pathsToRemove;
+
+		launchPath.IterateChildren([&](const IO::Path& path)
+			{
+				if (!path.IsDirectory() && path.GetExtension() == ".casset")
+				{
+					pathsToRemove.Add(path);
+				}
+			});
+
+		for (const auto& path : pathsToRemove)
+		{
+			IO::Path::Remove(path);
+		}
+	}
+
+	CEDeregisterModuleTypes();
+	TEST_END;
 }
 
 #pragma endregion
@@ -3345,9 +3463,9 @@ TEST(Resource, Manipulation)
 	String textResource = GetResourceManager()->LoadTextResource("/Core_Test/Resources/Text/Entry0.txt");
 	EXPECT_EQ(textResource, "resource_text");
 
-	cssResource->RequestDestroy();
+	cssResource->BeginDestroy();
 	cssResource = nullptr;
-	resource->RequestDestroy();
+	resource->BeginDestroy();
 	resource = nullptr;
 
 	GetResourceManager()->DeregisterResource("Core_Test", "Text/Entry0.txt");

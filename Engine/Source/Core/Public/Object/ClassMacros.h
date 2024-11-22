@@ -98,6 +98,7 @@ namespace CE\
 				: Type(fullName, impl, size, Attributes "")\
 				, TypeData(typeData)\
             {\
+				static_assert(std::is_same_v<Namespace::Class::Self, Namespace::Class>, "Reflected class must have CE_CLASS() in body!");\
 				Type.AddSuper<SuperClasses>();\
 				FieldList\
 				FunctionList\
@@ -195,6 +196,7 @@ public:\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
 	inline static CE::ClassType* StaticType() { return Self::Type(); }\
+	inline static CE::ClassType* StaticClass() { return Self::Type(); }\
 	static CE::String StaticBundle();\
 	static CE::String StaticModule();\
 	constexpr static bool IsClass = true;\
@@ -335,6 +337,7 @@ public:\
 	friend struct CE::THasOnBeforeSerializeFunction;\
     static CE::StructType* Type();\
 	inline static CE::StructType* StaticType() { return Self::Type(); }\
+	inline static CE::StructType* StaticStruct() { return Self::Type(); }\
     constexpr static bool IsClass = false;\
     constexpr static bool IsStruct = true;\
 	static CE::String StaticBundle();\

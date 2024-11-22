@@ -83,13 +83,13 @@ namespace CE::Editor
 
         if (editor)
         {
-            editor->Destroy();
+            editor->BeginDestroy();
             editor = nullptr;
         }
 
         if (item && item->GetActor())
         {
-            editor = ObjectEditorRegistry::Get().FindOrCreate(item->GetActor());
+            editor = ObjectEditorRegistry::Get().Create(item->GetActor());
             editorContainer->Child(*editor);
         }
     }

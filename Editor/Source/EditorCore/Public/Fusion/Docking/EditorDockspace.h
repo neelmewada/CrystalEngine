@@ -19,6 +19,14 @@ namespace CE::Editor
         void SelectTab(EditorDockTabItem* tabItem);
         void SelectTab(EditorDockTab* tab);
 
+        FStyledWidget* GetProjectLabelParent() const { return projectLabelParent; }
+
+        int GetTabItemCount() const { return tabItems.GetSize(); }
+        EditorDockTabItem* GetTabItem(int index) const { return tabItems[index]; }
+
+        int GetDockedEditorCount() const { return dockedEditors.GetSize(); }
+        Ref<EditorDockTab> GetDockedEditor(int index) const { return dockedEditors[index]; }
+
     protected:
 
         EditorDockspace();
@@ -27,7 +35,7 @@ namespace CE::Editor
 
         void Construct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         FStyledWidget* borderWidget = nullptr;
         FVerticalStack* rootBox = nullptr;
@@ -45,7 +53,7 @@ namespace CE::Editor
 
         FHorizontalStack* tabWell = nullptr;
 
-        Array<EditorDockTab*> dockedEditors;
+        Array<Ref<EditorDockTab>> dockedEditors;
         Array<EditorDockTabItem*> tabItems;
         int selectedTab = -1;
 

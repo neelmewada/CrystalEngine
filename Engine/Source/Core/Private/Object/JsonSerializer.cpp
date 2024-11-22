@@ -26,7 +26,7 @@ namespace CE
     
     bool JsonFieldSerializer::HasNext()
     {
-        return fields.NonEmpty() && IsValid();
+        return fields.NotEmpty() && IsValid();
     }
 
 	int JsonFieldSerializer::Serialize(Stream* stream)
@@ -187,7 +187,7 @@ namespace CE
 			if (isMap)
 				writer.WriteIdentifier(field->GetName().GetString());
 
-			writer.WriteValue((u64)field->GetFieldValue<Uuid>(rawInstance));
+			writer.WriteValue(field->GetFieldValue<Uuid>(rawInstance));
         }
         else if (fieldTypeId == TYPEID(String))
         {
@@ -426,7 +426,7 @@ namespace CE
 				parentJson->GetArrayValue().Add(json);
 			}
 
-			*json = JsonValue((f64)(u64)field->GetFieldValue<Uuid>(rawInstance));
+			*json = JsonValue(field->GetFieldValue<Uuid>(rawInstance).ToString());
 		}
 		else if (fieldTypeId == TYPEID(bool))
 		{
@@ -627,7 +627,7 @@ namespace CE
 				json = &parentJson.GetArrayValue().Top();
 			}
 
-			*json = JValue((f64)(u64)field->GetFieldValue<Uuid>(rawInstance));
+			*json = JValue(field->GetFieldValue<Uuid>(rawInstance).ToString());
 		}
 		else if (fieldTypeId == TYPEID(bool))
 		{
@@ -828,7 +828,7 @@ namespace CE
 
 	bool JsonFieldDeserializer::HasNext()
 	{
-		return fields.NonEmpty();
+		return fields.NotEmpty();
 	}
 
 	int JsonFieldDeserializer::Deserialize(Stream* stream)
@@ -972,8 +972,6 @@ namespace CE
 				field->SetFieldValue<f32>(rawInstance, (f32)json.GetNumberValue());
 			else if (fieldTypeId == TYPEID(f64))
 				field->SetFieldValue<f64>(rawInstance, (f64)json.GetNumberValue());
-			else if (fieldTypeId == TYPEID(Uuid))
-				field->SetFieldValue<Uuid>(rawInstance, Uuid((u64)json.GetNumberValue()));
 			else if (field->IsEnumField()) // Deserialize enum from number
 				field->SetFieldEnumValue(rawInstance, (s64)json.GetNumberValue());
 			else
@@ -1000,6 +998,8 @@ namespace CE
 				field->SetFieldValue<Name>(rawInstance, json.GetStringValue());
 			else if (fieldTypeId == TYPEID(IO::Path))
 				field->SetFieldValue<IO::Path>(rawInstance, IO::Path(json.GetStringValue()));
+			else if (fieldTypeId == TYPEID(Uuid))
+				field->SetFieldValue<Uuid>(rawInstance, Uuid::FromString(json.GetStringValue()));
 			else if (fieldTypeId == TYPEID(SubClassType<Object>) && underlyingType != nullptr)
 			{
 				SubClassType<Object>& value = const_cast<SubClassType<Object>&>(field->GetFieldValue<SubClassType<Object>>(rawInstance));
@@ -1225,7 +1225,7 @@ namespace CE
 		auto fieldTypeId = field->GetDeclarationTypeId();
 
 		if (jsonValue->IsNumberValue() &&
-			(field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid) || fieldTypeId == TYPEID(UUID32)))
+			(field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid)))
 		{
 			if (fieldTypeId == TYPEID(s8))
 				field->SetFieldValue<s8>(rawInstance, (s8)jsonValue->GetNumberValue());
@@ -1247,10 +1247,6 @@ namespace CE
 				field->SetFieldValue<f32>(rawInstance, (f32)jsonValue->GetNumberValue());
 			else if (fieldTypeId == TYPEID(f64))
 				field->SetFieldValue<f64>(rawInstance, (f64)jsonValue->GetNumberValue());
-			else if (fieldTypeId == TYPEID(Uuid))
-				field->SetFieldValue<Uuid>(rawInstance, Uuid((u64)jsonValue->GetNumberValue()));
-			else if (fieldTypeId == TYPEID(UUID32))
-				field->SetFieldValue<UUID32>(rawInstance, UUID32((u32)jsonValue->GetNumberValue()));
 			else
 				return false;
 
@@ -1275,6 +1271,8 @@ namespace CE
 				field->SetFieldValue<Name>(rawInstance, jsonValue->GetStringValue());
 			else if (fieldTypeId == TYPEID(IO::Path))
 				field->SetFieldValue<IO::Path>(rawInstance, IO::Path(jsonValue->GetStringValue()));
+			else if (fieldTypeId == TYPEID(Uuid))
+				field->SetFieldValue<Uuid>(rawInstance, Uuid::FromString(jsonValue->GetStringValue()));
 			else
 				return false;
 

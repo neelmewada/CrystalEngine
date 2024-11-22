@@ -10,9 +10,11 @@ namespace CE
         
         Settings() = default;
         
-        static Settings* LoadSettings(ClassType* settingsClass, String settingsName = "");
+        static Ref<Settings> LoadSettings(ClassType* settingsClass, String settingsName = "");
 
         static void SaveSettings();
+
+        virtual String GetTitleName();
 
 #if PAL_TRAIT_BUILD_EDITOR
         static void SaveSettings(const IO::Path& customPath);
@@ -33,9 +35,9 @@ namespace CE
     };
 
 	template<typename TSettings> requires TIsBaseClassOf<Settings, TSettings>::Value
-	TSettings* GetSettings()
+	Ref<TSettings> GetSettings()
 	{
-		return (TSettings*)Settings::LoadSettings(TSettings::Type());
+		return (Ref<TSettings>)Settings::LoadSettings(TSettings::Type());
 	}
     
 	FORCE_INLINE void SaveSettings()

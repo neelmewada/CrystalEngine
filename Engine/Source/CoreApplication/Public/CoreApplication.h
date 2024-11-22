@@ -6,7 +6,17 @@
 #include "PAL/Common/PlatformWindow.h"
 
 #if PAL_TRAIT_SDL_SUPPORTED
-#include "PAL/SDL/SDLApplication.h"
+
+#if PLATFORM_WINDOWS
+#   include "PAL/Windows/WindowsSDLApplication.h"
+#elif PLATFORM_MAC
+#   include "PAL/Mac/MacSDLApplication.h"
+#elif PLATFORM_LINUX
+#   include "PAL/Linux/LinuxSDLApplication.h"
+#else
+#   include "PAL/SDL/SDLApplication.h"
+#endif
+
 #include "PAL/SDL/SDLWindow.h"
 #else
 #error SDL not supported! Currently, the engine only supports SDL as the application & windowing platform.

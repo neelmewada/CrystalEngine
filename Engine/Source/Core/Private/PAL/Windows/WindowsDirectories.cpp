@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <ShlObj_core.h>
 
-#define MAX_PATH_SIZE 512
+#define MAX_PATH_SIZE 1024
 
 namespace CE
 {

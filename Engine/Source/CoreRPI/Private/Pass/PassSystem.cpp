@@ -156,7 +156,7 @@ namespace CE::RPI
         for (auto [name, pass] : passTemplates)
         {
             if (pass)
-				pass->Destroy();
+				pass->BeginDestroy();
         }
         passTemplates.Clear();
     }

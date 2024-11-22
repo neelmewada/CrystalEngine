@@ -20,11 +20,11 @@ namespace CE::Editor
 
         instance = this;
 
-        SceneEditor* sceneEditor = nullptr;
+        Ref<SceneEditor> sceneEditor = nullptr;
         FAssignNew(SceneEditor, sceneEditor);
-        AddDockTab(sceneEditor);
+        AddDockTab(sceneEditor.Get());
 
-        ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+        Ref<ProjectSettings> projectSettings = GetSettings<ProjectSettings>();
 
         projectLabelParent->Enabled(true);
         projectLabel->Text(projectSettings->projectName);
@@ -32,9 +32,9 @@ namespace CE::Editor
         Style("EditorDockspace");
     }
 
-    void CrystalEditorWindow::OnBeforeDestroy()
+    void CrystalEditorWindow::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (this == instance)
         {

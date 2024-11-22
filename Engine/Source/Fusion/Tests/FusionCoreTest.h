@@ -54,7 +54,7 @@ namespace RenderingTests
 
 		void Construct() override;
 
-		void OnBeforeDestroy() override;
+		void OnBeginDestroy() override;
 
 		void OnWindowRestored(PlatformWindow* window) override;
 		void OnWindowMaximized(PlatformWindow* window) override;

@@ -47,7 +47,7 @@ namespace CE
             {
                 FListItem* item = items[i];
                 items.Remove(item);
-                item->Destroy();
+                item->BeginDestroy();
             }
         }
 

@@ -24,14 +24,14 @@ ce_add_target(Core SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::xxHash
-            ThirdParty::mINI
             ThirdParty::zip
             ThirdParty::crcpp
         PUBLIC
+            ThirdParty::cpptrace
             ThirdParty::spdlog
-            ThirdParty::yaml
             ThirdParty::efsw
             CE::CoreTracy
+        MAC_FRAMEWORKS CoreServices
         TARGETS Config
     RUNTIME_DEPENDENCIES
         

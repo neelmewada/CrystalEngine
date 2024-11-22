@@ -59,6 +59,14 @@ namespace CE
         return selectedItems[0];
     }
 
+    int FListView::GetSelectedItemIndex()
+    {
+        if (selectedItems.IsEmpty())
+            return -1;
+	    return itemWidgets.IndexOf(selectedItems[0]);
+    }
+
+
     void FListView::OnItemSelected(FListItemWidget* selectedItem)
     {
         if (m_SelectionMode == FSelectionMode::None)
@@ -92,7 +100,7 @@ namespace CE
 
         while (content->GetChildCount() > 0)
         {
-            content->GetChild(0)->Destroy();
+            content->GetChild(0)->BeginDestroy();
         }
 
         itemWidgets.Clear();

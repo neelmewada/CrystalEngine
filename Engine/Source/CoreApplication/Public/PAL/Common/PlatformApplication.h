@@ -67,6 +67,8 @@ namespace CE
 
         virtual ~PlatformApplication();
 
+        virtual u32 GetSystemDpi() = 0;
+
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
             this->messageHandlers.Add(handler);

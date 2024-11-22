@@ -112,10 +112,3 @@ template <> struct fmt::formatter<CE::Name> {
         return fmt::format_to(ctx.out(), "{}", name.GetString());
     }
 };
-
-namespace YAML 
-{
-    inline Emitter& operator<<(Emitter& emitter, CE::Name name) {
-        return emitter.Write(std::string(name.GetString().GetCString()));
-    }
-}

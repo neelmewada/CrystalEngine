@@ -210,7 +210,7 @@ namespace CE
 
 		virtual TypeInfo* GetUnderlyingType() { return nullptr; }
 
-		/// Memory foot-print of `this` type as a member field. For ex: All Objects have a FieldSize of u64 (pointer size).
+		/// Memory foot-print of `this` type as a member field.
 		virtual u32 GetFieldSize();
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
@@ -357,7 +357,6 @@ CE_RTTI_POD(CORE_API, , u16, TYPEID(s16))
 CE_RTTI_POD(CORE_API, , u32, TYPEID(s32))
 CE_RTTI_POD(CORE_API, , u64, TYPEID(s64))
 CE_RTTI_POD(CORE_API, CE, Uuid, TYPEID(u64), TYPEID(s64))
-CE_RTTI_POD(CORE_API, CE, UUID32, TYPEID(u32), TYPEID(s32))
 
 CE_RTTI_POD(CORE_API, , f32)
 CE_RTTI_POD(CORE_API, , f64)

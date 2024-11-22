@@ -113,7 +113,7 @@ namespace CE::Editor
 
 		if (job->success)
 		{
-			AssetManager::GetRegistry()->OnAssetImported(job->bundleName);
+			AssetManager::GetRegistry()->OnAssetImported(job->productPath);
 		}
 
 		importResults.Add(importResult);
@@ -197,19 +197,40 @@ namespace CE::Editor
 		productPath = productPath.GetString().Replace({'\\'}, '/');
 #endif
 		
-		Bundle* bundle = nullptr;
+		Ref<Bundle> bundle = nullptr;
+    	Ref<Object> transient = CreateObject<Object>(nullptr, "Transient", OF_Transient);
+
+    	LoadBundleArgs args{
+    		.loadFully = true
+    	};
 
 		if (productPath.Exists())
-			bundle = Bundle::LoadBundleFromDisk(nullptr, productPath, LOAD_Full);
-		else
-			bundle = CreateObject<Bundle>(nullptr, bundleName);
+		{
+			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
+
+			if (bundle == nullptr)
+			{
+				IO::Path::Remove(productPath);
+			}
+		}
+
+    	if (bundle == nullptr)
+    	{
+    		bundle = CreateObject<Bundle>(transient.Get(), bundleName);
+    	}
+    	if (bundle == nullptr)
+    	{
+    		CE_LOG(Error, All, "Failed to create Bundle object!");
+    		success = false;
+    		return;
+    	}
 
 		success = ProcessAsset(bundle);
 
 		if (!success)
 		{
 			if (bundle)
-				bundle->Destroy();
+				bundle->BeginDestroy();
 			return;
 		}
 
@@ -232,31 +253,31 @@ namespace CE::Editor
 					}
 
 					String pathInBundle = object->GetPathInBundle().GetString();
-					if (pathInBundle.NonEmpty())
+					if (pathInBundle.NotEmpty())
 						pathInBundle = "." + pathInBundle;
-					Name fullObjectPath = bundle->GetBundleName().GetString() + pathInBundle;
+					String fullObjectPath = bundle->GetName().GetString() + pathInBundle;
 					if (objectPathNameCounter[fullObjectPath] > 0)
 					{
-						fullObjectPath = String::Format(fullObjectPath.GetString() + "_{}", objectPathNameCounter[fullObjectPath]);
+						fullObjectPath = String::Format(fullObjectPath + "_{}", objectPathNameCounter[fullObjectPath]);
 					}
 
-					SIZE_T hash = GetHash(fullObjectPath);
+					Hash128 hash = CalculateHash128(fullObjectPath.GetCString(), fullObjectPath.GetLength());
 					bundle->SetObjectUuid(object, Uuid(hash));
 
 					objectPathNameCounter[fullObjectPath]++;
 
 					for (int i = 0; i < object->GetSubObjectCount(); ++i)
 					{
-						Object* subObject = object->GetSubobject(i);
+						Object* subObject = object->GetSubObject(i);
 						visitorFunc(subObject);
 					}
 				};
 
-			visitorFunc(bundle);
+			visitorFunc(bundle.Get());
 		}
 
-		auto saveResult = Bundle::SaveBundleToDisk(bundle, nullptr, productPath);
-		bundle->Destroy();
+		auto saveResult = Bundle::SaveToDisk(bundle, nullptr, productPath);
+		bundle->BeginDestroy();
 
 		if (saveResult != BundleSaveResult::Success)
 		{

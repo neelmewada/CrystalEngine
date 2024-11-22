@@ -3,20 +3,9 @@
 
 namespace CE
 {
-	// TODO: Temporary solution to check if object is destroyed
-	// TODO: Implement a garbage collector OR reference counting later and replace this code
-	static HashSet<Object*> gDestroyedObjects{};
-	static SharedMutex gDestroyedObjectsMutex{};
 
-	CORE_API bool IsValidObject(Object* object)
-	{
-		if (object == nullptr)
-			return false;
-
-		LockGuard lock{ gDestroyedObjectsMutex };
-
-		return !gDestroyedObjects.Exists(object);
-	}
+	static HashSet<Ref<Object>> gRootObjects{};
+	static SharedMutex gRootObjectsMutex{};
 
 	SharedMutex ObjectListener::mutex{};
 	HashMap<Object*, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
@@ -55,14 +44,18 @@ namespace CE
 		}
 	}
 
-	Object::Object() : name("Object"), uuid(Uuid())
+	Object::Object() : name("Object"), uuid(Uuid::Random())
     {
+        control = new Internal::RefCountControl();
+        control->object = this;
+        control->objectState = Internal::RefCountControl::Alive;
+        
         ConstructInternal();
     }
 
 	Object::~Object()
 	{
-		// Never call delete directly. Use Destroy() instead.
+        delete control; control = nullptr;
 	}
 
 	void Object::UnbindAllEvents()
@@ -84,21 +77,67 @@ namespace CE
 		}
 	}
 
-	void Object::RequestDestroy()
+	void Object::DestroyImmediate()
 	{
-		ObjectListener::RemoveAllListeners(this);
+		if (!IsPendingDestruction())
+		{
+			objectFlags |= OF_PendingDestroy;
+
+			ObjectListener::RemoveAllListeners(this);
+
+			OnBeginDestroy();
+
+			if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
+			{
+				Prefs::Get().SavePrefs(this);
+			}
+
+			auto bundle = GetBundle();
+			if (bundle != nullptr)
+			{
+				bundle->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+			}
+
+			// Detach this object from outer
+			if (Ref<Object> outerObj = outer.Lock())
+			{
+				outerObj->DetachSubobject(this);
+			}
+			outer = nullptr;
+
+			// Delete all attached subobjects
+			if (attachedObjects.GetObjectCount() > 0)
+			{
+				for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
+				{
+					auto subobject = attachedObjects.GetObjectAt(i);
+					subobject->outer = nullptr;
+					subobject->BeginDestroy();
+				}
+			}
+			attachedObjects.RemoveAll();
+		}
 
 		OnBeforeDestroy();
 
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-			gDestroyedObjects.Add(this);
-		}
+		delete this;
+	}
 
-		//if (!IsDefaultInstance())
-		{
-			//UnbindAllEvents();
-		}
+	void Object::BeginDestroy()
+	{
+		if (IsPendingDestruction())
+			return;
+
+		objectFlags |= OF_PendingDestroy;
+
+		// Prevent this object from being destroyed immediately on outerObj->DetachSubobject(this) call.
+		// That can happen if the parent object has the ONLY strong reference to this object, which can
+		// destroy this object while we are in this function.
+		Ref<Object> strongRef = this;
+
+		ObjectListener::RemoveAllListeners(this);
+
+		OnBeginDestroy();
 
 		if (!IsDefaultInstance() && !IsTransient() && GetClass()->HasAttribute("Prefs"))
 		{
@@ -112,27 +151,30 @@ namespace CE
 		}
 
 		// Detach this object from outer
-		if (outer != nullptr)
+		if (Ref<Object> outerObj = outer.Lock())
 		{
-			outer->DetachSubobject(this);
+			outerObj->DetachSubobject(this);
 		}
 		outer = nullptr;
 
 		// Delete all attached subobjects
 		if (attachedObjects.GetObjectCount() > 0)
 		{
-            int totalCount = attachedObjects.GetObjectCount();
-            
 			for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
 			{
 				auto subobject = attachedObjects.GetObjectAt(i);
 				subobject->outer = nullptr;
-				subobject->RequestDestroy();
+				subobject->BeginDestroy();
 			}
 		}
 		attachedObjects.RemoveAll();
 		
-		delete this;
+        if (control == nullptr || control->GetNumStrongRefs() == 0)
+		{
+			OnBeforeDestroy();
+
+			delete this;
+		}
 	}
 
 	bool Object::IsOfType(ClassType* classType) const
@@ -157,14 +199,9 @@ namespace CE
 		CE_ASSERT(parameters->objectClass != nullptr, "Object initializer passed with null objectClass!");
 
         this->objectFlags = parameters->objectFlags;
-        if (parameters->uuid != 0)
+        if (parameters->uuid.IsValid())
             this->uuid = parameters->uuid;
         this->name = parameters->name;
-
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-			gDestroyedObjects.Remove(this);
-		}
     }
 
     void Object::SetName(const Name& newName)
@@ -175,10 +212,26 @@ namespace CE
 		}
     }
 
+    void Object::AddToRoot()
+    {
+		LockGuard lock{ gRootObjectsMutex };
+
+		gRootObjects.Add(this);
+    }
+
+    void Object::RemoveFromRoot()
+    {
+		LockGuard lock{ gRootObjectsMutex };
+
+		gRootObjects.Remove(this);
+    }
+
     void Object::AttachSubobject(Object* subobject)
     {
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
+
+		Ref<Object> strongRef = subobject;
 		
 		// Detach the passed subobject from its parent first
 		if (subobject->outer != nullptr && subobject->outer != this)
@@ -191,7 +244,7 @@ namespace CE
 		if (bundle != nullptr)
 		{
 			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
-			bundle->loadedObjects[subobject->GetUuid()] = subobject;
+			bundle->loadedObjectsByUuid[subobject->GetUuid()] = subobject;
 		}
 		
 		if (EnumHasFlag(subobject->objectFlags, OF_DefaultSubobject) && 
@@ -211,6 +264,8 @@ namespace CE
         if (subobject == nullptr || !attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
 
+		Ref<Object> strongRef = subobject;
+
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
 
@@ -218,7 +273,7 @@ namespace CE
 		if (bundle != nullptr)
 		{
 			LockGuard<SharedMutex> lock{ bundle->loadedObjectsMutex };
-			bundle->loadedObjects.Remove(subobject->GetUuid());
+			bundle->loadedObjectsByUuid.Remove(subobject->GetUuid());
 		}
 
 		OnSubobjectDetached(subobject);
@@ -253,7 +308,7 @@ namespace CE
 
 	bool Object::ParentExistsInChain(Object* parent) const
 	{
-		Object* outer = GetOuter();
+		WeakRef<Object> outer = GetOuter();
 
 		while (outer != nullptr)
 		{
@@ -273,7 +328,7 @@ namespace CE
     Bundle* Object::GetBundle()
     {
 		if (GetClass()->IsSubclassOf<Bundle>())
-			return (Bundle*)this;
+			return Object::CastTo<Bundle>(this);
 
         auto outerObject = outer;
         if (outerObject == nullptr)
@@ -282,7 +337,7 @@ namespace CE
         while (outerObject != nullptr)
         {
             if (outerObject->GetClass()->IsSubclassOf<Bundle>())
-                return (Bundle*)outerObject;
+                return Object::CastTo<Bundle>(outerObject.Get());
             outerObject = outerObject->outer;
         }
         
@@ -292,6 +347,10 @@ namespace CE
     u64 Object::ComputeMemoryFootprint()
     {
 		u64 totalSize = GetClass()->GetSize();
+        if (control != nullptr)
+        {
+            totalSize += sizeof(Internal::RefCountControl);
+        }
 
 		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
@@ -318,12 +377,37 @@ namespace CE
 			}
 		}
 
-		for (Object* object : attachedObjects)
+		for (const auto& object : attachedObjects)
 		{
 			totalSize += object->ComputeMemoryFootprint();
 		}
 
 		return totalSize;
+    }
+
+    bool Object::IsBundle() const
+    {
+        return IsOfType<Bundle>();
+    }
+
+    Name Object::GetPathInBundle(Bundle* bundle)
+    {
+        if (this == bundle || bundle == nullptr)
+            return "";
+        
+        String path = name.GetString();
+        
+        auto outerObject = outer;
+        
+        while (outerObject != nullptr && outerObject != bundle)
+        {
+            auto outerPathName = outerObject->GetName();
+            if (outerPathName.IsValid())
+                path = outerPathName.GetString() + "." + path;
+            outerObject = outerObject->outer;
+        }
+        
+        return path;
     }
 
 	Name Object::GetPathInBundle()
@@ -348,9 +432,11 @@ namespace CE
 
 	void Object::FetchObjectReferences(HashMap<Uuid, Object*>& outReferences)
 	{
-		for (const auto& subobject : attachedObjects)
+		for (const auto& subobjectRef : attachedObjects)
 		{
-			if (subobject == nullptr || uuid == 0)
+			Object* subobject = subobjectRef.Get();
+
+			if (subobject == nullptr || uuid.IsNull())
 				continue;
 
 			if (!outReferences.KeyExists(subobject->uuid))
@@ -362,7 +448,20 @@ namespace CE
 		{
 			if (field->IsObjectField())
 			{
-				Object* value = field->GetFieldValue<Object*>(this);
+				Object* value = nullptr;
+				if (field->IsStrongRefCounted())
+				{
+					value = field->GetFieldValue<Ref<Object>>(this).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					value = field->GetFieldValue<WeakRef<Object>>(this).Get();
+				}
+				else
+				{
+					value = field->GetFieldValue<Object*>(this);
+				}
+				
 				if (value != nullptr && !outReferences.KeyExists(value->uuid))
 				{
 					outReferences[value->uuid] = value;
@@ -371,8 +470,10 @@ namespace CE
 			else if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
 			{
 				const auto& objectMap = field->GetFieldValue<ObjectMap>(this);
-				for (const auto& object : objectMap)
+				for (const auto& objectRef : objectMap)
 				{
+					Object* object = objectRef.Get();
+
 					if (object != nullptr)
 					{
 						outReferences[object->uuid] = object;
@@ -384,12 +485,37 @@ namespace CE
 				auto underlyingType = field->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsObject())
 				{
-					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
-					for (Object* object : array)
+					if (field->IsStrongRefCounted())
 					{
-						if (object != nullptr)
+						const Array<Ref<Object>>& array = field->GetFieldValue<Array<Ref<Object>>>(this);
+						for (const auto& object : array)
 						{
-							outReferences[object->uuid] = object;
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						const Array<WeakRef<Object>>& array = field->GetFieldValue<Array<WeakRef<Object>>>(this);
+						for (const auto& object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else
+					{
+						const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
+						for (Object* object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object;
+							}
 						}
 					}
 				}
@@ -405,6 +531,19 @@ namespace CE
 		}
 	}
 
+	void Object::FetchSubObjectsRecursive(Array<Object*>& outSubObjects)
+	{
+		outSubObjects.Add(this);
+
+		for (const auto& subObject : attachedObjects)
+		{
+			if (subObject)
+			{
+				subObject->FetchSubObjectsRecursive(outSubObjects);
+			}
+		}
+	}
+
 	void Object::FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance)
 	{
 		if (structType == nullptr || structInstance == nullptr)
@@ -414,7 +553,21 @@ namespace CE
 		{
 			if (field->IsObjectField())
 			{
-				Object* value = field->GetFieldValue<Object*>(structInstance);
+				Object* value = nullptr;
+
+				if (field->IsStrongRefCounted())
+				{
+					value = field->GetFieldValue<Ref<Object>>(structInstance).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					value = field->GetFieldValue<WeakRef<Object>>(structInstance).Get();
+				}
+				else
+				{
+					value = field->GetFieldValue<Object*>(structInstance);
+				}
+				
 				if (value != nullptr && !outReferences.KeyExists(value->uuid))
 				{
 					outReferences[value->uuid] = value;
@@ -425,12 +578,37 @@ namespace CE
 				auto underlyingType = field->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsObject())
 				{
-					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(structInstance);
-					for (Object* object : array)
+					if (field->IsStrongRefCounted())
 					{
-						if (object != nullptr)
+						const Array<Ref<Object>>& array = field->GetFieldValue<Array<Ref<Object>>>(structInstance);
+						for (const auto& object : array)
 						{
-							outReferences[object->uuid] = object;
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else if (field->IsWeakRefCounted())
+					{
+						const Array<WeakRef<Object>>& array = field->GetFieldValue<Array<WeakRef<Object>>>(structInstance);
+						for (const auto& object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object.Get();
+							}
+						}
+					}
+					else
+					{
+						const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(structInstance);
+						for (Object* object : array)
+						{
+							if (object != nullptr)
+							{
+								outReferences[object->uuid] = object;
+							}
 						}
 					}
 				}
@@ -446,7 +624,7 @@ namespace CE
 		}
 	}
 
-    void Object::LoadConfig(ClassType* configClass, String fileName)
+	void Object::LoadConfig(ClassType* configClass, String fileName)
     {
         if (configClass == NULL)
             configClass = GetClass();
@@ -553,20 +731,8 @@ namespace CE
 			}
             else if (fieldTypeId == TYPEID(Uuid))
             {
-                u64 uuid = 0;
-                if (String::TryParse(stringValue, uuid))
-                {
-                    field->SetFieldValue<Uuid>(this, Uuid(uuid));
-                }
+				field->SetFieldValue<Uuid>(this, Uuid::FromString(stringValue));
             }
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				u32 uuid = 0;
-				if (String::TryParse(stringValue, uuid))
-				{
-					field->SetFieldValue<UUID32>(this, UUID32(uuid));
-				}
-			}
             else if (field->IsIntegerField())
             {
                 s64 value = 0;
@@ -693,122 +859,12 @@ namespace CE
 
 	Object* Object::GetDefaultSubobject(ClassType* classType, const String& name)
 	{
-		for (auto object : attachedObjects)
+		for (const auto& object : attachedObjects)
 		{
 			if (object->GetName() == name && object->GetClass() == classType)
-				return object;
+				return object.Get();
 		}
 		return nullptr;
-	}
-
-	Object* Object::CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
-	{
-		auto thisClass = GetClass();
-
-		if (cloneName.IsEmpty())
-			cloneName = GetName().GetString() + "_Copy";
-
-		Object* clone = CreateObject<Object>(outer, cloneName, OF_NoFlags, thisClass);
-		originalToClonedObjectMap[this->GetUuid()] = clone;
-
-		for (auto field = thisClass->GetFirstField(); field != nullptr; field = field->GetNext())
-		{
-			if (field->GetName() == "name" && field->GetDeclarationTypeId() == TYPEID(Name))
-				continue;
-			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(Uuid))
-				continue;
-			if (field->IsInternal())
-				continue;
-
-			if (field->IsObjectField()) // Deep copy object fields
-			{
-				Object* objectToCopy = field->GetFieldValue<Object*>(this);
-				if (objectToCopy == nullptr)
-				{
-					field->ForceSetFieldValue<Object*>(clone, nullptr);
-				}
-				else
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						field->ForceSetFieldValue<Object*>(clone, deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						field->ForceSetFieldValue<Object*>(clone, originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-					else
-					{
-						// Shallow copy external object reference
-						field->ForceSetFieldValue<Object*>(clone, objectToCopy);
-					}
-				}
-			}
-			else if (field->IsObjectStoreType())
-			{
-				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(this);
-				ObjectMap& destMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(clone));
-				for (int i = destMap.GetObjectCount() - 1; i >= 0; i--)
-				{
-					auto objectToDelete = *(destMap.begin() + i);
-					if (objectToDelete != nullptr)
-						objectToDelete->Destroy();
-				}
-				destMap.RemoveAll();
-
-				for (auto objectToCopy : srcMap)
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						destMap.AddObject(deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						destMap.AddObject(originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-				}
-			}
-			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsClass())
-			{
-				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(this);
-				Array<Object*>& destArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(clone));
-				destArray.Clear();
-				for (auto objectToCopy : srcArray)
-				{
-					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						// Deep copy sub-object
-						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
-						destArray.Add(deepCopy);
-					}
-					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-					{
-						destArray.Add(originalToClonedObjectMap[objectToCopy->GetUuid()]);
-					}
-					else
-					{
-						// Shallow copy external object reference
-						destArray.Add(objectToCopy);
-					}
-				}
-			}
-			else
-			{
-				field->CopyTo(this, field, clone);
-			}
-		}
-
-		return clone;
-	}
-
-	Object* Object::Clone(String cloneName, bool deepClone)
-	{
-		HashMap<Uuid, Object*> originalToCloneMap{};
-		return CloneHelper(originalToCloneMap, outer, cloneName, deepClone);
 	}
 
 	void Object::LoadFromTemplate(Object* templateObject)
@@ -823,15 +879,15 @@ namespace CE
                 if (src != nullptr && dst != nullptr)
                     originalToCloneMap[src->GetUuid()] = dst;
                 
-				for (auto srcObject : src->attachedObjects)
+				for (const auto& srcObject : src->attachedObjects)
 				{
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Ref<Object> dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
 					if (dstObject == nullptr)
 						continue;
 
-					fetchSubobjects(srcObject, dstObject);
+					fetchSubobjects(srcObject.Get(), dstObject.Get());
 				}
 			};
 
@@ -872,11 +928,12 @@ namespace CE
 				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(templateObject);
 				ObjectMap& dstMap = const_cast<ObjectMap&>(destField->GetFieldValue<ObjectMap>(this));
 
-				for (auto srcObject : srcMap)
+				for (const auto& srcObjectRef : srcMap)
 				{
+					Object* srcObject = srcObjectRef.Get();
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass()).Get();
 					if (dstObject == nullptr)
 						return;
 
@@ -885,13 +942,13 @@ namespace CE
 			}
 			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsObject())
 			{
-				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(templateObject);
-				Array<Object*>& dstArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(this));
+				//const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(templateObject);
+				//Array<Object*>& dstArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(this));
 
-				for (auto srcObject : srcArray)
+				//for (auto srcObject : srcArray)
 				{
-					if (srcObject == nullptr)
-						continue;
+					//if (srcObject == nullptr)
+					//	continue;
 
 					// TODO: LoadFromTemplateHelper from Array
 				}
@@ -920,7 +977,20 @@ namespace CE
 			}
 			else if (field->IsObjectField()) // Deep copy object fields
 			{
-				Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				Object* objectToCopy = nullptr;
+
+				if (field->IsStrongRefCounted())
+				{
+					objectToCopy = field->GetFieldValue<Ref<Object>>(templateObject).Get();
+				}
+				else if (field->IsWeakRefCounted())
+				{
+					objectToCopy = field->GetFieldValue<WeakRef<Object>>(templateObject).Get();
+				}
+				else
+				{
+					objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				}
 				
 				if (objectToCopy == nullptr)
 				{
@@ -928,14 +998,28 @@ namespace CE
 				}
 				else
 				{
+					Object* valueToSet = nullptr;
 					if (originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
-						destField->SetFieldValue<Object*>(this, originalToClonedObjectMap[objectToCopy->GetUuid()]);
+						valueToSet = originalToClonedObjectMap[objectToCopy->GetUuid()];
 					}
 					else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
 						// Shallow copy external object references
-						destField->SetFieldValue<Object*>(this, objectToCopy);
+						valueToSet = objectToCopy;
+					}
+
+					if (destField->IsStrongRefCounted())
+					{
+						destField->SetFieldValue<Ref<Object>>(this, valueToSet);
+					}
+					else if (destField->IsWeakRefCounted())
+					{
+						destField->SetFieldValue<WeakRef<Object>>(this, valueToSet);
+					}
+					else
+					{
+						destField->SetFieldValue<Object*>(this, valueToSet);
 					}
 				}
 			}
@@ -990,11 +1074,6 @@ namespace CE
 			else if (fieldDeclId == TYPEID(Uuid))
 			{
 				Uuid value = srcField->GetFieldValue<Uuid>(srcInstance);
-				dstField->ForceSetFieldValue(dstInstance, value);
-			}
-			else if (fieldDeclId == TYPEID(UUID32))
-			{
-				UUID32 value = srcField->GetFieldValue<UUID32>(srcInstance);
 				dstField->ForceSetFieldValue(dstInstance, value);
 			}
 			else if (srcField->IsArrayField())
@@ -1060,7 +1139,20 @@ namespace CE
 		}
 		else if (fieldDeclType->IsObject())
 		{
-			Object* original = srcField->GetFieldValue<Object*>(srcInstance);
+			Object* original = nullptr;
+
+			if (srcField->IsStrongRefCounted())
+			{
+				original = srcField->GetFieldValue<Ref<Object>>(srcInstance).Get();
+			}
+			else if (srcField->IsWeakRefCounted())
+			{
+				original = srcField->GetFieldValue<WeakRef<Object>>(srcInstance).Get();
+			}
+			else
+			{
+				original = srcField->GetFieldValue<Object*>(srcInstance);
+			}
 
 			if (original == nullptr)
 			{
@@ -1069,13 +1161,27 @@ namespace CE
 			else
 			{
 				Object* parent = nullptr;
+				Object* valueToSet = nullptr;
 				if (originalToClonedObjectMap.KeyExists(original->GetUuid()))
 				{
-					dstField->SetFieldValue<Object*>(dstInstance, originalToClonedObjectMap[original->GetUuid()]);
+					valueToSet = originalToClonedObjectMap[original->GetUuid()];
 				}
 				else
 				{
-                    dstField->SetFieldValue<Object*>(dstInstance, original);
+					valueToSet = original;
+				}
+
+				if (dstField->IsStrongRefCounted())
+				{
+					dstField->SetFieldValue<Ref<Object>>(dstInstance, valueToSet);
+				}
+				else if (dstField->IsWeakRefCounted())
+				{
+					dstField->SetFieldValue<WeakRef<Object>>(dstInstance, valueToSet);
+				}
+				else
+				{
+					dstField->SetFieldValue<Object*>(dstInstance, valueToSet);
 				}
 			}
 		}
@@ -1180,20 +1286,8 @@ namespace CE
 		}
         else if (field->GetTypeId() == TYPEID(Uuid))
         {
-            u64 intValue = 0;
-            if (String::TryParse(value, intValue))
-            {
-                field->SetFieldValue(instance, Uuid(intValue));
-            }
+			field->SetFieldValue(instance, Uuid::FromString(value));
         }
-		else if (field->GetTypeId() == TYPEID(UUID32))
-		{
-			u32 intValue = 0;
-			if (String::TryParse(value, intValue))
-			{
-				field->SetFieldValue(instance, UUID32(intValue));
-			}
-		}
         else if (field->IsIntegerField())
         {
             s64 intValue = 0;
@@ -1259,17 +1353,7 @@ namespace CE
 			return;
 		}
 
-		// Remove this object from destroyed objects list if the address exists in it
-		{
-			LockGuard lock{ gDestroyedObjectsMutex };
-
-			if (gDestroyedObjects.Exists(this))
-			{
-				gDestroyedObjects.Remove(this);
-			}
-		}
-
-		for (Object* subObject : attachedObjects)
+		for (const auto& subObject : attachedObjects)
 		{
 			if (!subObject)
 				continue;
@@ -1277,7 +1361,7 @@ namespace CE
 			if ((subObject->objectFlags & OF_SubobjectPending) != 0)
 			{
 				subObject->objectFlags &= ~OF_SubobjectPending;
-				OnSubobjectAttached(subObject);
+				OnSubobjectAttached(subObject.Get());
 				subObject->OnAfterConstructInternal();
 			}
 		}

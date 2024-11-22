@@ -5,7 +5,7 @@ namespace CE
     using namespace CE::RHI;
     using namespace CE::RPI;
 
-    static FusionApplication* gInstance = nullptr;
+    static WeakRef<FusionApplication> gInstance = nullptr;
 
     extern RawData GetFusionShaderVert();
     extern RawData GetFusionShaderFrag();
@@ -21,10 +21,7 @@ namespace CE
 
     FusionApplication::~FusionApplication()
     {
-        if (gInstance == this)
-        {
-            gInstance = nullptr;
-        }
+
     }
 
     FusionApplication* FusionApplication::Get()
@@ -33,22 +30,23 @@ namespace CE
         {
             gInstance = CreateObject<FusionApplication>(GetTransient(MODULE_NAME), "FusionApplication");
         }
-        return gInstance;
+        return gInstance.Get();
     }
 
     FusionApplication* FusionApplication::TryGet()
     {
-        return gInstance;
+        return gInstance.Get();
     }
 
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
         assetLoader = initInfo.assetLoader;
+        systemDpi = PlatformApplication::Get()->GetSystemDpi();
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShaders();
-        
+
         fontManager->Init();
 
         IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
@@ -90,7 +88,7 @@ namespace CE
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
-            destructionQueue[i].object->Destroy();
+            destructionQueue[i].object->BeginDestroy();
             destructionQueue.RemoveAt(i);
         }
     }
@@ -279,6 +277,11 @@ namespace CE
         }
 
         int index = samplerArray.GetCount();
+        if (index > 15)
+        {
+            CE_LOG(Error, All, "Out of sampler slots!");
+        }
+
         samplerIndices[sampler] = index;
         samplerArray.Insert(sampler);
         samplersUpdated = true;
@@ -303,7 +306,7 @@ namespace CE
         {
             //if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
             {
-                destructionQueue[i].object->Destroy();
+                destructionQueue[i].object->BeginDestroy();
                 destructionQueue.RemoveAt(i);
                 continue;
             }
@@ -513,7 +516,7 @@ namespace CE
             if (window->IsMainWindow() || nativeContext->GetPlatformWindow() == window)
             {
                 if (nativeContext->owningWidget)
-                    nativeContext->owningWidget->Destroy();
+                    nativeContext->owningWidget->BeginDestroy();
                 nativeContext->owningWidget = nullptr;
 
                 if (!nativeContext->isDestroyed)

@@ -41,7 +41,7 @@ namespace CE
         bool AddChild(FWidget& child);
         void RemoveChild(FWidget* child);
 
-        FWidget* GetParent() const { return parent; }
+        FWidget* GetParent() const { return parent.Get(); }
 
         virtual void ApplyStyle();
 
@@ -170,7 +170,7 @@ namespace CE
 
         void OnAfterConstruct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         virtual void Construct();
 
@@ -196,7 +196,7 @@ namespace CE
         FFusionContext* context = nullptr;
 
         FIELD()
-        FWidget* parent = nullptr;
+        WeakRef<FWidget> parent = nullptr;
 
         // - Flags -
 
@@ -268,6 +268,13 @@ namespace CE
 
         template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
         TWidget& Assign(TWidget*& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
+        template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
+        TWidget& Assign(Ref<TWidget>& out)
         {
             out = (TWidget*)this;
             return *out;

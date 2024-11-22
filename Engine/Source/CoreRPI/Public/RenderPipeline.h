@@ -48,7 +48,7 @@ namespace CE::RPI
 		Name name{};
 
 		/// @brief Unique id of the pipeline
-		Uuid uuid{};
+		Uuid uuid = Uuid::Random();
 
 		/// @brief Name tag of the main view.
 		SceneViewTag mainViewTag = "MainCamera";

@@ -20,12 +20,13 @@ namespace CE
 	{
 		errorMessage = "";
 
-		defer(
-			if (errorMessage.NonEmpty())
+		defer(&)
+		{
+			if (errorMessage.NotEmpty())
 			{
 				CE_LOG(Error, All, "PreprocessShader failed: {}", errorMessage);
 			}
-		);
+		};
 
 		if (stream == nullptr || !stream->CanRead())
 		{
@@ -47,9 +48,10 @@ namespace CE
 
 		int passIndex = 0;
 
-		defer(
+		defer(&)
+		{
 			passSources.Clear();
-		);
+		};
 
 		ShaderPropertyEntry currentProperty{};
 		int defaultValueIdx = 0;
@@ -59,7 +61,7 @@ namespace CE
 		for (int i = 0; i < tokens.GetSize(); i++)
 		{
 			ScopeType lastScope = SCOPE_NONE;
-			if (scopeStack.NonEmpty())
+			if (scopeStack.NotEmpty())
 				lastScope = scopeStack.Top();
 
 			const Token& curToken = tokens[i];
@@ -79,7 +81,7 @@ namespace CE
 			}
 			else if (curToken.token == TK_SCOPE_CLOSE)
 			{
-				if (allScopeStack.NonEmpty())
+				if (allScopeStack.NotEmpty())
 				{
 					if (allScopeStack.Top() != SCOPE_NONE)
 					{
@@ -455,7 +457,7 @@ namespace CE
 		char c = stream->Read();
 
 		ScopeType lastScope = SCOPE_NONE;
-		if (scopeStack.NonEmpty())
+		if (scopeStack.NotEmpty())
 			lastScope = scopeStack.Top();
 
 		switch (c)
@@ -491,7 +493,7 @@ namespace CE
 			outToken = Token{ TK_SCOPE_OPEN };
 			return true;
 		case '}':
-			if (allScopeStack.NonEmpty())
+			if (allScopeStack.NotEmpty())
 			{
 				auto top = allScopeStack.Top();
 				if (top != SCOPE_NONE)

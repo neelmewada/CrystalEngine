@@ -16,7 +16,7 @@ namespace CE::Editor
 
         void Construct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override;
 

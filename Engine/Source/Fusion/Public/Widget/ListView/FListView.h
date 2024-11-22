@@ -19,6 +19,8 @@ namespace CE
 
         FListItemWidget* GetSelectedItem();
 
+        int GetSelectedItemIndex();
+
     protected:
 
         FListView();

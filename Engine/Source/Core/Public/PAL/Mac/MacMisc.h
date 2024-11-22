@@ -22,6 +22,8 @@ namespace CE
         {
             return PlatformName::Mac;
         }
+
+        static String GetOSVersionString();
     };
 
     typedef MacMisc PlatformMisc;

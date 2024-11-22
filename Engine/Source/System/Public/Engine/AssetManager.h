@@ -25,14 +25,14 @@ namespace CE
 		AssetData* GetPrimaryAssetDataAtPath(const Name& path);
 		Array<AssetData*> GetAssetsDataAtPath(const Name& path);
 
-		Asset* LoadAssetAtPath(const Name& path);
+		Ref<Asset> LoadAssetAtPath(const Name& path);
 
 		RHI::Texture* LoadTextureAtPath(const Name& path) override;
 
-		Array<Asset*> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
+		Array<Ref<Asset>> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
 
 		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
-		inline Array<TAsset*> LoadAssetsAtPath(const Name& path)
+		inline Array<Ref<TAsset>> LoadAssetsAtPath(const Name& path)
 		{
 			Array<Asset*> assets = LoadAssetsAtPath(path, TAsset::StaticType());
 			Array<TAsset*> outAssets{};
@@ -48,12 +48,12 @@ namespace CE
 		}
 
 		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
-		inline TAsset* LoadAssetAtPath(const Name& path)
+		inline Ref<TAsset> LoadAssetAtPath(const Name& path)
 		{
-			Asset* asset = LoadAssetAtPath(path);
-			if (!asset)
+			Ref<Asset> asset = LoadAssetAtPath(path);
+			if (asset.IsNull())
 				return nullptr;
-			return Object::CastTo<TAsset>(asset);
+			return Object::CastTo<TAsset>(asset.Get());
 		}
 
 		void UnloadAsset(Asset* asset);
@@ -64,8 +64,8 @@ namespace CE
 		AssetRegistry* assetRegistry = nullptr;
 
 		SharedMutex loadedAssetsMutex{};
-		HashMap<Name, Bundle*> loadedAssetsByPath{};
-		HashMap<Uuid, Bundle*> loadedAssetsByUuid{};
+		HashMap<Name, Ref<Bundle>> loadedAssetsByPath{};
+		HashMap<Uuid, WeakRef<Bundle>> loadedAssetsByUuid{};
 
 		friend class Engine;
 	};

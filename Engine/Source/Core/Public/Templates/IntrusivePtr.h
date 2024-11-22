@@ -177,19 +177,11 @@ namespace CE
 
 		inline T& operator*() const
 		{
-			if (ptr == nullptr)
-			{
-				throw NullPointerException();
-			}
 			return *ptr;
 		}
 
 		inline T* operator->() const
 		{
-			if (ptr == nullptr)
-			{
-				throw NullPointerException();
-			}
 			return ptr;
 		}
 
@@ -234,7 +226,7 @@ namespace CE
 		T* ptr = nullptr;
 	};
 
-	using IntrusiveBase = IntrusiveBaseRefCnt<std::atomic_uint>;
+	using IntrusiveBase = IntrusiveBaseRefCnt<std::atomic<int>>;
 
 	template<typename T>
 	using Ptr = IntrusivePtr<T>;

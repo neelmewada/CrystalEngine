@@ -20,7 +20,7 @@ namespace CE::Editor
 
         void Construct() override;
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         void OnSceneLoaded(CE::Scene* scene) override;
 

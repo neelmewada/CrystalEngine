@@ -25,21 +25,13 @@ namespace CE::Editor
 
     }
 
-    void ObjectEditor::OnBeforeDestroy()
+    void ObjectEditor::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         if (target)
         {
             ObjectListener::RemoveListener(target, this);
-        }
-
-        for (Object* target : targets)
-        {
-            if (ObjectEditorRegistry::Get().objectEditorsByInstances[target->GetUuid()] == this)
-            {
-	            ObjectEditorRegistry::Get().objectEditorsByInstances.Remove(target->GetUuid());
-            }
         }
     }
 
@@ -79,7 +71,7 @@ namespace CE::Editor
 
     f32 ObjectEditor::GetSplitRatio()
     {
-        if (propertyEditors.NonEmpty())
+        if (propertyEditors.NotEmpty())
         {
             return propertyEditors[0]->GetSplitRatio();
         }
@@ -252,7 +244,7 @@ namespace CE::Editor
 
             if (expandContent->GetChildCount() == 0)
             {
-                section->Destroy();
+                section->BeginDestroy();
             }
         }
     }

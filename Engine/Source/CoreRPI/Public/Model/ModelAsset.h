@@ -14,7 +14,7 @@ namespace CE::RPI
 
         u32 GetLodCount() const { return lods.GetSize(); }
 
-        ModelLodAsset* GetModelLod(u32 index) const { return lods[index]; }
+        Ref<ModelLodAsset> GetModelLod(u32 index) const { return lods[index]; }
 
         Model* CreateModel();
 
@@ -27,7 +27,7 @@ namespace CE::RPI
         Model* model = nullptr;
 
         FIELD()
-        Array<ModelLodAsset*> lods{};
+        Array<Ref<ModelLodAsset>> lods{};
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::StaticMeshAssetImportJob;

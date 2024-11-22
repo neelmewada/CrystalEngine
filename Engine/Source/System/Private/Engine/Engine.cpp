@@ -75,7 +75,7 @@ namespace CE
 		for (auto subsystem : engineSubsystems) // Shutdown
 			subsystem->Shutdown();
 		for (auto subsystem : engineSubsystems) // Destroy
-			subsystem->Destroy();
+			subsystem->BeginDestroy();
 		engineSubsystems.Clear();
 	}
 

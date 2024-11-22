@@ -32,7 +32,7 @@ namespace CE::Editor
 
 		}
 
-		virtual bool ProcessAsset(Bundle* bundle) override;
+		virtual bool ProcessAsset(const Ref<Bundle>& bundle) override;
 
 	private:
 

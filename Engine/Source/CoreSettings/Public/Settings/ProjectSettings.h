@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS(Settings = "ProjectSettings", DisplayName = "Project", SettingsCategory = "Project")
+    CLASS(Settings = "ProjectSettings", DisplayName = "Project Settings", SettingsCategory = "Project")
     class CORESETTINGS_API ProjectSettings : public Settings
     {
         CE_CLASS(ProjectSettings, Settings)

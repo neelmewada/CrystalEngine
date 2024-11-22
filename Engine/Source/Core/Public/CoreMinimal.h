@@ -38,8 +38,11 @@
 #include "IO/Stream/MemoryStream.h"
 #include "IO/Stream/FileStream.h"
 #include "IO/Archive.h"
+#include "IO/EngineDirectories.h"
 
 // *********************************
+
+#include <cpptrace/cpptrace.hpp>
 
 // Module
 #include "Module/Module.h"
@@ -93,6 +96,11 @@
 // Json
 #include "Json/Json.h"
 
+// Reference counting
+#include "Object/Lifecycle/RefCounting.h"
+#include "Object/Lifecycle/Ref.h"
+#include "Object/Lifecycle/WeakRef.h"
+
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Interface.h"
@@ -106,6 +114,7 @@
 #include "Object/BasePrefs.h"
 #include "Object/Prefs.h"
 #include "Object/Bundle.h"
+#include "Object/Serialization/ObjectSerializer.h"
 
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"

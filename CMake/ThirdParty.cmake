@@ -8,19 +8,19 @@ include_guard(GLOBAL)
 #     list(APPEND CMAKE_MODULE_PATH ${THIRD_PARTY_CMAKE_FILE_DIRECTORY})
 # endforeach()
 
-list(APPEND CMAKE_MODULE_PATH ${CE_ROOT_DIR}/ThirdParty)
+#list(APPEND CMAKE_MODULE_PATH ${CE_ROOT_DIR}/ThirdParty)
 
 set(FETCHCONTENT_QUIET FALSE)
 
 # \arg:TARGET_TYPE: SHARED; STATIC; MODULE; 
-function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
-    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_NAME}")
+function(ce_validate_package PACKAGE_FULL_NAME PACKAGE_SHORT_NAME)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME}")
         return()
     endif()
     
-    set(package_url "https://gitlab.com/neelrmewada/crystalengine-thirdparty/-/raw/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip?inline=false")
-    # set(package_url "https://github.com/neelmewada/CrystalEngine-ThirdParty/blob/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip?raw=true")
-    set(package_local_zip_path "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_NAME}.zip")
+    set(package_url "https://gitlab.com/neelrmewada/crystalengine-thirdparty/-/raw/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_FULL_NAME}.zip?inline=false")
+    # set(package_url "https://github.com/neelmewada/CrystalEngine-ThirdParty/blob/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_FULL_NAME}.zip?raw=true")
+    set(package_local_zip_path "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME}.zip")
 
     if(NOT EXISTS "${package_local_zip_path}")
         message("***********************************************************************************")
@@ -51,7 +51,7 @@ function(ce_add_rt_deps NAME)
     set(target "${NAME}_RT")
 
     set(options AUTORTTI)
-    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER ROOT_PATH MAC_ROOT_PATH)
+    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER ROOT_PATH MAC_ROOT_PATH LINUX_ROOT_PATH)
     set(multiValueArgs COPY_DIRS COPY_FILES COPY_LIBS INCLUDE_DIRECTORIES BIN_DIRS)
 
     cmake_parse_arguments(ce_add_rt_deps "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -62,10 +62,14 @@ function(ce_add_rt_deps NAME)
         message(FATAL_ERROR "ROOT_PATH not supplied to ce_add_rt_deps ${NAME}")
     endif()
 
-    if(ce_add_rt_deps_MAC_ROOT_PATH AND ${PAL_PLATFORM_IS_MAC})
+    if(ce_add_rt_deps_MAC_ROOT_PATH AND PAL_PLATFORM_IS_MAC)
         set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_MAC_ROOT_PATH}")
     endif()
-    
+
+    if (PAL_PLATFORM_IS_LINUX AND ce_add_rt_deps_LINUX_ROOT_PATH)
+        set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_LINUX_ROOT_PATH}")
+    endif()
+
     set_target_properties(${target} PROPERTIES ROOT_PATH "${ce_add_rt_deps_ROOT_PATH}")
 
     if(ce_add_rt_deps_COPY_DIRS)

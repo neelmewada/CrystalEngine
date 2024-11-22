@@ -119,7 +119,7 @@ namespace CE
         propertyMap[name] = prop;
     }
 
-    void MaterialInstance::SetProperty(const Name& name, CE::Texture* value, const Vec2& offset, const Vec2& scaling)
+    void MaterialInstance::SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset, const Vec2& scaling)
     {
         valuesModified = true;
 

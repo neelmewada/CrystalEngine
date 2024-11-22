@@ -52,7 +52,7 @@ namespace CE
 			
 			owningWidget->PlaceSubWidgets();
 
-			for (FPopup* popup : localPopupStack)
+			for (const auto& popup : localPopupStack)
 			{
 				popup->CalculateIntrinsicSize();
 
@@ -101,7 +101,7 @@ namespace CE
 
 	FFusionContext* FFusionContext::GetRootContext() const
 	{
-		return FusionApplication::Get()->rootContext;
+		return FusionApplication::Get()->rootContext.Get();
 	}
 
 	void FFusionContext::SetOwningWidget(FWidget* widget)
@@ -321,9 +321,9 @@ namespace CE
 
 		if (curFocusWidget != nullptr && curFocusWidget->ParentExistsRecursive(popup))
 		{
-			if (localPopupStack.NonEmpty())
+			if (localPopupStack.NotEmpty())
 			{
-				SetFocusWidget(localPopupStack.Top());
+				SetFocusWidget(localPopupStack.Top().Get());
 			}
 			else if (owningWidget)
 			{

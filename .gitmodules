@@ -1,0 +1,36 @@
+[submodule "ThirdParty/vendor/xxHash"]
+	path = ThirdParty/vendor/xxHash
+	url = https://github.com/Cyan4973/xxHash.git
+[submodule "ThirdParty/vendor/spdlog"]
+	path = ThirdParty/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "ThirdParty/vendor/cxxopts"]
+	path = ThirdParty/vendor/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
+[submodule "ThirdParty/vendor/efsw"]
+	path = ThirdParty/vendor/efsw
+	url = https://github.com/SpartanJ/efsw.git
+[submodule "ThirdParty/vendor/zip"]
+	path = ThirdParty/vendor/zip
+	url = https://github.com/kuba--/zip.git
+[submodule "ThirdParty/vendor/CRCpp"]
+	path = ThirdParty/vendor/CRCpp
+	url = https://github.com/d-bahr/CRCpp.git
+[submodule "ThirdParty/vendor/stb"]
+	path = ThirdParty/vendor/stb
+	url = https://github.com/nothings/stb.git
+[submodule "ThirdParty/vendor/miniz"]
+	path = ThirdParty/vendor/miniz
+	url = https://github.com/richgel999/miniz.git
+[submodule "ThirdParty/vendor/freetype"]
+	path = ThirdParty/vendor/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "ThirdParty/vendor/assimp"]
+	path = ThirdParty/vendor/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "ThirdParty/vendor/sdl"]
+	path = ThirdParty/vendor/sdl
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "ThirdParty/vendor/cpptrace"]
+	path = ThirdParty/vendor/cpptrace
+	url = https://github.com/jeremy-rifkin/cpptrace.git

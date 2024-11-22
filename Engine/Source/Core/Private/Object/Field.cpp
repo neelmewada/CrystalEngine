@@ -58,7 +58,7 @@ namespace CE
 		{
 			Object* object = (Object*)fieldInstance;
 			if (object != nullptr)
-				object->Destroy();
+				object->BeginDestroy();
 			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
 			return;
 		}
@@ -234,14 +234,29 @@ namespace CE
 
 	bool FieldType::IsObjectField() const
     {
-		Class* classType = ClassType::FindClass(fieldTypeId);
-        return classType != nullptr && classType->IsObject();
+		TypeInfo* declType = GetDeclarationType();
+		return declType != nullptr && declType->IsClass();
     }
 
 	bool FieldType::IsStructField()
 	{
-		Struct* structType = StructType::FindStruct(fieldTypeId);
-		return structType != nullptr;
+		TypeInfo* declType = GetDeclarationType();
+		return declType != nullptr && declType->IsStruct();
+	}
+
+	bool FieldType::IsRefCounted() const
+	{
+		return IsStrongRefCounted() || IsWeakRefCounted();
+	}
+
+	bool FieldType::IsStrongRefCounted() const
+	{
+		return refType == RefType::Strong;
+	}
+
+	bool FieldType::IsWeakRefCounted() const
+	{
+		return refType == RefType::Weak;
 	}
 
 	TypeInfo* FieldType::GetUnderlyingType()
@@ -253,7 +268,7 @@ namespace CE
 		return underlyingTypeInfo;
 	}
 
-	TypeInfo* FieldType::GetDeclarationType()
+	TypeInfo* FieldType::GetDeclarationType() const
     {
 		if (declarationType == nullptr)
 		{
@@ -286,11 +301,7 @@ namespace CE
 			}
 			else if (fieldTypeId == TYPEID(Uuid))
 			{
-				return String::Format("{}", (u64)GetFieldValue<Uuid>(instance));
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				return String::Format("{}", (u32)GetFieldValue<UUID32>(instance));
+				return String::Format("{}", GetFieldValue<Uuid>(instance));
 			}
 			else if (fieldTypeId == TYPEID(c8))
 			{
@@ -359,7 +370,7 @@ namespace CE
 						for (int i = 0; i < arraySize; i++)
 						{
 							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
-							if (result.NonEmpty())
+							if (result.NotEmpty())
 								result += ",";
 							result += str;
 						}
@@ -428,14 +439,6 @@ namespace CE
 				{
 					return value;
 				}
-			}
-			else if (fieldTypeId == TYPEID(Uuid))
-			{
-				return (u64)GetFieldValue<Uuid>(instance);
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				return (u32)GetFieldValue<UUID32>(instance);
 			}
 			else if (fieldTypeId == TYPEID(c8))
 			{
@@ -521,11 +524,6 @@ namespace CE
 			else if (fieldTypeId == TYPEID(Uuid))
 			{
 				const Uuid& value = GetFieldValue<Uuid>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
-			}
-			else if (fieldTypeId == TYPEID(UUID32))
-			{
-				const UUID32& value = GetFieldValue<UUID32>(srcInstance);
 				destField->SetFieldValue(destInstance, value);
 			}
 			else if (IsArrayField()) // Array
@@ -683,15 +681,25 @@ namespace CE
 		TypeInfo* underlyingType = GetUnderlyingType();
 		if (underlyingType == nullptr)
 			return 0;
+
 		auto underlyingTypeSize = underlyingType->GetSize();
 
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
 		}
 		if (underlyingType->IsTypeInfo())
 		{
-			underlyingTypeSize = sizeof(TypeInfo*); // Reflection types are always stored as pointers
+			underlyingTypeSize = sizeof(TypeInfo*); // Reflection types are always stored as raw pointers
 		}
 
 		return array.GetSize() / underlyingTypeSize;
@@ -718,13 +726,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
+
 			array.Resize(numElements * underlyingTypeSize, 0);
 		}
 		else
 		{
 			for (int i = numElements; i < curNumElements; i++) // Call destructor on elements that will be removed
 			{
-				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				void* elementInstance = array.GetData() + underlyingTypeSize * i;
 				underlyingType->CallDestructor(elementInstance);
 			}
 
@@ -732,7 +750,7 @@ namespace CE
 
 			for (int i = curNumElements; i < numElements; i++) // Initialize newly added elements if exists
 			{
-				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				void* elementInstance = array.GetData() + underlyingTypeSize * i;
 				underlyingType->InitializeDefaults(elementInstance);
 			}
 		}
@@ -775,6 +793,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+				Array<Ref<Object>>& refArray = const_cast<Array<Ref<Object>>&>(GetFieldValue<Array<Ref<Object>>>(instance));
+				refArray.InsertAt(insertPosition, Ref<Object>(nullptr));
+
+				return;
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+				Array<WeakRef<Object>>& refArray = const_cast<Array<WeakRef<Object>>&>(GetFieldValue<Array<WeakRef<Object>>>(instance));
+				refArray.InsertAt(insertPosition, WeakRef<Object>(nullptr));
+
+				return;
+			}
 		}
 
 		auto insertBytePos = insertPosition * underlyingTypeSize;
@@ -782,7 +817,7 @@ namespace CE
 		Array<u8> insertionValues = Array<u8>(underlyingTypeSize, 0);
 		array.InsertRange(insertBytePos, insertionValues); // Insert an array of zeroes
 
-		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
+		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes (aka Objects). They're just null pointers by default.
 			return;
 
 		void* elementInstance = &array[insertBytePos];
@@ -814,6 +849,24 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+				Array<Ref<Object>>& refArray = (Array<Ref<Object>>&)array;
+				refArray.RemoveAt(deletePosition);
+
+				return;
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+				Array<WeakRef<Object>>& refArray = (Array<WeakRef<Object>>&)array;
+				refArray.RemoveAt(deletePosition);
+
+				return;
+			}
+
 			deletionBytePos = deletePosition * underlyingTypeSize;
 		}
 		else
@@ -846,13 +899,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
 		}
 
 		Array<FieldType> array{};
 
 		for (int i = 0; i < arraySize; i++)
 		{
-			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 0, underlyingTypeSize, i * underlyingTypeSize, "", this));
+			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 
+				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
 		}
 
 		return array;

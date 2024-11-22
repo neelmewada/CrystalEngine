@@ -122,7 +122,7 @@ namespace CE
 		SubClass<CE::RenderPipeline> defaultRenderPipeline = nullptr;
 
 		FIELD()
-		TextureCube* skyboxCubeMap = nullptr;
+		Ref<TextureCube> skyboxCubeMap = nullptr;
 		
 	private:
 

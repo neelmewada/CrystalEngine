@@ -53,7 +53,7 @@ namespace CE
 
     private:
 
-        void OnBeforeDestroy() override;
+        void OnBeginDestroy() override;
 
         void AddGlyphs(const Array<u32>& characterSet, u32 fontSize, bool isBold = false, bool isItalic = false);
 

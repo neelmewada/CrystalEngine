@@ -248,6 +248,8 @@ namespace CE
 		constexpr bool isVoid = std::is_void_v<Type>;
 		constexpr bool isPointer = std::is_pointer_v<Type>;
 		constexpr bool isArray = TIsArray<Type>::Value;
+		constexpr bool isRef = TIsRef<Type>::Value;
+		constexpr bool isWeakRef = TIsWeakRef<Type>::Value;
 		constexpr bool isObjectStore = IsObjectStoreType<Type>::Value;
 		constexpr bool isSubClassType = TIsSubClassType<Type>::Value;
 		constexpr bool isScriptDelegate = TIsScriptDelegate<Type>::Value;
@@ -260,6 +262,14 @@ namespace CE
 		if constexpr (isVoid)
 		{
 			return 0;
+		}
+		else if constexpr (isRef)
+		{
+			return typeid(typename TIsRef<Type>::Type).hash_code();
+		}
+		else if constexpr (isWeakRef)
+		{
+			return typeid(typename TIsWeakRef<Type>::Type).hash_code();
 		}
 		else if constexpr (isObjectStore) // ObjectMap type
 		{

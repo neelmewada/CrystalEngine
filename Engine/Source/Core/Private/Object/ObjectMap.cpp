@@ -3,9 +3,10 @@
 
 namespace CE
 {
-    Object* ObjectMap::FindObject(Uuid uuid) const
+
+	Ref<Object> ObjectMap::FindObject(Uuid uuid) const
     {
-		for (auto object : objects)
+		for (const auto& object : objects)
 		{
 			if (object != nullptr && object->GetUuid() == uuid)
 			{
@@ -15,9 +16,9 @@ namespace CE
 		return nullptr;
     }
 
-	Object* ObjectMap::FindObject(const Name& name, ClassType* classType) const
+	Ref<Object> ObjectMap::FindObject(const Name& name, ClassType* classType) const
 	{
-		for (auto object : objects)
+		for (const auto& object : objects)
 		{
 			if (object != nullptr && object->GetName() == name && (classType == nullptr || classType == object->GetClass()))
 			{
@@ -27,26 +28,26 @@ namespace CE
 		return nullptr;
 	}
 
-    Object* ObjectMap::GetObjectAt(u32 index) const
+	Object* ObjectMap::GetObjectAt(u32 index) const
     {
 		if (index >= objects.GetSize())
 			return nullptr;
-		return objects[index];
+		return objects[index].Get();
     }
 
 	bool ObjectMap::ObjectExists(Uuid uuid) const
 	{
-		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetUuid() == uuid; });
+		return objects.Exists([=](const Ref<Object>& obj) { return obj != nullptr && obj->GetUuid() == uuid; });
 	}
 
 	bool ObjectMap::ObjectExists(const Name& objectName) const
 	{
-		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetName() == objectName; });
+		return objects.Exists([=](const Ref<Object>& obj) { return obj != nullptr && obj->GetName() == objectName; });
 	}
 
     void ObjectMap::AddObject(Object* object)
 	{
-        if (object == nullptr || objects.Exists(object))
+        if (object == nullptr || objects.Exists([&](const Ref<Object>& obj) { return obj.Get() == object; }))
             return;
         objects.Add(object);
 	}
@@ -61,11 +62,7 @@ namespace CE
 
 	void ObjectMap::RemoveObject(Uuid uuid)
 	{
-		if (!ObjectExists(uuid))
-			return;
-
-		auto objectRef = objects[uuid];
-		objects.Remove(objectRef);
+		objects.RemoveAll([&](const Ref<Object>& object) { return object->GetUuid() == uuid; });
 	}
 
 	void ObjectMap::RemoveAll()

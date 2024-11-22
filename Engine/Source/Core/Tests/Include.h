@@ -4,6 +4,88 @@
 
 using namespace CE;
 
+namespace LifecycleTests
+{
+	static std::atomic<bool> lifecycleClassDestroyed = false;
+	static std::atomic<bool> lifecycleSubObjectDestroyed = false;
+	static std::atomic<int> lifecycleSubObjectDestroyCount = 0;
+
+	CLASS()
+	class LifecycleSubObject : public Object
+	{
+		CE_CLASS(LifecycleSubObject, Object)
+	public:
+
+		LifecycleSubObject()
+		{
+			
+		}
+
+		~LifecycleSubObject()
+		{
+			if (IsDefaultInstance())
+				return;
+
+			++lifecycleSubObjectDestroyCount;
+
+			if (GetName() == "SubObject")
+			{
+				lifecycleSubObjectDestroyed = true;
+			}
+		}
+	};
+
+	CLASS()
+	class LifecycleClass : public Object
+	{
+		CE_CLASS(LifecycleClass, Object)
+	public:
+
+		LifecycleClass()
+		{
+			subobject = CreateDefaultSubobject<LifecycleSubObject>("SubObject");
+			
+		}
+
+		~LifecycleClass()
+		{
+			if (!IsDefaultInstance())
+			{
+				lifecycleClassDestroyed = true;
+			}
+		}
+
+		Ref<LifecycleSubObject> subobject = nullptr;
+
+		Array<WeakRef<LifecycleSubObject>> childArray;
+
+	};
+}
+
+CE_RTTI_CLASS(, LifecycleTests, LifecycleSubObject,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, LifecycleTests, LifecycleSubObject)
+
+CE_RTTI_CLASS(, LifecycleTests, LifecycleClass,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(subobject)
+		CE_FIELD(childArray)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, LifecycleTests, LifecycleClass)
+
 namespace VariantTests
 {
 	STRUCT()
@@ -53,11 +135,13 @@ namespace BundleTests
 		CE_STRUCT(WritingTestStructBase)
 	public:
 
+		virtual ~WritingTestStructBase() = default;
+
 		FIELD()
 		String stringValue = "struct default";
 
 		FIELD()
-		Object* owner = nullptr;
+		WeakRef<Object> owner = nullptr;
 	};
 
 	STRUCT()
@@ -67,7 +151,19 @@ namespace BundleTests
 	public:
 
 		FIELD()
-		WritingTestObj1* obj1Ptr = nullptr;
+		WeakRef<WritingTestObj1> obj1Ptr = nullptr;
+	};
+
+	STRUCT()
+	struct WritingTestStruct2 : WritingTestStructBase
+	{
+		CE_STRUCT(WritingTestStruct2, WritingTestStructBase)
+	public:
+
+
+		FIELD()
+		WritingTestStructBase anotherBase{};
+
 	};
 	
 	CLASS()
@@ -86,7 +182,7 @@ namespace BundleTests
 		Array<String> stringArray{};
 
 		FIELD()
-		Object* objPtr = nullptr;
+		WeakRef<Object> objPtr = nullptr;
 	};
 
 	CLASS()
@@ -99,12 +195,192 @@ namespace BundleTests
 		WritingTestStruct1 testStruct{};
 
 		FIELD()
-		Array<Object*> objectArray{};
+		Array<WritingTestStruct2> arrayOfStruct;
+
+		FIELD()
+		Array<WeakRef<Object>> objectArray{};
 
 		FIELD()
 		u32 value;
 	};
 }
+
+namespace BundleTests
+{
+	class MyScript;
+	class MyMesh;
+	class MyMaterial;
+	class MyTexture;
+
+	class MyScript : public Object
+	{
+		CE_CLASS(MyScript, Object)
+	public:
+
+		Ref<MyMesh> meshAsset;
+
+		ScriptEvent<void(Object*)> scriptEvent;
+	};
+
+	class MyMesh : public Object
+	{
+		CE_CLASS(MyMesh, Object)
+	public:
+
+		void OnBeforeDestroy() override
+		{
+			Super::OnBeforeDestroy();
+
+		}
+
+		Ref<MyMaterial> material;
+
+		void UpdateMesh(Object* caller)
+		{
+			callCounter++;
+		}
+
+		int callCounter = 0;
+
+	};
+
+	struct MyMaterialProperty final
+	{
+		CE_STRUCT(MyMaterialProperty)
+	public:
+
+		Name name;
+
+	};
+
+	class MyMaterial : public Object
+	{
+		CE_CLASS(MyMaterial, Object)
+	public:
+
+		Array<MyMaterialProperty> properties;
+
+		Array<Ref<MyTexture>> textures;
+
+		Ref<MyTexture> fallbackTexture;
+
+		Array<WeakRef<MyMesh>> usedInMeshes;
+
+	};
+
+	enum class FilterMode : u8
+	{
+		Nearest,
+		Bilinear,
+		Trilinear
+	};
+	ENUM_CLASS(FilterMode);
+
+	struct MyTextureDescriptor final
+	{
+		CE_STRUCT(MyTextureDescriptor)
+	public:
+
+		u32 width = 0;
+		u32 height = 0;
+
+		FilterMode filterMode = FilterMode::Nearest;
+	};
+
+	class MyTexture : public Object
+	{
+		CE_CLASS(MyTexture, Object)
+	public:
+
+		MyTextureDescriptor desc{};
+
+	};
+
+}
+
+CE_RTTI_ENUM(, BundleTests, FilterMode,
+	CE_ATTRIBS(),
+	CE_CONST(Nearest),
+	CE_CONST(Bilinear),
+	CE_CONST(Trilinear)
+)
+CE_RTTI_ENUM_IMPL(, BundleTests, FilterMode)
+
+CE_RTTI_STRUCT(, BundleTests, MyMaterialProperty,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(name)
+	),
+	CE_FUNCTION_LIST()
+)
+
+CE_RTTI_STRUCT_IMPL(, BundleTests, MyMaterialProperty)
+
+CE_RTTI_STRUCT(,BundleTests,MyTextureDescriptor,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(width)
+		CE_FIELD(height)
+		CE_FIELD(filterMode)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,BundleTests,MyTextureDescriptor)
+
+CE_RTTI_CLASS(,BundleTests, MyScript,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(meshAsset)
+		CE_FIELD(scriptEvent)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(,BundleTests,MyScript)
+
+CE_RTTI_CLASS(, BundleTests, MyMesh,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(material)
+	),
+	CE_FUNCTION_LIST(
+		CE_FUNCTION(UpdateMesh)
+	)
+)
+CE_RTTI_CLASS_IMPL(, BundleTests, MyMesh)
+
+CE_RTTI_CLASS(, BundleTests, MyMaterial,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(properties)
+		CE_FIELD(textures)
+		CE_FIELD(fallbackTexture)
+		CE_FIELD(usedInMeshes)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, BundleTests, MyMaterial)
+
+CE_RTTI_CLASS(, BundleTests, MyTexture,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(desc)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(, BundleTests, MyTexture)
 
 namespace EventTests
 {
@@ -144,7 +420,7 @@ namespace EventTests
 		}
 
 		String text{};
-		Object* object = nullptr;
+		WeakRef<Object> object = nullptr;
 		IO::FileAction fileAction = IO::FileAction::Add;
 	};
 	
@@ -414,6 +690,7 @@ CE_RTTI_CLASS(, BundleTests, WritingTestObj2,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(testStruct)
+		CE_FIELD(arrayOfStruct)
         CE_FIELD(objectArray)
         CE_FIELD(value)
     ),
@@ -494,6 +771,16 @@ CE_RTTI_STRUCT(, BundleTests, WritingTestStruct1,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(obj1Ptr)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+
+CE_RTTI_STRUCT(, BundleTests, WritingTestStruct2,
+    CE_SUPER(WritingTestStructBase),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(anotherBase)
     ),
     CE_FUNCTION_LIST(
     )

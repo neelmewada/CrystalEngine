@@ -22,7 +22,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (atlasImageMips.NonEmpty())
+        if (atlasImageMips.NotEmpty())
             return;
         if (regular == nullptr)
             return;
@@ -185,9 +185,9 @@ namespace CE
         fontSrg->FlushBindings();
     }
 
-    void FFontAtlas::OnBeforeDestroy()
+    void FFontAtlas::OnBeginDestroy()
     {
-	    Super::OnBeforeDestroy();
+	    Super::OnBeginDestroy();
 
         glyphBuffer.Shutdown();
 

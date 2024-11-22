@@ -14,6 +14,9 @@ namespace CE::Editor
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool IsActive() const { return isActive; }
+        bool IsHovered() const { return isHovered; }
+
     protected:
 
         EditorDockTabItem();
@@ -28,7 +31,7 @@ namespace CE::Editor
 
         FLabel* label = nullptr;
         FHorizontalStack* content = nullptr;
-        EditorDockTab* dockTab = nullptr;
+        WeakRef<EditorDockTab> dockTab = nullptr;
         FImageButton* closeButton = nullptr;
 
         bool isActive = false;

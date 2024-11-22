@@ -16,7 +16,7 @@ namespace CE
 		multisampling = initInfo.multisampling;
 
 		numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
-
+		
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 		clipItemIndexListBuffer.Init("ClipItemIndices_" + GetName().GetString(), initialClipItemCapacity, numFrames);
@@ -65,9 +65,9 @@ namespace CE
 		drawItemSrg->FlushBindings();
 	}
 
-	void FusionRenderer::OnBeforeDestroy()
+	void FusionRenderer::OnBeginDestroy()
 	{
-		Super::OnBeforeDestroy();
+		Super::OnBeginDestroy();
 
 		drawItemsBuffer.Shutdown();
 		clipItemsBuffer.Shutdown();
@@ -98,7 +98,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		currentBrush = FBrush();
 		currentPen = FPen();
@@ -144,7 +144,7 @@ namespace CE
 		{
 			const FDrawBatch& drawBatch = drawBatches[i];
 
-			if (oldPackets.NonEmpty()) // Reuse draw packet
+			if (oldPackets.NotEmpty()) // Reuse draw packet
 			{
 				drawPacket = oldPackets[0];
 				oldPackets.RemoveAt(0);
@@ -192,7 +192,7 @@ namespace CE
 
 		// Cleanup unused draw packets
 
-		while (oldPackets.NonEmpty())
+		while (oldPackets.NotEmpty())
 		{
 			delete oldPackets[0];
 			oldPackets.RemoveAt(0);
@@ -206,7 +206,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();
@@ -301,7 +301,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = font.GetFamily();
 		int fontSize = font.GetFontSize();
@@ -413,7 +413,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();
@@ -437,7 +437,7 @@ namespace CE
 		if (text.IsEmpty())
 			return {};
 
-		FFontManager* fontManager = FusionApplication::Get()->fontManager;
+		Ref<FFontManager> fontManager = FusionApplication::Get()->fontManager;
 
 		Name fontFamily = currentFont.GetFamily();
 		int fontSize = currentFont.GetFontSize();

@@ -23,11 +23,11 @@ namespace CE
         FunctionBinding()
         {}
 
-        FunctionBinding(Object* object, FunctionType* function)
+        FunctionBinding(const WeakRef<Object>& object, FunctionType* function)
 	        : object(object), function(function)
         {}
 
-        Object* object = nullptr;
+        WeakRef<Object> object = nullptr;
         FunctionType* function = nullptr;
     };
 
@@ -51,9 +51,13 @@ namespace CE
 
         virtual void CopyFrom(IScriptDelegate* other) = 0;
 
+        virtual void Bind(const Ref<Object>& object, FunctionType* function) = 0;
+
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
         virtual bool IsLambda() const = 0;
+
+        virtual FunctionBinding GetBinding() const = 0;
 
         virtual DelegateHandle GetLambdaHandle() const = 0;
 
@@ -78,7 +82,7 @@ namespace CE
         ScriptDelegate(std::nullptr_t)
         {}
 
-        ScriptDelegate(Object* object, FunctionType* function)
+        ScriptDelegate(const Ref<Object>& object, FunctionType* function)
         {
             this->dstObject = object;
             this->dstFunction = function;
@@ -86,7 +90,7 @@ namespace CE
             isBound = dstObject && dstFunction;
         }
 
-        ScriptDelegate(const FunctionBinding& binding) : ScriptDelegate(binding.object, binding.function)
+        ScriptDelegate(const FunctionBinding& binding) : ScriptDelegate(binding.object.Lock(), binding.function)
         {
 
         }
@@ -162,7 +166,7 @@ namespace CE
 
         SIZE_T GetSignature() const override
         {
-            return CE::GetCombinedHash(CE::GetFunctionSignature<TArgs...>(), CE::GetTypeId<TRetType>());
+            return CE::GetFunctionSignature<TArgs...>();
         }
 
         Array<TypeId> GetParamterTypes() override
@@ -209,6 +213,26 @@ namespace CE
             return 0;
         }
 
+        FunctionBinding GetBinding() const override
+        {
+            if (!isBound)
+                return FunctionBinding();
+            return FunctionBinding(dstObject, dstFunction);
+        }
+
+        void Bind(const Ref<Object>& object, FunctionType* function) override
+        {
+            if (object == nullptr || function == nullptr)
+                return;
+            if (this->GetSignature() != function->GetFunctionSignature())
+                return;
+
+            dstObject = object;
+            dstFunction = function;
+
+            isBound = true;
+        }
+
     private:
 
         void CopyFrom(const ScriptDelegate& copy)
@@ -233,7 +257,7 @@ namespace CE
         }
 
         FunctionType* dstFunction = nullptr;
-        Object* dstObject = nullptr;
+        WeakRef<Object> dstObject = nullptr;
         Delegate<Variant(const Array<Variant>&)> lambda{};
         mutable bool isBound = false;
 
@@ -259,15 +283,17 @@ namespace CE
 
         virtual SIZE_T GetSignature() const = 0;
 
-        virtual Array<TypeId> GetParamterTypes() = 0;
+        virtual Array<TypeId> GetParameterTypes() = 0;
 
         virtual void CopyFrom(IScriptEvent* other) = 0;
 
-        virtual void Bind(Object* object, FunctionType* function) = 0;
+        virtual u32 GetInvocationListCount() = 0;
+
+        virtual void Bind(const Ref<Object>& object, FunctionType* function) = 0;
         virtual void Bind(const FunctionBinding& binding) = 0;
         virtual void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) = 0;
 
-        virtual void Unbind(Object* object, FunctionType* function) = 0;
+        virtual void Unbind(const Ref<Object>& object, FunctionType* function) = 0;
         virtual void Unbind(const FunctionBinding& binding) = 0;
         virtual void Unbind(DelegateHandle lambdaHandle) = 0;
 
@@ -281,6 +307,8 @@ namespace CE
 
         virtual void UnbindAll(Object* object) = 0;
         virtual void UnbindAll() = 0;
+
+        virtual Array<FunctionBinding> GetSerializableBindings() = 0;
 
     protected:
 
@@ -346,14 +374,14 @@ namespace CE
             return signature;
         }
 
-        Array<TypeId> GetParamterTypes() override
+        Array<TypeId> GetParameterTypes() override
         {
             return { CE::GetTypeId<TArgs>()... };
         }
 
         void CopyFrom(IScriptEvent* other) override;
 
-        void Bind(Object* object, FunctionType* function) override
+        void Bind(const Ref<Object>& object, FunctionType* function) override
         {
 	        if (object == nullptr || function == nullptr)
                 return;
@@ -365,7 +393,7 @@ namespace CE
 
         void Bind(const FunctionBinding& binding) override
         {
-            Bind(binding.object, binding.function);
+            Bind(binding.object.Lock(), binding.function);
         }
 
         void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) override
@@ -390,7 +418,7 @@ namespace CE
 	        }
         }
 
-        void Unbind(Object* object, FunctionType* function) override
+        void Unbind(const Ref<Object>& object, FunctionType* function) override
         {
             if (object == nullptr || function == nullptr)
                 return;
@@ -451,6 +479,26 @@ namespace CE
             {
                 invocationList.Clear();
             }
+        }
+
+        Array<FunctionBinding> GetSerializableBindings() override
+        {
+            Array<FunctionBinding> result;
+
+            for (const DelegateType& item : invocationList)
+            {
+	            if (item.IsBound() && item.IsFunction())
+	            {
+                    result.Add(item.GetBinding());
+	            }
+            }
+
+            return result;
+        }
+
+        u32 GetInvocationListCount() override
+        {
+            return invocationList.GetSize();
         }
 
         ScriptEvent() = default;

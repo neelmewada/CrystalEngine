@@ -12,7 +12,7 @@ namespace CE
         StaticMesh();
         ~StaticMesh();
 
-        RPI::ModelAsset* GetModelAsset() const
+        Ref<RPI::ModelAsset> GetModelAsset() const
         {
 	        return modelAsset;
         }
@@ -33,8 +33,8 @@ namespace CE
         {
             if (!modelAsset || lodIndex >= modelAsset->GetLodCount())
                 return 0;
-            ModelLodAsset* lod = modelAsset->GetModelLod(lodIndex);
-            if (!lod)
+            Ref<ModelLodAsset> lod = modelAsset->GetModelLod(lodIndex);
+            if (lod.IsNull())
                 return 0;
             return lod->GetSubMeshCount();
         }
@@ -42,7 +42,7 @@ namespace CE
     private:
 
         FIELD()
-        RPI::ModelAsset* modelAsset = nullptr;
+        Ref<RPI::ModelAsset> modelAsset = nullptr;
         
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::StaticMeshAssetImportJob;

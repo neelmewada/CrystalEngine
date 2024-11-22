@@ -82,7 +82,7 @@ namespace CE
 		return directoryTree.GetNode(path);
 	}
 
-	Name AssetRegistry::ResolveBundlePath(Uuid bundleUuid)
+	Name AssetRegistry::ResolveBundlePath(const Uuid& bundleUuid)
 	{
 		if (!cachedPrimaryAssetByBundleUuid.KeyExists(bundleUuid))
 			return Name();
@@ -92,10 +92,15 @@ namespace CE
 		return assetData->bundleName;
 	}
 
-	void AssetRegistry::OnAssetImported(const Name& bundleName, const Name& sourcePath)
+	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
-		IO::Path bundlePath = Bundle::GetBundlePath(bundleName);
-		Bundle* load = Bundle::LoadBundleFromDisk(nullptr, bundleName, LOAD_Default);
+		LoadBundleArgs args{
+			.loadFully = false,
+			.forceReload = false,
+			.destroyOutdatedObjects = false
+		};
+
+		Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, bundleAbsolutePath, args);
 		if (load == nullptr)
 			return;
 
@@ -103,20 +108,20 @@ namespace CE
 		String relativePathStr = "";
 		String parentRelativePathStr = "";
 
-		if (IO::Path::IsSubDirectory(bundlePath, projectAssetsPath))
+		if (IO::Path::IsSubDirectory(bundleAbsolutePath, projectAssetsPath))
 		{
-			relativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
+			relativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePathStr.StartsWith("/"))
 				relativePathStr = "/" + relativePathStr;
 
-			parentRelativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			parentRelativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
 
 		AssetData* assetData = nullptr;
 		bool newEntry = false;
-		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetBundleName(); });
+		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetName(); });
 
 		if (originalIndex >= 0)
 		{
@@ -130,29 +135,32 @@ namespace CE
 		}
 
 		String sourceAssetRelativePath = "";
-		if (!load->GetPrimaryObjectName().IsValid())
-			load->LoadFully();
+		Bundle::ObjectData primaryObjectData = load->GetPrimaryObjectData();
 
-		Name primaryName = load->GetPrimaryObjectName();
-		Name primaryTypeName = load->GetPrimaryObjectTypeName();
-		assetData->bundleName = load->GetBundleName();
+		Name primaryName = primaryObjectData.name;
+		Name primaryTypeName = primaryObjectData.typeName;
+		assetData->bundleName = load->GetName();
 		assetData->assetName = primaryName;
 		assetData->assetClassPath = primaryTypeName;
 		assetData->bundleUuid = load->GetUuid();
-		assetData->assetUuid = load->GetPrimaryObjectUuid();
+		assetData->assetUuid = primaryObjectData.uuid;
 		
 #if PAL_TRAIT_BUILD_EDITOR
 		// Source asset path relative to project assets directory
-		sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
+		// TODO: Add source asset path
+		//sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
 		assetData->sourceAssetPath = sourceAssetRelativePath;
 #endif
 		
-		if (newEntry && relativePathStr.NonEmpty())
+		if (newEntry && relativePathStr.NotEmpty())
 		{
 			AddAssetEntry(relativePathStr, assetData);
 		}
 
-		load->RequestDestroy();
+		Name bundleName = assetData->bundleName;
+
+		load->BeginDestroy();
+		load = nullptr;
 
 		if (listener != nullptr)
 			listener->OnAssetImported(bundleName, sourcePath);
@@ -163,7 +171,7 @@ namespace CE
 
 	void AssetRegistry::OnAssetDeleted(const Name& bundleName)
 	{
-		IO::Path bundlePath = Bundle::GetBundlePath(bundleName);
+		IO::Path bundlePath = Bundle::GetAbsoluteBundlePath(bundleName);
 
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
 		String relativePathStr = "";
@@ -239,24 +247,32 @@ namespace CE
 					}
                     else if (item.GetExtension() == ".casset") // Product asset file
                     {
-						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
+                    	LoadBundleArgs args{
+                    		.loadFully = false,
+                    		.forceReload = false,
+                    		.destroyOutdatedObjects = false
+                    	};
+
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
-							if (!load->GetPrimaryObjectName().IsValid())
-								load->LoadFully();
-							Name primaryName = load->GetPrimaryObjectName();
-							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->bundleName = load->GetBundleName();
+							auto primaryObjectData = load->GetPrimaryObjectData();
+							//if (!load->GetPrimaryObjectName().IsValid())
+							//	load->LoadFully();
+							Name primaryName = primaryObjectData.name;
+							Name primaryTypeName = primaryObjectData.typeName;
+							assetData->bundleName = load->GetName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();
-							assetData->assetUuid = load->GetPrimaryObjectUuid();
+							assetData->assetUuid = primaryObjectData.uuid;
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
-							assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
+							// TODO: Get source asset relative path
+							//assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
 #endif
-							load->RequestDestroy();
+							load->BeginDestroy();
 							load = nullptr;
 
 							AddAssetEntry(relativePathStr, assetData);
@@ -307,24 +323,28 @@ namespace CE
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
 					{
-						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
+						LoadBundleArgs args{
+							.loadFully = false
+						};
+
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
-							if (!load->GetPrimaryObjectName().IsValid())
-								load->LoadFully();
-							Name primaryName = load->GetPrimaryObjectName();
-							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->bundleName = load->GetBundleName();
+							auto primaryObjectData = load->GetPrimaryObjectData();
+
+							Name primaryName = primaryObjectData.name;
+							Name primaryTypeName = primaryObjectData.typeName;
+							assetData->bundleName = load->GetName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();
-							assetData->assetUuid = load->GetPrimaryObjectUuid();
+							assetData->assetUuid = primaryObjectData.uuid;
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
-							assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
+							//assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
 #endif
-							load->RequestDestroy();
+							load->BeginDestroy();
 							load = nullptr;
 
 							AddAssetEntry(relativePathStr, assetData);
@@ -365,24 +385,29 @@ namespace CE
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
 					{
-						Bundle* load = Bundle::LoadBundleFromDisk(nullptr, item, LOAD_Default);
+						LoadBundleArgs args{
+							.loadFully = false
+						};
+
+						Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, item, args);
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
-							if (!load->GetPrimaryObjectName().IsValid())
-								load->LoadFully();
-							Name primaryName = load->GetPrimaryObjectName();
-							Name primaryTypeName = load->GetPrimaryObjectTypeName();
-							assetData->bundleName = load->GetBundleName();
+							auto primaryObjectData = load->GetPrimaryObjectData();
+
+							Name primaryName = primaryObjectData.name;
+							Name primaryTypeName = primaryObjectData.typeName;
+							assetData->bundleName = load->GetName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();
-							assetData->assetUuid = load->GetPrimaryObjectUuid();
+							assetData->assetUuid = primaryObjectData.uuid;
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
-							assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
+							// TODO:
+							//assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
 #endif
-							load->RequestDestroy();
+							load->BeginDestroy();
 							load = nullptr;
 
 							AddAssetEntry(relativePathStr, assetData);

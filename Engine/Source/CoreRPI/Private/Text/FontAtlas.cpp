@@ -15,7 +15,7 @@ namespace CE::RPI
 			CacheGlyphLayouts();
 		}
 
-		if (!characterLayoutBuffer && glyphLayouts.NonEmpty())
+		if (!characterLayoutBuffer && glyphLayouts.NotEmpty())
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.name = "Character Buffer";
@@ -27,9 +27,10 @@ namespace CE::RPI
 			characterLayoutBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 			
 			Vec4* data = new Vec4[glyphLayouts.GetSize()];
-			defer(
+			defer(&)
+			{
 				delete[] data;
-			);
+			};
 
 			for (int i = 0; i < glyphLayouts.GetSize(); i++)
 			{
