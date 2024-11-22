@@ -357,7 +357,7 @@ namespace CE
                     f32 contentHeight = child->computedSize.height;
 
                     f32 normalizedScrollY = NormalizedScrollY();
-                    normalizedScrollY += -wheelDelta.y * m_VerticalScrollSensitivity / (contentHeight - originalHeight);
+                    normalizedScrollY += -wheelDelta.y * m_VerticalScrollSensitivity / (contentHeight - originalHeight) * GetContext()->GetScaling();
                     NormalizedScrollY(normalizedScrollY);
 	            }
 
@@ -370,7 +370,7 @@ namespace CE
                         originalWidth -= m_ScrollBarMargin * 2 + m_ScrollBarWidth;
 
                     f32 normalizedScrollX = NormalizedScrollX();
-                    normalizedScrollX += -wheelDelta.x * m_HorizontalScrollSensitivity / (contentWidth - originalWidth);
+                    normalizedScrollX += -wheelDelta.x * m_HorizontalScrollSensitivity / (contentWidth - originalWidth) * GetContext()->GetScaling();
                     NormalizedScrollX(normalizedScrollX);
                 }
             }

@@ -146,7 +146,7 @@ namespace CE
 		if (platformWindow != window)
 			return;
 
-		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
+		availableSize = platformWindow->GetDrawableWindowSize().ToVec2() / GetScaling();
 
 		if (swapChain)
 		{
@@ -170,9 +170,9 @@ namespace CE
 
 		const Vec2 newSize = platformWindow->GetDrawableWindowSize().ToVec2();
 
-		if (newSize != availableSize || childContexts.IsEmpty())
+		if (newSize / GetScaling() != availableSize || childContexts.IsEmpty())
 		{
-			availableSize = newSize;
+			availableSize = newSize / GetScaling();
 
 			if (swapChain)
 			{
@@ -210,14 +210,17 @@ namespace CE
 	{
 		ZoneScoped;
 
-		u32 screenWidth = 0; u32 screenHeight = 0;
-		platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
+		u32 w = 0; u32 h = 0;
+		platformWindow->GetDrawableWindowSize(&w, &h);
+
+		f32 screenWidth = w / GetScaling();
+		f32 screenHeight = h / GetScaling();
 		
 		viewConstants.viewMatrix = Matrix4x4::Identity();
 
 		viewConstants.projectionMatrix =
 			Matrix4x4::Scale(Vec3(1.0f / screenWidth * 2, 1.0f / screenHeight * 2, 1)) *
-			Matrix4x4::Translation(Vec3(-(f32)screenWidth * 0.5f, -(f32)screenHeight * 0.5f, 0));
+			Matrix4x4::Translation(Vec3(-screenWidth * 0.5f, -screenHeight * 0.5f, 0));
 
 		viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
 		viewConstants.viewPosition = Vec4(0, 0, 0, 0);
@@ -257,7 +260,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		availableSize = platformWindow->GetDrawableWindowSize().ToVec2();
+		availableSize = platformWindow->GetDrawableWindowSize().ToVec2() / GetScaling();
 
 		Super::DoLayout();
 	}
@@ -270,11 +273,6 @@ namespace CE
 
 		if (renderer && dirty)
 		{
-			if (parentContext->IsNativeContext())
-			{
-				String::IsAlphabet('a');
-			}
-
 			renderer->Begin();
 
 			if (painter && owningWidget && owningWidget->Visible())
@@ -465,12 +463,12 @@ namespace CE
 
 	Vec2 FNativeContext::GlobalToScreenSpacePosition(Vec2 pos)
 	{
-		return platformWindow->GetWindowPosition().ToVec2() + pos;
+		return platformWindow->GetWindowPosition().ToVec2() + pos * GetScaling();
 	}
 
 	Vec2 FNativeContext::ScreenToGlobalSpacePosition(Vec2 pos)
 	{
-		return pos - platformWindow->GetWindowPosition().ToVec2();
+		return (pos - platformWindow->GetWindowPosition().ToVec2()) / GetScaling();
 	}
 
 	void FNativeContext::Maximize()
@@ -517,6 +515,8 @@ namespace CE
 	{
 		if (!window->IsBorderless() || IsPopupWindow())
 			return false;
+
+		position /= GetScaling();
 
 		FWidget* hitWidget = HitTest(position);
 

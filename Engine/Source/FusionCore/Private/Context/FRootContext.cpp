@@ -49,7 +49,7 @@ namespace CE
 
 		Vec2 screenMousePos = InputManager::GetGlobalMousePosition().ToVec2();
 
-		Vec2 mousePos = nativeContext->ScreenToGlobalSpacePosition(InputManager::GetGlobalMousePosition().ToVec2());
+		Vec2 mousePos = nativeContext->ScreenToGlobalSpacePosition(screenMousePos);
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
 		Vec2 wheelDelta = InputManager::GetMouseWheelDelta();
 		if (prevMousePos.GetSqrMagnitude() == 0)
