@@ -17,16 +17,30 @@ namespace CE
     {
         Super::OnAfterConstruct();
 
-        LockGuard lock{ bundleRegistryMutex };
-        loadedBundlesByUuid[GetUuid()] = this;
+	    {
+		    LockGuard lock{ bundleRegistryMutex };
+        	loadedBundlesByUuid[GetUuid()] = this;
+	    }
+
+        {
+            LockGuard lock{ loadedObjectsMutex };
+            loadedObjectsByUuid[GetUuid()] = this;
+        }
     }
 
     void Bundle::OnBeginDestroy()
     {
 	    Super::OnBeginDestroy();
 
-        LockGuard lock{ bundleRegistryMutex };
-        loadedBundlesByUuid.Remove(GetUuid());
+	    {
+		    LockGuard lock{ bundleRegistryMutex };
+	    	loadedBundlesByUuid.Remove(GetUuid());
+	    }
+
+        {
+            LockGuard lock{ loadedObjectsMutex };
+            loadedObjectsByUuid.Remove(GetUuid());
+        }
     }
 
     void Bundle::OnObjectUnloaded(Object* object)
@@ -34,7 +48,6 @@ namespace CE
         if (object != nullptr)
         {
             LockGuard lock{ loadedObjectsMutex };
-
             loadedObjectsByUuid.Remove(object->GetUuid());
         }
     }
@@ -217,6 +230,19 @@ namespace CE
         return SaveToDisk(bundle, asset, &stream);
     }
 
+    void Bundle::LoadFully()
+    {
+        if (isFullyLoaded)
+            return;
+
+        LockGuard lock{ bundleMutex };
+
+        for (const auto& serializedObject : serializedObjectEntries)
+        {
+            LoadObject(serializedObject.instanceUuid);
+        }
+    }
+
     Ref<Object> Bundle::LoadObject(Uuid objectUuid)
     {
         if (objectUuid.IsNull())
@@ -267,6 +293,21 @@ namespace CE
             return nullptr;
         }
 
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            for (const auto& [_, objectRef] : loadedObjectsByUuid)
+            {
+                if (Ref<Object> object = objectRef.Lock())
+                {
+                    if (object->GetPathInBundle(this) == pathInBundle)
+                    {
+                        return object;
+                    }
+                }
+            }
+        }
+
         Uuid objectUuid = Uuid::Zero();
 
         for (const auto& serializedObjectEntry : serializedObjectEntries)
@@ -290,6 +331,21 @@ namespace CE
     {
         if (objectClass == nullptr)
             return nullptr;
+
+        {
+            LockGuard lock{ loadedObjectsMutex };
+
+            for (const auto& [_, objectRef] : loadedObjectsByUuid)
+            {
+	            if (Ref<Object> object = objectRef.Lock())
+	            {
+		            if (object->GetClass() == objectClass)
+		            {
+                        return object;
+		            }
+	            }
+            }
+        }
 
         for (const auto& serializedObjectEntry : serializedObjectEntries)
         {

@@ -65,7 +65,7 @@ namespace CE
 	*	Globals
 	*/
 
-    extern Bundle* gSettingsBundle;
+    extern WeakRef<Bundle> gSettingsBundle;
 	extern ResourceManager* gResourceManager;
 
 	CORE_API Bundle* GetGlobalTransient()
@@ -78,22 +78,25 @@ namespace CE
 		return ModuleManager::Get().GetLoadedModuleTransientBundle(moduleName);
 	}
 
-	static Bundle* LoadSettingsBundle()
+	static Ref<Bundle> LoadSettingsBundle()
 	{
-		// TODO: Fix
-		return nullptr;
-		//return Bundle::LoadBundleFromDisk(nullptr, Name("/Game/Settings"), LOAD_Full);
+		LoadBundleArgs loadArgs{
+			.loadFully = true,
+			.forceReload = true,
+			.destroyOutdatedObjects = true
+		};
+		return Bundle::LoadBundle(GetGlobalTransient(), Name("/Game/Settings"), loadArgs);
 	}
 
-	CORE_API Bundle* GetSettingsBundle()
+	CORE_API Ref<Bundle> GetSettingsBundle()
     {
 		if (gSettingsBundle == nullptr)
 			gSettingsBundle = LoadSettingsBundle();
 
 		if (gSettingsBundle == nullptr)
-			gSettingsBundle = CreateObject<Bundle>(nullptr, TEXT("/Game/Settings"));
+			gSettingsBundle = CreateObject<Bundle>(GetGlobalTransient(), TEXT("/Game/Settings"));
 
-        return gSettingsBundle;
+        return gSettingsBundle.Lock();
     }
 
 	CORE_API void UnloadSettings()

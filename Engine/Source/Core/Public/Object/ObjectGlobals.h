@@ -24,7 +24,7 @@ namespace CE
 	/// @brief Returns the transient bundle of a specific module.
 	CORE_API Bundle* GetTransient(const String& moduleName);
 
-    CORE_API Bundle* GetSettingsBundle();
+    CORE_API Ref<Bundle> GetSettingsBundle();
 
 	/// Call this to unload all settings. Should be called in PreShutdown phase.
 	CORE_API void UnloadSettings();

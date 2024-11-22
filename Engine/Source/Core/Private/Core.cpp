@@ -22,7 +22,7 @@ namespace CE
     };
 
 
-    Bundle* gSettingsBundle = nullptr;
+    WeakRef<Bundle> gSettingsBundle = nullptr;
 	ResourceManager* gResourceManager = nullptr;
 
     void CoreModule::StartupModule()

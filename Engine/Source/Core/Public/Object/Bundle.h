@@ -105,6 +105,10 @@ namespace CE
 
         void DestroyAllSubObjects();
 
+        bool IsFullyLoaded() const { return isFullyLoaded; }
+
+        void LoadFully();
+
     protected:
 
         Ref<Object> LoadObject(Stream* stream, Uuid objectUuid);

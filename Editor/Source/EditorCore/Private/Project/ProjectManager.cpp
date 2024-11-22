@@ -64,7 +64,7 @@ namespace CE::Editor
 		gProjectName = projectFilePath.GetFileName().RemoveExtension().GetString();
 
 		// Load settings bundle
-		Bundle* settingsBundle = GetSettingsBundle();
+		Ref<Bundle> settingsBundle = GetSettingsBundle();
 		
 		return true;
     }
