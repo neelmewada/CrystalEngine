@@ -138,6 +138,9 @@ namespace CE
         FIELD()
         Color clearColor = Color::Clear();
 
+        FIELD()
+        f32 scaleFactor = 1.0f;
+
         bool layoutDirty = true;
         bool dirty = true;
         bool isDestroyed = false;
