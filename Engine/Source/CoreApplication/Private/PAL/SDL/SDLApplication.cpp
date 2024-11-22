@@ -35,14 +35,14 @@ namespace CE
 		
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 		{
-			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
+			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
 		}
 
 		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
 
 		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "1");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "0");
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
 
 #if PAL_TRAIT_BUILD_EDITOR
 		// Hints for editor window

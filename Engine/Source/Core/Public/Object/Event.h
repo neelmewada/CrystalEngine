@@ -90,7 +90,7 @@ namespace CE
             isBound = dstObject && dstFunction;
         }
 
-        ScriptDelegate(const FunctionBinding& binding) : ScriptDelegate(binding.object, binding.function)
+        ScriptDelegate(const FunctionBinding& binding) : ScriptDelegate(binding.object.Lock(), binding.function)
         {
 
         }
