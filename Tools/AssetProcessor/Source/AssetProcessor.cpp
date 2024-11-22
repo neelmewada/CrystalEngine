@@ -131,6 +131,8 @@ namespace CE
 
 		allSourceAssetPaths.Clear();
 		allProductAssetPaths.Clear();
+		HashSet<IO::Path> allPossibleProductPaths;
+		HashSet<IO::Path> filesToRemove;
 
 		if (individualAssetPaths.NotEmpty())
 		{
@@ -173,6 +175,8 @@ namespace CE
 					{
 						productPath = path.ReplaceExtension(".casset");
 					}
+
+					allPossibleProductPaths.Add(productPath);
 
 					if (!stampFilePath.Exists() || !productPath.Exists())
 					{
@@ -233,6 +237,22 @@ namespace CE
 						}
 					}
 				});
+
+			outputRoot.RecursivelyIterateChildren([&](const IO::Path& path)
+			{
+				if (path.IsDirectory())
+					return;
+
+				if (!allPossibleProductPaths.Exists(path))
+				{
+					filesToRemove.Add(path);
+				}
+			});
+		}
+
+		for (const auto& file : filesToRemove)
+		{
+			IO::Path::Remove(file);
 		}
 
 		Logger::Initialize();

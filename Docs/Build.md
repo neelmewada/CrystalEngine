@@ -2,11 +2,11 @@
 
 The engine can be built in either of these 2 configurations:
 * Editor/Host mode (**required**): Builds the host tools and editor along with the engine run-time. This is the main focus of the engine right now.
-* Standalone mode (**not** required): Builds only the engine runtime, but requires access to the built host tools. No need to build this at this time.
+* Standalone mode (**ignore**): Builds only the engine runtime, but requires access to the built host tools. No need to build this at this time.
 
-Currently, the engine compiles and works on both Windows and Linux (Ubuntu). However, windows is the only primary focus of the enigne.
+Currently, the engine compiles and works on both Windows and Linux (Ubuntu). However, Windows is the only primary focus of the enigne.
 
-Although, the Core libraries can be compiled on macOS too.
+Although, the engine can be compiled on macOS too, it is unusable with lots of issues.
 
 ## Prerequisites
 
@@ -14,8 +14,9 @@ The following is required to be installed to your computer along with environmen
 
 - Git for windows: This is required for using the bash shell that comes with it. Make sure the folder containing sh.exe `C:\Program Files\Git\bin` is added to the PATH environment variables.
 - Vulkan SDK: Minimum required version is **1.3.290**. Older versions won't work because they come with old DxCompiler binaries.
+- Make sure that `VULKAN_SDK` environment variable is set to the vulkan SDK directory!
 - CMake 3.25 or higher: Use the one that comes with Visual Studio.
-- Visual Studio 2022 OR Xcode.
+- Visual Studio 2022 OR Xcode OR CLion.
 - Visual Studio Code (optional).
 
 ### Linux specific requirements
@@ -30,7 +31,6 @@ Clone the repo recursively:
 
 ```sh
 git clone --recursive https://github.com/neelmewada/CrystalEngine.git
-git checkout linux-port
 git submodule update --init --recursive
 ```
 
@@ -39,7 +39,10 @@ git submodule update --init --recursive
 Run the following cmake command to make host build from the project's root directory. You can either run the helper script to generate the project, or use cmake manually.
 
 ```sh
-# Helper script to generate project
+# Helper script to generate project. For Windows and Mac: 
+sh Scripts/CMakeEditor.sh
+
+# For Linux:
 bash Scripts/CMakeEditor.sh
 ```
 
@@ -49,14 +52,14 @@ OR, custom cmake commands:
 # Windows
 cmake -B Build/Windows -S . -G "Visual Studio 17 2022" -Wno-dev
 
-#Linux
+#Linux (GCC is not supported)
 cmake -B Build/Linux -S . -G "Ninja Multi-Config" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
 ```
 
 Now, you can build the editor using the following command:
 
 ```sh
-# Replace the --build folder to what you have set.
+# Replace the --build folder to what you have used.
 cmake --build Build/Windows --config Debug --target EditorLauncher -Wno-dev
 ```
 
@@ -67,6 +70,11 @@ The `EditorLauncher` executable launches the Project Browser by default. If you'
 <p align="center">
     <img src="./Images/EditorLauncherProjectPath.png" width=400>
 </p>
+
+```shell
+# Or you can open the editor launcher manually IF you have created the project once.
+EditorLauncher "/path/to/project.cproject"
+```
 
 ## Building standalone (optional, ignore for now)
 
