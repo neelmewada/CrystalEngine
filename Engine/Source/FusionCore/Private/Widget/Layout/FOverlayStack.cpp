@@ -24,7 +24,7 @@ namespace CE
 
         Vec2 contentSize = {};
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled())
                 continue;
@@ -66,7 +66,7 @@ namespace CE
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
             m_Padding.top + m_Padding.bottom);
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled())
                 continue;
@@ -149,7 +149,7 @@ namespace CE
             painter->PushClipShape(Matrix4x4::Identity(), computedSize, FRectangle());
         }
 
-        for (FWidget* child : children)
+        for (const auto& child : children)
         {
             if (!child->Enabled() || !child->Visible())
                 continue;

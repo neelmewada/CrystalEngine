@@ -97,8 +97,8 @@ namespace CE::Editor
     {
         while (tabWell->GetChildCount() > dockedEditors.GetSize())
         {
-            FWidget* child = tabWell->GetChild(tabWell->GetChildCount() - 1);
-            tabWell->RemoveChild(child);
+            Ref<FWidget> child = tabWell->GetChild(tabWell->GetChildCount() - 1);
+            tabWell->RemoveChild(child.Get());
             child->BeginDestroy();
 
             tabItems.RemoveAt(tabItems.GetSize() - 1);

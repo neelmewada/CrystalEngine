@@ -17,7 +17,7 @@ namespace CE
 
     FTreeViewHeaderColumn* FTreeViewHeader::GetColumn(u32 index)
     {
-        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index * 2));
+        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index * 2).Get());
     }
 
     void FTreeViewHeader::Construct()

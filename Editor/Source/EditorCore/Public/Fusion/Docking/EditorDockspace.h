@@ -25,7 +25,7 @@ namespace CE::Editor
         EditorDockTabItem* GetTabItem(int index) const { return tabItems[index]; }
 
         int GetDockedEditorCount() const { return dockedEditors.GetSize(); }
-        EditorDockTab* GetDockedEditor(int index) const { return dockedEditors[index]; }
+        Ref<EditorDockTab> GetDockedEditor(int index) const { return dockedEditors[index]; }
 
     protected:
 
@@ -53,7 +53,7 @@ namespace CE::Editor
 
         FHorizontalStack* tabWell = nullptr;
 
-        Array<EditorDockTab*> dockedEditors;
+        Array<Ref<EditorDockTab>> dockedEditors;
         Array<EditorDockTabItem*> tabItems;
         int selectedTab = -1;
 

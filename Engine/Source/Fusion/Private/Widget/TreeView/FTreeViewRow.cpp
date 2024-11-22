@@ -10,7 +10,7 @@ namespace CE
 
     FTreeViewCell* FTreeViewRow::GetCell(u32 index) const
     {
-        return static_cast<FTreeViewCell*>(contentStack->GetChild(index));
+        return static_cast<FTreeViewCell*>(contentStack->GetChild(index).Get());
     }
 
     void FTreeViewRow::AddCell(FTreeViewCell& cell)

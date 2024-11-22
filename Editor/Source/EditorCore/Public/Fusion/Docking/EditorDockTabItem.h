@@ -31,7 +31,7 @@ namespace CE::Editor
 
         FLabel* label = nullptr;
         FHorizontalStack* content = nullptr;
-        EditorDockTab* dockTab = nullptr;
+        WeakRef<EditorDockTab> dockTab = nullptr;
         FImageButton* closeButton = nullptr;
 
         bool isActive = false;
