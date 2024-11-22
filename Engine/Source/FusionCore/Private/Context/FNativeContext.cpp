@@ -8,6 +8,10 @@ namespace CE
 	FNativeContext::FNativeContext()
 	{
 		isIsolatedContext = true;
+
+#if PLATFORM_LINUX
+		scaleFactor = 1.25f;
+#endif
 	}
 
 	FNativeContext::~FNativeContext()
@@ -234,7 +238,7 @@ namespace CE
 
 	f32 FNativeContext::GetScaling() const
 	{
-		return (f32)windowDpi / 96.0f;
+		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 
 	bool FNativeContext::IsFocused() const
