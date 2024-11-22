@@ -14,7 +14,7 @@ namespace CE
 
         void Initialize() override;
 
-        float GetDisplayScaling() override { return displayScaling; }
+        u32 GetSystemDpi() override;
 
     private:
 
@@ -23,6 +23,7 @@ namespace CE
         void CalculateDPI();
 
         float displayScaling = 1;
+        u32 dpi = 0;
     };
 
     typedef LinuxSDLApplication PlatformApplicationImpl;

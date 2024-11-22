@@ -205,9 +205,25 @@ namespace CE::Editor
     	};
 
 		if (productPath.Exists())
+		{
 			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
-		else
-			bundle = CreateObject<Bundle>(transient.Get(), bundleName);
+
+			if (bundle == nullptr)
+			{
+				IO::Path::Remove(productPath);
+			}
+		}
+
+    	if (bundle == nullptr)
+    	{
+    		bundle = CreateObject<Bundle>(transient.Get(), bundleName);
+    	}
+    	if (bundle == nullptr)
+    	{
+    		CE_LOG(Error, All, "Failed to create Bundle object!");
+    		success = false;
+    		return;
+    	}
 
 		success = ProcessAsset(bundle);
 

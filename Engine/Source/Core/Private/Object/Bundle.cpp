@@ -1,6 +1,8 @@
 
 #include "Core.h"
 
+#include "Bundle.inl"
+
 namespace CE
 {
     SharedRecursiveMutex Bundle::bundleRegistryMutex{};
@@ -50,6 +52,21 @@ namespace CE
             LockGuard lock{ loadedObjectsMutex };
             loadedObjectsByUuid.Remove(object->GetUuid());
         }
+    }
+
+    u32 Bundle::GetCurrentMajor()
+    {
+        return BUNDLE_VERSION_MAJOR;
+    }
+
+    u32 Bundle::GetCurrentMinor()
+    {
+        return BUNDLE_VERSION_MINOR;
+    }
+
+    u32 Bundle::GetCurrentPatch()
+    {
+        return BUNDLE_VERSION_PATCH;
     }
 
     void Bundle::PushBundleResolver(IBundleResolver* resolver)

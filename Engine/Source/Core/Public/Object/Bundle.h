@@ -69,6 +69,10 @@ namespace CE
 
         // - Static API -
 
+        static u32 GetCurrentMajor();
+        static u32 GetCurrentMinor();
+        static u32 GetCurrentPatch();
+
         static void PushBundleResolver(IBundleResolver* resolver);
         static void PopBundleResolver(IBundleResolver* resolver);
 

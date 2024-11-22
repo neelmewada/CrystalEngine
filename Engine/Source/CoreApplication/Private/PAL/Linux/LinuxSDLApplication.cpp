@@ -17,6 +17,11 @@ namespace CE
         CalculateDPI();
     }
 
+    u32 LinuxSDLApplication::GetSystemDpi()
+    {
+        return dpi;
+    }
+
     LinuxSDLApplication::LinuxSDLApplication()
     {
 
@@ -45,7 +50,7 @@ namespace CE
         int x = (int) (xres + 0.5);
         int y = (int) (yres + 0.5);
 
-        displayScaling = (float)y / 96.0f;
+        dpi = (u32)y;
 
         XCloseDisplay (dpy);
     }

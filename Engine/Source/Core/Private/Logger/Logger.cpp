@@ -121,7 +121,7 @@ namespace CE
         Log(level, fullMsg, target);
 
 #if !CE_BUILD_RELEASE // For Non-release builds
-        if (level == LogLevel::Error || level == LogLevel::Critical)
+        if (level == LogLevel::Critical)
         {
             //fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
             cpptrace::generate_trace().print();

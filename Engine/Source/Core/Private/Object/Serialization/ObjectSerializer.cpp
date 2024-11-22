@@ -78,6 +78,12 @@ namespace CE
         u32 headerChecksum = 0;
         *stream >> headerChecksum;
 
+        if (headerChecksum != 0)
+        {
+            outResult = BundleLoadResult::UnsupportedBundleVersion;
+            return nullptr;
+        }
+
         u32 majorVersion = 0;
         u32 minorVersion = 0;
         u32 patchVersion = 0;
@@ -86,7 +92,7 @@ namespace CE
         *stream >> minorVersion;
         *stream >> patchVersion;
 
-        if (majorVersion > BUNDLE_VERSION_MAJOR)
+        if (majorVersion != BUNDLE_VERSION_MAJOR)
         {
             outResult = BundleLoadResult::UnsupportedBundleVersion;
             return nullptr;

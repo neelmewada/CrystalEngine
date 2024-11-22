@@ -5,7 +5,7 @@
 
 namespace CE
 {
-	constexpr u32 StampFileVersion = 0;
+	constexpr u32 StampFileVersion = 1;
 
 	AssetProcessor::AssetProcessor(int argc, char** argv)
 	{
@@ -118,7 +118,17 @@ namespace CE
 		if (projectPath.NotEmpty())
 			gProjectPath = projectPath;
 		gProjectName = "AssetProcessor";
-	
+	}
+
+	AssetProcessor::~AssetProcessor()
+	{
+	}
+
+	int AssetProcessor::Run()
+	{
+		Initialize();
+		PostInit();
+
 		allSourceAssetPaths.Clear();
 		allProductAssetPaths.Clear();
 
@@ -173,16 +183,50 @@ namespace CE
 					{
 						FileStream reader = FileStream(stampFilePath, Stream::Permissions::ReadOnly);
 						reader.SetBinaryMode(true);
-						
+
+						bool needsProcessing = false;
+
 						u32 version = 0;
 						reader >> version;
-						
+
+						if (version != StampFileVersion)
+						{
+							needsProcessing = true;
+						}
+
 						u64 stampedTimeInt = 0;
 						reader >> stampedTimeInt;
 
 						DateTime stampedTime = DateTime::FromNumber(stampedTimeInt);
+						if (lastWriteTime != stampedTime)
+						{
+							needsProcessing = true;
+						}
 
-						if (lastWriteTime != stampedTime || version != StampFileVersion) // Source asset modified OR stamp version is different
+						if (version > 0)
+						{
+							u32 major = 0, minor = 0, patch = 0;
+
+							reader >> major;
+							reader >> minor;
+							reader >> patch;
+
+							u32 assetDefinitionVersion = 0;
+							reader >> assetDefinitionVersion;
+
+							AssetDefinition* assetDefinition = GetAssetDefinitionRegistry()->FindAssetDefinition(extension);
+							if (assetDefinition && assetDefinition->GetAssetVersion() != assetDefinitionVersion)
+							{
+								needsProcessing = true;
+							}
+
+							if (major != Bundle::GetCurrentMajor() || minor != Bundle::GetCurrentMinor() || patch != Bundle::GetCurrentPatch())
+							{
+								needsProcessing = true;
+							}
+						}
+
+						if (needsProcessing) // Source asset modified OR stamp version is different
 						{
 							allSourceAssetPaths.Add(path);
 							allProductAssetPaths.Add(productPath);
@@ -190,16 +234,6 @@ namespace CE
 					}
 				});
 		}
-	}
-
-	AssetProcessor::~AssetProcessor()
-	{
-	}
-
-	int AssetProcessor::Run()
-	{
-		Initialize();
-		PostInit();
 
 		Logger::Initialize();
 	
@@ -234,7 +268,8 @@ namespace CE
 			}
 		}
 
-		Array<AssetImporter*> importers{};
+		Array<Ref<AssetImporter>> importers{};
+		Array<AssetDefinition*> assetDefinitions{};
 
 		struct ImportJobEntry
 		{
@@ -256,7 +291,7 @@ namespace CE
 			ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
 			if (assetImporterClass == nullptr || !assetImporterClass->CanBeInstantiated())
 				continue;
-			auto assetImporter = CreateObject<AssetImporter>(nullptr, "AssetImporter", OF_Transient, assetImporterClass);
+			Ref<AssetImporter> assetImporter = CreateObject<AssetImporter>(nullptr, "AssetImporter", OF_Transient, assetImporterClass);
 			if (assetImporter == nullptr)
 				continue;
 
@@ -289,7 +324,8 @@ namespace CE
 			assetImporter->SetTempDirectoryPath(tempDir);
 
 			importers.Add(assetImporter);
-			
+			assetDefinitions.Add(assetDef);
+
 			Array<AssetImportJob*> jobs = assetImporter->PrepareImportJobs(sourcePaths, productPathsByAssetDef[assetDef]);
 
 			for (AssetImportJob* job : jobs)
@@ -322,29 +358,44 @@ namespace CE
 		// Wait for all jobs to complete
 		jobManager->Complete();
 		Array<AssetImportJobResult> assetImportResults{};
+		Array<u32> assetDefinitionVersions{};
 
-		for (auto importer : importers)
+		for (int i = 0; i < importers.GetSize(); ++i)
 		{
-			assetImportResults.AddRange(importer->GetResults());
-			importer->BeginDestroy();
+			int count = importers[i]->GetResults().GetSize();
+			assetImportResults.AddRange(importers[i]->GetResults());
+			for (int j = 0; j < count; ++j)
+			{
+				assetDefinitionVersions.Add(assetDefinitions[i]->GetAssetVersion());
+			}
+			importers[i]->BeginDestroy();
 		}
 		importers.Clear();
 
 		int failCounter = 0;
+		CE_ASSERT(assetImportResults.GetSize() == assetDefinitionVersions.GetSize(), "Invalid number of asset import results!");
 
 		// Update time stamps
 		{
-			for (const auto& result : assetImportResults)
+			for (int i = 0; i < assetImportResults.GetSize(); i++)
 			{
-				IO::Path relativePath = IO::Path::GetRelative(result.sourcePath, inputRoot);
+				const auto& [success, sourcePath, productPath, errorMessage] = assetImportResults[i];
+
+				IO::Path relativePath = IO::Path::GetRelative(sourcePath, inputRoot);
 				IO::Path stampFilePath = tempDir / relativePath.ReplaceExtension(".stamp");
-				if (result.success)
+				if (success)
 				{
 					FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
 					writer.SetBinaryMode(true);
-					
+
 					writer << StampFileVersion;
-					writer << result.sourcePath.GetLastWriteTime().ToNumber();
+					writer << sourcePath.GetLastWriteTime().ToNumber();
+
+					writer << Bundle::GetCurrentMajor();
+					writer << Bundle::GetCurrentMinor();
+					writer << Bundle::GetCurrentPatch();
+
+					writer << assetDefinitionVersions[i];
 				}
 				else
 				{
