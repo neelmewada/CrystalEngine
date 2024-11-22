@@ -43,8 +43,6 @@ namespace CE
 
         FRootContext* GetRootContext() const { return rootContext.Get(); }
 
-        f32 GetScaling() const { return scaling; }
-
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();
@@ -151,7 +149,7 @@ namespace CE
         FSamplerArray samplerArray;
         HashMap<RHI::Sampler*, int> samplerIndices;
         bool samplersUpdated = true;
-        f32 scaling = 1.0f;
+        u32 systemDpi = 0;
 
         Array<FTimer*> timers;
 

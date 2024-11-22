@@ -1,6 +1,11 @@
 
+
 #include "CoreApplication.h"
 
+#include <Windows.h>
+#include <shellscalingapi.h>
+
+#pragma comment(lib, "shcore.lib")
 
 namespace CE
 {
@@ -11,8 +16,14 @@ namespace CE
 
     void WindowsSDLApplication::Initialize()
     {
-        Super::Initialize();
+        SetProcessDPIAware();
 
+        Super::Initialize();
+    }
+
+    u32 WindowsSDLApplication::GetSystemDpi()
+    {
+        return GetDpiForSystem();
     }
 
     WindowsSDLApplication::WindowsSDLApplication()

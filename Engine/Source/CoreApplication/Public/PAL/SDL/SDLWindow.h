@@ -15,6 +15,8 @@ namespace CE
 		virtual WindowHandle GetOSNativeHandle() override;
         virtual String GetTitle() override;
 
+        u32 GetWindowDpi() override;
+
         void Show() override;
 
         void Hide() override;

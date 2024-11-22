@@ -26,6 +26,8 @@ namespace CE
 
 		virtual WindowHandle GetOSNativeHandle() = 0;
 
+        virtual u32 GetWindowDpi() = 0;
+
         virtual String GetTitle() = 0;
 
         virtual void Show() = 0;

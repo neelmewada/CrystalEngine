@@ -89,6 +89,36 @@ namespace CE
             return max;
         }
 
+        static f32 Round(f32 value)
+        {
+            return std::round(value);
+        }
+
+        static f64 Round(f64 value)
+        {
+            return std::round(value);
+        }
+
+        static s32 RoundToInt(f32 value)
+        {
+            return std::lround(value);
+        }
+
+        static s64 RoundToInt64(f32 value)
+        {
+            return std::llround(value);
+        }
+
+        static s32 RoundToInt(f64 value)
+        {
+            return std::lround(value);
+        }
+
+        static s64 RoundToInt64(f64 value)
+        {
+            return std::llround(value);
+        }
+
         template<typename T>
         CE_INLINE static T Min(T a, T b)
         {

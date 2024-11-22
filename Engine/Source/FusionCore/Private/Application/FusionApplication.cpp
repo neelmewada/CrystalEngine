@@ -41,7 +41,7 @@ namespace CE
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
         assetLoader = initInfo.assetLoader;
-        scaling = PlatformApplication::Get()->GetDisplayScaling();
+        systemDpi = PlatformApplication::Get()->GetSystemDpi();
 
         PlatformApplication::Get()->AddMessageHandler(this);
 

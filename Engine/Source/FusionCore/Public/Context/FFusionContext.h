@@ -46,6 +46,8 @@ namespace CE
 
         void SetAvailableSize(Vec2 value) { availableSize = value; }
 
+        virtual f32 GetScaling() const { return 1.0f; }
+
         bool IsLayoutDirty() const { return layoutDirty; }
 
         FFusionContext* GetParentContext() const { return parentContext; }

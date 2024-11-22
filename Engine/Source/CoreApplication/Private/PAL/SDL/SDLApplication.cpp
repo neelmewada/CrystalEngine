@@ -9,10 +9,6 @@ namespace CE
 {
 	int SDLWindowEventWatch(void* data, SDL_Event* event);
 
-	SDLApplication* SDLApplication::Create()
-	{
-		return new SDLApplication();
-	}
 
 	SDLApplication* SDLApplication::Get()
 	{
@@ -108,10 +104,6 @@ namespace CE
 
 	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
 	{
-		float scaling = GetDisplayScaling();
-		width = (u32)(width * scaling);
-		height = (u32)(height * scaling);
-
 		if (mainWindow == nullptr)
 		{
 			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen, resizable);
@@ -132,10 +124,6 @@ namespace CE
 	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height,
 		const PlatformWindowInfo& info)
 	{
-		float scaling = GetDisplayScaling();
-		width = (u32)(width * scaling);
-		height = (u32)(height * scaling);
-
 		if (mainWindow == nullptr)
 		{
 			mainWindow = new SDLPlatformWindow(title, width, height, info);
@@ -178,11 +166,7 @@ namespace CE
 			return InitMainWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 		}
 
-		float scaling = GetDisplayScaling();
-		u32 width = (u32)(gDefaultWindowWidth * scaling);
-		u32 height = (u32)(gDefaultWindowHeight * scaling);
-
-		auto window = new SDLPlatformWindow(title, width, height, false, false);
+		auto window = new SDLPlatformWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 		windowList.Add(window);
 		for (auto messageHandler : messageHandlers)
 		{
@@ -197,10 +181,6 @@ namespace CE
 		{
 			return InitMainWindow(title, width, height, maximised, fullscreen);
 		}
-
-		float scaling = GetDisplayScaling();
-		width = (u32)(width * scaling);
-		height = (u32)(height * scaling);
 
 		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen, false, hidden);
 		windowList.Add(window);
@@ -218,10 +198,6 @@ namespace CE
 		{
 			return InitMainWindow(title, width, height, info);
 		}
-
-		float scaling = GetDisplayScaling();
-		width = (u32)(width * scaling);
-		height = (u32)(height * scaling);
 
 		auto window = new SDLPlatformWindow(title, width, height, info);
 		windowList.Add(window);

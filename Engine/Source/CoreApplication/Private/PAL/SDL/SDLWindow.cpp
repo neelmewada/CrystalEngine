@@ -8,6 +8,8 @@
 
 #include <SDL_syswm.h>
 
+#include "PAL/Common/PlatformWindowMisc.h"
+
 constexpr auto MouseGrabPadding = 8;
 constexpr auto WindowDragPadding = 50;
 
@@ -160,7 +162,6 @@ namespace CE
 	void SDLPlatformWindow::SetAlwaysOnTop(bool alwaysOnTop)
 	{
 		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop ? SDL_TRUE : SDL_FALSE);
-		SDL_GetWindowFlags(handle)& SDL_WINDOW_ALWAYS_ON_TOP;
 	}
 
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
@@ -309,6 +310,11 @@ namespace CE
 	String SDLPlatformWindow::GetTitle()
 	{
 		return SDL_GetWindowTitle(handle);
+	}
+
+	u32 SDLPlatformWindow::GetWindowDpi()
+	{
+		return PlatformWindowMisc::GetDpiForWindow(this);
 	}
 
 	void SDLPlatformWindow::Show()

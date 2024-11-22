@@ -67,7 +67,7 @@ namespace CE
 
         virtual ~PlatformApplication();
 
-        virtual float GetDisplayScaling() { return 1.0f; }
+        virtual u32 GetSystemDpi() = 0;
 
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {

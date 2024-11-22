@@ -34,6 +34,8 @@ namespace CE
 
 		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
 		nativeContext->platformWindow = platformWindow;
+		nativeContext->windowDpi = platformWindow->GetWindowDpi();
+
 		if (parentContext)
 		{
 			parentContext->AddChildContext(nativeContext);
@@ -225,6 +227,11 @@ namespace CE
 		{
 			renderer->SetViewConstants(viewConstants);
 		}
+	}
+
+	f32 FNativeContext::GetScaling() const
+	{
+		return (f32)windowDpi / 96.0f;
 	}
 
 	bool FNativeContext::IsFocused() const

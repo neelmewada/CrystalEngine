@@ -12,8 +12,6 @@ namespace CE
     public:
         typedef PlatformApplication Super;
 
-        static SDLApplication* Create();
-
         static SDLApplication* Get();
 
         virtual ~SDLApplication();

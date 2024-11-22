@@ -14,10 +14,14 @@ namespace CE
 
         void Initialize() override;
 
+        u32 GetSystemDpi() override;
+
     private:
 
         WindowsSDLApplication();
 
+        float displayScaling = 0;
+        float dpi = 0;
     };
 
     typedef WindowsSDLApplication PlatformApplicationImpl;
