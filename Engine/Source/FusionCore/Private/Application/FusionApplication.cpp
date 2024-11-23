@@ -759,6 +759,15 @@ namespace CE
         {
             variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex;
             variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::Float4x4 };
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerObject)
+                .TryAdd(SRGVariableDescriptor(
+                    "_Objects",
+                    (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+            ;
         }
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");

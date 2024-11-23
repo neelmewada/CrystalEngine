@@ -47,7 +47,12 @@ static void TestBegin(bool gui)
 		windowInfo.hidden = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
-		PlatformWindow* window = app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+		u32 w = 1024, h = 768;
+#if PLATFORM_MAC
+		w = 540; h = 400;
+#endif
+
+		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
 		window->SetBorderless(true);
 
 		InputManager::Get().Initialize(app);
@@ -145,6 +150,8 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->Begin();
 
 	// TODO: Paint here
+	renderer->SetBrush(FBrush(Color::Cyan()));
+	renderer->DrawRect(Rect::FromSize(100, 100, 200, 200));
 
 	renderer->End();
 }

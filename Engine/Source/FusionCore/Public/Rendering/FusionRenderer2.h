@@ -20,6 +20,7 @@ namespace CE
         static constexpr u32 IndexArrayIncrement = 1024;
         static constexpr u32 PathArrayIncrement = 128;
         static constexpr u32 DrawCmdArrayIncrement = 128;
+        static constexpr u32 ObjectDataArrayIncrement = 128;
 
         void Init(const FusionRendererInitInfo& initInfo);
 
@@ -79,7 +80,18 @@ namespace CE
         FIELD(Config)
         f32 quadBufferGrowRatio = 0.2f;
 
+        FIELD(Config)
+        u32 initialObjectCount = 128;
+
+        FIELD(Config)
+        u32 objectDataGrowCount = 128;
+
         // - Data Structures -
+
+        struct FObjectData
+        {
+            Matrix4x4 transform = Matrix4x4::Identity();
+        };
 
         struct DestroyItem
         {
@@ -111,6 +123,7 @@ namespace CE
         using FIndexArray = StableDynamicArray<FIndex, IndexArrayIncrement, false>;
         using FPathArray = StableDynamicArray<Vec2, PathArrayIncrement, false>;
         using FDrawCmdArray = StableDynamicArray<FDrawCmd, DrawCmdArrayIncrement, false>;
+        using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
 
         // - Draw Data -
 
@@ -123,6 +136,7 @@ namespace CE
         FIndex vertexCurrentIdx = 0;
 
         FDrawCmdArray drawCmdList;
+        FObjectDataArray objectDataArray;
 
         StaticArray<bool, MaxImageCount> quadUpdatesRequired{};
 
@@ -151,16 +165,18 @@ namespace CE
 
         RPI::PerViewConstants viewConstants{};
         RHI::ShaderResourceGroup* perViewSrg = nullptr;
+        RHI::ShaderResourceGroup* perObjectSrg = nullptr;
     	StaticArray<bool, MaxImageCount> viewConstantsUpdateRequired{};
 
         // - GPU Buffers -
 
         StaticArray<RHI::Buffer*, MaxImageCount> viewConstantsBuffer{};
         StaticArray<RHI::Buffer*, MaxImageCount> quadsBuffer{};
+        DynamicStructuredBuffer<FObjectData> objectDataBuffer{};
 
         // - Draw List -
 
-        Array<RHI::DrawPacket*> drawPackets{};
+        StaticArray<Array<RHI::DrawPacket*>, MaxImageCount> drawPacketsPerImage{};
 
         // - Utils -
 

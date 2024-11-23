@@ -16,7 +16,7 @@ namespace CE
 		multisampling = initInfo.multisampling;
 
 		numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
-		
+
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 		clipItemIndexListBuffer.Init("ClipItemIndices_" + GetName().GetString(), initialClipItemCapacity, numFrames);

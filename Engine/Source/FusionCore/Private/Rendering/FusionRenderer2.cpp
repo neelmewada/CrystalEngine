@@ -20,9 +20,15 @@ namespace CE
         fusionShader = initInfo.fusionShader;
         multisampling = initInfo.multisampling;
 
+        auto perObjectSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
+        auto perViewSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerView);
+
         numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 
-        perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(FusionApplication::Get()->GetPerViewSrgLayout());
+        perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+        perObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSrgLayout);
+
+        objectDataBuffer.Init("ObjectData", initialObjectCount, numFrames);
 
         for (int i = 0; i < numFrames; ++i)
         {
@@ -54,25 +60,29 @@ namespace CE
         }
 
         perViewSrg->FlushBindings();
+        perObjectSrg->FlushBindings();
     }
 
     void FusionRenderer2::OnBeginDestroy()
     {
 	    Super::OnBeginDestroy();
 
+        objectDataBuffer.Shutdown();
+
         for (int i = 0; i < numFrames; i++)
         {
-            delete viewConstantsBuffer[i];
-            viewConstantsBuffer[i] = nullptr;
-        }
+            delete viewConstantsBuffer[i]; viewConstantsBuffer[i] = nullptr;
+            delete quadsBuffer[i]; quadsBuffer[i] = nullptr;
 
-        for (auto drawPacket : drawPackets)
-        {
-            delete drawPacket;
+            for (auto drawPacket : drawPacketsPerImage[i])
+            {
+                delete drawPacket;
+            }
+            drawPacketsPerImage[i].Clear();
         }
-        drawPackets.Clear();
 
         delete perViewSrg; perViewSrg = nullptr;
+        delete perObjectSrg; perObjectSrg = nullptr;
     }
 
     void FusionRenderer2::SetViewConstants(const RPI::PerViewConstants& viewConstants)
@@ -137,7 +147,7 @@ namespace CE
             quadUpdatesRequired[imageIndex] = false;
         }
 
-        return drawPackets;
+        return drawPacketsPerImage[imageIndex];
     }
 
     void FusionRenderer2::Begin()
@@ -156,8 +166,9 @@ namespace CE
         vertexArray.RemoveAll();
         indexArray.RemoveAll();
         pathPoints.RemoveAll();
-
-        drawCmdList.Insert(FDrawCmd());
+        indexWritePtr = nullptr;
+        vertexWritePtr = nullptr;
+        vertexCurrentIdx = 0;
 
         PushChildCoordinateSpace(Matrix4x4::Identity());
     }
@@ -168,9 +179,84 @@ namespace CE
 
         PopChildCoordinateSpace();
 
-        for (int i = 0; i < MaxImageCount; ++i)
+        for (int imageIdx = 0; imageIdx < numFrames; ++imageIdx)
         {
-            quadUpdatesRequired[i] = true;
+            quadUpdatesRequired[imageIdx] = true;
+
+            Array<RHI::DrawPacket*> oldPackets = this->drawPacketsPerImage[imageIdx];
+
+            for (int i = 0; i < drawCmdList.GetCount(); ++i)
+            {
+                if (oldPackets.NotEmpty())
+                {
+                    RHI::DrawPacket* drawPacket = oldPackets[i];
+                    oldPackets.RemoveAt(i);
+
+                    RHI::DrawIndexedArguments drawArgs{};
+                    drawArgs.firstIndex = drawCmdList[i].indexOffset;
+                    drawArgs.firstInstance = drawCmdList[i].firstInstance;
+                    drawArgs.vertexOffset = drawCmdList[i].vertexOffset;
+                    drawArgs.instanceCount = 1;
+                    drawArgs.indexCount = drawCmdList[i].numIndices;
+
+                    drawPacket->drawItems[0].arguments = drawArgs;
+
+                    drawPacket->shaderResourceGroups[0] = perObjectSrg;
+                    drawPacket->shaderResourceGroups[1] = perViewSrg;
+
+                    drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[imageIdx],
+                            0,
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            sizeof(FVertex));
+
+                    drawPacket->drawItems[0].indexBufferView[0] = IndexBufferView(quadsBuffer[imageIdx],
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            indexArray.GetCount() * sizeof(FIndex),
+                            sizeof(FIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+
+                    drawPacket->drawItems[0].pipelineState = fusionShader->GetVariant(0)->GetPipeline(multisampling);
+                }
+                else
+                {
+                    RHI::DrawPacketBuilder builder{};
+
+                    RHI::DrawIndexedArguments drawArgs{};
+                    drawArgs.firstIndex = drawCmdList[i].indexOffset;
+                    drawArgs.firstInstance = drawCmdList[i].firstInstance;
+                    drawArgs.vertexOffset = drawCmdList[i].vertexOffset;
+                    drawArgs.instanceCount = 1;
+                    drawArgs.indexCount = drawCmdList[i].numIndices;
+
+                    builder.SetDrawArguments(drawArgs);
+
+                    builder.AddShaderResourceGroup(perObjectSrg);
+                    builder.AddShaderResourceGroup(perViewSrg);
+
+                    // UI Item
+                    {
+                        RHI::DrawPacketBuilder::DrawItemRequest request{};
+                        request.vertexBufferViews.Add(VertexBufferView(quadsBuffer[imageIdx],
+                            0,
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            sizeof(FVertex)));
+
+                        request.indexBufferView = IndexBufferView(quadsBuffer[imageIdx],
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            indexArray.GetCount() * sizeof(FIndex),
+                            sizeof(FIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+
+                        request.drawItemTag = drawListTag;
+                        request.drawFilterMask = RHI::DrawFilterMask::ALL;
+
+                        request.pipelineState = fusionShader->GetVariant(0)->GetPipeline(multisampling);
+
+                        builder.AddDrawItem(request);
+                    }
+
+                    RHI::DrawPacket* drawPacket = builder.Build();
+                    this->drawPacketsPerImage[imageIdx].Add(drawPacket);
+                }
+            }
         }
     }
 
@@ -218,7 +304,7 @@ namespace CE
 	    switch (currentBrush.GetBrushStyle())
 	    {
 	    case FBrushStyle::SolidFill:
-            AddRectFilled(rect);
+            AddRectFilled(rect, currentBrush.GetFillColor().ToU32());
             break;
 	    case FBrushStyle::LinearGradient:
             break;
@@ -295,6 +381,8 @@ namespace CE
     {
         PrimReserve(4, 6);
         PrimRect(rect, color);
+
+        drawCmdList.Last().numIndices += 6;
     }
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)
