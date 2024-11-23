@@ -12,6 +12,11 @@ namespace CE
     extern RawData GetFusionShaderVertJson();
     extern RawData GetFusionShaderFragJson();
 
+    extern RawData GetFusionShader2Vert();
+    extern RawData GetFusionShader2Frag();
+    extern RawData GetFusionShader2VertJson();
+    extern RawData GetFusionShader2FragJson();
+
     FusionApplication::FusionApplication()
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
@@ -45,7 +50,8 @@ namespace CE
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
-        InitializeShaders();
+        InitializeShader();
+        InitializeShader2();
 
         fontManager->Init();
 
@@ -96,6 +102,7 @@ namespace CE
     void FusionApplication::Shutdown()
     {
         delete fusionShader; fusionShader = nullptr;
+        delete fusionShader2; fusionShader2 = nullptr;
     }
 
     void FusionApplication::RegisterViewport(FViewport* viewport)
@@ -562,7 +569,7 @@ namespace CE
 
     // - Shader Resources -
 
-    void FusionApplication::InitializeShaders()
+    void FusionApplication::InitializeShader()
     {
         RawData vertexShader = GetFusionShaderVert();
         RawData fragmentShader = GetFusionShaderFrag();
@@ -704,6 +711,62 @@ namespace CE
 
         fusionShader = new RPI::Shader();
         fusionShader->AddVariant(variantDesc);
+    }
+
+    void FusionApplication::InitializeShader2()
+    {
+        RawData vertexShader = GetFusionShader2Vert();
+        RawData fragmentShader = GetFusionShader2Frag();
+
+        String vertexShaderJson = (char*)GetFusionShader2VertJson().data;
+        String fragmentShaderJson = (char*)GetFusionShader2FragJson().data;
+
+        JValue vertexReflection{};
+        JValue fragmentReflection{};
+
+        JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
+        JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
+
+        RPI::ShaderVariantDescriptor2 variantDesc{};
+        variantDesc.useSingleVertexInputSlot = true;
+        variantDesc.shaderName = "FusionShader";
+        variantDesc.entryPoints.Resize(2);
+        variantDesc.entryPoints[0] = "VertMain";
+        variantDesc.entryPoints[1] = "FragMain";
+
+        variantDesc.moduleDesc.Resize(2);
+        variantDesc.moduleDesc[0].byteCode = vertexShader.data;
+        variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
+        variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
+        variantDesc.moduleDesc[0].name = "VertMain";
+
+        variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
+        variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
+        variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
+        variantDesc.moduleDesc[1].name = "FragMain";
+
+        RHI::SRGVariableDescriptor perViewData{};
+        perViewData.name = "_PerViewData";
+        perViewData.bindingSlot = (u32)vertexReflection["ubos"][0]["binding"].GetNumberValue();
+        perViewData.shaderStages = ShaderStage::Vertex | ShaderStage::Fragment;
+        perViewData.type = ShaderResourceType::ConstantBuffer;
+
+        variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView)
+            .TryAdd(perViewData);
+
+        perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
+
+        {
+            variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex;
+            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::Float4x4 };
+        }
+
+        variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
+
+        fusionShader2 = new RPI::Shader();
+        fusionShader2->AddVariant(variantDesc);
     }
 
 } // namespace CE

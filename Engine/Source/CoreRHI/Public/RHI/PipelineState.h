@@ -18,7 +18,9 @@ namespace CE::RHI
 		Undefined,
 		Float, Float2, Float3, Float4,
 		Int, Int2, Int3, Int4,
-		UInt, UInt2, UInt3, UInt4
+		UInt, UInt2, UInt3, UInt4,
+		Char4,
+		UChar4
 	};
 	ENUM_CLASS(VertexAttributeDataType);
 
@@ -248,6 +250,9 @@ namespace CE::RHI
 
 		Array<ShaderStageDescriptor> shaderStages{};
 		Array<ShaderResourceGroupLayout> srgLayouts{};
+
+		Array<ShaderStructMemberType> rootConstantLayout{};
+		ShaderStage rootConstantShaderStages = ShaderStage::None;
 
 		SIZE_T GetHash() const;
 	};

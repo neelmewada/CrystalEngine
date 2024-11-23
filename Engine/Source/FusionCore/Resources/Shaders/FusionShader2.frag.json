@@ -1,0 +1,78 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "FragMain",
+            "mode" : "frag"
+        }
+    ],
+    "types" : {
+        "_36" : {
+            "name" : "type._PerViewData",
+            "members" : [
+                {
+                    "name" : "viewMatrix",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 64,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "projectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 128,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewPosition",
+                    "type" : "vec4",
+                    "offset" : 192
+                },
+                {
+                    "name" : "pixelResolution",
+                    "type" : "vec2",
+                    "offset" : 208
+                }
+            ]
+        }
+    },
+    "outputs" : [
+        {
+            "type" : "vec4",
+            "name" : "out.var.SV_TARGET",
+            "location" : 0
+        }
+    ],
+    "separate_images" : [
+        {
+            "type" : "texture2D",
+            "name" : "_Texture",
+            "set" : 6,
+            "binding" : 0
+        }
+    ],
+    "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_TextureSampler",
+            "set" : 6,
+            "binding" : 1
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_36",
+            "name" : "type._PerViewData",
+            "block_size" : 216,
+            "set" : 1,
+            "binding" : 0
+        }
+    ]
+}

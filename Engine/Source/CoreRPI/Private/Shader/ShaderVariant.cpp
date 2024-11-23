@@ -129,59 +129,130 @@ namespace CE::RPI
 			}
 		}
 
-		for (int i = 0; i < desc.reflectionInfo.vertexInputs.GetSize(); i++)
+		if (desc.useSingleVertexInputSlot)
 		{
-			RHI::ShaderSemantic shaderSemantic = RHI::ShaderSemantic::Parse(desc.reflectionInfo.vertexInputs[i].GetString());
-			
+			u32 offset = 0;
+
 			RHI::VertexInputSlotDescriptor inputSlotDesc{};
-			inputSlotDesc.inputSlot = i;
+			inputSlotDesc.inputSlot = 0;
 			inputSlotDesc.inputRate = RHI::VertexInputRate::PerVertex;
 
-			RHI::VertexAttributeDescriptor vertexAttrib{};
-			vertexAttrib.inputSlot = i;
-			vertexAttrib.location = i;
-			vertexAttrib.offset = 0;
-
-			switch (shaderSemantic.attribute)
+			for (int i = 0; i < desc.reflectionInfo.vertexInputs.GetSize(); i++)
 			{
-			case VertexInputAttribute::Position:
-				inputSlotDesc.stride = sizeof(Vec4);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-				break;
-			case VertexInputAttribute::UV:
-				inputSlotDesc.stride = sizeof(Vec2);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float2;
-				break;
-			case VertexInputAttribute::Normal:
-				inputSlotDesc.stride = sizeof(Vec4);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-				break;
-			case VertexInputAttribute::Tangent:
-				inputSlotDesc.stride = sizeof(Vec4);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-				break;
-			case VertexInputAttribute::Binormal:
-				inputSlotDesc.stride = sizeof(Vec4);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-				break;
-			case VertexInputAttribute::Color:
-				inputSlotDesc.stride = sizeof(Vec4);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-				break;
-			case VertexInputAttribute::BlendIndices:
-				inputSlotDesc.stride = sizeof(u32);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::UInt;
-				break;
-			case VertexInputAttribute::BlendWeight:
-				inputSlotDesc.stride = sizeof(f32);
-				vertexAttrib.dataType = RHI::VertexAttributeDataType::Float;
-				break;
-			default:
-				continue;
+				RHI::ShaderSemantic shaderSemantic = RHI::ShaderSemantic::Parse(desc.reflectionInfo.vertexInputs[i].GetString());
+
+				RHI::VertexAttributeDescriptor vertexAttrib{};
+				vertexAttrib.inputSlot = 0;
+				vertexAttrib.location = i;
+				vertexAttrib.offset = offset;
+
+				switch (shaderSemantic.attribute)
+				{
+				case VertexInputAttribute::Position:
+					inputSlotDesc.stride += sizeof(Vec4);
+					offset += sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::UV:
+					inputSlotDesc.stride += sizeof(Vec2);
+					offset += sizeof(Vec2);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float2;
+					break;
+				case VertexInputAttribute::Normal:
+					inputSlotDesc.stride += sizeof(Vec4);
+					offset += sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Tangent:
+					inputSlotDesc.stride += sizeof(Vec4);
+					offset += sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Binormal:
+					inputSlotDesc.stride += sizeof(Vec4);
+					offset += sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Color:
+					inputSlotDesc.stride += sizeof(u32);
+					offset += sizeof(u32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::UChar4;
+					break;
+				case VertexInputAttribute::BlendIndices:
+					inputSlotDesc.stride += sizeof(u32);
+					offset += sizeof(u32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::UInt;
+					break;
+				case VertexInputAttribute::BlendWeight:
+					inputSlotDesc.stride += sizeof(f32);
+					offset += sizeof(f32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float;
+					break;
+				default:
+					continue;
+				}
+
+				pipelineDesc.vertexAttributes.Add(vertexAttrib);
 			}
 
 			pipelineDesc.vertexInputSlots.Add(inputSlotDesc);
-			pipelineDesc.vertexAttributes.Add(vertexAttrib);
+		}
+		else
+		{
+			for (int i = 0; i < desc.reflectionInfo.vertexInputs.GetSize(); i++)
+			{
+				RHI::ShaderSemantic shaderSemantic = RHI::ShaderSemantic::Parse(desc.reflectionInfo.vertexInputs[i].GetString());
+
+				RHI::VertexInputSlotDescriptor inputSlotDesc{};
+				inputSlotDesc.inputSlot = i;
+				inputSlotDesc.inputRate = RHI::VertexInputRate::PerVertex;
+
+				RHI::VertexAttributeDescriptor vertexAttrib{};
+				vertexAttrib.inputSlot = i;
+				vertexAttrib.location = i;
+				vertexAttrib.offset = 0;
+
+				switch (shaderSemantic.attribute)
+				{
+				case VertexInputAttribute::Position:
+					inputSlotDesc.stride = sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::UV:
+					inputSlotDesc.stride = sizeof(Vec2);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float2;
+					break;
+				case VertexInputAttribute::Normal:
+					inputSlotDesc.stride = sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Tangent:
+					inputSlotDesc.stride = sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Binormal:
+					inputSlotDesc.stride = sizeof(Vec4);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					break;
+				case VertexInputAttribute::Color:
+					inputSlotDesc.stride = sizeof(u32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::UChar4;
+					break;
+				case VertexInputAttribute::BlendIndices:
+					inputSlotDesc.stride = sizeof(u32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::UInt;
+					break;
+				case VertexInputAttribute::BlendWeight:
+					inputSlotDesc.stride = sizeof(f32);
+					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float;
+					break;
+				default:
+					continue;
+				}
+
+				pipelineDesc.vertexInputSlots.Add(inputSlotDesc);
+				pipelineDesc.vertexAttributes.Add(vertexAttrib);
+			}
 		}
 
 		modulesByStage.Clear();
@@ -234,6 +305,9 @@ namespace CE::RPI
 
 			pipelineDesc.rtLayout.attachmentLayouts.Add(depthStencilAttachment);
 		}
+
+		pipelineDesc.rootConstantLayout = desc.reflectionInfo.rootConstantLayout;
+		pipelineDesc.rootConstantShaderStages = desc.reflectionInfo.rootConstantStages;
 		
 		pipelineCollection = new RHI::GraphicsPipelineCollection(pipelineDesc);
 	}

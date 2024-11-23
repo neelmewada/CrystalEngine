@@ -669,6 +669,12 @@ namespace CE::Vulkan
 									// Draw Indexed
 									commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
 
+									if (drawItem->rootConstantSize > 0 && drawItem->rootConstants != nullptr && 
+										(int)drawItem->rootConstantSize % 4 == 0)
+									{
+										commandList->SetRootConstants(0, (u32)drawItem->rootConstantSize / 4, drawItem->rootConstants);
+									}
+									
 									if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsIndexed)
 									{
 										commandList->BindIndexBuffer(*drawItem->indexBufferView);

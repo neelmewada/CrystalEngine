@@ -110,7 +110,8 @@ namespace CE
 
     protected:
 
-        void InitializeShaders();
+        void InitializeShader();
+        void InitializeShader2();
 
         void BuildFrameGraph();
         void CompileFrameGraph();
@@ -154,6 +155,7 @@ namespace CE
         Array<FTimer*> timers;
 
         RPI::Shader* fusionShader = nullptr;
+        RPI::Shader* fusionShader2 = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
         RHI::ShaderResourceGroupLayout perObjectSrgLayout{};

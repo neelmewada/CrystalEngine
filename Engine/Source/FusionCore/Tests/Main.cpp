@@ -140,6 +140,15 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
+static void DoPaint(FusionRenderer2* renderer)
+{
+	renderer->Begin();
+
+
+
+	renderer->End();
+}
+
 TEST(FusionCore, Rendering)
 {
 	TEST_BEGIN_GUI;
@@ -311,6 +320,8 @@ TEST(FusionCore, Rendering)
 			FusionApplication::Get()->SetExposed();
 
 			FusionApplication::Get()->Tick();
+
+			RendererSystem::Get().Render();
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
@@ -336,6 +347,8 @@ TEST(FusionCore, Rendering)
 		InputManager::Get().Tick();
 
 		FusionApplication::Get()->Tick();
+
+		DoPaint(nativeContext->GetPainter()->GetRenderer());
 
 		RendererSystem::Get().Render();
 

@@ -10,6 +10,7 @@
 #ifndef COMPILE
 #define VERTEX 1
 #define FRAGMENT 1
+#define __spirv__ 1
 #endif
 
 
@@ -106,6 +107,10 @@
 
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
+
+#define BEGIN_ROOT_CONSTANTS() 
+#define END_ROOT_CONSTANTS() 
+#define ROOT_CONSTANT(name) 
 
 #define IMAGE_FORMAT(format)
 

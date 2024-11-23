@@ -94,6 +94,7 @@ namespace CE
 		Array<ImageScopeAttachmentDescriptor> shaderWriteAttachmentDependencies;
 
 		FusionRenderer* renderer = nullptr;
+		FusionRenderer2* renderer2 = nullptr;
 		FPainter* painter = nullptr;
 		int windowId = -1;
 

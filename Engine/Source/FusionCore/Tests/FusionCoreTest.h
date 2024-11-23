@@ -74,6 +74,7 @@ namespace RenderingTests
 		FImage* maximizeIcon = nullptr;
 		FStyledWidget* borderWidget = nullptr;
 		FTextInput* modelTextInput = nullptr;
+		FVerticalStack* windowContent = nullptr;
 
 		int hitCounter = 0;
 

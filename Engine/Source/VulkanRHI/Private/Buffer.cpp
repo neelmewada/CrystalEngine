@@ -100,9 +100,13 @@ namespace CE::Vulkan
 			if (heapType == RHI::MemoryHeapType::ReadBack && device->SupportsHostCachedMemory() && 
 				!device->IsUnifiedMemoryArchitecture() &&
 				!device->SupportsReBar())
+			{
 				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+			}
 			if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar())
+			{
 				memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			}
 		}
 		else
 		{

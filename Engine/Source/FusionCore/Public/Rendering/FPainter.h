@@ -36,6 +36,8 @@ namespace CE
 
         FFontMetrics GetFontMetrics(const FFont& font);
 
+        FusionRenderer2* GetRenderer() const { return renderer2; }
+
         // - Draw API -
 
         bool DrawShape(const Rect& rect, const FShape& shape);
@@ -57,6 +59,7 @@ namespace CE
     private:
 
         FusionRenderer* renderer = nullptr;
+        FusionRenderer2* renderer2 = nullptr;
 
         FUSION_FRIENDS;
     };

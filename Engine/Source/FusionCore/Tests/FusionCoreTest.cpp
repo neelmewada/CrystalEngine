@@ -202,6 +202,7 @@ namespace RenderingTests
 
         FBrush transparentPattern = FBrush("/Engine/Resources/Icons/TransparentPattern", Color::White());
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
+        transparentPattern.SetBrushSize(Vec2(16, 16));
 
         FButton* openPopupBtn = nullptr;
         FTextButton* nativePopupBtn = nullptr;
@@ -321,7 +322,7 @@ namespace RenderingTests
 
                     // Window Content Begins
 
-                    FNew(FVerticalStack)
+                    FAssignNew(FVerticalStack, windowContent)
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
                     (
@@ -412,6 +413,8 @@ namespace RenderingTests
                 )
             )
         );
+
+        windowContent->Enabled(false);
     }
 
     void RenderingTestWidget::OnBeginDestroy()

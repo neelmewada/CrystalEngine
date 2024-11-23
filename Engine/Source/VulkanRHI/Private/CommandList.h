@@ -22,6 +22,8 @@ namespace CE::Vulkan
 
 		void ClearShaderResourceGroups() override;
 
+		void SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData) override;
+
 		void SetViewports(u32 count, ViewportState* viewports) override;
 		void SetScissors(u32 count, ScissorState* scissors) override;
 

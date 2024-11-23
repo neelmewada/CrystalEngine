@@ -1,0 +1,103 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "VertMain",
+            "mode" : "vert"
+        }
+    ],
+    "types" : {
+        "_36" : {
+            "name" : "type._PerViewData",
+            "members" : [
+                {
+                    "name" : "viewMatrix",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 64,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "projectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 128,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewPosition",
+                    "type" : "vec4",
+                    "offset" : 192
+                },
+                {
+                    "name" : "pixelResolution",
+                    "type" : "vec2",
+                    "offset" : 208
+                }
+            ]
+        },
+        "_38" : {
+            "name" : "type.PushConstant.RootConstants",
+            "members" : [
+                {
+                    "name" : "_Transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                }
+            ]
+        }
+    },
+    "inputs" : [
+        {
+            "type" : "vec3",
+            "name" : "in.var.POSITION",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 1
+        },
+        {
+            "type" : "vec4",
+            "name" : "in.var.COLOR0",
+            "location" : 2
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD0",
+            "location" : 0
+        },
+        {
+            "type" : "vec4",
+            "name" : "out.var.TEXCOORD1",
+            "location" : 1
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_36",
+            "name" : "type._PerViewData",
+            "block_size" : 216,
+            "set" : 1,
+            "binding" : 0
+        }
+    ],
+    "push_constants" : [
+        {
+            "type" : "_38",
+            "name" : "_RootConstants",
+            "push_constant" : true
+        }
+    ]
+}
