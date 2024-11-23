@@ -149,9 +149,23 @@ namespace CE::RPI
 				switch (shaderSemantic.attribute)
 				{
 				case VertexInputAttribute::Position:
-					inputSlotDesc.stride += sizeof(Vec4);
-					offset += sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+
+					vertexAttrib.dataType = desc.positionAttributeType;
+
+					switch (desc.positionAttributeType)
+					{
+					default:
+						vertexAttrib.dataType = VertexAttributeDataType::Float4;
+					case VertexAttributeDataType::Float4:
+					case VertexAttributeDataType::Float3:
+						inputSlotDesc.stride += sizeof(Vec4);
+						offset += sizeof(Vec4);
+						break;
+					case VertexAttributeDataType::Float2:
+						inputSlotDesc.stride += sizeof(Vec2);
+						offset += sizeof(Vec2);
+						break;
+					}
 					break;
 				case VertexInputAttribute::UV:
 					inputSlotDesc.stride += sizeof(Vec2);
@@ -216,7 +230,20 @@ namespace CE::RPI
 				{
 				case VertexInputAttribute::Position:
 					inputSlotDesc.stride = sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+					vertexAttrib.dataType = desc.positionAttributeType;
+
+					switch (desc.positionAttributeType)
+					{
+					default:
+						vertexAttrib.dataType = VertexAttributeDataType::Float4;
+					case VertexAttributeDataType::Float4:
+					case VertexAttributeDataType::Float3:
+						inputSlotDesc.stride = sizeof(Vec4);
+						break;
+					case VertexAttributeDataType::Float2:
+						inputSlotDesc.stride = sizeof(Vec2);
+						break;
+					}
 					break;
 				case VertexInputAttribute::UV:
 					inputSlotDesc.stride = sizeof(Vec2);

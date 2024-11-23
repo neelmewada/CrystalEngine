@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_36" : {
+        "_44" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -41,8 +41,49 @@
                     "offset" : 208
                 }
             ]
+        },
+        "_47" : {
+            "name" : "ObjectData",
+            "members" : [
+                {
+                    "name" : "transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                }
+            ]
+        },
+        "_46" : {
+            "name" : "type.StructuredBuffer.ObjectData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_47",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 64
+                }
+            ]
         }
     },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 0
+        },
+        {
+            "type" : "vec4",
+            "name" : "in.var.TEXCOORD1",
+            "location" : 1
+        }
+    ],
     "outputs" : [
         {
             "type" : "vec4",
@@ -66,9 +107,19 @@
             "binding" : 1
         }
     ],
+    "ssbos" : [
+        {
+            "type" : "_46",
+            "name" : "type.StructuredBuffer.ObjectData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 0
+        }
+    ],
     "ubos" : [
         {
-            "type" : "_36",
+            "type" : "_44",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

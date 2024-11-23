@@ -144,7 +144,7 @@ static void DoPaint(FusionRenderer2* renderer)
 {
 	renderer->Begin();
 
-
+	// TODO: Paint here
 
 	renderer->End();
 }

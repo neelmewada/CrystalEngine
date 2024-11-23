@@ -12,6 +12,9 @@ namespace CE::RPI
 		Array<Name> entryPoints{};
 		bool useSingleVertexInputSlot = false;
 
+		//! @brief The data type & size to use for POSITION vertex attribute.
+		RHI::VertexAttributeDataType positionAttributeType = VertexAttributeDataType::Float4;
+
 		inline bool TagExists(const Name& key) const
 		{
 			for (int i = tags.GetSize() - 1; i >= 0; i--)

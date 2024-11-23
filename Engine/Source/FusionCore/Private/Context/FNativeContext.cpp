@@ -448,7 +448,12 @@ namespace CE
 		}
 
 		{
-			
+			const auto& drawPackets = renderer2->FlushDrawPackets(imageIndex);
+
+			for (RHI::DrawPacket* drawPacket : drawPackets)
+			{
+				drawList.AddDrawPacket(drawPacket);
+			}
 		}
 	}
 

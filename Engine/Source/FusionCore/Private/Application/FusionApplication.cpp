@@ -762,6 +762,8 @@ namespace CE
         }
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.positionAttributeType = VertexAttributeDataType::Float2;
+
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
         variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
 
