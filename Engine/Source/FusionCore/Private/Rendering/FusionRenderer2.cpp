@@ -274,6 +274,8 @@ namespace CE
         vertexWritePtr += 4;
         vertexCurrentIdx += 4;
         indexWritePtr += 6;
+
+        drawCmdList.Last().numIndices += 6;
     }
 
     void FusionRenderer2::AddDrawCmd()
