@@ -7,40 +7,45 @@ using namespace CE;
 
 namespace RenderingTests
 {
-	CLASS()
-	class TextInputModel : public Object
+	class RendererSystem : public ApplicationMessageHandler
 	{
-		CE_CLASS(TextInputModel, Object)
+		CE_NO_COPY(RendererSystem)
 	public:
 
-		TextInputModel()
+		static RendererSystem& Get()
 		{
-			m_Text = "[Text]";
+			static RendererSystem instance{};
+			return instance;
 		}
 
-		virtual void OnModelPropertyUpdated(const CE::Name& propertyName, Object* modifyingObject) {}
+		void Init();
+		void Shutdown();
 
-		MODEL_PROPERTY(String, Text);
-		MODEL_PROPERTY(Array<String>, ComboItems);
-		MODEL_PROPERTY(u64, MemoryFootprint);
+		void Render();
+
+		void BuildFrameGraph();
+		void CompileFrameGraph();
+
+		void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowDestroyed(PlatformWindow* window) override;
+		void OnWindowClosed(PlatformWindow* window) override;
+		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
+		void OnWindowMinimized(PlatformWindow* window) override;
+		void OnWindowCreated(PlatformWindow* window) override;
+		void OnWindowExposed(PlatformWindow* window) override;
+
+	private:
+
+		RendererSystem() {}
 
 	public:
 
-		void ModifyTextInCode()
-		{
-			SetText(String::Format("Text from code {}", Random::Range(0, 100)));
-		}
+		bool rebuildFrameGraph = true;
+		bool recompileFrameGraph = true;
+		int curImageIndex = 0;
 
-		void UpdateMemoryFootprint()
-		{
-			auto app = FusionApplication::Get();
-			SetMemoryFootprint(app->ComputeMemoryFootprint());
-			String footprint = String::Format("Fusion Memory: {:.2f} MB", GetMemoryFootprint() / 1024.0f / 1024.0f);
-			CE_LOG(Info, All, footprint);
-		}
-
+		RHI::DrawListContext drawList{};
 	};
-
 
 	CLASS()
 	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
@@ -49,8 +54,6 @@ namespace RenderingTests
 	public:
 
 		RenderingTestWidget() = default;
-
-		void BuildPopup(FPopup*& outPopup, int index);
 
 		void Construct() override;
 
@@ -71,9 +74,6 @@ namespace RenderingTests
 		FImage* maximizeIcon = nullptr;
 		FStyledWidget* borderWidget = nullptr;
 		FTextInput* modelTextInput = nullptr;
-		FLabel* modelDisplayLabel = nullptr;
-		TextInputModel* model = nullptr;
-		FSplitBox* splitBox = nullptr;
 
 		int hitCounter = 0;
 

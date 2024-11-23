@@ -70,7 +70,10 @@ static void TestBegin(bool gui)
 	FusionApplication* fApp = FusionApplication::Get();
 
 	FusionInitInfo initInfo = {};
+	initInfo.assetLoader = nullptr;
 	fApp->Initialize(initInfo);
+
+	RendererSystem::Get().Init();
 
 	JobManagerDesc desc{};
 	desc.defaultTag = JOB_THREAD_WORKER;
@@ -95,12 +98,14 @@ static void TestEnd(bool gui)
 	delete gJobManager;
 	gJobManager = nullptr;
 
+	RendererSystem::Get().Shutdown();
+
 	FusionApplication* fApp = FusionApplication::Get();
 
 	fApp->PreShutdown();
 	fApp->Shutdown();
 	delete fApp;
-
+	
 	if (gui)
 	{
 		delete RHI::FrameScheduler::Get();
@@ -220,7 +225,7 @@ TEST(FusionCore, Rendering)
 		}
 
 		{
-			auto primaryComboBox = CreateObject<FComboBoxPlainStyle>(rootStyle, "PrimaryComboBoxStyle");
+			auto primaryComboBox = CreateObject<FComboBoxStyle>(rootStyle, "PrimaryComboBoxStyle");
 			rootStyle->Add("ComboBox.Primary", primaryComboBox);
 
 			primaryComboBox->background = Color::RGBA(15, 15, 15);
@@ -229,7 +234,7 @@ TEST(FusionCore, Rendering)
 			primaryComboBox->borderWidth = 1.0f;
 			primaryComboBox->cornerRadius = Vec4(5, 5, 5, 5);
 
-			auto primaryComboBoxItem = CreateObject<FComboBoxItemPlainStyle>(rootStyle, "PrimaryComboBoxItemStyle");
+			auto primaryComboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "PrimaryComboBoxItemStyle");
 			rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
 
 			primaryComboBoxItem->background = Color::Clear();
@@ -237,14 +242,14 @@ TEST(FusionCore, Rendering)
 			primaryComboBoxItem->selectedBackground = Color::Clear();
 			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
-			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground;
+			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground.GetFillColor();
 			primaryComboBoxItem->borderWidth = 1.0f;
 
 			GetDefaultWidget<FComboBox>()
 				.ItemStyle(primaryComboBoxItem)
 				.Style(rootStyle, "ComboBox.Primary");
 
-			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
+			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
 			rootStyle->Add("ComboBoxPopup.Primary", primaryComboBoxPopup);
 
 			primaryComboBoxPopup->background = Color::RGBA(26, 26, 26);
@@ -291,7 +296,7 @@ TEST(FusionCore, Rendering)
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
-	mainWindow->Show();
+	mainWindow->Hide();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
@@ -303,7 +308,9 @@ TEST(FusionCore, Rendering)
 
 	auto exposedTick = [&]
 		{
-			FusionApplication::Get()->Tick(true);
+			FusionApplication::Get()->SetExposed();
+
+			FusionApplication::Get()->Tick();
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
@@ -313,6 +320,8 @@ TEST(FusionCore, Rendering)
 		mainWidget->comboBox->ApplyStyle();
 	}
 
+	mainWindow->Show();
+
 	int frameCounter = 0;
 
 	while (!IsEngineRequestingExit())
@@ -320,16 +329,15 @@ TEST(FusionCore, Rendering)
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
-		if (frameCounter == 1 && mainWidget->model)
-		{
-			mainWidget->model->UpdateMemoryFootprint();
-		}
+		FusionApplication::Get()->ResetExposed();
 
 		// App & Input Tick
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
 		FusionApplication::Get()->Tick();
+
+		RendererSystem::Get().Render();
 
 		previousTime = curTime;
 		frameCounter++;

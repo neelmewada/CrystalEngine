@@ -9,9 +9,15 @@
 // Test Classes
 class FusionCore_Construction_Test;
 class FusionCore_Layout_Test;
+namespace RenderingTests
+{
+    class RendererSystem;
+}
+
 #define FUSION_TESTS \
     friend class FusionCore_Construction_Test;\
-    friend class FusionCore_Layout_Test;
+    friend class FusionCore_Layout_Test;\
+    friend class RenderingTests::RendererSystem;
 
 #else
 

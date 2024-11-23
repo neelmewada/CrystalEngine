@@ -99,6 +99,7 @@ namespace CE
 
 		FUSION_FRIENDS;
 		friend class CE::RendererSubsystem;
+		friend class RenderingTests::RendererSystem;
 	};
 
 } // namespace CE
