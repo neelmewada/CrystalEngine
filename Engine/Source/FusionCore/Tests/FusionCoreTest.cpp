@@ -301,7 +301,7 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnClicked([this]
                                     {
-                                        GetContext()->QueueDestroy();
+                                        RequestEngineExit("USER_QUIT");
                                     })
                                 .Padding(Vec4(18, 8, 18, 8))
                                 .Name("WindowCloseButton")

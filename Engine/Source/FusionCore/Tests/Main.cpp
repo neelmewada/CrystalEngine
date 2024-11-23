@@ -44,7 +44,7 @@ static void TestBegin(bool gui)
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.resizable = true;
-		windowInfo.hidden = false;
+		windowInfo.hidden = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
 		PlatformWindow* window = app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
@@ -104,7 +104,7 @@ static void TestEnd(bool gui)
 
 	fApp->PreShutdown();
 	fApp->Shutdown();
-	delete fApp;
+	fApp->BeginDestroy();
 	
 	if (gui)
 	{
@@ -130,6 +130,7 @@ static void TestEnd(bool gui)
 
 	CEDeregisterModuleTypes();
 	ModuleManager::Get().UnloadModule("CoreRPI");
+	ModuleManager::Get().UnloadModule("FusionCore");
 	ModuleManager::Get().UnloadModule("VulkanRHI");
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreShader");
@@ -296,7 +297,6 @@ TEST(FusionCore, Rendering)
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
-	mainWindow->Hide();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
