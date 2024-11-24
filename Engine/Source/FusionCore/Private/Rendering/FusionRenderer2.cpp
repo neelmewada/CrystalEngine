@@ -2,12 +2,19 @@
 
 #include "FusionCore.h"
 
+// Credit: Dear Imgui
+#define IM_NORMALIZE2F_OVER_ZERO(VX,VY)     { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = ImRsqrt(d2); VX *= inv_len; VY *= inv_len; } } (void)0
+#define IM_FIXNORMAL2F_MAX_INVLEN2          100.0f // 500.0f (see #4053, #3366)
+#define IM_FIXNORMAL2F(VX,VY)               { float d2 = VX*VX + VY*VY; if (d2 > 0.000001f) { float inv_len2 = 1.0f / d2; if (inv_len2 > IM_FIXNORMAL2F_MAX_INVLEN2) inv_len2 = IM_FIXNORMAL2F_MAX_INVLEN2; VX *= inv_len2; VY *= inv_len2; } } (void)0
+
+
 namespace CE
 {
+    static inline float  ImRsqrt(float x) { return 1.0f / sqrtf(x); }
 
     FusionRenderer2::FusionRenderer2()
     {
-
+        circleSegmentMaxError = 0.25f;
     }
 
     FusionRenderer2::~FusionRenderer2()
@@ -130,7 +137,7 @@ namespace CE
         if (quadUpdatesRequired[imageIndex])
         {
             // TODO: Implement support for more than 65,535 vertices!
-            u32 totalSize = vertexArray.GetCount() * sizeof(FVertex) + indexArray.GetCount() * sizeof(FIndex);
+            u32 totalSize = vertexArray.GetCount() * sizeof(FVertex) + indexArray.GetCount() * sizeof(FDrawIndex);
 
             if (totalSize > quadsBuffer[imageIndex]->GetBufferSize())
             {
@@ -147,7 +154,7 @@ namespace CE
                         vertexArray.GetCount() * sizeof(FVertex));
                     memcpy((u8*)data + vertexArray.GetCount() * sizeof(FVertex),
                         indexArray.GetData(),
-                        indexArray.GetCount() * sizeof(FIndex));
+                        indexArray.GetCount() * sizeof(FDrawIndex));
                 }
                 quadsBuffer[imageIndex]->Unmap();
             }
@@ -240,8 +247,8 @@ namespace CE
 
                     drawPacket->drawItems[0].indexBufferView[0] = IndexBufferView(quadsBuffer[imageIdx],
                             vertexArray.GetCount() * sizeof(FVertex),
-                            indexArray.GetCount() * sizeof(FIndex),
-                            sizeof(FIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+                            indexArray.GetCount() * sizeof(FDrawIndex),
+                            sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
 
                     drawPacket->drawItems[0].pipelineState = fusionShader->GetVariant(0)->GetPipeline(multisampling);
                 }
@@ -271,8 +278,8 @@ namespace CE
 
                         request.indexBufferView = IndexBufferView(quadsBuffer[imageIdx],
                             vertexArray.GetCount() * sizeof(FVertex),
-                            indexArray.GetCount() * sizeof(FIndex),
-                            sizeof(FIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+                            indexArray.GetCount() * sizeof(FDrawIndex),
+                            sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
 
                         request.drawItemTag = drawListTag;
                         request.drawFilterMask = RHI::DrawFilterMask::ALL;
@@ -456,6 +463,8 @@ namespace CE
 	    case FBrushStyle::LinearGradient:
 		    break;
 	    }
+
+        PathClear();
     }
 
     void FusionRenderer2::DrawRect(const Rect& rect)
@@ -514,11 +523,11 @@ namespace CE
     void FusionRenderer2::PrimReserve(int vertexCount, int indexCount)
     {
         int curVertexCount = vertexArray.GetCount();
-        vertexArray.InsertRange(curVertexCount + vertexCount);
+        vertexArray.InsertRange(vertexCount);
         vertexWritePtr = vertexArray.GetData() + curVertexCount;
 
         int curIndexCount = indexArray.GetCount();
-        indexArray.InsertRange(curIndexCount + indexCount);
+        indexArray.InsertRange(indexCount);
         indexWritePtr = indexArray.GetData() + curIndexCount;
     }
 
@@ -551,7 +560,7 @@ namespace CE
         Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y) + offset;
         Vec2 uv = Vec2(0, 0);
 
-        FIndex idx = vertexCurrentIdx;
+        FDrawIndex idx = vertexCurrentIdx;
         indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
         indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
 
@@ -595,16 +604,73 @@ namespace CE
         if (points == nullptr || numPoints <= 0)
             return;
 
+        Vec2 uv = whitePixelUV;
+
         Vec2 offset = Vec2();
         if (coordinateSpaceStack.Last().isTranslationOnly)
         {
             offset = coordinateSpaceStack.Last().translation;
         }
 
-        antiAliased = false;
         if (antiAliased)
         {
-	        // TODO: Implement anti-aliased fill
+            // Credit: Dear ImGui
+
+            const float AA_SIZE = fringeScale;
+            const u32 transparentColor = color & ~ColorAlphaMask;
+            const int indexCount = (numPoints - 2) * 3 + numPoints * 6;
+            const int vertexCount = (numPoints * 2);
+            PrimReserve(vertexCount, indexCount);
+            
+            // Add indexes for fill
+            unsigned int vertexInnerIdx = vertexCurrentIdx;
+            unsigned int vertexOuterIdx = vertexCurrentIdx + 1;
+            for (int i = 2; i < numPoints; i++)
+            {
+                indexWritePtr[0] = (FDrawIndex)(vertexInnerIdx); indexWritePtr[1] = (FDrawIndex)(vertexInnerIdx + ((i - 1) << 1)); indexWritePtr[2] = (FDrawIndex)(vertexInnerIdx + (i << 1));
+                indexWritePtr += 3;
+            }
+
+            // Compute normals
+            temporaryPoints.RemoveAll();
+            temporaryPoints.InsertRange(numPoints);
+            Vec2* tempNormals = temporaryPoints.GetData();
+            
+            for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)
+            {
+                const Vec2& p0 = points[i0] + offset;
+                const Vec2& p1 = points[i1] + offset;
+                float dx = p1.x - p0.x;
+                float dy = p1.y - p0.y;
+                IM_NORMALIZE2F_OVER_ZERO(dx, dy);
+                tempNormals[i0].x = dy;
+                tempNormals[i0].y = -dx;
+            }
+
+            for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)
+            {
+                // Average normals
+                const Vec2& n0 = tempNormals[i0];
+                const Vec2& n1 = tempNormals[i1];
+                float dm_x = (n0.x + n1.x) * 0.5f;
+                float dm_y = (n0.y + n1.y) * 0.5f;
+                IM_FIXNORMAL2F(dm_x, dm_y);
+                dm_x *= AA_SIZE * 0.5f;
+                dm_y *= AA_SIZE * 0.5f;
+                
+                // Add vertices
+                vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;        // Inner
+                vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor;  // Outer
+                vertexWritePtr += 2;
+                
+                // Add indexes for fringes
+                indexWritePtr[0] = (FDrawIndex)(vertexInnerIdx + (i1 << 1)); indexWritePtr[1] = (FDrawIndex)(vertexInnerIdx + (i0 << 1)); indexWritePtr[2] = (FDrawIndex)(vertexOuterIdx + (i0 << 1));
+                indexWritePtr[3] = (FDrawIndex)(vertexOuterIdx + (i0 << 1)); indexWritePtr[4] = (FDrawIndex)(vertexOuterIdx + (i1 << 1)); indexWritePtr[5] = (FDrawIndex)(vertexInnerIdx + (i1 << 1));
+                indexWritePtr += 6;
+            }
+
+            vertexCurrentIdx += vertexCount;
+            drawCmdList.Last().numIndices += indexCount;
         }
         else
         {
@@ -629,7 +695,6 @@ namespace CE
             }
 
             vertexCurrentIdx += vertexCount;
-
             drawCmdList.Last().numIndices += indexCount;
         }
     }

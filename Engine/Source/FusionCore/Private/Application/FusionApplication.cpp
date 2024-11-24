@@ -733,7 +733,7 @@ namespace CE
         JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
 
         RPI::ShaderVariantDescriptor2 variantDesc{};
-        variantDesc.useSingleVertexInputSlot = true;
+        variantDesc.interleaveVertexData = true;
         variantDesc.shaderName = "FusionShader";
         variantDesc.entryPoints.Resize(2);
         variantDesc.entryPoints[0] = "VertMain";

@@ -10,7 +10,7 @@ namespace CE::RPI
 		Array<ShaderTagEntry> tags{};
 		Array<RHI::ShaderModuleDescriptor> moduleDesc{};
 		Array<Name> entryPoints{};
-		bool useSingleVertexInputSlot = false;
+		bool interleaveVertexData = false;
 
 		//! @brief The data type & size to use for POSITION vertex attribute.
 		RHI::VertexAttributeDataType positionAttributeType = VertexAttributeDataType::Float4;

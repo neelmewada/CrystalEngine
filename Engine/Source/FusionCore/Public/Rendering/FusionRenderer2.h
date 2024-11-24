@@ -20,11 +20,13 @@ namespace CE
         static constexpr u32 CoordinateStackItemIncrement = 128;
         static constexpr u32 VertexArrayIncrement = 1024;
         static constexpr u32 IndexArrayIncrement = 1024;
-        static constexpr u32 PathArrayIncrement = 128;
+        static constexpr u32 PathArrayIncrement = 512;
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
 
         static constexpr f32 MinOpacity = 0.0001f;
+
+        static constexpr u32 ColorAlphaMask = 0xff000000;
 
         // - Lifecycle -
 
@@ -149,11 +151,11 @@ namespace CE
             bool isTranslationOnly = false;
         };
 
-        using FIndex = u16;
+        using FDrawIndex = u16;
 
         using FCoordinateSpaceStack = StableDynamicArray<FCoordinateSpace, CoordinateStackItemIncrement, false>;
         using FVertexArray = StableDynamicArray<FVertex, VertexArrayIncrement, false>;
-        using FIndexArray = StableDynamicArray<FIndex, IndexArrayIncrement, false>;
+        using FIndexArray = StableDynamicArray<FDrawIndex, IndexArrayIncrement, false>;
         using FPathArray = StableDynamicArray<Vec2, PathArrayIncrement, false>;
         using FDrawCmdArray = StableDynamicArray<FDrawCmd, DrawCmdArrayIncrement, false>;
         using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
@@ -163,13 +165,16 @@ namespace CE
         FVertexArray vertexArray;
         FIndexArray indexArray;
         FPathArray path;
+        FPathArray temporaryPoints;
         Vec2 pathMin, pathMax;
 
         FVertex* vertexWritePtr = nullptr;
-        FIndex* indexWritePtr = nullptr;
+        FDrawIndex* indexWritePtr = nullptr;
 
     	// Start offset of current vertex
-        FIndex vertexCurrentIdx = 0;
+        FDrawIndex vertexCurrentIdx = 0;
+
+        float fringeScale = 1.0f;
 
         FDrawCmdArray drawCmdList;
         FObjectDataArray objectDataArray;

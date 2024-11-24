@@ -129,7 +129,7 @@ namespace CE::RPI
 			}
 		}
 
-		if (desc.useSingleVertexInputSlot)
+		if (desc.interleaveVertexData)
 		{
 			u32 offset = 0;
 
