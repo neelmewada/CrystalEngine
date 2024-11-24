@@ -157,13 +157,14 @@ static void DoPaint(FusionRenderer2* renderer)
 	{
 		renderer->SetBrush(Color::Cyan());
 		renderer->PathRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
-		renderer->PathFill(true);
+		renderer->PathFill();
 
 		renderer->SetBrush(Color::Red());
 		renderer->PathLineTo(Vec2(50, 50));
-		renderer->PathLineTo(Vec2(100, 50));
-		renderer->PathLineTo(Vec2(50, 100));
-		renderer->PathFill(true);
+		renderer->PathArcTo(Vec2(50, 50), 50, Math::ToRadians(0), Math::ToRadians(90));
+		//renderer->PathLineTo(Vec2(100, 50));
+		//renderer->PathLineTo(Vec2(50, 100));
+		renderer->PathFill();
 	}
 	renderer->PopChildCoordinateSpace();
 
