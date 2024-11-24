@@ -49,6 +49,7 @@ namespace CE
         void End();
 
         void PushChildCoordinateSpace(const Matrix4x4& transform);
+        void PushChildCoordinateSpace(Vec2 translation);
         void PopChildCoordinateSpace();
 
         void SetPen(const FPen& pen);
@@ -131,8 +132,6 @@ namespace CE
             u32 indexOffset = 0;
             u32 numIndices = 0;
             u32 firstInstance = 0;
-
-            u32 transformIndex = 0;
         };
 
         struct FVertex
@@ -142,9 +141,17 @@ namespace CE
             u32 color = Color::White().ToU32();
         };
 
+        struct FCoordinateSpace
+        {
+            Matrix4x4 transform;
+            Vec2 translation;
+
+            bool isTranslationOnly = false;
+        };
+
         using FIndex = u16;
 
-        using FCoordinateSpaceStack = StableDynamicArray<Matrix4x4, CoordinateStackItemIncrement, false>;
+        using FCoordinateSpaceStack = StableDynamicArray<FCoordinateSpace, CoordinateStackItemIncrement, false>;
         using FVertexArray = StableDynamicArray<FVertex, VertexArrayIncrement, false>;
         using FIndexArray = StableDynamicArray<FIndex, IndexArrayIncrement, false>;
         using FPathArray = StableDynamicArray<Vec2, PathArrayIncrement, false>;
@@ -190,6 +197,7 @@ namespace CE
         Matrix4x4 itemTransform = Matrix4x4::Identity();
 
         FCoordinateSpaceStack coordinateSpaceStack;
+        int transformIndex = 0;
 
         // - View Constants -
 

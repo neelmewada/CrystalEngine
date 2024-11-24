@@ -194,6 +194,7 @@ namespace CE
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
+        transformIndex = 0;
 
         PushChildCoordinateSpace(Matrix4x4::Identity());
     }
@@ -298,28 +299,64 @@ namespace CE
     {
         if (coordinateSpaceStack.IsEmpty())
         {
-            coordinateSpaceStack.Insert(transform);
+            coordinateSpaceStack.Insert(FCoordinateSpace{ 
+                .transform = transform, .translation = Vec3(), .isTranslationOnly = false });
         }
         else
         {
-            coordinateSpaceStack.Insert(coordinateSpaceStack.Last() * transform);
+            if (coordinateSpaceStack.Last().isTranslationOnly)
+            {
+                coordinateSpaceStack.Insert(FCoordinateSpace{
+	                .transform = coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation) * transform,
+	                .translation = Vec3(),
+	                .isTranslationOnly = false });
+            }
+            else
+            {
+                coordinateSpaceStack.Insert(FCoordinateSpace{
+	                .transform = coordinateSpaceStack.Last().transform * transform,
+	                .translation = Vec3(),
+	                .isTranslationOnly = false });
+            }
         }
 
-        objectDataArray.Insert(FObjectData{ .transform = transform });
+        objectDataArray.Insert(FObjectData{ .transform = coordinateSpaceStack.Last().transform });
+        transformIndex = (int)objectDataArray.GetCount() - 1;
 
         AddDrawCmd();
+    }
+
+    void FusionRenderer2::PushChildCoordinateSpace(Vec2 translation)
+    {
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            coordinateSpaceStack.Insert(FCoordinateSpace{
+                .transform = coordinateSpaceStack.Last().transform,
+                .translation = coordinateSpaceStack.Last().translation + translation,
+                .isTranslationOnly = true });
+        }
+        else
+        {
+            coordinateSpaceStack.Insert(FCoordinateSpace{
+                .transform = coordinateSpaceStack.Last().transform,
+                .translation = translation,
+                .isTranslationOnly = true });
+        }
     }
 
     void FusionRenderer2::PopChildCoordinateSpace()
     {
         if (!coordinateSpaceStack.IsEmpty())
         {
-            coordinateSpaceStack.RemoveLast();
-        }
+            bool isTranslation = coordinateSpaceStack.Last().isTranslationOnly;
 
-        if (!coordinateSpaceStack.IsEmpty())
-        {
-            AddDrawCmd();
+            coordinateSpaceStack.RemoveLast();
+
+            if (!isTranslation && !coordinateSpaceStack.IsEmpty())
+            {
+                transformIndex--;
+                AddDrawCmd();
+            }
         }
     }
 
@@ -448,17 +485,30 @@ namespace CE
         if (coordinateSpaceStack.IsEmpty())
             return;
 
+        // TODO: Implement vertex indexing with more than 65,535 vertices
+
         FDrawCmd drawCmd{};
         if (drawCmdList.GetCount() > 0)
         {
-            drawCmd.firstInstance = drawCmdList.Last().firstInstance + 1;
-            drawCmd.vertexOffset = 0;// (u32)vertexArray.GetCount();
-            drawCmd.indexOffset = (u32)indexArray.GetCount();
-            drawCmd.numIndices = 0;
+            if (drawCmdList.Last().numIndices == 0)
+            {
+	            // Do nothing
+            }
+            else
+            {
+                drawCmd.firstInstance = transformIndex;//drawCmdList.Last().firstInstance + 1;
+                drawCmd.vertexOffset = 0;
+                drawCmd.indexOffset = (u32)indexArray.GetCount();
+                drawCmd.numIndices = 0;
+                
+                drawCmdList.Insert(drawCmd);
+            }
         }
-        drawCmdList.Insert(drawCmd);
+        else
+        {
+            drawCmdList.Insert(drawCmd);
+        }
 
-        drawCmdList.Last().transformIndex = (u32)coordinateSpaceStack.GetCount() - 1;
     }
 
     void FusionRenderer2::PrimReserve(int vertexCount, int indexCount)
@@ -489,10 +539,16 @@ namespace CE
 
     void FusionRenderer2::PrimRect(const Rect& rect, u32 color)
     {
-        Vec2 topLeft = rect.min;
-        Vec2 topRight = Vec2(rect.max.x, rect.min.y);
-        Vec2 bottomRight = Vec2(rect.max.x, rect.max.y);
-        Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y);
+        Vec2 offset = Vec2();
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            offset = coordinateSpaceStack.Last().translation;
+        }
+
+        Vec2 topLeft = rect.min + offset;
+        Vec2 topRight = Vec2(rect.max.x, rect.min.y) + offset;
+        Vec2 bottomRight = Vec2(rect.max.x, rect.max.y) + offset;
+        Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y) + offset;
         Vec2 uv = Vec2(0, 0);
 
         FIndex idx = vertexCurrentIdx;
@@ -539,6 +595,12 @@ namespace CE
         if (points == nullptr || numPoints <= 0)
             return;
 
+        Vec2 offset = Vec2();
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            offset = coordinateSpaceStack.Last().translation;
+        }
+
         antiAliased = false;
         if (antiAliased)
         {
@@ -552,7 +614,7 @@ namespace CE
 
             for (int i = 0; i < vertexCount; i++)
             {
-                vertexWritePtr[0].position = points[i];
+                vertexWritePtr[0].position = points[i] + offset;
                 vertexWritePtr[0].uv = whitePixelUV;
                 vertexWritePtr[0].color = color;
                 vertexWritePtr++;

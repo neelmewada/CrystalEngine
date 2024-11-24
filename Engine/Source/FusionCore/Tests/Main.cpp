@@ -152,7 +152,8 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->SetBrush(FBrush(Color::Black()));
 	renderer->DrawRect(Rect::FromSize(100, 100, 200, 200));
 
-	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(100, 100, 0)));
+	renderer->PushChildCoordinateSpace(Vec2(100, 100));
+
 	{
 		renderer->SetBrush(Color::Cyan());
 		renderer->PathRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
