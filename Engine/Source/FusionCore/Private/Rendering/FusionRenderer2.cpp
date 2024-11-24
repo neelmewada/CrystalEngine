@@ -467,6 +467,67 @@ namespace CE
         PathClear();
     }
 
+    void FusionRenderer2::PathStroke(bool closed, bool antiAliased)
+    {
+	    switch (currentPen.GetStyle())
+	    {
+	    case FPenStyle::None:
+		    break;
+	    case FPenStyle::SolidLine:
+            if (currentPen.GetColor().a > MinOpacity)
+            {
+                AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetColor().ToU32(), currentPen.GetThickness(), closed, antiAliased);
+            }
+		    break;
+	    case FPenStyle::DashedLine:
+		    break;
+	    case FPenStyle::DottedLine:
+		    break;
+	    }
+
+        PathClear();
+    }
+
+    void FusionRenderer2::PathFillStroke(bool closed, bool antiAliased)
+    {
+        switch (currentBrush.GetBrushStyle())
+        {
+        case FBrushStyle::None:
+            break;
+        case FBrushStyle::SolidFill:
+        {
+            Color fillColor = currentBrush.GetFillColor();
+            if (fillColor.a > MinOpacity)
+            {
+                AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), fillColor.ToU32(), antiAliased);
+            }
+        }
+        break;
+        case FBrushStyle::Image:
+            break;
+        case FBrushStyle::LinearGradient:
+            break;
+        }
+
+        switch (currentPen.GetStyle())
+        {
+        case FPenStyle::None:
+            break;
+        case FPenStyle::SolidLine:
+            if (currentPen.GetColor().a > MinOpacity)
+            {
+                AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetColor().ToU32(), currentPen.GetThickness(), closed, antiAliased);
+            }
+            break;
+        case FPenStyle::DashedLine:
+            break;
+        case FPenStyle::DottedLine:
+            break;
+        }
+
+        PathClear();
+    }
+
     void FusionRenderer2::DrawRect(const Rect& rect)
     {
 	    switch (currentBrush.GetBrushStyle())
@@ -692,6 +753,229 @@ namespace CE
                 indexWritePtr[1] = vertexCurrentIdx + (i - 1);
                 indexWritePtr[2] = vertexCurrentIdx + (i);
                 indexWritePtr += 3;
+            }
+
+            vertexCurrentIdx += vertexCount;
+            drawCmdList.Last().numIndices += indexCount;
+        }
+    }
+
+    void FusionRenderer2::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased)
+    {
+        if (points == nullptr || numPoints <= 0)
+            return;
+
+        const Vec2 uv = whitePixelUV;
+        const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
+        const bool thickLine = (thickness > fringeScale);
+
+        Vec2 offset = Vec2();
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            offset = coordinateSpaceStack.Last().translation;
+        }
+
+        // Credit: Dear ImGui
+
+        if (antiAliased)
+        {
+	        // [PATH 1]
+            // Anti-aliased stroke
+            const float AA_SIZE = fringeScale;
+            const u32 transparentColor = color & ~ColorAlphaMask;
+
+            // Thicknesses <1.0 should behave like thickness 1.0
+            thickness = Math::Max(thickness, 1.0f);
+            const int integerThickness = (int)thickness;
+            const float fractionalThickness = thickness - integerThickness;
+
+            const int indexCount = (thickLine ? count * 18 : count * 12);
+            const int vertexCount = (thickLine ? numPoints * 4 : numPoints * 3);
+            PrimReserve(vertexCount, indexCount);
+
+            // Temporary buffer
+			// The first <numPoints> items are normals at each line point, then after that there are either 2 or 4 temp points for each line point
+            temporaryPoints.RemoveAll();
+            temporaryPoints.InsertRange(numPoints * (thickLine ? 5 : 3));
+            Vec2* tempNormals = temporaryPoints.GetData();
+            Vec2* tempPoints = tempNormals + numPoints;
+
+            // Calculate normals (tangents) for each line segment
+            for (int i1 = 0; i1 < count; i1++)
+            {
+                const int i2 = (i1 + 1) == numPoints ? 0 : i1 + 1;
+                float dx = points[i2].x - points[i1].x;
+                float dy = points[i2].y - points[i1].y;
+                IM_NORMALIZE2F_OVER_ZERO(dx, dy);
+                tempNormals[i1].x = dy;
+                tempNormals[i1].y = -dx;
+            }
+
+            if (!closed)
+                tempNormals[numPoints - 1] = tempNormals[numPoints - 2];
+
+            if (!thickLine)
+            {
+                const float half_draw_size = AA_SIZE;
+
+                // If line is not closed, the first and last points need to be generated differently as there are no normals to blend
+                if (!closed)
+                {
+                    tempPoints[0] = points[0] + tempNormals[0] * half_draw_size + offset;
+                    tempPoints[1] = points[0] - tempNormals[0] * half_draw_size + offset;
+                    tempPoints[(numPoints - 1) * 2 + 0] = points[numPoints - 1] + tempNormals[numPoints - 1] * half_draw_size + offset;
+                    tempPoints[(numPoints - 1) * 2 + 1] = points[numPoints - 1] - tempNormals[numPoints - 1] * half_draw_size + offset;
+                }
+
+                // Generate the indices to form a number of triangles for each line segment, and the vertices for the line edges
+                // This takes points n and n+1 and writes into n+1, with the first point in a closed line being generated from the final one (as n+1 wraps)
+                // FIXME-OPT: Merge the different loops, possibly remove the temporary buffer.
+                unsigned int idx1 = vertexCurrentIdx; // Vertex index for start of line segment
+                for (int i1 = 0; i1 < count; i1++) // i1 is the first point of the line segment
+                {
+                    const int i2 = (i1 + 1) == numPoints ? 0 : i1 + 1; // i2 is the second point of the line segment
+                    const unsigned int idx2 = ((i1 + 1) == numPoints) ? vertexCurrentIdx : (idx1 + 3); // Vertex index for end of segment
+
+                    // Average normals
+                    float dm_x = (tempNormals[i1].x + tempNormals[i2].x) * 0.5f;
+                    float dm_y = (tempNormals[i1].y + tempNormals[i2].y) * 0.5f;
+                    IM_FIXNORMAL2F(dm_x, dm_y);
+                    dm_x *= half_draw_size; // dm_x, dm_y are offset to the outer edge of the AA area
+                    dm_y *= half_draw_size;
+
+                    // Add temporary vertexes for the outer edges
+                    Vec2* out_vtx = &tempPoints[i2 * 2];
+                    out_vtx[0].x = points[i2].x + dm_x + offset.x;
+                    out_vtx[0].y = points[i2].y + dm_y + offset.y;
+                    out_vtx[1].x = points[i2].x - dm_x + offset.x;
+                    out_vtx[1].y = points[i2].y - dm_y + offset.y;
+
+                    {
+                        // Add indexes for four triangles
+                        indexWritePtr[0] = (FDrawIndex)(idx2 + 0); indexWritePtr[1] = (FDrawIndex)(idx1 + 0); indexWritePtr[2] = (FDrawIndex)(idx1 + 2); // Right tri 1
+                        indexWritePtr[3] = (FDrawIndex)(idx1 + 2); indexWritePtr[4] = (FDrawIndex)(idx2 + 2); indexWritePtr[5] = (FDrawIndex)(idx2 + 0); // Right tri 2
+                        indexWritePtr[6] = (FDrawIndex)(idx2 + 1); indexWritePtr[7] = (FDrawIndex)(idx1 + 1); indexWritePtr[8] = (FDrawIndex)(idx1 + 0); // Left tri 1
+                        indexWritePtr[9] = (FDrawIndex)(idx1 + 0); indexWritePtr[10] = (FDrawIndex)(idx2 + 0); indexWritePtr[11] = (FDrawIndex)(idx2 + 1); // Left tri 2
+                        indexWritePtr += 12;
+                    }
+
+                    idx1 = idx2;
+                }
+
+                {
+                    // If we're not using a texture, we need the center vertex as well
+                    for (int i = 0; i < numPoints; i++)
+                    {
+                        vertexWritePtr[0].position = points[i] + offset;              vertexWritePtr[0].uv = whitePixelUV; vertexWritePtr[0].color = color;       // Center of line
+                        vertexWritePtr[1].position = tempPoints[i * 2 + 0]; vertexWritePtr[1].uv = whitePixelUV; vertexWritePtr[1].color = transparentColor; // Left-side outer edge
+                        vertexWritePtr[2].position = tempPoints[i * 2 + 1]; vertexWritePtr[2].uv = whitePixelUV; vertexWritePtr[2].color = transparentColor; // Right-side outer edge
+                        vertexWritePtr += 3;
+                    }
+                }
+            }
+            else
+            {
+                // [PATH 2] Non texture-based lines (thick): we need to draw the solid line core and thus require four vertices per point
+                const float half_inner_thickness = (thickness - AA_SIZE) * 0.5f;
+
+                // If line is not closed, the first and last points need to be generated differently as there are no normals to blend
+                if (!closed)
+                {
+                    const int points_last = numPoints - 1;
+                    tempPoints[0] = points[0] + offset + tempNormals[0] * (half_inner_thickness + AA_SIZE);
+                    tempPoints[1] = points[0] + offset + tempNormals[0] * (half_inner_thickness);
+                    tempPoints[2] = points[0] + offset - tempNormals[0] * (half_inner_thickness);
+                    tempPoints[3] = points[0] + offset - tempNormals[0] * (half_inner_thickness + AA_SIZE);
+                    tempPoints[points_last * 4 + 0] = points[points_last] + offset + tempNormals[points_last] * (half_inner_thickness + AA_SIZE);
+                    tempPoints[points_last * 4 + 1] = points[points_last] + offset + tempNormals[points_last] * (half_inner_thickness);
+                    tempPoints[points_last * 4 + 2] = points[points_last] + offset - tempNormals[points_last] * (half_inner_thickness);
+                    tempPoints[points_last * 4 + 3] = points[points_last] + offset - tempNormals[points_last] * (half_inner_thickness + AA_SIZE);
+                }
+
+                // Generate the indices to form a number of triangles for each line segment, and the vertices for the line edges
+                // This takes points n and n+1 and writes into n+1, with the first point in a closed line being generated from the final one (as n+1 wraps)
+                // FIXME-OPT: Merge the different loops, possibly remove the temporary buffer.
+                unsigned int idx1 = vertexCurrentIdx; // Vertex index for start of line segment
+                for (int i1 = 0; i1 < count; i1++) // i1 is the first point of the line segment
+                {
+                    const int i2 = (i1 + 1) == numPoints ? 0 : (i1 + 1); // i2 is the second point of the line segment
+                    const unsigned int idx2 = (i1 + 1) == numPoints ? vertexCurrentIdx : (idx1 + 4); // Vertex index for end of segment
+
+                    // Average normals
+                    float dm_x = (tempNormals[i1].x + tempNormals[i2].x) * 0.5f;
+                    float dm_y = (tempNormals[i1].y + tempNormals[i2].y) * 0.5f;
+                    IM_FIXNORMAL2F(dm_x, dm_y);
+                    float dm_out_x = dm_x * (half_inner_thickness + AA_SIZE);
+                    float dm_out_y = dm_y * (half_inner_thickness + AA_SIZE);
+                    float dm_in_x = dm_x * half_inner_thickness;
+                    float dm_in_y = dm_y * half_inner_thickness;
+
+                    // Add temporary vertices
+                    Vec2* out_vtx = &tempPoints[i2 * 4];
+                    out_vtx[0].x = points[i2].x + dm_out_x + offset.x;
+                    out_vtx[0].y = points[i2].y + dm_out_y + offset.y;
+                    out_vtx[1].x = points[i2].x + dm_in_x + offset.x;
+                    out_vtx[1].y = points[i2].y + dm_in_y + offset.y;
+                    out_vtx[2].x = points[i2].x - dm_in_x + offset.x;
+                    out_vtx[2].y = points[i2].y - dm_in_y + offset.y;
+                    out_vtx[3].x = points[i2].x - dm_out_x + offset.x;
+                    out_vtx[3].y = points[i2].y - dm_out_y + offset.y;
+
+                    // Add indexes
+                    indexWritePtr[0] = (FDrawIndex)(idx2 + 1); indexWritePtr[1] = (FDrawIndex)(idx1 + 1); indexWritePtr[2] = (FDrawIndex)(idx1 + 2);
+                    indexWritePtr[3] = (FDrawIndex)(idx1 + 2); indexWritePtr[4] = (FDrawIndex)(idx2 + 2); indexWritePtr[5] = (FDrawIndex)(idx2 + 1);
+                    indexWritePtr[6] = (FDrawIndex)(idx2 + 1); indexWritePtr[7] = (FDrawIndex)(idx1 + 1); indexWritePtr[8] = (FDrawIndex)(idx1 + 0);
+                    indexWritePtr[9] = (FDrawIndex)(idx1 + 0); indexWritePtr[10] = (FDrawIndex)(idx2 + 0); indexWritePtr[11] = (FDrawIndex)(idx2 + 1);
+                    indexWritePtr[12] = (FDrawIndex)(idx2 + 2); indexWritePtr[13] = (FDrawIndex)(idx1 + 2); indexWritePtr[14] = (FDrawIndex)(idx1 + 3);
+                    indexWritePtr[15] = (FDrawIndex)(idx1 + 3); indexWritePtr[16] = (FDrawIndex)(idx2 + 3); indexWritePtr[17] = (FDrawIndex)(idx2 + 2);
+                    indexWritePtr += 18;
+
+                    idx1 = idx2;
+                }
+
+                // Add vertices
+                for (int i = 0; i < numPoints; i++)
+                {
+                    vertexWritePtr[0].position = tempPoints[i * 4 + 0]; vertexWritePtr[0].uv = whitePixelUV; vertexWritePtr[0].color = transparentColor;
+                    vertexWritePtr[1].position = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = whitePixelUV; vertexWritePtr[1].color = color;
+                    vertexWritePtr[2].position = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = whitePixelUV; vertexWritePtr[2].color = color;
+                    vertexWritePtr[3].position = tempPoints[i * 4 + 3]; vertexWritePtr[3].uv = whitePixelUV; vertexWritePtr[3].color = transparentColor;
+                    vertexWritePtr += 4;
+                }
+            }
+
+            vertexCurrentIdx += vertexCount;
+            drawCmdList.Last().numIndices += indexCount;
+        }
+        else
+        {
+            // [PATH 4] Non texture-based, Non anti-aliased lines
+            const int indexCount = count * 6;
+            const int vertexCount = count * 4;    // FIXME-OPT: Not sharing edges
+            PrimReserve(vertexCount, indexCount);
+
+            for (int i1 = 0; i1 < count; i1++)
+            {
+                const int i2 = (i1 + 1) == numPoints ? 0 : i1 + 1;
+                const Vec2& p1 = points[i1] + offset;
+                const Vec2& p2 = points[i2] + offset;
+
+                float dx = p2.x - p1.x;
+                float dy = p2.y - p1.y;
+                IM_NORMALIZE2F_OVER_ZERO(dx, dy);
+                dx *= (thickness * 0.5f);
+                dy *= (thickness * 0.5f);
+
+                vertexWritePtr[0].position.x = p1.x + dy; vertexWritePtr[0].position.y = p1.y - dx; vertexWritePtr[0].uv = whitePixelUV; vertexWritePtr[0].color = color;
+                vertexWritePtr[1].position.x = p2.x + dy; vertexWritePtr[1].position.y = p2.y - dx; vertexWritePtr[1].uv = whitePixelUV; vertexWritePtr[1].color = color;
+                vertexWritePtr[2].position.x = p2.x - dy; vertexWritePtr[2].position.y = p2.y + dx; vertexWritePtr[2].uv = whitePixelUV; vertexWritePtr[2].color = color;
+                vertexWritePtr[3].position.x = p1.x - dy; vertexWritePtr[3].position.y = p1.y + dx; vertexWritePtr[3].uv = whitePixelUV; vertexWritePtr[3].color = color;
+                vertexWritePtr += 4;
+
+                indexWritePtr[0] = (FDrawIndex)(vertexCurrentIdx); indexWritePtr[1] = (FDrawIndex)(vertexCurrentIdx + 1); indexWritePtr[2] = (FDrawIndex)(vertexCurrentIdx + 2);
+                indexWritePtr[3] = (FDrawIndex)(vertexCurrentIdx); indexWritePtr[4] = (FDrawIndex)(vertexCurrentIdx + 2); indexWritePtr[5] = (FDrawIndex)(vertexCurrentIdx + 3);
+                indexWritePtr += 6;
+                vertexCurrentIdx += 4;
             }
 
             vertexCurrentIdx += vertexCount;
