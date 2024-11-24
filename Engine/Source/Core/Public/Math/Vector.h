@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace CE
 {
     template<typename T>
@@ -187,6 +188,11 @@ namespace CE
         inline TVector2 GetNormalized() const
         {
             return *this / GetMagnitude();
+        }
+
+        f32 GetMax() const
+        {
+            return Math::Max({x, y});
         }
 
         static f32 SqrDistance(TVector2 a, TVector2 b)
@@ -393,6 +399,11 @@ namespace CE
         inline TVector3 GetNormalized() const
         {
             return *this / GetMagnitude();
+        }
+
+        f32 GetMax() const
+        {
+            return Math::Max({x, y, z});
         }
 
         inline static T Dot(TVector3 a, TVector3 b)
@@ -634,6 +645,11 @@ namespace CE
         {
             return *this / GetMagnitude();
         }
+
+        f32 GetMax() const
+		{
+            return Math::Max({x, y, z, w});
+		}
 
         inline static f32 Dot(TVector4 a, TVector4 b)
         {

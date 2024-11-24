@@ -91,6 +91,9 @@ namespace CE
 
 		renderer->Init(rendererInfo);
 
+		rendererInfo.fusionShader = FusionApplication::Get()->fusionShader2;
+		rendererInfo.multisampling.sampleCount = 1;
+
 		renderer2->SetDrawListTag(drawListTag);
 		renderer2->Init(rendererInfo);
 
@@ -251,6 +254,27 @@ namespace CE
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 
+	void FNativeContext::SetMultisamplingCount(int msaa)
+	{
+		if (sampleCount == msaa)
+			return;
+
+		if (msaa == 1 || msaa == 2 || msaa == 4)
+		{
+			sampleCount = msaa;
+
+			renderer->multisampling.sampleCount = sampleCount;
+			renderer->multisampling.quality = 1.0f;
+
+			if (renderer2)
+			{
+				renderer2->multisampling.sampleCount = sampleCount;
+			}
+
+			FusionApplication::Get()->RequestFrameGraphUpdate();
+		}
+	}
+
 	bool FNativeContext::IsFocused() const
 	{
 		return platformWindow->IsFocused();
@@ -403,7 +427,7 @@ namespace CE
 				}
 				
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
+				swapChainAttachment.multisampleState.sampleCount = sampleCount;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
 				for (const auto& shaderReadOnlyAttachmentDependency : shaderReadOnlyAttachmentDependencies)

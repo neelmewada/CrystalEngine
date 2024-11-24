@@ -14,6 +14,8 @@ namespace CE
 
     public:
 
+        // - Constants 0
+
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
         static constexpr u32 CoordinateStackItemIncrement = 128;
         static constexpr u32 VertexArrayIncrement = 1024;
@@ -21,6 +23,10 @@ namespace CE
         static constexpr u32 PathArrayIncrement = 128;
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
+
+        static constexpr f32 MinOpacity = 0.0001f;
+
+        // - Lifecycle -
 
         void Init(const FusionRendererInitInfo& initInfo);
 
@@ -49,6 +55,16 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        // - Path API -
+
+        void PathClear();
+        void PathLineTo(const Vec2& point);
+        void PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle);
+        void PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle, int numSegments);
+        void PathRect(const Rect& rect, const Vec4& cornerRadius = {});
+
+        void PathFill(bool antiAliased = true);
+
         // - Draw API -
 
         void DrawRect(const Rect& rect);
@@ -57,6 +73,8 @@ namespace CE
 
         // - Internal Draw API -
 
+        int CalculateNumCircleSegments(float radius) const;
+
         void PrimReserve(int vertexCount, int indexCount);
         void PrimUnreserve(int vertexCount, int indexCount);
 
@@ -64,7 +82,10 @@ namespace CE
 
         void AddDrawCmd();
 
-        void AddRectFilled(const Rect& rect, u32 color);
+        void PathInsert(const Vec2& point);
+
+        void AddRectFilled(const Rect& rect, u32 color, const Vec4& cornerRadius = {});
+        void AddConvexPolySolidFill(const Vec2* points, int numPoints, u32 color, bool antiAliased);
 
         // - Utility API -
 
@@ -85,6 +106,9 @@ namespace CE
 
         FIELD(Config)
         u32 objectDataGrowCount = 128;
+
+        FIELD(Config)
+        f32 circleSegmentMaxError = 0.3f;
 
         // - Data Structures -
 
@@ -107,6 +131,8 @@ namespace CE
             u32 indexOffset = 0;
             u32 numIndices = 0;
             u32 firstInstance = 0;
+
+            u32 transformIndex = 0;
         };
 
         struct FVertex
@@ -129,10 +155,13 @@ namespace CE
 
         FVertexArray vertexArray;
         FIndexArray indexArray;
-        FPathArray pathPoints;
+        FPathArray path;
+        Vec2 pathMin, pathMax;
 
         FVertex* vertexWritePtr = nullptr;
         FIndex* indexWritePtr = nullptr;
+
+    	// Start offset of current vertex
         FIndex vertexCurrentIdx = 0;
 
         FDrawCmdArray drawCmdList;
@@ -148,6 +177,7 @@ namespace CE
         int curImageIndex = 0;
         bool pixelPerfect = true;
         Vec2i screenSize = Vec2i(0, 0);
+        Vec2 whitePixelUV = Vec2(0, 0);
 
         RPI::Shader* fusionShader = nullptr;
         RHI::MultisampleState multisampling{};
@@ -181,9 +211,11 @@ namespace CE
         // - Utils -
 
         Array<DestroyItem> destructionQueue{};
+        Array<RHI::DrawPacket*> freePackets;
 
+        friend class FNativeContext;
     };
-    
+
 } // namespace CE
 
 #include "FusionRenderer2.rtti.h"

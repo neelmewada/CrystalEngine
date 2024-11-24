@@ -120,6 +120,11 @@ namespace RenderingTests
         scheduler->EndExecution();
     }
 
+    void RendererSystem::RebuildFrameGraph()
+    {
+        rebuildFrameGraph = recompileFrameGraph = true;
+    }
+
     void RendererSystem::BuildFrameGraph()
     {
         rebuildFrameGraph = false;

@@ -483,6 +483,11 @@ namespace CE
         rebuildFrameGraph = recompileFrameGraph = true;
     }
 
+    void FusionApplication::RequestFrameGraphUpdate()
+    {
+        onFrameGraphUpdateRequested.Broadcast();
+    }
+
     // - Application Callbacks -
 
     void FusionApplication::QueueDestroy(Object* object)
@@ -775,6 +780,11 @@ namespace CE
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
         variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
+
+        ShaderTagEntry cullMode{};
+        cullMode.key = "Cull";
+        cullMode.value = "Off";
+        variantDesc.tags.Add(cullMode);
 
         fusionShader2 = new RPI::Shader();
         fusionShader2->AddVariant(variantDesc);

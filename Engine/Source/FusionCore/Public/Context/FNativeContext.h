@@ -30,6 +30,9 @@ namespace CE
 
 		f32 GetScaling() const override;
 
+		int GetMultisamplingCount() const { return sampleCount; }
+		void SetMultisamplingCount(int msaa);
+
 		bool IsFocused() const override;
 
 		bool IsShown() const override;
@@ -88,6 +91,7 @@ namespace CE
 
 		RHI::SwapChain* swapChain = nullptr;
 		RHI::DrawListTag drawListTag = 0;
+		int sampleCount = 1;
 		Name attachmentId;
 
 		Array<ImageScopeAttachmentDescriptor> shaderReadOnlyAttachmentDependencies;

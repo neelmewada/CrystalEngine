@@ -57,6 +57,8 @@ namespace CE
             // - Bind Buffers -
 
             perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
+
+            perObjectSrg->Bind(i, "_Objects", objectDataBuffer.GetBuffer(i));
         }
 
         perViewSrg->FlushBindings();
@@ -69,7 +71,13 @@ namespace CE
 
         objectDataBuffer.Shutdown();
 
-        for (int i = 0; i < numFrames; i++)
+        while (freePackets.NotEmpty())
+        {
+            delete freePackets[0];
+            freePackets.RemoveAt(0);
+        }
+
+    	for (int i = 0; i < numFrames; i++)
         {
             delete viewConstantsBuffer[i]; viewConstantsBuffer[i] = nullptr;
             delete quadsBuffer[i]; quadsBuffer[i] = nullptr;
@@ -144,6 +152,22 @@ namespace CE
                 quadsBuffer[imageIndex]->Unmap();
             }
 
+            if (objectDataArray.GetCount() > objectDataBuffer.GetElementCount())
+            {
+                u32 totalElementRequired = Math::Max<u32>(objectDataArray.GetCount(), objectDataBuffer.GetElementCount() + objectDataGrowCount);
+                objectDataBuffer.GrowToFit(totalElementRequired);
+            }
+
+            if (objectDataArray.GetCount() > 0)
+	        {
+		        void* data;
+            	objectDataBuffer.Map(imageIndex, 0, objectDataArray.GetCount() * sizeof(FObjectData), &data);
+	            {
+		        	memcpy(data, objectDataArray.GetData(), objectDataArray.GetCount() * sizeof(FObjectData));
+	            }
+            	objectDataBuffer.Unmap(imageIndex);
+	        }
+
             quadUpdatesRequired[imageIndex] = false;
         }
 
@@ -165,7 +189,8 @@ namespace CE
         drawCmdList.RemoveAll();
         vertexArray.RemoveAll();
         indexArray.RemoveAll();
-        pathPoints.RemoveAll();
+        PathClear();
+        objectDataArray.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
@@ -187,10 +212,13 @@ namespace CE
 
             for (int i = 0; i < drawCmdList.GetCount(); ++i)
             {
+                if (drawCmdList[i].numIndices == 0)
+                    continue;
+
                 if (oldPackets.NotEmpty())
                 {
-                    RHI::DrawPacket* drawPacket = oldPackets[i];
-                    oldPackets.RemoveAt(i);
+                    RHI::DrawPacket* drawPacket = oldPackets[0];
+                    oldPackets.RemoveAt(0);
 
                     RHI::DrawIndexedArguments drawArgs{};
                     drawArgs.firstIndex = drawCmdList[i].indexOffset;
@@ -257,6 +285,12 @@ namespace CE
                     this->drawPacketsPerImage[imageIdx].Add(drawPacket);
                 }
             }
+
+            if (oldPackets.NotEmpty())
+            {
+                freePackets.AddRange(oldPackets);
+                oldPackets.Clear();
+            }
         }
     }
 
@@ -271,6 +305,8 @@ namespace CE
             coordinateSpaceStack.Insert(coordinateSpaceStack.Last() * transform);
         }
 
+        objectDataArray.Insert(FObjectData{ .transform = transform });
+
         AddDrawCmd();
     }
 
@@ -279,7 +315,10 @@ namespace CE
         if (!coordinateSpaceStack.IsEmpty())
         {
             coordinateSpaceStack.RemoveLast();
+        }
 
+        if (!coordinateSpaceStack.IsEmpty())
+        {
             AddDrawCmd();
         }
     }
@@ -299,6 +338,89 @@ namespace CE
         this->currentFont = font;
     }
 
+    void FusionRenderer2::PathClear()
+    {
+        path.RemoveAll();
+
+        pathMax = Vec2(NumericLimits<f32>::Min(), NumericLimits<f32>::Min());
+        pathMin = Vec2(NumericLimits<f32>::Max(), NumericLimits<f32>::Max());
+    }
+
+    void FusionRenderer2::PathLineTo(const Vec2& point)
+    {
+        PathInsert(point);
+    }
+
+    void FusionRenderer2::PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle)
+    {
+        if (radius < 0.5f)
+        {
+            PathInsert(center);
+	        return;
+        }
+
+        const float arcLength = Math::Abs(endAngle - startAngle);
+        const int circleSegmentCount = CalculateNumCircleSegments(radius);
+        const int arcSegmentCount = Math::Max(Math::RoundToInt(ceilf(circleSegmentCount * arcLength / (Math::PI * 2.0f))), 
+            Math::RoundToInt(2.0f * Math::PI / arcLength));
+
+        PathArcTo(center, radius, startAngle, endAngle, arcSegmentCount);
+    }
+
+    void FusionRenderer2::PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle, int numSegments)
+    {
+        if (radius < 0.5f)
+        {
+            PathInsert(center);
+	        return;
+        }
+
+        for (int i = 0; i <= numSegments; ++i)
+        {
+            const float angle = startAngle + ((float)i / (float)numSegments) * (endAngle - startAngle);
+            const float degrees = Math::ToDegrees(angle);
+            PathInsert(Vec2(center.x + Math::Cos(angle) * radius, center.y + Math::Sin(angle) * radius));
+        }
+    }
+
+    void FusionRenderer2::PathRect(const Rect& rect, const Vec4& cornerRadius)
+    {
+        const Vec2& min = rect.min;
+        const Vec2& max = rect.max;
+
+        PathArcTo(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft), cornerRadius.topLeft,
+            Math::ToRadians(180), Math::ToRadians(270));
+        PathArcTo(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight), cornerRadius.topRight,
+            Math::ToRadians(270), Math::ToRadians(360));
+        PathArcTo(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight), cornerRadius.bottomRight,
+            Math::ToRadians(0), Math::ToRadians(90));
+        PathArcTo(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft), cornerRadius.bottomLeft,
+            Math::ToRadians(90), Math::ToRadians(180));
+
+    }
+
+    void FusionRenderer2::PathFill(bool antiAliased)
+    {
+	    switch (currentBrush.GetBrushStyle())
+	    {
+	    case FBrushStyle::None:
+		    break;
+	    case FBrushStyle::SolidFill:
+		    {
+			    Color fillColor = currentBrush.GetFillColor();
+                if (fillColor.a > MinOpacity)
+                {
+                    AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), fillColor.ToU32(), antiAliased);
+                }
+		    }
+		    break;
+	    case FBrushStyle::Image:
+		    break;
+	    case FBrushStyle::LinearGradient:
+		    break;
+	    }
+    }
+
     void FusionRenderer2::DrawRect(const Rect& rect)
     {
 	    switch (currentBrush.GetBrushStyle())
@@ -313,6 +435,30 @@ namespace CE
 	    }
 
         
+    }
+
+    int FusionRenderer2::CalculateNumCircleSegments(float radius) const
+    {
+        const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy
+        return Math::Clamp((((((int)ceilf(Math::PI / acosf(1 - Math::Min((circleSegmentMaxError), (radius)) / (radius)))) + 1) / 2) * 2), 4, 512);
+    }
+
+    void FusionRenderer2::AddDrawCmd()
+    {
+        if (coordinateSpaceStack.IsEmpty())
+            return;
+
+        FDrawCmd drawCmd{};
+        if (drawCmdList.GetCount() > 0)
+        {
+            drawCmd.firstInstance = drawCmdList.Last().firstInstance + 1;
+            drawCmd.vertexOffset = 0;// (u32)vertexArray.GetCount();
+            drawCmd.indexOffset = (u32)indexArray.GetCount();
+            drawCmd.numIndices = 0;
+        }
+        drawCmdList.Insert(drawCmd);
+
+        drawCmdList.Last().transformIndex = (u32)coordinateSpaceStack.GetCount() - 1;
     }
 
     void FusionRenderer2::PrimReserve(int vertexCount, int indexCount)
@@ -364,25 +510,66 @@ namespace CE
         drawCmdList.Last().numIndices += 6;
     }
 
-    void FusionRenderer2::AddDrawCmd()
+    void FusionRenderer2::PathInsert(const Vec2& point)
     {
-        FDrawCmd drawCmd{};
-        if (drawCmdList.GetCount() > 0)
-        {
-            drawCmd.firstInstance = drawCmdList.Last().firstInstance + 1;
-            drawCmd.vertexOffset = (u32)vertexArray.GetCount();
-            drawCmd.indexOffset = (u32)indexArray.GetCount();
-            drawCmd.numIndices = 0;
-        }
-        drawCmdList.Insert(drawCmd);
+        path.Insert(point);
+
+        pathMin.x = Math::Min(point.x, pathMin.x);
+        pathMin.y = Math::Min(point.y, pathMin.y);
+
+        pathMax.x = Math::Max(point.x, pathMax.x);
+        pathMax.y = Math::Max(point.y, pathMax.y);
     }
 
-    void FusionRenderer2::AddRectFilled(const Rect& rect, u32 color)
+    void FusionRenderer2::AddRectFilled(const Rect& rect, u32 color, const Vec4& cornerRadius)
     {
-        PrimReserve(4, 6);
-        PrimRect(rect, color);
+        if (cornerRadius.GetMax() < 0.5f)
+        {
+	        PrimReserve(4, 6);
+        	PrimRect(rect, color);
+        }
+        else
+        {
+	        
+        }
+    }
 
-        drawCmdList.Last().numIndices += 6;
+    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, u32 color, bool antiAliased)
+    {
+        if (points == nullptr || numPoints <= 0)
+            return;
+
+        antiAliased = false;
+        if (antiAliased)
+        {
+	        // TODO: Implement anti-aliased fill
+        }
+        else
+        {
+            const int indexCount = (numPoints - 2) * 3;
+            const int vertexCount = numPoints;
+            PrimReserve(vertexCount, indexCount);
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                vertexWritePtr[0].position = points[i];
+                vertexWritePtr[0].uv = whitePixelUV;
+                vertexWritePtr[0].color = color;
+                vertexWritePtr++;
+            }
+
+            for (int i = 2; i < numPoints; ++i)
+            {
+                indexWritePtr[0] = vertexCurrentIdx;
+                indexWritePtr[1] = vertexCurrentIdx + (i - 1);
+                indexWritePtr[2] = vertexCurrentIdx + (i);
+                indexWritePtr += 3;
+            }
+
+            vertexCurrentIdx += vertexCount;
+
+            drawCmdList.Last().numIndices += indexCount;
+        }
     }
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)

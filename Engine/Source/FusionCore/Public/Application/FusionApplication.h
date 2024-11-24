@@ -76,6 +76,8 @@ namespace CE
 
         void RebuildFrameGraph();
 
+        void RequestFrameGraphUpdate();
+
         RPI::Shader* GetFusionShader() const { return fusionShader; }
 
         RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
@@ -95,6 +97,8 @@ namespace CE
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
+
+        ScriptEvent<void(void)> onFrameGraphUpdateRequested;
 
     protected:
 

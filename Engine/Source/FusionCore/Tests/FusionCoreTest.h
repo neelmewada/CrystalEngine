@@ -23,6 +23,9 @@ namespace RenderingTests
 
 		void Render();
 
+		FUNCTION()
+		void RebuildFrameGraph();
+
 		void BuildFrameGraph();
 		void CompileFrameGraph();
 
