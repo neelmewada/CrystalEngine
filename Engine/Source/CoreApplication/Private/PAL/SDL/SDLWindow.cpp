@@ -100,6 +100,8 @@ namespace CE
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+        
+        
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
@@ -206,6 +208,8 @@ namespace CE
 		{
 			SDL_SetWindowHitTest(handle, nullptr, nullptr);
 		}
+        
+        PlatformWindowMisc::SetupBorderlessWindow(this, borderless);
 	}
 
 	void SDLPlatformWindow::SetInputFocus()

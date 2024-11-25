@@ -1,7 +1,7 @@
 #!/bin/bash
 
 base_dir=$(pwd)
-num_cores=$(nproc --all)
+#num_cores=$(nproc --all)
 DefaultGenerator="Ninja Multi-Config"
 Compiler=""
 

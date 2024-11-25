@@ -256,9 +256,9 @@ namespace CE
         float arcFastRadiusCutoff = 0;
 
         friend class FNativeContext;
-        friend static void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer, 
+        friend void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer,
             float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level);
-        friend static void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
+        friend void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
             float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level);
     };
 

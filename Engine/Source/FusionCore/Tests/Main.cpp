@@ -2,6 +2,12 @@
 #include "FusionCore.h"
 #include "VulkanRHI.h"
 
+#include "../../Utils/clipper.svg.h"
+#include "../../Utils/ClipFileLoad.h"
+#include "../../Utils/clipper.svg.utils.h"
+#include "../../Utils/Colors.h"
+#include "../../Utils/Timer.h"
+
 #include "FusionCoreTest.h"
 
 #include <gtest/gtest.h>
@@ -145,12 +151,67 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
+namespace cl = Clipper2Lib;
+
+void System(const std::string& filename)
+{
+#ifdef _WIN32
+  system(filename.c_str());
+#else
+  system(("firefox " + filename).c_str());
+#endif
+}
+
+
+cl::Path64 MakeRandomRectangle(int minWidth, int minHeight, int maxWidth, int maxHeight,
+  int maxRight, int maxBottom)
+{
+    using namespace Clipper2Lib;
+    
+    int w = maxWidth > minWidth ? minWidth + rand() % (maxWidth - minWidth): minWidth;
+    int h = maxHeight > minHeight ? minHeight + rand() % (maxHeight - minHeight): minHeight;
+    int l = rand() % (maxRight - w);
+    int t = rand() % (maxBottom - h);
+    Path64 result;
+    result.reserve(4);
+    result.push_back(Point64(l, t));
+    result.push_back(Point64(l+w, t));
+    result.push_back(Point64(l+w, t+h));
+    result.push_back(Point64(l, t+h));
+    return result;
+}
+
+void DoRectangles(int cnt)
+{
+    using namespace Clipper2Lib;
+    const int width = 800, height = 600, margin = 120;
+    
+    Paths64 sub, clp, sol, store;
+    //Rect64 rect = Rect64(margin, margin, width - margin, height - margin);
+    //clp.push_back(rect.AsPath());
+    //for (int i = 0; i < cnt; ++i)
+    //    sub.push_back(MakeRandomRectangle(10, 10, 100, 100, width, height));
+    sub.push_back(Rect64(100, 100, 200, 200).AsPath());
+    clp.push_back(Rect64(50, 50, 250, 250).AsPath());
+
+    //sol = RectClip(rect, sub);
+    sol = Intersect(sub, clp, FillRule::EvenOdd);
+
+    String::IsAlphabet('a');
+}
+
+void TestClipping()
+{
+    DoRectangles(1);
+    
+    String::IsAlphabet('a');
+}
+
 static void DoPaint(FusionRenderer2* renderer)
 {
-	renderer->Begin();
 
 	renderer->SetBrush(FBrush(Color::Black()));
-	renderer->FillRect(Rect::FromSize(100, 100, 200, 200));
+	renderer->FillRect(CE::Rect::FromSize(100, 100, 200, 200));
 
 	FPen pen = Color::Blue();
 
@@ -161,8 +222,8 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->SetPen(pen);
 		renderer->SetBrush(Color::Cyan());
 
-		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
-		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
+		renderer->FillRect(CE::Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
+		renderer->StrokeRect(CE::Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 
 		f32 angle = 0;
 
@@ -380,6 +441,8 @@ TEST(FusionCore, Rendering)
 	mainWindow->Show();
 
 	int frameCounter = 0;
+    
+    TestClipping();
 
 	while (!IsEngineRequestingExit())
 	{
