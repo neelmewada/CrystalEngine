@@ -211,7 +211,6 @@ namespace CE
         FBrush currentBrush;
         FPen currentPen;
         FFont currentFont;
-        Matrix4x4 itemTransform = Matrix4x4::Identity();
 
         FCoordinateSpaceStack coordinateSpaceStack;
         int transformIndex = 0;

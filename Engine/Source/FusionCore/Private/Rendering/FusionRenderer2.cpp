@@ -198,7 +198,6 @@ namespace CE
         currentBrush = FBrush();
         currentPen = FPen();
         currentFont = FFont(fontManager->GetDefaultFontFamily(), fontManager->GetDefaultFontSize());
-        itemTransform = Matrix4x4::Identity();
 
         coordinateSpaceStack.RemoveAll();
         drawCmdList.RemoveAll();
@@ -710,7 +709,6 @@ namespace CE
         {
             drawCmdList.Insert(drawCmd);
         }
-
     }
 
     void FusionRenderer2::PrimReserve(int vertexCount, int indexCount)
