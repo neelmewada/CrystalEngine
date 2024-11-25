@@ -47,6 +47,8 @@ namespace CE
 
 }
 
+#include "clipper2/clipper.h"
+
 #include "FusionMacros.h"
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
