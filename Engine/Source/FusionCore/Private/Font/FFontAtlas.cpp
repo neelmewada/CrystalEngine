@@ -174,6 +174,9 @@ namespace CE
 
             fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
             fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+
+            fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+            fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
         }
 
         flushRequiredPerImage[imageIndex] = false;
@@ -191,6 +194,7 @@ namespace CE
         glyphBuffer.GetBuffer(imageIndex)->UploadData(glyphDataList.GetData(), numGlyphs * sizeof(FGlyphData));
 
         fontSrg->FlushBindings();
+        fontSrg2->FlushBindings();
     }
 
     void FFontAtlas::OnBeginDestroy()

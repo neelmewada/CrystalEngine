@@ -8,7 +8,7 @@ struct VSInput
     float2 position : POSITION;
     float2 uv : TEXCOORD0;
     float4 color : COLOR0;
-    uint index : TEXCOORD1;
+    uint drawType : TEXCOORD1;
     uint instanceId : SV_INSTANCEID;
 };
 
@@ -17,6 +17,7 @@ struct PSInput
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD0;
     float4 color : TEXCOORD1;
+    nointerpolation uint drawType : TEXCOORD2;
 };
 
 #define InstanceIdx input.instanceId
@@ -42,6 +43,7 @@ PSInput VertMain(VSInput input)
     o.position = mul(mul(float4(input.position.x, input.position.y, 0.0, 1.0), _Objects[input.instanceId].transform), viewProjectionMatrix);
     o.uv = input.uv;
     o.color = input.color;
+    o.drawType = input.drawType;
     return o;
 }
 
@@ -57,6 +59,17 @@ SamplerState _TextureSampler : SRG_PerDraw(s1);
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
+	switch (input.drawType)
+	{
+	case 1:
+		{
+            float alpha = _FontAtlas.Sample(_FontAtlasSampler, input.uv).r;
+			return float4(input.color.rgb, input.color.a * alpha);
+		}
+    default:
+		break;
+	}
+
     return input.color;
 }
 

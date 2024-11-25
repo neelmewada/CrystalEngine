@@ -507,6 +507,16 @@ namespace CE
         AddRect(rect, cornerRadius, antiAliased);
     }
 
+    void FusionRenderer2::FillCircle(const Vec2& center, f32 radius, bool antiAliased)
+    {
+        AddCircleFilled(center, radius, 0, antiAliased);
+    }
+
+    void FusionRenderer2::StrokeCircle(const Vec2& center, f32 radius, bool antiAliased)
+    {
+        AddCircle(center, radius, 0, antiAliased);
+    }
+
     int FusionRenderer2::CalculateNumCircleSegments(float radius) const
     {
         const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy
@@ -1085,6 +1095,54 @@ namespace CE
             vertexCurrentIdx += vertexCount;
             drawCmdList.Last().numIndices += indexCount;
         }
+    }
+
+    void FusionRenderer2::AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
+    {
+        u32 color = currentPen.GetColor().ToU32();
+        if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
+            return;
+
+        if (numSegments <= 0)
+        {
+            PathArcToFast(center, radius - 0.5f, 0, 12);
+            path.RemoveLast();
+        }
+        else
+        {
+            // Explicit segment count (still clamp to avoid drawing insanely tessellated shapes)
+            numSegments = Math::Clamp(numSegments, 3, CircleAutoSegmentMax);
+
+            // Because we are filling a closed shape we remove 1 from the count of segments/points
+            const float angleMax = (Math::PI * 2.0f) * ((float)numSegments - 1.0f) / (float)numSegments;
+            PathArcTo(center, radius - 0.5f, 0, angleMax, numSegments - 1);
+        }
+
+        PathStroke(true, antiAliased);
+    }
+
+    void FusionRenderer2::AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
+    {
+        u32 color = currentBrush.GetFillColor().ToU32();
+        if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
+            return;
+
+        if (numSegments <= 0)
+        {
+            PathArcToFast(center, radius, 0, 12);
+            path.RemoveLast();
+        }
+        else
+        {
+            // Explicit segment count (still clamp to avoid drawing insanely tessellated shapes)
+            numSegments = Math::Clamp(numSegments, 3, CircleAutoSegmentMax);
+
+            // Because we are filling a closed shape we remove 1 from the count of segments/points
+            const float angleMax = (Math::PI * 2.0f) * ((float)numSegments - 1.0f) / (float)numSegments;
+            PathArcTo(center, radius, 0, angleMax, numSegments - 1);
+        }
+
+        PathFill(antiAliased);
     }
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)

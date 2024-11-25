@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_48" : {
+        "_52" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_51" : {
+        "_55" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_50" : {
+        "_54" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_51",
+                    "type" : "_55",
                     "array" : [
                         0
                     ],
@@ -82,6 +82,11 @@
             "type" : "vec4",
             "name" : "in.var.TEXCOORD1",
             "location" : 1
+        },
+        {
+            "type" : "uint",
+            "name" : "in.var.TEXCOORD2",
+            "location" : 2
         }
     ],
     "outputs" : [
@@ -121,7 +126,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_50",
+            "type" : "_54",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -131,7 +136,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_48",
+            "type" : "_52",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

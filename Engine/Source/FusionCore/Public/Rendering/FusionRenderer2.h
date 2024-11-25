@@ -25,6 +25,9 @@ namespace CE
         static constexpr u32 ObjectDataArrayIncrement = 128;
         static constexpr u32 ArcFastTableSize = 48;
 
+        static constexpr int CircleAutoSegmentMin = 4;
+        static constexpr int CircleAutoSegmentMax = 512;
+
         static constexpr f32 MinOpacity = 0.0001f;
 
         static constexpr u32 ColorAlphaMask = 0xff000000;
@@ -78,6 +81,9 @@ namespace CE
         void FillRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
         void StrokeRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
 
+        void FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+        void StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+
     private:
 
         // - Internal Draw API -
@@ -100,6 +106,8 @@ namespace CE
         void AddRectFilled(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
         void AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased);
         void AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased);
+        void AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
+        void AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
 
         // - Utility API -
 
@@ -110,7 +118,7 @@ namespace CE
         // - Config -
 
         FIELD(Config)
-        u32 initialMeshBufferSize = 10'000;
+        u32 initialMeshBufferSize = 24'000;
 
         FIELD(Config)
         f32 meshBufferGrowRatio = 0.2f;
@@ -154,7 +162,7 @@ namespace CE
             Vec2 position;
             Vec2 uv;
             u32 color = Color::White().ToU32();
-            u32 index = 0;
+            u32 drawType = 0;
         };
 
         struct FCoordinateSpace

@@ -153,7 +153,6 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->FillRect(Rect::FromSize(100, 100, 200, 200));
 
 	renderer->PushChildCoordinateSpace(Vec2(100, 100));
-
 	{
 		FPen pen = Color::Blue();
 		pen.SetThickness(2.0f);
@@ -176,6 +175,9 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->PopChildCoordinateSpace();
 	}
 	renderer->PopChildCoordinateSpace();
+
+	renderer->FillCircle(Vec2(300, 300), 25);
+	renderer->StrokeCircle(Vec2(300, 300), 25);
 
 	renderer->End();
 }
