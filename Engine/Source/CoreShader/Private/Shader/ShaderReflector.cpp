@@ -331,7 +331,10 @@ namespace CE
 			
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.type = RHI::ShaderResourceType::Texture2D;
+				if (type.image.arrayed)
+					variable.type = RHI::ShaderResourceType::Texture2DArray;
+				else
+					variable.type = RHI::ShaderResourceType::Texture2D;
 			}
 			else if (type.image.dim == spv::Dim1D)
 			{

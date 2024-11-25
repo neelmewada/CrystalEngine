@@ -117,6 +117,7 @@ namespace CE::Vulkan
 			return usesDynamicOffset ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		case ShaderResourceType::Texture1D:
 		case ShaderResourceType::Texture2D:
+		case ShaderResourceType::Texture2DArray:
 		case ShaderResourceType::Texture3D:
 		case ShaderResourceType::TextureCube:
 			return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -889,6 +890,7 @@ namespace CE::Vulkan
 						break;
 					case ShaderResourceType::Texture1D:
 					case ShaderResourceType::Texture2D:
+					case ShaderResourceType::Texture2DArray:
 					case ShaderResourceType::Texture3D:
 					case ShaderResourceType::TextureCube:
 					case ShaderResourceType::RWTexture2D:

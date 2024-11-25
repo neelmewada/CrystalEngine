@@ -346,7 +346,8 @@ namespace CE::RHI
 		StructuredBuffer, // A storage buffer in vulkan
 		RWStructuredBuffer, // A RW storage buffer in vulkan
 		Texture1D, // A texture1D in vulkan
-		Texture2D, // A texture2D in vulkan
+        Texture2D, // A texture2D in vulkan
+        Texture2DArray, // A texture2D in vulkan
 		Texture3D, // A texture3D in vulkan
 		TextureCube, // A textureCube in vulkan
 		RWTexture2D, // An image2D in vulkan

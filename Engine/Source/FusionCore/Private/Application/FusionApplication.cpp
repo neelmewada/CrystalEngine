@@ -776,6 +776,36 @@ namespace CE
                     ShaderStage::Vertex | ShaderStage::Fragment
                 ))
             ;
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
+				.TryAdd(SRGVariableDescriptor(
+					"_FontAtlas",
+                    (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2D,
+                    ShaderStage::Fragment
+                ))
+				.TryAdd(SRGVariableDescriptor(
+					"_FontAtlasSampler",
+                    (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment
+                ))
+            ;
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw)
+                .TryAdd(SRGVariableDescriptor(
+                    "_Texture",
+                    (u32)fragmentReflection["separate_images"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2DArray,
+                    ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_TextureSampler",
+                    (u32)fragmentReflection["separate_samplers"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment
+                ))
+            ;
         }
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");

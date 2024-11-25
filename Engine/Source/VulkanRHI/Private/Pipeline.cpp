@@ -161,6 +161,7 @@ namespace CE::Vulkan
                         break;
                     case RHI::ShaderResourceType::Texture1D:
                     case RHI::ShaderResourceType::Texture2D:
+                    case RHI::ShaderResourceType::Texture2DArray:
                     case RHI::ShaderResourceType::Texture3D:
                     case RHI::ShaderResourceType::TextureCube:
                         layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
