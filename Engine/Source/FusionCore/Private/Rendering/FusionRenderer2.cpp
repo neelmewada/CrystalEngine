@@ -150,6 +150,19 @@ namespace CE
             if (totalSize > quadsBuffer[imageIndex]->GetBufferSize())
             {
                 GrowQuadBuffer(totalSize);
+
+                for (DrawPacket* drawPacket : drawPacketsPerImage[imageIndex])
+                {
+                    drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[imageIndex],
+                        0,
+                        vertexArray.GetCount() * sizeof(FVertex),
+                        sizeof(FVertex));
+
+                    drawPacket->drawItems[0].indexBufferView[0] = IndexBufferView(quadsBuffer[imageIndex],
+                        vertexArray.GetCount() * sizeof(FVertex),
+                        indexArray.GetCount() * sizeof(FDrawIndex),
+                        sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+                }
             }
 
             if (totalSize > 0)
@@ -720,6 +733,8 @@ namespace CE
 
         if ((color & ColorAlphaMask) == 0)
             return;
+
+        PathClear();
         if (antiAliased)
             PathRect(Rect(rect.min + Vec2(0.50f, 0.50f), rect.max - Vec2(0.50f, 0.50f)), cornerRadius);
         else

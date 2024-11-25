@@ -155,18 +155,19 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->PushChildCoordinateSpace(Vec2(100, 100));
 
 	{
+		FPen pen = Color::Blue();
+		pen.SetThickness(2.0f);
+		renderer->SetPen(pen);
 		renderer->SetBrush(Color::Cyan());
-		renderer->PathRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
-		renderer->PathFill();
+
+		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
+		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 
 		f32 angle = 90;
 
 		renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(50, 50)) * Matrix4x4::Angle(angle) * Matrix4x4::Translation(Vec3(-50, -50)));
 
-		FPen pen = Color::Blue();
-		pen.SetThickness(2.0f);
 		renderer->SetBrush(Color::Red());
-		renderer->SetPen(pen);
 		renderer->PathLineTo(Vec2(50, 50));
 		//renderer->PathArcTo(Vec2(50, 50), 50, Math::ToRadians(0), Math::ToRadians(90));
 		renderer->PathArcToFast(Vec2(50, 50), 50, 0, 3);
