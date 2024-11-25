@@ -75,7 +75,8 @@ namespace CE
 
         // - Draw API -
 
-        void DrawRect(const Rect& rect);
+        void FillRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        void StrokeRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
 
     private:
 
@@ -95,9 +96,10 @@ namespace CE
         void PathInsert(const Vec2& point);
         void PathMinMax(const Vec2& point);
 
-        void AddRectFilled(const Rect& rect, u32 color, const Vec4& cornerRadius = {});
-        void AddConvexPolySolidFill(const Vec2* points, int numPoints, u32 color, bool antiAliased);
-        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased);
+        void AddRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        void AddRectFilled(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        void AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased);
+        void AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased);
 
         // - Utility API -
 

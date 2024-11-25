@@ -463,103 +463,35 @@ namespace CE
 
     void FusionRenderer2::PathFill(bool antiAliased)
     {
-	    switch (currentBrush.GetBrushStyle())
-	    {
-	    case FBrushStyle::None:
-		    break;
-	    case FBrushStyle::SolidFill:
-		    {
-			    Color fillColor = currentBrush.GetFillColor();
-                if (fillColor.a > MinOpacity)
-                {
-                    AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), fillColor.ToU32(), antiAliased);
-                }
-		    }
-		    break;
-	    case FBrushStyle::Image:
-		    break;
-	    case FBrushStyle::LinearGradient:
-		    break;
-	    }
+        AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased);
 
         PathClear();
     }
 
     void FusionRenderer2::PathStroke(bool closed, bool antiAliased)
     {
-	    switch (currentPen.GetStyle())
-	    {
-	    case FPenStyle::None:
-		    break;
-	    case FPenStyle::SolidLine:
-            if (currentPen.GetColor().a > MinOpacity)
-            {
-                AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetColor().ToU32(), currentPen.GetThickness(), closed, antiAliased);
-            }
-		    break;
-	    case FPenStyle::DashedLine:
-		    break;
-	    case FPenStyle::DottedLine:
-		    break;
-	    }
+        AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
     }
 
     void FusionRenderer2::PathFillStroke(bool closed, bool antiAliased)
     {
-        switch (currentBrush.GetBrushStyle())
-        {
-        case FBrushStyle::None:
-            break;
-        case FBrushStyle::SolidFill:
-        {
-            Color fillColor = currentBrush.GetFillColor();
-            if (fillColor.a > MinOpacity)
-            {
-                AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), fillColor.ToU32(), antiAliased);
-            }
-        }
-        break;
-        case FBrushStyle::Image:
-            break;
-        case FBrushStyle::LinearGradient:
-            break;
-        }
+        AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased);
 
-        switch (currentPen.GetStyle())
-        {
-        case FPenStyle::None:
-            break;
-        case FPenStyle::SolidLine:
-            if (currentPen.GetColor().a > MinOpacity)
-            {
-                AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetColor().ToU32(), currentPen.GetThickness(), closed, antiAliased);
-            }
-            break;
-        case FPenStyle::DashedLine:
-            break;
-        case FPenStyle::DottedLine:
-            break;
-        }
+        AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
     }
 
-    void FusionRenderer2::DrawRect(const Rect& rect)
+    void FusionRenderer2::FillRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
-	    switch (currentBrush.GetBrushStyle())
-	    {
-	    case FBrushStyle::SolidFill:
-            AddRectFilled(rect, currentBrush.GetFillColor().ToU32());
-            break;
-	    case FBrushStyle::LinearGradient:
-            break;
-        default:
-            break;
-	    }
+        AddRectFilled(rect, cornerRadius, antiAliased);
+    }
 
-        
+    void FusionRenderer2::StrokeRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    {
+        AddRect(rect, cornerRadius, antiAliased);
     }
 
     int FusionRenderer2::CalculateNumCircleSegments(float radius) const
@@ -782,8 +714,24 @@ namespace CE
         pathMax.y = Math::Max(point.y, pathMax.y);
     }
 
-    void FusionRenderer2::AddRectFilled(const Rect& rect, u32 color, const Vec4& cornerRadius)
+    void FusionRenderer2::AddRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
+        u32 color = currentPen.GetColor().ToU32();
+
+        if ((color & ColorAlphaMask) == 0)
+            return;
+        if (antiAliased)
+            PathRect(Rect(rect.min + Vec2(0.50f, 0.50f), rect.max - Vec2(0.50f, 0.50f)), cornerRadius);
+        else
+            PathRect(Rect(rect.min + Vec2(0.50f, 0.50f), rect.max - Vec2(0.49f, 0.49f)), cornerRadius); // Better looking lower-right corner and rounded non-AA shapes.
+
+    	PathStroke(true, antiAliased);
+    }
+
+    void FusionRenderer2::AddRectFilled(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    {
+        u32 color = currentBrush.GetFillColor().ToU32();
+
         if (cornerRadius.GetMax() < 0.5f)
         {
 	        PrimReserve(4, 6);
@@ -791,14 +739,18 @@ namespace CE
         }
         else
         {
-	        
+            PathClear();
+            PathRect(rect, cornerRadius);
+            PathFill(antiAliased);
         }
     }
 
-    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, u32 color, bool antiAliased)
+    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased)
     {
         if (points == nullptr || numPoints <= 0)
             return;
+
+        u32 color = currentBrush.GetFillColor().ToU32();
 
         Vec2 uv = whitePixelUV;
 
@@ -895,10 +847,12 @@ namespace CE
         }
     }
 
-    void FusionRenderer2::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased)
+    void FusionRenderer2::AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased)
     {
         if (points == nullptr || numPoints <= 0)
             return;
+
+        u32 color = currentPen.GetColor().ToU32();
 
         const Vec2 uv = whitePixelUV;
         const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw

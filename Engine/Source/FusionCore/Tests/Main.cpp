@@ -150,7 +150,7 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->Begin();
 
 	renderer->SetBrush(FBrush(Color::Black()));
-	renderer->DrawRect(Rect::FromSize(100, 100, 200, 200));
+	renderer->FillRect(Rect::FromSize(100, 100, 200, 200));
 
 	renderer->PushChildCoordinateSpace(Vec2(100, 100));
 
