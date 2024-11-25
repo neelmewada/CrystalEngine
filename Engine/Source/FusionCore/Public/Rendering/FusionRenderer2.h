@@ -110,10 +110,10 @@ namespace CE
         // - Config -
 
         FIELD(Config)
-        u32 initialQuadBufferSize = 5'000;
+        u32 initialMeshBufferSize = 10'000;
 
         FIELD(Config)
-        f32 quadBufferGrowRatio = 0.2f;
+        f32 meshBufferGrowRatio = 0.2f;
 
         FIELD(Config)
         u32 initialObjectCount = 128;

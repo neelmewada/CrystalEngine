@@ -54,7 +54,7 @@ namespace CE
             RHI::BufferDescriptor quadMeshBufferDesc{};
             quadMeshBufferDesc.name = "Quad Meshes";
             quadMeshBufferDesc.bindFlags = RHI::BufferBindFlags::IndexBuffer | RHI::BufferBindFlags::VertexBuffer;
-            quadMeshBufferDesc.bufferSize = initialQuadBufferSize;
+            quadMeshBufferDesc.bufferSize = initialMeshBufferSize;
             quadMeshBufferDesc.defaultHeapType = MemoryHeapType::Upload;
             quadMeshBufferDesc.structureByteStride = quadMeshBufferDesc.bufferSize;
 
@@ -1089,12 +1089,12 @@ namespace CE
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)
     {
-	    quadBufferGrowRatio = Math::Min<float>(quadBufferGrowRatio, 0.75f);
+	    meshBufferGrowRatio = Math::Min<float>(meshBufferGrowRatio, 0.75f);
 
         u64 curSize = quadsBuffer[0]->GetBufferSize();
         newTotalSize = Math::Max(curSize, newTotalSize);
 
-        newTotalSize = Math::Max(newTotalSize, (u64)(curSize * (1 + quadBufferGrowRatio)));
+        newTotalSize = Math::Max(newTotalSize, (u64)(curSize * (1 + meshBufferGrowRatio)));
 
 	    for (int i = 0; i < numFrames; ++i)
 	    {

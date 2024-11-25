@@ -163,7 +163,7 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 
-		f32 angle = 90;
+		f32 angle = 0;
 
 		renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(50, 50)) * Matrix4x4::Angle(angle) * Matrix4x4::Translation(Vec3(-50, -50)));
 
