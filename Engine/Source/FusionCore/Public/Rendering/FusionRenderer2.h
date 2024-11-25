@@ -23,6 +23,7 @@ namespace CE
         static constexpr u32 PathArrayIncrement = 512;
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
+        static constexpr u32 ArcFastTableSize = 48;
 
         static constexpr f32 MinOpacity = 0.0001f;
 
@@ -64,6 +65,8 @@ namespace CE
         void PathLineTo(const Vec2& point);
         void PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle);
         void PathArcTo(const Vec2& center, float radius, float startAngle, float endAngle, int numSegments);
+        // 0: East, 3: South, 6: West, 9: North, 12: East
+        void PathArcToFast(const Vec2& center, float radius, int angleMinOf12, int angleMaxOf12);
         void PathRect(const Rect& rect, const Vec4& cornerRadius = {});
 
         void PathFill(bool antiAliased = true);
@@ -80,6 +83,8 @@ namespace CE
 
         int CalculateNumCircleSegments(float radius) const;
 
+        void PathArcToFastInternal(const Vec2& center, float radius, int sampleMin, int sampleMax, int step);
+
         void PrimReserve(int vertexCount, int indexCount);
         void PrimUnreserve(int vertexCount, int indexCount);
 
@@ -88,6 +93,7 @@ namespace CE
         void AddDrawCmd();
 
         void PathInsert(const Vec2& point);
+        void PathMinMax(const Vec2& point);
 
         void AddRectFilled(const Rect& rect, u32 color, const Vec4& cornerRadius = {});
         void AddConvexPolySolidFill(const Vec2* points, int numPoints, u32 color, bool antiAliased);
@@ -228,6 +234,9 @@ namespace CE
 
         Array<DestroyItem> destructionQueue{};
         Array<RHI::DrawPacket*> freePackets;
+
+        Vec2 arcFastVertex[ArcFastTableSize] = {};
+        float arcFastRadiusCutoff = 0;
 
         friend class FNativeContext;
     };

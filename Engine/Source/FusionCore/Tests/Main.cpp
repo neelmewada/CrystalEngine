@@ -164,9 +164,8 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->SetBrush(Color::Red());
 		renderer->SetPen(pen);
 		renderer->PathLineTo(Vec2(50, 50));
-		renderer->PathArcTo(Vec2(50, 50), 50, Math::ToRadians(0), Math::ToRadians(90));
-		//renderer->PathLineTo(Vec2(100, 50));
-		//renderer->PathLineTo(Vec2(50, 100));
+		//renderer->PathArcTo(Vec2(50, 50), 50, Math::ToRadians(0), Math::ToRadians(90));
+		renderer->PathArcToFast(Vec2(50, 50), 50, 0, 3);
 		//renderer->PathFill();
 		renderer->PathFillStroke(true);
 	}

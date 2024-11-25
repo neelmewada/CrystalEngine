@@ -70,6 +70,14 @@ namespace CE
 
         perViewSrg->FlushBindings();
         perObjectSrg->FlushBindings();
+
+        for (int i = 0; i < ArcFastTableSize; i++)
+        {
+            const float a = ((float)i * 2 * M_PI) / (float)ArcFastTableSize;
+            arcFastVertex[i] = Vec2(cosf(a), sinf(a));
+        }
+
+        arcFastRadiusCutoff = ((circleSegmentMaxError) / (1 - cosf(Math::PI / Math::Max((float)(ArcFastTableSize), Math::PI))));
     }
 
     void FusionRenderer2::OnBeginDestroy()
@@ -427,20 +435,29 @@ namespace CE
         }
     }
 
+    void FusionRenderer2::PathArcToFast(const Vec2& center, float radius, int angleMinOf12, int angleMaxOf12)
+    {
+        if (radius < 0.5f)
+        {
+            PathInsert(center);
+            return;
+        }
+        PathArcToFastInternal(center, radius, angleMinOf12 * ArcFastTableSize / 12, angleMaxOf12 * ArcFastTableSize / 12, 0);
+    }
+
     void FusionRenderer2::PathRect(const Rect& rect, const Vec4& cornerRadius)
     {
         const Vec2& min = rect.min;
         const Vec2& max = rect.max;
 
-        PathArcTo(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft), cornerRadius.topLeft,
-            Math::ToRadians(180), Math::ToRadians(270));
-        PathArcTo(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight), cornerRadius.topRight,
-            Math::ToRadians(270), Math::ToRadians(360));
-        PathArcTo(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight), cornerRadius.bottomRight,
-            Math::ToRadians(0), Math::ToRadians(90));
-        PathArcTo(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft), cornerRadius.bottomLeft,
-            Math::ToRadians(90), Math::ToRadians(180));
-
+        PathArcToFast(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft), cornerRadius.topLeft,
+            6, 9);
+        PathArcToFast(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight), cornerRadius.topRight,
+            9, 12);
+        PathArcToFast(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight), cornerRadius.bottomRight,
+            0, 3);
+        PathArcToFast(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft), cornerRadius.bottomLeft,
+            3, 6);
     }
 
     void FusionRenderer2::PathFill(bool antiAliased)
@@ -550,6 +567,98 @@ namespace CE
         return Math::Clamp((((((int)ceilf(Math::PI / acosf(1 - Math::Min((circleSegmentMaxError), (radius)) / (radius)))) + 1) / 2) * 2), 4, 512);
     }
 
+    void FusionRenderer2::PathArcToFastInternal(const Vec2& center, float radius, int sampleMin, int sampleMax, int step)
+    {
+        if (radius < 0.5f)
+        {
+            PathInsert(center);
+            return;
+        }
+
+        // Calculate arc auto segment step size
+        if (step <= 0)
+            step = ArcFastTableSize / CalculateNumCircleSegments(radius);
+
+        // Make sure we never do steps larger than one quarter of the circle
+        step = Math::Clamp(step, 1, (int)ArcFastTableSize / 4);
+
+        const int sampleRange = abs(sampleMax - sampleMin);
+        const int nextStep = step;
+
+        int samples = sampleRange + 1;
+        bool extraMaxSample = false;
+        if (step > 1)
+        {
+            samples = sampleRange / step + 1;
+            const int overstep = sampleRange % step;
+
+            if (overstep > 0)
+            {
+                extraMaxSample = true;
+                samples++;
+
+                // When we have overstep to avoid awkwardly looking one long line and one tiny one at the end,
+                // distribute first step range evenly between them by reducing first step size.
+                if (sampleRange > 0)
+                    step -= (step - overstep) / 2;
+            }
+        }
+
+        path.InsertRange(samples, Vec2());
+
+        Vec2* outPtr = path.GetData() + (path.GetCount() - samples);
+
+        int sampleIndex = sampleMin;
+        if (sampleIndex < 0 || sampleIndex >= ArcFastTableSize)
+        {
+            sampleIndex = sampleIndex % ArcFastTableSize;
+            if (sampleIndex < 0)
+                sampleIndex += ArcFastTableSize;
+        }
+
+        if (sampleMax >= sampleMin)
+        {
+            for (int a = sampleMin; a <= sampleMax; a += step, sampleIndex += step, step = nextStep)
+            {
+                if (sampleIndex >= ArcFastTableSize)
+                    sampleIndex -= ArcFastTableSize;
+
+                const Vec2 s = arcFastVertex[sampleIndex];
+                outPtr->x = center.x + s.x * radius;
+                outPtr->y = center.y + s.y * radius;
+                PathMinMax(*outPtr);
+                outPtr++;
+            }
+        }
+        else
+        {
+            for (int a = sampleMin; a >= sampleMax; a -= step, sampleIndex -= step, step = nextStep)
+            {
+                if (sampleIndex < 0)
+                    sampleIndex += ArcFastTableSize;
+
+                const Vec2 s = arcFastVertex[sampleIndex];
+                outPtr->x = center.x + s.x * radius;
+                outPtr->y = center.y + s.y * radius;
+                PathMinMax(*outPtr);
+                outPtr++;
+            }
+        }
+
+        if (extraMaxSample)
+        {
+            int normalizedMaxSample = sampleMax % ArcFastTableSize;
+            if (normalizedMaxSample < 0)
+                normalizedMaxSample += ArcFastTableSize;
+
+            const Vec2 s = arcFastVertex[normalizedMaxSample];
+            outPtr->x = center.x + s.x * radius;
+            outPtr->y = center.y + s.y * radius;
+            PathMinMax(*outPtr);
+            outPtr++;
+        }
+    }
+
     void FusionRenderer2::AddDrawCmd()
     {
         if (coordinateSpaceStack.IsEmpty())
@@ -640,6 +749,11 @@ namespace CE
     {
         path.Insert(point);
 
+        PathMinMax(point);
+    }
+
+    void FusionRenderer2::PathMinMax(const Vec2& point)
+    {
         pathMin.x = Math::Min(point.x, pathMin.x);
         pathMin.y = Math::Min(point.y, pathMin.y);
 
