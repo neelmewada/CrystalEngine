@@ -152,6 +152,7 @@ namespace CE
             Vec2 position;
             Vec2 uv;
             u32 color = Color::White().ToU32();
+            u32 index = 0;
         };
 
         struct FCoordinateSpace

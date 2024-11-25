@@ -145,62 +145,50 @@ namespace CE::RPI
 				vertexAttrib.inputSlot = 0;
 				vertexAttrib.location = i;
 				vertexAttrib.offset = offset;
+				vertexAttrib.dataType = desc.reflectionInfo.vertexInputTypes[i];
 
-				switch (shaderSemantic.attribute)
+				switch (vertexAttrib.dataType)
 				{
-				case VertexInputAttribute::Position:
-
-					vertexAttrib.dataType = desc.positionAttributeType;
-
-					switch (desc.positionAttributeType)
-					{
-					default:
-						vertexAttrib.dataType = VertexAttributeDataType::Float4;
-					case VertexAttributeDataType::Float4:
-					case VertexAttributeDataType::Float3:
-						inputSlotDesc.stride += sizeof(Vec4);
-						offset += sizeof(Vec4);
-						break;
-					case VertexAttributeDataType::Float2:
-						inputSlotDesc.stride += sizeof(Vec2);
-						offset += sizeof(Vec2);
-						break;
-					}
-					break;
-				case VertexInputAttribute::UV:
-					inputSlotDesc.stride += sizeof(Vec2);
-					offset += sizeof(Vec2);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float2;
-					break;
-				case VertexInputAttribute::Normal:
-					inputSlotDesc.stride += sizeof(Vec4);
-					offset += sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-					break;
-				case VertexInputAttribute::Tangent:
-					inputSlotDesc.stride += sizeof(Vec4);
-					offset += sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-					break;
-				case VertexInputAttribute::Binormal:
-					inputSlotDesc.stride += sizeof(Vec4);
-					offset += sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
-					break;
-				case VertexInputAttribute::Color:
-					inputSlotDesc.stride += sizeof(u32);
-					offset += sizeof(u32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::UChar4;
-					break;
-				case VertexInputAttribute::BlendIndices:
-					inputSlotDesc.stride += sizeof(u32);
-					offset += sizeof(u32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::UInt;
-					break;
-				case VertexInputAttribute::BlendWeight:
+				case VertexAttributeDataType::Float:
 					inputSlotDesc.stride += sizeof(f32);
 					offset += sizeof(f32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float;
+					break;
+				case VertexAttributeDataType::Float2:
+					inputSlotDesc.stride += sizeof(Vec2);
+					offset += sizeof(Vec2);
+					break;
+				case VertexAttributeDataType::Float4:
+					inputSlotDesc.stride += sizeof(Vec4);
+					offset += sizeof(Vec4);
+					break;
+				case VertexAttributeDataType::Int:
+					inputSlotDesc.stride += sizeof(int);
+					offset += sizeof(int);
+					break;
+				case VertexAttributeDataType::Int2:
+					inputSlotDesc.stride += sizeof(Vec2i);
+					offset += sizeof(Vec2i);
+					break;
+				case VertexAttributeDataType::Int4:
+					inputSlotDesc.stride += sizeof(Vec4i);
+					offset += sizeof(Vec4i);
+					break;
+				case VertexAttributeDataType::UInt:
+					inputSlotDesc.stride += sizeof(u32);
+					offset += sizeof(u32);
+					break;
+				case VertexAttributeDataType::UInt2:
+					inputSlotDesc.stride += sizeof(Vec2i);
+					offset += sizeof(Vec2i);
+					break;
+				case VertexAttributeDataType::UInt4:
+					inputSlotDesc.stride += sizeof(Vec4i);
+					offset += sizeof(Vec4i);
+					break;
+				case VertexAttributeDataType::Char4:
+				case VertexAttributeDataType::UChar4:
+					inputSlotDesc.stride += sizeof(u32);
+					offset += sizeof(u32);
 					break;
 				default:
 					continue;
@@ -225,53 +213,40 @@ namespace CE::RPI
 				vertexAttrib.inputSlot = i;
 				vertexAttrib.location = i;
 				vertexAttrib.offset = 0;
+				vertexAttrib.dataType = desc.reflectionInfo.vertexInputTypes[i];
 
-				switch (shaderSemantic.attribute)
+				switch (vertexAttrib.dataType)
 				{
-				case VertexInputAttribute::Position:
-					inputSlotDesc.stride = sizeof(Vec4);
-					vertexAttrib.dataType = desc.positionAttributeType;
-
-					switch (desc.positionAttributeType)
-					{
-					default:
-						vertexAttrib.dataType = VertexAttributeDataType::Float4;
-					case VertexAttributeDataType::Float4:
-					case VertexAttributeDataType::Float3:
-						inputSlotDesc.stride = sizeof(Vec4);
-						break;
-					case VertexAttributeDataType::Float2:
-						inputSlotDesc.stride = sizeof(Vec2);
-						break;
-					}
+				case VertexAttributeDataType::Float:
+					inputSlotDesc.stride = sizeof(float);
 					break;
-				case VertexInputAttribute::UV:
+				case VertexAttributeDataType::Float2:
 					inputSlotDesc.stride = sizeof(Vec2);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float2;
 					break;
-				case VertexInputAttribute::Normal:
+				case VertexAttributeDataType::Float4:
 					inputSlotDesc.stride = sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
 					break;
-				case VertexInputAttribute::Tangent:
-					inputSlotDesc.stride = sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+				case VertexAttributeDataType::Int:
+					inputSlotDesc.stride = sizeof(int);
 					break;
-				case VertexInputAttribute::Binormal:
-					inputSlotDesc.stride = sizeof(Vec4);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float4;
+				case VertexAttributeDataType::Int2:
+					inputSlotDesc.stride = sizeof(Vec2i);
 					break;
-				case VertexInputAttribute::Color:
+				case VertexAttributeDataType::Int4:
+					inputSlotDesc.stride = sizeof(Vec4i);
+					break;
+				case VertexAttributeDataType::UInt:
 					inputSlotDesc.stride = sizeof(u32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::UChar4;
 					break;
-				case VertexInputAttribute::BlendIndices:
+				case VertexAttributeDataType::UInt2:
+					inputSlotDesc.stride = sizeof(Vec2i);
+					break;
+				case VertexAttributeDataType::UInt4:
+					inputSlotDesc.stride = sizeof(Vec4i);
+					break;
+				case VertexAttributeDataType::Char4:
+				case VertexAttributeDataType::UChar4:
 					inputSlotDesc.stride = sizeof(u32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::UInt;
-					break;
-				case VertexInputAttribute::BlendWeight:
-					inputSlotDesc.stride = sizeof(f32);
-					vertexAttrib.dataType = RHI::VertexAttributeDataType::Float;
 					break;
 				default:
 					continue;

@@ -31,6 +31,9 @@ namespace CE
 		Array<Name> vertexInputs{};
 
 		FIELD(ReadOnly)
+		Array<RHI::VertexAttributeDataType> vertexInputTypes{};
+
+		FIELD(ReadOnly)
 		Array<RHI::ShaderStructMemberType> rootConstantLayout{};
 
 		FIELD(ReadOnly)

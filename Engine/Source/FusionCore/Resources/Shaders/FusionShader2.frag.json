@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_46" : {
+        "_48" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_49" : {
+        "_51" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_48" : {
+        "_50" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_49",
+                    "type" : "_51",
                     "array" : [
                         0
                     ],
@@ -99,7 +99,7 @@
             "binding" : 0
         },
         {
-            "type" : "texture2D",
+            "type" : "texture2DArray",
             "name" : "_Texture",
             "set" : 6,
             "binding" : 0
@@ -121,7 +121,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_48",
+            "type" : "_50",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -131,7 +131,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_46",
+            "type" : "_48",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

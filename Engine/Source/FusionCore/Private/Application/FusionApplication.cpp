@@ -712,7 +712,10 @@ namespace CE
         textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
 
         fusionShader = new RPI::Shader();
         fusionShader->AddVariant(variantDesc);
@@ -776,10 +779,16 @@ namespace CE
         }
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
-        variantDesc.positionAttributeType = VertexAttributeDataType::Float2;
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
         variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("COLOR1");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UInt);
 
         ShaderTagEntry cullMode{};
         cullMode.key = "Cull";

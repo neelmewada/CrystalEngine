@@ -37,7 +37,6 @@ namespace CE
 			// Fetch vertex stage inputs
 			for (const spirv_cross::Resource& input : resources.stage_inputs)
 			{
-				u32 vecSize = reflection->get_type(input.base_type_id).vecsize;
 				String name = input.name;
 				if (!name.StartsWith("in.var."))
 				{
@@ -47,6 +46,66 @@ namespace CE
 				String shaderSemanticName = name.GetSubstring(7);
 				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(shaderSemanticName);
 				outReflection.vertexInputs.Add(semantic.ToString());
+
+				if (semantic.attribute == VertexInputAttribute::Color)
+				{
+					outReflection.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
+				}
+				else
+				{
+					auto baseType = reflection->get_type(input.type_id);
+					switch (baseType.basetype)
+					{
+					case spirv_cross::SPIRType::Int:
+						if (!baseType.array.empty())
+						{
+							if (baseType.array[0] == 1)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int);
+							else if (baseType.array[0] == 2)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int2);
+							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int4);
+						}
+						else
+						{
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int);
+						}
+						break;
+					case spirv_cross::SPIRType::UInt:
+						if (!baseType.array.empty())
+						{
+							if (baseType.array[0] == 1)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt);
+							else if (baseType.array[0] == 2)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt2);
+							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt4);
+						}
+						else
+						{
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt);
+						}
+						break;
+					case spirv_cross::SPIRType::Float:
+						if (!baseType.array.empty())
+						{
+							if (baseType.array[0] == 1)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float);
+							else if (baseType.array[0] == 2)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
+								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+						}
+						else
+						{
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float);
+						}
+						break;
+					default:
+						outReflection.vertexInputTypes.Add(VertexAttributeDataType::Undefined);
+						break;
+					}
+				}
 			}
 		}
 
