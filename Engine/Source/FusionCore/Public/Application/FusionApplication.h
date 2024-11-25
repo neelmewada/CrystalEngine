@@ -79,6 +79,7 @@ namespace CE
         void RequestFrameGraphUpdate();
 
         RPI::Shader* GetFusionShader() const { return fusionShader; }
+        RPI::Shader* GetFusionShader2() const { return fusionShader2; }
 
         RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
         RHI::ShaderResourceGroupLayout GetPerObjectSrgLayout() const { return perObjectSrgLayout; }

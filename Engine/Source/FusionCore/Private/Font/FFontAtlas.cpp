@@ -72,6 +72,7 @@ namespace CE
         atlasTexture = new RPI::Texture(images, fontSampler);
 
         RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
+        RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
         fontSrg = gDynamicRHI->CreateShaderResourceGroup(fusionShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
 
@@ -84,6 +85,13 @@ namespace CE
         }
 
         fontSrg->FlushBindings();
+
+        fontSrg2 = gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
+
+        fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+        fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+
+        fontSrg2->FlushBindings();
     }
 
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
@@ -193,6 +201,7 @@ namespace CE
 
         delete atlasTexture; atlasTexture = nullptr;
         delete fontSrg; fontSrg = nullptr;
+        delete fontSrg2; fontSrg2 = nullptr;
 
         atlasImageMips.Clear();
         glyphDataList.Free();

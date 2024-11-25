@@ -247,6 +247,7 @@ namespace CE
 
                     drawPacket->shaderResourceGroups[0] = perObjectSrg;
                     drawPacket->shaderResourceGroups[1] = perViewSrg;
+                    drawPacket->shaderResourceGroups[2] = drawCmdList[i].fontSrg;
 
                     drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[imageIdx],
                             0,
@@ -275,6 +276,7 @@ namespace CE
 
                     builder.AddShaderResourceGroup(perObjectSrg);
                     builder.AddShaderResourceGroup(perViewSrg);
+                    builder.AddShaderResourceGroup(drawCmdList[i].fontSrg);
 
                     // UI Item
                     {
@@ -666,16 +668,37 @@ namespace CE
 
         // TODO: Implement vertex indexing with more than 65,535 vertices
 
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = currentFont.GetFamily();
+        int fontSize = currentFont.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = 12;
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+
         FDrawCmd drawCmd{};
+
+        if (fontAtlas)
+        {
+            drawCmd.fontSrg = fontAtlas->GetFontSrg2();
+        }
+
         if (drawCmdList.GetCount() > 0)
         {
             if (drawCmdList.Last().numIndices == 0)
             {
-	            // Do nothing
+                if (fontAtlas)
+                {
+                    drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+                }
             }
             else
             {
-                drawCmd.firstInstance = transformIndex;//drawCmdList.Last().firstInstance + 1;
+                drawCmd.firstInstance = transformIndex;
                 drawCmd.vertexOffset = 0;
                 drawCmd.indexOffset = (u32)indexArray.GetCount();
                 drawCmd.numIndices = 0;

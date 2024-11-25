@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_44" : {
+        "_46" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_47" : {
+        "_49" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_46" : {
+        "_48" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_47",
+                    "type" : "_49",
                     "array" : [
                         0
                     ],
@@ -94,12 +94,24 @@
     "separate_images" : [
         {
             "type" : "texture2D",
+            "name" : "_FontAtlas",
+            "set" : 4,
+            "binding" : 0
+        },
+        {
+            "type" : "texture2D",
             "name" : "_Texture",
             "set" : 6,
             "binding" : 0
         }
     ],
     "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_FontAtlasSampler",
+            "set" : 4,
+            "binding" : 1
+        },
         {
             "type" : "sampler",
             "name" : "_TextureSampler",
@@ -109,7 +121,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_46",
+            "type" : "_48",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -119,7 +131,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_44",
+            "type" : "_46",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,

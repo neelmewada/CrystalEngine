@@ -46,6 +46,9 @@ namespace CE
 
         // - Public API -
 
+        RHI::ShaderResourceGroup* GetFontSrg() const { return fontSrg; }
+        RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
+
         FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
 
         //! @brief Flushes all the changes to GPU
@@ -105,6 +108,7 @@ namespace CE
 
         RPI::Texture* atlasTexture = nullptr;
         RHI::ShaderResourceGroup* fontSrg = nullptr;
+        RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FFontMetrics metrics{};
 

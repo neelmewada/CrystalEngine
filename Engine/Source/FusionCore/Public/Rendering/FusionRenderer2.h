@@ -143,6 +143,8 @@ namespace CE
             u32 indexOffset = 0;
             u32 numIndices = 0;
             u32 firstInstance = 0;
+
+            RHI::ShaderResourceGroup* fontSrg = nullptr;
         };
 
         struct FVertex

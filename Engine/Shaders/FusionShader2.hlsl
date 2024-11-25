@@ -43,6 +43,9 @@ PSInput VertMain(VSInput input)
 
 #if FRAGMENT
 
+Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
+SamplerState _FontAtlasSampler : SRG_PerMaterial(t1);
+
 Texture2D _Texture : SRG_PerDraw(t0);
 SamplerState _TextureSampler : SRG_PerDraw(s1);
 
