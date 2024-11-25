@@ -464,14 +464,126 @@ namespace CE
         const Vec2& min = rect.min;
         const Vec2& max = rect.max;
 
-        PathArcToFast(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft), cornerRadius.topLeft,
-            6, 9);
-        PathArcToFast(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight), cornerRadius.topRight,
-            9, 12);
-        PathArcToFast(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight), cornerRadius.bottomRight,
-            0, 3);
-        PathArcToFast(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft), cornerRadius.bottomLeft,
-            3, 6);
+        if (cornerRadius.GetMax() < 0.5f)
+        {
+            PathLineTo(min);
+            PathLineTo(Vec2(max.x, min.y));
+            PathLineTo(max);
+            PathLineTo(Vec2(min.x, max.y));
+        }
+        else
+        {
+            PathArcToFast(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft), cornerRadius.topLeft,
+                6, 9);
+            PathArcToFast(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight), cornerRadius.topRight,
+                9, 12);
+            PathArcToFast(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight), cornerRadius.bottomRight,
+                0, 3);
+            PathArcToFast(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft), cornerRadius.bottomLeft,
+                3, 6);
+        }
+    }
+
+    // Credit: Dear ImGui
+
+    static Vec2 ImBezierCubicCalc(const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec2& p4, float t)
+    {
+        float u = 1.0f - t;
+        float w1 = u * u * u;
+        float w2 = 3 * u * u * t;
+        float w3 = 3 * u * t * t;
+        float w4 = t * t * t;
+        return Vec2(w1 * p1.x + w2 * p2.x + w3 * p3.x + w4 * p4.x, w1 * p1.y + w2 * p2.y + w3 * p3.y + w4 * p4.y);
+    }
+
+    static Vec2 ImBezierQuadraticCalc(const Vec2& p1, const Vec2& p2, const Vec2& p3, float t)
+    {
+        float u = 1.0f - t;
+        float w1 = u * u;
+        float w2 = 2 * u * t;
+        float w3 = t * t;
+        return Vec2(w1 * p1.x + w2 * p2.x + w3 * p3.x, w1 * p1.y + w2 * p2.y + w3 * p3.y);
+    }
+
+    static void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer,
+        float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level)
+    {
+        float dx = x4 - x1;
+        float dy = y4 - y1;
+        float d2 = (x2 - x4) * dy - (y2 - y4) * dx;
+        float d3 = (x3 - x4) * dy - (y3 - y4) * dx;
+        d2 = (d2 >= 0) ? d2 : -d2;
+        d3 = (d3 >= 0) ? d3 : -d3;
+        if ((d2 + d3) * (d2 + d3) < tess_tol * (dx * dx + dy * dy))
+        {
+            renderer->PathInsert(Vec2(x4, y4));
+        }
+        else if (level < 10)
+        {
+            float x12 = (x1 + x2) * 0.5f, y12 = (y1 + y2) * 0.5f;
+            float x23 = (x2 + x3) * 0.5f, y23 = (y2 + y3) * 0.5f;
+            float x34 = (x3 + x4) * 0.5f, y34 = (y3 + y4) * 0.5f;
+            float x123 = (x12 + x23) * 0.5f, y123 = (y12 + y23) * 0.5f;
+            float x234 = (x23 + x34) * 0.5f, y234 = (y23 + y34) * 0.5f;
+            float x1234 = (x123 + x234) * 0.5f, y1234 = (y123 + y234) * 0.5f;
+            PathBezierCubicCurveToCasteljau(renderer, x1, y1, x12, y12, x123, y123, x1234, y1234, tess_tol, level + 1);
+            PathBezierCubicCurveToCasteljau(renderer, x1234, y1234, x234, y234, x34, y34, x4, y4, tess_tol, level + 1);
+        }
+    }
+
+    static void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
+        float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level)
+    {
+        float dx = x3 - x1, dy = y3 - y1;
+        float det = (x2 - x3) * dy - (y2 - y3) * dx;
+        if (det * det * 4.0f < tess_tol * (dx * dx + dy * dy))
+        {
+            renderer->PathInsert(Vec2(x3, y3));
+        }
+        else if (level < 10)
+        {
+            float x12 = (x1 + x2) * 0.5f, y12 = (y1 + y2) * 0.5f;
+            float x23 = (x2 + x3) * 0.5f, y23 = (y2 + y3) * 0.5f;
+            float x123 = (x12 + x23) * 0.5f, y123 = (y12 + y23) * 0.5f;
+            PathBezierQuadraticCurveToCasteljau(renderer, x1, y1, x12, y12, x123, y123, tess_tol, level + 1);
+            PathBezierQuadraticCurveToCasteljau(renderer, x123, y123, x23, y23, x3, y3, tess_tol, level + 1);
+        }
+    }
+
+    void FusionRenderer2::PathBezierCubicCurveTo(const Vec2& p2, const Vec2& p3, const Vec2& p4, int numSegments)
+    {
+        Vec2 p1 = path.Last();
+        if (numSegments == 0)
+        {
+            // Auto-tessellated
+            PathBezierCubicCurveToCasteljau(this, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y, curveTessellationTolerance, 0);
+        }
+        else
+        {
+            float totalSteps = 1.0f / (float)numSegments;
+            for (int i = 1; i <= numSegments; i++)
+            {
+                path.Insert(ImBezierCubicCalc(p1, p2, p3, p4, totalSteps * i));
+            }
+        }
+    }
+
+    void FusionRenderer2::PathQuadraticCubicCurveTo(const Vec2& p2, const Vec2& p3, int numSegments)
+    {
+        Vec2 p1 = path.Last();
+        if (numSegments == 0)
+        {
+            // Auto-tessellated
+            PathBezierQuadraticCurveToCasteljau(this, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, curveTessellationTolerance, 0);
+        }
+        else
+        {
+            float totalSteps = 1.0f / (float)numSegments;
+            for (int i = 1; i <= numSegments; i++)
+            {
+                path.Insert(ImBezierQuadraticCalc(p1, p2, p3, totalSteps * i));
+            }
+        }
     }
 
     void FusionRenderer2::PathFill(bool antiAliased)
@@ -648,6 +760,7 @@ namespace CE
                 if (fontAtlas)
                 {
                     drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+                    drawCmdList.Last().firstInstance = transformIndex;
                 }
             }
             else
@@ -757,17 +870,9 @@ namespace CE
     {
         u32 color = currentBrush.GetFillColor().ToU32();
 
-        if (cornerRadius.GetMax() < 0.5f)
-        {
-	        PrimReserve(4, 6);
-        	PrimRect(rect, color);
-        }
-        else
-        {
-            PathClear();
-            PathRect(rect, cornerRadius);
-            PathFill(antiAliased);
-        }
+        PathClear();
+        PathRect(rect, cornerRadius);
+        PathFill(antiAliased);
     }
 
     void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased)

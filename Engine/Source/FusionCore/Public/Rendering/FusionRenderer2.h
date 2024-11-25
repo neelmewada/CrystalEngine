@@ -18,8 +18,8 @@ namespace CE
 
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
         static constexpr u32 CoordinateStackItemIncrement = 128;
-        static constexpr u32 VertexArrayIncrement = 1024;
-        static constexpr u32 IndexArrayIncrement = 1024;
+        static constexpr u32 VertexArrayIncrement = 4096;
+        static constexpr u32 IndexArrayIncrement = 4096;
         static constexpr u32 PathArrayIncrement = 512;
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
@@ -71,6 +71,8 @@ namespace CE
         // 0: East, 3: South, 6: West, 9: North, 12: East
         void PathArcToFast(const Vec2& center, float radius, int angleMinOf12, int angleMaxOf12);
         void PathRect(const Rect& rect, const Vec4& cornerRadius = {});
+        void PathBezierCubicCurveTo(const Vec2& p2, const Vec2& p3, const Vec2& p4, int numSegments = 0);
+        void PathQuadraticCubicCurveTo(const Vec2& p2, const Vec2& p3, int numSegments = 0);
 
         void PathFill(bool antiAliased = true);
         void PathStroke(bool closed = false, bool antiAliased = true);
@@ -131,6 +133,9 @@ namespace CE
 
         FIELD(Config)
         f32 circleSegmentMaxError = 0.3f;
+
+        FIELD(Config)
+        f32 curveTessellationTolerance = 1.25f;
 
         // - Data Structures -
 
@@ -251,6 +256,10 @@ namespace CE
         float arcFastRadiusCutoff = 0;
 
         friend class FNativeContext;
+        friend static void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer, 
+            float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level);
+        friend static void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
+            float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level);
     };
 
 } // namespace CE

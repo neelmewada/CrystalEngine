@@ -5,19 +5,20 @@
 
 struct VSInput
 {
-    float2 position : POSITION;
-    float2 uv : TEXCOORD0;
-    float4 color : COLOR0;
-    uint drawType : TEXCOORD1;
-    uint instanceId : SV_INSTANCEID;
+    float2  position : POSITION;
+    float2  uv : TEXCOORD0;
+    float4  color : COLOR0;
+    uint    drawType : TEXCOORD1;
+    uint    instanceId : SV_INSTANCEID;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
-    float4 color : TEXCOORD1;
-    nointerpolation uint drawType : TEXCOORD2;
+    float4 globalPos : TEXCOORD0;
+    float2 uv : TEXCOORD1;
+    float4 color : TEXCOORD2;
+    nointerpolation uint drawType : TEXCOORD3;
 };
 
 #define InstanceIdx input.instanceId
@@ -27,7 +28,18 @@ struct ObjectData
 	float4x4 transform;
 };
 
+struct ClipRect
+{
+	float4x4 clipRectTransform;
+    float2 clipRectSize;
+};
+
 StructuredBuffer<ObjectData> _Objects : SRG_PerObject(t0);
+
+BEGIN_ROOT_CONSTANTS()
+int clipCount;
+int clipIndices[12];
+END_ROOT_CONSTANTS()
 
 // Draw features:
 // Fill: Solid Color, Texture, Linear Gradient
@@ -39,8 +51,9 @@ StructuredBuffer<ObjectData> _Objects : SRG_PerObject(t0);
 PSInput VertMain(VSInput input)
 {
 	PSInput o;
-    
-    o.position = mul(mul(float4(input.position.x, input.position.y, 0.0, 1.0), _Objects[input.instanceId].transform), viewProjectionMatrix);
+
+    o.globalPos = mul(float4(input.position.x, input.position.y, 0.0, 1.0), _Objects[input.instanceId].transform);
+    o.position = mul(o.globalPos, viewProjectionMatrix);
     o.uv = input.uv;
     o.color = input.color;
     o.drawType = input.drawType;
