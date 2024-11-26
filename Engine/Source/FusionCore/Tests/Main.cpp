@@ -209,6 +209,7 @@ void TestClipping()
 
 static void DoPaint(FusionRenderer2* renderer)
 {
+	renderer->Begin();
 
 	renderer->SetBrush(FBrush(Color::Black()));
 	renderer->FillRect(CE::Rect::FromSize(100, 100, 200, 200));
