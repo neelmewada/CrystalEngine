@@ -35,11 +35,7 @@ struct ClipRect
 };
 
 StructuredBuffer<ObjectData> _Objects : SRG_PerObject(t0);
-
-BEGIN_ROOT_CONSTANTS()
-int clipCount;
-int clipIndices[12];
-END_ROOT_CONSTANTS()
+StructuredBuffer<ClipRect> _ClipRects : SRG_PerObject(t1);
 
 // Draw features:
 // Fill: Solid Color, Texture, Linear Gradient
@@ -72,18 +68,21 @@ SamplerState _TextureSampler : SRG_PerDraw(s1);
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
+	float4 color = input.color;
+
 	switch (input.drawType)
 	{
-	case 1:
+	case 1: // Font glyph
 		{
             float alpha = _FontAtlas.Sample(_FontAtlasSampler, input.uv).r;
-			return float4(input.color.rgb, input.color.a * alpha);
+			color = float4(input.color.rgb, input.color.a * alpha);
 		}
-    default:
+        break;
+    default: // Just raw vertex color
 		break;
 	}
 
-    return input.color;
+    return color;
 }
 
 #endif
