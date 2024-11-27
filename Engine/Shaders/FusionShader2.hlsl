@@ -93,7 +93,7 @@ float SDFClipRect(in float2 p, in float2 shapePos, in float2 shapeSize)
 float4 FragMain(PSInput input) : SV_TARGET
 {
 	float4 color = input.color;
-    float finalAlpha = 1.0;
+    float clipSdf = -1;
 
     for (int i = 0; i < min(ROOT_CONSTANT(numClipRects), MAX_CLIP_RECTS); ++i)
     {
@@ -103,7 +103,14 @@ float4 FragMain(PSInput input) : SV_TARGET
     		? input.clipPos
     		: mul(float4(input.globalPos.xy, 0, 1.0), _ClipRects[clipIndex].clipRectTransform).xy;
 
-        
+        float sd = SDFClipRect(clipPos, float2(0, 0), _ClipRects[clipIndex].clipRectSize);
+
+        if (sd > 0) // Outside clip rect
+        {
+	        discard;
+        }
+
+        clipSdf = max(clipSdf, sd);
     }
 
 	switch (input.drawType)
@@ -118,7 +125,9 @@ float4 FragMain(PSInput input) : SV_TARGET
 		break;
 	}
 
-    return float4(color.rgb, color.a * finalAlpha);
+    const float clipAlpha = clamp(-clipSdf, 0, 1);
+
+    return float4(color.rgb, color.a * clipAlpha);
 }
 
 #endif

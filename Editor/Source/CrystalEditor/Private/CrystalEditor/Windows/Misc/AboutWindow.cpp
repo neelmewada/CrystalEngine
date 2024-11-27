@@ -93,7 +93,9 @@ namespace CE::Editor
 			.windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
         };
 
-        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("About", 600, 500, info);
+        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+
+        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("About", (u32)(600 * scaling), (u32)(500 * scaling), info);
         window->SetAlwaysOnTop(true);
         window->SetBorderless(true);
 

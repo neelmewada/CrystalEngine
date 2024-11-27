@@ -218,7 +218,7 @@ static void DoPaint(FusionRenderer2* renderer)
 
 	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Scale(Vec3(1, 1, 1)));
 	//renderer->PushChildCoordinateSpace(Vec2(100, 100));
-	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(50, 50));
+	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
 	{
 		pen.SetThickness(2.0f);
 		renderer->SetPen(pen);
@@ -229,13 +229,16 @@ static void DoPaint(FusionRenderer2* renderer)
 
 		f32 angle = 0;
 
-		renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(50, 50)) * Matrix4x4::Angle(angle) * Matrix4x4::Translation(Vec3(-50, -50)));
+		Vec2 arcPos = Vec2(60, 60);
+		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
+		renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
 
 		renderer->SetBrush(Color::Red());
-		renderer->PathLineTo(Vec2(50, 50));
-		renderer->PathArcToFast(Vec2(50, 50), 50, 0, 3); // 0 to 90 degree
+		renderer->PathLineTo(arcPos);
+		renderer->PathArcToFast(arcPos, 50, 0, 3); // 0 to 90 degree
 		renderer->PathFillStroke(true);
 
+		renderer->PopClipRect();
 		renderer->PopChildCoordinateSpace();
 	}
 	renderer->PopClipRect();

@@ -245,6 +245,7 @@ namespace CE
         PathClear();
         objectDataArray.RemoveAll();
         clipRectArray.RemoveAll();
+        clipStack.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
@@ -817,6 +818,13 @@ namespace CE
                 {
                     drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
                     drawCmdList.Last().firstInstance = transformIndex;
+
+                    drawCmdList.Last().rootConstants.numClipRects = clipStack.GetCount();
+                    int j = 0;
+                    for (int i = drawCmdList.Last().rootConstants.numClipRects - 1; i >= 0; --i)
+                    {
+                        drawCmdList.Last().rootConstants.clipRectIndices[j++] = clipStack[i];
+                    }
                 }
             }
             else
@@ -825,7 +833,7 @@ namespace CE
                 drawCmd.vertexOffset = 0;
                 drawCmd.indexOffset = (u32)indexArray.GetCount();
                 drawCmd.numIndices = 0;
-                //memcpy(&drawCmd.rootConstants, &drawCmdList.Last().rootConstants, sizeof(FRootConstants));
+                
                 drawCmd.rootConstants.numClipRects = clipStack.GetCount();
                 int j = 0;
                 for (int i = drawCmd.rootConstants.numClipRects - 1; i>= 0 ; --i)
