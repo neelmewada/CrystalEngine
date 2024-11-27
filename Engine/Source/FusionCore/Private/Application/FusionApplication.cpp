@@ -765,13 +765,23 @@ namespace CE
         perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
 
         {
-            variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex;
-            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::Float4x4 };
+            variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex | ShaderStage::Fragment;
+            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::UInt };
+            for (int i = 0; i < FusionRenderer2::MaxClipRectStack; ++i)
+            {
+                variantDesc.reflectionInfo.rootConstantLayout.Add(ShaderStructMemberType::UInt);
+            }
 
             variantDesc.reflectionInfo.FindOrAdd(SRGType::PerObject)
                 .TryAdd(SRGVariableDescriptor(
                     "_Objects",
                     (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_ClipRects",
+                    (u32)vertexReflection["ssbos"][1]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
                 ))

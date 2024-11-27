@@ -36,6 +36,7 @@ namespace CE
         perObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSrgLayout);
 
         objectDataBuffer.Init("ObjectData", initialObjectCount, numFrames);
+        clipRectBuffer.Init("ClipRects", initialClipRectCount, numFrames);
 
         for (int i = 0; i < numFrames; ++i)
         {
@@ -66,6 +67,7 @@ namespace CE
             perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
 
             perObjectSrg->Bind(i, "_Objects", objectDataBuffer.GetBuffer(i));
+            perObjectSrg->Bind(i, "_ClipRects", clipRectBuffer.GetBuffer(i));
         }
 
         perViewSrg->FlushBindings();
@@ -85,6 +87,7 @@ namespace CE
 	    Super::OnBeginDestroy();
 
         objectDataBuffer.Shutdown();
+        clipRectBuffer.Shutdown();
 
         while (freePackets.NotEmpty())
         {
@@ -180,10 +183,26 @@ namespace CE
                 quadsBuffer[imageIndex]->Unmap();
             }
 
+            if (clipRectArray.GetCount() > clipRectBuffer.GetElementCount())
+            {
+                u32 totalElementRequired = Math::Max<u32>(clipRectArray.GetCount(), clipRectBuffer.GetElementCount() + clipRectGrowCount);
+                clipRectBuffer.GrowToFit(totalElementRequired);
+
+                for (int i = 0; i < numFrames; ++i)
+                {
+                    perObjectSrg->Bind(i, "_ClipRects", clipRectBuffer.GetBuffer(i));
+                }
+            }
+
             if (objectDataArray.GetCount() > objectDataBuffer.GetElementCount())
             {
                 u32 totalElementRequired = Math::Max<u32>(objectDataArray.GetCount(), objectDataBuffer.GetElementCount() + objectDataGrowCount);
                 objectDataBuffer.GrowToFit(totalElementRequired);
+
+                for (int i = 0; i < numFrames; ++i)
+                {
+                    perObjectSrg->Bind(i, "_Objects", objectDataBuffer.GetBuffer(i));
+                }
             }
 
             if (objectDataArray.GetCount() > 0)
@@ -196,8 +215,15 @@ namespace CE
             	objectDataBuffer.Unmap(imageIndex);
 	        }
 
+            if (clipRectArray.GetCount() > 0)
+            {
+                clipRectBuffer.GetBuffer(imageIndex)->UploadData(clipRectArray.GetData(), clipRectArray.GetCount() * sizeof(FClipRect));
+            }
+
             quadUpdatesRequired[imageIndex] = false;
         }
+
+        perObjectSrg->FlushBindings();
 
         return drawPacketsPerImage[imageIndex];
     }
@@ -218,6 +244,7 @@ namespace CE
         indexArray.RemoveAll();
         PathClear();
         objectDataArray.RemoveAll();
+        clipRectArray.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
@@ -261,6 +288,8 @@ namespace CE
                     drawPacket->shaderResourceGroups[1] = perViewSrg;
                     drawPacket->shaderResourceGroups[2] = drawCmdList[i].fontSrg;
 
+                    memcpy((u8*)drawPacket->rootConstants, &drawCmdList[i].rootConstants, sizeof(FRootConstants));
+
                     drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[imageIdx],
                             0,
                             vertexArray.GetCount() * sizeof(FVertex),
@@ -289,6 +318,8 @@ namespace CE
                     builder.AddShaderResourceGroup(perObjectSrg);
                     builder.AddShaderResourceGroup(perViewSrg);
                     builder.AddShaderResourceGroup(drawCmdList[i].fontSrg);
+
+                    builder.SetRootConstants((u8*)&drawCmdList[i].rootConstants, sizeof(FRootConstants));
 
                     // UI Item
                     {
@@ -387,6 +418,31 @@ namespace CE
                 AddDrawCmd();
             }
         }
+    }
+
+    void FusionRenderer2::PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize)
+    {
+        Matrix4x4 inverse = (coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation) * clipTransform).GetInverse();
+
+        // Clipping is done via SDF functions, which require you to inverse the transformations applied
+        clipRectArray.Insert(FClipRect{
+            .clipTransform = inverse,
+            .size = rectSize
+        });
+
+        clipStack.Insert(clipRectArray.GetCount() - 1);
+
+        AddDrawCmd();
+    }
+
+    void FusionRenderer2::PopClipRect()
+    {
+        if (clipStack.IsEmpty())
+            return;
+
+        clipStack.RemoveLast();
+
+        AddDrawCmd();
     }
 
     void FusionRenderer2::SetPen(const FPen& pen)
@@ -769,7 +825,14 @@ namespace CE
                 drawCmd.vertexOffset = 0;
                 drawCmd.indexOffset = (u32)indexArray.GetCount();
                 drawCmd.numIndices = 0;
-                
+                //memcpy(&drawCmd.rootConstants, &drawCmdList.Last().rootConstants, sizeof(FRootConstants));
+                drawCmd.rootConstants.numClipRects = clipStack.GetCount();
+                int j = 0;
+                for (int i = drawCmd.rootConstants.numClipRects - 1; i>= 0 ; --i)
+                {
+                    drawCmd.rootConstants.clipRectIndices[j++] = clipStack[i];
+                }
+
                 drawCmdList.Insert(drawCmd);
             }
         }

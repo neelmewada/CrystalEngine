@@ -218,6 +218,7 @@ static void DoPaint(FusionRenderer2* renderer)
 
 	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Scale(Vec3(1, 1, 1)));
 	//renderer->PushChildCoordinateSpace(Vec2(100, 100));
+	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(50, 50));
 	{
 		pen.SetThickness(2.0f);
 		renderer->SetPen(pen);
@@ -237,6 +238,7 @@ static void DoPaint(FusionRenderer2* renderer)
 
 		renderer->PopChildCoordinateSpace();
 	}
+	renderer->PopClipRect();
 	renderer->PopChildCoordinateSpace();
 
 	pen.SetColor(Color::Cyan());

@@ -23,12 +23,14 @@ namespace CE
         static constexpr u32 PathArrayIncrement = 512;
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
+        static constexpr u32 ClipRectArrayIncrement = 32;
         static constexpr u32 ArcFastTableSize = 48;
 
         static constexpr int CircleAutoSegmentMin = 4;
         static constexpr int CircleAutoSegmentMax = 512;
 
         static constexpr f32 MinOpacity = 0.0001f;
+        static constexpr u32 MaxClipRectStack = 24;
 
         static constexpr u32 ColorAlphaMask = 0xff000000;
 
@@ -57,6 +59,9 @@ namespace CE
         void PushChildCoordinateSpace(const Matrix4x4& transform);
         void PushChildCoordinateSpace(Vec2 translation);
         void PopChildCoordinateSpace();
+
+        void PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize);
+        void PopClipRect();
 
         void SetPen(const FPen& pen);
         void SetBrush(const FBrush& brush);
@@ -132,6 +137,12 @@ namespace CE
         u32 objectDataGrowCount = 128;
 
         FIELD(Config)
+        u32 initialClipRectCount = 128;
+
+        FIELD(Config)
+        u32 clipRectGrowCount = 128;
+
+        FIELD(Config)
         f32 circleSegmentMaxError = 0.3f;
 
         FIELD(Config)
@@ -152,6 +163,12 @@ namespace CE
             int frameCounter = 0;
         };
 
+        struct FRootConstants
+        {
+            u32 numClipRects = 0;
+            u32 clipRectIndices[MaxClipRectStack] = {};
+        };
+
         struct FDrawCmd
         {
             u32 vertexOffset = 0;
@@ -160,6 +177,13 @@ namespace CE
             u32 firstInstance = 0;
 
             RHI::ShaderResourceGroup* fontSrg = nullptr;
+            FRootConstants rootConstants{};
+        };
+
+        struct FClipRect
+        {
+            Matrix4x4 clipTransform = Matrix4x4::Identity();
+            Vec2 size = Vec2();
         };
 
         struct FVertex
@@ -186,6 +210,8 @@ namespace CE
         using FPathArray = StableDynamicArray<Vec2, PathArrayIncrement, false>;
         using FDrawCmdArray = StableDynamicArray<FDrawCmd, DrawCmdArrayIncrement, false>;
         using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
+        using FClipRectArray = StableDynamicArray<FClipRect, ClipRectArrayIncrement, false>;
+        using FClipRectStack = StableDynamicArray<u32, ClipRectArrayIncrement, false>;
 
         // - Draw Data -
 
@@ -230,6 +256,9 @@ namespace CE
         FCoordinateSpaceStack coordinateSpaceStack;
         int transformIndex = 0;
 
+        FClipRectArray clipRectArray;
+        FClipRectStack clipStack;
+
         // - View Constants -
 
         RPI::PerViewConstants viewConstants{};
@@ -242,6 +271,7 @@ namespace CE
         StaticArray<RHI::Buffer*, MaxImageCount> viewConstantsBuffer{};
         StaticArray<RHI::Buffer*, MaxImageCount> quadsBuffer{};
         DynamicStructuredBuffer<FObjectData> objectDataBuffer{};
+        DynamicStructuredBuffer<FClipRect> clipRectBuffer{};
 
         // - Draw List -
 

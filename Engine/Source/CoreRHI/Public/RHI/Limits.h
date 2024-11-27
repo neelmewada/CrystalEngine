@@ -17,7 +17,6 @@ namespace CE::RHI
 		//! @brief Max number of back buffers (images) that can be used in swap chain.
 		constexpr u32 MaxSwapChainImageCount = 2;
 
-
 		namespace Pipeline
 		{
 			//! @brief Max number of vertex attributes
@@ -46,7 +45,7 @@ namespace CE::RHI
 			constexpr u32 MaxShaderResourceGroupCount = 8;
 
 			/// @brief Max byte size of root constants
-			constexpr u8 MaxRootConstantSize = 64;
+			constexpr u8 MaxRootConstantSize = 128;
 		}
 	}
 } // namespace CE::RPI

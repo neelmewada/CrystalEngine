@@ -16,6 +16,12 @@ namespace CE::RHI
 
 	void DrawPacketBuilder::SetRootConstants(const u8* rootConstants, u8 rootConstantSize)
 	{
+		if (rootConstantSize > Limits::Pipeline::MaxRootConstantSize)
+		{
+			CE_LOG(Error, All, "Cannot set root constants of size {}. It needs be <= {}.", rootConstantSize, Limits::Pipeline::MaxRootConstantSize);
+			return;
+		}
+
 		this->rootConstantSize = rootConstantSize;
 
 		for (int i = 0; i < rootConstantSize; i++)

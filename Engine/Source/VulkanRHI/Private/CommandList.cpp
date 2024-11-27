@@ -52,7 +52,7 @@ namespace CE::Vulkan
 
 		VkPushConstantRange pushConstantRange = boundPipeline->GetPushConstant();
 
-		vkCmdPushConstants(commandBuffer, boundPipeline->GetVkPipelineLayout(), pushConstantRange.stageFlags, offset, num32BitValues, srcData);
+		vkCmdPushConstants(commandBuffer, boundPipeline->GetVkPipelineLayout(), pushConstantRange.stageFlags, offset, num32BitValues * sizeof(u32), srcData);
 	}
 
 	void CommandList::SetViewports(u32 count, ViewportState* viewports)

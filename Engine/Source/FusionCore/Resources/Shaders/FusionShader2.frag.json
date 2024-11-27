@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_54" : {
+        "_67" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_57" : {
+        "_70" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_56" : {
+        "_69" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_57",
+                    "type" : "_70",
                     "array" : [
                         0
                     ],
@@ -70,11 +70,67 @@
                     "array_stride" : 64
                 }
             ]
+        },
+        "_73" : {
+            "name" : "ClipRect",
+            "members" : [
+                {
+                    "name" : "clipRectTransform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "clipRectSize",
+                    "type" : "vec2",
+                    "offset" : 64
+                }
+            ]
+        },
+        "_72" : {
+            "name" : "type.StructuredBuffer.ClipRect",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_73",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 80
+                }
+            ]
+        },
+        "_75" : {
+            "name" : "type.PushConstant.RootConstants",
+            "members" : [
+                {
+                    "name" : "numClipRects",
+                    "type" : "uint",
+                    "offset" : 0
+                },
+                {
+                    "name" : "clipRectIndices",
+                    "type" : "uint",
+                    "array" : [
+                        24
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 4,
+                    "array_stride" : 4
+                }
+            ]
         }
     },
     "inputs" : [
         {
-            "type" : "vec4",
+            "type" : "vec2",
             "name" : "in.var.TEXCOORD0",
             "location" : 0
         },
@@ -92,6 +148,11 @@
             "type" : "uint",
             "name" : "in.var.TEXCOORD3",
             "location" : 3
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD4",
+            "location" : 4
         }
     ],
     "outputs" : [
@@ -131,21 +192,36 @@
     ],
     "ssbos" : [
         {
-            "type" : "_56",
+            "type" : "_69",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
             "set" : 5,
             "binding" : 0
+        },
+        {
+            "type" : "_72",
+            "name" : "type.StructuredBuffer.ClipRect",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 1
         }
     ],
     "ubos" : [
         {
-            "type" : "_54",
+            "type" : "_67",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
             "binding" : 0
+        }
+    ],
+    "push_constants" : [
+        {
+            "type" : "_75",
+            "name" : "_RootConstants",
+            "push_constant" : true
         }
     ]
 }
