@@ -34,7 +34,7 @@ namespace CE
     };
 
     CLASS()
-        class FUSIONCORE_API FFontAtlas : public Object
+    class FUSIONCORE_API FFontAtlas : public Object
     {
         CE_CLASS(FFontAtlas, Object)
     public:
