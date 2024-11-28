@@ -215,8 +215,9 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->FillRect(CE::Rect::FromSize(100, 100, 200, 200));
 
 	FPen pen = Color::Blue();
+	f32 angle = 0;
 
-	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Angle(0) * Matrix4x4::Scale(Vec3(1, 1, 1)));
+	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Angle(angle) * Matrix4x4::Scale(Vec3(1, 1, 1)));
 	renderer->PushClipRect(Matrix4x4::Angle(0), Vec2(100, 100));
 	{
 		pen.SetThickness(2.0f);
@@ -226,7 +227,10 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->FillRect(CE::Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 		renderer->StrokeRect(CE::Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 
-		f32 angle = 0;
+		pen.SetColor(Color::White());
+		renderer->SetPen(pen);
+
+		renderer->DrawText("Hello World!", Vec2(0, 0));
 
 		Vec2 arcPos = Vec2(60, 60);
 		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());

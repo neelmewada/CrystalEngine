@@ -51,6 +51,8 @@ namespace CE
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
+        Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         // - State API -
 
         void Begin();
@@ -91,9 +93,13 @@ namespace CE
         void FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
         void StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
+        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+
     private:
 
         // - Internal Draw API -
+
+        void DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 pos);
 
         int CalculateNumCircleSegments(float radius) const;
 
@@ -150,9 +156,15 @@ namespace CE
 
         // - Data Structures -
 
-        struct FObjectData
+        struct alignas(16) FObjectData
         {
             Matrix4x4 transform = Matrix4x4::Identity();
+        };
+
+        enum FDrawType
+        {
+	        DRAW_Geometry = 0,
+            DRAW_Text
         };
 
         struct DestroyItem

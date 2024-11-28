@@ -68,6 +68,7 @@ namespace CE
         fontSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
         fontSampler.enableAnisotropy = false;
         fontSampler.samplerFilterMode = FilterMode::Linear;
+        //fontSampler.samplerFilterMode = FilterMode::Nearest;
 
         atlasTexture = new RPI::Texture(images, fontSampler);
 
@@ -263,7 +264,7 @@ namespace CE
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             FFontGlyphInfo glyph{};
-
+            
             glyph.charCode = charCode;
 
             int width = bmp->width;
@@ -299,6 +300,8 @@ namespace CE
 
             if (foundEmptySpot)
             {
+                glyph.atlasSize = atlasSize;
+
                 glyph.x0 = posX;
                 glyph.y0 = posY;
                 glyph.x1 = posX + width;

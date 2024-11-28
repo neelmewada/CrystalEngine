@@ -27,6 +27,8 @@ namespace CE
         u32 fontSize = 0; // Font size used when baking this glyph
         u32 index = 0; // User specific data: Stores the index of the glyph into the character buffer
 
+        u32 atlasSize = 0;
+
         inline int GetWidth() const { return x1 - x0; }
         inline int GetHeight() const { return y1 - y0; }
     };
