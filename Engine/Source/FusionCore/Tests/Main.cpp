@@ -216,9 +216,8 @@ static void DoPaint(FusionRenderer2* renderer)
 
 	FPen pen = Color::Blue();
 
-	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Scale(Vec3(1, 1, 1)));
-	//renderer->PushChildCoordinateSpace(Vec2(100, 100));
-	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
+	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Angle(0) * Matrix4x4::Scale(Vec3(1, 1, 1)));
+	renderer->PushClipRect(Matrix4x4::Angle(0), Vec2(100, 100));
 	{
 		pen.SetThickness(2.0f);
 		renderer->SetPen(pen);
@@ -231,7 +230,7 @@ static void DoPaint(FusionRenderer2* renderer)
 
 		Vec2 arcPos = Vec2(60, 60);
 		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
-		renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
+		renderer->PushClipRect(Matrix4x4::Translation(Vec2(70, 70)), Vec2(300, 300));
 
 		renderer->SetBrush(Color::Red());
 		renderer->PathLineTo(arcPos);
@@ -256,7 +255,6 @@ static void DoPaint(FusionRenderer2* renderer)
 
 	renderer->PathLineTo(Vec2(25, 25));
 	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
-	//renderer->PathQuadraticCubicCurveTo(Vec2(50, 50), Vec2(25, 100));
 	renderer->PathStroke();
 
 	renderer->End();

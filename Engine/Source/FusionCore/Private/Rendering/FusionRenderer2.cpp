@@ -431,7 +431,7 @@ namespace CE
             .size = rectSize
         });
 
-        clipStack.Insert(clipRectArray.GetCount() - 1);
+        clipStack.Insert((int)clipRectArray.GetCount() - 1);
 
         AddDrawCmd();
     }

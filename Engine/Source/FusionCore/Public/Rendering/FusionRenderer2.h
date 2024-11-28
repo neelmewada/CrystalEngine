@@ -180,13 +180,13 @@ namespace CE
             FRootConstants rootConstants{};
         };
 
-        struct FClipRect
+        struct alignas(16) FClipRect
         {
             Matrix4x4 clipTransform = Matrix4x4::Identity();
             Vec2 size = Vec2();
         };
 
-        struct FVertex
+        struct alignas(8) FVertex
         {
             Vec2 position;
             Vec2 uv;
