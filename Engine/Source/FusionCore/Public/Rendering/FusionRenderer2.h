@@ -53,6 +53,8 @@ namespace CE
 
         Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
+        FFontMetrics GetFontMetrics(const FFont& font);
+
         // - State API -
 
         void Begin();
@@ -162,10 +164,10 @@ namespace CE
             Matrix4x4 transform = Matrix4x4::Identity();
         };
 
-        enum FDrawType
+        enum FDrawType : int
         {
 	        DRAW_Geometry = 0,
-            DRAW_Text
+            DRAW_Text = -1
         };
 
         struct DestroyItem
@@ -204,7 +206,7 @@ namespace CE
             Vec2 position;
             Vec2 uv;
             u32 color = Color::White().ToU32();
-            u32 drawType = 0;
+            FDrawType drawType = DRAW_Geometry;
         };
 
         struct FCoordinateSpace

@@ -832,7 +832,7 @@ namespace CE
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
 
         variantDesc.reflectionInfo.vertexInputs.Add("COLOR1");
-        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UInt);
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
 
         ShaderTagEntry cullMode{};
         cullMode.key = "Cull";

@@ -5,12 +5,18 @@
 
 #define MAX_CLIP_RECTS 24
 
+enum FDrawType
+{
+    DRAW_Geometry = 0,
+    DRAW_Text = -1
+};
+
 struct VSInput
 {
     float2  position : POSITION;
     float2  uv : TEXCOORD0;
     float4  color : COLOR0;
-    uint    drawType : TEXCOORD1;
+    int     drawType : TEXCOORD1;
     uint    instanceId : SV_INSTANCEID;
 };
 
@@ -113,9 +119,9 @@ float4 FragMain(PSInput input) : SV_TARGET
         clipSdf = max(clipSdf, sd);
     }
 
-	switch (input.drawType)
+	switch ((FDrawType)input.drawType)
 	{
-	case 1: // Font glyph
+	case DRAW_Text: // Font glyph
 		{
             float alpha = _FontAtlas.Sample(_FontAtlasSampler, input.uv).r;
 			color = float4(input.color.rgb, input.color.a * alpha);

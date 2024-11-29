@@ -269,6 +269,27 @@ namespace CE
         return false;
     }
 
+    FFontMetrics FusionRenderer2::GetFontMetrics(const FFont& font)
+    {
+        ZoneScoped;
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = currentFont.GetFamily();
+        int fontSize = currentFont.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = 12;
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return {};
+
+        return fontAtlas->GetMetrics();
+    }
+
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
 	    f32 width, FWordWrap wordWrap)
     {
