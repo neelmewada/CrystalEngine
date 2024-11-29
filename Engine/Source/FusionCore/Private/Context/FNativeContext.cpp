@@ -248,6 +248,7 @@ namespace CE
 
 	f32 FNativeContext::GetScaling() const
 	{
+        //return 1.0f;
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 

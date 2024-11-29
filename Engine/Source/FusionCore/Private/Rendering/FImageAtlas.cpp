@@ -164,6 +164,10 @@ namespace CE
 
                 u8* dstPixel = foundAtlas->ptr + (foundAtlas->atlasSize * dstPos.y + dstPos.x) * sizeof(u32);
                 u8* srcPixel = (u8*)imageSource.GetDataPtr() + (textureSize.y * y + x) * srcPixelSize;
+                u8* r = dstPixel;
+                u8* g = dstPixel + 1;
+                u8* b = dstPixel + 2;
+                u8* a = dstPixel + 3;
 
                 // TODO: 
                 switch (imageSource.GetFormat())
@@ -171,20 +175,44 @@ namespace CE
                 case CMImageFormat::Undefined:
 	                break;
                 case CMImageFormat::R8:
+                    *r = *g = *b = *srcPixel;
+                    *a = (u8)255;
 	                break;
                 case CMImageFormat::RG8:
+                    *r = *g = *b = *srcPixel;
+                    *a = *(srcPixel + 1);
 	                break;
                 case CMImageFormat::RGB8:
+                    *r = *srcPixel;
+                    *g = *(srcPixel + 1);
+                    *b = *(srcPixel + 2);
+                    *a = (u8)255;
 	                break;
                 case CMImageFormat::RGBA8:
+                    *r = *srcPixel;
+                    *g = *(srcPixel + 1);
+                    *b = *(srcPixel + 2);
+                    *a = *(srcPixel + 3);
 	                break;
                 case CMImageFormat::R32:
+                    *r = *g = *b = static_cast<u8>(*((f32*)srcPixel) * 255.0f);
+                    *a = (u8)255;
 	                break;
                 case CMImageFormat::RG32:
+                    *r = *g = *b = static_cast<u8>(*((f32*)srcPixel) * 255.0f);
+                    *a = static_cast<u8>(*((f32*)srcPixel + 1) * 255.0f);
 	                break;
                 case CMImageFormat::RGB32:
+                    *r = static_cast<u8>(*((f32*)srcPixel) * 255.0f);
+                    *g = static_cast<u8>(*((f32*)srcPixel + 1) * 255.0f);
+                    *b = static_cast<u8>(*((f32*)srcPixel + 2) * 255.0f);
+                    *a = (u8)255;
 	                break;
                 case CMImageFormat::RGBA32:
+                    *r = static_cast<u8>(*((f32*)srcPixel) * 255.0f);
+                    *g = static_cast<u8>(*((f32*)srcPixel + 1) * 255.0f);
+                    *b = static_cast<u8>(*((f32*)srcPixel + 2) * 255.0f);
+                    *a = static_cast<u8>(*((f32*)srcPixel + 3) * 255.0f);
 	                break;
                 case CMImageFormat::R16:
 	                break;

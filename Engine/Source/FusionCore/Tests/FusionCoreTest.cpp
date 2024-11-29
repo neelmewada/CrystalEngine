@@ -419,7 +419,7 @@ namespace RenderingTests
             )
         );
 
-        windowContent->Enabled(false);
+        //windowContent->Enabled(false);
     }
 
     void RenderingTestWidget::OnBeginDestroy()

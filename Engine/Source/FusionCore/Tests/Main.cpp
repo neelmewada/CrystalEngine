@@ -56,7 +56,7 @@ static void TestBegin(bool gui)
 #elif PLATFORM_WINDOWS
 		u32 w = 1024, h = 768;
 #endif
-
+        
 		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
 		window->SetBorderless(true);
 
