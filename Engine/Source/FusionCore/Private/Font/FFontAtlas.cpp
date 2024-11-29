@@ -341,8 +341,7 @@ namespace CE
 
                 atlasMip->glyphsByFontSize[fontSize][charCode] = glyph;
                 mipIndicesByCharacter[{ static_cast<unsigned int>(charCode), fontSize }] = currentMip;
-
-
+                
                 for (int j = 0; j < flushRequiredPerImage.GetSize(); ++j)
                 {
                     flushRequiredPerImage[j] = true;
