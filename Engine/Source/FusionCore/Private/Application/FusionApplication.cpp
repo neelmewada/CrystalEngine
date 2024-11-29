@@ -22,6 +22,10 @@ namespace CE
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
         styleManager = CreateDefaultSubobject<FStyleManager>("StyleManager");
         rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
+
+#if PLATFORM_LINUX
+        defaultScalingFactor = 1.3f;
+#endif
     }
 
     FusionApplication::~FusionApplication()

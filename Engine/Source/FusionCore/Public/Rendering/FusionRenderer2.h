@@ -69,6 +69,9 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        //! @brief Used for CPU side culling and is dependent on the state (clips and transforms)!
+        bool IsRectClipped(const Rect& rect);
+
         // - Path API -
 
         void PathClear();
@@ -107,8 +110,6 @@ namespace CE
 
         void PrimReserve(int vertexCount, int indexCount);
         void PrimUnreserve(int vertexCount, int indexCount);
-
-        void PrimRect(const Rect& rect, u32 color);
 
         void AddDrawCmd();
 
@@ -223,7 +224,7 @@ namespace CE
         using FDrawCmdArray = StableDynamicArray<FDrawCmd, DrawCmdArrayIncrement, false>;
         using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
         using FClipRectArray = StableDynamicArray<FClipRect, ClipRectArrayIncrement, false>;
-        using FClipRectStack = StableDynamicArray<u32, ClipRectArrayIncrement, false>;
+        using FClipRectStack = StableDynamicArray<int, ClipRectArrayIncrement, false>;
 
         // - Draw Data -
 

@@ -16,6 +16,7 @@ include(Findsdl.cmake)
 include(Findcpptrace.cmake)
 include(Findispctexturecompressor.cmake)
 include(Findclipper.cmake)
+include(Findtracy.cmake)
 
 # Linux packages
 # libxxhash-dev 

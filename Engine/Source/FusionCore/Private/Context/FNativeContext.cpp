@@ -8,10 +8,6 @@ namespace CE
 	FNativeContext::FNativeContext()
 	{
 		isIsolatedContext = true;
-
-#if PLATFORM_LINUX
-		scaleFactor = 1.25f;
-#endif
 	}
 
 	FNativeContext::~FNativeContext()
@@ -39,6 +35,7 @@ namespace CE
 		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
 		nativeContext->platformWindow = platformWindow;
 		nativeContext->windowDpi = platformWindow->GetWindowDpi();
+		nativeContext->scaleFactor = FusionApplication::Get()->GetDefaultScalingFactor();
 
 		if (parentContext)
 		{

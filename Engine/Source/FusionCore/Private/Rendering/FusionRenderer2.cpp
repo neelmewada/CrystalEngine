@@ -128,6 +128,8 @@ namespace CE
 
     const Array<RHI::DrawPacket*>& FusionRenderer2::FlushDrawPackets(u32 imageIndex)
     {
+        ZoneScoped;
+
         // - Destroy queued resources only when they are out of usage scope
 
         for (int i = (int)destructionQueue.GetSize() - 1; i >= 0; i--)
@@ -231,6 +233,40 @@ namespace CE
         perObjectSrg->FlushBindings();
 
         return drawPacketsPerImage[imageIndex];
+    }
+
+    bool FusionRenderer2::IsRectClipped(const Rect& rect)
+    {
+        if (!clipStack.IsEmpty())
+        {
+            ZoneScoped;
+
+            // CPU culling
+            Vec2 pos = rect.min;
+            Vec2 size = rect.GetSize();
+
+            Vec2 globalPos = coordinateSpaceStack.Last().transform *
+                Matrix4x4::Translation(coordinateSpaceStack.Last().translation) *
+                Vec4(pos.x, pos.y, 0, 1);
+
+            for (int i = clipStack.GetCount() - 1; i >= 0; --i)
+            {
+                int clipIndex = clipStack[i];
+
+                Matrix4x4 clipTransform = clipRectArray[clipIndex].clipTransform.GetInverse();
+                Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
+
+                Rect shapeRect = Rect::FromSize(globalPos, size);
+                Rect clipRect = Rect::FromSize(clipPos, clipRectArray[clipIndex].size);
+
+                if (!shapeRect.Overlaps(clipRect))
+                {
+                    return true; // Rect is Clipped
+                }
+            }
+        }
+
+        return false;
     }
 
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
@@ -474,6 +510,8 @@ namespace CE
 
     void FusionRenderer2::PushChildCoordinateSpace(const Matrix4x4& transform)
     {
+        ZoneScoped;
+
         if (coordinateSpaceStack.IsEmpty())
         {
             coordinateSpaceStack.Insert(FCoordinateSpace{ 
@@ -505,6 +543,8 @@ namespace CE
 
     void FusionRenderer2::PushChildCoordinateSpace(Vec2 translation)
     {
+        ZoneScoped;
+
         if (coordinateSpaceStack.Last().isTranslationOnly)
         {
             coordinateSpaceStack.Insert(FCoordinateSpace{
@@ -523,6 +563,8 @@ namespace CE
 
     void FusionRenderer2::PopChildCoordinateSpace()
     {
+        ZoneScoped;
+
         if (!coordinateSpaceStack.IsEmpty())
         {
             bool isTranslation = coordinateSpaceStack.Last().isTranslationOnly;
@@ -539,6 +581,8 @@ namespace CE
 
     void FusionRenderer2::PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize)
     {
+        ZoneScoped;
+
         Matrix4x4 inverse = (coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation) * clipTransform).GetInverse();
 
         // Clipping is done via SDF functions, which require you to inverse the transformations applied
@@ -554,6 +598,8 @@ namespace CE
 
     void FusionRenderer2::PopClipRect()
     {
+        ZoneScoped;
+
         if (clipStack.IsEmpty())
             return;
 
@@ -742,7 +788,7 @@ namespace CE
             float totalSteps = 1.0f / (float)numSegments;
             for (int i = 1; i <= numSegments; i++)
             {
-                path.Insert(ImBezierCubicCalc(p1, p2, p3, p4, totalSteps * i));
+                PathInsert(ImBezierCubicCalc(p1, p2, p3, p4, totalSteps * i));
             }
         }
     }
@@ -760,13 +806,19 @@ namespace CE
             float totalSteps = 1.0f / (float)numSegments;
             for (int i = 1; i <= numSegments; i++)
             {
-                path.Insert(ImBezierQuadraticCalc(p1, p2, p3, totalSteps * i));
+                PathInsert(ImBezierQuadraticCalc(p1, p2, p3, totalSteps * i));
             }
         }
     }
 
     void FusionRenderer2::PathFill(bool antiAliased)
     {
+        if (path.IsEmpty() || IsRectClipped(Rect(pathMin, pathMax)))
+        {
+            PathClear();
+            return;
+        }
+
         AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased);
 
         PathClear();
@@ -774,6 +826,12 @@ namespace CE
 
     void FusionRenderer2::PathStroke(bool closed, bool antiAliased)
     {
+        if (IsRectClipped(Rect(pathMin, pathMax)))
+        {
+            PathClear();
+            return;
+        }
+
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
@@ -781,6 +839,12 @@ namespace CE
 
     void FusionRenderer2::PathFillStroke(bool closed, bool antiAliased)
     {
+        if (IsRectClipped(Rect(pathMin, pathMax)))
+        {
+            PathClear();
+            return;
+        }
+
         AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased);
 
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
@@ -1004,6 +1068,8 @@ namespace CE
 
     void FusionRenderer2::AddDrawCmd()
     {
+        ZoneScoped;
+
         if (coordinateSpaceStack.IsEmpty())
             return;
 
@@ -1070,6 +1136,8 @@ namespace CE
 
     void FusionRenderer2::PrimReserve(int vertexCount, int indexCount)
     {
+        ZoneScoped;
+
         int curVertexCount = vertexArray.GetCount();
         vertexArray.InsertRange(vertexCount);
         vertexWritePtr = vertexArray.GetData() + curVertexCount;
@@ -1081,6 +1149,8 @@ namespace CE
 
     void FusionRenderer2::PrimUnreserve(int vertexCount, int indexCount)
     {
+        ZoneScoped;
+
         while (vertexCount > 0)
         {
             vertexArray.RemoveLast();
@@ -1094,37 +1164,10 @@ namespace CE
         }
     }
 
-    void FusionRenderer2::PrimRect(const Rect& rect, u32 color)
-    {
-        Vec2 offset = Vec2();
-        if (coordinateSpaceStack.Last().isTranslationOnly)
-        {
-            offset = coordinateSpaceStack.Last().translation;
-        }
-
-        Vec2 topLeft = rect.min + offset;
-        Vec2 topRight = Vec2(rect.max.x, rect.min.y) + offset;
-        Vec2 bottomRight = Vec2(rect.max.x, rect.max.y) + offset;
-        Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y) + offset;
-        Vec2 uv = Vec2(0, 0);
-
-        FDrawIndex idx = vertexCurrentIdx;
-        indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
-        indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
-
-        vertexWritePtr[0].position = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = uv;
-        vertexWritePtr[1].position = topRight; vertexWritePtr[1].color = color; vertexWritePtr[0].uv = uv;
-        vertexWritePtr[2].position = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[0].uv = uv;
-        vertexWritePtr[3].position = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[0].uv = uv;
-        vertexWritePtr += 4;
-        vertexCurrentIdx += 4;
-        indexWritePtr += 6;
-
-        drawCmdList.Last().numIndices += 6;
-    }
-
     void FusionRenderer2::PathInsert(const Vec2& point)
     {
+        ZoneScoped;
+
         path.Insert(point);
 
         PathMinMax(point);
@@ -1132,6 +1175,8 @@ namespace CE
 
     void FusionRenderer2::PathMinMax(const Vec2& point)
     {
+        ZoneScoped;
+
         pathMin.x = Math::Min(point.x, pathMin.x);
         pathMin.y = Math::Min(point.y, pathMin.y);
 
@@ -1141,6 +1186,8 @@ namespace CE
 
     void FusionRenderer2::AddRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
+        ZoneScoped;
+
         u32 color = currentPen.GetColor().ToU32();
 
         if ((color & ColorAlphaMask) == 0)
@@ -1157,6 +1204,8 @@ namespace CE
 
     void FusionRenderer2::AddRectFilled(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
+        ZoneScoped;
+
         u32 color = currentBrush.GetFillColor().ToU32();
 
         PathClear();
@@ -1166,6 +1215,8 @@ namespace CE
 
     void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased)
     {
+        ZoneScoped;
+
         if (points == nullptr || numPoints <= 0)
             return;
 
@@ -1267,6 +1318,8 @@ namespace CE
 
     void FusionRenderer2::AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased)
     {
+        ZoneScoped;
+
         if (points == nullptr || numPoints <= 0)
             return;
 
@@ -1492,6 +1545,8 @@ namespace CE
 
     void FusionRenderer2::AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
     {
+        ZoneScoped;
+
         u32 color = currentPen.GetColor().ToU32();
         if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
             return;
@@ -1516,6 +1571,8 @@ namespace CE
 
     void FusionRenderer2::AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
     {
+        ZoneScoped;
+
         u32 color = currentBrush.GetFillColor().ToU32();
         if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
             return;
@@ -1540,6 +1597,8 @@ namespace CE
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)
     {
+        ZoneScoped;
+
 	    meshBufferGrowRatio = Math::Min<float>(meshBufferGrowRatio, 0.75f);
 
         u64 curSize = quadsBuffer[0]->GetBufferSize();

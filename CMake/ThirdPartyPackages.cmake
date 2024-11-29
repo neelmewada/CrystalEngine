@@ -20,15 +20,14 @@ option(BUILD_SHARED_LIBS OFF)
 #find_package(dxcompiler REQUIRED)
 #find_package(ispctexturecompressor REQUIRED)
 
-FetchContent_Declare(
-    tracy
-    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-    GIT_TAG master
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-)
-
-FetchContent_MakeAvailable(tracy)
+#FetchContent_Declare(
+#    tracy
+#    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+#    GIT_TAG master
+#    GIT_SHALLOW TRUE
+#    GIT_PROGRESS TRUE
+#)
+#FetchContent_MakeAvailable(tracy)
 
 # SDL2
 #find_package(sdl REQUIRED)

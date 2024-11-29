@@ -97,6 +97,8 @@ namespace CE
 
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
+        ZoneScoped;
+
         u32 fontSizeInAtlas = fontSize;
 
         static Array<u32> charSet{};
@@ -351,6 +353,8 @@ namespace CE
 
     bool FFontAtlas::FAtlasImage::FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY)
     {
+        ZoneScoped;
+
         int bestRowIndex = -1;
         int bestRowHeight = INT_MAX;
 

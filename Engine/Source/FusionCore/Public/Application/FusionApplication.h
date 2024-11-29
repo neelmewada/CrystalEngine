@@ -25,7 +25,7 @@ namespace CE
         IFusionAssetLoader* assetLoader = nullptr;
     };
 
-    CLASS()
+    CLASS(Config = Engine)
     class FUSIONCORE_API FusionApplication : public Object, protected ApplicationMessageHandler
     {
         CE_CLASS(FusionApplication, Object)
@@ -42,6 +42,8 @@ namespace CE
         FStyleManager* GetStyleManager() const { return styleManager.Get(); }
 
         FRootContext* GetRootContext() const { return rootContext.Get(); }
+
+        f32 GetDefaultScalingFactor() const { return defaultScalingFactor; }
 
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
@@ -136,6 +138,9 @@ namespace CE
 
         FIELD()
         Ref<FStyleManager> styleManager = nullptr;
+
+        FIELD(Config)
+        f32 defaultScalingFactor = 1.0f;
 
         IFusionAssetLoader* assetLoader = nullptr;
 
