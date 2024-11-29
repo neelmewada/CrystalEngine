@@ -2,12 +2,6 @@
 #include "FusionCore.h"
 #include "VulkanRHI.h"
 
-#include "../../Utils/clipper.svg.h"
-#include "../../Utils/ClipFileLoad.h"
-#include "../../Utils/clipper.svg.utils.h"
-#include "../../Utils/Colors.h"
-#include "../../Utils/Timer.h"
-
 #include "FusionCoreTest.h"
 
 #include <gtest/gtest.h>
@@ -56,7 +50,7 @@ static void TestBegin(bool gui)
 		f32 scaleFactor = GetDefaults<FusionApplication>()->GetDefaultScalingFactor();
 
 #if PLATFORM_MAC
-		w = 540; h = 400;
+		u32 w = 540, h = 400;
 #elif PLATFORM_LINUX
 		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
 #elif PLATFORM_WINDOWS
@@ -155,8 +149,6 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 }
-
-namespace cl = Clipper2Lib;
 
 void System(const std::string& filename)
 {
