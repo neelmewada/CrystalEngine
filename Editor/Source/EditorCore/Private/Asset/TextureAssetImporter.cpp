@@ -256,7 +256,7 @@ namespace CE::Editor
 		TextureSourceCompressionFormat compressionFormat,
 		CMImageSourceFormat targetSourceFormat)
 	{
-		Texture2D* texture = CreateObject<Texture2D>(bundle, name);
+		Ref<Texture2D> texture = CreateObject<Texture2D>(bundle, name);
 
 		texture->anisoLevel = anisotropy;
 		texture->width = image.GetWidth();

@@ -373,7 +373,7 @@ namespace CE::RPI
 							if (attachment->attachmentDescriptor.type == AttachmentType::Image &&
 								(binding.attachmentUsage == ScopeAttachmentUsage::Color || binding.attachmentUsage == ScopeAttachmentUsage::DepthStencil))
 							{
-								const RPI::ImageDescriptor& attachmentDesc = attachment->attachmentDescriptor.imageDesc;
+								const RPI::ImageAttachmentDescriptor& attachmentDesc = attachment->attachmentDescriptor.imageDesc;
 
 								pipelineStateData->multisampleState.sampleCount = attachmentDesc.sampleCount;
 							}

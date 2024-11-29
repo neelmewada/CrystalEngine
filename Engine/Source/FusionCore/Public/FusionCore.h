@@ -47,8 +47,6 @@ namespace CE
 
 }
 
-#include "clipper2/clipper.h"
-
 #include "FusionMacros.h"
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
@@ -64,6 +62,7 @@ namespace CE
 
 #include "Application/FTimer.h"
 #include "Application/FusionApplication.h"
+#include "Rendering/FImageAtlas.h"
 #include "Rendering/FusionRenderer.h"
 #include "Rendering/FusionRenderer2.h"
 #include "Rendering/FPainter.h"

@@ -75,7 +75,6 @@ namespace CE::RPI
 #include "Scene.h"
 
 #include "Texture.h"
-#include "TextureAtlas.h"
 #include "CubeMap/CubeMap.h"
 #include "CubeMap/CubeMapProcessor.h"
 #include "Material/MaterialProperty.h"

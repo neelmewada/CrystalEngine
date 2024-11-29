@@ -14,9 +14,9 @@ namespace CE::RPI
             else if (copy.type == AttachmentType::Buffer) // Copy is a buffer
             {
                 if (type == AttachmentType::Image)
-                    imageDesc.~ImageDescriptor();
+                    imageDesc.~ImageAttachmentDescriptor();
                 memset(&bufferDesc, 0, sizeof(bufferDesc));
-                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
+                new(&bufferDesc) RPI::BufferAttachmentDescriptor(copy.bufferDesc);
             }
             type = copy.type;
         }
@@ -24,14 +24,14 @@ namespace CE::RPI
         {
             if (copy.type == type || type == AttachmentType::None) // Both are buffer types
             {
-                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+                bufferDesc = RPI::BufferAttachmentDescriptor(copy.bufferDesc);
             }
             else if (copy.type == AttachmentType::Image) // Copy is an image
             {
                 if (type == AttachmentType::Buffer)
-                    bufferDesc.~BufferDescriptor();
+                    bufferDesc.~BufferAttachmentDescriptor();
                 memset(&imageDesc, 0, sizeof(imageDesc));
-                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
+                new(&imageDesc) RPI::ImageAttachmentDescriptor(copy.imageDesc);
             }
             type = copy.type;
         }
@@ -43,14 +43,14 @@ namespace CE::RPI
         {
             if (copy.type == type || type == AttachmentType::None)
             {
-                imageDesc = RPI::ImageDescriptor(copy.imageDesc);
+                imageDesc = RPI::ImageAttachmentDescriptor(copy.imageDesc);
             }
             else if (copy.type == AttachmentType::Buffer) // Copy is a buffer
             {
                 if (type == AttachmentType::Image)
-                    imageDesc.~ImageDescriptor();
+                    imageDesc.~ImageAttachmentDescriptor();
                 memset(&bufferDesc, 0, sizeof(bufferDesc));
-                new(&bufferDesc) RPI::BufferDescriptor(copy.bufferDesc);
+                new(&bufferDesc) RPI::BufferAttachmentDescriptor(copy.bufferDesc);
             }
             type = copy.type;
         }
@@ -58,14 +58,14 @@ namespace CE::RPI
         {
             if (copy.type == type || type == AttachmentType::None)
             {
-                bufferDesc = RPI::BufferDescriptor(copy.bufferDesc);
+                bufferDesc = RPI::BufferAttachmentDescriptor(copy.bufferDesc);
             }
             else if (copy.type == AttachmentType::Image) // Copy is an image
             {
                 if (type == AttachmentType::Buffer)
-                    bufferDesc.~BufferDescriptor();
+                    bufferDesc.~BufferAttachmentDescriptor();
                 memset(&imageDesc, 0, sizeof(imageDesc));
-                new(&imageDesc) RPI::ImageDescriptor(copy.imageDesc);
+                new(&imageDesc) RPI::ImageAttachmentDescriptor(copy.imageDesc);
             }
             type = copy.type;
         }

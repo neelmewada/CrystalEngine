@@ -36,7 +36,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreApplication
             CE::CoreRHI
             CE::CoreRPI
-            ThirdParty::clipper
         TARGETS EngineResources
     RUNTIME_DEPENDENCIES
 

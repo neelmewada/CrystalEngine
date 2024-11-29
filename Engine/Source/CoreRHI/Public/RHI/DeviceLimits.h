@@ -24,6 +24,30 @@ namespace CE::RHI
         inline u64 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
         inline u64 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
 
+        bool IsSparseBindingSupported() const { return sparseBinding; }
+
+        bool IsSparseTexture2DResidencySupported(u32 sampleCount)
+        {
+	        switch (sampleCount)
+	        {
+	        case 2:
+                return sparseResidency2DSample2;
+            case 4:
+                return sparseResidency2DSample4;
+            case 8:
+                return sparseResidency2DSample8;
+            case 16:
+                return sparseResidency2DSample16;
+            default:
+                return sparseResidency2D;
+	        }
+        }
+
+        bool IsSparseTexture3DResidencySupported()
+        {
+            return sparseResidency3D;
+        }
+
     protected:
 
         struct FormatEntry
@@ -36,6 +60,15 @@ namespace CE::RHI
 
         u32 maxConstantBufferRange = 0;
         u32 maxStructuredBufferRange = 0;
+
+        bool sparseBinding = false;
+        bool sparseResidency2D = false;
+        bool sparseResidency2DSample2 = false;
+        bool sparseResidency2DSample4 = false;
+        bool sparseResidency2DSample8 = false;
+        bool sparseResidency2DSample16 = false;
+
+        bool sparseResidency3D = false;
     };
     
 } // namespace CE::RHI
