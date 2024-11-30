@@ -18,6 +18,7 @@ static CE::JobManager* gJobManager = nullptr;
 static CE::JobContext* gJobContext = nullptr;
 
 using namespace CE;
+using namespace RenderingTests;
 
 static int windowWidth = 0;
 static int windowHeight = 0;
@@ -165,6 +166,60 @@ void System(const std::string& filename)
 #endif
 }
 
+static Array<Color> colors = {
+	Color::RGBHex(0x37b04e),
+	Color::RGBHex(0xcd4e92),
+	Color::RGBHex(0x5d5bc5),
+	Color::RGBHex(0x115eee),
+	Color::RGBHex(0x2cfb66),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0xbd0a57),
+	Color::RGBHex(0xd3d5e4),
+	Color::RGBHex(0x5b78b3),
+	Color::RGBHex(0x1ee740),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0xf86210),
+	Color::RGBHex(0xd388af),
+	Color::RGBHex(0x5b78b3),
+	Color::RGBHex(0x2b1152),
+	Color::RGBHex(0x26a3f9),
+};
+
+static Array<Vec2i> rects = {
+	Vec2i(20, 30),
+	Vec2i(60, 20),
+	Vec2i(30, 30),
+	Vec2i(100, 50),
+	Vec2i(50, 100),
+	Vec2i(200, 100),
+	Vec2i(80, 20),
+	Vec2i(20, 60),
+};
+
+Ptr<BSTNode> root = nullptr;
+
+static void AddRect()
+{
+	Vec2i imageSize = Vec2i(Random::Range(10, 80), Random::Range(10, 80));
+	Ptr<BSTNode> node = root->Insert(imageSize);
+	if (node == nullptr)
+	{
+		String::IsAlphabet('a');
+	}
+	else
+	{
+		node->imageId = Random::Range(0, colors.GetSize() - 1);
+	}
+}
+
+static void RemoveRect()
+{
+	Ptr<BSTNode> node = root->SelectRandom();
+
+
+}
+
 static void DoRectPacking(FusionRenderer2* renderer)
 {
 	renderer->SetBrush(Color::Black());
@@ -175,7 +230,16 @@ static void DoRectPacking(FusionRenderer2* renderer)
 		// BG
 		renderer->FillRect(Rect::FromSize(0, 0, windowWidth, windowHeight - 40));
 
+		root->ForEachRecursive([&](Ptr<BSTNode> node)
+			{
+				if (node->imageId >= 0)
+				{
+					renderer->SetPen(FPen());
+					renderer->SetBrush(colors[node->imageId % (int)colors.GetSize()]);
 
+					renderer->FillRect(node->rect);
+				}
+			});
 	}
 	renderer->PopChildCoordinateSpace();
 }
@@ -406,6 +470,15 @@ TEST(FusionCore, Rendering)
 
 	nativeContext->SetOwningWidget(mainWidget);
 
+	mainWidget->OnAdd([]
+		{
+			AddRect();
+		});
+	mainWidget->OnRemove([]
+		{
+			RemoveRect();
+		});
+
 	auto exposedTick = [&]
 		{
 			FusionApplication::Get()->SetExposed();
@@ -425,6 +498,22 @@ TEST(FusionCore, Rendering)
 	mainWindow->Show();
 
 	int frameCounter = 0;
+
+	root = new BSTNode;
+	root->rect = Rect(0, 0, 680, 460);
+
+	for (int i = 0; i < rects.GetSize(); ++i)
+	{
+		Ptr<BSTNode> node = root->Insert(rects[i]);
+		if (node != nullptr)
+		{
+			node->imageId = i;
+		}
+		else
+		{
+			String::IsAlphabet('a');
+		}
+	}
 
 	while (!IsEngineRequestingExit())
 	{
