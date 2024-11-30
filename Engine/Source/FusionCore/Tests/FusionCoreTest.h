@@ -16,9 +16,30 @@ namespace RenderingTests
 		Rect rect;
 		int imageId = -1;
 
+		bool IsLeaf() const
+		{
+			return child[0] == nullptr && child[1] == nullptr;
+		}
+
+		bool IsWidthSpan() const
+		{
+			return !IsLeaf() && child[0]->rect.max.x < child[1]->rect.max.x;
+		}
+
+		bool IsHeightSpan() const
+		{
+			return !IsLeaf() && child[0]->rect.max.y < child[1]->rect.max.y;
+		}
+
 		bool IsValid() const
 		{
 			return imageId >= 0;
+		}
+
+		bool IsValidRecursive() const
+		{
+			return IsValid() && (child[0] == nullptr || child[0]->IsValidRecursive()) &&
+				(child[1] == nullptr || child[1]->IsValidRecursive());
 		}
 
 		Vec2i GetSize() const
@@ -186,15 +207,29 @@ namespace RenderingTests
 	{
 		if (child[0] != nullptr && child[1] != nullptr)
 		{
-			bool b1 = child[0]->Defragment();
-			bool b2 = child[1]->Defragment();
+			bool leftValid = child[0]->Defragment();
+			bool rightValid = child[1]->Defragment();
 
-			if (!b1 && !b2)
+			if (!leftValid && !rightValid)
 			{
 				child[0] = nullptr;
 				child[1] = nullptr;
 
 				return false;
+			}
+
+			// Better defragmentation but very slow:
+			//if (child[0]->IsWidthSpan() && child[1]->IsWidthSpan())
+			{
+				// TODO: It destroys valid rects too. Need to be fixed
+				if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
+					!child[1]->child[0]->IsValidRecursive() && child[1]->IsWidthSpan())
+				{
+					Ptr<BinaryNode> nodeToMove = child[1]->child[1];
+					child[0]->rect.max.x = child[1]->child[0]->rect.max.x;
+					child[1] = nodeToMove;
+					nodeToMove->parent = this;
+				}
 			}
 
 			return true;
