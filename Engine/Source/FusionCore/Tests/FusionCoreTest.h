@@ -7,6 +7,11 @@ using namespace CE;
 
 namespace RenderingTests
 {
+	struct BST
+	{
+
+	};
+
 	class RendererSystem : public ApplicationMessageHandler
 	{
 		CE_NO_COPY(RendererSystem)

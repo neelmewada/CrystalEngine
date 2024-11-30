@@ -23,18 +23,18 @@ namespace CE
 
     private:
 
-        // - Utils -
-
-        bool AddImage(const Name& name, const CMImage& imageSource);
-
-        // - Configs -
-
-        FIELD(Config)
-        u32 atlasSize = 4096;
-
         // - Data Structures -
 
-        struct RowSegment {
+        struct ImageItem
+        {
+            int layerIndex = -1;
+            Vec2 uvMin, uvMax;
+
+            bool IsValid() const { return layerIndex >= 0; }
+        };
+
+        struct RowSegment
+    	{
             int x, y;
             int height;
         };
@@ -54,6 +54,15 @@ namespace CE
             bool FindInsertionPoint(Vec2i textureSize, int& outX, int& outY);
         };
 
+        // - Utils -
+
+        ImageItem AddImage(const Name& name, const CMImage& imageSource);
+
+        // - Configs -
+
+        FIELD(Config)
+        u32 atlasSize = 4096;
+
         // - Internals -
 
         StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> atlasTexturesPerImage;
@@ -61,7 +70,9 @@ namespace CE
         Array<Ptr<FAtlasImage>> atlasLayers;
         StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> flushRequiredPerImage;
 
-        HashMap<Name, RHI::TextureView*> texturesByName;
+        // - Cache -
+
+        HashMap<Name, ImageItem> imagesByName;
 
     };
     

@@ -68,11 +68,11 @@ namespace CE
         
     }
 
-    bool FImageAtlas::AddImage(const Name& name, const CMImage& imageSource)
+    FImageAtlas::ImageItem FImageAtlas::AddImage(const Name& name, const CMImage& imageSource)
     {
-        if (!name.IsValid() || !imageSource.IsValid())
+        if (!name.IsValid() || !imageSource.IsValid() || imagesByName.KeyExists(name))
         {
-            return false;
+            return {};
         }
 
         bool foundEmptySlot = false;
@@ -84,7 +84,7 @@ namespace CE
         switch (imageSource.GetFormat())
         {
         case CMImageFormat::Undefined:
-            return false;
+            return {};
         case CMImageFormat::R8:
             srcPixelSize = sizeof(u8);
             break;
@@ -148,13 +148,16 @@ namespace CE
 
             if (!foundEmptySlot)
             {
-                return false;
+                return {};
             }
             else
             {
                 foundAtlas = atlas;
             }
         }
+
+        Vec2 uvMin = Vec2((f32)posX / (f32)foundAtlas->atlasSize, (f32)posY / (f32)foundAtlas->atlasSize);
+        Vec2 uvMax = Vec2((f32)(posX + textureSize.width) / (f32)foundAtlas->atlasSize, (f32)(posY + textureSize.height) / (f32)foundAtlas->atlasSize);
 
         for (int x = 0; x < textureSize.x; ++x)
         {
@@ -168,8 +171,7 @@ namespace CE
                 u8* g = dstPixel + 1;
                 u8* b = dstPixel + 2;
                 u8* a = dstPixel + 3;
-
-                // TODO: 
+                
                 switch (imageSource.GetFormat())
                 {
                 case CMImageFormat::Undefined:
@@ -226,8 +228,11 @@ namespace CE
 	        }
         }
 
+        ImageItem item = { .layerIndex = foundAtlas->layerIndex, .uvMin = uvMin, .uvMax = uvMax };
 
-        return false;
+        imagesByName[name] = item;
+
+        return item;
     }
 
     bool FImageAtlas::FAtlasImage::FindInsertionPoint(Vec2i textureSize, int& outX, int& outY)

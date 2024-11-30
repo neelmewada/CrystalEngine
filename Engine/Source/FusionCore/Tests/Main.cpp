@@ -19,6 +19,9 @@ static CE::JobContext* gJobContext = nullptr;
 
 using namespace CE;
 
+static int windowWidth = 0;
+static int windowHeight = 0;
+
 static void TestBegin(bool gui)
 {
 	gProjectPath = PlatformDirectories::GetLaunchDir();
@@ -56,7 +59,10 @@ static void TestBegin(bool gui)
 #elif PLATFORM_WINDOWS
 		u32 w = 1024, h = 768;
 #endif
-        
+
+		windowWidth = w;
+		windowHeight = h;
+
 		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
 		window->SetBorderless(true);
 
@@ -159,6 +165,21 @@ void System(const std::string& filename)
 #endif
 }
 
+static void DoRectPacking(FusionRenderer2* renderer)
+{
+	renderer->SetBrush(Color::Black());
+	renderer->SetPen(FPen());
+
+	renderer->PushChildCoordinateSpace(Vec2(0, 40));
+	{
+		// BG
+		renderer->FillRect(Rect::FromSize(0, 0, windowWidth, windowHeight - 40));
+
+
+	}
+	renderer->PopChildCoordinateSpace();
+}
+
 static void DoPaint(FusionRenderer2* renderer)
 {
 	renderer->Begin();
@@ -213,6 +234,8 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->PathLineTo(Vec2(25, 25));
 	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
 	renderer->PathStroke();
+
+	DoRectPacking(renderer);
 
 	renderer->End();
 }
