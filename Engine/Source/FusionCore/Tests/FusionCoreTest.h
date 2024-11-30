@@ -7,21 +7,33 @@ using namespace CE;
 
 namespace RenderingTests
 {
-	struct BSTNode : IntrusiveBase
+	struct BinaryNode : IntrusiveBase
 	{
-		StaticArray<Ptr<BSTNode>, 2> child;
+		StaticArray<Ptr<BinaryNode>, 2> child;
+		BinaryNode* parent = nullptr;
 
+        int totalChildren = 0;
 		Rect rect;
 		int imageId = -1;
+
+		bool IsValid() const
+		{
+			return imageId >= 0;
+		}
 
 		Vec2i GetSize() const
 		{
 			return Vec2i(Math::RoundToInt(rect.GetSize().width), Math::RoundToInt(rect.GetSize().height));
 		}
 
-		Ptr<BSTNode> Insert(Vec2i imageSize);
+		Ptr<BinaryNode> Insert(Vec2i imageSize);
 
-		void ForEachRecursive(const std::function<void(Ptr<BSTNode> node)>& visitor)
+		void ClearImage()
+		{
+			imageId = -1;
+		}
+
+		void ForEachRecursive(const std::function<void(Ptr<BinaryNode> node)>& visitor)
 		{
 			visitor(this);
 
@@ -35,21 +47,94 @@ namespace RenderingTests
 			}
 		}
 
+		Ptr<BinaryNode> FindUsedNode()
+		{
+			if (imageId >= 0)
+				return this;
 
+			if (child[0] != nullptr)
+			{
+				Ptr<BinaryNode> node = child[0]->FindUsedNode();
+				if (node != nullptr)
+				{
+					return node;
+				}
+			}
+
+			if (child[1] != nullptr)
+			{
+				Ptr<BinaryNode> node = child[1]->FindUsedNode();
+				if (node != nullptr)
+				{
+					return node;
+				}
+			}
+
+			return nullptr;
+		}
+
+		Ptr<BinaryNode> SelectRandom()
+		{
+			int index = 0;
+			return SelectRandomInternal(index, Random::Range(0, totalChildren - 1));
+		}
+
+        Ptr<BinaryNode> SelectRandomInternal(int& curIndex, int targetIndex)
+		{
+			if (curIndex == targetIndex)
+			{
+				return this;
+			}
+
+			if (child[0] != nullptr)
+			{
+				curIndex++;
+				Ptr<BinaryNode> result = child[0]->SelectRandomInternal(curIndex, targetIndex);
+				if (result != nullptr)
+				{
+					return result;
+				}
+			}
+
+			if (child[1] != nullptr)
+			{
+				curIndex++;
+				Ptr<BinaryNode> result = child[1]->SelectRandomInternal(curIndex, targetIndex);
+				if (result != nullptr)
+				{
+					return result;
+				}
+			}
+
+			return nullptr;
+		}
+
+		bool Defragment();
 	};
 
-	inline Ptr<BSTNode> BSTNode::Insert(Vec2i imageSize)
+	inline Ptr<BinaryNode> BinaryNode::Insert(Vec2i imageSize)
 	{
 		if (child[0] != nullptr)
 		{
 			// We are not in leaf node
-			Ptr<BSTNode> newNode = child[0]->Insert(imageSize);
+			Ptr<BinaryNode> newNode = child[0]->Insert(imageSize);
 			if (newNode != nullptr)
+			{
+				totalChildren++;
 				return newNode;
+			}
 			if (child[1] == nullptr)
+			{
 				return nullptr;
+			}
 
-			return child[1]->Insert(imageSize);
+			newNode = child[1]->Insert(imageSize);
+			if (newNode != nullptr)
+			{
+				totalChildren++;
+			}
+
+			return newNode;
 		}
 		else // We are in leaf node
 		{
@@ -68,8 +153,12 @@ namespace RenderingTests
 			}
 
 			// Split the node
-			child[0] = new BSTNode;
-			child[1] = new BSTNode;
+			child[0] = new BinaryNode;
+			child[1] = new BinaryNode;
+			child[0]->parent = this;
+			child[1]->parent = this;
+
+			totalChildren = 2;
 
 			int dw = GetSize().width - imageSize.width;
 			int dh = GetSize().height - imageSize.height;
@@ -91,6 +180,27 @@ namespace RenderingTests
 
 			return child[0]->Insert(imageSize);
 		}
+	}
+
+	inline bool BinaryNode::Defragment()
+	{
+		if (child[0] != nullptr && child[1] != nullptr)
+		{
+			bool b1 = child[0]->Defragment();
+			bool b2 = child[1]->Defragment();
+
+			if (!b1 && !b2)
+			{
+				child[0] = nullptr;
+				child[1] = nullptr;
+
+				return false;
+			}
+
+			return true;
+		}
+
+		return IsValid();
 	}
 
 	class RendererSystem : public ApplicationMessageHandler
@@ -154,6 +264,7 @@ namespace RenderingTests
 
 		FUSION_EVENT(ScriptEvent<void()>, OnAdd);
 		FUSION_EVENT(ScriptEvent<void()>, OnRemove);
+		FUSION_EVENT(ScriptEvent<void()>, OnDefragment);
 
 		FStackBox* rootBox = nullptr;
 		FButton* button = nullptr;

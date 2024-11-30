@@ -197,12 +197,12 @@ static Array<Vec2i> rects = {
 	Vec2i(20, 60),
 };
 
-Ptr<BSTNode> root = nullptr;
+Ptr<BinaryNode> root = nullptr;
 
 static void AddRect()
 {
 	Vec2i imageSize = Vec2i(Random::Range(10, 80), Random::Range(10, 80));
-	Ptr<BSTNode> node = root->Insert(imageSize);
+	Ptr<BinaryNode> node = root->Insert(imageSize);
 	if (node == nullptr)
 	{
 		String::IsAlphabet('a');
@@ -215,9 +215,15 @@ static void AddRect()
 
 static void RemoveRect()
 {
-	Ptr<BSTNode> node = root->SelectRandom();
-
-
+	Ptr<BinaryNode> node = root->FindUsedNode();
+	if (node != nullptr)
+	{
+		node->ClearImage();
+	}
+	else
+	{
+		String::IsAlphabet('a');
+	}
 }
 
 static void DoRectPacking(FusionRenderer2* renderer)
@@ -228,9 +234,9 @@ static void DoRectPacking(FusionRenderer2* renderer)
 	renderer->PushChildCoordinateSpace(Vec2(0, 40));
 	{
 		// BG
-		renderer->FillRect(Rect::FromSize(0, 0, windowWidth, windowHeight - 40));
+		renderer->FillRect(Rect::FromSize(0, 0, root->rect.max.x, root->rect.max.y));
 
-		root->ForEachRecursive([&](Ptr<BSTNode> node)
+		root->ForEachRecursive([&](Ptr<BinaryNode> node)
 			{
 				if (node->imageId >= 0)
 				{
@@ -239,6 +245,20 @@ static void DoRectPacking(FusionRenderer2* renderer)
 
 					renderer->FillRect(node->rect);
 				}
+
+				if (node->child[0] != nullptr || node->child[1] != nullptr)
+				{
+					renderer->SetPen(FPen(Color::Red(), 1.5f));
+					renderer->StrokeRect(node->rect);
+				}
+				else
+				{
+					renderer->SetPen(FPen(Color::White().WithAlpha(0.8f), 1));
+					renderer->StrokeRect(node->rect);
+				}
+
+				//renderer->SetPen(FPen(Color::White()));
+				//renderer->DrawText(node->IsValid() ? "1" : "0", node->rect.min + Vec2(5, 5));
 			});
 	}
 	renderer->PopChildCoordinateSpace();
@@ -471,13 +491,26 @@ TEST(FusionCore, Rendering)
 	nativeContext->SetOwningWidget(mainWidget);
 
 	mainWidget->OnAdd([]
-		{
-			AddRect();
-		});
+	{
+		AddRect();
+	});
 	mainWidget->OnRemove([]
-		{
-			RemoveRect();
-		});
+	{
+		clock_t prev = clock();
+
+		RemoveRect();
+		//root->Defragment();
+
+		CE_LOG(Info, All, "Remove Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
+	});
+	mainWidget->OnDefragment([]
+	{
+		clock_t prev = clock();
+
+		root->Defragment();
+
+		CE_LOG(Info, All, "Defragment Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
+	});
 
 	auto exposedTick = [&]
 		{
@@ -499,12 +532,12 @@ TEST(FusionCore, Rendering)
 
 	int frameCounter = 0;
 
-	root = new BSTNode;
+	root = new BinaryNode;
 	root->rect = Rect(0, 0, 680, 460);
 
 	for (int i = 0; i < rects.GetSize(); ++i)
 	{
-		Ptr<BSTNode> node = root->Insert(rects[i]);
+		Ptr<BinaryNode> node = root->Insert(rects[i]);
 		if (node != nullptr)
 		{
 			node->imageId = i;

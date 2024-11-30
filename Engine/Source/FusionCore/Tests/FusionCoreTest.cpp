@@ -384,6 +384,8 @@ namespace RenderingTests
                         .OnClicked([this]
                             {
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+
+                                m_OnAdd.Broadcast();
                             })
                         .Name("Button")
                         (
@@ -395,7 +397,8 @@ namespace RenderingTests
                         FAssignNew(FButton, openPopupBtn)
                         .OnClicked([this, openPopupBtn]
                             {
-                                GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
+                                m_OnRemove.Broadcast();
+                                //GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
                             })
                         .Name("PopupButton")
                         (
@@ -408,7 +411,8 @@ namespace RenderingTests
                         .Text("Open Native Popup")
                         .OnClicked([this, nativePopupBtn]
                             {
-                                GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
+                                m_OnDefragment.Broadcast();
+                                //GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
                             })
                         .Name("NativePopupButton"),
 
