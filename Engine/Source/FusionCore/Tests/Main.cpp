@@ -499,7 +499,7 @@ TEST(FusionCore, Rendering)
 		clock_t prev = clock();
 
 		RemoveRect();
-		//root->Defragment();
+		root->Defragment();
 
 		CE_LOG(Info, All, "Remove Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
 	});
@@ -535,11 +535,10 @@ TEST(FusionCore, Rendering)
 	root = new BinaryNode;
 	root->rect = Rect(0, 0, 680, 460);
 
-	root->Insert(Vec2i(20, 460));
+	/*root->Insert(Vec2i(20, 460));
 	root->Insert(Vec2i(80, 460));
-	root->Insert(Vec2i(480, 460))->imageId = 2;
-
-	/*
+	root->Insert(Vec2i(480, 460))->imageId = 2;*/
+	
 	for (int i = 0; i < rects.GetSize(); ++i)
 	{
 		Ptr<BinaryNode> node = root->Insert(rects[i]);
@@ -552,7 +551,11 @@ TEST(FusionCore, Rendering)
 			String::IsAlphabet('a');
 		}
 	}
-	*/
+
+	for (int i = 0; i < 32; ++i)
+	{
+		AddRect();
+	}
 
 	while (!IsEngineRequestingExit())
 	{

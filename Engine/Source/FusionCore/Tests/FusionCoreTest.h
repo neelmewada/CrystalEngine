@@ -38,8 +38,8 @@ namespace RenderingTests
 
 		bool IsValidRecursive() const
 		{
-			return IsValid() && (child[0] == nullptr || child[0]->IsValidRecursive()) &&
-				(child[1] == nullptr || child[1]->IsValidRecursive());
+			return IsValid() || (child[0] != nullptr && child[0]->IsValidRecursive()) ||
+				(child[1] != nullptr && child[1]->IsValidRecursive());
 		}
 
 		Vec2i GetSize() const
@@ -219,7 +219,7 @@ namespace RenderingTests
 			}
 
 			// Better defragmentation but very slow:
-			if (false)
+			//if (false)
 			{
 				// TODO: It destroys valid rects too. Need to be fixed
 				if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
@@ -227,6 +227,14 @@ namespace RenderingTests
 				{
 					Ptr<BinaryNode> nodeToMove = child[1]->child[1];
 					child[0]->rect.max.x = child[1]->child[0]->rect.max.x;
+					child[1] = nodeToMove;
+					nodeToMove->parent = this;
+				}
+				else if (IsHeightSpan() && !leftValid && child[1]->child[0] != nullptr &&
+					!child[1]->child[0]->IsValidRecursive() && child[1]->IsHeightSpan())
+				{
+					Ptr<BinaryNode> nodeToMove = child[1]->child[1];
+					child[0]->rect.max.y = child[1]->child[0]->rect.max.y;
 					child[1] = nodeToMove;
 					nodeToMove->parent = this;
 				}
