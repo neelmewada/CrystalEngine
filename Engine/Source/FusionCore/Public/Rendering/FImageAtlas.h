@@ -14,6 +14,18 @@ namespace CE
 
     public:
 
+        struct ImageItem;
+
+        // - Getters -
+
+        u32 GetAtlasSize() const { return atlasSize; }
+
+        RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
+
+        Vec2 GetWhitePixelUV() const;
+
+        ImageItem FindImage(const Name& imageName);
+
         // - Public API -
 
         void Init();
@@ -21,8 +33,6 @@ namespace CE
 
         //! @brief Flushes all the changes to GPU.
         void Flush(u32 imageIndex);
-
-        RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
 
         // - Data Structures -
 
@@ -167,6 +177,7 @@ namespace CE
         // - Cache -
 
         HashMap<Name, ImageItem> imagesByName;
+        ImageItem whitePixel{};
 
     };
     

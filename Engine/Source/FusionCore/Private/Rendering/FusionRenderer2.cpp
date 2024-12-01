@@ -32,6 +32,8 @@ namespace CE
         fusionShader = initInfo.fusionShader;
         multisampling = initInfo.multisampling;
 
+        whitePixelUV = FusionApplication::Get()->GetImageAtlas()->GetWhitePixelUV();
+
         auto perObjectSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
         auto perViewSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerView);
 
@@ -856,7 +858,21 @@ namespace CE
             return;
         }
 
-        AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased);
+        Rect minMax = Rect(pathMin, pathMax);
+
+        switch (currentBrush.GetBrushStyle())
+        {
+        case FBrushStyle::None:
+	        break;
+        case FBrushStyle::SolidFill:
+            AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased);
+	        break;
+        case FBrushStyle::Image:
+            AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased, &minMax);
+	        break;
+        case FBrushStyle::LinearGradient:
+	        break;
+        }
 
         PathClear();
     }
@@ -882,7 +898,21 @@ namespace CE
             return;
         }
 
-        AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased);
+        Rect minMax = Rect(pathMin, pathMax);
+
+        switch (currentBrush.GetBrushStyle())
+        {
+        case FBrushStyle::None:
+	        break;
+        case FBrushStyle::SolidFill:
+            AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased);
+	        break;
+        case FBrushStyle::Image:
+            AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased, &minMax);
+	        break;
+        case FBrushStyle::LinearGradient:
+	        break;
+        }
 
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
@@ -1262,7 +1292,7 @@ namespace CE
         PathFill(antiAliased);
     }
 
-    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased)
+    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos)
     {
         ZoneScoped;
 
@@ -1270,14 +1300,39 @@ namespace CE
             return;
 
         u32 color = currentBrush.GetFillColor().ToU32();
-        Vec2 uv = whitePixelUV;
+        //Vec2 uv = whitePixelUV;
+
+        auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
+            {
+                if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
+                {
+                	auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+                    if (image.IsValid())
+                    {
+                        Vec2 ratios = Vec2((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x), 
+                            (pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y));
+                        return image.uvMin + ratios * (image.uvMax - image.uvMin);
+                    }
+                }
+                return whitePixelUV;
+            };
+
+        if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
+        {
+            color = currentBrush.GetTintColor().ToU32();
+        }
+        else
+        {
+            minMaxPos = nullptr;
+            color = currentBrush.GetFillColor().ToU32();
+        }
 
         Vec2 offset = Vec2();
         if (coordinateSpaceStack.Last().isTranslationOnly)
         {
             offset = coordinateSpaceStack.Last().translation;
         }
-
+        
         if (antiAliased)
         {
             // Credit: Dear ImGui
@@ -1323,10 +1378,13 @@ namespace CE
                 IM_FIXNORMAL2F(dm_x, dm_y);
                 dm_x *= AA_SIZE * 0.5f;
                 dm_y *= AA_SIZE * 0.5f;
+
+                Vec2 pos0 = Vec2(points[i1].x - dm_x, points[i1].y - dm_y);
+                Vec2 pos1 = Vec2(points[i1].x + dm_x, points[i1].y + dm_y);
                 
                 // Add vertices
-                vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;        // Inner
-                vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor;  // Outer
+                vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
+                vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = calcUV(pos1); vertexWritePtr[1].color = transparentColor;  // Outer
                 vertexWritePtr += 2;
                 
                 // Add indexes for fringes
@@ -1347,7 +1405,7 @@ namespace CE
             for (int i = 0; i < vertexCount; i++)
             {
                 vertexWritePtr[0].position = points[i] + offset;
-                vertexWritePtr[0].uv = whitePixelUV;
+                vertexWritePtr[0].uv = calcUV(points[i]);
                 vertexWritePtr[0].color = color;
                 vertexWritePtr++;
             }

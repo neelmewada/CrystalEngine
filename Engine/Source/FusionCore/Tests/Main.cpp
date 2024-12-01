@@ -322,7 +322,11 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
 	renderer->PathStroke();
 
-	DoRectPacking(renderer);
+	renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
+	renderer->PathRect(Rect::FromSize(100, 100, 200, 200));
+	renderer->PathFill();
+
+	//DoRectPacking(renderer);
 
 	renderer->End();
 }

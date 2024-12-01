@@ -120,7 +120,7 @@ namespace CE
 
         void AddRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
         void AddRectFilled(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
-        void AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased);
+        void AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos = nullptr);
         void AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased);
         void AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
         void AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased);

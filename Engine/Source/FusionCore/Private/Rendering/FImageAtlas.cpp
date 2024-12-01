@@ -13,6 +13,19 @@ namespace CE
         
     }
 
+    Vec2 FImageAtlas::GetWhitePixelUV() const
+    {
+        return whitePixel.uvMin + (whitePixel.uvMax - whitePixel.uvMin) * 0.5f;
+    }
+
+    FImageAtlas::ImageItem FImageAtlas::FindImage(const Name& imageName)
+    {
+        if (!imagesByName.KeyExists(imageName))
+            return {};
+
+        return imagesByName[imageName];
+    }
+
     void FImageAtlas::Init()
     {
         ZoneScoped;
@@ -78,7 +91,7 @@ namespace CE
             pixels[i] = NumericLimits<u8>::Max();
         }
         CMImage image = CMImage::LoadRawImageFromMemory(pixels, 4, 4, CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
-        AddImage("__WhitePixel", image);
+        whitePixel = AddImage("__WhitePixel", image);
     }
 
     void FImageAtlas::Shutdown()
