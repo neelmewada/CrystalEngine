@@ -70,7 +70,7 @@ namespace RenderingTests
 
 		Ptr<BinaryNode> FindUsedNode()
 		{
-			if (imageId >= 0)
+			if (IsValid())
 				return this;
 
 			if (child[0] != nullptr)

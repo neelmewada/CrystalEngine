@@ -23,6 +23,11 @@ using namespace RenderingTests;
 static int windowWidth = 0;
 static int windowHeight = 0;
 
+namespace CE
+{
+	extern FUSIONCORE_API bool atlasDefragmentDone;
+}
+
 static void TestBegin(bool gui)
 {
 	gProjectPath = PlatformDirectories::GetLaunchDir();
@@ -197,12 +202,12 @@ static Array<Vec2i> rects = {
 	Vec2i(20, 60),
 };
 
-Ptr<BinaryNode> root = nullptr;
+Ptr<FImageAtlas::BinaryNode> root = nullptr;
 
 static void AddRect()
 {
 	Vec2i imageSize = Vec2i(Random::Range(10, 80), Random::Range(10, 80));
-	Ptr<BinaryNode> node = root->Insert(imageSize);
+	auto node = root->Insert(imageSize);
 	if (node == nullptr)
 	{
 		String::IsAlphabet('a');
@@ -210,12 +215,13 @@ static void AddRect()
 	else
 	{
 		node->imageId = Random::Range(0, colors.GetSize() - 1);
+		node->imageName = "Valid";
 	}
 }
 
 static void RemoveRect()
 {
-	Ptr<BinaryNode> node = root->FindUsedNode();
+	auto node = root->FindUsedNode();
 	if (node != nullptr)
 	{
 		node->ClearImage();
@@ -236,7 +242,7 @@ static void DoRectPacking(FusionRenderer2* renderer)
 		// BG
 		renderer->FillRect(Rect::FromSize(0, 0, root->rect.max.x, root->rect.max.y));
 
-		root->ForEachRecursive([&](Ptr<BinaryNode> node)
+		root->ForEachRecursive([&](Ptr<FImageAtlas::BinaryNode> node)
 			{
 				if (node->imageId >= 0)
 				{
@@ -507,7 +513,10 @@ TEST(FusionCore, Rendering)
 	{
 		clock_t prev = clock();
 
-		root->Defragment();
+		//root->Defragment();
+		root->DefragmentSlow();
+
+		CE::atlasDefragmentDone = false;
 
 		CE_LOG(Info, All, "Defragment Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
 	});
@@ -532,7 +541,7 @@ TEST(FusionCore, Rendering)
 
 	int frameCounter = 0;
 
-	root = new BinaryNode;
+	root = new FImageAtlas::BinaryNode;
 	root->rect = Rect(0, 0, 680, 460);
 
 	/*root->Insert(Vec2i(20, 460));
@@ -541,10 +550,11 @@ TEST(FusionCore, Rendering)
 	
 	for (int i = 0; i < rects.GetSize(); ++i)
 	{
-		Ptr<BinaryNode> node = root->Insert(rects[i]);
+		auto node = root->Insert(rects[i]);
 		if (node != nullptr)
 		{
 			node->imageId = i;
+			node->imageName = "Valid";
 		}
 		else
 		{
@@ -552,10 +562,18 @@ TEST(FusionCore, Rendering)
 		}
 	}
 
-	for (int i = 0; i < 32; ++i)
+	for (int i = 0; i < 92; ++i)
 	{
 		AddRect();
 	}
+
+	for (int i = 0; i < 92; ++i)
+	{
+		RemoveRect();
+	}
+
+	root->Defragment();
+	//root->Defragment2();
 
 	while (!IsEngineRequestingExit())
 	{

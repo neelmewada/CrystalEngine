@@ -239,56 +239,173 @@ namespace CE
     {
         ZoneScoped;
 
-        int bestRowIndex = -1;
-        int bestRowHeight = INT_MAX;
-
-        if (rows.IsEmpty())
-        {
-            rows.Add({ .x = textureSize.width, .y = 0, .height = textureSize.height });
-            outX = 0;
-            outY = 0;
-            return true;
-        }
-
-        for (int i = 0; i < rows.GetSize(); ++i)
-        {
-            int x = rows[i].x;
-            int y = rows[i].y;
-
-            // Check if the glyph fits at this position
-            if (x + textureSize.width <= atlasSize && y + textureSize.height <= atlasSize)
-            {
-                if (rows[i].height >= textureSize.height && rows[i].height < bestRowHeight)
-                {
-                    bestRowHeight = rows[i].height;
-                    bestRowIndex = i;
-                }
-            }
-        }
-
-        if (bestRowIndex == -1)
-        {
-            RowSegment lastRow = rows.Top();
-            if (lastRow.y + lastRow.height + textureSize.height > atlasSize)
-            {
-                return false;
-            }
-
-            rows.Add({ .x = textureSize.width, .y = lastRow.y + lastRow.height, .height = textureSize.height });
-
-            outX = 0;
-            outY = rows.Top().y;
-
-            return true;
-        }
-
-        outX = rows[bestRowIndex].x;
-        outY = rows[bestRowIndex].y;
-
-        rows[bestRowIndex].x += textureSize.width;
+        
 
         return true;
     }
 
+    Ptr<FImageAtlas::BinaryNode> FImageAtlas::BinaryNode::Insert(Vec2i imageSize)
+    {
+        using BinaryNode = FImageAtlas::BinaryNode;
+
+        if (child[0] != nullptr)
+        {
+            // We are not in leaf node
+            Ptr<BinaryNode> newNode = child[0]->Insert(imageSize);
+            if (newNode != nullptr)
+            {
+                totalChildren++;
+                return newNode;
+            }
+            if (child[1] == nullptr)
+            {
+                return nullptr;
+            }
+
+            newNode = child[1]->Insert(imageSize);
+            if (newNode != nullptr)
+            {
+                totalChildren++;
+            }
+
+            return newNode;
+        }
+        else // We are in leaf node
+        {
+            if (IsValid()) // Do not split a valid node
+                return nullptr;
+
+            if (GetSize().width < imageSize.width ||
+                GetSize().height < imageSize.height)
+            {
+                return nullptr;
+            }
+
+            if (GetSize().width == imageSize.width && GetSize().height == imageSize.height)
+            {
+                return this;
+            }
+
+            // Split the node
+            child[0] = new BinaryNode;
+            child[1] = new BinaryNode;
+            child[0]->parent = this;
+            child[1]->parent = this;
+
+            totalChildren = 2;
+
+            int dw = GetSize().width - imageSize.width;
+            int dh = GetSize().height - imageSize.height;
+
+            if (dw > dh)
+            {
+                child[0]->rect = Rect(rect.left, rect.top,
+                    rect.left + imageSize.width, rect.bottom);
+                child[1]->rect = Rect(rect.left + imageSize.width + 1, rect.top,
+                    rect.right, rect.bottom);
+            }
+            else
+            {
+                child[0]->rect = Rect(rect.left, rect.top,
+                    rect.right, rect.top + imageSize.height);
+                child[1]->rect = Rect(rect.left, rect.top + imageSize.height + 1,
+                    rect.right, rect.bottom);
+            }
+
+            return child[0]->Insert(imageSize);
+        }
+    }
+
+    bool FImageAtlas::BinaryNode::Defragment()
+    {
+        if (child[0] != nullptr && child[1] != nullptr)
+        {
+            bool leftValid = child[0]->Defragment();
+            bool rightValid = child[1]->Defragment();
+
+            if (!leftValid && !rightValid)
+            {
+                child[0] = nullptr;
+                child[1] = nullptr;
+
+                return false;
+            }
+
+            // Better defragmentation but very slow:
+            //if (false)
+            {
+                // TODO: It destroys valid rects too. Need to be fixed
+                if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
+                    child[1]->IsWidthSpan() && !child[1]->child[0]->IsValidRecursive())
+                {
+                    Ptr<BinaryNode> nodeToMove = child[1]->child[1];
+                    child[0]->rect.max.x = child[1]->child[0]->rect.max.x;
+                    child[1] = nodeToMove;
+                    nodeToMove->parent = this;
+                }
+                else if (IsHeightSpan() && !leftValid && child[1]->child[0] != nullptr &&
+                    child[1]->IsHeightSpan() && !child[1]->child[0]->IsValidRecursive())
+                {
+                    Ptr<BinaryNode> nodeToMove = child[1]->child[1];
+                    child[0]->rect.max.y = child[1]->child[0]->rect.max.y;
+                    child[1] = nodeToMove;
+                    nodeToMove->parent = this;
+                }
+            }
+
+            return true;
+        }
+
+        return IsValid();
+    }
+
+    FUSIONCORE_API bool atlasDefragmentDone = false;
+
+    bool FImageAtlas::BinaryNode::DefragmentSlow()
+    {
+        if (child[0] != nullptr && child[1] != nullptr)
+        {
+            bool leftValid = child[0]->DefragmentSlow();
+            bool rightValid = child[1]->DefragmentSlow();
+
+            if (!leftValid && !rightValid)
+            {
+                return false;
+            }
+
+            // Better defragmentation but very slow:
+            if (!atlasDefragmentDone)
+            {
+                if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
+                    child[1]->IsHeightSpan() && !child[1]->child[0]->IsValidRecursive() &&
+                    child[1]->child[1] != nullptr && child[1]->child[1]->IsWidthSpan() &&
+                    child[1]->child[1]->child[0] != nullptr && !child[1]->child[1]->child[0]->IsValidRecursive())
+                {
+                    Ptr<BinaryNode> nodeToMove = child[1]->child[1]->child[1];
+                    f32 splitX = child[1]->child[1]->child[0]->rect.max.x;
+
+                    child[0]->rect.max.x = splitX;
+                    child[1]->rect.min.x = splitX + 1;
+                    child[1]->child[0]->rect.min.x = splitX + 1;
+                    child[1]->child[1] = nodeToMove;
+                    nodeToMove->parent = child[1]->child[1];
+
+                    if (nodeToMove->IsHeightSpan() && !nodeToMove->child[0]->IsValidRecursive())
+                    {
+                    	Ptr<BinaryNode> contentNode = nodeToMove->child[1];
+                        child[1]->child[0]->rect.max.y = contentNode->rect.min.y - 1;
+                        child[1]->child[1] = contentNode;
+                        contentNode->parent = child[1]->child[1];
+                    }
+
+                    //atlasDefragmentDone = true;
+                }
+            }
+
+            return true;
+        }
+
+        return IsValid();
+    }
 } // namespace CE
 
