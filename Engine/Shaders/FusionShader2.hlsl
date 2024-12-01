@@ -26,7 +26,7 @@ struct PSInput
     float2 globalPos : TEXCOORD0;
     float2 uv : TEXCOORD1;
     float4 color : TEXCOORD2;
-    nointerpolation uint drawType : TEXCOORD3;
+    nointerpolation int drawType : TEXCOORD3;
     float2 clipPos : TEXCOORD4;
 };
 

@@ -27,7 +27,6 @@ namespace CE::RHI
 		MemoryHeap,
         RenderTarget,
         RenderTargetBuffer,
-        RenderPass,
         Viewport,
 		SwapChain,
         DeviceLimits,

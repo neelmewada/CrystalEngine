@@ -23,11 +23,6 @@ using namespace RenderingTests;
 static int windowWidth = 0;
 static int windowHeight = 0;
 
-namespace CE
-{
-	extern FUSIONCORE_API bool atlasDefragmentDone;
-}
-
 static void TestBegin(bool gui)
 {
 	gProjectPath = PlatformDirectories::GetLaunchDir();
@@ -216,6 +211,7 @@ static void AddRect()
 	{
 		node->imageId = Random::Range(0, colors.GetSize() - 1);
 		node->imageName = "Valid";
+		root->usedArea += imageSize.x * imageSize.y;
 	}
 }
 
@@ -224,6 +220,7 @@ static void RemoveRect()
 	auto node = root->FindUsedNode();
 	if (node != nullptr)
 	{
+		root->usedArea -= Math::RoundToInt(node->rect.GetSize().x * node->rect.GetSize().y);
 		node->ClearImage();
 	}
 	else
@@ -262,10 +259,10 @@ static void DoRectPacking(FusionRenderer2* renderer)
 					renderer->SetPen(FPen(Color::White().WithAlpha(0.8f), 1));
 					renderer->StrokeRect(Rect(node->rect.left + 1, node->rect.top + 1, node->rect.right - 1, node->rect.bottom - 1));
 				}
-
-				//renderer->SetPen(FPen(Color::White()));
-				//renderer->DrawText(node->IsValid() ? "1" : "0", node->rect.min + Vec2(5, 5));
 			});
+
+		renderer->SetPen(FPen(Color::White()));
+		renderer->DrawText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
 	}
 	renderer->PopChildCoordinateSpace();
 }
@@ -516,8 +513,6 @@ TEST(FusionCore, Rendering)
 		//root->Defragment();
 		root->DefragmentSlow();
 
-		CE::atlasDefragmentDone = false;
-
 		CE_LOG(Info, All, "Defragment Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
 	});
 
@@ -543,10 +538,6 @@ TEST(FusionCore, Rendering)
 
 	root = new FImageAtlas::BinaryNode;
 	root->rect = Rect(0, 0, 680, 460);
-
-	/*root->Insert(Vec2i(20, 460));
-	root->Insert(Vec2i(80, 460));
-	root->Insert(Vec2i(480, 460))->imageId = 2;*/
 	
 	for (int i = 0; i < rects.GetSize(); ++i)
 	{
@@ -555,6 +546,7 @@ TEST(FusionCore, Rendering)
 		{
 			node->imageId = i;
 			node->imageName = "Valid";
+			root->usedArea += rects[i].x * rects[i].y;
 		}
 		else
 		{
@@ -573,7 +565,7 @@ TEST(FusionCore, Rendering)
 	}
 
 	root->Defragment();
-	//root->Defragment2();
+	//root->DefragmentSlow();
 
 	while (!IsEngineRequestingExit())
 	{

@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_74" : {
+        "_73" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_77" : {
+        "_76" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_76" : {
+        "_75" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_77",
+                    "type" : "_76",
                     "array" : [
                         0
                     ],
@@ -71,7 +71,7 @@
                 }
             ]
         },
-        "_80" : {
+        "_79" : {
             "name" : "ClipRect",
             "members" : [
                 {
@@ -88,12 +88,12 @@
                 }
             ]
         },
-        "_79" : {
+        "_78" : {
             "name" : "type.StructuredBuffer.ClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_80",
+                    "type" : "_79",
                     "array" : [
                         0
                     ],
@@ -105,7 +105,7 @@
                 }
             ]
         },
-        "_82" : {
+        "_81" : {
             "name" : "type.PushConstant.RootConstants",
             "members" : [
                 {
@@ -145,7 +145,7 @@
             "location" : 2
         },
         {
-            "type" : "uint",
+            "type" : "int",
             "name" : "in.var.TEXCOORD3",
             "location" : 3
         },
@@ -192,7 +192,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_76",
+            "type" : "_75",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -200,7 +200,7 @@
             "binding" : 0
         },
         {
-            "type" : "_79",
+            "type" : "_78",
             "name" : "type.StructuredBuffer.ClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -210,7 +210,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_74",
+            "type" : "_73",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
@@ -219,7 +219,7 @@
     ],
     "push_constants" : [
         {
-            "type" : "_82",
+            "type" : "_81",
             "name" : "_RootConstants",
             "push_constant" : true
         }

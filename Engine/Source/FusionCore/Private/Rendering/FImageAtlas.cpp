@@ -10,12 +10,7 @@ namespace CE
 
     FImageAtlas::~FImageAtlas()
     {
-        for (int i = 0; i < atlasTexturesPerImage.GetSize(); ++i)
-        {
-            delete atlasTexturesPerImage[i];
-            atlasTexturesPerImage[i] = nullptr;
-        }
-        atlasLayers.Clear();
+        
     }
 
     void FImageAtlas::Init()
@@ -25,13 +20,15 @@ namespace CE
         if (atlasLayers.NotEmpty())
             return;
 
-        Ptr<FAtlasImage> atlas = new FAtlasImage;
-        atlas->ptr = new u8[atlasSize * atlasSize * sizeof(u32)];
-        memset(atlas->ptr, 0, atlasSize * atlasSize * sizeof(u32));
-        atlas->atlasSize = atlasSize;
+        Ptr<FAtlasImage> atlas = new FAtlasImage(atlasSize);
         atlas->layerIndex = 0;
 
         atlasLayers.Add(atlas);
+
+        auto fusionShader = FusionApplication::Get()->GetFusionShader2();
+
+        auto perDrawSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
+        textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
 
         RPI::TextureDescriptor textureDescriptor{};
         textureDescriptor.texture.width = textureDescriptor.texture.height = atlasSize;
@@ -39,7 +36,6 @@ namespace CE
         textureDescriptor.texture.depth = 1;
         textureDescriptor.texture.dimension = Dimension::Dim2D;
         textureDescriptor.texture.arrayLayers = atlasLayers.GetSize();
-        textureDescriptor.texture.name = "Fusion Image Atlas";
         textureDescriptor.texture.mipLevels = 1;
         textureDescriptor.texture.bindFlags = TextureBindFlags::ShaderRead;
         textureDescriptor.texture.format = Format::R8G8B8A8_UNORM;
@@ -52,10 +48,62 @@ namespace CE
         textureDescriptor.samplerDesc.enableAnisotropy = false;
         textureDescriptor.samplerDesc.samplerFilterMode = FilterMode::Linear;
 
-        for (int i = 0; i < atlasTexturesPerImage.GetSize(); ++i)
+        for (int i = 0; i < atlasTexturesPerFrame.GetSize(); ++i)
         {
-            atlasTexturesPerImage[i] = new RPI::Texture(textureDescriptor);
+            textureDescriptor.texture.name = String::Format("Fusion Image Atlas {}", i);
+
+            atlasTexturesPerFrame[i] = new RPI::Texture(textureDescriptor);
+
+            textureSrg->Bind(i, "_Texture", atlasTexturesPerFrame[i]->GetRhiTexture());
+            textureSrg->Bind(i, "_TextureSampler", atlasTexturesPerFrame[i]->GetSamplerState());
         }
+
+        RHI::BufferDescriptor stagingDesc{};
+        stagingDesc.name = "Staging Buffer";
+        stagingDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+        stagingDesc.bufferSize = atlasSize * atlasSize * sizeof(u32) * atlasLayers.GetSize();
+        stagingDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+
+        stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
+        stagingBufferFence = RHI::gDynamicRHI->CreateFence(true);
+
+        stagingCommandQueue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
+        stagingCommandList = RHI::gDynamicRHI->AllocateCommandList(stagingCommandQueue);
+
+        textureSrg->FlushBindings();
+
+        u8 pixels[16];
+        for (int i = 0; i < COUNTOF(pixels); ++i)
+        {
+            pixels[i] = NumericLimits<u8>::Max();
+        }
+        CMImage image = CMImage::LoadRawImageFromMemory(pixels, 4, 4, CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+        AddImage("__WhitePixel", image);
+    }
+
+    void FImageAtlas::Shutdown()
+    {
+        RHI::gDynamicRHI->DestroyShaderResourceGroup(textureSrg);
+        textureSrg = nullptr;
+
+        RHI::gDynamicRHI->DestroyBuffer(stagingBuffer);
+        stagingBuffer = nullptr;
+
+        RHI::gDynamicRHI->DestroyFence(stagingBufferFence);
+        stagingBufferFence = nullptr;
+
+        RHI::gDynamicRHI->FreeCommandLists(1, &stagingCommandList);
+        stagingCommandList = nullptr;
+        stagingCommandQueue = nullptr;
+
+        for (int i = 0; i < atlasTexturesPerFrame.GetSize(); ++i)
+        {
+            delete atlasTexturesPerFrame[i];
+            atlasTexturesPerFrame[i] = nullptr;
+        }
+
+    	atlasLayers.Clear();
+        imagesByName.Clear();
     }
 
     void FImageAtlas::Flush(u32 imageIndex)
@@ -65,7 +113,81 @@ namespace CE
         if (!flushRequiredPerImage[imageIndex])
             return;
 
+        if (atlasTexturesPerFrame[imageIndex]->GetRhiTexture()->GetArrayLayerCount() != atlasLayers.GetSize())
+        {
+            RPI::TextureDescriptor textureDescriptor{};
+            textureDescriptor.texture.width = textureDescriptor.texture.height = atlasSize;
+            textureDescriptor.texture.sampleCount = 1;
+            textureDescriptor.texture.depth = 1;
+            textureDescriptor.texture.dimension = Dimension::Dim2D;
+            textureDescriptor.texture.arrayLayers = atlasLayers.GetSize();
+            textureDescriptor.texture.name = String::Format("Fusion Image Atlas {}", imageIndex);
+            textureDescriptor.texture.mipLevels = 1;
+            textureDescriptor.texture.bindFlags = TextureBindFlags::ShaderRead;
+            textureDescriptor.texture.format = Format::R8G8B8A8_UNORM;
+            textureDescriptor.texture.defaultHeapType = MemoryHeapType::Upload;
+
+            textureDescriptor.samplerDesc.addressModeU = SamplerAddressMode::ClampToBorder;
+            textureDescriptor.samplerDesc.addressModeV = SamplerAddressMode::ClampToBorder;
+            textureDescriptor.samplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
+            textureDescriptor.samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
+            textureDescriptor.samplerDesc.enableAnisotropy = false;
+            textureDescriptor.samplerDesc.samplerFilterMode = FilterMode::Linear;
+
+            delete atlasTexturesPerFrame[imageIndex];
+
+            atlasTexturesPerFrame[imageIndex] = new RPI::Texture(textureDescriptor);
+            
+            textureSrg->Bind(imageIndex, "_Texture", atlasTexturesPerFrame[imageIndex]->GetRhiTexture());
+            textureSrg->Bind(imageIndex, "_TextureSampler", atlasTexturesPerFrame[imageIndex]->GetSamplerState());
+        }
+
+        textureSrg->FlushBindings();
         
+        // Copy data to image
+        {
+            RPI::Texture* atlasTexture = atlasTexturesPerFrame[imageIndex];
+            RHI::Texture* atlasRhiTexture = atlasTexture->GetRhiTexture();
+
+            auto commandList = stagingCommandList;
+
+            commandList->Begin();
+            {
+                ResourceBarrierDescriptor barrier{};
+                barrier.resource = stagingBuffer;
+                barrier.fromState = ResourceState::Undefined;
+                barrier.toState = ResourceState::CopySource;
+                commandList->ResourceBarrier(1, &barrier);
+
+                barrier.resource = atlasRhiTexture;
+                barrier.fromState = ResourceState::Undefined;
+                barrier.toState = ResourceState::CopyDestination;
+                commandList->ResourceBarrier(1, &barrier);
+
+                RHI::BufferToTextureCopy copy{};
+                copy.dstTexture = atlasRhiTexture;
+                copy.mipSlice = 0;
+                copy.baseArrayLayer = 0;
+                copy.layerCount = atlasLayers.GetSize();
+
+            	copy.srcBuffer = stagingBuffer;
+                copy.bufferOffset = 0;
+
+                commandList->CopyTextureRegion(copy);
+
+                barrier.resource = atlasRhiTexture;
+                barrier.fromState = ResourceState::CopyDestination;
+                barrier.toState = ResourceState::FragmentShaderResource;
+                commandList->ResourceBarrier(1, &barrier);
+            }
+            commandList->End();
+
+            stagingBufferFence->Reset();
+            stagingCommandQueue->Execute(1, &commandList, stagingBufferFence);
+            stagingBufferFence->WaitForFence();
+        }
+
+        flushRequiredPerImage[imageIndex] = false;
     }
 
     FImageAtlas::ImageItem FImageAtlas::AddImage(const Name& name, const CMImage& imageSource)
@@ -75,10 +197,11 @@ namespace CE
             return {};
         }
 
-        bool foundEmptySlot = false;
         Vec2i textureSize = Vec2i(imageSource.GetWidth(), imageSource.GetHeight());
-        int posX = -1, posY = -1;
+        u32 textureArea = textureSize.width * textureSize.height;
+
         Ptr<FAtlasImage> foundAtlas = nullptr;
+        Ptr<BinaryNode> insertNode = nullptr;
 
         u32 srcPixelSize = sizeof(u32);
         switch (imageSource.GetFormat())
@@ -125,39 +248,70 @@ namespace CE
         {
             Ptr<FAtlasImage> atlas = atlasLayers[i];
 
-            foundEmptySlot = atlas->FindInsertionPoint(textureSize, posX, posY);
+            insertNode = atlas->root->Insert(textureSize);
 
-            if (foundEmptySlot)
+            if (insertNode == nullptr && atlas->root->GetFreeArea() > textureArea * 2)
+            {
+                atlas->root->DefragmentSlow();
+                
+                insertNode = atlas->root->Insert(textureSize);
+            }
+
+            if (insertNode != nullptr)
             {
                 foundAtlas = atlas;
 	            break;
             }
         }
 
-        if (!foundEmptySlot)
+        if (insertNode == nullptr) // Need to create a new atlas layer
         {
-            Ptr<FAtlasImage> atlas = new FAtlasImage;
-            atlas->ptr = new u8[atlasSize * atlasSize * sizeof(u32)];
-            memset(atlas->ptr, 0, atlasSize * atlasSize * sizeof(u32));
-            atlas->atlasSize = atlasSize;
+            Ptr<FAtlasImage> atlas = new FAtlasImage(atlasSize);
             atlas->layerIndex = atlasLayers.GetSize();
-
             atlasLayers.Add(atlas);
 
-            foundEmptySlot = atlas->FindInsertionPoint(textureSize, posX, posY);
+            RHI::BufferDescriptor stagingDesc{};
+            stagingDesc.name = "Staging Buffer";
+            stagingDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+            stagingDesc.bufferSize = atlasSize * atlasSize * sizeof(u32) * atlasLayers.GetSize();
+            stagingDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
-            if (!foundEmptySlot)
+            RHI::Buffer* newStagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
+
+            void* data;
+            stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
+            {
+                newStagingBuffer->UploadData(data, stagingBuffer->GetBufferSize());
+            }
+            stagingBuffer->Unmap();
+
+            delete stagingBuffer;
+        	stagingBuffer = newStagingBuffer;
+
+            insertNode = atlas->root->Insert(textureSize);
+
+            if (insertNode == nullptr)
             {
                 return {};
             }
-            else
-            {
-                foundAtlas = atlas;
-            }
+
+            foundAtlas = atlas;
         }
+
+        insertNode->imageName = name;
+
+        foundAtlas->root->usedArea += textureArea;
+        foundAtlas->nodesByImageName[name] = insertNode;
+
+        int posX = Math::RoundToInt(insertNode->rect.min.x);
+        int posY = Math::RoundToInt(insertNode->rect.min.y);
 
         Vec2 uvMin = Vec2((f32)posX / (f32)foundAtlas->atlasSize, (f32)posY / (f32)foundAtlas->atlasSize);
         Vec2 uvMax = Vec2((f32)(posX + textureSize.width) / (f32)foundAtlas->atlasSize, (f32)(posY + textureSize.height) / (f32)foundAtlas->atlasSize);
+
+        void* stagingPtr;
+        stagingBuffer->Map((u32)foundAtlas->layerIndex * atlasSize * atlasSize * sizeof(u32), 
+            atlasSize * atlasSize * sizeof(u32), &stagingPtr);
 
         for (int x = 0; x < textureSize.x; ++x)
         {
@@ -165,7 +319,7 @@ namespace CE
 	        {
                 Vec2i dstPos = Vec2i(posX + x, posY + y);
 
-                u8* dstPixel = foundAtlas->ptr + (foundAtlas->atlasSize * dstPos.y + dstPos.x) * sizeof(u32);
+                u8* dstPixel = (u8*)stagingPtr + (foundAtlas->atlasSize * dstPos.y + dstPos.x) * sizeof(u32);
                 u8* srcPixel = (u8*)imageSource.GetDataPtr() + (textureSize.y * y + x) * srcPixelSize;
                 u8* r = dstPixel;
                 u8* g = dstPixel + 1;
@@ -228,20 +382,112 @@ namespace CE
 	        }
         }
 
+        stagingBuffer->Unmap();
+
         ImageItem item = { .layerIndex = foundAtlas->layerIndex, .uvMin = uvMin, .uvMax = uvMax };
 
         imagesByName[name] = item;
 
+        for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
+        {
+            flushRequiredPerImage[i] = true;
+        }
+
         return item;
     }
 
-    bool FImageAtlas::FAtlasImage::FindInsertionPoint(Vec2i textureSize, int& outX, int& outY)
+    bool FImageAtlas::RemoveImage(const Name& name)
     {
-        ZoneScoped;
+        if (!imagesByName.KeyExists(name))
+            return false;
 
-        
+        int layerIndex = imagesByName[name].layerIndex;
+        if (layerIndex < 0 || layerIndex >= atlasLayers.GetSize())
+            return false;
+
+        Ptr<FAtlasImage> atlas = atlasLayers[layerIndex];
+
+        if (!atlas->nodesByImageName.KeyExists(name))
+            return false;
+
+        Ptr<BinaryNode> node = atlas->nodesByImageName[name];
+        if (node == nullptr)
+            return false;
+
+        // Clean up the image pixels from the atlas (not necessary)
+        {
+            void* stagingPtr;
+            stagingBuffer->Map((u32)atlas->layerIndex * atlasSize * atlasSize * sizeof(u32),
+                atlasSize * atlasSize * sizeof(u32), &stagingPtr);
+
+            int posX = node->rect.min.x;
+            int posY = node->rect.min.y;
+            Vec2i textureSize = node->GetSize();
+
+            for (int x = 0; x < textureSize.x; ++x)
+            {
+                for (int y = 0; y < textureSize.y; ++y)
+                {
+                    Vec2i dstPos = Vec2i(posX + x, posY + y);
+
+                    u8* dstPixel = (u8*)stagingPtr + (atlas->atlasSize * dstPos.y + dstPos.x) * sizeof(u32);
+                    u8* r = dstPixel;
+                    u8* g = dstPixel + 1;
+                    u8* b = dstPixel + 2;
+                    u8* a = dstPixel + 3;
+
+                    memset(dstPixel, 0, sizeof(u32));
+                }
+            }
+
+            stagingBuffer->Unmap();
+        }
+
+        atlas->root->usedArea -= node->rect.GetAreaInt();
+        node->ClearImage();
+        atlas->root->Defragment();
+
+        for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
+        {
+            flushRequiredPerImage[i] = true;
+        }
+
+        atlas->nodesByImageName.Remove(name);
+        imagesByName.Remove(name);
 
         return true;
+    }
+
+    void FImageAtlas::BinaryNode::ClearImage()
+    {
+        imageName = Name();
+        imageId = -1;
+    }
+
+    Ptr<FImageAtlas::BinaryNode> FImageAtlas::BinaryNode::FindUsedNode()
+    {
+        if (IsValid())
+            return this;
+
+        if (child[0] != nullptr)
+        {
+            Ptr<BinaryNode> node = child[0]->FindUsedNode();
+            if (node != nullptr)
+            {
+                return node;
+            }
+        }
+
+        if (child[1] != nullptr)
+        {
+            Ptr<BinaryNode> node = child[1]->FindUsedNode();
+            if (node != nullptr)
+            {
+                return node;
+            }
+        }
+
+        return nullptr;
     }
 
     Ptr<FImageAtlas::BinaryNode> FImageAtlas::BinaryNode::Insert(Vec2i imageSize)
@@ -331,10 +577,10 @@ namespace CE
                 return false;
             }
 
-            // Better defragmentation but very slow:
-            //if (false)
+            // Perform basic defragmentation:
+            // Merge two empty consecutive columns OR rows into a single one!
+            // This can happen if the 2nd consecutive column/row is the 1st child of 2nd node.
             {
-                // TODO: It destroys valid rects too. Need to be fixed
                 if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
                     child[1]->IsWidthSpan() && !child[1]->child[0]->IsValidRecursive())
                 {
@@ -359,8 +605,6 @@ namespace CE
         return IsValid();
     }
 
-    FUSIONCORE_API bool atlasDefragmentDone = false;
-
     bool FImageAtlas::BinaryNode::DefragmentSlow()
     {
         if (child[0] != nullptr && child[1] != nullptr)
@@ -373,8 +617,7 @@ namespace CE
                 return false;
             }
 
-            // Better defragmentation but very slow:
-            if (!atlasDefragmentDone)
+            // Perform advanced defragmentation which is very slow:
             {
                 if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
                     child[1]->IsHeightSpan() && !child[1]->child[0]->IsValidRecursive() &&
@@ -397,8 +640,6 @@ namespace CE
                         child[1]->child[1] = contentNode;
                         contentNode->parent = child[1]->child[1];
                     }
-
-                    //atlasDefragmentDone = true;
                 }
             }
 

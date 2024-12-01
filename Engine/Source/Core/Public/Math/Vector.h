@@ -759,6 +759,16 @@ namespace CE
             return max - min;
         }
 
+        f32 GetArea() const
+        {
+            return GetSize().width * GetSize().height;
+        }
+
+        s32 GetAreaInt() const
+        {
+            return Math::RoundToInt(GetSize().width * GetSize().height);
+        }
+
         inline Vec4 ToVec4() const
         {
             return Vec4(left, top, right, bottom);

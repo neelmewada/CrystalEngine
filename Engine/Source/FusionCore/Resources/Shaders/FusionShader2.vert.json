@@ -167,7 +167,7 @@
             "location" : 2
         },
         {
-            "type" : "uint",
+            "type" : "int",
             "name" : "out.var.TEXCOORD3",
             "location" : 3
         },

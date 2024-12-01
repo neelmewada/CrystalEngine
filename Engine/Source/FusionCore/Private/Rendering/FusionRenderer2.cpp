@@ -461,6 +461,14 @@ namespace CE
                     drawPacket->shaderResourceGroups[0] = perObjectSrg;
                     drawPacket->shaderResourceGroups[1] = perViewSrg;
                     drawPacket->shaderResourceGroups[2] = drawCmdList[i].fontSrg;
+                    if (drawCmdList[i].textureSrgOverride != nullptr)
+                    {
+                        drawPacket->shaderResourceGroups[3] = drawCmdList[i].textureSrgOverride;
+                    }
+                    else
+                    {
+                        drawPacket->shaderResourceGroups[3] = FusionApplication::Get()->GetImageAtlas()->GetTextureSrg();
+                    }
 
                     memcpy((u8*)drawPacket->rootConstants, &drawCmdList[i].rootConstants, sizeof(FRootConstants));
 
@@ -492,6 +500,14 @@ namespace CE
                     builder.AddShaderResourceGroup(perObjectSrg);
                     builder.AddShaderResourceGroup(perViewSrg);
                     builder.AddShaderResourceGroup(drawCmdList[i].fontSrg);
+                    if (drawCmdList[i].textureSrgOverride != nullptr)
+                    {
+                        builder.AddShaderResourceGroup(drawCmdList[i].textureSrgOverride);
+                    }
+                    else
+                    {
+                        builder.AddShaderResourceGroup(FusionApplication::Get()->GetImageAtlas()->GetTextureSrg());
+                    }
 
                     builder.SetRootConstants((u8*)&drawCmdList[i].rootConstants, sizeof(FRootConstants));
 
@@ -1117,7 +1133,7 @@ namespace CE
 
         if (drawCmdList.GetCount() > 0)
         {
-            if (drawCmdList.Last().numIndices == 0)
+            if (drawCmdList.Last().numIndices == 0) // Reuse previous draw command
             {
                 if (fontAtlas)
                 {
@@ -1135,9 +1151,10 @@ namespace CE
             else
             {
                 drawCmd.firstInstance = transformIndex;
-                drawCmd.vertexOffset = 0;
+                drawCmd.vertexOffset = drawCmdList.Last().vertexOffset;
                 drawCmd.indexOffset = (u32)indexArray.GetCount();
                 drawCmd.numIndices = 0;
+                drawCmd.textureSrgOverride = nullptr;
                 
                 drawCmd.rootConstants.numClipRects = clipStack.GetCount();
                 int j = 0;
@@ -1159,7 +1176,18 @@ namespace CE
     {
         ZoneScoped;
 
-        int curVertexCount = vertexArray.GetCount();
+        // TODO: Add support for more than 65,536 vertices
+
+        u32 curVertexCount = vertexArray.GetCount();
+
+        if ((u32)vertexCurrentIdx + (u32)vertexCount >= (u32)NumericLimits<u16>::Max())
+        {
+            AddDrawCmd();
+
+            drawCmdList.Last().vertexOffset = vertexCurrentIdx;
+            vertexCurrentIdx = 0;
+        }
+
         vertexArray.InsertRange(vertexCount);
         vertexWritePtr = vertexArray.GetData() + curVertexCount;
 

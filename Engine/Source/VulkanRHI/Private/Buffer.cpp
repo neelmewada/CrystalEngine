@@ -302,6 +302,11 @@ namespace CE::Vulkan
 		if (isMapped)
 			return false;
 
+		if (size == 0)
+		{
+			size = bufferSize;
+		}
+
 		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			if (bufferMemory != nullptr) // Self allocated memory

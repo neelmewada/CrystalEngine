@@ -17,9 +17,12 @@ namespace CE
         // - Public API -
 
         void Init();
+        void Shutdown();
 
-        //! @brief Flushes all the changes to GPU
+        //! @brief Flushes all the changes to GPU.
         void Flush(u32 imageIndex);
+
+        RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
 
         // - Data Structures -
 
@@ -36,10 +39,22 @@ namespace CE
             StaticArray<Ptr<BinaryNode>, 2> child;
             BinaryNode* parent = nullptr;
             int totalChildren = 0;
+            u32 usedArea = 0;
 
             Rect rect;
             Name imageName;
+            // For debug use only!
             int imageId = -1;
+
+            u32 GetTotalArea() const
+            {
+                return Math::RoundToInt(rect.GetSize().width * rect.GetSize().height);
+            }
+
+            u32 GetFreeArea() const
+            {
+                return GetTotalArea() - usedArea;
+            }
 
             bool IsLeaf() const
             {
@@ -72,11 +87,7 @@ namespace CE
                 return Vec2i(Math::RoundToInt(rect.GetSize().width), Math::RoundToInt(rect.GetSize().height));
             }
 
-            void ClearImage()
-            {
-                imageName = Name();
-                imageId = -1;
-            }
+            void ClearImage();
 
             template<typename TFunc>
             void ForEachRecursive(const TFunc& visitor)
@@ -93,31 +104,7 @@ namespace CE
                 }
             }
 
-            Ptr<BinaryNode> FindUsedNode()
-            {
-                if (IsValid())
-                    return this;
-
-                if (child[0] != nullptr)
-                {
-                    Ptr<BinaryNode> node = child[0]->FindUsedNode();
-                    if (node != nullptr)
-                    {
-                        return node;
-                    }
-                }
-
-                if (child[1] != nullptr)
-                {
-                    Ptr<BinaryNode> node = child[1]->FindUsedNode();
-                    if (node != nullptr)
-                    {
-                        return node;
-                    }
-                }
-
-                return nullptr;
-            }
+            Ptr<BinaryNode> FindUsedNode();
 
             Ptr<BinaryNode> Insert(Vec2i imageSize);
 
@@ -125,27 +112,39 @@ namespace CE
             bool DefragmentSlow();
         };
 
-    private:
-
         // - Atlas -
 
         struct FAtlasImage : IntrusiveBase
         {
-            virtual ~FAtlasImage()
+            FAtlasImage(u32 atlasSize) : atlasSize(atlasSize)
             {
-                delete ptr; ptr = nullptr;
+                layerIndex = 0;
+                root = new BinaryNode;
+
+                root->rect = Rect(0, 0, atlasSize, atlasSize);
             }
 
-            u8* ptr = nullptr;
+            virtual ~FAtlasImage()
+            {
+                //delete ptr; ptr = nullptr;
+                root = nullptr;
+            }
+
+            //u8* ptr = nullptr;
             u32 atlasSize = 0;
             int layerIndex = 0;
 
-            bool FindInsertionPoint(Vec2i textureSize, int& outX, int& outY);
+            Ptr<BinaryNode> root = nullptr;
+            HashMap<Name, Ptr<BinaryNode>> nodesByImageName;
+
         };
 
-        // - Utils -
+        // - Utils API -
 
         ImageItem AddImage(const Name& name, const CMImage& imageSource);
+        bool RemoveImage(const Name& name);
+
+    private:
 
         // - Configs -
 
@@ -154,7 +153,13 @@ namespace CE
 
         // - Internals -
 
-        StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> atlasTexturesPerImage;
+        RHI::Buffer* stagingBuffer = nullptr;
+        RHI::Fence* stagingBufferFence = nullptr;
+        RHI::CommandList* stagingCommandList = nullptr;
+        RHI::CommandQueue* stagingCommandQueue = nullptr;
+
+        RHI::ShaderResourceGroup* textureSrg = nullptr;
+        StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> atlasTexturesPerFrame;
 
         Array<Ptr<FAtlasImage>> atlasLayers;
         StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> flushRequiredPerImage;

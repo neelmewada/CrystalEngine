@@ -407,6 +407,12 @@ namespace CE::RPI
 
     void RPISystem::QueueDestroy(RHI::RHIResource* rhiResource)
     {
+        if (!isInitialized)
+        {
+            delete rhiResource;
+	        return;
+        }
+
         LockGuard lock{ rhiDestructionQueueMutex };
 
         rhiDestructionQueue.Add({ .resource = rhiResource, .frameCounter = 0 });

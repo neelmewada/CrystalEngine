@@ -4,6 +4,7 @@
 namespace CE
 {
 	class FViewport;
+    class FImageAtlas;
 	class FNativeContext;
     class FFusionContext;
     class FLayoutManager;
@@ -42,6 +43,8 @@ namespace CE
         FStyleManager* GetStyleManager() const { return styleManager.Get(); }
 
         FRootContext* GetRootContext() const { return rootContext.Get(); }
+
+        FImageAtlas* GetImageAtlas() const { return imageAtlas.Get(); }
 
         f32 GetDefaultScalingFactor() const { return defaultScalingFactor; }
 
@@ -138,6 +141,9 @@ namespace CE
 
         FIELD()
         Ref<FStyleManager> styleManager = nullptr;
+
+        FIELD()
+        Ref<FImageAtlas> imageAtlas = nullptr;
 
         FIELD(Config)
         f32 defaultScalingFactor = 1.0f;

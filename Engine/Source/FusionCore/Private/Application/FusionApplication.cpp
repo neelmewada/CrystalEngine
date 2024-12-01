@@ -22,6 +22,7 @@ namespace CE
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
         styleManager = CreateDefaultSubobject<FStyleManager>("StyleManager");
         rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
+        imageAtlas = CreateDefaultSubobject<FImageAtlas>("ImageAtlas");
 
 #if PLATFORM_LINUX
         defaultScalingFactor = 1.3f;
@@ -58,6 +59,7 @@ namespace CE
         InitializeShader2();
 
         fontManager->Init();
+        imageAtlas->Init();
 
         IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
         engineResourceDir.RecursivelyIterateChildren([this](const IO::Path& path)
@@ -95,6 +97,8 @@ namespace CE
 
         delete textureSrg; textureSrg = nullptr;
         fontManager->Shutdown();
+
+        imageAtlas->Shutdown();
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
@@ -171,6 +175,8 @@ namespace CE
             CMImage image = CMImage::LoadFromFile(resourcePath);
             if (image.IsValid())
             {
+                imageAtlas->AddImage(imageName, image);
+
                 RPI::Texture* texture = new RPI::Texture(image);
                 image.Free();
 
@@ -406,6 +412,7 @@ namespace CE
     void FusionApplication::FlushDrawPackets(DrawListContext& drawList, u32 imageIndex)
     {
         fontManager->Flush(imageIndex);
+        imageAtlas->Flush(imageIndex);
 
         if (imageRegistryUpdated)
         {

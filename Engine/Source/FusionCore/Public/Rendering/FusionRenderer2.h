@@ -192,6 +192,7 @@ namespace CE
             u32 firstInstance = 0;
 
             RHI::ShaderResourceGroup* fontSrg = nullptr;
+            RHI::ShaderResourceGroup* textureSrgOverride = nullptr;
             FRootConstants rootConstants{};
         };
 

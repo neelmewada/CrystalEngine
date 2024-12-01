@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
 #include <limits>
 
 #define TO_RADIANS(Degrees) Degrees * (float)M_PI / 180.0f
@@ -25,9 +26,8 @@ namespace CE
         {
             f32* ptr = &floatValue;
             unsigned int fltInt32 = *((u32*)ptr);
-            u16 fltInt16;
 
-            fltInt16 = (fltInt32 >> 31) << 5;
+            u16 fltInt16 = (fltInt32 >> 31) << 5;
             u16 tmp = (fltInt32 >> 23) & 0xff;
             tmp = (tmp - 0x70) & ((unsigned int)((int)(0x70 - tmp) >> 4) >> 27);
             fltInt16 = (fltInt16 | tmp) << 10;
@@ -35,6 +35,31 @@ namespace CE
 
             return fltInt16;
         }
+
+        // Needs to be tested!
+        static f32 ToFloat32(u16 float16)
+        {
+            uint32_t t1;
+            uint32_t t2;
+            uint32_t t3;
+
+            t1 = float16 & 0x7fffu;                       // Non-sign bits
+            t2 = float16 & 0x8000u;                       // Sign bit
+            t3 = float16 & 0x7c00u;                       // Exponent
+
+            t1 <<= 13u;                              // Align mantissa on MSB
+            t2 <<= 16u;                              // Shift sign bit into position
+
+            t1 += 0x38000000;                       // Adjust bias
+
+            t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
+
+            t1 |= t2;                               // Re-insert sign bit
+
+            return *(f32*)(&t1);
+        }
+
+        static bool ApproxEquals(f32 a, f32 b) { return fpclassify(a - b) == FP_ZERO; }
 
         static constexpr f32 Infinity() { return NumericLimits<f32>::Infinity(); }
 
