@@ -204,6 +204,7 @@ namespace CE::Vulkan
         switch (desc.dimension)
         {
 		case RHI::Dimension::Dim2D:
+		case RHI::Dimension::Dim2DArray:
 		case RHI::Dimension::DimCUBE:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
             break;
@@ -297,6 +298,7 @@ namespace CE::Vulkan
 		switch (desc.dimension)
 		{
 		case RHI::Dimension::Dim2D:
+		case RHI::Dimension::Dim2DArray:
 		case RHI::Dimension::DimCUBE:
 			imageCI.imageType = VK_IMAGE_TYPE_2D;
 			break;
@@ -422,6 +424,9 @@ namespace CE::Vulkan
 		case RHI::Dimension::Dim2D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			break;
+		case Dimension::Dim2DArray:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+			break;
 		case RHI::Dimension::DimCUBE:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
 			break;
@@ -530,6 +535,9 @@ namespace CE::Vulkan
 			break;
 		case RHI::Dimension::Dim1D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
+			break;
+		case Dimension::Dim2DArray:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 			break;
 		}
 		imageViewCI.format = vkFormat;

@@ -128,6 +128,10 @@ float4 FragMain(PSInput input) : SV_TARGET
 		}
         break;
     default: // Just raw vertex color
+	    {
+		    float4 sample = _Texture.Sample(_TextureSampler, float3(input.uv.x, input.uv.y, 0));
+            color *= sample;
+	    }
 		break;
 	}
 

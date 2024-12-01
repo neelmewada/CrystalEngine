@@ -1299,8 +1299,7 @@ namespace CE
         if (points == nullptr || numPoints <= 0)
             return;
 
-        u32 color = currentBrush.GetFillColor().ToU32();
-        //Vec2 uv = whitePixelUV;
+        u32 color;
 
         auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
             {

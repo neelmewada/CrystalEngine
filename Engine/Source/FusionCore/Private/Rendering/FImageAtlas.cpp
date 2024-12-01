@@ -47,7 +47,7 @@ namespace CE
         textureDescriptor.texture.width = textureDescriptor.texture.height = atlasSize;
         textureDescriptor.texture.sampleCount = 1;
         textureDescriptor.texture.depth = 1;
-        textureDescriptor.texture.dimension = Dimension::Dim2D;
+        textureDescriptor.texture.dimension = Dimension::Dim2DArray;
         textureDescriptor.texture.arrayLayers = atlasLayers.GetSize();
         textureDescriptor.texture.mipLevels = 1;
         textureDescriptor.texture.bindFlags = TextureBindFlags::ShaderRead;
@@ -132,7 +132,7 @@ namespace CE
             textureDescriptor.texture.width = textureDescriptor.texture.height = atlasSize;
             textureDescriptor.texture.sampleCount = 1;
             textureDescriptor.texture.depth = 1;
-            textureDescriptor.texture.dimension = Dimension::Dim2D;
+            textureDescriptor.texture.dimension = Dimension::Dim2DArray;
             textureDescriptor.texture.arrayLayers = atlasLayers.GetSize();
             textureDescriptor.texture.name = String::Format("Fusion Image Atlas {}", imageIndex);
             textureDescriptor.texture.mipLevels = 1;
@@ -216,47 +216,6 @@ namespace CE
         Ptr<FAtlasImage> foundAtlas = nullptr;
         Ptr<BinaryNode> insertNode = nullptr;
 
-        u32 srcPixelSize = sizeof(u32);
-        switch (imageSource.GetFormat())
-        {
-        case CMImageFormat::Undefined:
-            return {};
-        case CMImageFormat::R8:
-            srcPixelSize = sizeof(u8);
-            break;
-        case CMImageFormat::RG8:
-            srcPixelSize = sizeof(u8) * 2;
-            break;
-        case CMImageFormat::RGB8:
-        case CMImageFormat::RGBA8:
-            srcPixelSize = sizeof(u8) * 4;
-            break;
-        case CMImageFormat::R32:
-            srcPixelSize = sizeof(f32);
-            break;
-        case CMImageFormat::RG32:
-            srcPixelSize = sizeof(f32) * 2;
-            break;
-        case CMImageFormat::RGB32:
-            srcPixelSize = sizeof(f32) * 4;
-            break;
-        case CMImageFormat::RGBA32:
-            srcPixelSize = sizeof(f32) * 4;
-            break;
-        case CMImageFormat::R16:
-            srcPixelSize = sizeof(u16);
-            break;
-        case CMImageFormat::RG16:
-            srcPixelSize = sizeof(u16) * 2;
-            break;
-        case CMImageFormat::RGB16:
-            srcPixelSize = sizeof(u16) * 4;
-            break;
-        case CMImageFormat::RGBA16:
-            srcPixelSize = sizeof(u16) * 4;
-            break;
-        }
-
         for (int i = 0; i < atlasLayers.GetSize(); ++i)
         {
             Ptr<FAtlasImage> atlas = atlasLayers[i];
@@ -326,14 +285,19 @@ namespace CE
         stagingBuffer->Map((u32)foundAtlas->layerIndex * atlasSize * atlasSize * sizeof(u32), 
             atlasSize * atlasSize * sizeof(u32), &stagingPtr);
 
-        for (int x = 0; x < textureSize.x; ++x)
+        if (name == "/Engine/Resources/Icons/Test")
         {
-	        for (int y = 0; y < textureSize.y; ++y)
+            String::IsAlphabet('a');
+        }
+
+        for (int y = 0; y < textureSize.y; ++y)
+        {
+            for (int x = 0; x < textureSize.x; ++x)
 	        {
                 Vec2i dstPos = Vec2i(posX + x, posY + y);
-
+                
                 u8* dstPixel = (u8*)stagingPtr + (foundAtlas->atlasSize * dstPos.y + dstPos.x) * sizeof(u32);
-                u8* srcPixel = (u8*)imageSource.GetDataPtr() + (textureSize.y * y + x) * srcPixelSize;
+                u8* srcPixel = (u8*)imageSource.GetDataPtr() + (SIZE_T)(textureSize.x * y + x) * (SIZE_T)imageSource.GetBitsPerPixel() / 8;
                 u8* r = dstPixel;
                 u8* g = dstPixel + 1;
                 u8* b = dstPixel + 2;

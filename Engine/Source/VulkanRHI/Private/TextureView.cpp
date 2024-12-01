@@ -32,6 +32,9 @@ namespace CE::Vulkan
         case RHI::Dimension::Dim1D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
             break;
+		case Dimension::Dim2DArray:
+            imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+			break;
         }
 
         bool isDepthFormat = IsDepthVkFormat(imageViewCI.format);

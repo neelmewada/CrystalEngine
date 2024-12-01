@@ -125,7 +125,8 @@ namespace CE::RHI
         //! Exactly same as Dim2D but is reserved for CubeMaps.
         DimCUBE,
         Dim3D,
-        Dim1D
+        Dim1D,
+        Dim2DArray
     };
 
 	ENUM()

@@ -61,8 +61,8 @@ namespace CE
         fontManager->Init();
         imageAtlas->Init();
 
-        IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
-        engineResourceDir.RecursivelyIterateChildren([this](const IO::Path& path)
+        IO::Path iconResourcesDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
+        iconResourcesDir.RecursivelyIterateChildren([this](const IO::Path& path)
             {
                 if (path.IsDirectory())
                     return;
@@ -178,6 +178,7 @@ namespace CE
                 imageAtlas->AddImage(imageName, image);
 
                 RPI::Texture* texture = new RPI::Texture(image);
+
                 image.Free();
 
                 if (texture->GetRhiTexture() != nullptr)

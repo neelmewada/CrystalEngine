@@ -290,7 +290,7 @@ static void DoPaint(FusionRenderer2* renderer)
 		pen.SetColor(Color::White());
 		renderer->SetPen(pen);
 
-		renderer->DrawText("Hello World!", Vec2(0, 0));
+		renderer->DrawText("Hello World 1234567890", Vec2(0, 0));
 
 		Vec2 arcPos = Vec2(60, 60);
 		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
@@ -322,8 +322,12 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
 	renderer->PathStroke();
 
+	renderer->SetBrush(FBrush("/Engine/Resources/Icons/Test"));
+	renderer->PathRect(Rect::FromSize(0, 40, 300, 200));
+	renderer->PathFill();
+
 	renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
-	renderer->PathRect(Rect::FromSize(100, 100, 200, 200));
+	renderer->PathRect(Rect::FromSize(250, 250, 100, 100));
 	renderer->PathFill();
 
 	//DoRectPacking(renderer);
