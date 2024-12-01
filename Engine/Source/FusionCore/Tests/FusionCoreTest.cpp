@@ -263,17 +263,35 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnClicked([this]
                                     {
+                                        m_OnDefragment.Broadcast();
+                                    })
+                                .Padding(Vec4(16, 8, 16, 8))
+                                .Name("DefragmentButton")
+                                .Style("Button.WindowControl")
+                                .VAlign(VAlign::Top)
+                                (
+                                    FNew(FImage)
+                                    .Background(FBrush("/Engine/Resources/Icons/Warning"))
+                                    .Width(12)
+                                    .Height(12)
+                                    .HAlign(HAlign::Center)
+                                    .VAlign(VAlign::Center)
+                                ),
+
+                                FNew(FButton)
+                                .OnClicked([this]
+                                    {
                                         m_OnRemove.Broadcast();
                                     })
-                                .Padding(Vec4(17, 8, 17, 8))
+                                .Padding(Vec4(16, 8, 16, 8))
                                 .Name("DeleteButton")
                                 .Style("Button.WindowControl")
                                 .VAlign(VAlign::Top)
                                 (
                                     FNew(FImage)
                                     .Background(FBrush("/Engine/Resources/Icons/Delete"))
-                                    .Width(11)
-                                    .Height(11)
+                                    .Width(12)
+                                    .Height(12)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
                                 ),

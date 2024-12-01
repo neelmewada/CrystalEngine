@@ -245,7 +245,7 @@ static void DoRectPacking(FusionRenderer2* renderer)
 
 					renderer->FillRect(node->rect);
 				}
-
+				
 				if (node->child[0] != nullptr || node->child[1] != nullptr)
 				{
 					renderer->SetPen(FPen(Color::Red(), 1.5f));
@@ -254,7 +254,7 @@ static void DoRectPacking(FusionRenderer2* renderer)
 				else
 				{
 					renderer->SetPen(FPen(Color::White().WithAlpha(0.8f), 1));
-					renderer->StrokeRect(node->rect);
+					renderer->StrokeRect(Rect(node->rect.left + 1, node->rect.top + 1, node->rect.right - 1, node->rect.bottom - 1));
 				}
 
 				//renderer->SetPen(FPen(Color::White()));
@@ -535,6 +535,11 @@ TEST(FusionCore, Rendering)
 	root = new BinaryNode;
 	root->rect = Rect(0, 0, 680, 460);
 
+	root->Insert(Vec2i(20, 460));
+	root->Insert(Vec2i(80, 460));
+	root->Insert(Vec2i(480, 460))->imageId = 2;
+
+	/*
 	for (int i = 0; i < rects.GetSize(); ++i)
 	{
 		Ptr<BinaryNode> node = root->Insert(rects[i]);
@@ -547,6 +552,7 @@ TEST(FusionCore, Rendering)
 			String::IsAlphabet('a');
 		}
 	}
+	*/
 
 	while (!IsEngineRequestingExit())
 	{

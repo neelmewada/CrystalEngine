@@ -219,7 +219,7 @@ namespace RenderingTests
 			}
 
 			// Better defragmentation but very slow:
-			//if (child[0]->IsWidthSpan() && child[1]->IsWidthSpan())
+			if (false)
 			{
 				// TODO: It destroys valid rects too. Need to be fixed
 				if (IsWidthSpan() && !leftValid && child[1]->child[0] != nullptr &&
