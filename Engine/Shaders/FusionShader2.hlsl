@@ -8,7 +8,11 @@
 enum FDrawType
 {
     DRAW_Geometry = 0,
-    DRAW_Text = -1
+    DRAW_Text,
+    DRAW_TextureNoTile,
+    DRAW_TextureTileX,
+    DRAW_TextureTileY,
+    DRAW_TextureTileXY,
 };
 
 struct VSInput
@@ -17,6 +21,7 @@ struct VSInput
     float2  uv : TEXCOORD0;
     float4  color : COLOR0;
     int     drawType : TEXCOORD1;
+    int     index	 : TEXCOORD2;
     uint    instanceId : SV_INSTANCEID;
 };
 
@@ -28,6 +33,7 @@ struct PSInput
     float4 color : TEXCOORD2;
     nointerpolation int drawType : TEXCOORD3;
     float2 clipPos : TEXCOORD4;
+    nointerpolation int index : TEXCOORD5;
 };
 
 #define InstanceIdx input.instanceId
@@ -67,6 +73,7 @@ PSInput VertMain(VSInput input)
     o.uv = input.uv;
     o.color = input.color;
     o.drawType = input.drawType;
+    o.index = input.index;
     if (ROOT_CONSTANT(numClipRects) > 0)
     {
 	    o.clipPos = mul(float4(o.globalPos.xy, 0, 1.0), _ClipRects[ROOT_CONSTANT(clipRectIndices[0])].clipRectTransform).xy;
@@ -118,7 +125,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         clipSdf = max(clipSdf, sd);
     }
-
+    
 	switch ((FDrawType)input.drawType)
 	{
 	case DRAW_Text: // Font glyph
@@ -127,11 +134,16 @@ float4 FragMain(PSInput input) : SV_TARGET
 			color = float4(input.color.rgb, input.color.a * alpha);
 		}
         break;
-    default: // Just raw vertex color
+    case DRAW_TextureNoTile: // Draw texture
+    case DRAW_TextureTileX:
+    case DRAW_TextureTileY:
+    case DRAW_TextureTileXY:
 	    {
 		    float4 sample = _Texture.Sample(_TextureSampler, float3(input.uv.x, input.uv.y, 0));
             color *= sample;
 	    }
+		break;
+    default:
 		break;
 	}
 

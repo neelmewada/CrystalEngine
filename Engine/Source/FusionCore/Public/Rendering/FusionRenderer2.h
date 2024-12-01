@@ -167,7 +167,11 @@ namespace CE
         enum FDrawType : int
         {
 	        DRAW_Geometry = 0,
-            DRAW_Text = -1
+            DRAW_Text,
+            DRAW_TextureNoTile,
+            DRAW_TextureTileX,
+            DRAW_TextureTileY,
+            DRAW_TextureTileXY,
         };
 
         struct DestroyItem
@@ -202,12 +206,13 @@ namespace CE
             Vec2 size = Vec2();
         };
 
-        struct alignas(8) FVertex
+        struct FVertex
         {
             Vec2 position;
             Vec2 uv;
             u32 color = Color::White().ToU32();
             FDrawType drawType = DRAW_Geometry;
+            int index = -1;
         };
 
         struct FCoordinateSpace

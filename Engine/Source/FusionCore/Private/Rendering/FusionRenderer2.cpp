@@ -1300,6 +1300,7 @@ namespace CE
             return;
 
         u32 color;
+        FDrawType drawType = DRAW_Geometry;
 
         auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
             {
@@ -1319,6 +1320,7 @@ namespace CE
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
             color = currentBrush.GetTintColor().ToU32();
+            drawType = DRAW_TextureNoTile;
         }
         else
         {
@@ -1384,7 +1386,10 @@ namespace CE
                 // Add vertices
                 vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
                 vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = calcUV(pos1); vertexWritePtr[1].color = transparentColor;  // Outer
-                vertexWritePtr += 2;
+                vertexWritePtr[0].drawType = drawType;
+                vertexWritePtr[1].drawType = drawType;
+                
+            	vertexWritePtr += 2;
                 
                 // Add indexes for fringes
                 indexWritePtr[0] = (FDrawIndex)(vertexInnerIdx + (i1 << 1)); indexWritePtr[1] = (FDrawIndex)(vertexInnerIdx + (i0 << 1)); indexWritePtr[2] = (FDrawIndex)(vertexOuterIdx + (i0 << 1));
@@ -1406,6 +1411,7 @@ namespace CE
                 vertexWritePtr[0].position = points[i] + offset;
                 vertexWritePtr[0].uv = calcUV(points[i]);
                 vertexWritePtr[0].color = color;
+                vertexWritePtr[0].drawType = drawType;
                 vertexWritePtr++;
             }
 

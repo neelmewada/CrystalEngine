@@ -839,7 +839,10 @@ namespace CE
         variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
 
-        variantDesc.reflectionInfo.vertexInputs.Add("COLOR1");
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD1");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD2");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
 
         ShaderTagEntry cullMode{};

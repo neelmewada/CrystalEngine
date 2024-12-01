@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_59" : {
+        "_62" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_62" : {
+        "_65" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_61" : {
+        "_64" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_62",
+                    "type" : "_65",
                     "array" : [
                         0
                     ],
@@ -71,7 +71,7 @@
                 }
             ]
         },
-        "_65" : {
+        "_68" : {
             "name" : "ClipRect",
             "members" : [
                 {
@@ -88,12 +88,12 @@
                 }
             ]
         },
-        "_64" : {
+        "_67" : {
             "name" : "type.StructuredBuffer.ClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_65",
+                    "type" : "_68",
                     "array" : [
                         0
                     ],
@@ -105,7 +105,7 @@
                 }
             ]
         },
-        "_67" : {
+        "_70" : {
             "name" : "type.PushConstant.RootConstants",
             "members" : [
                 {
@@ -148,6 +148,11 @@
             "type" : "int",
             "name" : "in.var.TEXCOORD1",
             "location" : 3
+        },
+        {
+            "type" : "int",
+            "name" : "in.var.TEXCOORD2",
+            "location" : 4
         }
     ],
     "outputs" : [
@@ -175,11 +180,16 @@
             "type" : "vec2",
             "name" : "out.var.TEXCOORD4",
             "location" : 4
+        },
+        {
+            "type" : "int",
+            "name" : "out.var.TEXCOORD5",
+            "location" : 5
         }
     ],
     "ssbos" : [
         {
-            "type" : "_61",
+            "type" : "_64",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -187,7 +197,7 @@
             "binding" : 0
         },
         {
-            "type" : "_64",
+            "type" : "_67",
             "name" : "type.StructuredBuffer.ClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -197,7 +207,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_59",
+            "type" : "_62",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
@@ -206,7 +216,7 @@
     ],
     "push_constants" : [
         {
-            "type" : "_67",
+            "type" : "_70",
             "name" : "_RootConstants",
             "push_constant" : true
         }
