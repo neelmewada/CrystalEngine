@@ -245,7 +245,7 @@ namespace RenderingTests
 
                                 FNew(FLabel)
                                 .FontSize(15)
-                                .Text("Widget 123")
+                                .Text("0123456789")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
 

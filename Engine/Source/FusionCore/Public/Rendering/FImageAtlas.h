@@ -23,6 +23,7 @@ namespace CE
         RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
 
         Vec2 GetWhitePixelUV() const;
+        Vec2 GetTransparentPixelUV() const;
 
         ImageItem FindImage(const Name& imageName);
 
@@ -40,6 +41,7 @@ namespace CE
         {
             int layerIndex = -1;
             Vec2 uvMin, uvMax;
+            u32 width = 0, height = 0;
 
             bool IsValid() const { return layerIndex >= 0; }
         };
@@ -178,6 +180,7 @@ namespace CE
 
         HashMap<Name, ImageItem> imagesByName;
         ImageItem whitePixel{};
+        ImageItem transparentPixel{};
 
     };
     

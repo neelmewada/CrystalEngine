@@ -33,6 +33,7 @@ namespace CE
         multisampling = initInfo.multisampling;
 
         whitePixelUV = FusionApplication::Get()->GetImageAtlas()->GetWhitePixelUV();
+        transparentPixelUV = FusionApplication::Get()->GetImageAtlas()->GetTransparentPixelUV();
 
         auto perObjectSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
         auto perViewSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerView);
@@ -44,6 +45,7 @@ namespace CE
 
         objectDataBuffer.Init("ObjectData", initialObjectCount, numFrames);
         clipRectBuffer.Init("ClipRects", initialClipRectCount, numFrames);
+        drawDataBuffer.Init("DrawData", initialDrawDataCount, numFrames);
 
         for (int i = 0; i < numFrames; ++i)
         {
@@ -75,6 +77,7 @@ namespace CE
 
             perObjectSrg->Bind(i, "_Objects", objectDataBuffer.GetBuffer(i));
             perObjectSrg->Bind(i, "_ClipRects", clipRectBuffer.GetBuffer(i));
+            perObjectSrg->Bind(i, "_DrawData", drawDataBuffer.GetBuffer(i));
         }
 
         perViewSrg->FlushBindings();
@@ -95,6 +98,7 @@ namespace CE
 
         objectDataBuffer.Shutdown();
         clipRectBuffer.Shutdown();
+        drawDataBuffer.Shutdown();
 
         while (freePackets.NotEmpty())
         {
@@ -194,8 +198,8 @@ namespace CE
 
             if (clipRectArray.GetCount() > clipRectBuffer.GetElementCount())
             {
-                u32 totalElementRequired = Math::Max<u32>(clipRectArray.GetCount(), clipRectBuffer.GetElementCount() + clipRectGrowCount);
-                clipRectBuffer.GrowToFit(totalElementRequired);
+                u32 totalElementsRequired = Math::Max<u32>(clipRectArray.GetCount(), clipRectBuffer.GetElementCount() + clipRectGrowCount);
+                clipRectBuffer.GrowToFit(totalElementsRequired);
 
                 for (int i = 0; i < numFrames; ++i)
                 {
@@ -205,8 +209,8 @@ namespace CE
 
             if (objectDataArray.GetCount() > objectDataBuffer.GetElementCount())
             {
-                u32 totalElementRequired = Math::Max<u32>(objectDataArray.GetCount(), objectDataBuffer.GetElementCount() + objectDataGrowCount);
-                objectDataBuffer.GrowToFit(totalElementRequired);
+                u32 totalElementsRequired = Math::Max<u32>(objectDataArray.GetCount(), objectDataBuffer.GetElementCount() + objectDataGrowCount);
+                objectDataBuffer.GrowToFit(totalElementsRequired);
 
                 for (int i = 0; i < numFrames; ++i)
                 {
@@ -227,6 +231,23 @@ namespace CE
             if (clipRectArray.GetCount() > 0)
             {
                 clipRectBuffer.GetBuffer(imageIndex)->UploadData(clipRectArray.GetData(), clipRectArray.GetCount() * sizeof(FClipRect));
+            }
+
+            if (drawDataArray.GetCount() > 0)
+            {
+                if (drawDataArray.GetCount() > drawDataBuffer.GetElementCount())
+                {
+                    u32 totalElementsRequired = Math::Max<u32>(drawDataArray.GetCount(), 
+                        Math::RoundToInt(drawDataBuffer.GetElementCount() * (1 + drawDataGrowRatio)));
+                    drawDataBuffer.GrowToFit(totalElementsRequired);
+
+                    for (int i = 0; i < numFrames; ++i)
+                    {
+                        perObjectSrg->Bind(i, "_DrawData", drawDataBuffer.GetBuffer(i));
+                    }
+                }
+
+                drawDataBuffer.GetBuffer(imageIndex)->UploadData(drawDataArray.GetData(), drawDataArray.GetCount() * sizeof(FDrawData));
             }
 
             quadUpdatesRequired[imageIndex] = false;
@@ -421,6 +442,7 @@ namespace CE
         objectDataArray.RemoveAll();
         clipRectArray.RemoveAll();
         clipStack.RemoveAll();
+        drawDataArray.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
@@ -865,10 +887,10 @@ namespace CE
         case FBrushStyle::None:
 	        break;
         case FBrushStyle::SolidFill:
-            AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased);
+            AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased);
 	        break;
         case FBrushStyle::Image:
-            AddConvexPolySolidFill(path.GetData(), path.GetCount(), antiAliased, &minMax);
+            AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased, &minMax);
 	        break;
         case FBrushStyle::LinearGradient:
 	        break;
@@ -905,10 +927,10 @@ namespace CE
         case FBrushStyle::None:
 	        break;
         case FBrushStyle::SolidFill:
-            AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased);
+            AddConvexPolyFilled(path.GetData(), (int)path.GetCount(), antiAliased);
 	        break;
         case FBrushStyle::Image:
-            AddConvexPolySolidFill(path.GetData(), (int)path.GetCount(), antiAliased, &minMax);
+            AddConvexPolyFilled(path.GetData(), (int)path.GetCount(), antiAliased, &minMax);
 	        break;
         case FBrushStyle::LinearGradient:
 	        break;
@@ -1155,7 +1177,8 @@ namespace CE
         FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
 
         FDrawCmd drawCmd{};
-
+        drawCmd.rootConstants.transparentUV = transparentPixelUV;
+        
         if (fontAtlas)
         {
             drawCmd.fontSrg = fontAtlas->GetFontSrg2();
@@ -1292,7 +1315,7 @@ namespace CE
         PathFill(antiAliased);
     }
 
-    void FusionRenderer2::AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos)
+    void FusionRenderer2::AddConvexPolyFilled(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos)
     {
         ZoneScoped;
 
@@ -1302,10 +1325,131 @@ namespace CE
         u32 color;
         FDrawType drawType = DRAW_Geometry;
 
+        if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
+        {
+            color = currentBrush.GetTintColor().ToU32();
+            drawType = DRAW_TextureNoTile;
+
+            Vec2 brushSize = currentBrush.GetBrushSize();
+            Vec2 brushPos = currentBrush.GetBrushPosition();
+            FImageFit imageFit = currentBrush.GetImageFit();
+            FBrushTiling tiling = currentBrush.GetBrushTiling();
+
+            bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
+            bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+            bool autoSizeX = brushSize.x < 0;
+            bool autoSizeY = brushSize.y < 0;
+
+            FDrawData drawData{};
+
+            auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            if (image.IsValid())
+            {
+                Vec2 imageSize = Vec2(image.width, image.height);
+                drawData.rectSize = minMaxPos->GetSize();
+                drawData.index = image.layerIndex;
+                drawData.imageFit = (int)currentBrush.GetImageFit();
+                drawData.uvMin = image.uvMin;
+                drawData.uvMax = image.uvMax;
+
+                switch (currentBrush.GetImageFit())
+                {
+                case FImageFit::None:
+                case FImageFit::Fill:
+                    if (autoSizeX)
+                        brushSize.x = image.width;
+                    if (autoSizeY)
+                        brushSize.y = image.height;
+	                break;
+                case FImageFit::Contain:
+                    if (autoSizeX && autoSizeY)
+                    {
+                        float scale = Math::Min(drawData.rectSize.width / imageSize.width, drawData.rectSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else if (autoSizeX)
+                    {
+                        float scale = Math::Min(drawData.rectSize.width / imageSize.width, brushSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else if (autoSizeY)
+                    {
+                        float scale = Math::Min(brushSize.width / imageSize.width, drawData.rectSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else
+                    {
+                        float scale = Math::Min(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+	                break;
+                case FImageFit::Cover:
+                    if (autoSizeX && autoSizeY)
+                    {
+                        float scale = Math::Max(drawData.rectSize.width / imageSize.width, drawData.rectSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else if (autoSizeX)
+                    {
+                        float scale = Math::Max(drawData.rectSize.width / imageSize.width, brushSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else if (autoSizeY)
+                    {
+                        float scale = Math::Max(brushSize.width / imageSize.width, drawData.rectSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+                    else
+                    {
+                        float scale = Math::Max(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
+                        brushSize.x = imageSize.width * scale;
+                        brushSize.y = imageSize.height * scale;
+                    }
+	                break;
+                }
+
+                switch (currentBrush.GetBrushTiling())
+                {
+                case FBrushTiling::None:
+                    drawType = DRAW_TextureNoTile;
+                    break;
+                case FBrushTiling::TileX:
+                    drawType = DRAW_TextureTileX;
+                    break;
+                case FBrushTiling::TileY:
+                    drawType = DRAW_TextureTileY;
+                    break;
+                case FBrushTiling::TileXY:
+                    drawType = DRAW_TextureTileXY;
+                    break;
+                }
+
+                drawData.brushSize = brushSize;
+                drawData.brushPos = brushPos;
+
+                drawDataArray.Insert(drawData);
+            }
+        }
+        else
+        {
+            minMaxPos = nullptr;
+            color = currentBrush.GetFillColor().ToU32();
+        }
+
         auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
             {
                 if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
                 {
+                    return Vec2(Math::Clamp01((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x)),
+                        Math::Clamp01((pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y)));
+
                 	auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
                     if (image.IsValid())
                     {
@@ -1316,17 +1460,6 @@ namespace CE
                 }
                 return whitePixelUV;
             };
-
-        if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
-        {
-            color = currentBrush.GetTintColor().ToU32();
-            drawType = DRAW_TextureNoTile;
-        }
-        else
-        {
-            minMaxPos = nullptr;
-            color = currentBrush.GetFillColor().ToU32();
-        }
 
         Vec2 offset = Vec2();
         if (coordinateSpaceStack.Last().isTranslationOnly)
@@ -1386,8 +1519,8 @@ namespace CE
                 // Add vertices
                 vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
                 vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = calcUV(pos1); vertexWritePtr[1].color = transparentColor;  // Outer
-                vertexWritePtr[0].drawType = drawType;
-                vertexWritePtr[1].drawType = drawType;
+                vertexWritePtr[0].drawType = drawType; vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;
+                vertexWritePtr[1].drawType = drawType; vertexWritePtr[1].index = (int)drawDataArray.GetCount() - 1;
                 
             	vertexWritePtr += 2;
                 
@@ -1412,6 +1545,7 @@ namespace CE
                 vertexWritePtr[0].uv = calcUV(points[i]);
                 vertexWritePtr[0].color = color;
                 vertexWritePtr[0].drawType = drawType;
+                vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;
                 vertexWritePtr++;
             }
 

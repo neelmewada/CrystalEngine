@@ -24,6 +24,7 @@ namespace CE
         static constexpr u32 DrawCmdArrayIncrement = 128;
         static constexpr u32 ObjectDataArrayIncrement = 128;
         static constexpr u32 ClipRectArrayIncrement = 32;
+        static constexpr u32 DrawDataArrayIncrement = 128;
         static constexpr u32 ArcFastTableSize = 48;
 
         static constexpr int CircleAutoSegmentMin = 4;
@@ -120,7 +121,7 @@ namespace CE
 
         void AddRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
         void AddRectFilled(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
-        void AddConvexPolySolidFill(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos = nullptr);
+        void AddConvexPolyFilled(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos = nullptr);
         void AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased);
         void AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
         void AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
@@ -152,12 +153,23 @@ namespace CE
         u32 clipRectGrowCount = 128;
 
         FIELD(Config)
+        u32 initialDrawDataCount = 512;
+
+        FIELD(Config)
+        f32 drawDataGrowRatio = 0.3f;
+
+        FIELD(Config)
         f32 circleSegmentMaxError = 0.3f;
 
         FIELD(Config)
         f32 curveTessellationTolerance = 1.25f;
 
         // - Data Structures -
+
+        using float4x4 = Matrix4x4;
+        using float2 = Vec2;
+        using float4 = Vec4;
+        using uint = u32;
 
         struct alignas(16) FObjectData
         {
@@ -174,6 +186,18 @@ namespace CE
             DRAW_TextureTileXY,
         };
 
+        struct alignas(8) FDrawData
+        {
+            float2 rectSize;
+            float2 uvMin;
+            float2 uvMax;
+            float2 brushPos;
+            float2 brushSize;
+            // Index into texture Array
+            int index = 0;
+            int imageFit = 0;
+        };
+
         struct DestroyItem
         {
             RHI::Buffer* buffer = nullptr;
@@ -184,6 +208,7 @@ namespace CE
 
         struct FRootConstants
         {
+            float2 transparentUV;
             u32 numClipRects = 0;
             u32 clipRectIndices[MaxClipRectStack] = {};
         };
@@ -233,6 +258,7 @@ namespace CE
         using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
         using FClipRectArray = StableDynamicArray<FClipRect, ClipRectArrayIncrement, false>;
         using FClipRectStack = StableDynamicArray<int, ClipRectArrayIncrement, false>;
+        using FDrawDataArray = StableDynamicArray<FDrawData, DrawDataArrayIncrement, false>;
 
         // - Draw Data -
 
@@ -253,6 +279,8 @@ namespace CE
         FDrawCmdArray drawCmdList;
         FObjectDataArray objectDataArray;
 
+        FDrawDataArray drawDataArray;
+
         StaticArray<bool, MaxImageCount> quadUpdatesRequired{};
 
         // - Setup -
@@ -264,6 +292,7 @@ namespace CE
         bool pixelPerfect = true;
         Vec2i screenSize = Vec2i(0, 0);
         Vec2 whitePixelUV = Vec2(0, 0);
+        Vec2 transparentPixelUV = Vec2(0, 0);
 
         RPI::Shader* fusionShader = nullptr;
         RHI::MultisampleState multisampling{};
@@ -293,6 +322,7 @@ namespace CE
         StaticArray<RHI::Buffer*, MaxImageCount> quadsBuffer{};
         DynamicStructuredBuffer<FObjectData> objectDataBuffer{};
         DynamicStructuredBuffer<FClipRect> clipRectBuffer{};
+        DynamicStructuredBuffer<FDrawData> drawDataBuffer{};
 
         // - Draw List -
 

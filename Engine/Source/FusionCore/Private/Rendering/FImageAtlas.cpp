@@ -18,6 +18,11 @@ namespace CE
         return whitePixel.uvMin + (whitePixel.uvMax - whitePixel.uvMin) * 0.5f;
     }
 
+    Vec2 FImageAtlas::GetTransparentPixelUV() const
+    {
+        return transparentPixel.uvMin + (transparentPixel.uvMax - transparentPixel.uvMin) * 0.5f;
+    }
+
     FImageAtlas::ImageItem FImageAtlas::FindImage(const Name& imageName)
     {
         if (!imagesByName.KeyExists(imageName))
@@ -85,13 +90,25 @@ namespace CE
 
         textureSrg->FlushBindings();
 
-        u8 pixels[16];
-        for (int i = 0; i < COUNTOF(pixels); ++i)
-        {
-            pixels[i] = NumericLimits<u8>::Max();
-        }
-        CMImage image = CMImage::LoadRawImageFromMemory(pixels, 4, 4, CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
-        whitePixel = AddImage("__WhitePixel", image);
+	    {
+		    u8 pixels[16];
+        	for (int i = 0; i < COUNTOF(pixels); ++i)
+        	{
+        		pixels[i] = NumericLimits<u8>::Max();
+        	}
+        	CMImage image = CMImage::LoadRawImageFromMemory(pixels, 4, 4, CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+        	whitePixel = AddImage("__WhitePixel", image);
+	    }
+
+	    {
+		    u32 pixels[16];
+        	for (int i = 0; i < COUNTOF(pixels); ++i)
+        	{
+        		pixels[i] = 0;
+        	}
+            CMImage image = CMImage::LoadRawImageFromMemory((u8*)pixels, 4, 4, CMImageFormat::RGBA8, CMImageSourceFormat::None, 8, 8 * 4);
+            transparentPixel = AddImage("__TransparentPixel", image);
+	    }
     }
 
     void FImageAtlas::Shutdown()
@@ -362,6 +379,8 @@ namespace CE
         stagingBuffer->Unmap();
 
         ImageItem item = { .layerIndex = foundAtlas->layerIndex, .uvMin = uvMin, .uvMax = uvMax };
+        item.width = textureSize.width;
+        item.height = textureSize.height;
 
         imagesByName[name] = item;
 

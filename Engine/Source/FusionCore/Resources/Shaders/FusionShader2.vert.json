@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_62" : {
+        "_72" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_65" : {
+        "_75" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_64" : {
+        "_74" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_65",
+                    "type" : "_75",
                     "array" : [
                         0
                     ],
@@ -71,7 +71,7 @@
                 }
             ]
         },
-        "_68" : {
+        "_78" : {
             "name" : "ClipRect",
             "members" : [
                 {
@@ -88,12 +88,12 @@
                 }
             ]
         },
-        "_67" : {
+        "_77" : {
             "name" : "type.StructuredBuffer.ClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_68",
+                    "type" : "_78",
                     "array" : [
                         0
                     ],
@@ -105,13 +105,75 @@
                 }
             ]
         },
-        "_70" : {
+        "_81" : {
+            "name" : "DrawData",
+            "members" : [
+                {
+                    "name" : "rectSize",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "uvMin",
+                    "type" : "vec2",
+                    "offset" : 8
+                },
+                {
+                    "name" : "uvMax",
+                    "type" : "vec2",
+                    "offset" : 16
+                },
+                {
+                    "name" : "brushPos",
+                    "type" : "vec2",
+                    "offset" : 24
+                },
+                {
+                    "name" : "brushSize",
+                    "type" : "vec2",
+                    "offset" : 32
+                },
+                {
+                    "name" : "index",
+                    "type" : "int",
+                    "offset" : 40
+                },
+                {
+                    "name" : "imageFit",
+                    "type" : "int",
+                    "offset" : 44
+                }
+            ]
+        },
+        "_80" : {
+            "name" : "type.StructuredBuffer.DrawData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_81",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 48
+                }
+            ]
+        },
+        "_83" : {
             "name" : "type.PushConstant.RootConstants",
             "members" : [
                 {
+                    "name" : "transparentUV",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
                     "name" : "numClipRects",
                     "type" : "uint",
-                    "offset" : 0
+                    "offset" : 8
                 },
                 {
                     "name" : "clipRectIndices",
@@ -122,7 +184,7 @@
                     "array_size_is_literal" : [
                         true
                     ],
-                    "offset" : 4,
+                    "offset" : 12,
                     "array_stride" : 4
                 }
             ]
@@ -189,7 +251,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_64",
+            "type" : "_74",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -197,17 +259,25 @@
             "binding" : 0
         },
         {
-            "type" : "_67",
+            "type" : "_77",
             "name" : "type.StructuredBuffer.ClipRect",
             "readonly" : true,
             "block_size" : 0,
             "set" : 5,
             "binding" : 1
+        },
+        {
+            "type" : "_80",
+            "name" : "type.StructuredBuffer.DrawData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 2
         }
     ],
     "ubos" : [
         {
-            "type" : "_62",
+            "type" : "_72",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
@@ -216,7 +286,7 @@
     ],
     "push_constants" : [
         {
-            "type" : "_70",
+            "type" : "_83",
             "name" : "_RootConstants",
             "push_constant" : true
         }

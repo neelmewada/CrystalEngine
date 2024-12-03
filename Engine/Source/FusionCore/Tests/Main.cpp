@@ -287,11 +287,6 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 
-		pen.SetColor(Color::White());
-		renderer->SetPen(pen);
-
-		renderer->DrawText("Hello World 1234567890", Vec2(0, 0));
-
 		Vec2 arcPos = Vec2(60, 60);
 		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
 		renderer->PushClipRect(Matrix4x4::Translation(Vec2(70, 70)), Vec2(300, 300));
@@ -322,13 +317,23 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
 	renderer->PathStroke();
 
-	renderer->SetBrush(FBrush("/Engine/Resources/Icons/Test"));
-	renderer->PathRect(Rect::FromSize(0, 40, 300, 200));
+	FBrush image = FBrush("/Engine/Resources/Icons/Test");
+	image.SetBrushPosition(Vec2(0.5f, 0.5f));
+	//image.SetBrushSize(Vec2(300 * 0.5f, 200 * 0.5f));
+	image.SetBrushTiling(FBrushTiling::TileXY);
+	image.SetImageFit(FImageFit::Cover);
+	renderer->SetBrush(image);
+	renderer->PathRect(Rect::FromSize(0, 40, 500, 200));
 	renderer->PathFill();
 
-	renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
-	renderer->PathRect(Rect::FromSize(250, 250, 100, 100));
-	renderer->PathFill();
+	pen.SetColor(Color::White());
+	renderer->SetPen(pen);
+
+	renderer->DrawText("0123456789", Vec2(50, 50));
+
+	//renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
+	//renderer->PathRect(Rect::FromSize(250, 250, 100, 100));
+	//renderer->PathFill();
 
 	//DoRectPacking(renderer);
 

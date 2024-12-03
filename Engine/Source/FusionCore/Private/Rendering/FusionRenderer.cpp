@@ -776,7 +776,6 @@ namespace CE
 					Vec2 brushPos = currentBrush.GetBrushPosition();
 					FBrushTiling tiling = currentBrush.GetBrushTiling();
 
-					f32 imageAspect = imageSize.width / imageSize.height;
 					bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
 					bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
 					bool autoSizeX = brushSize.x < 0;

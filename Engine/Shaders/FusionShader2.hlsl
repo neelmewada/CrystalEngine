@@ -5,7 +5,7 @@
 
 #define MAX_CLIP_RECTS 24
 
-enum FDrawType
+enum FDrawType : int
 {
     DRAW_Geometry = 0,
     DRAW_Text,
@@ -13,6 +13,14 @@ enum FDrawType
     DRAW_TextureTileX,
     DRAW_TextureTileY,
     DRAW_TextureTileXY,
+};
+
+enum class FImageFit : int
+{
+	None = 0,
+    Fill,
+    Contain,
+    Cover
 };
 
 struct VSInput
@@ -49,10 +57,24 @@ struct ClipRect
     float2 clipRectSize;
 };
 
+struct DrawData
+{
+    float2 rectSize;
+	float2 uvMin;
+    float2 uvMax;
+    float2 brushPos;
+    float2 brushSize;
+    // Index into texture Array
+    int index;
+    FImageFit imageFit;
+};
+
 StructuredBuffer<ObjectData> _Objects : SRG_PerObject(t0);
 StructuredBuffer<ClipRect> _ClipRects : SRG_PerObject(t1);
+StructuredBuffer<DrawData> _DrawData : SRG_PerObject(t2);
 
 BEGIN_ROOT_CONSTANTS()
+float2 transparentUV;
 uint numClipRects;
 uint clipRectIndices[MAX_CLIP_RECTS];
 END_ROOT_CONSTANTS()
@@ -107,6 +129,8 @@ float4 FragMain(PSInput input) : SV_TARGET
 {
 	float4 color = input.color;
     float clipSdf = -1;
+    const float2 transparentUV = ROOT_CONSTANT(transparentUV);
+    const float2 inputUV = input.uv;
 
     for (int i = 0; i < min(ROOT_CONSTANT(numClipRects), MAX_CLIP_RECTS); ++i)
     {
@@ -130,7 +154,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 	{
 	case DRAW_Text: // Font glyph
 		{
-            float alpha = _FontAtlas.Sample(_FontAtlasSampler, input.uv).r;
+            float alpha = _FontAtlas.Sample(_FontAtlasSampler, inputUV).r;
 			color = float4(input.color.rgb, input.color.a * alpha);
 		}
         break;
@@ -139,8 +163,50 @@ float4 FragMain(PSInput input) : SV_TARGET
     case DRAW_TextureTileY:
     case DRAW_TextureTileXY:
 	    {
-		    float4 sample = _Texture.Sample(_TextureSampler, float3(input.uv.x, input.uv.y, 0));
-            color *= sample;
+            // TODO: Add tiling support
+			const DrawData drawData = _DrawData[input.index];
+            int layerIndex = drawData.index;
+
+            // Normalized value of start and end position
+            float2 uvStartPos = (drawData.rectSize - drawData.brushSize) * drawData.brushPos / drawData.rectSize;
+            float2 uvEndPos = uvStartPos + drawData.brushSize / drawData.rectSize;
+            float2 uv = (inputUV - uvStartPos) / (uvEndPos - uvStartPos);
+
+            if ((FDrawType)input.drawType == DRAW_TextureNoTile && (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1))
+            {
+	            color.a = 0;
+            }
+            else if ((FDrawType)input.drawType == DRAW_TextureTileX && (uv.y < 0 || uv.y > 1))
+            {
+	            color.a = 0;
+            }
+            else if ((FDrawType)input.drawType == DRAW_TextureTileY && (uv.x < 0 || uv.x > 1))
+            {
+	            color.a = 0;
+            }
+            else
+            {
+				if (uv.x < 0)
+				{
+					uv.x = 1 - (abs(uv.x) % 1);
+				}
+                else if (uv.x > 1)
+                {
+	                uv.x = uv.x % 1;
+                }
+                if (uv.y < 0)
+                {
+	                uv.y = 1 - (abs(uv.y) % 1);
+                }
+                else if (uv.y > 1)
+                {
+	                uv.y = uv.y % 1;
+                }
+
+                float2 textureUV = drawData.uvMin + uv * (drawData.uvMax - drawData.uvMin);
+                float4 sample = _Texture.Sample(_TextureSampler, float3(textureUV.x, textureUV.y, layerIndex));
+                color *= sample;
+            }
 	    }
 		break;
     default:

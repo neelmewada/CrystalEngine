@@ -778,7 +778,7 @@ namespace CE
 
         {
             variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex | ShaderStage::Fragment;
-            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::UInt };
+            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::Float2, ShaderStructMemberType::UInt };
             for (int i = 0; i < FusionRenderer2::MaxClipRectStack; ++i)
             {
                 variantDesc.reflectionInfo.rootConstantLayout.Add(ShaderStructMemberType::UInt);
@@ -794,6 +794,12 @@ namespace CE
                 .TryAdd(SRGVariableDescriptor(
                     "_ClipRects",
                     (u32)vertexReflection["ssbos"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_DrawData",
+                    (u32)vertexReflection["ssbos"][2]["binding"].GetNumberValue(),
                     ShaderResourceType::StructuredBuffer,
                     ShaderStage::Vertex | ShaderStage::Fragment
                 ))
