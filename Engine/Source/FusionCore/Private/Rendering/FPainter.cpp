@@ -23,6 +23,11 @@ namespace CE
 		renderer2->SetFont(font);
 	}
 
+	const FFont& FPainter::GetCurrentFont()
+	{
+		return renderer2->GetFont();
+	}
+
 	void FPainter::PushOpacity(f32 opacity)
 	{
 		renderer2->PushOpacity(opacity);

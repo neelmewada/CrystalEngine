@@ -18,6 +18,8 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        const FFont& GetCurrentFont();
+
         void PushOpacity(f32 opacity);
         void PopOpacity();
 

@@ -316,6 +316,18 @@ namespace CE
 				}
 			}
 
+			renderer2->SetFont(FFont("Roboto", 10));
+			String text = "This is a sentence.";
+
+			renderer2->SetPen(FPen());
+			renderer2->SetBrush(Color::Red());
+			Vec2 textSize = painter->CalculateTextSize(text, renderer2->GetFont());
+			painter->DrawRect(Rect::FromSize(0, 0, textSize.width, textSize.height));
+
+			renderer2->SetPen(FPen(Color::White()));
+			renderer2->SetBrush(FBrush());
+			renderer2->DrawText(text, Vec2());
+
 			renderer2->End();
 
 			dirty = false;

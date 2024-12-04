@@ -243,7 +243,7 @@ namespace CE
 
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
-        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+        f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
 
         FT_Set_Pixel_Sizes(face, 0, Math::RoundToInt(fontSize * scaling));
 

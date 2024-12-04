@@ -78,6 +78,8 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        const FFont& GetFont() const { return currentFont; }
+
         //! @brief Used for CPU side culling and is dependent on the state (clips and transforms)!
         bool IsRectClipped(const Rect& rect);
 
