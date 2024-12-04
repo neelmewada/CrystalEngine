@@ -272,13 +272,14 @@ static void DoPaint(FusionRenderer2* renderer)
 	renderer->Begin();
 
 	renderer->SetBrush(FBrush(Color::Black()));
-	renderer->FillRect(CE::Rect::FromSize(100, 100, 200, 200));
+	renderer->FillRect(Rect::FromSize(100, 100, 200, 200));
 
 	FPen pen = Color::Blue();
 	f32 angle = 0;
 
 	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Angle(angle) * Matrix4x4::Scale(Vec3(1, 1, 1)));
-	renderer->PushClipRect(Matrix4x4::Angle(0), Vec2(100, 100));
+	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
+	renderer->PushOpacity(1.0f);
 	{
 		pen.SetThickness(2.0f);
 		renderer->SetPen(pen);
@@ -286,6 +287,11 @@ static void DoPaint(FusionRenderer2* renderer)
 
 		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
 		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
+
+		pen.SetColor(Color::White());
+		renderer->SetPen(pen);
+		renderer->SetFont(FFont("Roboto", 10));
+		renderer->DrawText("0123456789", Vec2(0, 0));
 
 		Vec2 arcPos = Vec2(60, 60);
 		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
@@ -299,6 +305,7 @@ static void DoPaint(FusionRenderer2* renderer)
 		renderer->PopClipRect();
 		renderer->PopChildCoordinateSpace();
 	}
+	renderer->PopOpacity();
 	renderer->PopClipRect();
 	renderer->PopChildCoordinateSpace();
 
@@ -323,27 +330,19 @@ static void DoPaint(FusionRenderer2* renderer)
 	image.SetBrushTiling(FBrushTiling::TileXY);
 	image.SetImageFit(FImageFit::Contain);
 	renderer->SetBrush(image);
-	renderer->PathRect(Rect::FromSize(0, 40, 500, 200));
+	renderer->PathRect(Rect::FromSize(0, 40, 300 * 0.25f, 200 * 0.25f));
 	renderer->PathFill(false);
 
 	pen.SetColor(Color::White());
 	renderer->SetPen(pen);
-
-	renderer->SetFont(FFont("Roboto", 10));
-	renderer->DrawText("0123456789", Vec2(0, 0));
 
 	FBrush grid = FBrush("/Engine/Resources/Images/GridSmall");
 	grid.SetBrushSize(Vec2(16, 16));
 	grid.SetBrushPosition(Vec2());
 	grid.SetBrushTiling(FBrushTiling::TileXY);
 	renderer->SetBrush(grid);
-	renderer->PathRect(Rect::FromSize(0, 300, 480, 192));
-	renderer->PathFill(false);
-
-
-	//renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
-	//renderer->PathRect(Rect::FromSize(250, 250, 100, 100));
-	//renderer->PathFill();
+	//renderer->PathRect(Rect::FromSize(0, 300, 480, 192));
+	//renderer->PathFill(false);
 
 	//DoRectPacking(renderer);
 

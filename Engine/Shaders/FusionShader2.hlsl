@@ -205,8 +205,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 {
 	                uv.y = uv.y % 1;
                 }
-                //uv.x = clamp(uv.x, 0.05, 0.95);
-                //uv.y = clamp(uv.y, 0.05, 0.95);
+
                 float2 tolerance = float2(1.0 / texWidth, 1.0 / texHeight);
 
                 float2 textureUV = drawData.uvMin + uv * (drawData.uvMax - drawData.uvMin);

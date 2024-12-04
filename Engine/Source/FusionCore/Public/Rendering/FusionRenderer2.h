@@ -25,12 +25,13 @@ namespace CE
         static constexpr u32 ObjectDataArrayIncrement = 128;
         static constexpr u32 ClipRectArrayIncrement = 32;
         static constexpr u32 DrawDataArrayIncrement = 128;
-        static constexpr u32 ArcFastTableSize = 48;
+        static constexpr u32 OpacityStackIncrement = 64;
 
+        static constexpr u32 ArcFastTableSize = 48;
         static constexpr int CircleAutoSegmentMin = 4;
         static constexpr int CircleAutoSegmentMax = 512;
 
-        static constexpr f32 MinOpacity = 0.0001f;
+        static constexpr f32 MinOpacity = 0.001f;
         static constexpr u32 MaxClipRectStack = 24;
 
         static constexpr u32 ColorAlphaMask = 0xff000000;
@@ -67,6 +68,9 @@ namespace CE
 
         void PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize);
         void PopClipRect();
+
+        void PushOpacity(f32 opacity);
+        void PopOpacity();
 
         void SetPen(const FPen& pen);
         void SetBrush(const FBrush& brush);
@@ -259,6 +263,7 @@ namespace CE
         using FClipRectArray = StableDynamicArray<FClipRect, ClipRectArrayIncrement, false>;
         using FClipRectStack = StableDynamicArray<int, ClipRectArrayIncrement, false>;
         using FDrawDataArray = StableDynamicArray<FDrawData, DrawDataArrayIncrement, false>;
+        using FOpacityStack = StableDynamicArray<f32, OpacityStackIncrement, false>;
 
         // - Draw Data -
 
@@ -308,6 +313,7 @@ namespace CE
 
         FClipRectArray clipRectArray;
         FClipRectStack clipStack;
+        FOpacityStack opacityStack;
 
         // - View Constants -
 

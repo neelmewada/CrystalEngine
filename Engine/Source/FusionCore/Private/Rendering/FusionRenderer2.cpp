@@ -444,11 +444,14 @@ namespace CE
         objectDataArray.RemoveAll();
         clipRectArray.RemoveAll();
         clipStack.RemoveAll();
+        opacityStack.RemoveAll();
         drawDataArray.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
         transformIndex = 0;
+
+        opacityStack.Insert(1.0f);
 
         PushChildCoordinateSpace(Matrix4x4::Identity());
     }
@@ -458,6 +461,8 @@ namespace CE
         ZoneScoped;
 
         PopChildCoordinateSpace();
+
+        opacityStack.RemoveLast();
 
         for (int imageIdx = 0; imageIdx < numFrames; ++imageIdx)
         {
@@ -669,6 +674,16 @@ namespace CE
         clipStack.RemoveLast();
 
         AddDrawCmd();
+    }
+
+    void FusionRenderer2::PushOpacity(f32 opacity)
+    {
+        opacityStack.Insert(opacity);
+    }
+
+    void FusionRenderer2::PopOpacity()
+    {
+        opacityStack.RemoveLast();
     }
 
     void FusionRenderer2::SetPen(const FPen& pen)
@@ -966,7 +981,20 @@ namespace CE
     Vec2 FusionRenderer2::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
     {
         thread_local Array<Rect> quads{};
+        const bool isFixedSize = !Math::ApproxEquals(size.x, 0) && !Math::ApproxEquals(size.y, 0);
+
+    	if (isFixedSize && IsRectClipped(Rect::FromSize(pos, size)))
+        {
+            return Vec2();
+        }
+
         Vec2 finalSize = CalculateTextQuads(quads, text, currentFont, size.width, wordWrap);
+
+        if (!isFixedSize && IsRectClipped(Rect::FromSize(pos, finalSize)))
+        {
+            return Vec2();
+        }
+
         DrawTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, pos);
         return finalSize;
     }
@@ -993,7 +1021,10 @@ namespace CE
 
         f32 dpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
 
-        u32 color = currentPen.GetColor().ToU32();
+        Color penColor = currentPen.GetColor();
+        penColor.a *= opacityStack.Last();
+
+        u32 color = penColor.ToU32();
 
 	    for (int i = 0; i < length; ++i)
 	    {
@@ -1309,6 +1340,9 @@ namespace CE
 
         u32 color = currentBrush.GetFillColor().ToU32();
 
+        if ((color & ColorAlphaMask) == 0)
+            return;
+
         PathClear();
         PathRect(rect, cornerRadius);
         PathFill(antiAliased);
@@ -1321,12 +1355,18 @@ namespace CE
         if (points == nullptr || numPoints <= 0)
             return;
 
+        if (opacityStack.Last() < MinOpacity)
+            return;
+
         u32 color;
         FDrawType drawType = DRAW_Geometry;
 
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
-            color = currentBrush.GetTintColor().ToU32();
+            Color tint = currentBrush.GetTintColor();
+            tint.a *= opacityStack.Last();
+
+            color = tint.ToU32();
             drawType = DRAW_TextureNoTile;
 
             Vec2 brushSize = currentBrush.GetBrushSize();
@@ -1439,7 +1479,10 @@ namespace CE
         else
         {
             minMaxPos = nullptr;
-            color = currentBrush.GetFillColor().ToU32();
+            Color fill = currentBrush.GetFillColor();
+            fill.a *= opacityStack.Last();
+
+            color = fill.ToU32();
         }
 
         auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
@@ -1568,7 +1611,10 @@ namespace CE
         if (points == nullptr || numPoints <= 0)
             return;
 
-        u32 color = currentPen.GetColor().ToU32();
+        Color penColor = currentPen.GetColor();
+        penColor.a *= opacityStack.Last();
+
+        u32 color = penColor.ToU32();
 
         const Vec2 uv = whitePixelUV;
         const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
