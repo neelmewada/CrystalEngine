@@ -12,6 +12,7 @@
 
 namespace CE
 {
+    static constexpr f32 FontScaling = 1.0f;
 
     FFontAtlas::FFontAtlas()
     {
@@ -32,7 +33,7 @@ namespace CE
         glyphBuffer.Init("GlyphBuffer", GlyphBufferInitialCount, numFrames);
 
         f32 unitsPerEM = regular->units_per_EM;
-        f32 scaleFactor = (f32)1.0f / unitsPerEM; // 1.0f is used as a font size here
+        f32 scaleFactor = 1.0f / unitsPerEM; // 1.0f is used as a font size here
 
         metrics.ascender = regular->ascender * scaleFactor;
         metrics.descender = regular->descender * scaleFactor;
@@ -244,8 +245,9 @@ namespace CE
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
         f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        scaling = 1.0f;
 
-        FT_Set_Pixel_Sizes(face, 0, Math::RoundToInt(fontSize * scaling));
+        FT_Set_Pixel_Sizes(face, 0, Math::RoundToInt(fontSize * scaling * FontScaling));
 
         FAtlasImage* atlasMip = atlasImageMips[currentMip];
 
