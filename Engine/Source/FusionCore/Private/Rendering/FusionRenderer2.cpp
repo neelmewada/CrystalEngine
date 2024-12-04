@@ -407,7 +407,7 @@ namespace CE
                 }
             }
 
-            outQuads[i] = Rect::FromSize(curPos.x, curPos.y, (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize, glyphHeight);
+            outQuads[i] = Rect::FromSize(curPos.x, curPos.y, glyphWidth, glyphHeight);
 
             curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
 
