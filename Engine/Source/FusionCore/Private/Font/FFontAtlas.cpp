@@ -244,10 +244,11 @@ namespace CE
 
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
+        u32 dpi = PlatformApplication::Get()->GetSystemDpi();
         f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
-        scaling = 1.0f;
+        dpi = 0; // TODO: Remove this
 
-        FT_Set_Pixel_Sizes(face, 0, Math::RoundToInt(fontSize * scaling * FontScaling));
+        FT_Set_Char_Size(face, 0, fontSize * 64, dpi, dpi);
 
         FAtlasImage* atlasMip = atlasImageMips[currentMip];
 
@@ -268,6 +269,7 @@ namespace CE
             }
 
             FT_Bitmap* bmp = &face->glyph->bitmap;
+            // Hello World!
 
             FFontGlyphInfo glyph{};
             

@@ -1009,7 +1009,11 @@ namespace CE
             }
 			*/
 
-            outQuads[i] = Rect::FromSize(curPos.x, curPos.y, glyphWidth, glyphHeight);
+            // Apply glyph offsets
+            outQuads[i] = Rect::FromSize(
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize,
+                curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize,
+                glyphWidth, glyphHeight);
 
             curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
 
@@ -1083,12 +1087,6 @@ namespace CE
 
             Vec2 uvMin = Vec2((f32)glyph.x0 / atlasSize, (f32)glyph.y0 / atlasSize);
             Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize);
-
-            // Apply glyph offsets
-            rect = rect.Translate(Vec2(
-                 (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize,
-                -(f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize
-            ));
 
             Vec2 topLeft = rect.min + offset;
             Vec2 topRight = Vec2(rect.max.x, rect.min.y) + offset;
