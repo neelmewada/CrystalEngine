@@ -269,6 +269,8 @@ static void DoRectPacking(FusionRenderer2* renderer)
 
 static void DoPaint(FusionRenderer2* renderer)
 {
+	return;
+
 	renderer->Begin();
 
 	renderer->SetBrush(FBrush(Color::Black()));

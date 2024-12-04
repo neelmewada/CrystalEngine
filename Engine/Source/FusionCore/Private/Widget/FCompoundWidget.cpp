@@ -103,14 +103,14 @@ namespace CE
             painter->PushChildCoordinateSpace(localTransform);
             if (m_ClipChildren)
             {
-                painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+                painter->PushClipRect(Matrix4x4::Identity(), computedSize);
             }
 
             m_Child->OnPaint(painter);
 
             if (m_ClipChildren)
             {
-                painter->PopClipShape();
+                painter->PopClipRect();
             }
             painter->PopChildCoordinateSpace();
         }

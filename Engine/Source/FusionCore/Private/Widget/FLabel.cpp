@@ -43,17 +43,17 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
+        if (GetName() == "TitleLabel")
+        {
+            painter->SetPen(FPen());
+            painter->SetBrush(Color::Red());
+
+            painter->DrawRect(Rect::FromSize(computedPosition, computedSize));
+        }
+
         painter->SetFont(m_Font);
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());
-
-        bool transformChanged = false;
-
-        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 1)
-        {
-            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(m_Scale));
-            transformChanged = true;
-        }
 
         painter->DrawText(m_Text, computedPosition, computedSize, m_WordWrap);
 
@@ -104,11 +104,6 @@ namespace CE
                     }
                 }
             }
-        }
-
-        if (transformChanged)
-        {
-            painter->SetItemTransform(Matrix4x4::Identity());
         }
     }
 

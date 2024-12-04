@@ -66,6 +66,8 @@ namespace CE
         void PushChildCoordinateSpace(Vec2 translation);
         void PopChildCoordinateSpace();
 
+        Matrix4x4 GetTopCoordinateSpace();
+
         void PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize);
         void PopClipRect();
 
@@ -91,17 +93,17 @@ namespace CE
         void PathBezierCubicCurveTo(const Vec2& p2, const Vec2& p3, const Vec2& p4, int numSegments = 0);
         void PathQuadraticCubicCurveTo(const Vec2& p2, const Vec2& p3, int numSegments = 0);
 
-        void PathFill(bool antiAliased = true);
-        void PathStroke(bool closed = false, bool antiAliased = true);
-        void PathFillStroke(bool closed = false, bool antiAliased = true);
+        bool PathFill(bool antiAliased = true);
+        bool PathStroke(bool closed = false, bool antiAliased = true);
+        bool PathFillStroke(bool closed = false, bool antiAliased = true);
 
         // - Draw API -
 
-        void FillRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
-        void StrokeRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        bool FillRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        bool StrokeRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
 
-        void FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
-        void StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+        bool FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+        bool StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
@@ -123,12 +125,12 @@ namespace CE
         void PathInsert(const Vec2& point);
         void PathMinMax(const Vec2& point);
 
-        void AddRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
-        void AddRectFilled(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        bool AddRect(const Rect& rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
+        bool AddRectFilled(Rect rect, const Vec4& cornerRadius = {}, bool antiAliased = true);
         void AddConvexPolyFilled(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos = nullptr);
         void AddPolyLine(const Vec2* points, int numPoints, f32 thickness, bool closed, bool antiAliased);
-        void AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
-        void AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
+        bool AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
+        bool AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased);
 
         // - Utility API -
 
@@ -250,6 +252,7 @@ namespace CE
             Vec2 translation;
 
             bool isTranslationOnly = false;
+            int indexInObjectArray = 0;
         };
 
         using FDrawIndex = u16;
@@ -309,7 +312,6 @@ namespace CE
         FFont currentFont;
 
         FCoordinateSpaceStack coordinateSpaceStack;
-        int transformIndex = 0;
 
         FClipRectArray clipRectArray;
         FClipRectStack clipStack;

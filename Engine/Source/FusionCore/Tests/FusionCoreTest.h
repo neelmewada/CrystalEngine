@@ -305,6 +305,8 @@ namespace RenderingTests
 		void OnWindowMaximized(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
 
+		void OnPaint(FPainter* painter) override;
+
 		FUSION_EVENT(ScriptEvent<void()>, OnAdd);
 		FUSION_EVENT(ScriptEvent<void()>, OnRemove);
 		FUSION_EVENT(ScriptEvent<void()>, OnDefragment);

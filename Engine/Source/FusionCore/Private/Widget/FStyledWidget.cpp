@@ -27,7 +27,7 @@ namespace CE
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {
-            painter->PushClipShape(localTransform, computedSize, m_ClipShape);
+            painter->PushClipRect(localTransform, computedSize);
         }
 
         bool transformChanged = false;
@@ -85,7 +85,7 @@ namespace CE
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {
-            painter->PopClipShape();
+            painter->PopClipRect();
         }
 
         if (m_Opacity < 1.0f)

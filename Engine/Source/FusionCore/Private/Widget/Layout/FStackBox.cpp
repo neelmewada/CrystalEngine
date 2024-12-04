@@ -25,6 +25,11 @@ namespace CE
 			return;
 		}
 
+		if (GetName() == "TitleLabelStack")
+		{
+			String::IsAlphabet('a');
+		}
+
 		intrinsicSize.width = m_Padding.left + m_Padding.right;
 		intrinsicSize.height = m_Padding.top + m_Padding.bottom;
 
@@ -82,6 +87,11 @@ namespace CE
 		if (children.IsEmpty())
 		{
 			return;
+		}
+
+		if (GetName() == "TitleLabelStack")
+		{
+			String::IsAlphabet('a');
 		}
 
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
@@ -249,7 +259,7 @@ namespace CE
 		painter->PushChildCoordinateSpace(localTransform);
 		if (m_ClipChildren)
 		{
-			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+			painter->PushClipRect(Matrix4x4::Identity(), computedSize);
 		}
 
 		for (const auto& child : children)
@@ -262,7 +272,7 @@ namespace CE
 
 		if (m_ClipChildren)
 		{
-			painter->PopClipShape();
+			painter->PopClipRect();
 		}
 		painter->PopChildCoordinateSpace();
 	}

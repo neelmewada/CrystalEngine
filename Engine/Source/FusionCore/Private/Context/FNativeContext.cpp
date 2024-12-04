@@ -74,7 +74,7 @@ namespace CE
 
 		PlatformApplication::Get()->AddMessageHandler(this);
 
-		renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
+		//renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
 		renderer2 = CreateObject<FusionRenderer2>(this, "FusionRenderer2");
 
 		UpdateViewConstants();
@@ -83,10 +83,10 @@ namespace CE
 		rendererInfo.fusionShader = FusionApplication::Get()->GetFusionShader();
 		rendererInfo.multisampling.sampleCount = 1;
 		
-		renderer->SetScreenSize(Vec2i(swapChain->GetWidth(), swapChain->GetHeight()));
-		renderer->SetDrawListTag(drawListTag);
+		//renderer->SetScreenSize(Vec2i(swapChain->GetWidth(), swapChain->GetHeight()));
+		//renderer->SetDrawListTag(drawListTag);
 
-		renderer->Init(rendererInfo);
+		//renderer->Init(rendererInfo);
 
 		rendererInfo.fusionShader = FusionApplication::Get()->fusionShader2;
 		rendererInfo.multisampling.sampleCount = 1;
@@ -95,7 +95,7 @@ namespace CE
 		renderer2->Init(rendererInfo);
 
 		painter = CreateObject<FPainter>(this, "FusionPainter");
-		painter->renderer = renderer;
+		//painter->renderer = renderer;
 		painter->renderer2 = renderer2;
 
 		FusionApplication::Get()->nativeWindows.Add(this);
@@ -150,7 +150,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
@@ -172,7 +172,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
@@ -199,7 +199,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
@@ -235,11 +235,6 @@ namespace CE
 		viewConstants.viewPosition = Vec4(0, 0, 0, 0);
 		viewConstants.pixelResolution = Vec2(screenWidth, screenHeight);
 
-		if (renderer)
-		{
-			renderer->SetViewConstants(viewConstants);
-		}
-
 		if (renderer2)
 		{
 			renderer2->SetViewConstants(viewConstants);
@@ -260,9 +255,6 @@ namespace CE
 		if (msaa == 1 || msaa == 2 || msaa == 4)
 		{
 			sampleCount = msaa;
-
-			renderer->multisampling.sampleCount = sampleCount;
-			renderer->multisampling.quality = 1.0f;
 
 			if (renderer2)
 			{
@@ -307,9 +299,9 @@ namespace CE
 
 		Super::DoPaint();
 
-		if (renderer && dirty)
+		if (renderer2 && dirty)
 		{
-			renderer->Begin();
+			renderer2->Begin();
 
 			if (painter && owningWidget && owningWidget->Visible())
 			{
@@ -324,7 +316,7 @@ namespace CE
 				}
 			}
 
-			renderer->End();
+			renderer2->End();
 
 			dirty = false;
 		}
@@ -460,14 +452,6 @@ namespace CE
 
 		Super::EnqueueDrawPackets(drawList, imageIndex);
 
-		{
-			const auto& drawPackets = renderer->FlushDrawPackets(imageIndex);
-
-			for (RHI::DrawPacket* drawPacket : drawPackets)
-			{
-				drawList.AddDrawPacket(drawPacket);
-			}
-		}
 
 		{
 			const auto& drawPackets = renderer2->FlushDrawPackets(imageIndex);

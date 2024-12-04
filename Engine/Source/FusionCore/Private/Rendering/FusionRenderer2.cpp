@@ -246,7 +246,7 @@ namespace CE
                         perObjectSrg->Bind(i, "_DrawData", drawDataBuffer.GetBuffer(i));
                     }
                 }
-
+                
                 drawDataBuffer.GetBuffer(imageIndex)->UploadData(drawDataArray.GetData(), drawDataArray.GetCount() * sizeof(FDrawData));
             }
 
@@ -336,6 +336,8 @@ namespace CE
         if (fontAtlas == nullptr)
             return Vec2();
 
+        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
         const float startY = metrics.ascender * (f32)fontSize;
@@ -351,8 +353,6 @@ namespace CE
         int idx = 0;
 
         outQuads.Resize(text.GetLength());
-
-        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
 
         for (int i = 0; i < text.GetLength(); ++i)
         {
@@ -449,7 +449,6 @@ namespace CE
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
-        transformIndex = 0;
 
         opacityStack.Insert(1.0f);
 
@@ -469,6 +468,7 @@ namespace CE
             quadUpdatesRequired[imageIdx] = true;
 
             Array<RHI::DrawPacket*> oldPackets = this->drawPacketsPerImage[imageIdx];
+            this->drawPacketsPerImage[imageIdx].Clear();
 
             for (int i = 0; i < drawCmdList.GetCount(); ++i)
             {
@@ -514,6 +514,8 @@ namespace CE
                             sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
 
                     drawPacket->drawItems[0].pipelineState = fusionShader->GetVariant(0)->GetPipeline(multisampling);
+
+                    this->drawPacketsPerImage[imageIdx].Add(drawPacket);
                 }
                 else
                 {
@@ -583,7 +585,7 @@ namespace CE
         if (coordinateSpaceStack.IsEmpty())
         {
             coordinateSpaceStack.Insert(FCoordinateSpace{ 
-                .transform = transform, .translation = Vec3(), .isTranslationOnly = false });
+                .transform = transform, .translation = Vec3(), .isTranslationOnly = false, .indexInObjectArray = (int)objectDataArray.GetCount() });
         }
         else
         {
@@ -592,19 +594,20 @@ namespace CE
                 coordinateSpaceStack.Insert(FCoordinateSpace{
 	                .transform = coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation) * transform,
 	                .translation = Vec3(),
-	                .isTranslationOnly = false });
+	                .isTranslationOnly = false,
+					.indexInObjectArray = (int)objectDataArray.GetCount() });
             }
             else
             {
                 coordinateSpaceStack.Insert(FCoordinateSpace{
 	                .transform = coordinateSpaceStack.Last().transform * transform,
 	                .translation = Vec3(),
-	                .isTranslationOnly = false });
+	                .isTranslationOnly = false,
+                    .indexInObjectArray = (int)objectDataArray.GetCount() });
             }
         }
 
         objectDataArray.Insert(FObjectData{ .transform = coordinateSpaceStack.Last().transform });
-        transformIndex = (int)objectDataArray.GetCount() - 1;
 
         AddDrawCmd();
     }
@@ -618,14 +621,16 @@ namespace CE
             coordinateSpaceStack.Insert(FCoordinateSpace{
                 .transform = coordinateSpaceStack.Last().transform,
                 .translation = coordinateSpaceStack.Last().translation + translation,
-                .isTranslationOnly = true });
+                .isTranslationOnly = true,
+				.indexInObjectArray = coordinateSpaceStack.Last().indexInObjectArray });
         }
         else
         {
             coordinateSpaceStack.Insert(FCoordinateSpace{
                 .transform = coordinateSpaceStack.Last().transform,
                 .translation = translation,
-                .isTranslationOnly = true });
+                .isTranslationOnly = true,
+                .indexInObjectArray = coordinateSpaceStack.Last().indexInObjectArray });
         }
     }
 
@@ -641,10 +646,19 @@ namespace CE
 
             if (!isTranslation && !coordinateSpaceStack.IsEmpty())
             {
-                transformIndex--;
                 AddDrawCmd();
             }
         }
+    }
+
+    Matrix4x4 FusionRenderer2::GetTopCoordinateSpace()
+    {
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            return coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation);
+        }
+
+        return coordinateSpaceStack.Last().transform;
     }
 
     void FusionRenderer2::PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize)
@@ -889,12 +903,17 @@ namespace CE
         }
     }
 
-    void FusionRenderer2::PathFill(bool antiAliased)
+    bool FusionRenderer2::PathFill(bool antiAliased)
     {
-        if (path.IsEmpty() || IsRectClipped(Rect(pathMin, pathMax)))
+        if (IsRectClipped(Rect(pathMin, pathMax)))
         {
             PathClear();
-            return;
+            return false;
+        }
+
+        if (path.IsEmpty())
+        {
+            return true;
         }
 
         Rect minMax = Rect(pathMin, pathMax);
@@ -914,27 +933,31 @@ namespace CE
         }
 
         PathClear();
+
+        return true;
     }
 
-    void FusionRenderer2::PathStroke(bool closed, bool antiAliased)
+    bool FusionRenderer2::PathStroke(bool closed, bool antiAliased)
     {
         if (IsRectClipped(Rect(pathMin, pathMax)))
         {
             PathClear();
-            return;
+            return false;
         }
 
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
+
+        return true;
     }
 
-    void FusionRenderer2::PathFillStroke(bool closed, bool antiAliased)
+    bool FusionRenderer2::PathFillStroke(bool closed, bool antiAliased)
     {
         if (IsRectClipped(Rect(pathMin, pathMax)))
         {
             PathClear();
-            return;
+            return false;
         }
 
         Rect minMax = Rect(pathMin, pathMax);
@@ -956,26 +979,28 @@ namespace CE
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
+
+        return true;
     }
 
-    void FusionRenderer2::FillRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    bool FusionRenderer2::FillRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
-        AddRectFilled(rect, cornerRadius, antiAliased);
+        return AddRectFilled(rect, cornerRadius, antiAliased);
     }
 
-    void FusionRenderer2::StrokeRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    bool FusionRenderer2::StrokeRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
-        AddRect(rect, cornerRadius, antiAliased);
+        return AddRect(rect, cornerRadius, antiAliased);
     }
 
-    void FusionRenderer2::FillCircle(const Vec2& center, f32 radius, bool antiAliased)
+    bool FusionRenderer2::FillCircle(const Vec2& center, f32 radius, bool antiAliased)
     {
-        AddCircleFilled(center, radius, 0, antiAliased);
+        return AddCircleFilled(center, radius, 0, antiAliased);
     }
 
-    void FusionRenderer2::StrokeCircle(const Vec2& center, f32 radius, bool antiAliased)
+    bool FusionRenderer2::StrokeCircle(const Vec2& center, f32 radius, bool antiAliased)
     {
-        AddCircle(center, radius, 0, antiAliased);
+        return AddCircle(center, radius, 0, antiAliased);
     }
 
     Vec2 FusionRenderer2::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
@@ -1221,8 +1246,8 @@ namespace CE
                 if (fontAtlas)
                 {
                     drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
-                    drawCmdList.Last().firstInstance = transformIndex;
-
+                    drawCmdList.Last().firstInstance = coordinateSpaceStack.Last().indexInObjectArray;
+                    
                     drawCmdList.Last().rootConstants.numClipRects = clipStack.GetCount();
                     int j = 0;
                     for (int i = drawCmdList.Last().rootConstants.numClipRects - 1; i >= 0; --i)
@@ -1233,7 +1258,7 @@ namespace CE
             }
             else
             {
-                drawCmd.firstInstance = transformIndex;
+                drawCmd.firstInstance = coordinateSpaceStack.Last().indexInObjectArray;
                 drawCmd.vertexOffset = drawCmdList.Last().vertexOffset;
                 drawCmd.indexOffset = (u32)indexArray.GetCount();
                 drawCmd.numIndices = 0;
@@ -1316,14 +1341,14 @@ namespace CE
         pathMax.y = Math::Max(point.y, pathMax.y);
     }
 
-    void FusionRenderer2::AddRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    bool FusionRenderer2::AddRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
     {
         ZoneScoped;
 
         u32 color = currentPen.GetColor().ToU32();
 
         if ((color & ColorAlphaMask) == 0)
-            return;
+            return true;
 
         PathClear();
         if (antiAliased)
@@ -1331,21 +1356,23 @@ namespace CE
         else
             PathRect(Rect(rect.min + Vec2(0.50f, 0.50f), rect.max - Vec2(0.49f, 0.49f)), cornerRadius); // Better looking lower-right corner and rounded non-AA shapes.
 
-    	PathStroke(true, antiAliased);
+        return PathStroke(true, antiAliased);
     }
 
-    void FusionRenderer2::AddRectFilled(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+    bool FusionRenderer2::AddRectFilled(Rect rect, const Vec4& cornerRadius, bool antiAliased)
     {
         ZoneScoped;
 
-        u32 color = currentBrush.GetFillColor().ToU32();
+        Color fillColor = currentBrush.GetFillColor();
+        fillColor.a *= opacityStack.Last();
+        u32 color = fillColor.ToU32();
 
         if ((color & ColorAlphaMask) == 0)
-            return;
+            return true;
 
         PathClear();
         PathRect(rect, cornerRadius);
-        PathFill(antiAliased);
+        return PathFill(antiAliased);
     }
 
     void FusionRenderer2::AddConvexPolyFilled(const Vec2* points, int numPoints, bool antiAliased, Rect* minMaxPos)
@@ -1396,9 +1423,9 @@ namespace CE
                 case FImageFit::None:
                 case FImageFit::Fill:
                     if (autoSizeX)
-                        brushSize.x = image.width;
+                        brushSize.x = drawData.rectSize.width;
                     if (autoSizeY)
-                        brushSize.y = image.height;
+                        brushSize.y = drawData.rectSize.height;
 	                break;
                 case FImageFit::Contain:
                     if (autoSizeX && autoSizeY)
@@ -1487,18 +1514,10 @@ namespace CE
 
         auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
             {
-                if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
+                if (minMaxPos != nullptr)
                 {
                     return Vec2(Math::Clamp01((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x)),
                         Math::Clamp01((pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y)));
-
-                	auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
-                    if (image.IsValid())
-                    {
-                        Vec2 ratios = Vec2((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x), 
-                            (pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y));
-                        return image.uvMin + ratios * (image.uvMax - image.uvMin);
-                    }
                 }
                 return whitePixelUV;
             };
@@ -1555,12 +1574,18 @@ namespace CE
                 dm_x *= AA_SIZE * 0.5f;
                 dm_y *= AA_SIZE * 0.5f;
 
-                Vec2 pos0 = Vec2(points[i1].x - dm_x, points[i1].y - dm_y);
-                Vec2 pos1 = Vec2(points[i1].x + dm_x, points[i1].y + dm_y);
+                //Vec2 pos0 = Vec2(points[i1].x - dm_x, points[i1].y - dm_y);
+                //Vec2 pos1 = Vec2(points[i1].x + dm_x, points[i1].y + dm_y);
+
+                Vec2 pos0 = Vec2(points[i1].x, points[i1].y);
+                Vec2 pos1 = Vec2(points[i1].x + dm_x * 2, points[i1].y + dm_y * 2);
                 
                 // Add vertices
-                vertexWritePtr[0].position.x = (points[i1].x - dm_x) + offset.x; vertexWritePtr[0].position.y = (points[i1].y - dm_y) + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
-                vertexWritePtr[1].position.x = (points[i1].x + dm_x) + offset.x; vertexWritePtr[1].position.y = (points[i1].y + dm_y) + offset.y; vertexWritePtr[1].uv = calcUV(pos1); vertexWritePtr[1].color = transparentColor;  // Outer
+
+                // Inner
+                vertexWritePtr[0].position.x = pos0.x + offset.x; vertexWritePtr[0].position.y = pos0.y + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
+                // Outer
+            	vertexWritePtr[1].position.x = pos1.x + offset.x; vertexWritePtr[1].position.y = pos1.y + offset.y; vertexWritePtr[1].uv = calcUV(pos0); vertexWritePtr[1].color = transparentColor;  // Outer
                 vertexWritePtr[0].drawType = drawType; vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;
                 vertexWritePtr[1].drawType = drawType; vertexWritePtr[1].index = (int)drawDataArray.GetCount() - 1;
                 
@@ -1834,13 +1859,13 @@ namespace CE
         }
     }
 
-    void FusionRenderer2::AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
+    bool FusionRenderer2::AddCircle(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
     {
         ZoneScoped;
 
         u32 color = currentPen.GetColor().ToU32();
         if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
-            return;
+            return true;
 
         if (numSegments <= 0)
         {
@@ -1857,16 +1882,16 @@ namespace CE
             PathArcTo(center, radius - 0.5f, 0, angleMax, numSegments - 1);
         }
 
-        PathStroke(true, antiAliased);
+        return PathStroke(true, antiAliased);
     }
 
-    void FusionRenderer2::AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
+    bool FusionRenderer2::AddCircleFilled(const Vec2& center, f32 radius, int numSegments, bool antiAliased)
     {
         ZoneScoped;
 
         u32 color = currentBrush.GetFillColor().ToU32();
         if ((color & ColorAlphaMask) == 0 || radius < 0.5f)
-            return;
+            return true;
 
         if (numSegments <= 0)
         {
@@ -1883,7 +1908,7 @@ namespace CE
             PathArcTo(center, radius, 0, angleMax, numSegments - 1);
         }
 
-        PathFill(antiAliased);
+        return PathFill(antiAliased);
     }
 
     void FusionRenderer2::GrowQuadBuffer(u64 newTotalSize)

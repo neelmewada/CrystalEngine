@@ -24,11 +24,11 @@ namespace CE
         void SetItemTransform(const Matrix4x4& transform);
 
         void PushChildCoordinateSpace(const Matrix4x4& coordinateTransform);
-        const Matrix4x4& GetTopCoordinateSpace();
+        Matrix4x4 GetTopCoordinateSpace();
         void PopChildCoordinateSpace();
 
-        void PushClipShape(const Matrix4x4& clipTransform, Vec2 rectSize, const FShape& clipShape = FRectangle());
-        void PopClipShape();
+        void PushClipRect(const Matrix4x4& clipTransform, Vec2 rectSize);
+        void PopClipRect();
 
         Vec2 CalculateTextSize(const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
@@ -50,7 +50,7 @@ namespace CE
 
         bool DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
 
-        void DrawLine(const Vec2& startPos, const Vec2& endPos);
+        bool DrawLine(const Vec2& startPos, const Vec2& endPos);
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 

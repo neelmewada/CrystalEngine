@@ -154,7 +154,7 @@ namespace CE
 		painter->PushChildCoordinateSpace(localTransform);
 		if (m_ClipChildren)
 		{
-			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+			painter->PushClipRect(Matrix4x4::Identity(), computedSize);
 		}
 
 		Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
@@ -212,7 +212,7 @@ namespace CE
 
 		if (m_ClipChildren)
 		{
-			painter->PopClipShape();
+			painter->PopClipRect();
 		}
 		painter->PopChildCoordinateSpace();
     }

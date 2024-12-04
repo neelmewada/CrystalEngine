@@ -239,15 +239,17 @@ namespace RenderingTests
                             .ContentVAlign(VAlign::Center)
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
+                            .Name("TitleLabelStack")
                             (
                                 FNew(FWidget)
                                 .FillRatio(1.0f),
 
                                 FNew(FLabel)
                                 .FontSize(15)
-                                .Text("0123456789")
+                                .Text("Hello World!")
                                 .HAlign(HAlign::Center)
-                                .VAlign(VAlign::Center),
+                                .VAlign(VAlign::Center)
+                                .Name("TitleLabel"),
 
                                 FNew(FWidget)
                                 .FillRatio(1.0f)
@@ -256,63 +258,10 @@ namespace RenderingTests
                             FNew(FHorizontalStack)
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
+                            .Name("ControlStack")
                             (
                                 FNew(FWidget)
                                 .FillRatio(1.0f),
-
-                                FNew(FButton)
-                                .OnClicked([this]
-                                    {
-                                        m_OnDefragment.Broadcast();
-                                    })
-                                .Padding(Vec4(16, 8, 16, 8))
-                                .Name("DefragmentButton")
-                                .Style("Button.WindowControl")
-                                .VAlign(VAlign::Top)
-                                (
-                                    FNew(FImage)
-                                    .Background(FBrush("/Engine/Resources/Icons/Warning"))
-                                    .Width(12)
-                                    .Height(12)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                ),
-
-                                FNew(FButton)
-                                .OnClicked([this]
-                                    {
-                                        m_OnRemove.Broadcast();
-                                    })
-                                .Padding(Vec4(16, 8, 16, 8))
-                                .Name("DeleteButton")
-                                .Style("Button.WindowControl")
-                                .VAlign(VAlign::Top)
-                                (
-                                    FNew(FImage)
-                                    .Background(FBrush("/Engine/Resources/Icons/Delete"))
-                                    .Width(12)
-                                    .Height(12)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                ),
-
-                                FNew(FButton)
-                                .OnClicked([this]
-                                    {
-                                        m_OnAdd.Broadcast();
-                                    })
-                                .Padding(Vec4(17, 8, 17, 8))
-                                .Name("AddButton")
-                                .Style("Button.WindowControl")
-                                .VAlign(VAlign::Top)
-                                (
-                                    FNew(FImage)
-                                    .Background(FBrush("/Engine/Resources/Icons/Add"))
-                                    .Width(11)
-                                    .Height(11)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                ),
 
                                 FNew(FButton)
                                 .OnClicked([this]
@@ -374,6 +323,7 @@ namespace RenderingTests
                                     .Height(10)
                                     .HAlign(HAlign::Center)
                                     .VAlign(VAlign::Center)
+                                    .Name("CloseBtn")
                                 )
                             )
                         )
@@ -384,100 +334,26 @@ namespace RenderingTests
                     FAssignNew(FVerticalStack, windowContent)
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
-                    (
-                        FNew(FHorizontalStack)
-                        .ContentVAlign(VAlign::Fill)
-                        .Name("HStack1")
-                        (
-                            FNew(FStyledWidget)
-                            .Background(transparentPattern)
-                            .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
-                            .FillRatio(1.0f)
-                            .MinWidth(60)
-                            .MinHeight(30)
-                        )
-                        .Margin(Vec4(0, 0, 0, 5)),
-
-                        FAssignNew(FButton, button)
-                        .OnClicked([this]
-                            {
-                                buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
-
-                                m_OnAdd.Broadcast();
-                            })
-                        .Name("Button")
-                        (
-                            FAssignNew(FLabel, buttonLabel)
-                            .FontSize(13)
-                            .Text("Click Count 0")
-                        ),
-
-                        FAssignNew(FButton, openPopupBtn)
-                        .OnClicked([this, openPopupBtn]
-                            {
-                                m_OnRemove.Broadcast();
-                                //GetContext()->PushLocalPopup(btnPopup, openPopupBtn->GetGlobalPosition() + Vec2(0, openPopupBtn->GetComputedSize().y));
-                            })
-                        .Name("PopupButton")
-                        (
-                            FNew(FLabel)
-                            .FontSize(13)
-                            .Text("Open Popup")
-                        ),
-
-                        FAssignNew(FTextButton, nativePopupBtn)
-                        .Text("Open Native Popup")
-                        .OnClicked([this, nativePopupBtn]
-                            {
-                                m_OnDefragment.Broadcast();
-                                //GetContext()->PushNativePopup(nativePopup, nativePopupBtn->GetGlobalPosition() + Vec2(0, nativePopupBtn->GetComputedSize().y));
-                            })
-                        .Name("NativePopupButton"),
-
-                        FAssignNew(FTextInput, textInput)
-                        .Text("This is a very long text box")
-                        .Style("TextInput.Primary")
-                        .MaxWidth(120)
-                        .HAlign(HAlign::Left)
-                        .Margin(Vec4(0, 0, 0, 5)),
-
-                        FNew(FHorizontalStack)
-                        .ContentVAlign(VAlign::Center)
-                        .Name("HStack2")
-                        (
-                            FAssignNew(FStyledWidget, subWidget)
-                            .Background(FBrush(Color::Green()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(1.0f)
-                            .MinWidth(60)
-                            .MinHeight(15),
-
-                            FNew(FStyledWidget)
-                            .Background(FBrush(Color::Cyan()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(2.0f)
-                            .MinWidth(60)
-                            .MinHeight(40),
-
-                            FNew(FStyledWidget)
-                            .Background(FBrush(Color::Yellow()))
-                            .BackgroundShape(FRectangle())
-                            .FillRatio(1.0f)
-                            .MinWidth(60)
-                            .MinHeight(25)
-                        ),
-
-                        FNew(FLabel)
-                        .FontSize(18)
-                        .Text("Demo Title")
-                        .HAlign(HAlign::Left)
-
-                    )
+                    
                 )
             )
         );
 
         //windowContent->Enabled(false);
+    }
+
+    void RenderingTestWidget::OnPaint(FPainter* painter)
+    {
+        Super::OnPaint(painter);
+
+		painter->SetPen(Color::White());
+
+        painter->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(0, 40, 0)));
+        {
+            painter->SetFont(FFont("Roboto", 13));
+            painter->DrawText("This is a sentence.", Vec2(0, 0));
+        }
+        painter->PopChildCoordinateSpace();
     }
 
     void RenderingTestWidget::OnBeginDestroy()
