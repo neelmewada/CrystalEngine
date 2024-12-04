@@ -352,6 +352,8 @@ namespace CE
 
         outQuads.Resize(text.GetLength());
 
+        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+
         for (int i = 0; i < text.GetLength(); ++i)
         {
             char c = text[i];
@@ -372,13 +374,13 @@ namespace CE
 
             FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
 
-            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
-            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / dpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / dpiScaling;
 
-            if (isFixedWidth && curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize > width && wordWrap != FWordWrap::NoWrap)
+            if (isFixedWidth && (curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / dpiScaling > width) && wordWrap != FWordWrap::NoWrap)
             {
                 curPos.x = startX;
-                curPos.y += metrics.lineHeight * (f32)fontSize;
+                curPos.y += metrics.lineHeight * (f32)fontSize / dpiScaling;
 
                 // Go through previous characters and bring them to this new-line
                 if (breakCharIdx >= 0)
@@ -390,29 +392,29 @@ namespace CE
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(curPos.x, curPos.y,
-                            (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize,
-                            (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize);
+                            (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / dpiScaling,
+                            (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / dpiScaling);
 
-                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize;
+                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / dpiScaling;
                     }
                     breakCharIdx = -1;
 
-                    curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize;
+                    curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / dpiScaling;
                 }
                 else if (wordWrap == FWordWrap::BreakWord)
                 {
                     breakCharIdx = -1;
                     curPos.x = startX;
-                    curPos.y += metrics.lineHeight * fontSize;
+                    curPos.y += metrics.lineHeight * fontSize / dpiScaling;
                 }
             }
 
             outQuads[i] = Rect::FromSize(curPos.x, curPos.y, glyphWidth, glyphHeight);
 
-            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
+            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / dpiScaling;
 
             maxX = Math::Max(curPos.x, maxX);
-            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize, maxY);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize / dpiScaling, maxY);
 
             totalCharacters++;
         }
@@ -989,6 +991,8 @@ namespace CE
         if (fontAtlas == nullptr)
             return;
 
+        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+
         u32 color = currentPen.GetColor().ToU32();
 
 	    for (int i = 0; i < length; ++i)
@@ -1023,18 +1027,13 @@ namespace CE
             Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize);
 
             // Apply glyph offsets
-            rect = rect.Translate(Vec2((f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize, 
-                -(f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize));
+            rect = rect.Translate(Vec2((f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / dpiScaling,
+                -(f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize) / dpiScaling);
 
             Vec2 topLeft = rect.min + offset;
             Vec2 topRight = Vec2(rect.max.x, rect.min.y) + offset;
             Vec2 bottomRight = Vec2(rect.max.x, rect.max.y) + offset;
             Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y) + offset;
-
-            /*topLeft = RoundVector(topLeft);
-            topRight = RoundVector(topRight);
-            bottomRight = RoundVector(bottomRight);
-            bottomLeft = RoundVector(bottomLeft);*/
 
             Vec2 topLeftUV = uvMin;
             Vec2 topRightUV = Vec2(uvMax.x, uvMin.y);

@@ -243,7 +243,9 @@ namespace CE
 
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
-        FT_Set_Pixel_Sizes(face, 0, fontSize);
+        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+
+        FT_Set_Pixel_Sizes(face, 0, Math::RoundToInt(fontSize * scaling));
 
         FAtlasImage* atlasMip = atlasImageMips[currentMip];
 

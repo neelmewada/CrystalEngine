@@ -74,6 +74,15 @@ namespace CE
 		SDL_Quit();
 	}
 
+	f32 SDLApplication::GetSystemDpiScaling()
+	{
+#if PLATFORM_MAC
+		return PlatformApplication::Get()->GetSystemDpi() / 72.0f;
+#else
+		return PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#endif
+	}
+
 	bool SDLApplication::IsFocused()
 	{
 		for (auto window : windowList)

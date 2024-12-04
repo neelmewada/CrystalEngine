@@ -324,13 +324,22 @@ static void DoPaint(FusionRenderer2* renderer)
 	image.SetImageFit(FImageFit::Contain);
 	renderer->SetBrush(image);
 	renderer->PathRect(Rect::FromSize(0, 40, 500, 200));
-	renderer->PathFill();
+	renderer->PathFill(false);
 
 	pen.SetColor(Color::White());
 	renderer->SetPen(pen);
 
-	renderer->SetFont(FFont("Roboto", 15));
-	renderer->DrawText("0123456789", Vec2(50, 50));
+	renderer->SetFont(FFont("Roboto", 10));
+	renderer->DrawText("0123456789", Vec2(0, 0));
+
+	FBrush grid = FBrush("/Engine/Resources/Images/GridSmall");
+	grid.SetBrushSize(Vec2(16, 16));
+	grid.SetBrushPosition(Vec2());
+	grid.SetBrushTiling(FBrushTiling::TileXY);
+	renderer->SetBrush(grid);
+	renderer->PathRect(Rect::FromSize(0, 300, 480, 192));
+	renderer->PathFill(false);
+
 
 	//renderer->SetBrush(FBrush("/Engine/Resources/Icons/Logo"));
 	//renderer->PathRect(Rect::FromSize(250, 250, 100, 100));

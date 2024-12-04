@@ -22,6 +22,8 @@ namespace CE
 
         void Shutdown() override;
 
+        f32 GetSystemDpiScaling() override;
+
         PlatformBackend GetBackend() override
         {
             return PlatformBackend::SDL;

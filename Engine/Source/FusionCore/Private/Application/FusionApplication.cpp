@@ -67,10 +67,22 @@ namespace CE
                 if (path.IsDirectory())
                     return;
 
-				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg")
+				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg" || path.GetExtension() == ".jpeg")
 				{
                     LoadImageResource(path, "/Engine/Resources/Icons/" + path.GetFileName().RemoveExtension().GetString());
 				}
+            });
+
+        IO::Path imagesResourcesDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Images";
+        imagesResourcesDir.RecursivelyIterateChildren([this](const IO::Path& path)
+            {
+                if (path.IsDirectory())
+                    return;
+
+                if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg" || path.GetExtension() == ".jpeg")
+                {
+                    LoadImageResource(path, "/Engine/Resources/Images/" + path.GetFileName().RemoveExtension().GetString());
+                }
             });
 
         imageRegistryUpdated = true;
