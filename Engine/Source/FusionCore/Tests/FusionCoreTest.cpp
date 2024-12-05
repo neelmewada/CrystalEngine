@@ -249,7 +249,8 @@ namespace RenderingTests
                                 .Text("Window Title")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
-                                .Name("TitleLabel"),
+                                .Name("TitleLabel")
+                                .Angle(15),
 
                                 FNew(FWidget)
                                 .FillRatio(1.0f)
@@ -334,6 +335,8 @@ namespace RenderingTests
                     FAssignNew(FVerticalStack, windowContent)
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
+                    .FillRatio(1.0f)
+                    .Angle(0)
                     (
 						FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Fill)
@@ -354,7 +357,7 @@ namespace RenderingTests
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
                             })
                         .Name("Button")
-                        .Angle(5)
+                        .Angle(15)
                         (
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)

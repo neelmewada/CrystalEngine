@@ -79,10 +79,22 @@ namespace CE
         if (!Enabled())
             return nullptr;
 
-        Vec2 rectPos = computedPosition;
+        if (IsOfType<FButton>())
+        {
+            String::IsAlphabet('a');
+        }
+
+        Vec2 rectPos = computedPosition + m_Translation;
         Vec2 rectSize = computedSize;
+        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
 
         // TODO: Implement matrix transformation support for input handling
+
+        localMousePos = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
+            Matrix4x4::Angle(-m_Angle) *
+            Matrix4x4::Scale(invScale) *
+            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor) *
+            Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         Rect rect = Rect::FromSize(rectPos, rectSize);
 
@@ -294,10 +306,10 @@ namespace CE
         else
         {
             localTransform =
-                Matrix4x4::Translation(GetComputedPosition() + Translation() + GetComputedSize() / 2) *
-                Matrix4x4::Angle(Angle()) *
-                Matrix4x4::Translation(-GetComputedSize() / 2) *
-                Matrix4x4::Scale(Scale());
+                Matrix4x4::Translation(GetComputedPosition() + m_Translation + GetComputedSize() * m_Anchor) *
+                Matrix4x4::Angle(m_Angle) *
+                Matrix4x4::Scale(m_Scale) *
+                Matrix4x4::Translation(-GetComputedSize() * m_Anchor);
         }
     }
 
