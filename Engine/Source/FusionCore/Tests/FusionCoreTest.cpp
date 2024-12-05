@@ -334,7 +334,32 @@ namespace RenderingTests
                     FAssignNew(FVerticalStack, windowContent)
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
-                    
+                    (
+						FNew(FHorizontalStack)
+                        .ContentVAlign(VAlign::Fill)
+                        .Name("HStack1")
+                        (
+                            FNew(FStyledWidget)
+                            .Background(transparentPattern)
+                            .BackgroundShape(FRoundedRectangle(2.5f, 5, 7.5f, 10))
+                            .FillRatio(1.0f)
+                            .MinWidth(60)
+                            .MinHeight(30)
+                        )
+                        .Margin(Vec4(0, 0, 0, 5)),
+
+                        FAssignNew(FButton, button)
+                        .OnClicked([this]
+                            {
+                                buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+                            })
+                        .Name("Button")
+                        (
+                            FAssignNew(FLabel, buttonLabel)
+                            .FontSize(13)
+                            .Text("Click Count 0")
+                        )
+                    )
                 )
             )
         );
@@ -346,20 +371,6 @@ namespace RenderingTests
     {
         Super::OnPaint(painter);
 
-        painter->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(0, 40, 0)));
-        {
-            painter->SetFont(FFont("Roboto", 15));
-            String text = "[]gyj This is a sentence. good year.\n[]gyj This is new line!";
-
-            Vec2 textSize = painter->CalculateTextSize(text, painter->GetCurrentFont());
-            painter->SetPen(Color::Clear());
-            painter->SetBrush(Color::Red());
-            painter->DrawRect(Rect::FromSize(0, 0, textSize.width, textSize.height));
-
-            painter->SetPen(Color::White());
-            painter->DrawText(text, Vec2(0, 0));
-        }
-        painter->PopChildCoordinateSpace();
     }
 
     void RenderingTestWidget::OnBeginDestroy()
