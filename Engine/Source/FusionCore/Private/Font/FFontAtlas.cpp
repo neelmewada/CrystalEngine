@@ -246,7 +246,6 @@ namespace CE
 
         u32 dpi = PlatformApplication::Get()->GetSystemDpi();
         f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
-        dpi = 0; // TODO: Remove this
 
         FT_Set_Char_Size(face, 0, fontSize * 64, dpi, dpi);
 
@@ -320,6 +319,8 @@ namespace CE
                 glyph.advance = advance;
                 glyph.fontSize = fontSize;
                 glyph.index = glyphDataList.GetCount();
+
+                glyph.scalingFactor = 1.0f;
 
                 Vec2 uvMin = Vec2((f32)glyph.x0 / (f32)atlasSize, (f32)glyph.y0 / (f32)atlasSize);
                 Vec2 uvMax = Vec2((f32)glyph.x1 / (f32)atlasSize, (f32)glyph.y1 / (f32)atlasSize);

@@ -890,24 +890,26 @@ namespace CE
         return AddCircle(center, radius, 0, antiAliased);
     }
 
-    Vec2 FusionRenderer2::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
+    Vec2 FusionRenderer2::DrawText(const String& text, Vec2 textPos, Vec2 size, FWordWrap wordWrap)
     {
         thread_local Array<Rect> quads{};
         const bool isFixedSize = !Math::ApproxEquals(size.x, 0) && !Math::ApproxEquals(size.y, 0);
 
-        if (isFixedSize && IsRectClipped(Rect::FromSize(pos, size)))
+        if (isFixedSize && IsRectClipped(Rect::FromSize(textPos, size)))
         {
             return Vec2();
         }
+
+        quads.Reserve(text.GetLength());
 
         Vec2 finalSize = CalculateTextQuads(quads, text, currentFont, size.width, wordWrap);
 
-        if (!isFixedSize && IsRectClipped(Rect::FromSize(pos, finalSize)))
+        if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
         {
             return Vec2();
         }
 
-        DrawTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, pos);
+        DrawTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
         return finalSize;
     }
 
@@ -933,12 +935,15 @@ namespace CE
         FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
         if (fontAtlas == nullptr)
             return Vec2();
-
-        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+        
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
-        const float startY = metrics.ascender * (f32)fontSize;
+        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
         constexpr float startX = 0;
 
         float maxX = startX;
@@ -965,21 +970,21 @@ namespace CE
             {
                 breakCharIdx = -1;
                 curPos.x = startX;
-                curPos.y += metrics.lineHeight * (f32)fontSize;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
                 outQuads[i] = Rect();
                 continue;
             }
 
             FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
 
-            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize;
-            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize;
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
 
-            /*
-            if (isFixedWidth && (curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / dpiScaling > width) && wordWrap != FWordWrap::NoWrap)
+            
+            if (isFixedWidth && (curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling > width) && wordWrap != FWordWrap::NoWrap)
             {
                 curPos.x = startX;
-                curPos.y += metrics.lineHeight * (f32)fontSize / dpiScaling;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
 
                 // Go through previous characters and bring them to this new-line
                 if (breakCharIdx >= 0)
@@ -991,34 +996,33 @@ namespace CE
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(curPos.x, curPos.y,
-                            (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / dpiScaling,
-                            (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / dpiScaling);
+                            (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
+                            (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling);
 
-                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / dpiScaling;
+                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling;
                     }
                     breakCharIdx = -1;
 
-                    curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / dpiScaling;
+                    curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
                 }
                 else if (wordWrap == FWordWrap::BreakWord)
                 {
                     breakCharIdx = -1;
                     curPos.x = startX;
-                    curPos.y += metrics.lineHeight * fontSize / dpiScaling;
+                    curPos.y += metrics.lineHeight * fontSize * metricsScaling;
                 }
             }
-			*/
 
             // Apply glyph offsets
             outQuads[i] = Rect::FromSize(
-                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize,
-                curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize,
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
+                curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 glyphWidth, glyphHeight);
 
-            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize;
+            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
 
             maxX = Math::Max(curPos.x, maxX);
-            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize, maxY);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);
 
             totalCharacters++;
         }
@@ -1030,7 +1034,7 @@ namespace CE
         return finalSize;
     }
 
-    void FusionRenderer2::DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 pos)
+    void FusionRenderer2::DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos)
     {
         thread_local HashSet<char> ignoreCharacters = { ' ', '\n', '\r', '\t', '\0' };
 
@@ -1050,8 +1054,6 @@ namespace CE
         if (fontAtlas == nullptr)
             return;
 
-        f32 dpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
-
         Color penColor = currentPen.GetColor();
         penColor.a *= opacityStack.Last();
 
@@ -1060,7 +1062,7 @@ namespace CE
 	    for (int i = 0; i < length; ++i)
 	    {
             char c = text[i];
-            Rect rect = quads[i];
+            Rect quad = quads[i];
 
             if (ignoreCharacters.Exists(c))
             {
@@ -1079,7 +1081,7 @@ namespace CE
                 offset = coordinateSpaceStack.Last().translation;
             }
 
-            rect = rect.Translate(pos + offset);
+            quad = quad.Translate(textPos + offset);
 
             PrimReserve(4, 6);
 
@@ -1088,10 +1090,10 @@ namespace CE
             Vec2 uvMin = Vec2((f32)glyph.x0 / atlasSize, (f32)glyph.y0 / atlasSize);
             Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize);
 
-            Vec2 topLeft = rect.min + offset;
-            Vec2 topRight = Vec2(rect.max.x, rect.min.y) + offset;
-            Vec2 bottomRight = Vec2(rect.max.x, rect.max.y) + offset;
-            Vec2 bottomLeft = Vec2(rect.min.x, rect.max.y) + offset;
+            Vec2 topLeft = quad.min + offset;
+            Vec2 topRight = Vec2(quad.max.x, quad.min.y) + offset;
+            Vec2 bottomRight = Vec2(quad.max.x, quad.max.y) + offset;
+            Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y) + offset;
 
             Vec2 topLeftUV = uvMin;
             Vec2 topRightUV = Vec2(uvMax.x, uvMin.y);

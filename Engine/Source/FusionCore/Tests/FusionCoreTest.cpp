@@ -246,7 +246,7 @@ namespace RenderingTests
 
                                 FNew(FLabel)
                                 .FontSize(15)
-                                .Text("Hello World!")
+                                .Text("Hello jgy[]")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
                                 .Name("TitleLabel"),
@@ -349,14 +349,15 @@ namespace RenderingTests
         painter->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(0, 40, 0)));
         {
             painter->SetFont(FFont("Roboto", 15));
+            String text = "[]gyj This is a sentence. good year.\n[]gyj This is new line!";
 
-            Vec2 textSize = painter->CalculateTextSize("This is a sentence.", painter->GetCurrentFont());
+            Vec2 textSize = painter->CalculateTextSize(text, painter->GetCurrentFont());
             painter->SetPen(Color::Clear());
             painter->SetBrush(Color::Red());
             painter->DrawRect(Rect::FromSize(0, 0, textSize.width, textSize.height));
 
             painter->SetPen(Color::White());
-            painter->DrawText("This is a sentence.", Vec2(0, 0));
+            painter->DrawText(text, Vec2(0, 0));
         }
         painter->PopChildCoordinateSpace();
     }

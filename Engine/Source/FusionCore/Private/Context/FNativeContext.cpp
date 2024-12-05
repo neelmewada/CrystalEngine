@@ -317,7 +317,7 @@ namespace CE
 			}
 
 			renderer2->SetFont(FFont("Roboto", 10));
-			String text = "This is a sentence.";
+			String text = "This is a sentence. good year[].";
 
 			renderer2->SetPen(FPen());
 			renderer2->SetBrush(Color::Red());

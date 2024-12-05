@@ -107,13 +107,13 @@ namespace CE
         bool FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
         bool StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
-        Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
     private:
 
         // - Internal Draw API -
 
-        void DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 pos);
+        void DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos);
 
         int CalculateNumCircleSegments(float radius) const;
 
