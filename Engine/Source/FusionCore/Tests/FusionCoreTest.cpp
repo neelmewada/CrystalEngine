@@ -354,11 +354,11 @@ namespace RenderingTests
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
                             })
                         .Name("Button")
+                        .Angle(5)
                         (
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)
                             .Text("Click Count 0")
-                            
                         )
                     )
                 )

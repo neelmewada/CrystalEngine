@@ -294,23 +294,16 @@ namespace CE
         else
         {
             localTransform =
-                Matrix4x4::Translation(computedPosition + m_Translation) *
+                Matrix4x4::Translation(computedPosition + m_Translation + computedSize / 2.0f) *
                 Matrix4x4::Angle(m_Angle) *
+                Matrix4x4::Translation(-computedSize / 2.0f) *
                 Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
         }
     }
 
     void FWidget::OnPostComputeLayout()
     {
-        if (IsOfType<FTitleBar>())
-        {
-            FTitleBar* titleBar = static_cast<FTitleBar*>(this);
 
-            Vec2 pos = GetComputedPosition();
-            Vec2 size = GetComputedSize();
-
-            GetName();
-        }
     }
 
     bool FWidget::AddChild(FWidget* child)

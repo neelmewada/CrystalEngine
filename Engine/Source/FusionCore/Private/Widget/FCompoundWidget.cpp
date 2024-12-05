@@ -101,7 +101,7 @@ namespace CE
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
             if (isTranslationOnly)
-				painter->PushChildCoordinateSpace(localTransform);
+				painter->PushChildCoordinateSpace(computedPosition + m_Translation);
             else
                 painter->PushChildCoordinateSpace(localTransform);
 
