@@ -267,90 +267,6 @@ static void DoRectPacking(FusionRenderer2* renderer)
 	renderer->PopChildCoordinateSpace();
 }
 
-static void DoPaint(FusionRenderer2* renderer)
-{
-	return;
-
-	renderer->Begin();
-
-	renderer->SetBrush(FBrush(Color::Black()));
-	renderer->FillRect(Rect::FromSize(100, 100, 200, 200));
-
-	FPen pen = Color::Blue();
-	f32 angle = 0;
-
-	renderer->PushChildCoordinateSpace(Matrix4x4::Translation(Vec2(100, 100)) * Matrix4x4::Angle(angle) * Matrix4x4::Scale(Vec3(1, 1, 1)));
-	renderer->PushClipRect(Matrix4x4::Identity(), Vec2(100, 100));
-	renderer->PushOpacity(1.0f);
-	{
-		pen.SetThickness(2.0f);
-		renderer->SetPen(pen);
-		renderer->SetBrush(Color::Cyan());
-
-		renderer->FillRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
-		renderer->StrokeRect(Rect::FromSize(30, 30, 100, 60), Vec4(5, 10, 15, 20));
-
-		pen.SetColor(Color::White());
-		renderer->SetPen(pen);
-		renderer->SetFont(FFont("Roboto", 10));
-		renderer->DrawText("0123456789", Vec2(0, 0));
-
-		Vec2 arcPos = Vec2(60, 60);
-		renderer->PushChildCoordinateSpace(Matrix4x4::Identity());
-		renderer->PushClipRect(Matrix4x4::Translation(Vec2(70, 70)), Vec2(300, 300));
-
-		renderer->SetBrush(Color::Red());
-		renderer->PathLineTo(arcPos);
-		renderer->PathArcToFast(arcPos, 50, 0, 3); // 0 to 90 degree
-		renderer->PathFillStroke(true);
-
-		renderer->PopClipRect();
-		renderer->PopChildCoordinateSpace();
-	}
-	renderer->PopOpacity();
-	renderer->PopClipRect();
-	renderer->PopChildCoordinateSpace();
-
-	pen.SetColor(Color::Cyan());
-	pen.SetThickness(2.0f);
-	renderer->SetPen(pen);
-	renderer->SetBrush(Color::Red());
-	renderer->FillCircle(Vec2(300, 300), 25);
-	renderer->StrokeCircle(Vec2(300, 300), 25);
-
-	pen.SetColor(Color::Red());
-	pen.SetThickness(2.5f);
-	renderer->SetPen(pen);
-
-	renderer->PathLineTo(Vec2(25, 25));
-	renderer->PathBezierCubicCurveTo(Vec2(50, 50), Vec2(0, 75), Vec2(25, 100));
-	renderer->PathStroke();
-
-	FBrush image = FBrush("/Engine/Resources/Icons/Test");
-	image.SetBrushPosition(Vec2(0.5f, 0.5f));
-	//image.SetBrushSize(Vec2(300 * 0.5f, 200 * 0.5f));
-	image.SetBrushTiling(FBrushTiling::TileXY);
-	image.SetImageFit(FImageFit::Contain);
-	renderer->SetBrush(image);
-	renderer->PathRect(Rect::FromSize(0, 40, 300 * 0.25f, 200 * 0.25f));
-	renderer->PathFill(false);
-
-	pen.SetColor(Color::White());
-	renderer->SetPen(pen);
-
-	FBrush grid = FBrush("/Engine/Resources/Images/GridSmall");
-	grid.SetBrushSize(Vec2(16, 16));
-	grid.SetBrushPosition(Vec2());
-	grid.SetBrushTiling(FBrushTiling::TileXY);
-	renderer->SetBrush(grid);
-	//renderer->PathRect(Rect::FromSize(0, 300, 480, 192));
-	//renderer->PathFill(false);
-
-	//DoRectPacking(renderer);
-
-	renderer->End();
-}
-
 TEST(FusionCore, Rendering)
 {
 	TEST_BEGIN_GUI;
@@ -379,7 +295,8 @@ TEST(FusionCore, Rendering)
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 			primaryBtn->cornerRadius = Vec4(1, 1, 1, 1) * 5;
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
-			primaryBtn->borderWidth = 1.0f;
+			primaryBtn->hoveredBorderColor = primaryBtn->pressedBorderColor = primaryBtn->borderColor;
+			primaryBtn->borderWidth = 1.5f;
 
 			GetDefaultWidget<FButton>()
 				.Padding(Vec4(10, 5, 10, 5))
@@ -603,8 +520,6 @@ TEST(FusionCore, Rendering)
 		InputManager::Get().Tick();
 
 		FusionApplication::Get()->Tick();
-
-		DoPaint(nativeContext->GetPainter()->GetRenderer());
 
 		RendererSystem::Get().Render();
 

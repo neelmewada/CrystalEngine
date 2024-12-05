@@ -79,6 +79,7 @@ namespace CE
         void SetFont(const FFont& font);
 
         const FFont& GetFont() const { return currentFont; }
+        const FPen& GetPen() const { return currentPen; }
 
         //! @brief Used for CPU side culling and is dependent on the state (clips and transforms)!
         bool IsRectClipped(const Rect& rect);

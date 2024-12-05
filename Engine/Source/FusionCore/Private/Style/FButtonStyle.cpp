@@ -15,7 +15,7 @@ namespace CE
 
     FCustomButtonStyle::FCustomButtonStyle()
     {
-
+        contentMoveY = 1.0f;
     }
 
     void FCustomButtonStyle::MakeStyle(FWidget& widget)
@@ -61,7 +61,7 @@ namespace CE
         f32 childHeight = child.GetComputedSize().y;
 
         child
-            .Translation(Vec2(0, button.IsPressed() && button.IsHovered() ? childHeight * 0.1f : 0))
+            .Translation(Vec2(0, button.IsPressed() && button.IsHovered() ? contentMoveY : 0))
             ;
     }
 

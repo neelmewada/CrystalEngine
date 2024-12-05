@@ -6,6 +6,7 @@ namespace CE
     FWidget::FWidget()
     {
         m_Scale = Vec2(1, 1);
+        m_Anchor = Vec2(0.5f, 0.5f);
         m_MaxHeight = NumericLimits<f32>::Infinity();
         m_MaxWidth = NumericLimits<f32>::Infinity();
 
@@ -30,11 +31,6 @@ namespace CE
     void FWidget::OnPaint(FPainter* painter)
     {
         ZoneScoped;
-
-        if (GetName() == "DebugSplitBox")
-        {
-            String::IsAlphabet('a');
-        }
 
         globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
     }
@@ -285,10 +281,23 @@ namespace CE
 
     void FWidget::UpdateLocalTransform()
     {
-        localTransform =
-            Matrix4x4::Translation(computedPosition + m_Translation) *
-            Matrix4x4::Angle(m_Angle) *
-            Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
+        isTranslationOnly = false;
+
+        if (Math::ApproxEquals(m_Angle, 0) &&
+            Math::ApproxEquals(m_Scale.x, 1) &&
+            Math::ApproxEquals(m_Scale.y, 1))
+        {
+            isTranslationOnly = true;
+
+            localTransform = Matrix4x4::Translation(computedPosition + m_Translation);
+        }
+        else
+        {
+            localTransform =
+                Matrix4x4::Translation(computedPosition + m_Translation) *
+                Matrix4x4::Angle(m_Angle) *
+                Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
+        }
     }
 
     void FWidget::OnPostComputeLayout()

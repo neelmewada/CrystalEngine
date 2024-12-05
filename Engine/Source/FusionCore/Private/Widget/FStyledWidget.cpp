@@ -30,14 +30,6 @@ namespace CE
             painter->PushClipRect(localTransform, computedSize);
         }
 
-        bool transformChanged = false;
-
-        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 2)
-        {
-            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1)));
-            transformChanged = true;
-        }
-
 	    if ((m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None) ||
             (m_BorderWidth > 0 && m_BorderColor.a > 0))
 	    {
@@ -69,11 +61,6 @@ namespace CE
         else
         {
             isCulled = painter->IsCulled(computedPosition, computedSize);
-        }
-
-        if (transformChanged)
-        {
-	        painter->SetItemTransform(Matrix4x4::Identity());
         }
 
         OnPaintContent(painter);

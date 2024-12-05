@@ -35,7 +35,7 @@ namespace CE
             RecalculateCharacterOffsets();
         }
 
-        painter->PushChildCoordinateSpace(Matrix4x4::Translation(Vec3(-textScrollOffset, 0, 0)));
+        painter->PushChildCoordinateSpace(Vec2(-textScrollOffset, 0));
 
         if (IsEditing() && IsTextSelected() && selectionStart <= selectionEnd)
         {

@@ -151,7 +151,11 @@ namespace CE
 		if (children.IsEmpty() || !Enabled())
 			return;
 
-		painter->PushChildCoordinateSpace(localTransform);
+		if (isTranslationOnly)
+			painter->PushChildCoordinateSpace(m_Translation);
+		else
+			painter->PushChildCoordinateSpace(localTransform);
+		
 		if (m_ClipChildren)
 		{
 			painter->PushClipRect(Matrix4x4::Identity(), computedSize);

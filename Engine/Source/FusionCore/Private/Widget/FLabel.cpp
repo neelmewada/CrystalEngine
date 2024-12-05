@@ -43,19 +43,20 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (GetName() == "TitleLabel123")
+        if (IsTranslationOnly())
         {
-            painter->SetPen(FPen());
-            painter->SetBrush(Color::Red());
-
-            painter->DrawRect(Rect::FromSize(computedPosition, computedSize));
+	        painter->PushChildCoordinateSpace(computedPosition + m_Translation);
+        }
+        else
+        {
+	        painter->PushChildCoordinateSpace(localTransform);
         }
 
         painter->SetFont(m_Font);
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());
 
-        painter->DrawText(m_Text, computedPosition, computedSize, m_WordWrap);
+        painter->DrawText(m_Text, Vec2(), computedSize, m_WordWrap);
 
         if (m_Underline.GetStyle() != FPenStyle::None && m_Underline.GetColor().a > 0.001f && 
             !m_Text.IsEmpty())
@@ -106,6 +107,7 @@ namespace CE
             }
         }
 
+        painter->PopChildCoordinateSpace();
     }
 
     FLabel::Self& FLabel::FontFamily(const CE::Name& fontFamily)

@@ -832,6 +832,8 @@ namespace CE
             return false;
         }
 
+        // TODO: Implement dotted and dashed lines
+
         AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
 
         PathClear();
@@ -1090,10 +1092,10 @@ namespace CE
             Vec2 uvMin = Vec2((f32)glyph.x0 / atlasSize, (f32)glyph.y0 / atlasSize);
             Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize);
 
-            Vec2 topLeft = quad.min + offset;
-            Vec2 topRight = Vec2(quad.max.x, quad.min.y) + offset;
-            Vec2 bottomRight = Vec2(quad.max.x, quad.max.y) + offset;
-            Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y) + offset;
+            Vec2 topLeft = quad.min;
+            Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+            Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+            Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
 
             Vec2 topLeftUV = uvMin;
             Vec2 topRightUV = Vec2(uvMax.x, uvMin.y);

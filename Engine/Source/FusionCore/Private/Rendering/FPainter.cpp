@@ -49,6 +49,11 @@ namespace CE
 		renderer2->PushChildCoordinateSpace(coordinateTransform);
 	}
 
+	void FPainter::PushChildCoordinateSpace(const Vec2& translation)
+	{
+		renderer2->PushChildCoordinateSpace(translation);
+	}
+
 	Matrix4x4 FPainter::GetTopCoordinateSpace()
 	{
 		return renderer2->GetTopCoordinateSpace();
@@ -90,24 +95,36 @@ namespace CE
 	{
 		bool isDrawn = false;
 
+		Rect borderRect = rect;
+		const FPen& pen = renderer2->GetPen();
+		f32 borderOffset = 0;
+
+		if (pen.GetThickness() > 0.1f)
+		{
+			borderOffset = pen.GetThickness() * 0.5f;
+		}
+
+		borderRect.min -= Vec2(1, 1) * borderOffset;
+		borderRect.max += Vec2(1, 1) * borderOffset;
+
 		switch (shape.GetShapeType())
 		{
 		case FShapeType::None:
 			break;
 		case FShapeType::Rect:
 			isDrawn |= renderer2->FillRect(rect);
-			isDrawn |= renderer2->StrokeRect(rect);
+			isDrawn |= renderer2->StrokeRect(borderRect);
 			break;
 		case FShapeType::RoundedRect:
 			isDrawn |= renderer2->FillRect(rect, shape.GetCornerRadius());
-			isDrawn |= renderer2->StrokeRect(rect, shape.GetCornerRadius());
+			isDrawn |= renderer2->StrokeRect(borderRect, shape.GetCornerRadius());
 			break;
 		case FShapeType::Circle:
 		{
 			Vec2 center = (rect.max - rect.min) / 2.0f;
 			f32 radius = Math::Min((center - rect.min).x, (center - rect.min).y);
 			isDrawn |= renderer2->FillCircle(center, radius);
-			isDrawn |= renderer2->StrokeCircle(center, radius);
+			isDrawn |= renderer2->StrokeCircle(center, radius + borderOffset);
 		}
 			break;
 		}

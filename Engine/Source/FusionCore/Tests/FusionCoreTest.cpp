@@ -356,8 +356,9 @@ namespace RenderingTests
                         .Name("Button")
                         (
                             FAssignNew(FLabel, buttonLabel)
-                            .FontSize(13)
+                            .FontSize(10)
                             .Text("Click Count 0")
+                            
                         )
                     )
                 )

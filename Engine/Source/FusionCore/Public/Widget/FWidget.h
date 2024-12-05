@@ -149,6 +149,8 @@ namespace CE
         //! @brief Returns true if this widget is both enabled and visible.
         bool IsVisible();
 
+        bool IsTranslationOnly() const { return isTranslationOnly; }
+
         //! @brief Internal use only! Never call this function directly.
         void SetParent(FWidget* parent);
 
@@ -202,6 +204,7 @@ namespace CE
 
         FIELD(ReadOnly)
         bool isFocused = false;
+        bool isTranslationOnly = false;
 
     protected:
 
@@ -219,6 +222,7 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(Vec4, Padding);
         FUSION_LAYOUT_PROPERTY(Vec4, Margin);
+        FUSION_PROPERTY(Vec2, Anchor);
 
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);

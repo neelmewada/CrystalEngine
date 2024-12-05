@@ -100,7 +100,11 @@ namespace CE
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
-            painter->PushChildCoordinateSpace(localTransform);
+            if (isTranslationOnly)
+				painter->PushChildCoordinateSpace(localTransform);
+            else
+                painter->PushChildCoordinateSpace(localTransform);
+
             if (m_ClipChildren)
             {
                 painter->PushClipRect(Matrix4x4::Identity(), computedSize);

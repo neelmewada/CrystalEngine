@@ -26,6 +26,7 @@ namespace CE
         void SetItemTransform(const Matrix4x4& transform);
 
         void PushChildCoordinateSpace(const Matrix4x4& coordinateTransform);
+        void PushChildCoordinateSpace(const Vec2& translation);
         Matrix4x4 GetTopCoordinateSpace();
         void PopChildCoordinateSpace();
 
@@ -60,7 +61,6 @@ namespace CE
 
     private:
 
-        FusionRenderer* renderer = nullptr;
         FusionRenderer2* renderer2 = nullptr;
 
         FUSION_FRIENDS;
