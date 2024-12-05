@@ -56,11 +56,11 @@ namespace CE
                 break;
             }
 
-            isCulled = !painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
+            isCulled = !painter->DrawShape(Rect::FromSize(Vec2(), computedSize), m_BackgroundShape);
 	    }
         else
         {
-            isCulled = painter->IsCulled(computedPosition, computedSize);
+            isCulled = painter->IsCulled(Vec2(), computedSize);
         }
 
         OnPaintContent(painter);

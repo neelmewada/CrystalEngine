@@ -100,10 +100,14 @@ namespace CE
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
-            if (isTranslationOnly)
-				painter->PushChildCoordinateSpace(computedPosition + m_Translation);
+            if (m_Child->isTranslationOnly)
+            {
+	            painter->PushChildCoordinateSpace(m_Child->computedPosition + m_Child->m_Translation);
+            }
             else
-                painter->PushChildCoordinateSpace(localTransform);
+            {
+	            painter->PushChildCoordinateSpace(m_Child->GetLocalTransform());
+            }
 
             if (m_ClipChildren)
             {

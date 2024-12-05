@@ -294,10 +294,10 @@ namespace CE
         else
         {
             localTransform =
-                Matrix4x4::Translation(computedPosition + m_Translation + computedSize / 2.0f) *
-                Matrix4x4::Angle(m_Angle) *
-                Matrix4x4::Translation(-computedSize / 2.0f) *
-                Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
+                Matrix4x4::Translation(GetComputedPosition() + Translation() + GetComputedSize() / 2) *
+                Matrix4x4::Angle(Angle()) *
+                Matrix4x4::Translation(-GetComputedSize() / 2) *
+                Matrix4x4::Scale(Scale());
         }
     }
 

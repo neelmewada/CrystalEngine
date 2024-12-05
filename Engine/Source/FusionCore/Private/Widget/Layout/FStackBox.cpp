@@ -255,11 +255,6 @@ namespace CE
 
 		if (children.IsEmpty() || !Enabled())
 			return;
-
-		if (isTranslationOnly)
-			painter->PushChildCoordinateSpace(computedPosition + m_Translation);
-		else
-			painter->PushChildCoordinateSpace(localTransform);
 		
 		if (m_ClipChildren)
 		{
@@ -271,14 +266,24 @@ namespace CE
 			if (!child->Enabled() || !child->Visible())
 				continue;
 
+			if (child->IsTranslationOnly())
+			{
+				painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+			}
+			else
+			{
+				painter->PushChildCoordinateSpace(child->GetLocalTransform());
+			}
+
 			child->OnPaint(painter);
+
+			painter->PopChildCoordinateSpace();
 		}
 
 		if (m_ClipChildren)
 		{
 			painter->PopClipRect();
 		}
-		painter->PopChildCoordinateSpace();
 	}
 
 	void FStackBox::Construct()

@@ -43,15 +43,6 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (IsTranslationOnly())
-        {
-	        painter->PushChildCoordinateSpace(computedPosition + m_Translation);
-        }
-        else
-        {
-	        painter->PushChildCoordinateSpace(localTransform);
-        }
-
         painter->SetFont(m_Font);
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());
@@ -106,8 +97,6 @@ namespace CE
                 }
             }
         }
-
-        painter->PopChildCoordinateSpace();
     }
 
     FLabel::Self& FLabel::FontFamily(const CE::Name& fontFamily)
