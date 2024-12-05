@@ -43,7 +43,7 @@ namespace CE
     {
 	    Super::OnPaint(painter);
 
-        if (GetName() == "TitleLabel")
+        if (GetName() == "TitleLabel123")
         {
             painter->SetPen(FPen());
             painter->SetBrush(Color::Red());

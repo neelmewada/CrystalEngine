@@ -120,8 +120,8 @@ namespace CE
 
             if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
             {
-                int halfSize = (gFontSizes[i] + gFontSizes[i + 1]) / 2;
-                if (fontSize <= halfSize)
+                int splitSize = Math::RoundToInt((gFontSizes[i] + gFontSizes[i + 1]) * 0.2f);
+                if (fontSize <= splitSize)
                     fontSizeInAtlas = gFontSizes[i];
                 else
                     fontSizeInAtlas = gFontSizes[i + 1];

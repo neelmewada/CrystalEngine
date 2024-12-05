@@ -245,8 +245,8 @@ namespace RenderingTests
                                 .FillRatio(1.0f),
 
                                 FNew(FLabel)
-                                .FontSize(15)
-                                .Text("Hello jgy[]")
+                                .FontSize(12)
+                                .Text("Window Title")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
                                 .Name("TitleLabel"),
