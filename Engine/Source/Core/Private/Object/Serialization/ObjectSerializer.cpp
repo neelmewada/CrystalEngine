@@ -704,6 +704,11 @@ namespace CE
 
                 *stream << (u32)schemaTypeToIndex.Get((StructType*)underlyingType);
             }
+            else if (underlyingType->IsEnum())
+            {
+                typeByte = FieldTypeBytes[TYPEID(s64)];
+                *stream << typeByte;
+            }
             else
             {
                 String msg = String::Format("Bundle::SaveToDisk(): Failed to serialize field: {}", field->GetName());

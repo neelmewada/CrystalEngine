@@ -110,6 +110,8 @@ namespace CE
 
         Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
+        void DrawViewport(const Rect& rect, FViewport* viewport);
+
     private:
 
         // - Internal Draw API -
@@ -193,6 +195,7 @@ namespace CE
             DRAW_TextureTileX,
             DRAW_TextureTileY,
             DRAW_TextureTileXY,
+            DRAW_Viewport
         };
 
         struct alignas(8) FDrawData

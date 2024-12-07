@@ -458,6 +458,19 @@ namespace CE
             return this;
         }
 
+        auto invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1.0f);
+
+        Vec2 transformedMousePos;
+
+    	if (child != nullptr && (isVerticalScrollVisible || isHorizontalScrollVisible))
+    	{
+            transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
+                Matrix4x4::Angle(-m_Angle) *
+                Matrix4x4::Scale(invScale) *
+                Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor)) *
+                Vec4(mousePosition.x, mousePosition.y, 0, 1);
+    	}
+
         if (child && isVerticalScrollVisible)
         {
             f32 scrollBarHeight = computedSize.y / child->computedSize.y;
@@ -465,7 +478,7 @@ namespace CE
             
             Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
 
-            if (Rect::FromSize(Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, computedPosition.y), barSize).Contains(mousePosition))
+            if (Rect::FromSize(Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, computedPosition.y), barSize).Contains(transformedMousePos))
             {
                 return this;
             }
@@ -473,12 +486,10 @@ namespace CE
 
         if (child && isHorizontalScrollVisible)
         {
-            Rect rect = GetHorizontalScrollBarRect();
-
             Rect barRegion = Rect(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth, 
                 computedPosition.x + computedSize.x, computedPosition.y + computedSize.y);
 
-            if (barRegion.Contains(mousePosition))
+            if (barRegion.Contains(transformedMousePos))
             {
                 return this;
             }

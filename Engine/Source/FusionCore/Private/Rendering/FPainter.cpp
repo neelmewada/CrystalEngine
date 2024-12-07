@@ -132,11 +132,9 @@ namespace CE
 		return isDrawn;
 	}
 
-	void FPainter::DrawFrameBuffer(const Rect& rect,
-		const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames)
+	void FPainter::DrawViewport(const Rect& rect, FViewport* viewport)
 	{
-		// TODO
-		//renderer2->DrawFrameBuffer(frames, rect.min, rect.GetSize());
+		renderer2->DrawViewport(rect, viewport);
 	}
 
 	bool FPainter::DrawRect(const Rect& rect)

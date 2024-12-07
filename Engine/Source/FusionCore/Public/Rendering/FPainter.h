@@ -3,6 +3,7 @@
 namespace CE
 {
     class FusionRenderer;
+    class FViewport;
 
     CLASS()
     class FUSIONCORE_API FPainter final : public Object
@@ -45,7 +46,7 @@ namespace CE
 
         bool DrawShape(const Rect& rect, const FShape& shape);
 
-        void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
+        void DrawViewport(const Rect& rect, FViewport* viewport);
 
         bool DrawRect(const Rect& rect);
 

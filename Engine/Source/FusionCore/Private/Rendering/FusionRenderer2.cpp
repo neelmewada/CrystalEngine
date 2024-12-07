@@ -915,8 +915,43 @@ namespace CE
         return finalSize;
     }
 
+    void FusionRenderer2::DrawViewport(const Rect& quad, FViewport* viewport)
+    {
+        AddDrawCmd();
+
+        PrimReserve(4, 6);
+
+        u32 color = Color::White().ToU32();
+
+        drawCmdList.Last().textureSrgOverride = viewport->GetTextureSrg();
+
+        Vec2 topLeft = quad.min;
+        Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+        Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+        Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+
+        Vec2 topLeftUV = Vec2(0, 0);
+        Vec2 topRightUV = Vec2(1, 0);
+        Vec2 bottomRightUV = Vec2(1, 1);
+        Vec2 bottomLeftUV = Vec2(0, 1);
+
+        FDrawIndex idx = vertexCurrentIdx;
+        indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
+        indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
+
+        vertexWritePtr[0].position = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV; vertexWritePtr[0].drawType = DRAW_Viewport;
+        vertexWritePtr[1].position = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV; vertexWritePtr[1].drawType = DRAW_Viewport;
+        vertexWritePtr[2].position = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV; vertexWritePtr[2].drawType = DRAW_Viewport;
+        vertexWritePtr[3].position = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV; vertexWritePtr[3].drawType = DRAW_Viewport;
+        vertexWritePtr += 4;
+        vertexCurrentIdx += 4;
+        indexWritePtr += 6;
+
+        drawCmdList.Last().numIndices += 6;
+    }
+
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
-        f32 width, FWordWrap wordWrap)
+                                             f32 width, FWordWrap wordWrap)
     {
         ZoneScoped;
 
@@ -1253,6 +1288,7 @@ namespace CE
                 {
                     drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
                     drawCmdList.Last().firstInstance = coordinateSpaceStack.Last().indexInObjectArray;
+                    drawCmdList.Last().textureSrgOverride = nullptr;
                     
                     drawCmdList.Last().rootConstants.numClipRects = clipStack.GetCount();
                     int j = 0;

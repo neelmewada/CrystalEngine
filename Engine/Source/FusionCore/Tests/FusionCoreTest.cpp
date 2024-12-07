@@ -336,7 +336,6 @@ namespace RenderingTests
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
                     .FillRatio(1.0f)
-                    .Angle(0)
                     (
 						FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Fill)
@@ -357,7 +356,7 @@ namespace RenderingTests
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
                             })
                         .Name("Button")
-                        .Angle(15)
+                        .Scale(Vec2(0.75f, 0.75f))
                         (
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)

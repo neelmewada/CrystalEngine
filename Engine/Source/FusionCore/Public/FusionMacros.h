@@ -22,8 +22,9 @@
 			}\
 			this->m_##PropertyName = value;\
 			thread_local const CE::Name nameValue = #PropertyName;\
+			if ((GetFlags() & OF_InsideConstructor) == 0) {\
 			OnFusionPropertyModified(nameValue);\
-			DirtyFunc;\
+			DirtyFunc;}\
 			return *this;\
 		}\
 		const auto& PropertyName() const { return this->m_##PropertyName; }
