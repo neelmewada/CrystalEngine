@@ -706,8 +706,10 @@ namespace CE
             }
             else if (underlyingType->IsEnum())
             {
-                typeByte = FieldTypeBytes[TYPEID(s64)];
+                typeByte = SimpleArrayFieldType;
                 *stream << typeByte;
+
+                *stream << FieldTypeBytes[TYPEID(s64)];
             }
             else
             {
@@ -1108,7 +1110,7 @@ namespace CE
                 Array<FieldType> elements;
                 void* arrayInstance = nullptr;
 
-                if (field != nullptr && FieldTypeBytes.KeyExists(field->GetUnderlyingTypeId()))
+                if (field != nullptr && (FieldTypeBytes.KeyExists(field->GetUnderlyingTypeId()) || field->IsEnumArrayField()))
                 {
                     field->ResizeArray(instance, numElements);
 

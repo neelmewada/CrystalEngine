@@ -311,6 +311,7 @@ namespace RenderingTests
 		FUSION_EVENT(ScriptEvent<void()>, OnRemove);
 		FUSION_EVENT(ScriptEvent<void()>, OnDefragment);
 
+		FSplitBox* splitBox = nullptr;
 		FStackBox* rootBox = nullptr;
 		FButton* button = nullptr;
 		FTextInput* textInput = nullptr;

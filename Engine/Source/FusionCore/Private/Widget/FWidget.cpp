@@ -72,6 +72,37 @@ namespace CE
         }
     }
 
+    void FWidget::UpdateLocalTransform()
+    {
+        isTranslationOnly = false;
+
+        if (Math::ApproxEquals(m_Angle, 0) &&
+            Math::ApproxEquals(m_Scale.x, 1) &&
+            Math::ApproxEquals(m_Scale.y, 1))
+        {
+            isTranslationOnly = true;
+
+            localTransform = Matrix4x4::Translation(computedPosition + m_Translation);
+
+            mouseTransform = Matrix4x4::Translation(Vec2());
+        }
+        else
+        {
+            localTransform =
+                Matrix4x4::Translation(GetComputedPosition() + m_Translation + GetComputedSize() * m_Anchor) *
+                Matrix4x4::Angle(m_Angle) *
+                Matrix4x4::Scale(m_Scale) *
+                Matrix4x4::Translation(-GetComputedSize() * m_Anchor);
+
+            Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
+
+            mouseTransform = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
+                Matrix4x4::Angle(-m_Angle) *
+                Matrix4x4::Scale(invScale) *
+                Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor);
+        }
+    }
+
     FWidget* FWidget::HitTest(Vec2 localMousePos)
     {
         ZoneScoped;
@@ -83,11 +114,13 @@ namespace CE
         Vec2 rectSize = computedSize;
         Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
 
-        localMousePos = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
+        /*localMousePos = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
             Matrix4x4::Angle(-m_Angle) *
             Matrix4x4::Scale(invScale) *
             Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor) *
-            Vec4(localMousePos.x, localMousePos.y, 0, 1);
+            Vec4(localMousePos.x, localMousePos.y, 0, 1);*/
+
+        localMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         Rect rect = Rect::FromSize(rectPos, rectSize);
 
@@ -282,28 +315,6 @@ namespace CE
         computedSize.height = Math::Clamp(computedSize.height,
             m_MinHeight + m_Padding.bottom + m_Padding.top,
             m_MaxHeight + m_Padding.bottom + m_Padding.top);
-    }
-
-    void FWidget::UpdateLocalTransform()
-    {
-        isTranslationOnly = false;
-
-        if (Math::ApproxEquals(m_Angle, 0) &&
-            Math::ApproxEquals(m_Scale.x, 1) &&
-            Math::ApproxEquals(m_Scale.y, 1))
-        {
-            isTranslationOnly = true;
-
-            localTransform = Matrix4x4::Translation(computedPosition + m_Translation);
-        }
-        else
-        {
-            localTransform =
-                Matrix4x4::Translation(GetComputedPosition() + m_Translation + GetComputedSize() * m_Anchor) *
-                Matrix4x4::Angle(m_Angle) *
-                Matrix4x4::Scale(m_Scale) *
-                Matrix4x4::Translation(-GetComputedSize() * m_Anchor);
-        }
     }
 
     void FWidget::OnPostComputeLayout()

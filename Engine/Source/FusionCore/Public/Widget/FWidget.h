@@ -191,6 +191,8 @@ namespace CE
         //! @brief Transformation matrix that is pushed by parent widget to coordinate space stack.
         Matrix4x4 localTransform;
 
+        Matrix4x4 mouseTransform;
+
         FIELD()
         CE::Name styleKey;
 

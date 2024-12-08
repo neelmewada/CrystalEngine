@@ -151,10 +151,6 @@ namespace CE
 		if (children.IsEmpty() || !Enabled())
 			return;
 
-		if (isTranslationOnly)
-			painter->PushChildCoordinateSpace(m_Translation);
-		else
-			painter->PushChildCoordinateSpace(localTransform);
 		
 		if (m_ClipChildren)
 		{
@@ -164,7 +160,12 @@ namespace CE
 		Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
 			m_Padding.top + m_Padding.bottom);
 
-		if (m_SplitterBackground.a > 0)
+		if ((hoveredSplitIndex >= 0 && isCursorPushed) || m_SplitterBackground.a > 0.01f)
+		{
+			
+		}
+
+		if (m_SplitterBackground.a > 0.01f)
 		{
 			for (int i = 0; i < children.GetSize() - 1; ++i)
 			{
@@ -206,19 +207,34 @@ namespace CE
 			}
 		}
 
+		if ((hoveredSplitIndex >= 0 && isCursorPushed) || m_SplitterBackground.a > 0.01f)
+		{
+			
+		}
+
 		for (const auto& child : children)
 		{
 			if (!child->Enabled() || !child->Visible())
 				continue;
 
+			if (child->IsTranslationOnly())
+			{
+				painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+			}
+			else
+			{
+				painter->PushChildCoordinateSpace(child->GetLocalTransform());
+			}
+
 			child->OnPaint(painter);
+
+			painter->PopChildCoordinateSpace();
 		}
 
 		if (m_ClipChildren)
 		{
 			painter->PopClipRect();
 		}
-		painter->PopChildCoordinateSpace();
     }
 
     void FSplitBox::HandleEvent(FEvent* event)
@@ -234,7 +250,12 @@ namespace CE
 		if (event->IsMouseEvent())
 		{
 			FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-			Vec2 localMousePos = mouseEvent->mousePosition - globalPosition;
+			
+			Vec2 localMousePos = Matrix4x4::Translation(computedPosition + computedSize * m_Anchor) *
+				Matrix4x4::Angle(-m_Angle) *
+				Matrix4x4::Scale(Vec2(1 / m_Scale.x, 1 / m_Scale.y)) *
+				Matrix4x4::Translation(-globalPosition - m_Translation - computedSize * m_Anchor) *
+				Vec4(mouseEvent->mousePosition.x, mouseEvent->mousePosition.y, 0, 1);
 
 			if (draggedSplitIndex == -1 && 
 				(mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseLeave))
