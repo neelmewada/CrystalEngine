@@ -383,7 +383,10 @@ namespace RenderingTests
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)
                             .Text("Click Count 0")
-                        )
+                        ),
+
+                        FNew(FComboBox)
+                        .Items("Item 0", "Item 1", "Item 2", "Item 3")
                     )
                 )
             )

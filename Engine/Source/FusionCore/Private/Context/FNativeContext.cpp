@@ -310,9 +310,22 @@ namespace CE
 
 			for (int i = 0; i < localPopupStack.GetSize(); ++i)
 			{
-				if (localPopupStack[i]->Visible())
+				Ref<FPopup> popup = localPopupStack[i];
+
+				if (popup->Visible())
 				{
-					localPopupStack[i]->OnPaint(painter);
+					if (popup->IsTranslationOnly())
+					{
+						renderer2->PushChildCoordinateSpace(popup->computedPosition + popup->Translation());
+					}
+					else
+					{
+						renderer2->PushChildCoordinateSpace(popup->GetLocalTransform());
+					}
+
+					popup->OnPaint(painter);
+
+					renderer2->PopChildCoordinateSpace();
 				}
 			}
 
