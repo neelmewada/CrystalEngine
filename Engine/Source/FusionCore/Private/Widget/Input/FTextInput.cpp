@@ -7,8 +7,15 @@ namespace CE
         m_SelectionColor = Color::RGBA(0, 112, 224);
 
         cursorTimer = CreateDefaultSubobject<FTimer>("Timer");
+    }
+
+    void FTextInputLabel::Construct()
+    {
+        Super::Construct();
+
         cursorTimer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
     }
+
 
     void FTextInputLabel::CalculateIntrinsicSize()
     {
@@ -100,7 +107,7 @@ namespace CE
             bool capslock = EnumHasAnyFlags(keyEvent->modifiers, KeyModifier::Caps);
             bool ctrl = EnumHasFlag(keyEvent->modifiers, KeyModifier::Ctrl);
 
-            bool isUpperCase = shiftPressed != capslock;
+            bool isUpperCase = (shiftPressed != capslock);
             char c = 0;
 
             if ((int)keyEvent->key >= (int)KeyCode::Space && (int)keyEvent->key <= (int)KeyCode::Z && IsEditing())
@@ -252,6 +259,9 @@ namespace CE
 
                     if (CanInsertAt(str, cursorPos))
                     {
+                        cursorState = true;
+                        cursorTimer->Reset();
+
                         InsertAt(str, cursorPos);
                         ScrollTo(cursorPos);
                     }
@@ -314,6 +324,9 @@ namespace CE
                 {
                     if (IsTextSelected() && CanRemoveSelectedText())
                     {
+                        cursorState = true;
+                        cursorTimer->Reset();
+
                         RemoveSelectedRange();
                     }
 
@@ -322,6 +335,9 @@ namespace CE
 
                     if (CanInsertAt(str, cursorPos))
                     {
+                        cursorState = true;
+                        cursorTimer->Reset();
+
                         InsertAt(str, cursorPos);
                     }
                 }
@@ -329,14 +345,23 @@ namespace CE
             else if ((keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete) 
                 && IsTextSelected() && CanRemoveSelectedText())
             {
+                cursorState = true;
+                cursorTimer->Reset();
+
                 RemoveSelectedRange();
             }
             else if (keyEvent->key == KeyCode::Backspace && CanRemoveRange(cursorPos - 1, 1))
             {
+                cursorState = true;
+                cursorTimer->Reset();
+
                 RemoveRange(cursorPos - 1, 1);
             }
             else if (keyEvent->key == KeyCode::Delete && CanRemoveRange(cursorPos, 1))
             {
+                cursorState = true;
+                cursorTimer->Reset();
+
                 RemoveRange(cursorPos, 1);
             }
             else if (keyEvent->key == KeyCode::Left)
@@ -472,6 +497,7 @@ namespace CE
         if (characterOffsets.IsEmpty())
         {
             cursorState = true;
+            cursorTimer->Reset();
             cursorPos = 0;
 
             if (!IsEditing())
@@ -488,16 +514,17 @@ namespace CE
 
 	    for (int i = 0; i < characterOffsets.GetSize(); ++i)
 	    {
-            if ((i > 0 && localPos.x < characterOffsets[i].min.x) || (i < characterOffsets.GetSize() - 1 && localPos.x > characterOffsets[i].max.x))
+            if ((i > 0 && localPos.x < characterOffsets[i].min) || (i < characterOffsets.GetSize() - 1 && localPos.x > characterOffsets[i].max))
                 continue;
 
-            f32 halfWayPos = (characterOffsets[i].min.x + characterOffsets[i].max.x) / 2.0f;
+            f32 halfWayPos = (characterOffsets[i].min + characterOffsets[i].max) / 2.0f;
             if (localPos.x <= halfWayPos)
                 cursorPos = i;
             else
                 cursorPos = i + 1;
 
             cursorState = true;
+            cursorTimer->Reset();
 
             if (!IsEditing())
             {
@@ -531,10 +558,11 @@ namespace CE
 
         if (characterIndex < characterOffsets.GetSize())
         {
-            return Range(characterOffsets[characterIndex].min.x, characterOffsets[characterIndex].max.x);
+            return Range(characterOffsets[characterIndex].min, characterOffsets[characterIndex].max);
         }
 
-        return Range(characterOffsets.Top().max.x, characterOffsets.Top().max.x + characterOffsets.Top().GetSize().width);
+        f32 lastWidth = characterOffsets.Top().max - characterOffsets.Top().min;
+        return Range(characterOffsets.Top().max, characterOffsets.Top().max + lastWidth);
     }
 
     bool FTextInputLabel::IsEditing()
@@ -786,7 +814,7 @@ namespace CE
                     FAssignNew(FTextInputLabel, inputLabel)
                     .Text("")
                     .WordWrap(FWordWrap::NoWrap)
-                    .FontSize(13)
+                    .FontSize(10)
                     .Foreground(Color::White())
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)

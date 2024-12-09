@@ -32,7 +32,15 @@ namespace CE
     {
         ZoneScoped;
 
-        globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
+        if (IsOfType<FComboBox>())
+        {
+            String::IsAlphabet('a');
+        }
+
+        //globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
+        globalPosition = painter->GetTopCoordinateSpace() * Vec4(0, 0, 0, 1);
+
+        String::IsAlphabet('a');
     }
 
     void FWidget::HandleEvent(FEvent* event)

@@ -546,8 +546,6 @@ TEST(FusionCore, Rendering)
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
-		FusionApplication::Get()->Tick();
-
 		RendererSystem::Get().Render();
 
 		previousTime = curTime;

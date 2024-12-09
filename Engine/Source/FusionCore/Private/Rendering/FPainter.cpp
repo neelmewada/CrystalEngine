@@ -80,8 +80,14 @@ namespace CE
 		return renderer2->CalculateTextQuads(quads, text, font, width, wordWrap);
 	}
 
-	Vec2 FPainter::CalculateCharacterOffsets(Array<Rect>& outRects, const String& text, 
+	Vec2 FPainter::CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text,
 		const FFont& font, f32 width, FWordWrap wordWrap)
+	{
+		return renderer2->CalculateCharacterOffsets(outOffsets, text, font, width, wordWrap);
+	}
+
+	Vec2 FPainter::CalculateTextQuads(Array<Rect>& outRects, const String& text, const FFont& font, f32 width,
+		FWordWrap wordWrap)
 	{
 		return renderer2->CalculateTextQuads(outRects, text, font, width, wordWrap);
 	}

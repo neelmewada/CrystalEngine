@@ -53,6 +53,7 @@ namespace CE
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
+        Vec2 CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
         Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);

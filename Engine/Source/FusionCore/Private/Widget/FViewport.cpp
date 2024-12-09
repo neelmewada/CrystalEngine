@@ -144,7 +144,7 @@ namespace CE
 
         if (frames[0] != nullptr)
         {
-            painter->DrawViewport(Rect::FromSize(computedPosition, computedSize), this);
+            //painter->DrawViewport(Rect::FromSize(computedPosition, computedSize), this);
         }
     }
 

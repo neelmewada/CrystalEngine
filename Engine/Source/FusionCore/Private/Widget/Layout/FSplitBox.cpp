@@ -251,7 +251,7 @@ namespace CE
 		{
 			FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 			
-			Vec2 localMousePos = Matrix4x4::Translation(computedPosition + computedSize * m_Anchor) *
+			Vec2 localMousePos = Matrix4x4::Translation(computedSize * m_Anchor) *
 				Matrix4x4::Angle(-m_Angle) *
 				Matrix4x4::Scale(Vec2(1 / m_Scale.x, 1 / m_Scale.y)) *
 				Matrix4x4::Translation(-globalPosition - m_Translation - computedSize * m_Anchor) *

@@ -40,6 +40,8 @@ namespace CE
 
     protected:
 
+        void Construct() override;
+
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void OnPaint(FPainter* painter) override;
@@ -96,7 +98,7 @@ namespace CE
         FTextInput* textInput = nullptr;
 
         String originalText;
-        Array<Rect> characterOffsets;
+        Array<Vec2> characterOffsets;
         Vec2 textSize;
         bool cursorState : 1 = false;
         bool isSelectionActive : 1 = false;

@@ -386,7 +386,10 @@ namespace RenderingTests
                         ),
 
                         FNew(FComboBox)
-                        .Items("Item 0", "Item 1", "Item 2", "Item 3")
+                        .Items("Item 0", "Item 1", "Item 2", "Item 3"),
+
+                        FNew(FTextInput)
+                        .Text("Type here...")
                     )
                 )
             )
