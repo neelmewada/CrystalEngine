@@ -20,7 +20,7 @@ namespace CE
             .Padding(Vec4(1.5f, 2, 1.5f, 2) * 3)
             (
                 FAssignNew(FLabel, label)
-                .FontSize(15)
+                .FontSize(11)
                 .HAlign(HAlign::Left)
             )
         );

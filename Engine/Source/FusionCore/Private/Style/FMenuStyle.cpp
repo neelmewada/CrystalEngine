@@ -6,6 +6,7 @@ namespace CE
 	{
         padding = Vec4();
         itemPadding = Vec4();
+        itemFontSize = 10;
 	}
 
 	SubClass<FWidget> FMenuBarStyle::GetWidgetClass() const

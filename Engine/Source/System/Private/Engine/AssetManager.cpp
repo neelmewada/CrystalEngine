@@ -203,4 +203,13 @@ namespace CE
 
 		return rpiTexture->GetRhiTexture();
 	}
+
+	CMImage AssetManager::LoadImageAssetAtPath(const Name& path)
+	{
+		Ref<CE::Texture2D> texture = LoadAssetAtPath<CE::Texture2D>(path);
+		if (!texture)
+			return {};
+
+		return texture->GetCMImage();
+	}
 } // namespace CE

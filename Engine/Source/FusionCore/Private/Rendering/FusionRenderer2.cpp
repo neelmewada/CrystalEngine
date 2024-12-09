@@ -1569,8 +1569,15 @@ namespace CE
             bool autoSizeY = brushSize.y < 0;
 
             FDrawData drawData{};
+            auto app = FusionApplication::Get();
 
-            auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            if (!image.IsValid())
+            {
+                CMImage imageAsset = app->LoadImageAsset(currentBrush.GetImageName());
+                image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
+            }
+
             if (image.IsValid())
             {
                 Vec2 imageSize = Vec2(image.width, image.height);
