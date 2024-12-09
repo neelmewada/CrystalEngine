@@ -282,6 +282,7 @@ namespace CE
 						if (job != nullptr && (job->GetThreadFilter() == JOB_THREAD_UNDEFINED || job->GetThreadFilter() == threadInfo->tag))
 						{
 							globalQueue.pop_front();
+							totalJobsInGlobalQueue--;
 						}
 						else
 						{
@@ -462,6 +463,16 @@ namespace CE
 		}
 	}
 
+	void JobManager::FinishAndComplete()
+	{
+		while (totalJobsInGlobalQueue > 0)
+		{
+			// Wait for global queue to become empty
+		}
+
+		Complete();
+	}
+
 	void JobManager::EnqueueJob(Job* job)
 	{
 		if (job == nullptr || workerThreads.IsEmpty())
@@ -486,6 +497,7 @@ namespace CE
 			LockGuard<SharedMutex> lock{ jobManagerMutex };
 
 			globalQueue.push_back(job);
+			totalJobsInGlobalQueue++;
 			AwakeWorker();
 		}
 	}

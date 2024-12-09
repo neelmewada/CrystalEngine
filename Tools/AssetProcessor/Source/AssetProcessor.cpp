@@ -391,7 +391,7 @@ namespace CE
 		}
 
 		// Wait for all jobs to complete
-		jobManager->Complete();
+		jobManager->FinishAndComplete();
 		Array<AssetImportJobResult> assetImportResults{};
 		Array<u32> assetDefinitionVersions{};
 		Array<u32> assetImporterVersions{};
