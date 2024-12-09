@@ -94,6 +94,9 @@ namespace CE::Editor
         };
 
         f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+    	scaling = 1;
+#endif
 
         PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("About", (u32)(600 * scaling), (u32)(500 * scaling), info);
         window->SetAlwaysOnTop(true);

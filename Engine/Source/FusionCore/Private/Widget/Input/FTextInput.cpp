@@ -106,6 +106,10 @@ namespace CE
             bool shiftPressed = EnumHasAnyFlags(keyEvent->modifiers, KeyModifier::LShift | KeyModifier::RShift);
             bool capslock = EnumHasAnyFlags(keyEvent->modifiers, KeyModifier::Caps);
             bool ctrl = EnumHasFlag(keyEvent->modifiers, KeyModifier::Ctrl);
+            bool gui = EnumHasFlag(keyEvent->modifiers, KeyModifier::Gui);
+#if PLATFORM_MAC
+            ctrl = ctrl || gui;
+#endif
 
             bool isUpperCase = (shiftPressed != capslock);
             char c = 0;

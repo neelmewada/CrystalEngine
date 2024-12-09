@@ -22,7 +22,7 @@ namespace CE::Editor
             .Padding(Vec4(1, 0, 1, 0) * 20)
             (
                 FAssignNew(FLabel, label)
-                .FontSize(10)
+                .FontSize(12)
                 .VAlign(VAlign::Center)
                 .HAlign(HAlign::Left)
                 .MinWidth(140),

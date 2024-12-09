@@ -19,9 +19,9 @@ namespace CE
         Gestalt(gestaltSystemVersionBugFix, &bugFixVersion);
 
 #if defined(__aarch64__)
-        return String::Format("macOS {}.{}.{} (arm64)");
+        return String::Format("macOS {}.{}.{} (arm64)", majorVersion, minorVersion, bugFixVersion);
 #elif defined(__x86_64__)
-        return String::Format("macOS {}.{}.{} (x86_64)");
+        return String::Format("macOS {}.{}.{} (x86_64)", majorVersion, minorVersion, bugFixVersion);
 #else
         #error "Invalid architecture!"
 #endif
