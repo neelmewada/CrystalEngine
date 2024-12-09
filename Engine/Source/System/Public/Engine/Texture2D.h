@@ -28,6 +28,8 @@ namespace CE
 			return arrayCount;
 		}
 
+		CMImage GetCMImage();
+
 	protected:
 
 		FIELD()

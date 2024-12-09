@@ -42,22 +42,22 @@ namespace CE::Editor
                 .Margin(Vec4(0, 0, 0, 10)),
 
                 FNew(FLabel)
-                .FontSize(15)
+                .FontSize(13)
                 .Text("CrystalEditor")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Version: " CE_ENGINE_VERSION_STRING_SHORT " pre-alpha [Build " CE_TOSTRING(CE_VERSION_BUILD) "]")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Platform: " + PlatformMisc::GetOSVersionString())
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Icons by flaticon.com")
                 .HAlign(HAlign::Left)
 	        )

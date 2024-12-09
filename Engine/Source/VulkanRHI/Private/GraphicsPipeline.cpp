@@ -303,8 +303,12 @@ namespace CE::Vulkan
             return nullptr;
         }
 
-        pipelines[variant] = pipeline;
-        pipelinesByHash[instanceHash] = pipeline;
+	    {
+		    LockGuard lock{ pipelineMutex };
+
+        	pipelines[variant] = pipeline;
+        	pipelinesByHash[instanceHash] = pipeline;
+	    }
 
         return pipeline;
     }

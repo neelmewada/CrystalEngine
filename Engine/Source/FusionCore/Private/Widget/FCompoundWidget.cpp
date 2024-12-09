@@ -142,18 +142,12 @@ namespace CE
         if (!m_Child || !m_Child->Enabled())
             return thisHitTest;
 
-        /*localMousePos = Matrix4x4::Translation(computedPosition + m_Translation + computedSize / 2) *
+        auto invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1.0f);
+
+        Vec2 transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
             Matrix4x4::Angle(-m_Angle) *
             Matrix4x4::Scale(invScale) *
-            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize / 2) *
-            Vec4(localMousePos.x, localMousePos.y, 0, 1);*/
-
-        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1.0f);
-
-        Vec2 transformedMousePos = (Matrix4x4::Translation(computedPosition + m_Translation + computedSize / 2) *
-            Matrix4x4::Angle(-m_Angle) *
-            Matrix4x4::Scale(invScale) *
-            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize / 2)) * 
+            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor)) *
             Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         FWidget* result = m_Child->HitTest(transformedMousePos);

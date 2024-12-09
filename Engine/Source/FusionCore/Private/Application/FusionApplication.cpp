@@ -165,16 +165,12 @@ namespace CE
         }
     }
 
-    int FusionApplication::LoadImageAsset(const Name& assetPath)
+    CMImage FusionApplication::LoadImageAsset(const Name& assetPath)
     {
         if (!assetPath.IsValid() || !assetLoader)
-            return -1;
+            return {};
 
-        RHI::Texture* texture = assetLoader->LoadTextureAtPath(assetPath);
-        if (!texture)
-            return -1;
-
-        return RegisterImage(assetPath, texture);
+        return assetLoader->LoadImageAssetAtPath(assetPath);
     }
 
     int FusionApplication::LoadImageResource(const IO::Path& resourcePath, const Name& imageName)

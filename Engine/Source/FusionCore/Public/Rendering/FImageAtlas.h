@@ -138,17 +138,14 @@ namespace CE
 
             virtual ~FAtlasImage()
             {
-                //delete ptr; ptr = nullptr;
                 root = nullptr;
             }
 
-            //u8* ptr = nullptr;
             u32 atlasSize = 0;
             int layerIndex = 0;
 
             Ptr<BinaryNode> root = nullptr;
             HashMap<Name, Ptr<BinaryNode>> nodesByImageName;
-
         };
 
         // - Utils API -

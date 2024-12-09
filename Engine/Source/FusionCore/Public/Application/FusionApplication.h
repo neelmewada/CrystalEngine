@@ -19,6 +19,8 @@ namespace CE
 
         virtual RHI::Texture* LoadTextureAtPath(const Name& path) = 0;
 
+        virtual CMImage LoadImageAssetAtPath(const Name& path) = 0;
+
     };
 
     struct FusionInitInfo
@@ -59,7 +61,7 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
-        int LoadImageAsset(const Name& assetPath);
+        CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
         int RegisterImage(const Name& imageName, RHI::Texture* image);
         void DeregisterImage(const Name& imageName);

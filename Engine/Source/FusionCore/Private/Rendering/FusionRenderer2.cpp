@@ -160,24 +160,27 @@ namespace CE
 
         if (quadUpdatesRequired[imageIndex])
         {
-            // TODO: Implement support for more than 65,535 vertices!
+            // TODO: Implement support for more than 65,536 vertices!
             u32 totalSize = vertexArray.GetCount() * sizeof(FVertex) + indexArray.GetCount() * sizeof(FDrawIndex);
 
             if (totalSize > quadsBuffer[imageIndex]->GetBufferSize())
             {
                 GrowQuadBuffer(totalSize);
 
-                for (DrawPacket* drawPacket : drawPacketsPerImage[imageIndex])
+                for (int i = 0; i < numFrames; ++i)
                 {
-                    drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[imageIndex],
-                        0,
-                        vertexArray.GetCount() * sizeof(FVertex),
-                        sizeof(FVertex));
+                    for (DrawPacket* drawPacket : drawPacketsPerImage[i])
+                    {
+                        drawPacket->drawItems[0].vertexBufferViews[0] = VertexBufferView(quadsBuffer[i],
+                            0,
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            sizeof(FVertex));
 
-                    drawPacket->drawItems[0].indexBufferView[0] = IndexBufferView(quadsBuffer[imageIndex],
-                        vertexArray.GetCount() * sizeof(FVertex),
-                        indexArray.GetCount() * sizeof(FDrawIndex),
-                        sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+                        drawPacket->drawItems[0].indexBufferView[0] = IndexBufferView(quadsBuffer[i],
+                            vertexArray.GetCount() * sizeof(FVertex),
+                            indexArray.GetCount() * sizeof(FDrawIndex),
+                            sizeof(FDrawIndex) == 2 ? IndexFormat::Uint16 : IndexFormat::Uint32);
+                    }
                 }
             }
 
@@ -915,8 +918,43 @@ namespace CE
         return finalSize;
     }
 
+    void FusionRenderer2::DrawViewport(const Rect& quad, FViewport* viewport)
+    {
+        AddDrawCmd();
+
+        PrimReserve(4, 6);
+
+        u32 color = Color::White().ToU32();
+
+        drawCmdList.Last().textureSrgOverride = viewport->GetTextureSrg();
+
+        Vec2 topLeft = quad.min;
+        Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+        Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+        Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+
+        Vec2 topLeftUV = Vec2(0, 0);
+        Vec2 topRightUV = Vec2(1, 0);
+        Vec2 bottomRightUV = Vec2(1, 1);
+        Vec2 bottomLeftUV = Vec2(0, 1);
+
+        FDrawIndex idx = vertexCurrentIdx;
+        indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
+        indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
+
+        vertexWritePtr[0].position = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV; vertexWritePtr[0].drawType = DRAW_Viewport;
+        vertexWritePtr[1].position = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV; vertexWritePtr[1].drawType = DRAW_Viewport;
+        vertexWritePtr[2].position = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV; vertexWritePtr[2].drawType = DRAW_Viewport;
+        vertexWritePtr[3].position = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV; vertexWritePtr[3].drawType = DRAW_Viewport;
+        vertexWritePtr += 4;
+        vertexCurrentIdx += 4;
+        indexWritePtr += 6;
+
+        drawCmdList.Last().numIndices += 6;
+    }
+
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
-        f32 width, FWordWrap wordWrap)
+                                             f32 width, FWordWrap wordWrap)
     {
         ZoneScoped;
 
@@ -1020,6 +1058,123 @@ namespace CE
                 curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 glyphWidth, glyphHeight);
+
+            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            maxX = Math::Max(curPos.x, maxX);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);
+
+            totalCharacters++;
+        }
+
+        Vec2 finalSize = Vec2(maxX - startX, maxY - startY);
+        if (isFixedWidth)
+            finalSize.width = width;
+
+        return finalSize;
+    }
+
+    Vec2 FusionRenderer2::CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font,
+        f32 width, FWordWrap wordWrap)
+    {
+        ZoneScoped;
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = font.GetFamily();
+        int fontSize = font.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = fontManager->GetDefaultFontSize();
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        fontSize = Math::Max(fontSize, 6);
+
+        const bool isFixedWidth = width > 0.1f;
+
+        FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return Vec2();
+
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+
+        const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        constexpr float startX = 0;
+
+        float maxX = startX;
+        float maxY = startY;
+
+        Vec3 curPos = Vec3(startX, startY, 0);
+
+        int totalCharacters = 0;
+        int breakCharIdx = -1;
+        int idx = 0;
+
+        outOffsets.Resize(text.GetLength());
+
+        for (int i = 0; i < text.GetLength(); ++i)
+        {
+            char c = text[i];
+
+            if (c == ' ' || c == '-' || c == '\\' || c == '/')
+            {
+                breakCharIdx = i;
+            }
+
+            if (c == '\n')
+            {
+                breakCharIdx = -1;
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+                outOffsets[i] = Vec2();
+                continue;
+            }
+
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+
+            if (isFixedWidth && (curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling > width) && wordWrap != FWordWrap::NoWrap)
+            {
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+
+                // Go through previous characters and bring them to this new-line
+                if (breakCharIdx >= 0)
+                {
+                    for (int j = breakCharIdx + 1; j < i; j++)
+                    {
+                        char prevChar = text[j];
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        f32 atlasFontSize = prevGlyph.fontSize;
+
+                        outOffsets[j] = Vec2(curPos.x, curPos.x + (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling);
+
+                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling;
+                    }
+                    breakCharIdx = -1;
+                }
+                else if (wordWrap == FWordWrap::BreakWord)
+                {
+                    breakCharIdx = -1;
+                    curPos.x = startX;
+                    curPos.y += metrics.lineHeight * fontSize * metricsScaling;
+                }
+            }
+
+            // Apply glyph offsets
+            outOffsets[i] = Vec2(
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling + 
+                (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling);
 
             curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
 
@@ -1253,6 +1408,7 @@ namespace CE
                 {
                     drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
                     drawCmdList.Last().firstInstance = coordinateSpaceStack.Last().indexInObjectArray;
+                    drawCmdList.Last().textureSrgOverride = nullptr;
                     
                     drawCmdList.Last().rootConstants.numClipRects = clipStack.GetCount();
                     int j = 0;
@@ -1413,8 +1569,20 @@ namespace CE
             bool autoSizeY = brushSize.y < 0;
 
             FDrawData drawData{};
+            auto app = FusionApplication::Get();
 
-            auto image = FusionApplication::Get()->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            if (currentBrush.GetImageName() == "/Editor/Assets/Images/Splash")
+            {
+                String::IsAlphabet('a');
+            }
+
+            auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            if (!image.IsValid())
+            {
+                CMImage imageAsset = app->LoadImageAsset(currentBrush.GetImageName());
+                image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
+            }
+
             if (image.IsValid())
             {
                 Vec2 imageSize = Vec2(image.width, image.height);

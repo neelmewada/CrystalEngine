@@ -422,6 +422,33 @@ TEST(FusionCore, Rendering)
 			GetDefaultWidget<FMenuBar>()
 				.Style(rootStyle, "MenuBar.Primary");
 		}
+
+		{
+			
+			auto comboBox = CreateObject<FComboBoxStyle>(rootStyle, "ComboBox");
+			rootStyle->Add("ComboBox", comboBox);
+
+			comboBox->background = Color::RGBA(15, 15, 15);
+			comboBox->borderColor = Color::RGBA(60, 60, 60);
+			comboBox->pressedBorderColor = comboBox->hoverBorderColor = Color::RGBA(74, 74, 74);
+			comboBox->borderWidth = 1.0f;
+			comboBox->cornerRadius = Vec4(5, 5, 5, 5);
+
+			auto comboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "ComboBoxItem");
+			rootStyle->Add("ComboBoxItem", comboBoxItem);
+
+			comboBoxItem->background = Color::Clear();
+			comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
+			comboBoxItem->selectedBackground = Color::Clear();
+			comboBoxItem->selectedShape = FShapeType::RoundedRect;
+			comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
+			comboBoxItem->selectedBorderColor = Color::RGBA(0, 112, 224);
+			comboBoxItem->borderWidth = 1.0f;
+
+			GetDefaultWidget<FComboBox>()
+				.ItemStyle(comboBoxItem)
+				.Style(comboBox);
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
@@ -518,8 +545,6 @@ TEST(FusionCore, Rendering)
 		// App & Input Tick
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
-
-		FusionApplication::Get()->Tick();
 
 		RendererSystem::Get().Render();
 

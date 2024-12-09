@@ -13,6 +13,7 @@ enum FDrawType : int
     DRAW_TextureTileX,
     DRAW_TextureTileY,
     DRAW_TextureTileXY,
+    DRAW_Viewport,
 };
 
 enum class FImageFit : int
@@ -217,6 +218,11 @@ float4 FragMain(PSInput input) : SV_TARGET
             }
 	    }
 		break;
+    case DRAW_Viewport:
+	    {
+		    color.rgb *= _Texture.Sample(_TextureSampler, float3(inputUV.x, inputUV.y, 0)).rgb;
+	    }
+        break;
     default:
 		break;
 	}

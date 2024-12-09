@@ -18,7 +18,7 @@ namespace CE
             .ContentVAlign(VAlign::Center)
             (
                 FAssignNew(FLabel, label)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("")
             )
         );

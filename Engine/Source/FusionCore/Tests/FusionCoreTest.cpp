@@ -336,7 +336,6 @@ namespace RenderingTests
                     .Padding(Vec4(10, 10, 10, 10))
                     .Name("ContentVStack")
                     .FillRatio(1.0f)
-                    .Angle(0)
                     (
 						FNew(FHorizontalStack)
                         .ContentVAlign(VAlign::Fill)
@@ -351,18 +350,46 @@ namespace RenderingTests
                         )
                         .Margin(Vec4(0, 0, 0, 5)),
 
+                        FAssignNew(FSplitBox, splitBox)
+                        .Direction(FSplitDirection::Horizontal)
+                        .Angle(0)
+                        (
+							FNew(FStyledWidget)
+                            .Background(Color::Yellow())
+                            .Height(25)
+                            .FillRatio(0.25f),
+
+                            FNew(FStyledWidget)
+                            .Background(Color::Green())
+                            .Height(25)
+                            .FillRatio(0.5f),
+
+                            FNew(FStyledWidget)
+                            .Background(Color::Cyan())
+                            .Height(25)
+                            .FillRatio(0.25f)
+                        ),
+
                         FAssignNew(FButton, button)
                         .OnClicked([this]
                             {
                                 buttonLabel->Text(String::Format("Click Count {}", ++hitCounter));
+                                splitBox->Angle(hitCounter % 2 == 0 ? 15 : 0);
                             })
                         .Name("Button")
+                        .Scale(Vec2(0.75f, 0.75f))
                         .Angle(15)
                         (
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)
                             .Text("Click Count 0")
-                        )
+                        ),
+
+                        FNew(FComboBox)
+                        .Items("Item 0", "Item 1", "Item 2", "Item 3"),
+
+                        FNew(FTextInput)
+                        .Text("Type here...")
                     )
                 )
             )

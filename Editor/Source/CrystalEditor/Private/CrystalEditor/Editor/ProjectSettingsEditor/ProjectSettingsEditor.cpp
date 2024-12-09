@@ -180,7 +180,7 @@ namespace CE::Editor
 
         right->AddChild(
             FNew(FLabel)
-            .FontSize(18)
+            .FontSize(16)
             .Text(target->GetTitleName())
             .Margin(Vec4(10, 10, 0, 15))
         );

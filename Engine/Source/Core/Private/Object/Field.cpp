@@ -217,6 +217,16 @@ namespace CE
 		return declType->IsEnum() && ((EnumType*)declType)->IsFlagsEnum();
 	}
 
+	bool FieldType::IsEnumArrayField()
+	{
+		if (!IsArrayField())
+			return false;
+		auto underlyingDeclType = GetUnderlyingType();
+		if (underlyingDeclType == nullptr)
+			return false;
+		return underlyingDeclType->IsEnum();
+	}
+
 	bool FieldType::IsEventField() const
 	{
 		return GetDeclarationTypeId() == Internal::GetScriptEventTypeId();

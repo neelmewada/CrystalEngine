@@ -11,6 +11,7 @@ namespace CE::Editor
 		{
 			auto job = new TextureAssetImportJob(this, sourceAssets[i], productAssets[i]);
 			job->compressionQuality = compressionQuality;
+			job->ignoreCompressionFolders = ignoreCompressionFolders;
 			job->anisotropy = anisotropy;
 			job->importHdrAsCubemap = importHdrAsCubemap;
 			job->convoluteCubemap = convoluteCubemap;
@@ -45,7 +46,41 @@ namespace CE::Editor
 
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
 		bundle->DestroyAllSubObjects();
-		
+
+		bool forceUncompressed = false;
+		String relativeProductPath = "";
+
+		if (IO::Path::IsSubDirectory(productPath.GetParentPath(), EngineDirectories::GetEngineInstallDirectory() / "Engine"))
+		{
+			relativeProductPath = IO::Path::GetRelative(productPath.GetParentPath(), EngineDirectories::GetEngineInstallDirectory());
+		}
+		else if (IO::Path::IsSubDirectory(productPath.GetParentPath(), EngineDirectories::GetEngineInstallDirectory() / "Editor"))
+		{
+			relativeProductPath = IO::Path::GetRelative(productPath.GetParentPath(), EngineDirectories::GetEngineInstallDirectory());
+		}
+		else if (IO::Path::IsSubDirectory(productPath.GetParentPath(), EngineDirectories::GetGameDirectory()))
+		{
+			relativeProductPath = IO::Path::GetRelative(productPath.GetParentPath(), EngineDirectories::GetGameDirectory());
+		}
+
+		relativeProductPath = relativeProductPath.Replace({ '\\' }, '/');
+		if (relativeProductPath.NotEmpty())
+		{
+			if (relativeProductPath[0] != '/')
+			{
+				relativeProductPath.InsertAt('/', 0);
+			}
+
+			for (const auto& ignoreCompressionFolder : ignoreCompressionFolders)
+			{
+				if (relativeProductPath.StartsWith(ignoreCompressionFolder))
+				{
+					forceUncompressed = true;
+					break;
+				}
+			}
+		}
+
 		String extension = sourcePath.GetFileName().GetExtension().GetString();
 		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
@@ -102,7 +137,7 @@ namespace CE::Editor
 			break;
 		}
 		
-		if (compressionQuality != TextureCompressionQuality::None && PlatformMisc::IsDesktopPlatform(targetPlatform))
+		if (!forceUncompressed && compressionQuality != TextureCompressionQuality::None && PlatformMisc::IsDesktopPlatform(targetPlatform))
 		{
 			switch (imageFormat)
 			{
@@ -153,7 +188,7 @@ namespace CE::Editor
 				break;
 			}
 		}
-
+		
 		if (isCubeMap) // Process CubeMap
 		{
 			return ProcessCubeMap(fileName, bundle.Get(), image, pixelFormat, compressionFormat, targetSourceFormat);
@@ -173,8 +208,7 @@ namespace CE::Editor
 		TextureCube* texture = CreateObject<TextureCube>(bundle, name);
 
 		// Temporary code
-		//pixelFormat = TextureFormat::RGBAHalf;
-		//compressionFormat = TextureSourceCompressionFormat::None;
+		
 		if (compressionFormat == TextureSourceCompressionFormat::None)
 		{
 			pixelFormat = TextureFormat::RGBAHalf;

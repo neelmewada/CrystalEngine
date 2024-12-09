@@ -3,6 +3,7 @@
 namespace CE
 {
     class FusionRenderer;
+    class FViewport;
 
     CLASS()
     class FUSIONCORE_API FPainter final : public Object
@@ -35,7 +36,8 @@ namespace CE
 
         Vec2 CalculateTextSize(const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
-        Vec2 CalculateCharacterOffsets(Array<Rect>& outRects, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateTextQuads(Array<Rect>& outRects, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);
 
@@ -45,7 +47,7 @@ namespace CE
 
         bool DrawShape(const Rect& rect, const FShape& shape);
 
-        void DrawFrameBuffer(const Rect& rect, const StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount>& frames);
+        void DrawViewport(const Rect& rect, FViewport* viewport);
 
         bool DrawRect(const Rect& rect);
 

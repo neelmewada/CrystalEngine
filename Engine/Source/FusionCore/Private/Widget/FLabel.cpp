@@ -55,7 +55,7 @@ namespace CE
             FFontMetrics metrics = painter->GetFontMetrics(m_Font);
             f32 lineHeight = metrics.lineHeight * (f32)m_Font.GetFontSize();
 
-        	painter->CalculateCharacterOffsets(charRects, m_Text, m_Font, computedSize.width, m_WordWrap);
+        	painter->CalculateTextQuads(charRects, m_Text, m_Font, computedSize.width, m_WordWrap);
 
             f32 startX = 0;
             f32 curX = NumericLimits<f32>::Min();

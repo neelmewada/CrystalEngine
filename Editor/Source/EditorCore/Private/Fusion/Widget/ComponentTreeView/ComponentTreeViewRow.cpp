@@ -41,7 +41,7 @@ namespace CE::Editor
 
                 FAssignNew(FLabel, label)
                 .Text("Label")
-                .FontSize(13)
+                .FontSize(11)
             )
         );
     }

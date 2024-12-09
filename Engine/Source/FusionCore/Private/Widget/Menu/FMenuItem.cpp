@@ -34,7 +34,7 @@ namespace CE
             (
                 FAssignNew(FLabel, label)
                 .Text("")
-                .FontSize(14)
+                .FontSize(10)
             )
         );
     }

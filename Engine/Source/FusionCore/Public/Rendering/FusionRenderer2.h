@@ -53,6 +53,7 @@ namespace CE
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
+        Vec2 CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
         Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);
@@ -109,6 +110,8 @@ namespace CE
         bool StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
         Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+
+        void DrawViewport(const Rect& rect, FViewport* viewport);
 
     private:
 
@@ -193,6 +196,7 @@ namespace CE
             DRAW_TextureTileX,
             DRAW_TextureTileY,
             DRAW_TextureTileXY,
+            DRAW_Viewport
         };
 
         struct alignas(8) FDrawData
