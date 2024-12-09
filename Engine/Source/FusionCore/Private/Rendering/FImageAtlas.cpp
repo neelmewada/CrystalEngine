@@ -227,6 +227,23 @@ namespace CE
             return {};
         }
 
+        switch (imageSource.GetFormat())
+        {
+        case CMImageFormat::Undefined:
+        case CMImageFormat::R16:
+        case CMImageFormat::RG16:
+        case CMImageFormat::RGB16:
+        case CMImageFormat::RGBA16:
+        case CMImageFormat::RGB565:
+        case CMImageFormat::BC1:
+        case CMImageFormat::BC3:
+        case CMImageFormat::BC4:
+        case CMImageFormat::BC5:
+        case CMImageFormat::BC6H:
+        case CMImageFormat::BC7:
+            return {};
+        }
+
         Vec2i textureSize = Vec2i(imageSource.GetWidth(), imageSource.GetHeight());
         u32 textureArea = textureSize.width * textureSize.height;
 
@@ -301,11 +318,6 @@ namespace CE
         void* stagingPtr;
         stagingBuffer->Map((u32)foundAtlas->layerIndex * atlasSize * atlasSize * sizeof(u32), 
             atlasSize * atlasSize * sizeof(u32), &stagingPtr);
-
-        if (name == "/Engine/Resources/Icons/Test")
-        {
-            String::IsAlphabet('a');
-        }
 
         for (int y = 0; y < textureSize.y; ++y)
         {

@@ -5,7 +5,7 @@
 
 namespace CE
 {
-	constexpr u32 StampFileVersion = 1;
+	constexpr u32 StampFileVersion = 2;
 
 	AssetProcessor::AssetProcessor(int argc, char** argv)
 	{
@@ -207,7 +207,7 @@ namespace CE
 							needsProcessing = true;
 						}
 
-						if (version > 0)
+						if (version >= 1)
 						{
 							u32 major = 0, minor = 0, patch = 0;
 
@@ -227,6 +227,21 @@ namespace CE
 							if (major != Bundle::GetCurrentMajor() || minor != Bundle::GetCurrentMinor() || patch != Bundle::GetCurrentPatch())
 							{
 								needsProcessing = true;
+							}
+
+							if (version >= 2)
+							{
+								u32 assetImporterVersion = 0;
+								reader >> assetImporterVersion;
+
+								if (assetDefinition)
+								{
+									AssetImporter* importerCDI = (AssetImporter*)assetDefinition->GetAssetImporterClass()->GetDefaultInstance();
+									if (importerCDI != nullptr && importerCDI->GetImporterVersion() != assetImporterVersion)
+									{
+										needsProcessing = true;
+									}
+								}
 							}
 						}
 
@@ -379,6 +394,7 @@ namespace CE
 		jobManager->Complete();
 		Array<AssetImportJobResult> assetImportResults{};
 		Array<u32> assetDefinitionVersions{};
+		Array<u32> assetImporterVersions{};
 
 		for (int i = 0; i < importers.GetSize(); ++i)
 		{
@@ -387,6 +403,7 @@ namespace CE
 			for (int j = 0; j < count; ++j)
 			{
 				assetDefinitionVersions.Add(assetDefinitions[i]->GetAssetVersion());
+				assetImporterVersions.Add(importers[i]->GetImporterVersion());
 			}
 			importers[i]->BeginDestroy();
 		}
@@ -416,6 +433,8 @@ namespace CE
 					writer << Bundle::GetCurrentPatch();
 
 					writer << assetDefinitionVersions[i];
+
+					writer << assetImporterVersions[i];
 				}
 				else
 				{

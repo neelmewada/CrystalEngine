@@ -47,12 +47,17 @@ namespace CE::Editor
 
 		virtual Array<Name> GetProductAssetDependencies() { return {}; }
 
+		u32 GetImporterVersion() const { return importerVersion; }
+
     protected:
 
 		void OnAssetImportJobFinish(AssetImportJob* job);
         
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets) = 0;
-		
+
+		FIELD(Config)
+		u32 importerVersion = 0;
+
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
 		bool enableLogging = false;
