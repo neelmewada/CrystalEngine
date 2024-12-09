@@ -74,7 +74,8 @@ namespace CE
 
 		if (platformWindow->dragHitTest.IsValid())
 		{
-			return platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y)) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
+			bool result = platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y));
+			return result ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
 		}
 		else if (area->y < WindowDragPadding)
 		{

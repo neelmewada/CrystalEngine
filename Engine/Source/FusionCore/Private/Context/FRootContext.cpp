@@ -56,8 +56,6 @@ namespace CE
 			prevMousePos = mousePos;
 		if (prevScreenMousePos.GetSqrMagnitude() == 0)
 			prevScreenMousePos = screenMousePos;
-        
-        //CE_LOG(Info, All, "{} | {}", mousePos, platformWindow->GetWindowPosition());
 
 		MouseButtonMask curButtonMask = MouseButtonMask::None;
 		if (InputManager::IsMouseButtonHeld(MouseButton::Left))

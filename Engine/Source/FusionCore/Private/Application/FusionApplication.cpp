@@ -24,8 +24,8 @@ namespace CE
         rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
         imageAtlas = CreateDefaultSubobject<FImageAtlas>("ImageAtlas");
 
-#if PLATFORM_LINUX
-        defaultScalingFactor = 1.3f;
+#if PLATFORM_LINUX || PLATFORM_MAC
+        defaultScalingFactor = 96.0f / 72.0f;
 #endif
     }
 
