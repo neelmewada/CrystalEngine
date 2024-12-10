@@ -460,6 +460,8 @@ namespace CE
         f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
 #if PLATFORM_MAC
         scaling = 1;
+#elif PLATFORM_LINUX
+        scaling *= defaultScalingFactor;
 #endif
 
         PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(title, (u32)(width * scaling), (u32)(height * scaling), info);

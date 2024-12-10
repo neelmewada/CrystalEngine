@@ -12,6 +12,7 @@ namespace CE
     class FRootContext;
     class FStyleManager;
     class FGameWindow;
+    class FWindow;
 
     struct IFusionAssetLoader
     {

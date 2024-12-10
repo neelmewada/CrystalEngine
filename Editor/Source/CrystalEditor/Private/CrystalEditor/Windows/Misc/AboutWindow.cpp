@@ -93,6 +93,7 @@ namespace CE::Editor
         };
 
         f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+    	scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
 #if PLATFORM_MAC
     	scaling = 1;
 #endif

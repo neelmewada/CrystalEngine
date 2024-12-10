@@ -80,16 +80,6 @@ namespace CE::Editor
     {
         Super::OnPostComputeLayout();
 
-        const CE::Name gridSmall = "/Engine/Resources/Images/GridSmall";
-
-        FBrush gridBg = FBrush(gridSmall);
-        gridBg.SetBrushSize(Vec2(16, 16));
-        gridBg.SetBrushTiling(FBrushTiling::TileXY);
-
-        if (imageAtlasSize.x > 0 && imageAtlasSize.y > 0)
-        {
-	        
-        }
     }
 
     void FusionImageAtlasWindow::OnPaint(FPainter* painter)
@@ -97,8 +87,6 @@ namespace CE::Editor
 	    Super::OnPaint(painter);
 
         imageAtlasSize = painter->GetImageAtlasSize();
-
-
     }
 
     Ref<FusionImageAtlasWindow> FusionImageAtlasWindow::Show()
@@ -116,7 +104,7 @@ namespace CE::Editor
             .fullscreen = false,
             .resizable = true,
             .hidden = false,
-            .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
+            .windowFlags = PlatformWindowFlags::DestroyOnClose
         };
 
         Ref<FusionImageAtlasWindow> window = (Ref<FusionImageAtlasWindow>)FusionApplication::Get()->CreateNativeWindow(
@@ -126,6 +114,8 @@ namespace CE::Editor
             Self::StaticClass(), info);
 
         instance = window;
+
+        window->ShowWindow();
 
         return window;
     }
