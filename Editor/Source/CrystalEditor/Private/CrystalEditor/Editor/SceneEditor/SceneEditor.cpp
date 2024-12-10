@@ -377,14 +377,7 @@ namespace CE::Editor
                                 .Text("Fusion Image Atlas")
                                 .OnClick([this]
                                 {
-	                                
-                                }),
-
-                                FNew(FMenuItem)
-                                .Text("Fusion Font Atlas")
-                                .OnClick([this]
-                                {
-	                                
+                                    FusionImageAtlasWindow::Show();
                                 })
                             )
                         )

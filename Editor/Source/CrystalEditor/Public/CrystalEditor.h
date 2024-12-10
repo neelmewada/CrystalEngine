@@ -25,6 +25,9 @@
 #include "CrystalEditor/Windows/Misc/AboutWindow.h"
 #include "CrystalEditor/Windows/Misc/SampleWidgetWindow.h"
 
+// - Debug -
+#include "CrystalEditor/Windows/Debug/FusionImageAtlasWindow.h"
+
 // ------------------------------------------------
 // Crystal Editor
 // ------------------------------------------------

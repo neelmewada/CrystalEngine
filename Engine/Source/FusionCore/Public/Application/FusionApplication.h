@@ -104,6 +104,10 @@ namespace CE
 
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
+        Ref<FWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+            const SubClass<FWindow>& windowClass, 
+            const PlatformWindowInfo& info = {});
+
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
 
         ScriptEvent<void(void)> onFrameGraphUpdateRequested;

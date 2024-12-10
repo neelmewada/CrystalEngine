@@ -17,13 +17,8 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
-        if (m_Opacity < 0.0001f)
+        if (m_Opacity < 0.001f)
             return;
-
-        if (IsOfType<FComboBox>())
-        {
-            String::IsAlphabet('a');
-        }
 
         if (m_Opacity < 1.0f)
         {

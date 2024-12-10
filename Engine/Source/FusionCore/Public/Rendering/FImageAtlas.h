@@ -155,6 +155,12 @@ namespace CE
         ImageItem AddImage(const Name& name, const CMImage& imageSource);
         bool RemoveImage(const Name& name);
 
+        void UpdateImageAtlasItems();
+
+        // - Model -
+
+        MODEL_PROPERTY(Array<String>, Pages);
+
     private:
 
         // - Configs -

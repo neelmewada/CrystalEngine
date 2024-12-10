@@ -19,6 +19,10 @@ namespace CE
 
         void Construct() override;
 
+        void OnMaximized() override;
+        void OnMinimized() override;
+        void OnRestored() override;
+
         FStyledWidget* borderWidget = nullptr;
         FVerticalStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;

@@ -290,5 +290,27 @@ namespace CE::Editor
         
     }
 
+    void EditorDockspace::OnMaximized()
+    {
+	    Super::OnMaximized();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
+
+#if PLATFORM_WINDOWS
+        // This is needed on Windows to prevent things from rendering outside the screen edges when maximized
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 7);
+#endif
+    }
+
+    void EditorDockspace::OnRestored()
+    {
+        Super::OnRestored();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
+
+#if PLATFORM_WINDOWS
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 1);
+#endif
+    }
 }
 

@@ -440,6 +440,42 @@ namespace CE
         rootContext->SetDrawPackets(drawList);
     }
 
+    Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 
+        const SubClass<FWindow>& windowClass, 
+        const PlatformWindowInfo& info)
+    {
+        if (windowClass == nullptr || !windowClass->CanBeInstantiated())
+            return nullptr;
+
+        ClassType* clazz = windowClass;
+
+        FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
+        FFusionContext* parentContext = rootContext;
+        if (rootContext->GetChildContexts().NotEmpty())
+        {
+            // FRootContext should have only 1 NativeContext which is the primary Native Window
+            parentContext = rootContext->GetChildContexts().GetFirst();
+        }
+
+        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+        scaling = 1;
+#endif
+
+        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(title, (u32)(width * scaling), (u32)(height * scaling), info);
+        window->SetBorderless(true);
+
+        FNativeContext* context = FNativeContext::Create(window, windowName.GetString(), parentContext);
+        parentContext->AddChildContext(context);
+
+        Ref<FWindow> outWindow = nullptr;
+
+        FAssignNewOwnedDynamic(FWindow, outWindow, context, clazz);
+        context->SetOwningWidget(outWindow.Get());
+
+        return outWindow;
+    }
+
     void FusionApplication::BuildFrameGraph()
     {
         ZoneScoped;

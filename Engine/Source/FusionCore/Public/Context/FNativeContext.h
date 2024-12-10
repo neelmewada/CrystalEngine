@@ -84,6 +84,10 @@ namespace CE
 		void OnWindowMoved(PlatformWindow* window, int x, int y) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;
 
+		void OnWindowMaximized(PlatformWindow* window) override;
+		void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowMinimized(PlatformWindow* window) override;
+
 		void UpdateViewConstants();
 
 		PlatformWindow* platformWindow = nullptr;

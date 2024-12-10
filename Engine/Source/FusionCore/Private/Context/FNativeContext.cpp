@@ -215,6 +215,54 @@ namespace CE
 		}
 	}
 
+	void FNativeContext::OnWindowMaximized(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnMaximized();
+		}
+	}
+
+	void FNativeContext::OnWindowRestored(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnRestored();
+		}
+	}
+
+	void FNativeContext::OnWindowMinimized(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnMinimized();
+		}
+	}
+
 	void FNativeContext::UpdateViewConstants()
 	{
 		ZoneScoped;

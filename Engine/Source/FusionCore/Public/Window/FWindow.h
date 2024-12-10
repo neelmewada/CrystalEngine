@@ -13,8 +13,11 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
-    public:
+    protected:
 
+        virtual void OnMaximized() {}
+        virtual void OnRestored() {}
+        virtual void OnMinimized() {}
 
     private: // - Fields -
 

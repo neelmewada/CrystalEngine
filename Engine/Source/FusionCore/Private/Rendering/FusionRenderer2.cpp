@@ -1636,11 +1636,6 @@ namespace CE
             FDrawData drawData{};
             auto app = FusionApplication::Get();
 
-            if (currentBrush.GetImageName() == "/Editor/Assets/UI/Splash")
-            {
-                String::IsAlphabet('a');
-            }
-
             auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
             if (!image.IsValid())
             {

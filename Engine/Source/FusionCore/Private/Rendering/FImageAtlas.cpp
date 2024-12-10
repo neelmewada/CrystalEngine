@@ -43,6 +43,12 @@ namespace CE
 
         atlasLayers.Add(atlas);
 
+        Array<String> pages = GetPages();
+        pages.Add(String::Format("Page {}", pages.GetSize()));
+        SetPages(pages);
+
+        UpdateImageAtlasItems();
+
         auto fusionShader = FusionApplication::Get()->GetFusionShader2();
 
         auto perDrawSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
@@ -134,6 +140,20 @@ namespace CE
 
     	atlasLayers.Clear();
         imagesByName.Clear();
+    }
+
+    void FImageAtlas::UpdateImageAtlasItems()
+    {
+	    for (int i = 0; i < atlasLayers.GetSize(); ++i)
+	    {
+            imagesByName[String::Format("__ImageAtlas_{}", i)] = ImageItem{
+                .layerIndex = i,
+                .uvMin = Vec2(0, 0),
+                .uvMax = Vec2(1, 1),
+                .width = atlasSize,
+                .height = atlasSize
+            };
+	    }
     }
 
     void FImageAtlas::Flush(u32 imageIndex)
@@ -275,6 +295,12 @@ namespace CE
             Ptr<FAtlasImage> atlas = new FAtlasImage(atlasSize);
             atlas->layerIndex = atlasLayers.GetSize();
             atlasLayers.Add(atlas);
+
+            Array<String> pages = GetPages();
+            pages.Add(String::Format("Page {}", pages.GetSize()));
+            SetPages(pages);
+
+            UpdateImageAtlasItems();
 
             RHI::BufferDescriptor stagingDesc{};
             stagingDesc.name = "Staging Buffer";
