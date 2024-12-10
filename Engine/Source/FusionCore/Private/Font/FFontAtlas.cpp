@@ -96,6 +96,11 @@ namespace CE
         fontSrg2->FlushBindings();
     }
 
+    u32 FFontAtlas::GetAtlasSize() const
+    {
+        return FontAtlasSize;
+    }
+
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
         ZoneScoped;

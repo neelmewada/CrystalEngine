@@ -49,6 +49,8 @@ namespace CE
 
         // - Public API -
 
+        u32 GetAtlasSize() const;
+
         RHI::ShaderResourceGroup* GetFontSrg() const { return fontSrg; }
         RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
 

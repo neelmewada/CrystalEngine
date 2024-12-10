@@ -82,6 +82,11 @@ namespace CE
         const FFont& GetFont() const { return currentFont; }
         const FPen& GetPen() const { return currentPen; }
 
+        Vec2i GetImageAtlasSize();
+        Vec2i GetFontAtlasSize();
+
+        u32 GetNumImageAtlasLayers();
+
         //! @brief Used for CPU side culling and is dependent on the state (clips and transforms)!
         bool IsRectClipped(const Rect& rect);
 
@@ -113,7 +118,21 @@ namespace CE
 
         void DrawViewport(const Rect& rect, FViewport* viewport);
 
+        void DrawImageAtlas(const Rect& rect, int layerIndex);
+
     private:
+
+        enum FDrawType : int
+        {
+            DRAW_Geometry = 0,
+            DRAW_Text,
+            DRAW_TextureNoTile,
+            DRAW_TextureTileX,
+            DRAW_TextureTileY,
+            DRAW_TextureTileXY,
+            DRAW_Viewport,
+            DRAW_TextureAtlas
+        };
 
         // - Internal Draw API -
 
@@ -125,6 +144,8 @@ namespace CE
 
         void PrimReserve(int vertexCount, int indexCount);
         void PrimUnreserve(int vertexCount, int indexCount);
+
+        void PrimRect(const Rect& rect, u32 color, Vec2* uvs = nullptr, FDrawType drawType = DRAW_Geometry, int index = -1);
 
         void AddDrawCmd();
 
@@ -186,17 +207,6 @@ namespace CE
         struct alignas(16) FObjectData
         {
             Matrix4x4 transform = Matrix4x4::Identity();
-        };
-
-        enum FDrawType : int
-        {
-	        DRAW_Geometry = 0,
-            DRAW_Text,
-            DRAW_TextureNoTile,
-            DRAW_TextureTileX,
-            DRAW_TextureTileY,
-            DRAW_TextureTileXY,
-            DRAW_Viewport
         };
 
         struct alignas(8) FDrawData

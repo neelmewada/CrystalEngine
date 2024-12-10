@@ -261,6 +261,27 @@ namespace CE
         return drawPacketsPerImage[imageIndex];
     }
 
+    Vec2i FusionRenderer2::GetImageAtlasSize()
+    {
+        auto app = FusionApplication::Get();
+
+        return Vec2i(1, 1) * app->GetImageAtlas()->GetAtlasSize();
+    }
+
+    Vec2i FusionRenderer2::GetFontAtlasSize()
+    {
+        auto app = FusionApplication::Get();
+
+        return Vec2i(1, 1) * app->GetFontManager()->GetDefaultFontAtlas()->GetAtlasSize();
+    }
+
+    u32 FusionRenderer2::GetNumImageAtlasLayers()
+    {
+        auto app = FusionApplication::Get();
+
+        return app->GetImageAtlas()->GetArrayLayers();
+    }
+
     bool FusionRenderer2::IsRectClipped(const Rect& rect)
     {
         if (!clipStack.IsEmpty())
@@ -953,6 +974,15 @@ namespace CE
         drawCmdList.Last().numIndices += 6;
     }
 
+    void FusionRenderer2::DrawImageAtlas(const Rect& quad, int layerIndex)
+    {
+        PrimReserve(4, 6);
+
+        u32 color = Color::White().ToU32();
+
+        PrimRect(quad, color, nullptr, DRAW_TextureAtlas, layerIndex);
+    }
+
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
                                              f32 width, FWordWrap wordWrap)
     {
@@ -1483,6 +1513,41 @@ namespace CE
         }
     }
 
+    void FusionRenderer2::PrimRect(const Rect& quad, u32 color, Vec2* uvs, FDrawType drawType, int index)
+    {
+        Vec2 topLeft = quad.min;
+        Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+        Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+        Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+
+        Vec2 topLeftUV = uvs != nullptr ? uvs[0] : Vec2(0, 0);
+        Vec2 topRightUV = uvs != nullptr ? uvs[1] : Vec2(1, 0);
+        Vec2 bottomRightUV = uvs != nullptr ? uvs[2] : Vec2(1, 1);
+        Vec2 bottomLeftUV = uvs != nullptr ? uvs[3] : Vec2(0, 1);
+
+        FDrawIndex idx = vertexCurrentIdx;
+        indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
+        indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
+
+        vertexWritePtr[0].position = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV; vertexWritePtr[0].drawType = drawType;
+        vertexWritePtr[0].index = index;
+
+    	vertexWritePtr[1].position = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV; vertexWritePtr[1].drawType = drawType;
+        vertexWritePtr[1].index = index;
+
+    	vertexWritePtr[2].position = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV; vertexWritePtr[2].drawType = drawType;
+        vertexWritePtr[2].index = index;
+
+        vertexWritePtr[3].position = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV; vertexWritePtr[3].drawType = drawType;
+        vertexWritePtr[3].index = index;
+
+        vertexWritePtr += 4;
+        vertexCurrentIdx += 4;
+        indexWritePtr += 6;
+
+        drawCmdList.Last().numIndices += 6;
+    }
+
     void FusionRenderer2::PathInsert(const Vec2& point)
     {
         ZoneScoped;
@@ -1571,7 +1636,7 @@ namespace CE
             FDrawData drawData{};
             auto app = FusionApplication::Get();
 
-            if (currentBrush.GetImageName() == "/Editor/Assets/Images/Splash")
+            if (currentBrush.GetImageName() == "/Editor/Assets/UI/Splash")
             {
                 String::IsAlphabet('a');
             }

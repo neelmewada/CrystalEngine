@@ -74,6 +74,16 @@ namespace CE
 		renderer2->PopClipRect();
 	}
 
+	Vec2i FPainter::GetImageAtlasSize()
+	{
+		return renderer2->GetImageAtlasSize();
+	}
+
+	u32 FPainter::GetNumImageAtlasLayers()
+	{
+		return renderer2->GetNumImageAtlasLayers();
+	}
+
 	Vec2 FPainter::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
 		static Array<Rect> quads{};
@@ -172,6 +182,11 @@ namespace CE
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
 		return renderer2->DrawText(text, pos, size, wordWrap);
+	}
+
+	void FPainter::DrawImageAtlas(const Rect& rect, int layerIndex)
+	{
+		renderer2->DrawImageAtlas(rect, layerIndex);
 	}
 
 	bool FPainter::IsCulled(Vec2 pos, Vec2 quadSize)

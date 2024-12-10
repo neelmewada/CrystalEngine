@@ -88,6 +88,11 @@ namespace CE
         return DefaultFontSize;
     }
 
+    FFontAtlas* FFontManager::GetDefaultFontAtlas()
+    {
+        return FindFont(GetDefaultFontFamily());
+    }
+
     bool FFontManager::LoadFontFace(Stream* ttfFile, FT_Face& outFace, u8** outData)
     {
         if (ttfFile == nullptr || !ttfFile->CanRead() || ttfFile->GetLength() == 0)

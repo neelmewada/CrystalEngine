@@ -20,6 +20,8 @@ namespace CE
 
         u32 GetAtlasSize() const { return atlasSize; }
 
+        u32 GetArrayLayers() const { return atlasLayers.GetSize(); }
+
         RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
 
         Vec2 GetWhitePixelUV() const;

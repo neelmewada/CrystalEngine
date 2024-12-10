@@ -16,8 +16,7 @@ namespace CE::Editor
         titleBar->Height(30);
         titleBarLabel->FontSize(13);
 
-        constexpr auto splashImage = "/Editor/Assets/Images/Splash";
-        constexpr auto gridImage = "/Editor/Assets/Images/GridSmall";
+        constexpr auto splashImage = "/Editor/Assets/UI/Splash";
 
         instance = this;
 

@@ -409,12 +409,6 @@ namespace CE
 
             if (loadedBundlesByUuid.KeyExists(oldUuid))
             {
-                loadedBundlesByUuid[newUuid] = loadedBundlesByUuid[oldUuid];
-                loadedBundlesByUuid.Remove(oldUuid);
-            }
-
-            if (loadedBundlesByUuid.KeyExists(oldUuid))
-            {
                 WeakRef<Bundle> oldRef = loadedBundlesByUuid[oldUuid];
                 loadedBundlesByUuid[newUuid] = oldRef;
                 loadedBundlesByUuid.Remove(oldUuid);

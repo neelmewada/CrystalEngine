@@ -14,6 +14,7 @@ enum FDrawType : int
     DRAW_TextureTileY,
     DRAW_TextureTileXY,
     DRAW_Viewport,
+    DRAW_TextureAtlas,
 };
 
 enum class FImageFit : int
@@ -169,7 +170,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 	    {
             // TODO: Add tiling support
 			const DrawData drawData = _DrawData[input.index];
-            int layerIndex = drawData.index;
+            const int layerIndex = drawData.index;
 
             // Normalized value of start and end position
             float2 uvStartPos = (drawData.rectSize - drawData.brushSize) * drawData.brushPos / drawData.rectSize;
@@ -216,6 +217,11 @@ float4 FragMain(PSInput input) : SV_TARGET
                 float4 sample = _Texture.Sample(_TextureSampler, float3(textureUV.x, textureUV.y, layerIndex));
                 color *= sample;
             }
+	    }
+		break;
+    case DRAW_TextureAtlas:
+	    {
+		    color.rgb *= _Texture.Sample(_TextureSampler, float3(inputUV.x, inputUV.y, max(input.index, 0))).rgb;
 	    }
 		break;
     case DRAW_Viewport:
