@@ -939,7 +939,7 @@ namespace CE
         return finalSize;
     }
 
-    void FusionRenderer2::DrawViewport(const Rect& quad, FViewport* viewport)
+    void FusionRenderer2::DrawViewport(const Rect& rect, FViewport* viewport)
     {
         AddDrawCmd();
 
@@ -948,6 +948,14 @@ namespace CE
         u32 color = Color::White().ToU32();
 
         drawCmdList.Last().textureSrgOverride = viewport->GetTextureSrg();
+
+        Vec2 offset = Vec2();
+        if (coordinateSpaceStack.Last().isTranslationOnly)
+        {
+            offset = coordinateSpaceStack.Last().translation;
+        }
+
+        Rect quad = rect.Translate(offset);
 
         Vec2 topLeft = quad.min;
         Vec2 topRight = Vec2(quad.max.x, quad.min.y);
