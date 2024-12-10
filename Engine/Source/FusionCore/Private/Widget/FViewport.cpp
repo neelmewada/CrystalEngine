@@ -95,6 +95,8 @@ namespace CE
 
         RPI::TextureDescriptor textureDescriptor{};
 
+        f32 scaling = GetContext()->GetScaling();
+
         textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer";
         textureDescriptor.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
         textureDescriptor.texture.arrayLayers = 1;
@@ -102,8 +104,8 @@ namespace CE
         textureDescriptor.texture.sampleCount = m_SampleCount;
         textureDescriptor.texture.format = m_ImageFormat;
         textureDescriptor.texture.defaultHeapType = MemoryHeapType::Default;
-        textureDescriptor.texture.width = currentSize.x;
-        textureDescriptor.texture.height = currentSize.y;
+        textureDescriptor.texture.width = (u32)(currentSize.x * scaling);
+        textureDescriptor.texture.height = (u32)(currentSize.y * scaling);
         textureDescriptor.texture.depth = 1;
         textureDescriptor.texture.dimension = Dimension::Dim2DArray;
 

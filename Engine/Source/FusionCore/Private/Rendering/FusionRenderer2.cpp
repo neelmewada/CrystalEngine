@@ -980,6 +980,8 @@ namespace CE
         indexWritePtr += 6;
 
         drawCmdList.Last().numIndices += 6;
+
+        AddDrawCmd();
     }
 
     void FusionRenderer2::DrawImageAtlas(const Rect& quad, int layerIndex)

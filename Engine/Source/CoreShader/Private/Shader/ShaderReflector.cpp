@@ -57,48 +57,48 @@ namespace CE
 					switch (baseType.basetype)
 					{
 					case spirv_cross::SPIRType::Int:
-						if (!baseType.array.empty())
+						switch (baseType.vecsize)
 						{
-							if (baseType.array[0] == 1)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int);
-							else if (baseType.array[0] == 2)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int2);
-							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int4);
-						}
-						else
-						{
+						case 1:
 							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int4);
+							break;
 						}
 						break;
 					case spirv_cross::SPIRType::UInt:
-						if (!baseType.array.empty())
+						switch (baseType.vecsize)
 						{
-							if (baseType.array[0] == 1)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt);
-							else if (baseType.array[0] == 2)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt2);
-							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt4);
-						}
-						else
-						{
+						case 1:
 							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt4);
+							break;
 						}
 						break;
 					case spirv_cross::SPIRType::Float:
-						if (!baseType.array.empty())
+						switch (baseType.vecsize)
 						{
-							if (baseType.array[0] == 1)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float);
-							else if (baseType.array[0] == 2)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float2);
-							else if (baseType.array[0] == 3 || baseType.array[0] == 4)
-								outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float4);
-						}
-						else
-						{
+						case 1:
 							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+							break;
 						}
 						break;
 					default:
