@@ -74,6 +74,7 @@ namespace CE
 
         Child(
             FAssignNew(FVerticalStack, container)
+            .Padding(Vec4(1, 1, 1, 1) * 1.5f)
         );
     }
 

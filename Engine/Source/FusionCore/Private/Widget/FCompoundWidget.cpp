@@ -100,6 +100,11 @@ namespace CE
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
+            if (m_ClipChildren)
+            {
+                painter->PushClipRect(Matrix4x4::Identity(), computedSize);
+            }
+
             if (m_Child->isTranslationOnly)
             {
 	            painter->PushChildCoordinateSpace(m_Child->computedPosition + m_Child->m_Translation);
@@ -109,18 +114,14 @@ namespace CE
 	            painter->PushChildCoordinateSpace(m_Child->GetLocalTransform());
             }
 
-            if (m_ClipChildren)
-            {
-                painter->PushClipRect(Matrix4x4::Identity(), computedSize);
-            }
-
             m_Child->OnPaint(painter);
+
+            painter->PopChildCoordinateSpace();
 
             if (m_ClipChildren)
             {
                 painter->PopClipRect();
             }
-            painter->PopChildCoordinateSpace();
         }
     }
 

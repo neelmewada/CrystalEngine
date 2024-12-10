@@ -33,7 +33,7 @@ namespace CE
             .Background(FBrush(Color::RGBA(36, 36, 36)))
             .BorderWidth(1.0f)
             .BorderColor(Color::RGBA(15, 15, 15))
-            .Padding(Vec4(1, 1, 1, 1))
+            .Padding(Vec4(1, 1, 1, 1) * 2)
             .Name("RootBorderWidget")
             (
                 FAssignNew(FVerticalStack, rootBox)

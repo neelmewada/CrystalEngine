@@ -34,8 +34,8 @@ namespace CE::Editor
         titleBar->Height(30);
         titleBarLabel->FontSize(13);
 
-        constexpr auto splashImage = "/Editor/Assets/Images/Splash";
-        constexpr auto gridImage = "/Editor/Assets/Images/GridSmall";
+        constexpr auto splashImage = "/Editor/Assets/UI/Splash";
+        constexpr auto gridImage = "/Engine/Resources/Icons/TransparentPattern";
 
         instance = this;
 
@@ -47,7 +47,7 @@ namespace CE::Editor
 
         FBrush grid = FBrush(gridImage);
         grid.SetBrushTiling(FBrushTiling::TileXY);
-        grid.SetBrushSize(Vec2(20, 20));
+        grid.SetBrushSize(Vec2(16, 16));
 
 
         (*this)
@@ -111,6 +111,7 @@ namespace CE::Editor
                 .ContentHAlign(HAlign::Left)
                 (
                     FNew(FTextButton)
+                    .FontSize(10)
                     .Text("Add Item")
                     .OnClicked([this]
                     {
@@ -120,7 +121,7 @@ namespace CE::Editor
                     }),
 
                     FNew(FComboBox)
-                    //.Bind_Items(BIND_PROPERTY_R(model, ItemList))
+                    .Bind_Items(BIND_PROPERTY_R(model, ItemList))
                     .MinWidth(60)
                 ),
 
@@ -129,13 +130,13 @@ namespace CE::Editor
                 .ContentHAlign(HAlign::Left)
                 (
                     FNew(FTextInput)
-                    //.Bind_Text(BIND_PROPERTY_RW(model, Text))
-                    .FontSize(13)
+                    .Bind_Text(BIND_PROPERTY_RW(model, Text))
+                    .FontSize(10)
                     .Width(180)
                     .Margin(Vec4(0, 0, 10, 0)),
 
                     FNew(FTextButton)
-                    .FontSize(13)
+                    .FontSize(10)
                     .Text("Randomize")
                     .OnClicked([this]
                         {
@@ -144,18 +145,35 @@ namespace CE::Editor
 
                     FNew(FLabel)
                     .FontSize(13)
-                    //.Bind_Text(BIND_PROPERTY_R(model, Text))
+                    .Bind_Text(BIND_PROPERTY_R(model, Text))
                 ),
 
                 FNew(FScrollBox)
                 .VerticalScroll(true)
                 .HorizontalScroll(true)
                 .FillRatio(1.0f)
+                .Name("TestScrollBox")
                 (
                     FNew(FVerticalStack)
                     .VAlign(VAlign::Top)
                     .HAlign(HAlign::Left)
                     (
+                        FNew(FLabel)
+                        .Text("The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                        .FontSize(16),
+
+                        FNew(FLabel)
+                        .Text("Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
+                        .FontSize(16),
+
+                        FNew(FLabel)
+                        .Text("The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
+                        .FontSize(16),
+
+                        FNew(FLabel)
+                        .Text("With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
+                        .FontSize(16),
+
                         FNew(FLabel)
                         .Text("The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
                         .FontSize(16),
@@ -205,27 +223,15 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
         };
 
-        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("SampleWidgets", 600, 600, info);
-        window->SetAlwaysOnTop(true);
-        window->SetBorderless(true);
+        Ref<SampleWidgetWindow> sampleWindow = (Ref<SampleWidgetWindow>)FusionApplication::Get()->CreateNativeWindow(
+			"SampleWidgetWindow", "Sample Widgets", 
+            600, 625, 
+            Self::StaticClass(), info);
 
-        FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
-        FFusionContext* parentContext = rootContext;
-        if (rootContext->GetChildContexts().NotEmpty())
-        {
-            // FRootContext should have only 1 NativeContext which is the primary Native Window
-            parentContext = rootContext->GetChildContexts().GetFirst();
-        }
+        PlatformWindow* platformWindow = static_cast<FNativeContext*>(sampleWindow->GetContext())->GetPlatformWindow();
+        platformWindow->SetAlwaysOnTop(true);
 
-        FNativeContext* context = FNativeContext::Create(window, "SampleWidgetWindow", parentContext);
-        parentContext->AddChildContext(context);
-
-        SampleWidgetWindow* sampleWindow = nullptr;
-
-        FAssignNewOwned(SampleWidgetWindow, sampleWindow, context);
-        context->SetOwningWidget(sampleWindow);
-
-        return sampleWindow;
+        return sampleWindow.Get();
     }
 }
 

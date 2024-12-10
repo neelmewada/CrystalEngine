@@ -30,6 +30,8 @@ namespace CE::Editor
         projectLabel->Text(projectSettings->projectName);
 
         Style("EditorDockspace");
+
+        SampleWidgetWindow::Show();
     }
 
     void CrystalEditorWindow::OnBeginDestroy()

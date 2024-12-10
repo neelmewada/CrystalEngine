@@ -1061,7 +1061,7 @@ namespace CE
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
 
             
-            if (isFixedWidth && (curPos.x + (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling > width) && wordWrap != FWordWrap::NoWrap)
+            if (isFixedWidth && (curPos.x + glyphWidth > width) && wordWrap != FWordWrap::NoWrap)
             {
                 curPos.x = startX;
                 curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;

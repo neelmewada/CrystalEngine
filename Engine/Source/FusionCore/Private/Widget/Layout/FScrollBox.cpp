@@ -220,7 +220,7 @@ namespace CE
                 painter->SetBrush(m_ScrollBarBackground);
                 painter->SetPen(m_ScrollBarBackgroundPen);
 
-                Vec2 pos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth, computedPosition.y);
+                Vec2 pos = Vec2(computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth, 0);
                 Vec2 size = Vec2(m_ScrollBarMargin * 2 + m_ScrollBarWidth, computedSize.y);
 
                 painter->DrawRect(Rect::FromSize(pos, size));
@@ -237,7 +237,7 @@ namespace CE
                 painter->SetPen(m_ScrollBarPen);
             }
 
-            painter->DrawShape(GetVerticalScrollBarRect(), m_ScrollBarShape);
+            painter->DrawShape(GetVerticalScrollBarRect().Translate(-computedPosition), m_ScrollBarShape);
         }
 
         if (isHorizontalScrollVisible)
@@ -251,7 +251,7 @@ namespace CE
                 if (isVerticalScrollVisible)
                     horiOffset = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
 
-                Vec2 pos = Vec2(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth);
+                Vec2 pos = Vec2(0, computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth);
                 Vec2 size = Vec2(computedSize.x - horiOffset, m_ScrollBarMargin * 2 + m_ScrollBarWidth);
 
                 painter->DrawRect(Rect::FromSize(pos, size));
@@ -268,7 +268,7 @@ namespace CE
                 painter->SetPen(m_ScrollBarPen);
             }
 
-            painter->DrawShape(GetHorizontalScrollBarRect(), m_ScrollBarShape);
+            painter->DrawShape(GetHorizontalScrollBarRect().Translate(-computedPosition), m_ScrollBarShape);
         }
     }
 

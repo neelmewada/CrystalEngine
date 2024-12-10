@@ -111,6 +111,7 @@ namespace CE
 	{
 		bool isDrawn = false;
 
+		Rect fillRect = rect;
 		Rect borderRect = rect;
 		const FPen& pen = renderer2->GetPen();
 		f32 borderOffset = 0;
@@ -123,22 +124,25 @@ namespace CE
 		borderRect.min -= Vec2(1, 1) * borderOffset;
 		borderRect.max += Vec2(1, 1) * borderOffset;
 
+		fillRect.min += Vec2(1, 1) * borderOffset;
+		fillRect.max -= Vec2(1, 1) * borderOffset;
+
 		switch (shape.GetShapeType())
 		{
 		case FShapeType::None:
 			break;
 		case FShapeType::Rect:
-			isDrawn |= renderer2->FillRect(rect);
+			isDrawn |= renderer2->FillRect(fillRect);
 			isDrawn |= renderer2->StrokeRect(borderRect);
 			break;
 		case FShapeType::RoundedRect:
-			isDrawn |= renderer2->FillRect(rect, shape.GetCornerRadius());
+			isDrawn |= renderer2->FillRect(fillRect, shape.GetCornerRadius());
 			isDrawn |= renderer2->StrokeRect(borderRect, shape.GetCornerRadius());
 			break;
 		case FShapeType::Circle:
 		{
-			Vec2 center = (rect.max - rect.min) / 2.0f;
-			f32 radius = Math::Min((center - rect.min).x, (center - rect.min).y);
+			Vec2 center = (fillRect.max - fillRect.min) / 2.0f;
+			f32 radius = Math::Min((center - fillRect.min).x, (center - fillRect.min).y);
 			isDrawn |= renderer2->FillCircle(center, radius);
 			isDrawn |= renderer2->StrokeCircle(center, radius + borderOffset);
 		}
