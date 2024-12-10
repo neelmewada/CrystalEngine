@@ -188,11 +188,6 @@ namespace CE
 		return renderer2->DrawText(text, pos, size, wordWrap);
 	}
 
-	void FPainter::DrawImageAtlas(const Rect& rect, int layerIndex)
-	{
-		renderer2->DrawImageAtlas(rect, layerIndex);
-	}
-
 	bool FPainter::IsCulled(Vec2 pos, Vec2 quadSize)
 	{
 		return renderer2->IsRectClipped(Rect::FromSize(pos, quadSize));

@@ -993,6 +993,15 @@ namespace CE
         PrimRect(quad, color, nullptr, DRAW_TextureAtlas, layerIndex);
     }
 
+    void FusionRenderer2::DrawFontAtlas(const Rect& rect, const Ref<FFontAtlas>& fontAtlas, int layerIndex)
+    {
+        PrimReserve(4, 6);
+
+        u32 color = Color::White().ToU32();
+
+        PrimRect(rect, color, nullptr, DRAW_FontAtlas, layerIndex);
+    }
+
     Vec2 FusionRenderer2::CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font,
                                              f32 width, FWordWrap wordWrap)
     {
@@ -1646,11 +1655,33 @@ namespace CE
             FDrawData drawData{};
             auto app = FusionApplication::Get();
 
+            String imageName = currentBrush.GetImageName().GetString();
+
             auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
             if (!image.IsValid())
             {
                 CMImage imageAsset = app->LoadImageAsset(currentBrush.GetImageName());
-                image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
+                if (imageAsset.IsValid())
+                {
+                    image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
+                }
+            }
+
+            if (!image.IsValid() && imageName.StartsWith(FFontAtlas::ImageNamePrefix))
+            {
+                // Example: __FontAtlas_Roboto_0
+                imageName.Remove(0, strlen(FFontAtlas::ImageNamePrefix));
+                Array<String> split = imageName.Split('_');
+                if (split.GetSize() >= 2)
+                {
+                    String fontName = split[0];
+                    int layerIndex = -1;
+                    if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
+                    {
+                        FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName);
+                        image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+                    }
+                }
             }
 
             if (image.IsValid())

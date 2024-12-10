@@ -15,6 +15,7 @@ enum FDrawType : int
     DRAW_TextureTileXY,
     DRAW_Viewport,
     DRAW_TextureAtlas,
+    DRAW_FontAtlas
 };
 
 enum class FImageFit : int
@@ -228,6 +229,12 @@ float4 FragMain(PSInput input) : SV_TARGET
 	    {
 		    color.rgb *= _Texture.Sample(_TextureSampler, float3(inputUV.x, inputUV.y, 0)).rgb;
 	    }
+        break;
+    case DRAW_FontAtlas:
+        {
+            float fontRead = _FontAtlas.Sample(_FontAtlasSampler, inputUV).r;
+            color *= float4(1, 1, 1, 1) * fontRead;
+        }
         break;
     default:
 		break;

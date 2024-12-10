@@ -40,12 +40,16 @@ namespace CE
         CE_CLASS(FFontAtlas, Object)
     public:
 
+        static constexpr const char* ImageNamePrefix = "__FontAtlas_";
+
         FFontAtlas();
 
         void Init(const Array<u32>& characterSet);
 
         //! @brief Font metrics calculated for a unit font size. Multiply each field with the actual font size
         const FFontMetrics& GetMetrics() const { return metrics; }
+
+        u32 GetArrayLayerCount() const { return atlasImageMips.GetSize(); }
 
         // - Public API -
 

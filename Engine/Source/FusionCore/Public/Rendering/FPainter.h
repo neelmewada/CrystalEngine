@@ -62,8 +62,6 @@ namespace CE
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
-        void DrawImageAtlas(const Rect& rect, int layerIndex);
-
         bool IsCulled(Vec2 pos, Vec2 quadSize);
 
     private:

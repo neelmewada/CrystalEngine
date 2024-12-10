@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_98" : {
+        "_99" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_101" : {
+        "_102" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_100" : {
+        "_101" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_101",
+                    "type" : "_102",
                     "array" : [
                         0
                     ],
@@ -71,7 +71,7 @@
                 }
             ]
         },
-        "_104" : {
+        "_105" : {
             "name" : "ClipRect",
             "members" : [
                 {
@@ -88,12 +88,12 @@
                 }
             ]
         },
-        "_103" : {
+        "_104" : {
             "name" : "type.StructuredBuffer.ClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_104",
+                    "type" : "_105",
                     "array" : [
                         0
                     ],
@@ -105,7 +105,7 @@
                 }
             ]
         },
-        "_107" : {
+        "_108" : {
             "name" : "DrawData",
             "members" : [
                 {
@@ -145,12 +145,12 @@
                 }
             ]
         },
-        "_106" : {
+        "_107" : {
             "name" : "type.StructuredBuffer.DrawData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_107",
+                    "type" : "_108",
                     "array" : [
                         0
                     ],
@@ -162,7 +162,7 @@
                 }
             ]
         },
-        "_109" : {
+        "_110" : {
             "name" : "type.PushConstant.RootConstants",
             "members" : [
                 {
@@ -259,7 +259,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_100",
+            "type" : "_101",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -267,7 +267,7 @@
             "binding" : 0
         },
         {
-            "type" : "_103",
+            "type" : "_104",
             "name" : "type.StructuredBuffer.ClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -275,7 +275,7 @@
             "binding" : 1
         },
         {
-            "type" : "_106",
+            "type" : "_107",
             "name" : "type.StructuredBuffer.DrawData",
             "readonly" : true,
             "block_size" : 0,
@@ -285,7 +285,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_98",
+            "type" : "_99",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
@@ -294,7 +294,7 @@
     ],
     "push_constants" : [
         {
-            "type" : "_109",
+            "type" : "_110",
             "name" : "_RootConstants",
             "push_constant" : true
         }

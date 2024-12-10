@@ -120,6 +120,8 @@ namespace CE
 
         void DrawImageAtlas(const Rect& rect, int layerIndex);
 
+        void DrawFontAtlas(const Rect& rect, const Ref<FFontAtlas>& fontAtlas, int layerIndex);
+
     private:
 
         enum FDrawType : int
@@ -131,7 +133,8 @@ namespace CE
             DRAW_TextureTileY,
             DRAW_TextureTileXY,
             DRAW_Viewport,
-            DRAW_TextureAtlas
+            DRAW_TextureAtlas,
+            DRAW_FontAtlas
         };
 
         // - Internal Draw API -

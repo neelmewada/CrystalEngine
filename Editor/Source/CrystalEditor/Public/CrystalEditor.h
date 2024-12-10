@@ -27,6 +27,7 @@
 
 // - Debug -
 #include "CrystalEditor/Windows/Debug/FusionImageAtlasWindow.h"
+#include "CrystalEditor/Windows/Debug/FusionFontAtlasWindow.h"
 
 // ------------------------------------------------
 // Crystal Editor
