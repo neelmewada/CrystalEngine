@@ -1669,6 +1669,7 @@ namespace CE
 
             if (!image.IsValid() && imageName.StartsWith(FFontAtlas::ImageNamePrefix))
             {
+                drawType = DRAW_FontAtlas;
                 // Example: __FontAtlas_Roboto_0
                 imageName.Remove(0, strlen(FFontAtlas::ImageNamePrefix));
                 Array<String> split = imageName.Split('_');
@@ -1679,7 +1680,10 @@ namespace CE
                     if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
                     {
                         FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName);
-                        image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+                        if (fontAtlas)
+                        {
+                            image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+                        }
                     }
                 }
             }
@@ -1756,20 +1760,23 @@ namespace CE
 	                break;
                 }
 
-                switch (currentBrush.GetBrushTiling())
+                if (drawType != DRAW_FontAtlas)
                 {
-                case FBrushTiling::None:
-                    drawType = DRAW_TextureNoTile;
-                    break;
-                case FBrushTiling::TileX:
-                    drawType = DRAW_TextureTileX;
-                    break;
-                case FBrushTiling::TileY:
-                    drawType = DRAW_TextureTileY;
-                    break;
-                case FBrushTiling::TileXY:
-                    drawType = DRAW_TextureTileXY;
-                    break;
+                    switch (currentBrush.GetBrushTiling())
+                    {
+                    case FBrushTiling::None:
+                        drawType = DRAW_TextureNoTile;
+                        break;
+                    case FBrushTiling::TileX:
+                        drawType = DRAW_TextureTileX;
+                        break;
+                    case FBrushTiling::TileY:
+                        drawType = DRAW_TextureTileY;
+                        break;
+                    case FBrushTiling::TileXY:
+                        drawType = DRAW_TextureTileXY;
+                        break;
+                    }
                 }
 
                 drawData.brushSize = brushSize;

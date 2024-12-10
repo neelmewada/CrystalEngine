@@ -15,6 +15,11 @@ namespace CE::Editor
 
         const CE::Name gridSmall = "/Engine/Resources/Images/GridSmall";
 
+        FBrush defaultImage = FBrush("__FontAtlas_Roboto_0");
+        defaultImage.SetBrushTiling(FBrushTiling::None);
+        defaultImage.SetImageFit(FImageFit::Contain);
+        defaultImage.SetBrushPosition(Vec2(0, 0));
+
         FBrush gridBg = FBrush(gridSmall);
         gridBg.SetBrushSize(Vec2(16, 16));
         gridBg.SetBrushTiling(FBrushTiling::TileXY);
@@ -54,6 +59,7 @@ namespace CE::Editor
                     .HAlign(HAlign::Fill),
 
                     FAssignNew(FStyledWidget, atlasViewport)
+                    .Background(defaultImage)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
                 )

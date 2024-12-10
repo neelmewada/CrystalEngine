@@ -233,7 +233,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     case DRAW_FontAtlas:
         {
             float fontRead = _FontAtlas.Sample(_FontAtlasSampler, inputUV).r;
-            color *= float4(1, 1, 1, 1) * fontRead;
+            color *= float4(fontRead, fontRead, fontRead, 1);
         }
         break;
     default:

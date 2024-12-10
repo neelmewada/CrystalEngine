@@ -379,6 +379,13 @@ namespace CE::Editor
                                 .OnClick([this]
                                 {
                                     FusionImageAtlasWindow::Show();
+                                }),
+
+                                FNew(FMenuItem)
+                                .Text("Fusion Font Atlas")
+                                .OnClick([this]
+                                {
+                                    FusionFontAtlasWindow::Show();
                                 })
                             )
                         )

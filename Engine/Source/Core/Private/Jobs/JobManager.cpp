@@ -463,7 +463,7 @@ namespace CE
 		}
 	}
 
-	void JobManager::FinishAndComplete()
+	void JobManager::Finish()
 	{
 		while (totalJobsInGlobalQueue > 0)
 		{

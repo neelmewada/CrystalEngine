@@ -109,7 +109,7 @@ namespace CE::Editor
 
         Ref<FusionImageAtlasWindow> window = (Ref<FusionImageAtlasWindow>)FusionApplication::Get()->CreateNativeWindow(
             "FusionImageAtlasWindow", 
-            "Fusion Image Atlas", 
+            "Fusion Image Atlas",
             800, 600,
             Self::StaticClass(), info);
 
