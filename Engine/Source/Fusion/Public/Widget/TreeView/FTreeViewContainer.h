@@ -55,8 +55,21 @@ namespace CE
         TreeViewRowList children;
         HashSet<FModelIndex> expandedRows;
         Vec2 modelUpdateComputedSize;
+        f32 totalRowHeight = 0;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
+
+        // - ScrollBar -
+
+        FUSION_PROPERTY(FBrush, ScrollBarBackground);
+        FUSION_PROPERTY(FPen, ScrollBarBackgroundPen);
+        FUSION_PROPERTY(FBrush, ScrollBarBrush);
+        FUSION_PROPERTY(FBrush, ScrollBarHoverBrush);
+        FUSION_PROPERTY(FPen, ScrollBarPen);
+        FUSION_PROPERTY(FPen, ScrollBarHoverPen);
+        FUSION_PROPERTY(FShape, ScrollBarShape);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
+        FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
         FUSION_WIDGET;
         friend class FTreeView;

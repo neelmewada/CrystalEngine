@@ -5,7 +5,13 @@ namespace CE
 
     FTreeViewContainer::FTreeViewContainer()
     {
-        
+        m_ScrollBarWidth = 8;
+        m_ScrollBarShape = FRoundedRectangle(4);
+        m_ScrollBarMargin = 2.5f;
+
+        m_ScrollBarBackground = Color::RGBA(50, 50, 50);
+        m_ScrollBarBrush = Color::RGBA(255, 255, 255, 100);
+        m_ScrollBarHoverBrush = Color::RGBA(255, 255, 255, 140);
     }
 
     void FTreeViewContainer::Construct()
@@ -39,6 +45,23 @@ namespace CE
             child->OnPaint(painter);
 
             painter->PopChildCoordinateSpace();
+        }
+
+        if (totalRowHeight >= computedSize.y)
+        {
+            f32 normalizedScrollY = -Translation().y / (totalRowHeight - computedSize.y);
+            f32 scrollBarHeight = computedSize.y * (computedSize.y / totalRowHeight);
+            scrollBarHeight = Math::Max(scrollBarHeight, 10.0f);
+
+            f32 posX = computedSize.x - m_ScrollBarWidth;
+            f32 posY = -Translation().y + normalizedScrollY * (computedSize.y - scrollBarHeight);
+
+            painter->SetPen(m_ScrollBarPen);
+            painter->SetBrush(m_ScrollBarBrush);
+
+            Rect scrollBar = Rect::FromSize(posX, posY, m_ScrollBarWidth, scrollBarHeight);
+
+            painter->DrawRoundedRect(scrollBar, Vec4(1, 1, 1, 1) * m_ScrollBarWidth / 2.0f);
         }
     }
 
@@ -300,7 +323,7 @@ namespace CE
 
         auto model = treeView->m_Model;
 
-        f32 totalRowHeight = 0;
+        totalRowHeight = 0;
 
         Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
             {
@@ -328,9 +351,9 @@ namespace CE
                 }
             };
 
+        visitor(FModelIndex());
         if (treeView->AutoHeight())
         {
-            visitor(FModelIndex());
             contentSize.height = totalRowHeight;
         }
 
@@ -346,6 +369,15 @@ namespace CE
             {
                 contentSize.height += children[i]->GetIntrinsicSize().height;
             }
+        }
+
+        if (totalRowHeight >= computedSize.y)
+        {
+            Padding(Vec4(0, 0, m_ScrollBarWidth + m_ScrollBarMargin, 0));
+        }
+        else
+        {
+            Padding(Vec4(0, 0, 0, 0));
         }
 
         intrinsicSize.width += contentSize.width;
@@ -396,8 +428,6 @@ namespace CE
 
             curPos.y += rowHeight;
         }
-
-        // TODO: Place sub-widgets
     }
     
 }
