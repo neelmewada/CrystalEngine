@@ -391,6 +391,11 @@ namespace CE
 
 									for (int i = 0; i < frameBuffer.GetSize(); ++i)
 									{
+										if (viewport->GetFrame(i) == nullptr)
+										{
+											viewport->RecreateFrameBuffer();
+										}
+
 										frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
 									}
 

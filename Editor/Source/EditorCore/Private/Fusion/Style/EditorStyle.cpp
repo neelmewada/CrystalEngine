@@ -80,6 +80,27 @@ namespace CE::Editor
 		clearButton->borderWidth = 0.0f;
 		clearButton->contentMoveY = 0;
 
+		if (!underlineButton)
+		{
+			underlineButton = CreateObject<FTextButtonStyle>(this, "UnderlineButton");
+			Add("TextButton.Underline", underlineButton);
+		}
+
+		underlineButton->background =
+			underlineButton->hoveredBackground =
+			underlineButton->pressedBackground =
+			underlineButton->disabledBackground = Color::Clear();
+		underlineButton->cornerRadius = Vec4();
+		underlineButton->borderColor =
+			underlineButton->hoveredBorderColor =
+			underlineButton->pressedBorderColor = Color::Clear();
+		underlineButton->borderWidth = 0.0f;
+		underlineButton->contentMoveY = 0;
+
+		underlineButton->underline = FPen(Color::White(), 1, FPenStyle::DottedLine);
+		underlineButton->hoverUnderline = FPen(Color::White(), 1, FPenStyle::SolidLine);
+		underlineButton->pressedUnderline = FPen();
+
 		if (!highlightedButton)
 		{
 			highlightedButton = CreateObject<FCustomButtonStyle>(this, "Button_Highlighted");

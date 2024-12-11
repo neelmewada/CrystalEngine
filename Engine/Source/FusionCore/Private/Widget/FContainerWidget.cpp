@@ -145,12 +145,12 @@ namespace CE
 
     void FContainerWidget::OnPaint(FPainter* painter)
     {
-        if (m_DebugColor.a > 0)
+        if (m_DebugColor.a > 0.001f)
         {
             painter->SetPen(FPen());
             painter->SetBrush(m_DebugColor);
 
-            painter->DrawRect(Rect::FromSize(computedPosition, computedSize));
+            painter->DrawRect(Rect::FromSize(Vec2(), computedSize));
         }
 
 	    Super::OnPaint(painter);

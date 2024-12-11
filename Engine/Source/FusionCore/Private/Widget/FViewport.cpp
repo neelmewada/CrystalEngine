@@ -83,7 +83,9 @@ namespace CE
     void FViewport::RecreateFrameBuffer()
     {
         if (currentSize.x <= 0 || currentSize.y <= 0)
-            return;
+        {
+            currentSize = Vec2i(512, 512);
+        }
 
         for (int i = 0; i < frames.GetSize(); ++i)
         {

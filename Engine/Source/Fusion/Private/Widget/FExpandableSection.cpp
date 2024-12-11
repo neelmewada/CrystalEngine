@@ -43,7 +43,7 @@ namespace CE
                         .Angle(m_Expanded ? 0 : -90),
 
                         FAssignNew(FLabel, titleLabel)
-                        .FontSize(14)
+                        .FontSize(11)
                         .Text("Section")
                         .VAlign(VAlign::Center),
 

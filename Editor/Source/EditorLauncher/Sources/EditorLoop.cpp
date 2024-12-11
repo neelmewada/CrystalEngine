@@ -201,10 +201,6 @@ void EditorLoop::PostInit()
 
 	RPI::RPISystem::Get().PostInitialize(rpiInitInfo);
 
-	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
-	this->tickDelegateHandle = tickDelegate.GetHandle();
-	app->AddTickHandler(tickDelegate);
-
 	auto rootContext = fApp->GetRootContext();
 
 	if (!projectPath.Exists())
@@ -239,7 +235,13 @@ void EditorLoop::PostInit()
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
+
+		//ProjectSettingsEditor::Show();
 	}
+
+	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
+	this->tickDelegateHandle = tickDelegate.GetHandle();
+	app->AddTickHandler(tickDelegate);
 }
 
 void EditorLoop::InitStyles()

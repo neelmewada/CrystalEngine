@@ -36,6 +36,8 @@ namespace CE
 
         bool SupportsKeyboardEvents() const override { return true; }
 
+        bool SupportsFocusEvents() const override { return true; }
+
     protected: // - Internal Methods -
 
         void SetState(FButtonState newState);

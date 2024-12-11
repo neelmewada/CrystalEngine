@@ -21,9 +21,6 @@ namespace CE::Editor
         ToolBarEnabled(true);
         MenuBarEnabled(false);
 
-        FPen underline = FPen(Color::White(), 1, FPenStyle::DottedLine);
-        underline.SetDashLength(5);
-
         Content(
             FNew(FSplitBox)
             .Direction(FSplitDirection::Horizontal)
@@ -72,12 +69,11 @@ namespace CE::Editor
         left->AddChild(
             FNew(FTextButton)
             .Text("All Settings")
-            .FontSize(14)
-            .Underline(underline)
+            .FontSize(11)
             .Cursor(SystemCursor::Hand)
             .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
             .ClipChildren(true)
-            .Style("Button.Clear")
+            .Style("TextButton.Underline")
             .Margin(Vec4(0, 0, 0, headerGap))
         );
 
@@ -89,15 +85,14 @@ namespace CE::Editor
             left->AddChild(
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
-                .FontSize(14)
-                .Underline(underline)
+                .FontSize(11)
                 .Cursor(SystemCursor::Hand)
                 .OnClicked([this, index]
                 {
                     OnSettingsItemClicked(index);
                 })
                 .ClipChildren(true)
-                .Style("Button.Clear")
+                .Style("TextButton.Underline")
             );
         }
     }
@@ -153,6 +148,13 @@ namespace CE::Editor
             curEditor->FixedInputWidth(180);
             curEditor->SetSplitRatio(splitRatio);
 
+            right->AddChild(
+                FNew(FLabel)
+                .FontSize(15)
+                .Text(target->GetTitleName())
+                .Margin(Vec4(10, 10, 0, 15))
+            );
+
             right->AddChild(curEditor);
         }
 
@@ -183,7 +185,7 @@ namespace CE::Editor
 
         right->AddChild(
             FNew(FLabel)
-            .FontSize(16)
+            .FontSize(15)
             .Text(target->GetTitleName())
             .Margin(Vec4(10, 10, 0, 15))
         );

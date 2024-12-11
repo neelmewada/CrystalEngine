@@ -17,7 +17,7 @@ namespace CE::Editor
 
         FBrush defaultImage = FBrush("__ImageAtlas_0");
         defaultImage.SetBrushTiling(FBrushTiling::None);
-        defaultImage.SetImageFit(FImageFit::Contain);
+        defaultImage.SetImageFit(FImageFit::Cover);
         defaultImage.SetBrushPosition(Vec2(0, 0));
 
         const CE::Name gridSmall = "/Engine/Resources/Images/GridSmall";
@@ -48,7 +48,7 @@ namespace CE::Editor
 
                         FBrush image = FBrush(String::Format("__ImageAtlas_{}", selectionIndex));
                         image.SetBrushTiling(FBrushTiling::None);
-                        image.SetImageFit(FImageFit::Contain);
+                        image.SetImageFit(FImageFit::Cover);
                         image.SetBrushPosition(Vec2(0, 0));
 
                         atlasViewport->Background(image);

@@ -53,18 +53,17 @@ namespace CE
             !m_Text.IsEmpty())
         {
             FFontMetrics metrics = painter->GetFontMetrics(m_Font);
-            f32 lineHeight = metrics.lineHeight * (f32)m_Font.GetFontSize();
+
+            const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+            const f32 fontDpiScaling = dpi / 72.0f;
+            const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+            const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
 
         	painter->GetRenderer()->CalculateUnderlinePositions(underlineRects, m_Text, m_Font, computedSize.width, m_WordWrap);
 
-            f32 startX = 0;
-            f32 curX = NumericLimits<f32>::Min();
-            f32 curY = 0;
-            int curLine = 0;
-
             for (int i = 0; i < underlineRects.GetSize(); ++i)
             {
-                underlineRects[i] = underlineRects[i].Translate(Vec2(0, m_Underline.GetThickness()));
+                underlineRects[i] = underlineRects[i].Translate(Vec2(0,  -metrics.descender * m_Font.GetFontSize() * metricsScaling));
 
                 painter->SetPen(m_Underline);
                 painter->DrawLine(underlineRects[i].min, underlineRects[i].max);

@@ -168,6 +168,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     case DRAW_TextureTileX:
     case DRAW_TextureTileY:
     case DRAW_TextureTileXY:
+    case DRAW_FontAtlas:
 	    {
             // TODO: Add tiling support
 			const DrawData drawData = _DrawData[input.index];
@@ -178,7 +179,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             float2 uvEndPos = uvStartPos + drawData.brushSize / drawData.rectSize;
             float2 uv = (inputUV - uvStartPos) / (uvEndPos - uvStartPos);
 
-            if ((FDrawType)input.drawType == DRAW_TextureNoTile && (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1))
+            if (((FDrawType)input.drawType == DRAW_TextureNoTile || (FDrawType)input.drawType == DRAW_FontAtlas) && (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1))
             {
 	            color.a = 0;
             }
@@ -215,8 +216,16 @@ float4 FragMain(PSInput input) : SV_TARGET
                 textureUV.x = clamp(textureUV.x, drawData.uvMin.x + tolerance.x, drawData.uvMax.x - tolerance.x);
                 textureUV.y = clamp(textureUV.y, drawData.uvMin.y + tolerance.y, drawData.uvMax.y - tolerance.y);
 
-                float4 sample = _Texture.Sample(_TextureSampler, float3(textureUV.x, textureUV.y, layerIndex));
-                color *= sample;
+                if ((FDrawType)input.drawType == DRAW_FontAtlas)
+                {
+	                float fontRead = _FontAtlas.Sample(_FontAtlasSampler, textureUV).r;
+					color *= float4(fontRead, fontRead, fontRead, 1);
+                }
+                else
+	            {
+		            float4 sample = _Texture.Sample(_TextureSampler, float3(textureUV.x, textureUV.y, layerIndex));
+					color *= sample;
+	            }
             }
 	    }
 		break;
@@ -229,12 +238,6 @@ float4 FragMain(PSInput input) : SV_TARGET
 	    {
 		    color.rgb *= _Texture.Sample(_TextureSampler, float3(inputUV.x, inputUV.y, 0)).rgb;
 	    }
-        break;
-    case DRAW_FontAtlas:
-        {
-            float fontRead = _FontAtlas.Sample(_FontAtlasSampler, inputUV).r;
-            color *= float4(fontRead, fontRead, fontRead, 1);
-        }
         break;
     default:
 		break;

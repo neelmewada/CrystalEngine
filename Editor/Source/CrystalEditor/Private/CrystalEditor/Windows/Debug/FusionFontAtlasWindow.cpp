@@ -25,7 +25,7 @@ namespace CE::Editor
 
         FBrush defaultImage = FBrush(String::Format("__FontAtlas_{}_0", fontNames[0]));
         defaultImage.SetBrushTiling(FBrushTiling::None);
-        defaultImage.SetImageFit(FImageFit::Contain);
+        defaultImage.SetImageFit(FImageFit::Cover);
         defaultImage.SetBrushPosition(Vec2(0, 0));
 
         (*this)
@@ -50,7 +50,7 @@ namespace CE::Editor
 
                         FBrush image = FBrush(String::Format("__FontAtlas_{}_0", fontNames[selectionIndex]));
                         image.SetBrushTiling(FBrushTiling::None);
-                        image.SetImageFit(FImageFit::Contain);
+                        image.SetImageFit(FImageFit::Cover);
                         image.SetBrushPosition(Vec2(0, 0));
 
                         if (auto selectedAtlas = fontAtlases[selectionIndex].Lock())
@@ -73,7 +73,7 @@ namespace CE::Editor
 
                         FBrush image = FBrush(String::Format("__FontAtlas_{}_{}", fontNames[fontIndex], page));
                         image.SetBrushTiling(FBrushTiling::None);
-                        image.SetImageFit(FImageFit::Contain);
+                        image.SetImageFit(FImageFit::Cover);
                         image.SetBrushPosition(Vec2(0, 0));
 
                         atlasViewport->Background(image);

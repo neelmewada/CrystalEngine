@@ -15,7 +15,7 @@ namespace CE
 
     FCustomButtonStyle::FCustomButtonStyle()
     {
-        contentMoveY = 1.0f;
+        
     }
 
     void FCustomButtonStyle::MakeStyle(FWidget& widget)
@@ -63,6 +63,33 @@ namespace CE
         child
             .Translation(Vec2(0, button.IsPressed() && button.IsHovered() ? contentMoveY : 0))
             ;
+    }
+
+    FTextButtonStyle::FTextButtonStyle()
+    {
+    }
+
+    SubClass<FWidget> FTextButtonStyle::GetWidgetClass() const
+    {
+        return FTextButton::StaticClass();
+    }
+
+    void FTextButtonStyle::MakeStyle(FWidget& widget)
+    {
+	    Super::MakeStyle(widget);
+
+        FTextButton& button = widget.As<FTextButton>();
+
+        FPen underline = this->underline;
+        if (!button.IsInteractionDisabled())
+        {
+            if (button.IsPressed())
+                underline = pressedUnderline;
+            else if (button.IsHovered())
+                underline = hoverUnderline;
+        }
+
+        button.Underline(underline);
     }
 
 } // namespace CE
