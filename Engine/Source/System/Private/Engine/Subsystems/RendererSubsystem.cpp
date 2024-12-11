@@ -326,14 +326,10 @@ namespace CE
 	{
 		ZoneScoped;
 
-		CE_LOG(Info, All, "FrameGraph Rebuilt");
-
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
 
 		// TODO: Implement multi scene support
-
-		// TODO: Enqueue draw packets early! Some scope producers (shadow, reflection probe, etc.) need to have all draw packets available beforehand.
 
 		RPI::RPISystem::Get().SimulationTick(curImageIndex);
 		RPI::RPISystem::Get().RenderTick(curImageIndex);

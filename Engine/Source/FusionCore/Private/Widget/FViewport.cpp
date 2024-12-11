@@ -57,6 +57,8 @@ namespace CE
 
     void FViewport::OnFusionPropertyModified(const CE::Name& propertyName)
     {
+        ZoneScoped;
+
 	    Super::OnFusionPropertyModified(propertyName);
 
         static const CE::Name imageFormat = "ImageFormat";

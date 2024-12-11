@@ -579,7 +579,6 @@ namespace CE
     void FusionApplication::OnWindowExposed(PlatformWindow* window)
     {
         RebuildFrameGraph();
-        rootContext->MarkLayoutDirty();
     }
 
     void FusionApplication::OnRenderViewportDestroyed(FGameWindow* renderViewport)

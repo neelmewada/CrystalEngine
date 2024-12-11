@@ -108,50 +108,64 @@ namespace CE
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
         ZoneScoped;
+        char __text[2] = { (char)charCode, 0 };
+        ZoneText(__text, 1);
 
         u32 fontSizeInAtlas = fontSize;
 
-        static Array<u32> charSet{};
-        charSet.Resize(1);
-        charSet[0] = charCode;
-
         // Find the closest matching font size
 
-        for (int i = 0; i < gFontSizes.GetSize(); ++i)
-        {
-	        if (gFontSizes[i] == fontSize || 
-                (i == 0 && fontSize <= gFontSizes[i]) || 
-                (i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
-	        {
-                fontSizeInAtlas = gFontSizes[i];
-                break;
-	        }
+	    {
+            ZoneNamedN(__fontSizes, "_FontSizeLoop", true);
 
-            if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
-            {
-                int splitSize = Math::RoundToInt((gFontSizes[i] + gFontSizes[i + 1]) * 0.2f);
-                if (fontSize <= splitSize)
-                    fontSizeInAtlas = gFontSizes[i];
-                else
-                    fontSizeInAtlas = gFontSizes[i + 1];
-                break;
-            }
-        }
+		    for (int i = 0; i < gFontSizes.GetSize(); ++i)
+		    {
+		    	if (gFontSizes[i] == fontSize || 
+					(i == 0 && fontSize <= gFontSizes[i]) || 
+					(i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
+		    	{
+		    		fontSizeInAtlas = gFontSizes[i];
+		    		break;
+		    	}
 
-        if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
-        {
-            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
-        }
+		    	if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
+		    	{
+		    		int splitSize = Math::RoundToInt((gFontSizes[i] + gFontSizes[i + 1]) * 0.2f);
+		    		if (fontSize <= splitSize)
+		    			fontSizeInAtlas = gFontSizes[i];
+		    		else
+		    			fontSizeInAtlas = gFontSizes[i + 1];
+		    		break;
+		    	}
+		    }
+	    }
+        
+	    {
+            ZoneNamedN(__hashMaps, "_HashMaps", true);
 
-        int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
-        Ptr<FAtlasImage> atlasMip = atlasImageMips[mipIndex];
+		    if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
+		    {
+		    	static Array<u32> charSet{};
+		    	charSet.Resize(1);
+		    	charSet[0] = charCode;
+		    	AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
+		    }
 
-        if (!atlasMip->glyphsByFontSize[fontSizeInAtlas].KeyExists(charCode))
-        {
-            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
-        }
+        	int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
+        	Ptr<FAtlasImage> atlasMip = atlasImageMips[mipIndex];
 
-        return atlasMip->glyphsByFontSize[fontSizeInAtlas][charCode];
+        	auto& glyphsByFontSize = atlasMip->glyphsByFontSize[fontSizeInAtlas];
+
+        	if (!glyphsByFontSize.KeyExists(charCode))
+        	{
+        		static Array<u32> charSet{};
+        		charSet.Resize(1);
+        		charSet[0] = charCode;
+        		AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
+        	}
+
+        	return glyphsByFontSize[charCode];
+	    }
     }
 
     void FFontAtlas::Flush(u32 imageIndex)

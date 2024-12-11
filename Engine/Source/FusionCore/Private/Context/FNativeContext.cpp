@@ -185,7 +185,6 @@ namespace CE
 
 			if (swapChain)
 			{
-				CE_LOG(Info, All, "Rebuild: {} | {}", newSize / GetScaling(), availableSize);
 				swapChain->Rebuild();
 			}
 		}
