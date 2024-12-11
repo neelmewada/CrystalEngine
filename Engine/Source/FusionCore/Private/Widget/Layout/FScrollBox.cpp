@@ -378,7 +378,7 @@ namespace CE
         if (event->IsDragEvent())
         {
             FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
-            Vec2 mouseDelta = dragEvent->mousePosition - dragEvent->prevMousePosition;
+            Vec2 mouseDelta = (dragEvent->mousePosition - dragEvent->prevMousePosition) * FusionApplication::Get()->GetDefaultScalingFactor();
 
             if (dragEvent->type == FEventType::DragMove)
             {

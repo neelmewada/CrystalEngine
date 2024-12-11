@@ -415,8 +415,8 @@ void EditorLoop::AppInit()
 	Vec2i screenSize = app->GetMainScreenSize();
 	if (screenSize.x > 2560 && screenSize.y > 1440)
 	{
-		gDefaultWindowWidth = 2560;
-		gDefaultWindowHeight = 1440;
+		gDefaultWindowWidth = 2560 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowHeight = 1440 * FusionApplication::Get()->GetDefaultScalingFactor();
 	}
 
 	PlatformWindowInfo windowInfo{};
