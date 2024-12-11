@@ -56,6 +56,7 @@ namespace CE::Editor
                         .ContentHAlign(HAlign::Fill)
                         .VAlign(VAlign::Top)
                         .HAlign(HAlign::Fill)
+                        .Name("ProjectSettingsContentStack")
                     )
                 )
                 .HAlign(HAlign::Fill)

@@ -250,12 +250,9 @@ namespace CE
 		if (event->IsMouseEvent())
 		{
 			FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-			
-			Vec2 localMousePos = Matrix4x4::Translation(computedSize * m_Anchor) *
-				Matrix4x4::Angle(-m_Angle) *
-				Matrix4x4::Scale(Vec2(1 / m_Scale.x, 1 / m_Scale.y)) *
-				Matrix4x4::Translation(-globalPosition - m_Translation - computedSize * m_Anchor) *
-				Vec4(mouseEvent->mousePosition.x, mouseEvent->mousePosition.y, 0, 1);
+
+			Vec2 localMousePos = mouseEvent->mousePosition;
+			localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
 			if (draggedSplitIndex == -1 && 
 				(mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseLeave))
