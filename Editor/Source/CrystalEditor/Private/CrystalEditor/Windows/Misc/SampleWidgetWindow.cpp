@@ -153,6 +153,7 @@ namespace CE::Editor
                 .HorizontalScroll(true)
                 .FillRatio(1.0f)
                 .Angle(5)
+                .Scale(Vec2(1, 1) * 0.75f)
                 .Name("TestScrollBox")
                 (
                     FNew(FVerticalStack)
