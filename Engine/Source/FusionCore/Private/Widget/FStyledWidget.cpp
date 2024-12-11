@@ -8,6 +8,7 @@ namespace CE
         m_BackgroundShape = FRectangle();
         m_Opacity = 1.0f;
         m_ClipShape = FShapeType::None;
+        m_BorderStyle = FPenStyle::SolidLine;
     }
 
     void FStyledWidget::CalculateIntrinsicSize()
@@ -37,7 +38,7 @@ namespace CE
 
             if (m_BorderWidth > 0 && m_BorderColor.a > 0)
             {
-                painter->SetPen(FPen(m_BorderColor, m_BorderWidth));
+                painter->SetPen(FPen(m_BorderColor, m_BorderWidth, m_BorderStyle));
             }
             else
             {

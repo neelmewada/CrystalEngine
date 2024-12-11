@@ -858,7 +858,122 @@ namespace CE
 
         // TODO: Implement dotted and dashed lines
 
-        AddPolyLine(path.GetData(), (int)path.GetCount(), currentPen.GetThickness(), closed, antiAliased);
+        f32 thickness = currentPen.GetThickness();
+
+        switch (currentPen.GetStyle())
+        {
+        case FPenStyle::None:
+	        break;
+        case FPenStyle::SolidLine:
+            AddPolyLine(path.GetData(), (int)path.GetCount(), thickness, closed, antiAliased);
+	        break;
+        case FPenStyle::DashedLine:
+	        {
+		        const f32 dashLength = currentPen.GetDashLength();
+                const f32 dashSeparation = dashLength / 2;
+                f32 distanceWithoutPainting = dashLength + 1;
+
+                for (int i = 0; i < path.GetCount(); ++i)
+                {
+                    Vec2 p0 = path[i];
+                    if (!closed && i == (int)path.GetCount() - 1)
+                        break;
+                    Vec2 p1 = path[(i + 1) % path.GetCount()];
+
+                    if (Vec2::SqrDistance(p0, p1) > dashLength * dashLength)
+                    {
+                        // Split the line segment into individual dotted and non-dotted segments
+                        int numSegments = (int)(Vec2::Distance(p0, p1) / dashLength);
+
+                        for (int j = 0; j < numSegments; ++j)
+                        {
+                            if (j % 2 != 0) // Skip odd segments
+                                continue;
+
+                            distanceWithoutPainting = 0;
+
+                            f32 curStep = (f32)j / numSegments;
+                            f32 nextStep = (f32)(j + 1) / numSegments;
+                            Vec2 curPoint = p0 + (p1 - p0) * curStep;
+                            Vec2 nextPoint = p0 + (p1 - p0) * nextStep;
+
+                            Vec2 points[2] = { curPoint, nextPoint };
+
+                            AddPolyLine(points, 2, thickness, false, antiAliased);
+                        }
+                    }
+                    else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
+                    {
+                        if (distanceWithoutPainting >= dashLength)
+                        {
+                            Vec2 points[2] = { p0, p1 };
+
+                            AddPolyLine(points, 2, thickness, false, antiAliased);
+
+                            distanceWithoutPainting = 0;
+                        }
+                        else
+                        {
+                            distanceWithoutPainting += Vec2::Distance(p0, p1);
+                        }
+                    }
+                }
+	        }
+	        break;
+        case FPenStyle::DottedLine:
+	        {
+		        constexpr f32 dottedLength = 1;
+                f32 distanceWithoutPainting = dottedLength + 1;
+
+				for (int i = 0; i < path.GetCount(); ++i)
+				{
+                    Vec2 p0 = path[i];
+                    if (!closed && i == (int)path.GetCount() - 1)
+                        break;
+                    Vec2 p1 = path[(i + 1) % path.GetCount()];
+
+                    if (Vec2::SqrDistance(p0, p1) > dottedLength * dottedLength)
+                    {
+                        f32 dist = Vec2::Distance(p0, p1);
+                        // Split the line segment into individual dotted and non-dotted segments
+                        int numSegments = (int)(dist / dottedLength);
+
+                        for (int j = 0; j < numSegments; ++j)
+                        {
+                            if (j % 2 != 0) // Skip odd segments
+                                continue;
+
+                            distanceWithoutPainting = 0;
+
+                            f32 curStep = (f32)j / numSegments;
+                            f32 nextStep = (f32)(j + 1) / numSegments;
+                            Vec2 curPoint = p0 + (p1 - p0) * curStep;
+                            Vec2 nextPoint = p0 + (p1 - p0) * nextStep;
+
+                            Vec2 points[2] = { curPoint, nextPoint };
+
+                            AddPolyLine(points, 2, thickness, false, antiAliased);
+                        }
+                    }
+                    else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
+                    {
+                        if (distanceWithoutPainting >= dottedLength)
+                        {
+                            Vec2 points[2] = { p0, p1 };
+
+                            AddPolyLine(points, 2, thickness, false, antiAliased);
+
+                            distanceWithoutPainting = 0;
+                        }
+                        else
+                        {
+                            distanceWithoutPainting += Vec2::Distance(p0, p1);
+                        }
+                    }
+				}
+	        }
+	        break;
+        }
 
         PathClear();
 
@@ -1068,7 +1183,6 @@ namespace CE
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
-
             
             if (isFixedWidth && (curPos.x + glyphWidth > width) && wordWrap != FWordWrap::NoWrap)
             {
@@ -1123,8 +1237,109 @@ namespace CE
         return finalSize;
     }
 
+    void FusionRenderer2::CalculateUnderlinePositions(Array<Rect>& outLines, const String& text, const FFont& font, f32 width,
+	    FWordWrap wordWrap)
+    {
+        ZoneScoped;
+
+        if (text.IsEmpty())
+            return;
+
+        outLines.Clear();
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = font.GetFamily();
+        int fontSize = font.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = fontManager->GetDefaultFontSize();
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        fontSize = Math::Max(fontSize, 6);
+
+        const bool isFixedWidth = width > 0.1f;
+
+        FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return;
+
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+
+        const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        constexpr float startX = 0;
+
+        float maxX = startX;
+        float maxY = startY;
+
+        Vec3 curPos = Vec3(startX, startY, 0);
+
+        int totalCharacters = 0;
+        int breakCharIdx = -1;
+        int idx = 0;
+
+        bool newLine = true;
+        Rect curRect;
+
+        for (int i = 0; i < text.GetLength(); ++i)
+        {
+            char c = text[i];
+
+            if (c == ' ' || c == '-' || c == '\\' || c == '/')
+            {
+                breakCharIdx = i;
+            }
+
+            if (c == '\n')
+            {
+                breakCharIdx = -1;
+                if (!newLine)
+                {
+                    outLines.Add(curRect);
+                }
+                newLine = true;
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+                curRect.min = curPos;
+                continue;
+            }
+
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            if (newLine)
+            {
+                newLine = false;
+                curRect.min = curPos;
+            }
+
+            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            curRect.max.x = curPos.x;
+            curRect.max.y = curRect.min.y;
+
+            maxX = Math::Max(curPos.x, maxX);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);
+
+            totalCharacters++;
+        }
+
+        if (!newLine && text.NotEmpty())
+        {
+            outLines.Add(curRect);
+        }
+    }
+
     Vec2 FusionRenderer2::CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font,
-        f32 width, FWordWrap wordWrap)
+                                                    f32 width, FWordWrap wordWrap)
     {
         ZoneScoped;
 

@@ -55,46 +55,19 @@ namespace CE
             FFontMetrics metrics = painter->GetFontMetrics(m_Font);
             f32 lineHeight = metrics.lineHeight * (f32)m_Font.GetFontSize();
 
-        	painter->CalculateTextQuads(charRects, m_Text, m_Font, computedSize.width, m_WordWrap);
+        	painter->GetRenderer()->CalculateUnderlinePositions(underlineRects, m_Text, m_Font, computedSize.width, m_WordWrap);
 
             f32 startX = 0;
             f32 curX = NumericLimits<f32>::Min();
             f32 curY = 0;
             int curLine = 0;
 
-            for (int i = 0; i < charRects.GetSize(); ++i)
+            for (int i = 0; i < underlineRects.GetSize(); ++i)
             {
-	            if (i == 0 || startX < -1000)
-	            {
-                    startX = charRects[0].min.x;
+                underlineRects[i] = underlineRects[i].Translate(Vec2(0, m_Underline.GetThickness()));
 
-                    curX = charRects[0].max.x;
-                    curY = charRects[0].min.y;
-	            }
-                else
-                {
-	                if (charRects[i].max.x < curX || i == (int)charRects.GetSize() - 1) // New line OR EOL
-	                {
-                        if (i == (int)charRects.GetSize() - 1)
-                        {
-                            curX = charRects[i].max.x;
-                            curY = charRects[i].min.y;
-                        }
-
-                        painter->SetPen(m_Underline);
-                        painter->DrawLine(computedPosition + Vec2(startX, curY + 1),
-                            computedPosition + Vec2(curX, curY + 1));
-
-                        startX = charRects[i].min.x;
-                        curX = charRects[i].max.x;
-                        curY = charRects[i].min.y;
-	                }
-                    else
-                    {
-                        curX = charRects[i].max.x;
-                        curY = charRects[i].min.y;
-                    }
-                }
+                painter->SetPen(m_Underline);
+                painter->DrawLine(underlineRects[i].min, underlineRects[i].max);
             }
         }
     }

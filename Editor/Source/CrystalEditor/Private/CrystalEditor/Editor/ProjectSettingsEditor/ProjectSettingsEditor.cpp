@@ -21,6 +21,9 @@ namespace CE::Editor
         ToolBarEnabled(true);
         MenuBarEnabled(false);
 
+        FPen underline = FPen(Color::White(), 1, FPenStyle::DottedLine);
+        underline.SetDashLength(5);
+
         Content(
             FNew(FSplitBox)
             .Direction(FSplitDirection::Horizontal)
@@ -70,7 +73,7 @@ namespace CE::Editor
             FNew(FTextButton)
             .Text("All Settings")
             .FontSize(14)
-            .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+            .Underline(underline)
             .Cursor(SystemCursor::Hand)
             .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
             .ClipChildren(true)
@@ -87,7 +90,7 @@ namespace CE::Editor
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
                 .FontSize(14)
-                .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+                .Underline(underline)
                 .Cursor(SystemCursor::Hand)
                 .OnClicked([this, index]
                 {

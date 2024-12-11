@@ -48,6 +48,7 @@ namespace CE
 
         FUSION_PROPERTY(Color, BorderColor);
         FUSION_PROPERTY(f32, BorderWidth);
+        FUSION_PROPERTY(FPenStyle, BorderStyle);
 
         Self& Border(const Color& borderColor, f32 borderWidth = 1.0f)
         {
