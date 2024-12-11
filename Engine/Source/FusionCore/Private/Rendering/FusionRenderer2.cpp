@@ -1034,6 +1034,11 @@ namespace CE
 
     Vec2 FusionRenderer2::DrawText(const String& text, Vec2 textPos, Vec2 size, FWordWrap wordWrap)
     {
+        if (text == "Mobility")
+        {
+            String::IsAlphabet('a');
+        }
+
         thread_local Array<Rect> quads{};
         const bool isFixedSize = !Math::ApproxEquals(size.x, 0) && !Math::ApproxEquals(size.y, 0);
 
@@ -1184,8 +1189,9 @@ namespace CE
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphAdvance = (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             
-            if (isFixedWidth && (curPos.x + glyphWidth > width) && wordWrap != FWordWrap::NoWrap)
+            if (isFixedWidth && (curPos.x + glyphAdvance > width + 0.1f) && wordWrap != FWordWrap::NoWrap)
             {
                 curPos.x = startX;
                 curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
@@ -1223,7 +1229,7 @@ namespace CE
                 curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 glyphWidth, glyphHeight);
 
-            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            curPos.x += glyphAdvance;
 
             maxX = Math::Max(curPos.x, maxX);
             maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);

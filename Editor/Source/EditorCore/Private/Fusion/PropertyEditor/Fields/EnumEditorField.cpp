@@ -15,7 +15,7 @@ namespace CE::Editor
         Child(
             FAssignNew(FComboBox, comboBox)
             .OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged))
-            .FontSize(13)
+            .FontSize(10)
             .HAlign(HAlign::Left)
             .Width(100)
         );
