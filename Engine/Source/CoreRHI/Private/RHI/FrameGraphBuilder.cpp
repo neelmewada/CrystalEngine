@@ -255,6 +255,8 @@ namespace CE::RHI
 
     bool FrameGraphBuilder::EndFrameGraph()
     {
+		ZoneScoped;
+
 		return frameGraph->Build();
     }
 

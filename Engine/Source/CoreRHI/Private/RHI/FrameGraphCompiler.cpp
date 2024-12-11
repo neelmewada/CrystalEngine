@@ -5,6 +5,8 @@ namespace CE::RHI
 
 	void FrameGraphCompiler::Compile(const FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		// 1. Compile scope
 		CompileScopes(compileRequest);
 
@@ -17,11 +19,15 @@ namespace CE::RHI
 
 	void FrameGraphCompiler::CompileScopes(const FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		CompileScopesInternal(compileRequest);
 	}
 
 	void FrameGraphCompiler::CompileTransientAttachments(const FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		TransientMemoryPool* pool = compileRequest.transientPool;
 

@@ -57,6 +57,8 @@ namespace CE::Vulkan
 
 	void SwapChain::RebuildSwapChain()
 	{
+		ZoneScoped;
+
 		window->GetDrawableWindowSize(&width, &height);
 
 		if (preferredWidth != 0 && preferredHeight != 0)
@@ -79,6 +81,8 @@ namespace CE::Vulkan
 
 	void SwapChain::Create()
 	{
+		ZoneScoped;
+
 		auto oldSwapChain = swapChain;
 		auto gpu = device->GetPhysicalHandle();
 

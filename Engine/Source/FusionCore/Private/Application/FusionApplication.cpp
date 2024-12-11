@@ -349,49 +349,6 @@ namespace CE
         {
             rootContext->Tick();
         }
-
-        return;
-
-        int submittedFrameIdx = -1;
-
-        if (rebuildFrameGraph)
-        {
-            rebuildFrameGraph = false;
-            recompileFrameGraph = true;
-
-            BuildFrameGraph();
-            submittedFrameIdx = curImageIndex;
-        }
-
-        if (recompileFrameGraph)
-        {
-            recompileFrameGraph = false;
-
-            CompileFrameGraph();
-        }
-
-        if (rootContext)
-        {
-            rootContext->Tick();
-        }
-
-        auto scheduler = FrameScheduler::Get();
-
-        int imageIndex = scheduler->BeginExecution();
-
-        if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
-        {
-            rebuildFrameGraph = recompileFrameGraph = true;
-            return;
-        }
-
-        curImageIndex = imageIndex;
-        
-        RPISystem::Get().SimulationTick(curImageIndex);
-
-        PrepareDrawList();
-
-        scheduler->EndExecution();
     }
 
     void FusionApplication::EmplaceFrameAttachments()

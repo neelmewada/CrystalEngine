@@ -63,6 +63,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileScopesInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		//vkDeviceWaitIdle(device->GetHandle());
 
 		// Queue allocation logic...
@@ -124,6 +126,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		vkDeviceWaitIdle(device->GetHandle());

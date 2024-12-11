@@ -15,6 +15,8 @@ namespace CE::Vulkan
 
 	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
 	{
+		ZoneScoped;
+
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
@@ -96,6 +98,8 @@ namespace CE::Vulkan
 
 	void FrameGraphExecuter::WaitUntilIdle()
 	{
+		ZoneScoped;
+
 		vkDeviceWaitIdle(device->GetHandle());
 		return;
 
@@ -112,6 +116,8 @@ namespace CE::Vulkan
 
 	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
+		ZoneScoped;
+
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
@@ -179,6 +185,8 @@ namespace CE::Vulkan
 
 	void FrameGraphExecuter::EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 
 		HashSet<RHI::ScopeId> executedScopes{};
@@ -199,6 +207,8 @@ namespace CE::Vulkan
 	{
 		if (!scope)
 			return false;
+
+		ZoneScoped;
 
 		for (auto rhiProducer : scope->producers)
 		{

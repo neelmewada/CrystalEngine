@@ -179,12 +179,13 @@ namespace CE
 
 		const Vec2 newSize = platformWindow->GetDrawableWindowSize().ToVec2();
 
-		if (newSize / GetScaling() != availableSize || childContexts.IsEmpty())
+		if (newSize / GetScaling() != availableSize)
 		{
 			availableSize = newSize / GetScaling();
 
 			if (swapChain)
 			{
+				CE_LOG(Info, All, "Rebuild: {} | {}", newSize / GetScaling(), availableSize);
 				swapChain->Rebuild();
 			}
 		}

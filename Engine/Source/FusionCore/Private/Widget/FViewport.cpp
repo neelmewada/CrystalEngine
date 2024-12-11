@@ -82,6 +82,8 @@ namespace CE
 
     void FViewport::RecreateFrameBuffer()
     {
+        ZoneScoped;
+
         if (currentSize.x <= 0 || currentSize.y <= 0)
         {
             currentSize = Vec2i(512, 512);

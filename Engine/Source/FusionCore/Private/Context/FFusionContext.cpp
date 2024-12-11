@@ -442,6 +442,8 @@ namespace CE
 
 	void FFusionContext::EmplaceFrameAttachments()
 	{
+		ZoneScoped;
+
 		for (FFusionContext* childContext : childContexts)
 		{
 			childContext->EmplaceFrameAttachments();
@@ -495,6 +497,8 @@ namespace CE
 
 	void FFusionContext::NotifyWindowEvent(FEventType eventType, FNativeContext* nativeContext)
 	{
+		ZoneScoped;
+
 		if (!owningWidget)
 			return;
 

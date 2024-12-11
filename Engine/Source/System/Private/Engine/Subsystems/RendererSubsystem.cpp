@@ -56,7 +56,7 @@ namespace CE
 
 	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
 	{
-		rebuildFrameGraph = recompileFrameGraph = true;
+		//rebuildFrameGraph = recompileFrameGraph = true;
 	}
 
     void RendererSubsystem::Initialize()
@@ -324,6 +324,8 @@ namespace CE
 
 	void RendererSubsystem::BuildFrameGraph()
 	{
+		ZoneScoped;
+
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
 
@@ -424,6 +426,8 @@ namespace CE
 
 	void RendererSubsystem::CompileFrameGraph()
 	{
+		ZoneScoped;
+
 		recompileFrameGraph = false;
 
 		scheduler->Compile();
