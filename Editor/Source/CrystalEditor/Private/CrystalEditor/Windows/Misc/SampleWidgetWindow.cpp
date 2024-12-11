@@ -152,43 +152,45 @@ namespace CE::Editor
                 .VerticalScroll(true)
                 .HorizontalScroll(true)
                 .FillRatio(1.0f)
-                .Angle(0)
+                .Angle(5)
                 .Name("TestScrollBox")
                 (
                     FNew(FVerticalStack)
+                    .ContentHAlign(HAlign::Left)
                     .VAlign(VAlign::Top)
                     .HAlign(HAlign::Left)
                     (
                         FNew(FLabel)
-                        .Text("The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                        //.Text("0. The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                        .Text("0. The quick brown fox jumps.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
+                        .Text("1. Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
+                        .Text("2. The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
+                        .Text("3. With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                        .Text("4. The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
+                        .Text("5. Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
+                        .Text("6, The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
                         .FontSize(16),
 
                         FNew(FLabel)
-                        .Text("With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
+                        .Text("7. With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
                         .FontSize(16)
                     )
                 )

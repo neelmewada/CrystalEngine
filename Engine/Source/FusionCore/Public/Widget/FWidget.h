@@ -193,6 +193,8 @@ namespace CE
 
         Matrix4x4 mouseTransform;
 
+        Matrix4x4 globalTransform;
+
         FIELD()
         CE::Name styleKey;
 

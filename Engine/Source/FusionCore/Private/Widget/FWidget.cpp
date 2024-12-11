@@ -32,15 +32,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (IsOfType<FComboBox>())
-        {
-            String::IsAlphabet('a');
-        }
-
-        //globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
         globalPosition = painter->GetTopCoordinateSpace() * Vec4(0, 0, 0, 1);
-
-        String::IsAlphabet('a');
     }
 
     void FWidget::HandleEvent(FEvent* event)
@@ -108,6 +100,15 @@ namespace CE
                 Matrix4x4::Angle(-m_Angle) *
                 Matrix4x4::Scale(invScale) *
                 Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor);
+        }
+
+        if (parent != nullptr)
+        {
+            globalTransform = parent->globalTransform * localTransform;
+        }
+        else
+        {
+            globalTransform = localTransform;
         }
     }
 

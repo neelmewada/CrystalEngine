@@ -281,14 +281,21 @@ namespace CE
             FMouseEvent* mouseEvent = (FMouseEvent*)event;
             Vec2 localMousePos = mouseEvent->mousePosition;
             if (parent)
-                localMousePos -= parent->globalPosition;
+            {
+	            //localMousePos -= parent->globalPosition;
+                localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+            }
 
             bool isVScroll = false;
             bool isHScroll = false;
 
             if (isVerticalScrollVisible)
             {
-                Rect scrollBar = GetVerticalScrollBarRect();
+                f32 scrollBarHeight = computedSize.y * (computedSize.y / child->computedSize.y);
+                f32 normalizedScrollY = NormalizedScrollY();
+                Vec2 barPos = Vec2(computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, normalizedScrollY * (computedSize.y - scrollBarHeight));
+
+                Rect scrollBar = Rect::FromSize(barPos, Vec2(m_ScrollBarWidth, scrollBarHeight));
 
                 if (scrollBar.Contains(localMousePos))
                 {
@@ -298,7 +305,20 @@ namespace CE
 
             if (isHorizontalScrollVisible)
             {
-                Rect scrollBar = GetHorizontalScrollBarRect();
+                f32 endOffset = 0;
+                if (isVerticalScrollVisible)
+                {
+                    endOffset = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
+                }
+
+                f32 computedSizeX = computedSize.x - endOffset;
+
+                f32 scrollBarSize = computedSizeX * computedSizeX / child->computedSize.x;
+                f32 normalizedScrollX = NormalizedScrollX();
+                Vec2 barPos = Vec2(normalizedScrollX * (computedSizeX - scrollBarSize), 
+                    computedSize.y - m_ScrollBarMargin - m_ScrollBarWidth);
+
+                Rect scrollBar = Rect::FromSize(barPos, Vec2(scrollBarSize, m_ScrollBarWidth));
 
                 if (scrollBar.Contains(localMousePos))
                 {
@@ -476,9 +496,11 @@ namespace CE
             f32 scrollBarHeight = computedSize.y / child->computedSize.y;
             scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
             
-            Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+            Vec2 barSize = Vec2(m_ScrollBarWidth, computedSize.y);
+            Rect barRegion = Rect::FromSize(Vec2(computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, 
+                0), barSize);
 
-            if (Rect::FromSize(Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, computedPosition.y), barSize).Contains(transformedMousePos))
+            if (barRegion.Contains(transformedMousePos))
             {
                 return this;
             }

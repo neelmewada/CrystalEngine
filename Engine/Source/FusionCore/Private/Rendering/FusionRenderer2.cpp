@@ -289,12 +289,13 @@ namespace CE
             ZoneScoped;
 
             // CPU culling
-            Vec2 pos = rect.min;
-            Vec2 size = rect.GetSize();
-
-            Vec2 globalPos = coordinateSpaceStack.Last().transform *
+            
+            Vec2 globalTopLeft = coordinateSpaceStack.Last().transform *
                 Matrix4x4::Translation(coordinateSpaceStack.Last().translation) *
-                Vec4(pos.x, pos.y, 0, 1);
+                Vec4(rect.min.x, rect.min.y, 0, 1);
+            Vec2 globalBottomRight = coordinateSpaceStack.Last().transform *
+                Matrix4x4::Translation(coordinateSpaceStack.Last().translation) *
+                Vec4(rect.max.x, rect.max.y, 0, 1);
 
             for (int i = clipStack.GetCount() - 1; i >= 0; --i)
             {
@@ -303,7 +304,7 @@ namespace CE
                 Matrix4x4 clipTransform = clipRectArray[clipIndex].clipTransform.GetInverse();
                 Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
 
-                Rect shapeRect = Rect::FromSize(globalPos, size);
+                Rect shapeRect = Rect(globalTopLeft, globalBottomRight);
                 Rect clipRect = Rect::FromSize(clipPos, clipRectArray[clipIndex].size);
 
                 if (!shapeRect.Overlaps(clipRect))
