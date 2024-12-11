@@ -63,6 +63,10 @@ namespace CE
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 
+        // - Model -
+
+        MODEL_PROPERTY(Array<String>, Pages);
+
     private:
 
         void OnBeginDestroy() override;

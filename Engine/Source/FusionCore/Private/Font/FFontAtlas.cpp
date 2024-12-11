@@ -47,6 +47,10 @@ namespace CE
 
         atlasImageMips.Add(atlas);
 
+        Array<String> pages = GetPages();
+        pages.Add(String::Format("Page {}", pages.GetSize()));
+        SetPages(pages);
+
         AddGlyphs(charSet, DefaultFontSize);
 
         Array<CMImage> images;
@@ -301,6 +305,10 @@ namespace CE
                 atlasMip->atlasSize = (u32)atlasSize;
 
                 atlasImageMips.Add(atlasMip);
+
+                Array<String> pages = GetPages();
+                pages.Add(String::Format("Page {}", pages.GetSize()));
+                SetPages(pages);
                 
                 foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
             }

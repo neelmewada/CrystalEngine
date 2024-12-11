@@ -13,17 +13,20 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        const CE::Name gridSmall = "/Engine/Resources/Images/GridSmall";
+        FFontManager* fontManager = FusionApplication::Get()->GetFontManager();
+        Array<String> fontNames{};
+        Array<WeakRef<FFontAtlas>> fontAtlases;
 
-        FBrush defaultImage = FBrush("__FontAtlas_Roboto_0");
+        fontManager->IterateFontAtlases([&](FFontAtlas* fontAtlas)
+            {
+                fontNames.Add(fontAtlas->GetName().GetString());
+                fontAtlases.Add(fontAtlas);
+            });
+
+        FBrush defaultImage = FBrush(String::Format("__FontAtlas_{}_0", fontNames[0]));
         defaultImage.SetBrushTiling(FBrushTiling::None);
         defaultImage.SetImageFit(FImageFit::Contain);
         defaultImage.SetBrushPosition(Vec2(0, 0));
-
-        FBrush gridBg = FBrush(gridSmall);
-        gridBg.SetBrushSize(Vec2(16, 16));
-        gridBg.SetBrushTiling(FBrushTiling::TileXY);
-        gridBg.SetImageFit(FImageFit::Fill);
 
         (*this)
             .Title("Fusion Font Atlas")
@@ -33,17 +36,47 @@ namespace CE::Editor
 			.ContentGap(10)
             .Content(
                 FNew(FHorizontalStack)
+                .Gap(15)
                 .ContentHAlign(HAlign::Left)
                 .ContentVAlign(VAlign::Center)
                 .Height(35)
                 .HAlign(HAlign::Fill)
                 (
-                    FAssignNew(FComboBox, comboBox)
-                    .OnSelectionChanged([this](FComboBox*)
+                    FAssignNew(FComboBox, fontComboBox)
+                    .Items(fontNames)
+                    .OnSelectionChanged([this, fontNames, fontAtlases](FComboBox*)
                     {
-                        int selectionIndex = comboBox->GetSelectedItemIndex();
+                        int selectionIndex = fontComboBox->GetSelectedItemIndex();
 
+                        FBrush image = FBrush(String::Format("__FontAtlas_{}_0", fontNames[selectionIndex]));
+                        image.SetBrushTiling(FBrushTiling::None);
+                        image.SetImageFit(FImageFit::Contain);
+                        image.SetBrushPosition(Vec2(0, 0));
 
+                        if (auto selectedAtlas = fontAtlases[selectionIndex].Lock())
+                        {
+                            fontPageComboBox->Items(selectedAtlas->GetPages());
+                        }
+
+                        fontPageComboBox->SelectItem(0);
+
+                        atlasViewport->Background(image);
+                    })
+                    .Width(60),
+
+                    FAssignNew(FComboBox, fontPageComboBox)
+                    .Items(fontAtlases[0]->GetPages())
+                    .OnSelectionChanged([this, fontNames, fontAtlases](FComboBox*)
+                    {
+                        int fontIndex = fontComboBox->GetSelectedItemIndex();
+                        int page = fontPageComboBox->GetSelectedItemIndex();
+
+                        FBrush image = FBrush(String::Format("__FontAtlas_{}_{}", fontNames[fontIndex], page));
+                        image.SetBrushTiling(FBrushTiling::None);
+                        image.SetImageFit(FImageFit::Contain);
+                        image.SetBrushPosition(Vec2(0, 0));
+
+                        atlasViewport->Background(image);
                     })
                     .Width(60)
                 ),
@@ -54,7 +87,7 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 (
                     FAssignNew(FStyledWidget, background)
-                    .Background(gridBg)
+                    .Background(Color::Black())
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill),
 
@@ -65,7 +98,8 @@ namespace CE::Editor
                 )
             );
 
-        comboBox->SelectItem(0);
+        fontComboBox->SelectItem(0);
+        fontPageComboBox->SelectItem(0);
     }
 
     void FusionFontAtlasWindow::OnPostComputeLayout()

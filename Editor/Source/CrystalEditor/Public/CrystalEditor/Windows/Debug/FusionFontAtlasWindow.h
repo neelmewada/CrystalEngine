@@ -22,7 +22,8 @@ namespace CE::Editor
 
         void OnPaint(FPainter* painter) override;
 
-        FComboBox* comboBox = nullptr;
+        FComboBox* fontComboBox = nullptr;
+        FComboBox* fontPageComboBox = nullptr;
         FStyledWidget* background = nullptr;
         FStyledWidget* atlasViewport = nullptr;
 
