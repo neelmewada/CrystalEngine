@@ -13,6 +13,9 @@ namespace CE
 
     void MacSDLApplication::Initialize()
     {
+        [[NSUserDefaults standardUserDefaults] setBool: YES
+            forKey: @"AppleMomentumScrollSupported"];
+
         Super::Initialize();
 
     }

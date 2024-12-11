@@ -81,7 +81,7 @@ namespace CE::Editor
     {
         editorContainer->RemoveChildWidget();
 
-        if (editor)
+        if (editor.IsValid())
         {
             editor->BeginDestroy();
             editor = nullptr;

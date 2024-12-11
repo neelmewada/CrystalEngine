@@ -27,7 +27,7 @@ namespace CE::Editor
         FLabel* emptyLabel = nullptr;
         FCompoundWidget* detailsContainer = nullptr;
         FStyledWidget* editorContainer = nullptr;
-        ObjectEditor* editor = nullptr;
+        Ref<ObjectEditor> editor = nullptr;
 
         FLabel* actorName = nullptr;
         ComponentTreeView* treeView = nullptr;

@@ -22,25 +22,24 @@ namespace CE
         if (children.IsEmpty() || !Enabled())
             return;
 
-        painter->PushChildCoordinateSpace(localTransform);
-        //if (m_ClipChildren)
-        {
-            //painter->PushClipShape(Matrix4x4::Identity(), computedSize);
-        }
-
         for (FTreeViewRow* child : children)
         {
             if (!child->Enabled() || !child->Visible())
                 continue;
 
-            child->OnPaint(painter);
-        }
+            if (child->IsTranslationOnly())
+            {
+                painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+            }
+            else
+            {
+                painter->PushChildCoordinateSpace(child->GetLocalTransform());
+            }
 
-        //if (m_ClipChildren)
-        {
-            //painter->PopClipShape();
+            child->OnPaint(painter);
+
+            painter->PopChildCoordinateSpace();
         }
-        painter->PopChildCoordinateSpace();
     }
 
     void FTreeViewContainer::OnPostComputeLayout()
@@ -68,13 +67,6 @@ namespace CE
         if (children.IsEmpty())
             return thisHitTest;
 
-        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
-
-        // Vec2 transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
-        //     Matrix4x4::Angle(-m_Angle) *
-        //     Matrix4x4::Scale(invScale) *
-        //     Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor)) *
-        //     Vec4(localMousePos.x, localMousePos.y, 0, 1);
         Vec2 transformedMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         for (int i = children.GetCount() - 1; i >= 0; --i)
