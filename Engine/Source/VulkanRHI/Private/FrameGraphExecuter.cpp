@@ -169,6 +169,8 @@ namespace CE::Vulkan
 
 						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
 					}
+
+
 				}
 
 				if (result != VK_SUCCESS)

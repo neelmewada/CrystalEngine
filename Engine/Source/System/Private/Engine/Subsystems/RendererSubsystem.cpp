@@ -2,7 +2,6 @@
 
 namespace CE
 {
-	RHI::Buffer* vertexBuffer = nullptr;
 
     RendererSubsystem::RendererSubsystem()
     {
@@ -56,7 +55,15 @@ namespace CE
 
 	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
 	{
-		//rebuildFrameGraph = recompileFrameGraph = true;
+		auto id = window->GetWindowId();
+		Vec2i windowSize = window->GetWindowSize();
+
+		if (!windowSizesById.KeyExists(id) || windowSize != windowSizesById[id])
+		{
+			RebuildFrameGraph();
+		}
+
+		windowSizesById[id] = windowSize;
 	}
 
     void RendererSubsystem::Initialize()
