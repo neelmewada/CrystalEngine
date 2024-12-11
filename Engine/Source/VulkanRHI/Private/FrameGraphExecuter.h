@@ -29,8 +29,8 @@ namespace CE::Vulkan
 		FrameGraphCompiler* compiler = nullptr;
 
 		u32 currentSubmissionIndex = 0;
-		u32 currentImageIndex = 0;
-		Array<u32> currentImageIndices{};
+		//u32 currentImageIndex = 0;
+		//Array<u32> currentImageIndices{};
 
 		u64 totalFramesSubmitted = 0;
 	};

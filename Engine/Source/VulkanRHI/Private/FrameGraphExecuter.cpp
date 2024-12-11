@@ -28,7 +28,7 @@ namespace CE::Vulkan
 		const Array<RHI::Scope*>& producers = frameGraph->producers;
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
 		VkResult result = VK_SUCCESS;
-		currentImageIndices.Clear();
+		//currentImageIndices.Clear();
 
 		if (swapChainExists)
 		{
@@ -63,21 +63,21 @@ namespace CE::Vulkan
 				if (i == 0)
 				{
 					// TODO: Switch to using currentSubmissionIndex instead
-					currentImageIndex = swapChain->currentImageIndex;
+					//currentImageIndex = swapChain->currentImageIndex;
 				}
-				currentImageIndices.Add(swapChain->currentImageIndex);
+				//currentImageIndices.Add(swapChain->currentImageIndex);
 			}
 			
 			vkWaitForFences(device->GetHandle(),
-				compiler->graphExecutionFences[currentImageIndex].GetSize(),
-				compiler->graphExecutionFences[currentImageIndex].GetData(),
+				compiler->graphExecutionFences[currentSubmissionIndex].GetSize(),
+				compiler->graphExecutionFences[currentSubmissionIndex].GetData(),
 				VK_TRUE, u64Max);
 
 		}
 		else
 		{
-			currentImageIndex = currentSubmissionIndex;
-			currentImageIndices.Add(currentImageIndex);
+			//currentImageIndex = currentSubmissionIndex;
+			//currentImageIndices.Add(currentImageIndex);
 		}
 
 		bool success = true;
@@ -137,11 +137,12 @@ namespace CE::Vulkan
 
 			{
 				ZoneNamedN(__graphExecution, "_GraphExecutionFences", true);
-				ZoneValue(currentSubmissionIndex);
+				String val = String("Index: ") + currentSubmissionIndex;
+				ZoneText(val.GetCString(), val.GetLength());
 
 				vkWaitForFences(device->GetHandle(),
-				   compiler->graphExecutionFences[currentImageIndex].GetSize(),
-				   compiler->graphExecutionFences[currentImageIndex].GetData(),
+				   compiler->graphExecutionFences[currentSubmissionIndex].GetSize(),
+				   compiler->graphExecutionFences[currentSubmissionIndex].GetData(),
 				   VK_TRUE, u64Max);
 			}
 
@@ -158,8 +159,6 @@ namespace CE::Vulkan
 					   //compiler->imageAcquiredFences[currentSubmissionIndex][i],
 					   nullptr,
 					   &swapChain->currentImageIndex);
-
-					CE_LOG(Info, All, "SwapChain Image: {} |   {}", swapChain->currentImageIndex, currentSubmissionIndex);
 				}
 
 				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -176,21 +175,14 @@ namespace CE::Vulkan
 				{
 					return RHI::Limits::MaxSwapChainImageCount;
 				}
-
-				if (i == 0)
-				{
-					// TODO: Switch to using currentSubmissionIndex instead
-					currentImageIndex = swapChain->currentImageIndex;
-				}
-				currentImageIndices.Add(swapChain->currentImageIndex);
 			}
 		}
 		else
 		{
-			currentImageIndex = currentSubmissionIndex;
+			//currentImageIndex = currentSubmissionIndex;
 		}
 
-		return currentImageIndex;
+		return currentSubmissionIndex;
 	}
 
 	void FrameGraphExecuter::EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
@@ -233,12 +225,9 @@ namespace CE::Vulkan
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 		RHI::FrameScheduler* scheduler = executeRequest.scheduler;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
-		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 
 		bool presentRequired = false;
 		auto presentQueue = device->GetPresentQueue();
-		//bool isFirstSwapChainUse = false;
 
 		Array<RHI::SwapChain*> presentSwapChains = frameGraph->presentSwapChains;
 		
@@ -249,10 +238,10 @@ namespace CE::Vulkan
 
 		// Wait for rendering from earlier submission to finish.
 		// We cannot record new commands into a command buffer that is currently being executed.
-		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex], VK_TRUE, u64Max);
+		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentSubmissionIndex], VK_TRUE, u64Max);
 		
 		u32 familyIndex = scope->queue->GetFamilyIndex();
-		CommandList* commandList = scope->commandListsByFamilyIndexPerImage[currentImageIndex][familyIndex];
+		CommandList* commandList = scope->commandListsByFamilyIndexPerImage[currentSubmissionIndex][familyIndex];
 
 		Array<RHI::Scope*> consumers{};
 
@@ -274,7 +263,7 @@ namespace CE::Vulkan
 			scopeInChain = (Vulkan::Scope*)scopeInChain->next;
 		}
 
-		for (auto executedScopeId : executedScopes)
+		for (const auto& executedScopeId : executedScopes)
 		{
 			Vulkan::Scope* executedScope = (Vulkan::Scope*)frameGraph->scopesById[executedScopeId];
 			for (auto usedSwapChain : usedSwapChains)
@@ -307,7 +296,7 @@ namespace CE::Vulkan
 
 		commandList->Begin();
 		{
-			commandList->SetCurrentImageIndex(currentImageIndex);
+			commandList->SetCurrentImageIndex(currentSubmissionIndex);
 
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
@@ -364,9 +353,9 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (initial barriers)
-				if (currentScope->initialBarriers[currentImageIndex].NotEmpty())
+				if (currentScope->initialBarriers[currentSubmissionIndex].NotEmpty())
 				{
-					for (const auto& barrier : currentScope->initialBarriers[currentImageIndex])
+					for (const auto& barrier : currentScope->initialBarriers[currentSubmissionIndex])
 					{
 						vkCmdPipelineBarrier(cmdBuffer,
 							barrier.srcStageMask, barrier.dstStageMask,
@@ -408,7 +397,7 @@ namespace CE::Vulkan
 							RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
 							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
-							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
+							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
 							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
@@ -584,7 +573,7 @@ namespace CE::Vulkan
 						shouldNotExecuteAtAll = true;
 						break;
 					}
-					const auto& value = frameGraph->GetVariable(currentImageIndex, cond.variableName);
+					const auto& value = frameGraph->GetVariable(currentSubmissionIndex, cond.variableName);
 					bool result = cond.Compare(value);
 
 					if (!result)
@@ -609,7 +598,7 @@ namespace CE::Vulkan
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentImageIndex];
+					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentSubmissionIndex];
 					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();
@@ -721,7 +710,7 @@ namespace CE::Vulkan
 											!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
 											continue;
 
-										Vulkan::Texture* texture = (Vulkan::Texture*)scopeAttachment->GetFrameAttachment()->GetResource(currentImageIndex);
+										Vulkan::Texture* texture = (Vulkan::Texture*)scopeAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
 										if (texture == nullptr)
 											continue;
 
@@ -733,7 +722,7 @@ namespace CE::Vulkan
 
 								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
 								{
-									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
+									scheduler->SetFrameGraphVariable(currentSubmissionIndex, variableName, value);
 								}
 
 								commandList->ClearShaderResourceGroups();
@@ -749,7 +738,7 @@ namespace CE::Vulkan
 
 								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
 								{
-									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
+									scheduler->SetFrameGraphVariable(currentSubmissionIndex, variableName, value);
 								}
 
 								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionAllFrames)
@@ -800,9 +789,9 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (exit barriers)
-				if (currentScope->barriers[currentImageIndex].NotEmpty())
+				if (currentScope->barriers[currentSubmissionIndex].NotEmpty())
 				{
-					for (const auto& barrier : currentScope->barriers[currentImageIndex])
+					for (const auto& barrier : currentScope->barriers[currentSubmissionIndex])
 					{
 						vkCmdPipelineBarrier(cmdBuffer,
 							barrier.srcStageMask, barrier.dstStageMask,
@@ -871,7 +860,7 @@ namespace CE::Vulkan
 		commandList->End();
         
         // Manually reset (close) the fence. i.e. put it in unsignalled state
-        result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex]);
+        result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentSubmissionIndex]);
 
 		static List<VkSemaphore> waitSemaphores{};
 		static List<VkPipelineStageFlags> waitStages{};
@@ -883,16 +872,16 @@ namespace CE::Vulkan
 		
 		if (!swapChainsUsedAsAttachmentForFirstTime.IsEmpty()) // Frame graph uses a SwapChain image for first time
 		{
-			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + swapChainsUsedAsAttachmentForFirstTime.GetSize();
+			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentSubmissionIndex].GetSize() + swapChainsUsedAsAttachmentForFirstTime.GetSize();
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
 				waitSemaphores.Resize(submitInfo.waitSemaphoreCount);
 			if (waitStages.GetSize() < submitInfo.waitSemaphoreCount)
 				waitStages.Resize(submitInfo.waitSemaphoreCount);
 			
 			// Wait semaphores from compiled FrameGraph, i.e. dependency on previous pass submissions.
-			for (int i = 0; i < scope->waitSemaphores[currentImageIndex].GetSize(); i++)
+			for (int i = 0; i < scope->waitSemaphores[currentSubmissionIndex].GetSize(); i++)
 			{
-				waitSemaphores[i] = scope->waitSemaphores[currentImageIndex][i];
+				waitSemaphores[i] = scope->waitSemaphores[currentSubmissionIndex][i];
 				waitStages[i] = scope->waitSemaphoreStageFlags[i];
 			}
 
@@ -903,8 +892,8 @@ namespace CE::Vulkan
 				CE_ASSERT(swapChainIndex >= 0, "SwapChain not found in FrameGraph.");
 
 				// We need to wait on image-acquire semaphore too
-				waitSemaphores[scope->waitSemaphores[currentImageIndex].GetSize() + idx] = compiler->imageAcquiredSemaphores[currentSubmissionIndex][swapChainIndex];
-				waitStages[scope->waitSemaphores[currentImageIndex].GetSize() + idx] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				waitSemaphores[scope->waitSemaphores[currentSubmissionIndex].GetSize() + idx] = compiler->imageAcquiredSemaphores[currentSubmissionIndex][swapChainIndex];
+				waitStages[scope->waitSemaphores[currentSubmissionIndex].GetSize() + idx] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 				idx++;
 			}
@@ -914,20 +903,20 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize();
+			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentSubmissionIndex].GetSize();
 			if (submitInfo.waitSemaphoreCount > 0)
 			{
-				submitInfo.pWaitSemaphores = scope->waitSemaphores[currentImageIndex].GetData();
+				submitInfo.pWaitSemaphores = scope->waitSemaphores[currentSubmissionIndex].GetData();
 				submitInfo.pWaitDstStageMask = scope->waitSemaphoreStageFlags.GetData();
 			}
 		}
-		submitInfo.signalSemaphoreCount = signallingScope->signalSemaphores[currentImageIndex].GetSize();
-		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentImageIndex].GetData();
+		submitInfo.signalSemaphoreCount = signallingScope->signalSemaphores[currentSubmissionIndex].GetSize();
+		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentSubmissionIndex].GetData();
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
-		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
+		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
 
 		if (presentRequired && scopeChain.Top()->presentSwapChains.NotEmpty())
 		{
@@ -952,7 +941,7 @@ namespace CE::Vulkan
 				presentInfo.pSwapchains = swapchainKhrs.GetData();
 				presentInfo.pImageIndices = imageIndices.GetData();
 				presentInfo.waitSemaphoreCount = 1;
-				presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentImageIndex][0];
+				presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentSubmissionIndex][0];
 
 				result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 			}

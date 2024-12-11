@@ -181,9 +181,10 @@ namespace CE::Vulkan
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
         //presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+
 		if (presentationModes.Exists(VK_PRESENT_MODE_MAILBOX_KHR))
 		{
-			//presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+			presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 		}
 
 		this->presentMode = presentMode;
