@@ -125,6 +125,8 @@ namespace CE
 
         virtual bool SupportsFocusEvents() const { return false; }
 
+        virtual bool SupportsKeyboardFocus() const { return SupportsFocusEvents() && SupportsKeyboardEvents(); }
+
         virtual bool CapturesMouseWheel() const { return false; }
 
         virtual void ClearStyle();

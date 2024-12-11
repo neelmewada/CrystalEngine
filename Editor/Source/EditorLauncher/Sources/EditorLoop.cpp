@@ -235,8 +235,6 @@ void EditorLoop::PostInit()
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
-
-		//ProjectSettingsEditor::Show();
 	}
 
 	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);

@@ -293,7 +293,9 @@ namespace CE::Vulkan
 		}
 
 		if (scopeChain.Top()->PresentsSwapChain())
+		{
 			presentRequired = true;
+		}
 
 		auto cmdBuffer = commandList->commandBuffer;
 

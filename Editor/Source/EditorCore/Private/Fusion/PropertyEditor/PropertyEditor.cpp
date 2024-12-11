@@ -35,7 +35,7 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FNew(FButton)
+                FNew(DetailsRow)
                 .OnDoubleClicked(FUNCTION_BINDING(this, ToggleExpansion))
                 .HAlign(HAlign::Fill)
                 .Padding(Vec4())
@@ -77,7 +77,7 @@ namespace CE::Editor
 
                             FAssignNew(FLabel, fieldNameLabel)
                             .Text("Field Name")
-                            .FontSize(10)
+                            .FontSize(9)
                         ),
 
                         FAssignNew(FHorizontalStack, right)
@@ -268,7 +268,7 @@ namespace CE::Editor
         painter->SetBrush(FBrush());
 
         constexpr f32 height = 1.0f;
-        Vec2 pos = Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height);
+        Vec2 pos = Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height + 1);
         Vec2 size = Vec2(computedSize.width, height);
 
         painter->DrawLine(pos, pos + Vec2(size.x, 0));

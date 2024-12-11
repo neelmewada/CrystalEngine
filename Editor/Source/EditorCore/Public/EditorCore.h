@@ -37,6 +37,7 @@
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
+#include "Fusion/PropertyEditor/DetailsRow.h"
 #include "Fusion/PropertyEditor/Fields/EditorField.h"
 #include "Fusion/PropertyEditor/Fields/EnumEditorField.h"
 #include "Fusion/PropertyEditor/Fields/TextEditorField.h"

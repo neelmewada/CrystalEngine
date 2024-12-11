@@ -185,6 +185,12 @@ namespace CE
 		//RPI::Scene* rpiScene = scene->GetRpiScene();
 		constexpr bool isSceneWindowActive = false;
 
+		if (rebuildFrameGraph || recompileFrameGraph)
+		{
+			RebuildFrameGraph();
+			return;
+		}
+
 		int imageIndex = scheduler->BeginExecution();
 
 		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
