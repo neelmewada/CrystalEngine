@@ -131,33 +131,43 @@ namespace CE::Vulkan
 
 		if (swapChainExists)
 		{
-			//vkWaitForFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
-			//	compiler->imageAcquiredFences[currentSubmissionIndex].GetData(), VK_TRUE, u64Max);
-
 			vkResetFences(device->GetHandle(),
 				compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
 				compiler->imageAcquiredFences[currentSubmissionIndex].GetData());
 
-			vkWaitForFences(device->GetHandle(),
-				compiler->graphExecutionFences[currentImageIndex].GetSize(),
-				compiler->graphExecutionFences[currentImageIndex].GetData(),
-				VK_TRUE, u64Max);
+			{
+				ZoneNamedN(__graphExecution, "_GraphExecutionFences", true);
+				ZoneValue(currentSubmissionIndex);
+
+				vkWaitForFences(device->GetHandle(),
+				   compiler->graphExecutionFences[currentImageIndex].GetSize(),
+				   compiler->graphExecutionFences[currentImageIndex].GetData(),
+				   VK_TRUE, u64Max);
+			}
 
 			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
 			{
 				auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
 
-				result = vkAcquireNextImageKHR(device->GetHandle(),
-					swapChain->GetHandle(), acquireTimeout,
-					compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
-					//compiler->imageAcquiredFences[currentSubmissionIndex][i],
-					nullptr,
-					&swapChain->currentImageIndex);
+				{
+					ZoneNamedN(__acquireImage, "_AcquireNextImage", true);
+
+					result = vkAcquireNextImageKHR(device->GetHandle(),
+					   swapChain->GetHandle(), acquireTimeout,
+					   compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
+					   //compiler->imageAcquiredFences[currentSubmissionIndex][i],
+					   nullptr,
+					   &swapChain->currentImageIndex);
+
+					CE_LOG(Info, All, "SwapChain Image: {} |   {}", swapChain->currentImageIndex, currentSubmissionIndex);
+				}
 
 				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 				{
 					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
 					{
+						ZoneNamedN(__rebuildSwapChain, "_RebuildSwapChain", true);
+
 						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
 					}
 				}

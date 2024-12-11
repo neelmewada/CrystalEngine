@@ -326,6 +326,8 @@ namespace CE
 	{
 		ZoneScoped;
 
+		CE_LOG(Info, All, "FrameGraph Rebuilt");
+
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
 

@@ -229,6 +229,8 @@ namespace CE::Vulkan
 
 	void ShaderResourceManager::DestroyQueuedSRG()
 	{
+		ZoneScoped;
+
 		LockGuard<SharedMutex> lock{ queuedDestroySetMutex };
 
 		for (int i = queuedDestroySets.GetSize() - 1; i >= 0; i--)

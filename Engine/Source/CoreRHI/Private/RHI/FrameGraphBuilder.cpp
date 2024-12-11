@@ -5,6 +5,8 @@ namespace CE::RHI
 
     void FrameGraphBuilder::BeginFrameGraph(FrameGraph* frameGraph)
     {
+		ZoneScoped;
+
 		this->frameGraph = frameGraph;
 		frameGraph->Clear();
 

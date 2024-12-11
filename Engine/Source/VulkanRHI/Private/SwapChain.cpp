@@ -75,6 +75,8 @@ namespace CE::Vulkan
 	{
         if (this->window == window)
 		{
+			ZoneScoped;
+
             RebuildSwapChain();
         }
 	}
