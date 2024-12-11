@@ -482,11 +482,6 @@ namespace CE
 		{
 			auto app = SDLApplication::Get();
 
-			for (const auto& tickHandler : app->tickHanders)
-			{
-				tickHandler.InvokeIfValid();
-			}
-
 			for (SDLPlatformWindow* window : app->windowList)
 			{
 				if (window->GetWindowId() == event->window.windowID)
@@ -498,6 +493,11 @@ namespace CE
 
 					break;
 				}
+			}
+
+			for (const auto& tickHandler : app->tickHanders)
+			{
+				tickHandler.InvokeIfValid();
 			}
 		}
 		

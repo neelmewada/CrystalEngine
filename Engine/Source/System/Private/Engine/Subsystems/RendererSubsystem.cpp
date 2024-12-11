@@ -20,7 +20,7 @@ namespace CE
 
     void RendererSubsystem::OnWindowCreated(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowDestroyed(PlatformWindow* window)
@@ -30,27 +30,27 @@ namespace CE
 			CE_LOG(Info, All, "Main Window Destroyed");
 		}
 
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowClosed(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowMinimized(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowRestored(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
 	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
@@ -61,6 +61,8 @@ namespace CE
 		if (!windowSizesById.KeyExists(id) || windowSize != windowSizesById[id])
 		{
 			RebuildFrameGraph();
+
+			scheduler->ResetFramesInFlight();
 		}
 
 		windowSizesById[id] = windowSize;
@@ -187,7 +189,7 @@ namespace CE
 
 		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
 		{
-			rebuildFrameGraph = recompileFrameGraph = true;
+			RebuildFrameGraph();
 			return;
 		}
 

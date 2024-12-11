@@ -167,10 +167,8 @@ namespace CE::Vulkan
 					{
 						ZoneNamedN(__rebuildSwapChain, "_RebuildSwapChain", true);
 
-						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
+						((Vulkan::SwapChain*)swapChain)->RebuildSwapChain();
 					}
-
-
 				}
 
 				if (result != VK_SUCCESS)
@@ -179,10 +177,6 @@ namespace CE::Vulkan
 				}
 			}
 		}
-		else
-		{
-			//currentImageIndex = currentSubmissionIndex;
-		}
 
 		return currentSubmissionIndex;
 	}
@@ -190,6 +184,8 @@ namespace CE::Vulkan
 	void FrameGraphExecuter::EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
 		ZoneScoped;
+		String value = String("Index: ") + currentSubmissionIndex;
+		ZoneText(value.GetCString(), value.GetLength());
 
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 
@@ -205,9 +201,14 @@ namespace CE::Vulkan
 		totalFramesSubmitted++;
 	}
 
+	void FrameGraphExecuter::ResetFramesInFlight()
+	{
+		currentSubmissionIndex = 0;
+	}
+
 	bool FrameGraphExecuter::ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, 
-		HashSet<RHI::ScopeId>& executedScopes,
-		HashSet<Vulkan::SwapChain*>& usedSwapChains)
+	                                      HashSet<RHI::ScopeId>& executedScopes,
+	                                      HashSet<Vulkan::SwapChain*>& usedSwapChains)
 	{
 		if (!scope)
 			return false;

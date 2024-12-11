@@ -10,7 +10,7 @@ namespace CE::Vulkan
 		using Self = Vulkan::FrameGraphExecuter;
 
 		FrameGraphExecuter(VulkanDevice* device);
-		~FrameGraphExecuter();
+		~FrameGraphExecuter() override;
 
 		bool ExecuteInternal(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
@@ -19,6 +19,8 @@ namespace CE::Vulkan
 		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
 		void EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
+
+		void ResetFramesInFlight() override;
 
 	private:
 

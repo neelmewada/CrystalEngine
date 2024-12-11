@@ -435,34 +435,6 @@ namespace CE
         return outWindow;
     }
 
-    void FusionApplication::BuildFrameGraph()
-    {
-        ZoneScoped;
-
-        FrameScheduler* scheduler = FrameScheduler::Get();
-
-        rebuildFrameGraph = false;
-        recompileFrameGraph = true;
-
-        scheduler->BeginFrameGraph();
-        {
-            EmplaceFrameAttachments();
-
-            EnqueueScopes();
-        }
-        scheduler->EndFrameGraph();
-    }
-
-    void FusionApplication::CompileFrameGraph()
-    {
-        ZoneScoped;
-
-        FrameScheduler* scheduler = FrameScheduler::Get();
-
-        recompileFrameGraph = false;
-
-        scheduler->Compile();
-    }
 
     void FusionApplication::PrepareDrawList()
     {
@@ -493,11 +465,6 @@ namespace CE
         FlushDrawPackets(drawList, curImageIndex);
     }
 
-    void FusionApplication::RebuildFrameGraph()
-    {
-        rebuildFrameGraph = recompileFrameGraph = true;
-    }
-
     void FusionApplication::RequestFrameGraphUpdate()
     {
         onFrameGraphUpdateRequested.Broadcast();
@@ -523,12 +490,11 @@ namespace CE
 
     void FusionApplication::OnWindowRestored(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+        
     }
 
     void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
         rootContext->MarkLayoutDirty();
 
         for (int i = rootContext->childContexts.GetSize() - 1; i >= 0; i--)
@@ -557,28 +523,28 @@ namespace CE
 
     void FusionApplication::OnWindowClosed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-        RebuildFrameGraph();
+
         rootContext->MarkLayoutDirty();
     }
 
     void FusionApplication::OnWindowMinimized(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowCreated(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowExposed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnRenderViewportDestroyed(FGameWindow* renderViewport)

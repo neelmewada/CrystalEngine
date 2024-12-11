@@ -82,8 +82,6 @@ namespace CE
 
         void Tick();
 
-        void RebuildFrameGraph();
-
         void RequestFrameGraphUpdate();
 
         RPI::Shader* GetFusionShader() const { return fusionShader; }
@@ -130,13 +128,8 @@ namespace CE
         void InitializeShader();
         void InitializeShader2();
 
-        void BuildFrameGraph();
-        void CompileFrameGraph();
-
         void PrepareDrawList();
 
-        bool rebuildFrameGraph = true;
-        bool recompileFrameGraph = true;
         int curImageIndex = 0;
         bool isExposed = false;
 

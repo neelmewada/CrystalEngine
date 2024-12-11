@@ -159,7 +159,7 @@ namespace CE
 
 		if (swapChain)
 		{
-			swapChain->Rebuild();
+			//swapChain->Rebuild();
 		}
 
 		UpdateViewConstants();

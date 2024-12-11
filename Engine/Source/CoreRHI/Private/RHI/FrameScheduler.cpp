@@ -34,6 +34,14 @@ namespace CE::RHI
 		delete frameGraph; frameGraph = nullptr;
 	}
 
+	void FrameScheduler::ResetFramesInFlight()
+	{
+		if (executer)
+		{
+			executer->ResetFramesInFlight();
+		}
+	}
+
 	void FrameScheduler::BeginFrameGraph()
 	{
 		ZoneScoped;

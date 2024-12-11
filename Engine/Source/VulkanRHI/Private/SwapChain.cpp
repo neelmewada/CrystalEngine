@@ -77,7 +77,7 @@ namespace CE::Vulkan
 		{
 			ZoneScoped;
 
-            RebuildSwapChain();
+            //RebuildSwapChain();
         }
 	}
 
