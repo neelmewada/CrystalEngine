@@ -108,7 +108,7 @@ namespace CE::Editor
         }
     }
 
-    void ProjectSettingsEditor::Show()
+    ProjectSettingsEditor* ProjectSettingsEditor::Show()
     {
         CrystalEditorWindow* editor = CrystalEditorWindow::Get();
 
@@ -119,6 +119,8 @@ namespace CE::Editor
         }
 
         editor->SelectTab(instance);
+
+        return instance;
     }
 
     void ProjectSettingsEditor::ShowAllSettings()

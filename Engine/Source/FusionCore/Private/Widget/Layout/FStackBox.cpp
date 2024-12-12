@@ -25,11 +25,6 @@ namespace CE
 			return;
 		}
 
-		if (GetName() == "TitleLabelStack")
-		{
-			String::IsAlphabet('a');
-		}
-
 		intrinsicSize.width = m_Padding.left + m_Padding.right;
 		intrinsicSize.height = m_Padding.top + m_Padding.bottom;
 
@@ -47,12 +42,12 @@ namespace CE
 
 			if (m_Direction == FStackBoxDirection::Horizontal)
 			{
-				contentSize.width += childSize.width + childMargin.left;
+				contentSize.width += childSize.width + childMargin.left + childMargin.right;
 				contentSize.height = Math::Max(contentSize.height, childSize.height + childMargin.top + childMargin.bottom);
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
-				contentSize.height += childSize.height + childMargin.top;
+				contentSize.height += childSize.height + childMargin.top + childMargin.bottom;
 				contentSize.width = Math::Max(contentSize.width, childSize.width + childMargin.left + childMargin.right);
 			}
 		}
@@ -87,11 +82,6 @@ namespace CE
 		if (children.IsEmpty())
 		{
 			return;
-		}
-
-		if (GetName() == "TitleLabelStack")
-		{
-			String::IsAlphabet('a');
 		}
 
 		Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
