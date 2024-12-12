@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewStyle::FTreeViewStyle()
     {
-        
+        separatorWidth = 1.5f;
     }
 
     FTreeViewStyle::~FTreeViewStyle()

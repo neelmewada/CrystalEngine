@@ -174,32 +174,32 @@ namespace WidgetTests
 
     void RendererSystem::OnWindowRestored(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowDestroyed(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowClosed(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowMinimized(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowCreated(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        RebuildFrameGraph();
     }
 
     void RendererSystem::OnWindowExposed(PlatformWindow* window)

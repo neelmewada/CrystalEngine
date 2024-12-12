@@ -39,7 +39,8 @@ namespace CE
 
         FAssignNew(FStyledWidget, separator)
         .Background(Color::Black())
-        .Width(5)
+        .Width(1)
+        .Padding(Vec4())
         .VAlign(VAlign::Fill)
         .Name("Separator")
     	;
