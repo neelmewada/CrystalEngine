@@ -57,6 +57,8 @@ namespace CE::Vulkan
 
 	void SwapChain::RebuildSwapChain()
 	{
+		ZoneScoped;
+
 		window->GetDrawableWindowSize(&width, &height);
 
 		if (preferredWidth != 0 && preferredHeight != 0)
@@ -73,12 +75,16 @@ namespace CE::Vulkan
 	{
         if (this->window == window)
 		{
-            RebuildSwapChain();
+			ZoneScoped;
+
+            //RebuildSwapChain();
         }
 	}
 
 	void SwapChain::Create()
 	{
+		ZoneScoped;
+
 		auto oldSwapChain = swapChain;
 		auto gpu = device->GetPhysicalHandle();
 
@@ -175,9 +181,10 @@ namespace CE::Vulkan
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
         //presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
-		if (presentationModes.Exists(VK_PRESENT_MODE_MAILBOX_KHR))
+
+		if (desc.useMailboxMode && presentationModes.Exists(VK_PRESENT_MODE_MAILBOX_KHR))
 		{
-			//presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+			presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 		}
 
 		this->presentMode = presentMode;

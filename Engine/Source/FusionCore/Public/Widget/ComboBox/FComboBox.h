@@ -37,6 +37,8 @@ namespace CE
 
         bool SupportsFocusEvents() const override { return true; }
 
+        bool SupportsKeyboardEvents() const override { return true; }
+
         void ApplyStyle() override;
 
         FComboBoxPopup& GetPopupMenu() const { return *popupMenu; }

@@ -94,6 +94,36 @@ namespace CE
 			return CMImageFormat::RG16;
 		case TextureFormat::RGB8:
 			return CMImageFormat::RGB8;
+		case TextureFormat::BC7:
+			return CMImageFormat::BC7;
+		case TextureFormat::BC1:
+			return CMImageFormat::BC1;
+		case TextureFormat::BC3:
+			return CMImageFormat::BC3;
+		case TextureFormat::BC4:
+			return CMImageFormat::BC4;
+		case TextureFormat::BC5:
+			return CMImageFormat::BC5;
+		case TextureFormat::BC6H:
+			return CMImageFormat::BC6H;
+		case TextureFormat::None:
+			break;
+		case TextureFormat::RGBA8:
+			return CMImageFormat::RGBA8;
+		case TextureFormat::BGRA8:
+			return CMImageFormat::RGBA8;
+		case TextureFormat::BGR8:
+			return CMImageFormat::RGB8;
+		case TextureFormat::RGB565:
+			return CMImageFormat::RGB565;
+		case TextureFormat::RGBAHalf:
+			return CMImageFormat::RGBA16;
+		case TextureFormat::RFloat:
+			return CMImageFormat::R32;
+		case TextureFormat::RGFloat:
+			return CMImageFormat::RG32;
+		case TextureFormat::RGBAFloat:
+			return CMImageFormat::RGBA32;
 		}
 		return CMImageFormat::Undefined;
 	}

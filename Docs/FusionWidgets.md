@@ -6,20 +6,28 @@ Fusion lets you create widgets in C++ using declarative syntax and apply flexibl
 
 ## Features
 
-* Declarative UI structure.
+* Declarative UI syntax.
+* DPI-aware rendering.
 * Texture support: Use textures to draw icons and images with custom scaling and tiling.
-* Fast 2D renderer with 2D clipping implemented on both CPU and GPU.
-* Uses builtin 2D renderer that uses instancing to draw almost all widgets in a single draw call and submits draw list to CoreRPI.
+* Font glyph caching. Font glyphs are only created on-demand and cached for reuse in a Font Atlas.
+* Fast 2D renderer with GPU side 2D clipping, and CPU side 2D draw culling.
 * Styling: Flexible styling using `FStyle` and `FStyleSet`.
 * Flexible layout: Use layouts like FStackBox, FOverlayStack, FCompoundWidget, FSplitBox, etc to create complex layouts.
-* Simple data binding between widget and model classes.
+* Simple data binding between widget and model classes, using `MODEL_PROPERTY()` and `BIND_PROPERTY_R/RW()` macros.
 * Create custom widgets with your own declarative properties with `FUSION_PROPERTY()` and other macros.
+* Apply layout-independent transformations with Translation(), Angle() and Scale() to individual widgets and have them still work with mouse input hit-test:
+<br><img src="../Screenshots/Widget Transformations.gif" height=300/>
 
-## Example
+
+### DPI Aware Rendering (New renderer)
+
+Here is the comparison between old renderer (left) and the new renderer (right) that is DPI-aware.
+<br><img src="../Screenshots/FusionSample.png" height=400/> <img src="../Screenshots/FusionSample_DPI.png" height=400/>
+
+## Widget Sample
 
 If you are running the Crystal Editor, you can go to Help menu and click "Fusion Samples" to open this sample:
-
-<img src="../Screenshots/FusionSample.png" height=600/>
+<br><img src="../Screenshots/FusionSample_DPI.png" height=500/>
 
 You can take a look at the cpp file below to see the full implementation
 [/Editor/Source/CrystalEditor/Private/CrystalEditor/Windows/Misc/SampleWidgetWindow.cpp](/Editor/Source/CrystalEditor/Private/CrystalEditor/Windows/Misc/SampleWidgetWindow.cpp)
@@ -34,8 +42,8 @@ void SampleWidgetWindow::Construct()
     titleBar->Height(30);
     titleBarLabel->FontSize(13);
 
-    constexpr auto splashImage = "/Editor/Assets/Images/Splash";
-    constexpr auto gridImage = "/Editor/Assets/Images/GridSmall";
+    constexpr auto splashImage = "/Editor/Assets/UI/Splash";
+    constexpr auto gridImage = "/Engine/Resources/Icons/TransparentPattern";
 
     instance = this;
 
@@ -47,7 +55,7 @@ void SampleWidgetWindow::Construct()
 
     FBrush grid = FBrush(gridImage);
     grid.SetBrushTiling(FBrushTiling::TileXY);
-    grid.SetBrushSize(Vec2(20, 20));
+    grid.SetBrushSize(Vec2(16, 16));
 
 
     (*this)
@@ -55,7 +63,7 @@ void SampleWidgetWindow::Construct()
         .MinimizeEnabled(false)
         .MaximizeEnabled(false)
         .ContentPadding(Vec4(1, 1, 1, 1) * 20)
-		.ContentGap(5)
+        .ContentGap(5)
         .Content(
             FNew(FImage)
             .Background(splash)
@@ -111,6 +119,7 @@ void SampleWidgetWindow::Construct()
             .ContentHAlign(HAlign::Left)
             (
                 FNew(FTextButton)
+                .FontSize(10)
                 .Text("Add Item")
                 .OnClicked([this]
                 {
@@ -130,12 +139,12 @@ void SampleWidgetWindow::Construct()
             (
                 FNew(FTextInput)
                 .Bind_Text(BIND_PROPERTY_RW(model, Text))
-                .FontSize(13)
+                .FontSize(10)
                 .Width(180)
                 .Margin(Vec4(0, 0, 10, 0)),
 
                 FNew(FTextButton)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Randomize")
                 .OnClicked([this]
                     {
@@ -151,25 +160,46 @@ void SampleWidgetWindow::Construct()
             .VerticalScroll(true)
             .HorizontalScroll(true)
             .FillRatio(1.0f)
+            .Angle(5)
+            .Scale(Vec2(1, 1) * 0.75f)
+            .Name("TestScrollBox")
             (
                 FNew(FVerticalStack)
+                .ContentHAlign(HAlign::Left)
                 .VAlign(VAlign::Top)
                 .HAlign(HAlign::Left)
                 (
                     FNew(FLabel)
-                    .Text("The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                    //.Text("0. The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                    .Text("0. The quick brown fox jumps.")
                     .FontSize(16),
 
                     FNew(FLabel)
-                    .Text("Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
+                    .Text("1. Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
                     .FontSize(16),
 
                     FNew(FLabel)
-                    .Text("The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
+                    .Text("2. The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
                     .FontSize(16),
 
                     FNew(FLabel)
-                    .Text("With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
+                    .Text("3. With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
+                    .FontSize(16),
+
+                    FNew(FLabel)
+                    .Text("4. The quick brown fox jumps over the lazy dog, showcasing every letter in the English alphabet.")
+                    .FontSize(16),
+
+                    FNew(FLabel)
+                    .Text("5. Beneath the starlit sky, a lively fox darted over fallen leaves, leaving soft echoes in the quiet woods.")
+                    .FontSize(16),
+
+                    FNew(FLabel)
+                    .Text("6, The curious red fox dashed through the misty forest, weaving between ancient trees with nimble grace.")
+                    .FontSize(16),
+
+                    FNew(FLabel)
+                    .Text("7. With a flick of its tail, the agile fox bounded across the meadow, vanishing into the evening shadows.")
                     .FontSize(16)
                 )
             )

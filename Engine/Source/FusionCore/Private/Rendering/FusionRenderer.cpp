@@ -16,7 +16,7 @@ namespace CE
 		multisampling = initInfo.multisampling;
 
 		numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
-		
+
 		drawItemsBuffer.Init("DrawItems_" + GetName().GetString(), initialDrawItemCapacity, numFrames);
 		clipItemsBuffer.Init("ClipItems_" + GetName().GetString(), initialClipItemCapacity, numFrames);
 		clipItemIndexListBuffer.Init("ClipItemIndices_" + GetName().GetString(), initialClipItemCapacity, numFrames);
@@ -757,11 +757,6 @@ namespace CE
 				shapeItem.brushColor = currentBrush.GetTintColor().ToVec4();
 
 				RHI::Texture* image = app->FindImage(imageName);
-				if (image == nullptr)
-				{
-					app->LoadImageAsset(imageName);
-					image = app->FindImage(imageName);
-				}
 
 				int imageIndex = app->FindImageIndex(imageName);
 
@@ -776,7 +771,6 @@ namespace CE
 					Vec2 brushPos = currentBrush.GetBrushPosition();
 					FBrushTiling tiling = currentBrush.GetBrushTiling();
 
-					f32 imageAspect = imageSize.width / imageSize.height;
 					bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
 					bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
 					bool autoSizeX = brushSize.x < 0;

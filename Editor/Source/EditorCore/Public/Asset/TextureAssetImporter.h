@@ -19,6 +19,9 @@ namespace CE::Editor
 		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
 
 		FIELD(Config)
+		Array<String> ignoreCompressionFolders; // Folders where image compression is not applied
+
+		FIELD(Config)
 		u8 anisotropy = 0;
 
 		FIELD(Config)
@@ -62,6 +65,7 @@ namespace CE::Editor
 	private:
 
 		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
+		Array<String> ignoreCompressionFolders; // Folders where image compression is not applied
 
 		u8 anisotropy = 0;
 		bool importHdrAsCubemap = false;

@@ -12,6 +12,7 @@
 
 namespace CE
 {
+    static constexpr f32 FontScaling = 1.0f;
 
     FFontAtlas::FFontAtlas()
     {
@@ -32,7 +33,7 @@ namespace CE
         glyphBuffer.Init("GlyphBuffer", GlyphBufferInitialCount, numFrames);
 
         f32 unitsPerEM = regular->units_per_EM;
-        f32 scaleFactor = (f32)1.0f / unitsPerEM; // 1.0f is used as a font size here
+        f32 scaleFactor = 1.0f / unitsPerEM; // 1.0f is used as a font size here
 
         metrics.ascender = regular->ascender * scaleFactor;
         metrics.descender = regular->descender * scaleFactor;
@@ -45,6 +46,10 @@ namespace CE
         atlas->atlasSize = FontAtlasSize;
 
         atlasImageMips.Add(atlas);
+
+        Array<String> pages = GetPages();
+        pages.Add(String::Format("Page {}", pages.GetSize()));
+        SetPages(pages);
 
         AddGlyphs(charSet, DefaultFontSize);
 
@@ -68,10 +73,12 @@ namespace CE
         fontSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
         fontSampler.enableAnisotropy = false;
         fontSampler.samplerFilterMode = FilterMode::Linear;
+        //fontSampler.samplerFilterMode = FilterMode::Nearest;
 
         atlasTexture = new RPI::Texture(images, fontSampler);
 
         RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
+        RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
         fontSrg = gDynamicRHI->CreateShaderResourceGroup(fusionShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
 
@@ -84,53 +91,81 @@ namespace CE
         }
 
         fontSrg->FlushBindings();
+
+        fontSrg2 = gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
+
+        fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+        fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+
+        fontSrg2->FlushBindings();
+    }
+
+    u32 FFontAtlas::GetAtlasSize() const
+    {
+        return FontAtlasSize;
     }
 
     FFontGlyphInfo FFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
     {
-        u32 fontSizeInAtlas = fontSize;
+        ZoneScoped;
+        char __text[2] = { (char)charCode, 0 };
+        ZoneText(__text, 1);
 
-        static Array<u32> charSet{};
-        charSet.Resize(1);
-        charSet[0] = charCode;
+        u32 fontSizeInAtlas = fontSize;
 
         // Find the closest matching font size
 
-        for (int i = 0; i < gFontSizes.GetSize(); ++i)
-        {
-	        if (gFontSizes[i] == fontSize || 
-                (i == 0 && fontSize <= gFontSizes[i]) || 
-                (i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
-	        {
-                fontSizeInAtlas = gFontSizes[i];
-                break;
-	        }
+	    {
+            ZoneNamedN(__fontSizes, "_FontSizeLoop", true);
 
-            if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
-            {
-                int halfSize = (gFontSizes[i] + gFontSizes[i + 1]) / 2;
-                if (fontSize <= halfSize)
-                    fontSizeInAtlas = gFontSizes[i];
-                else
-                    fontSizeInAtlas = gFontSizes[i + 1];
-                break;
-            }
-        }
+		    for (int i = 0; i < gFontSizes.GetSize(); ++i)
+		    {
+		    	if (gFontSizes[i] == fontSize || 
+					(i == 0 && fontSize <= gFontSizes[i]) || 
+					(i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
+		    	{
+		    		fontSizeInAtlas = gFontSizes[i];
+		    		break;
+		    	}
 
-        if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
-        {
-            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
-        }
+		    	if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
+		    	{
+		    		int splitSize = Math::RoundToInt((gFontSizes[i] + gFontSizes[i + 1]) * 0.2f);
+		    		if (fontSize <= splitSize)
+		    			fontSizeInAtlas = gFontSizes[i];
+		    		else
+		    			fontSizeInAtlas = gFontSizes[i + 1];
+		    		break;
+		    	}
+		    }
+	    }
+        
+	    {
+            ZoneNamedN(__hashMaps, "_HashMaps", true);
 
-        int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
-        Ptr<FAtlasImage> atlasMip = atlasImageMips[mipIndex];
+		    if (!mipIndicesByCharacter.KeyExists({ charCode, fontSizeInAtlas }))
+		    {
+		    	static Array<u32> charSet{};
+		    	charSet.Resize(1);
+		    	charSet[0] = charCode;
+		    	AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
+		    }
 
-        if (!atlasMip->glyphsByFontSize[fontSizeInAtlas].KeyExists(charCode))
-        {
-            AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
-        }
+        	int mipIndex = mipIndicesByCharacter[{ charCode, fontSizeInAtlas }];
+        	Ptr<FAtlasImage> atlasMip = atlasImageMips[mipIndex];
 
-        return atlasMip->glyphsByFontSize[fontSizeInAtlas][charCode];
+        	auto& glyphsByFontSize = atlasMip->glyphsByFontSize[fontSizeInAtlas];
+
+        	if (!glyphsByFontSize.KeyExists(charCode))
+        	{
+        		static Array<u32> charSet{};
+        		charSet.Resize(1);
+        		charSet[0] = charCode;
+        		AddGlyphs(charSet, fontSizeInAtlas, isBold, isItalic);
+        	}
+
+        	return glyphsByFontSize[charCode];
+	    }
     }
 
     void FFontAtlas::Flush(u32 imageIndex)
@@ -166,6 +201,9 @@ namespace CE
 
             fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
             fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+
+            fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+            fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
         }
 
         flushRequiredPerImage[imageIndex] = false;
@@ -183,6 +221,7 @@ namespace CE
         glyphBuffer.GetBuffer(imageIndex)->UploadData(glyphDataList.GetData(), numGlyphs * sizeof(FGlyphData));
 
         fontSrg->FlushBindings();
+        fontSrg2->FlushBindings();
     }
 
     void FFontAtlas::OnBeginDestroy()
@@ -193,6 +232,7 @@ namespace CE
 
         delete atlasTexture; atlasTexture = nullptr;
         delete fontSrg; fontSrg = nullptr;
+        delete fontSrg2; fontSrg2 = nullptr;
 
         atlasImageMips.Clear();
         glyphDataList.Free();
@@ -227,7 +267,10 @@ namespace CE
 
         static HashSet<FT_ULong> nonDisplayCharacters = { ' ', '\n', '\r', '\t' };
 
-        FT_Set_Pixel_Sizes(face, 0, fontSize);
+        u32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
+
+        FT_Set_Char_Size(face, 0, fontSize * 64, dpi, dpi);
 
         FAtlasImage* atlasMip = atlasImageMips[currentMip];
 
@@ -248,9 +291,10 @@ namespace CE
             }
 
             FT_Bitmap* bmp = &face->glyph->bitmap;
+            // Hello World!
 
             FFontGlyphInfo glyph{};
-
+            
             glyph.charCode = charCode;
 
             int width = bmp->width;
@@ -275,6 +319,10 @@ namespace CE
                 atlasMip->atlasSize = (u32)atlasSize;
 
                 atlasImageMips.Add(atlasMip);
+
+                Array<String> pages = GetPages();
+                pages.Add(String::Format("Page {}", pages.GetSize()));
+                SetPages(pages);
                 
                 foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
             }
@@ -286,6 +334,8 @@ namespace CE
 
             if (foundEmptySpot)
             {
+                glyph.atlasSize = atlasSize;
+
                 glyph.x0 = posX;
                 glyph.y0 = posY;
                 glyph.x1 = posX + width;
@@ -296,6 +346,8 @@ namespace CE
                 glyph.advance = advance;
                 glyph.fontSize = fontSize;
                 glyph.index = glyphDataList.GetCount();
+
+                glyph.scalingFactor = 1.0f;
 
                 Vec2 uvMin = Vec2((f32)glyph.x0 / (f32)atlasSize, (f32)glyph.y0 / (f32)atlasSize);
                 Vec2 uvMax = Vec2((f32)glyph.x1 / (f32)atlasSize, (f32)glyph.y1 / (f32)atlasSize);
@@ -323,8 +375,7 @@ namespace CE
 
                 atlasMip->glyphsByFontSize[fontSize][charCode] = glyph;
                 mipIndicesByCharacter[{ static_cast<unsigned int>(charCode), fontSize }] = currentMip;
-
-
+                
                 for (int j = 0; j < flushRequiredPerImage.GetSize(); ++j)
                 {
                     flushRequiredPerImage[j] = true;
@@ -335,6 +386,8 @@ namespace CE
 
     bool FFontAtlas::FAtlasImage::FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY)
     {
+        ZoneScoped;
+
         int bestRowIndex = -1;
         int bestRowHeight = INT_MAX;
 

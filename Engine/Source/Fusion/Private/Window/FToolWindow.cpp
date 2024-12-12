@@ -33,8 +33,8 @@ namespace CE
             .Background(FBrush(Color::RGBA(36, 36, 36)))
             .BorderWidth(1.0f)
             .BorderColor(Color::RGBA(15, 15, 15))
-            .Padding(Vec4(1, 1, 1, 1))
-            .Name("RootStyle")
+            .Padding(Vec4(1, 1, 1, 1) * 2)
+            .Name("RootBorderWidget")
             (
                 FAssignNew(FVerticalStack, rootBox)
                 .ContentHAlign(HAlign::Fill)
@@ -61,7 +61,7 @@ namespace CE
                                 .FillRatio(1.0f),
 
                                 FAssignNew(FLabel, titleBarLabel)
-                                .FontSize(15)
+                                .FontSize(13)
                                 .Text("Tool Window")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
@@ -159,6 +159,34 @@ namespace CE
         );
 
         this->Style("ToolWindow");
+    }
+
+    void FToolWindow::OnMaximized()
+    {
+	    Super::OnMaximized();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
+
+#if PLATFORM_WINDOWS
+        // This is needed on Windows to prevent things from rendering outside the screen edges when maximized
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 7);
+#endif
+    }
+
+    void FToolWindow::OnMinimized()
+    {
+        Super::OnMinimized();
+    }
+
+    void FToolWindow::OnRestored()
+    {
+        Super::OnRestored();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
+
+#if PLATFORM_WINDOWS
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 1);
+#endif
     }
 
     FToolWindow::Self& FToolWindow::MinimizeEnabled(bool enabled)

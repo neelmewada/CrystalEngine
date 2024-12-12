@@ -399,7 +399,8 @@ namespace CE::RPI
                 }
             }
             else if (variable.type == RHI::ShaderResourceType::Texture1D || 
-                variable.type == RHI::ShaderResourceType::Texture2D || 
+                variable.type == RHI::ShaderResourceType::Texture2D ||
+                variable.type == RHI::ShaderResourceType::Texture2DArray ||
                 variable.type == RHI::ShaderResourceType::TextureCube ||
                 variable.type == RHI::ShaderResourceType::Texture3D ||
                 variable.type == RHI::ShaderResourceType::RWTexture2D ||

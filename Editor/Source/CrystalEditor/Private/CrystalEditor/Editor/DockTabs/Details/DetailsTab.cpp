@@ -43,7 +43,7 @@ namespace CE::Editor
                             (
                                 FAssignNew(FLabel, actorName)
                                 .Text("Actor Name")
-                                .FontSize(14)
+                                .FontSize(11)
                                 .HAlign(HAlign::Left)
                                 .Margin(Vec4(5, 10, 5, 10)),
 
@@ -81,7 +81,7 @@ namespace CE::Editor
     {
         editorContainer->RemoveChildWidget();
 
-        if (editor)
+        if (editor.IsValid())
         {
             editor->BeginDestroy();
             editor = nullptr;

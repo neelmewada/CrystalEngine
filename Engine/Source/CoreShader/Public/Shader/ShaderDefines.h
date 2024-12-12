@@ -30,6 +30,15 @@ namespace CE
 		FIELD(ReadOnly)
 		Array<Name> vertexInputs{};
 
+		FIELD(ReadOnly)
+		Array<RHI::VertexAttributeDataType> vertexInputTypes{};
+
+		FIELD(ReadOnly)
+		Array<RHI::ShaderStructMemberType> rootConstantLayout{};
+
+		FIELD(ReadOnly)
+		ShaderStage rootConstantStages = ShaderStage::None;
+
 		const VariableBindingMap& GetVariableNameMap() const;
 
 	private:

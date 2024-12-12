@@ -13,8 +13,16 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
-    public:
+        void ShowWindow();
+        void HideWindow();
 
+        PlatformWindow* GetPlatformWindow();
+
+    protected:
+
+        virtual void OnMaximized() {}
+        virtual void OnRestored() {}
+        virtual void OnMinimized() {}
 
     private: // - Fields -
 

@@ -248,8 +248,6 @@ namespace CE
 
 		context->parentContext = this;
 		childContexts.Add(context);
-
-		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
 	void FFusionContext::RemoveChildContext(FFusionContext* context)
@@ -259,8 +257,6 @@ namespace CE
 
 		context->parentContext = nullptr;
 		childContexts.Remove(context);
-
-		FusionApplication::Get()->RebuildFrameGraph();
 	}
 
 	void FFusionContext::PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size, Vec2 controlSize)
@@ -349,8 +345,6 @@ namespace CE
 		if (clearScreen != set)
 		{
 			clearScreen = set;
-
-			FusionApplication::Get()->RebuildFrameGraph();
 		}
 	}
 
@@ -442,6 +436,8 @@ namespace CE
 
 	void FFusionContext::EmplaceFrameAttachments()
 	{
+		ZoneScoped;
+
 		for (FFusionContext* childContext : childContexts)
 		{
 			childContext->EmplaceFrameAttachments();
@@ -495,6 +491,8 @@ namespace CE
 
 	void FFusionContext::NotifyWindowEvent(FEventType eventType, FNativeContext* nativeContext)
 	{
+		ZoneScoped;
+
 		if (!owningWidget)
 			return;
 

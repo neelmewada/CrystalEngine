@@ -26,7 +26,7 @@ namespace CE::RPI
 
         RHI::TextureView* GetOrCreateTextureView();
 
-        virtual void UploadData(u8* src, u64 dataSize);
+        void UploadData(u8* src, u64 dataSize);
 
         u32 GetWidth() const { return width; }
 

@@ -2,7 +2,6 @@
 
 namespace CE
 {
-	RHI::Buffer* vertexBuffer = nullptr;
 
     RendererSubsystem::RendererSubsystem()
     {
@@ -21,42 +20,47 @@ namespace CE
 
     void RendererSubsystem::OnWindowCreated(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowDestroyed(PlatformWindow* window)
     {
-		if (window && window->IsMainWindow())
-		{
-			CE_LOG(Info, All, "Main Window Destroyed");
-		}
-
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowClosed(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowMinimized(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
     void RendererSubsystem::OnWindowRestored(PlatformWindow* window)
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
+		RebuildFrameGraph();
     }
 
 	void RendererSubsystem::OnWindowExposed(PlatformWindow* window)
 	{
-		rebuildFrameGraph = recompileFrameGraph = true;
+		auto id = window->GetWindowId();
+		Vec2i windowSize = window->GetWindowSize();
+
+		if (!windowSizesById.KeyExists(id) || windowSize != windowSizesById[id])
+		{
+			RebuildFrameGraph();
+
+			scheduler->ResetFramesInFlight();
+		}
+
+		windowSizesById[id] = windowSize;
 	}
 
     void RendererSubsystem::Initialize()
@@ -176,11 +180,17 @@ namespace CE
 		//RPI::Scene* rpiScene = scene->GetRpiScene();
 		constexpr bool isSceneWindowActive = false;
 
+		if (rebuildFrameGraph || recompileFrameGraph)
+		{
+			RebuildFrameGraph();
+			return;
+		}
+
 		int imageIndex = scheduler->BeginExecution();
 
 		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
 		{
-			rebuildFrameGraph = recompileFrameGraph = true;
+			RebuildFrameGraph();
 			return;
 		}
 
@@ -324,12 +334,12 @@ namespace CE
 
 	void RendererSubsystem::BuildFrameGraph()
 	{
+		ZoneScoped;
+
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
 
 		// TODO: Implement multi scene support
-
-		// TODO: Enqueue draw packets early! Some scope producers (shadow, reflection probe, etc.) need to have all draw packets available beforehand.
 
 		RPI::RPISystem::Get().SimulationTick(curImageIndex);
 		RPI::RPISystem::Get().RenderTick(curImageIndex);
@@ -391,6 +401,11 @@ namespace CE
 
 									for (int i = 0; i < frameBuffer.GetSize(); ++i)
 									{
+										if (viewport->GetFrame(i) == nullptr)
+										{
+											viewport->RecreateFrameBuffer();
+										}
+
 										frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
 									}
 
@@ -419,6 +434,8 @@ namespace CE
 
 	void RendererSubsystem::CompileFrameGraph()
 	{
+		ZoneScoped;
+
 		recompileFrameGraph = false;
 
 		scheduler->Compile();

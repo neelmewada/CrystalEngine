@@ -34,3 +34,9 @@
 [submodule "ThirdParty/vendor/cpptrace"]
 	path = ThirdParty/vendor/cpptrace
 	url = https://github.com/jeremy-rifkin/cpptrace.git
+[submodule "ThirdParty/vendor/Clipper2"]
+	path = ThirdParty/vendor/Clipper2
+	url = https://github.com/AngusJohnson/Clipper2.git
+[submodule "ThirdParty/vendor/tracy"]
+	path = ThirdParty/vendor/tracy
+	url = https://github.com/wolfpld/tracy.git

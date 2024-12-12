@@ -10,6 +10,7 @@ namespace CE
 		m_SplitterSize = 5.0f;
 		m_SplitterHoverBackground = Color::RGBA(255, 255, 255, 120);
 		m_SplitterBackground = Color::Clear();
+		m_Direction = FSplitDirection::Horizontal;
     }
 
     void FSplitBox::CalculateIntrinsicSize()
@@ -151,16 +152,21 @@ namespace CE
 		if (children.IsEmpty() || !Enabled())
 			return;
 
-		painter->PushChildCoordinateSpace(localTransform);
+		
 		if (m_ClipChildren)
 		{
-			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+			painter->PushClipRect(Matrix4x4::Identity(), computedSize);
 		}
 
 		Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
 			m_Padding.top + m_Padding.bottom);
 
-		if (m_SplitterBackground.a > 0)
+		if ((hoveredSplitIndex >= 0 && isCursorPushed) || m_SplitterBackground.a > 0.01f)
+		{
+			
+		}
+
+		if (m_SplitterBackground.a > 0.01f)
 		{
 			for (int i = 0; i < children.GetSize() - 1; ++i)
 			{
@@ -202,19 +208,34 @@ namespace CE
 			}
 		}
 
+		if ((hoveredSplitIndex >= 0 && isCursorPushed) || m_SplitterBackground.a > 0.01f)
+		{
+			
+		}
+
 		for (const auto& child : children)
 		{
 			if (!child->Enabled() || !child->Visible())
 				continue;
 
+			if (child->IsTranslationOnly())
+			{
+				painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+			}
+			else
+			{
+				painter->PushChildCoordinateSpace(child->GetLocalTransform());
+			}
+
 			child->OnPaint(painter);
+
+			painter->PopChildCoordinateSpace();
 		}
 
 		if (m_ClipChildren)
 		{
-			painter->PopClipShape();
+			painter->PopClipRect();
 		}
-		painter->PopChildCoordinateSpace();
     }
 
     void FSplitBox::HandleEvent(FEvent* event)
@@ -230,7 +251,9 @@ namespace CE
 		if (event->IsMouseEvent())
 		{
 			FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-			Vec2 localMousePos = mouseEvent->mousePosition - globalPosition;
+
+			Vec2 localMousePos = mouseEvent->mousePosition;
+			localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
 			if (draggedSplitIndex == -1 && 
 				(mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter || mouseEvent->type == FEventType::MouseLeave))

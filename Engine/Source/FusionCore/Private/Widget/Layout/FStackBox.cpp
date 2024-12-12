@@ -42,12 +42,12 @@ namespace CE
 
 			if (m_Direction == FStackBoxDirection::Horizontal)
 			{
-				contentSize.width += childSize.width + childMargin.left;
+				contentSize.width += childSize.width + childMargin.left + childMargin.right;
 				contentSize.height = Math::Max(contentSize.height, childSize.height + childMargin.top + childMargin.bottom);
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
 			{
-				contentSize.height += childSize.height + childMargin.top;
+				contentSize.height += childSize.height + childMargin.top + childMargin.bottom;
 				contentSize.width = Math::Max(contentSize.width, childSize.width + childMargin.left + childMargin.right);
 			}
 		}
@@ -245,11 +245,10 @@ namespace CE
 
 		if (children.IsEmpty() || !Enabled())
 			return;
-
-		painter->PushChildCoordinateSpace(localTransform);
+		
 		if (m_ClipChildren)
 		{
-			painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+			painter->PushClipRect(Matrix4x4::Identity(), computedSize);
 		}
 
 		for (const auto& child : children)
@@ -257,14 +256,24 @@ namespace CE
 			if (!child->Enabled() || !child->Visible())
 				continue;
 
+			if (child->IsTranslationOnly())
+			{
+				painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+			}
+			else
+			{
+				painter->PushChildCoordinateSpace(child->GetLocalTransform());
+			}
+
 			child->OnPaint(painter);
+
+			painter->PopChildCoordinateSpace();
 		}
 
 		if (m_ClipChildren)
 		{
-			painter->PopClipShape();
+			painter->PopClipRect();
 		}
-		painter->PopChildCoordinateSpace();
 	}
 
 	void FStackBox::Construct()

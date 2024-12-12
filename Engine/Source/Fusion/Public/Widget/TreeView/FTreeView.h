@@ -52,7 +52,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
-        FUSION_PROPERTY(FTreeViewModel*, Model);
+        FUSION_PROPERTY(FAbstractItemModel*, Model);
         FUSION_PROPERTY(FItemSelectionModel*, SelectionModel);
 
         FUSION_PROPERTY(int, ExpandableColumn);

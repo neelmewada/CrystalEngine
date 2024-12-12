@@ -1,5 +1,11 @@
 #pragma once
 
+#if WINDOWS_DEBUG_MEMORY_LEAKS
+// For debugging only!
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include "CoreTracy.h"
 
 #include "CoreMinimal.h"

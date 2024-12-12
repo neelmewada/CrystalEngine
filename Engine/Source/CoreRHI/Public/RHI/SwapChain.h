@@ -17,6 +17,8 @@ namespace CE::RHI
 
 		u32 preferredWidth = 0;
 		u32 preferredHeight = 0;
+
+		bool useMailboxMode = false;
 	};
     
 	class CORERHI_API SwapChain : public RHIResource

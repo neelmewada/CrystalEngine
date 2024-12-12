@@ -100,19 +100,28 @@ namespace CE
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())
         {
-            painter->PushChildCoordinateSpace(localTransform);
             if (m_ClipChildren)
             {
-                painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+                painter->PushClipRect(Matrix4x4::Identity(), computedSize);
+            }
+
+            if (m_Child->isTranslationOnly)
+            {
+	            painter->PushChildCoordinateSpace(m_Child->computedPosition + m_Child->m_Translation);
+            }
+            else
+            {
+	            painter->PushChildCoordinateSpace(m_Child->GetLocalTransform());
             }
 
             m_Child->OnPaint(painter);
 
+            painter->PopChildCoordinateSpace();
+
             if (m_ClipChildren)
             {
-                painter->PopClipShape();
+                painter->PopClipRect();
             }
-            painter->PopChildCoordinateSpace();
         }
     }
 
@@ -134,12 +143,16 @@ namespace CE
         if (!m_Child || !m_Child->Enabled())
             return thisHitTest;
 
-        Vec2 transformedMousePos = (Matrix4x4::Translation(-computedPosition - m_Translation) *
-            Matrix4x4::Angle(m_Angle) *
-            Matrix4x4::Scale(m_Scale)) * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+        auto invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1.0f);
+
+        Vec2 transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
+            Matrix4x4::Angle(-m_Angle) *
+            Matrix4x4::Scale(invScale) *
+            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor)) *
+            Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         FWidget* result = m_Child->HitTest(transformedMousePos);
-        if (result)
+        if (result != nullptr)
             return result;
         return thisHitTest;
     }

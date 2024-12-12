@@ -74,7 +74,8 @@ namespace CE
 
 		if (platformWindow->dragHitTest.IsValid())
 		{
-			return platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y)) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
+			bool result = platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y));
+			return result ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
 		}
 		else if (area->y < WindowDragPadding)
 		{
@@ -100,6 +101,8 @@ namespace CE
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+        
+        
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
@@ -206,6 +209,8 @@ namespace CE
 		{
 			SDL_SetWindowHitTest(handle, nullptr, nullptr);
 		}
+        
+        PlatformWindowMisc::SetupBorderlessWindow(this, borderless);
 	}
 
 	void SDLPlatformWindow::SetInputFocus()

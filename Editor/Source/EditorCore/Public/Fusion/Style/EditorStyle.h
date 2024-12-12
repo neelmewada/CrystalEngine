@@ -39,6 +39,9 @@ namespace CE::Editor
 		FCustomButtonStyle* highlightedButton = nullptr;
 
 		FIELD()
+		FTextButtonStyle* underlineButton = nullptr;
+
+		FIELD()
 		FCustomButtonStyle* windowCloseButton = nullptr;
 
 		FIELD()

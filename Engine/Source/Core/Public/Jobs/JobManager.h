@@ -99,7 +99,12 @@ namespace CE
 		void DeactivateWorkersAndWait();
 
 		/// Waits for all worker threads to complete execution until all jobs are finished, and deactivates & terminates all worker threads.
+		/// This function doesn't guarantee that the global job queue will be empty upon return!
 		void Complete();
+
+		/// Finish processing ALL the jobs and deactivate.
+		/// This function guarantees that the global job queue will be empty upon return!
+		void Finish();
 
 		int GetCurrentJobThreadIndex();
 
@@ -139,7 +144,7 @@ namespace CE
 		Atomic<int> numThreads = 0;
 
 		Atomic<bool> threadsCreated = false;
-		Atomic<int> totalJobsInQueue = 0;
+		Atomic<int> totalJobsInGlobalQueue = 0;
 		Atomic<int> numAvailableWorkers = 0;
 
 		std::deque<Job*> globalQueue{};

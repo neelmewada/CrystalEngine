@@ -31,6 +31,8 @@ namespace CE
 
         bool SupportsKeyboardEvents() const override { return true; }
 
+        bool CapturesMouseWheel() const override { return true; }
+
     protected:
 
         FTreeViewContainer();
@@ -55,8 +57,15 @@ namespace CE
         TreeViewRowList children;
         HashSet<FModelIndex> expandedRows;
         Vec2 modelUpdateComputedSize;
+        f32 totalRowHeight = 0;
+        bool isScrollHovered = false;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
+
+        // - ScrollBar -
+
+        Self& NormalizedScrollY(f32 value);
+        f32 NormalizedScrollY();
 
         FUSION_WIDGET;
         friend class FTreeView;

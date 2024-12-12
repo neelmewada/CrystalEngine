@@ -211,8 +211,6 @@ namespace CE
         if (!GetChild())
             return;
 
-        FWidget* child = GetChild();
-
         if (isVerticalScrollVisible)
         {
             if (m_ScrollBarBackground.IsValidBrush() || m_ScrollBarBackgroundPen.IsValidPen())
@@ -220,7 +218,7 @@ namespace CE
                 painter->SetBrush(m_ScrollBarBackground);
                 painter->SetPen(m_ScrollBarBackgroundPen);
 
-                Vec2 pos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth, computedPosition.y);
+                Vec2 pos = Vec2(computedSize.x - m_ScrollBarMargin * 2 - m_ScrollBarWidth, 0);
                 Vec2 size = Vec2(m_ScrollBarMargin * 2 + m_ScrollBarWidth, computedSize.y);
 
                 painter->DrawRect(Rect::FromSize(pos, size));
@@ -237,7 +235,7 @@ namespace CE
                 painter->SetPen(m_ScrollBarPen);
             }
 
-            painter->DrawShape(GetVerticalScrollBarRect(), m_ScrollBarShape);
+            painter->DrawShape(GetVerticalScrollBarRect().Translate(-computedPosition), m_ScrollBarShape);
         }
 
         if (isHorizontalScrollVisible)
@@ -251,7 +249,7 @@ namespace CE
                 if (isVerticalScrollVisible)
                     horiOffset = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
 
-                Vec2 pos = Vec2(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth);
+                Vec2 pos = Vec2(0, computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth);
                 Vec2 size = Vec2(computedSize.x - horiOffset, m_ScrollBarMargin * 2 + m_ScrollBarWidth);
 
                 painter->DrawRect(Rect::FromSize(pos, size));
@@ -268,7 +266,7 @@ namespace CE
                 painter->SetPen(m_ScrollBarPen);
             }
 
-            painter->DrawShape(GetHorizontalScrollBarRect(), m_ScrollBarShape);
+            painter->DrawShape(GetHorizontalScrollBarRect().Translate(-computedPosition), m_ScrollBarShape);
         }
     }
 
@@ -280,15 +278,15 @@ namespace CE
         {
             FMouseEvent* mouseEvent = (FMouseEvent*)event;
             Vec2 localMousePos = mouseEvent->mousePosition;
-            if (parent)
-                localMousePos -= parent->globalPosition;
+            localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
             bool isVScroll = false;
             bool isHScroll = false;
 
             if (isVerticalScrollVisible)
             {
-                Rect scrollBar = GetVerticalScrollBarRect();
+                // localMousePos already contains this widget's computed position in it.
+                Rect scrollBar = GetVerticalScrollBarRect().Translate(-computedPosition);
 
                 if (scrollBar.Contains(localMousePos))
                 {
@@ -298,7 +296,8 @@ namespace CE
 
             if (isHorizontalScrollVisible)
             {
-                Rect scrollBar = GetHorizontalScrollBarRect();
+                // localMousePos already contains this widget's computed position in it.
+                Rect scrollBar = GetHorizontalScrollBarRect().Translate(-computedPosition);
 
                 if (scrollBar.Contains(localMousePos))
                 {
@@ -379,7 +378,7 @@ namespace CE
         if (event->IsDragEvent())
         {
             FDragEvent* dragEvent = static_cast<FDragEvent*>(event);
-            Vec2 mouseDelta = dragEvent->mousePosition - dragEvent->prevMousePosition;
+            Vec2 mouseDelta = (dragEvent->mousePosition - dragEvent->prevMousePosition) * FusionApplication::Get()->GetDefaultScalingFactor();
 
             if (dragEvent->type == FEventType::DragMove)
             {
@@ -458,14 +457,29 @@ namespace CE
             return this;
         }
 
+        auto invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1.0f);
+
+        Vec2 transformedMousePos;
+
+    	if (child != nullptr && (isVerticalScrollVisible || isHorizontalScrollVisible))
+    	{
+            transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
+                Matrix4x4::Angle(-m_Angle) *
+                Matrix4x4::Scale(invScale) *
+                Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor)) *
+                Vec4(mousePosition.x, mousePosition.y, 0, 1);
+    	}
+
         if (child && isVerticalScrollVisible)
         {
             f32 scrollBarHeight = computedSize.y / child->computedSize.y;
             scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
             
-            Vec2 barSize = Vec2(m_ScrollBarWidth, scrollBarHeight);
+            Vec2 barSize = Vec2(m_ScrollBarWidth, computedSize.y);
+            Rect barRegion = Rect::FromSize(Vec2(computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, 
+                0), barSize);
 
-            if (Rect::FromSize(Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, computedPosition.y), barSize).Contains(mousePosition))
+            if (barRegion.Contains(transformedMousePos))
             {
                 return this;
             }
@@ -473,12 +487,10 @@ namespace CE
 
         if (child && isHorizontalScrollVisible)
         {
-            Rect rect = GetHorizontalScrollBarRect();
-
             Rect barRegion = Rect(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth, 
                 computedPosition.x + computedSize.x, computedPosition.y + computedSize.y);
 
-            if (barRegion.Contains(mousePosition))
+            if (barRegion.Contains(transformedMousePos))
             {
                 return this;
             }

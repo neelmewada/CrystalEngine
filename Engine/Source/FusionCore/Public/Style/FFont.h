@@ -58,7 +58,7 @@ namespace CE
         Name family = "";
 
         FIELD()
-        int fontSize = 12;
+        int fontSize = 10;
 
         FIELD()
         b8 isBold = false;

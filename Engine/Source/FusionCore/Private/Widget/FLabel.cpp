@@ -47,68 +47,27 @@ namespace CE
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());
 
-        bool transformChanged = false;
-
-        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 1)
-        {
-            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(m_Scale));
-            transformChanged = true;
-        }
-
-        painter->DrawText(m_Text, computedPosition, computedSize, m_WordWrap);
+        painter->DrawText(m_Text, Vec2(), computedSize, m_WordWrap);
 
         if (m_Underline.GetStyle() != FPenStyle::None && m_Underline.GetColor().a > 0.001f && 
             !m_Text.IsEmpty())
         {
             FFontMetrics metrics = painter->GetFontMetrics(m_Font);
-            f32 lineHeight = metrics.lineHeight * (f32)m_Font.GetFontSize();
 
-        	painter->CalculateCharacterOffsets(charRects, m_Text, m_Font, computedSize.width, m_WordWrap);
+            const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+            const f32 fontDpiScaling = dpi / 72.0f;
+            const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+            const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
 
-            f32 startX = 0;
-            f32 curX = NumericLimits<f32>::Min();
-            f32 curY = 0;
-            int curLine = 0;
+        	painter->GetRenderer()->CalculateUnderlinePositions(underlineRects, m_Text, m_Font, computedSize.width, m_WordWrap);
 
-            for (int i = 0; i < charRects.GetSize(); ++i)
+            for (int i = 0; i < underlineRects.GetSize(); ++i)
             {
-	            if (i == 0 || startX < -1000)
-	            {
-                    startX = charRects[0].min.x;
+                underlineRects[i] = underlineRects[i].Translate(Vec2(0,  -metrics.descender * m_Font.GetFontSize() * metricsScaling));
 
-                    curX = charRects[0].max.x;
-                    curY = charRects[0].min.y;
-	            }
-                else
-                {
-	                if (charRects[i].max.x < curX || i == (int)charRects.GetSize() - 1) // New line OR EOL
-	                {
-                        if (i == (int)charRects.GetSize() - 1)
-                        {
-                            curX = charRects[i].max.x;
-                            curY = charRects[i].min.y;
-                        }
-
-                        painter->SetPen(m_Underline);
-                        painter->DrawLine(computedPosition + Vec2(startX, curY + 1),
-                            computedPosition + Vec2(curX, curY + 1));
-
-                        startX = charRects[i].min.x;
-                        curX = charRects[i].max.x;
-                        curY = charRects[i].min.y;
-	                }
-                    else
-                    {
-                        curX = charRects[i].max.x;
-                        curY = charRects[i].min.y;
-                    }
-                }
+                painter->SetPen(m_Underline);
+                painter->DrawLine(underlineRects[i].min, underlineRects[i].max);
             }
-        }
-
-        if (transformChanged)
-        {
-            painter->SetItemTransform(Matrix4x4::Identity());
         }
     }
 

@@ -99,6 +99,9 @@ namespace CE
 
         Vec2 GetComputedSize() const { return computedSize; }
 
+        const Matrix4x4& GetLocalTransform() const { return localTransform; }
+        const Matrix4x4& GetGlobalTransform() const { return globalTransform; }
+
         void SetComputedPosition(Vec2 pos) { computedPosition = pos; }
 
         void SetComputedSize(Vec2 size) { computedSize = size; }
@@ -122,6 +125,8 @@ namespace CE
     	virtual bool SupportsDragEvents() const { return false; }
 
         virtual bool SupportsFocusEvents() const { return false; }
+
+        virtual bool SupportsKeyboardFocus() const { return SupportsFocusEvents() && SupportsKeyboardEvents(); }
 
         virtual bool CapturesMouseWheel() const { return false; }
 
@@ -148,6 +153,8 @@ namespace CE
 
         //! @brief Returns true if this widget is both enabled and visible.
         bool IsVisible();
+
+        bool IsTranslationOnly() const { return isTranslationOnly; }
 
         //! @brief Internal use only! Never call this function directly.
         void SetParent(FWidget* parent);
@@ -184,8 +191,12 @@ namespace CE
         //! @brief Global position of the widget, i.e. position in the leaf/terminal context.
         Vec2 globalPosition;
 
-        //! @brief Transformation matrix in parent widget's coordinate space.
+        //! @brief Transformation matrix that is pushed by parent widget to coordinate space stack.
         Matrix4x4 localTransform;
+
+        Matrix4x4 mouseTransform;
+
+        Matrix4x4 globalTransform;
 
         FIELD()
         CE::Name styleKey;
@@ -202,6 +213,7 @@ namespace CE
 
         FIELD(ReadOnly)
         bool isFocused = false;
+        bool isTranslationOnly = false;
 
     protected:
 
@@ -219,6 +231,7 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(Vec4, Padding);
         FUSION_LAYOUT_PROPERTY(Vec4, Margin);
+        FUSION_PROPERTY(Vec2, Anchor);
 
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);

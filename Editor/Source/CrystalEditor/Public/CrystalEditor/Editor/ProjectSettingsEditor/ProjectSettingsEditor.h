@@ -16,7 +16,7 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        static void Show();
+        static ProjectSettingsEditor* Show();
 
     protected: // - Internal -
 

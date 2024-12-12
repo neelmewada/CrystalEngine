@@ -18,6 +18,10 @@ static CE::JobManager* gJobManager = nullptr;
 static CE::JobContext* gJobContext = nullptr;
 
 using namespace CE;
+using namespace RenderingTests;
+
+static int windowWidth = 0;
+static int windowHeight = 0;
 
 static void TestBegin(bool gui)
 {
@@ -44,10 +48,23 @@ static void TestBegin(bool gui)
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.resizable = true;
-		windowInfo.hidden = false;
+		windowInfo.hidden = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
-		PlatformWindow* window = app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+		f32 scaleFactor = GetDefaults<FusionApplication>()->GetDefaultScalingFactor();
+
+#if PLATFORM_MAC
+		u32 w = 540, h = 400;
+#elif PLATFORM_LINUX
+		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
+#elif PLATFORM_WINDOWS
+		u32 w = 1024, h = 768;
+#endif
+
+		windowWidth = w;
+		windowHeight = h;
+
+		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
 		window->SetBorderless(true);
 
 		InputManager::Get().Initialize(app);
@@ -70,7 +87,10 @@ static void TestBegin(bool gui)
 	FusionApplication* fApp = FusionApplication::Get();
 
 	FusionInitInfo initInfo = {};
+	initInfo.assetLoader = nullptr;
 	fApp->Initialize(initInfo);
+
+	RendererSystem::Get().Init();
 
 	JobManagerDesc desc{};
 	desc.defaultTag = JOB_THREAD_WORKER;
@@ -95,12 +115,14 @@ static void TestEnd(bool gui)
 	delete gJobManager;
 	gJobManager = nullptr;
 
+	RendererSystem::Get().Shutdown();
+
 	FusionApplication* fApp = FusionApplication::Get();
 
 	fApp->PreShutdown();
 	fApp->Shutdown();
-	delete fApp;
-
+	fApp->BeginDestroy();
+	
 	if (gui)
 	{
 		delete RHI::FrameScheduler::Get();
@@ -125,6 +147,7 @@ static void TestEnd(bool gui)
 
 	CEDeregisterModuleTypes();
 	ModuleManager::Get().UnloadModule("CoreRPI");
+	ModuleManager::Get().UnloadModule("FusionCore");
 	ModuleManager::Get().UnloadModule("VulkanRHI");
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreShader");
@@ -132,6 +155,116 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
+}
+
+void System(const std::string& filename)
+{
+#ifdef _WIN32
+  system(filename.c_str());
+#else
+  system(("firefox " + filename).c_str());
+#endif
+}
+
+static Array<Color> colors = {
+	Color::RGBHex(0x37b04e),
+	Color::RGBHex(0xcd4e92),
+	Color::RGBHex(0x5d5bc5),
+	Color::RGBHex(0x115eee),
+	Color::RGBHex(0x2cfb66),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0xbd0a57),
+	Color::RGBHex(0xd3d5e4),
+	Color::RGBHex(0x5b78b3),
+	Color::RGBHex(0x1ee740),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0x34823c),
+	Color::RGBHex(0xf86210),
+	Color::RGBHex(0xd388af),
+	Color::RGBHex(0x5b78b3),
+	Color::RGBHex(0x2b1152),
+	Color::RGBHex(0x26a3f9),
+};
+
+static Array<Vec2i> rects = {
+	Vec2i(20, 30),
+	Vec2i(60, 20),
+	Vec2i(30, 30),
+	Vec2i(100, 50),
+	Vec2i(50, 100),
+	Vec2i(200, 100),
+	Vec2i(80, 20),
+	Vec2i(20, 60),
+};
+
+Ptr<FImageAtlas::BinaryNode> root = nullptr;
+
+static void AddRect()
+{
+	Vec2i imageSize = Vec2i(Random::Range(10, 80), Random::Range(10, 80));
+	auto node = root->Insert(imageSize);
+	if (node == nullptr)
+	{
+		String::IsAlphabet('a');
+	}
+	else
+	{
+		node->imageId = Random::Range(0, colors.GetSize() - 1);
+		node->imageName = "Valid";
+		root->usedArea += imageSize.x * imageSize.y;
+	}
+}
+
+static void RemoveRect()
+{
+	auto node = root->FindUsedNode();
+	if (node != nullptr)
+	{
+		root->usedArea -= Math::RoundToInt(node->rect.GetSize().x * node->rect.GetSize().y);
+		node->ClearImage();
+	}
+	else
+	{
+		String::IsAlphabet('a');
+	}
+}
+
+static void DoRectPacking(FusionRenderer2* renderer)
+{
+	renderer->SetBrush(Color::Black());
+	renderer->SetPen(FPen());
+
+	renderer->PushChildCoordinateSpace(Vec2(0, 40));
+	{
+		// BG
+		renderer->FillRect(Rect::FromSize(0, 0, root->rect.max.x, root->rect.max.y));
+
+		root->ForEachRecursive([&](Ptr<FImageAtlas::BinaryNode> node)
+			{
+				if (node->imageId >= 0)
+				{
+					renderer->SetPen(FPen());
+					renderer->SetBrush(colors[node->imageId % (int)colors.GetSize()]);
+
+					renderer->FillRect(node->rect);
+				}
+				
+				if (node->child[0] != nullptr || node->child[1] != nullptr)
+				{
+					renderer->SetPen(FPen(Color::Red(), 1.5f));
+					renderer->StrokeRect(node->rect);
+				}
+				else
+				{
+					renderer->SetPen(FPen(Color::White().WithAlpha(0.8f), 1));
+					renderer->StrokeRect(Rect(node->rect.left + 1, node->rect.top + 1, node->rect.right - 1, node->rect.bottom - 1));
+				}
+			});
+
+		renderer->SetPen(FPen(Color::White()));
+		renderer->DrawText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
+	}
+	renderer->PopChildCoordinateSpace();
 }
 
 TEST(FusionCore, Rendering)
@@ -162,7 +295,8 @@ TEST(FusionCore, Rendering)
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 			primaryBtn->cornerRadius = Vec4(1, 1, 1, 1) * 5;
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
-			primaryBtn->borderWidth = 1.0f;
+			primaryBtn->hoveredBorderColor = primaryBtn->pressedBorderColor = primaryBtn->borderColor;
+			primaryBtn->borderWidth = 1.5f;
 
 			GetDefaultWidget<FButton>()
 				.Padding(Vec4(10, 5, 10, 5))
@@ -220,7 +354,7 @@ TEST(FusionCore, Rendering)
 		}
 
 		{
-			auto primaryComboBox = CreateObject<FComboBoxPlainStyle>(rootStyle, "PrimaryComboBoxStyle");
+			auto primaryComboBox = CreateObject<FComboBoxStyle>(rootStyle, "PrimaryComboBoxStyle");
 			rootStyle->Add("ComboBox.Primary", primaryComboBox);
 
 			primaryComboBox->background = Color::RGBA(15, 15, 15);
@@ -229,7 +363,7 @@ TEST(FusionCore, Rendering)
 			primaryComboBox->borderWidth = 1.0f;
 			primaryComboBox->cornerRadius = Vec4(5, 5, 5, 5);
 
-			auto primaryComboBoxItem = CreateObject<FComboBoxItemPlainStyle>(rootStyle, "PrimaryComboBoxItemStyle");
+			auto primaryComboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "PrimaryComboBoxItemStyle");
 			rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
 
 			primaryComboBoxItem->background = Color::Clear();
@@ -237,14 +371,14 @@ TEST(FusionCore, Rendering)
 			primaryComboBoxItem->selectedBackground = Color::Clear();
 			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
-			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground;
+			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground.GetFillColor();
 			primaryComboBoxItem->borderWidth = 1.0f;
 
 			GetDefaultWidget<FComboBox>()
 				.ItemStyle(primaryComboBoxItem)
 				.Style(rootStyle, "ComboBox.Primary");
 
-			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
+			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
 			rootStyle->Add("ComboBoxPopup.Primary", primaryComboBoxPopup);
 
 			primaryComboBoxPopup->background = Color::RGBA(26, 26, 26);
@@ -288,10 +422,36 @@ TEST(FusionCore, Rendering)
 			GetDefaultWidget<FMenuBar>()
 				.Style(rootStyle, "MenuBar.Primary");
 		}
+
+		{
+			
+			auto comboBox = CreateObject<FComboBoxStyle>(rootStyle, "ComboBox");
+			rootStyle->Add("ComboBox", comboBox);
+
+			comboBox->background = Color::RGBA(15, 15, 15);
+			comboBox->borderColor = Color::RGBA(60, 60, 60);
+			comboBox->pressedBorderColor = comboBox->hoverBorderColor = Color::RGBA(74, 74, 74);
+			comboBox->borderWidth = 1.0f;
+			comboBox->cornerRadius = Vec4(5, 5, 5, 5);
+
+			auto comboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "ComboBoxItem");
+			rootStyle->Add("ComboBoxItem", comboBoxItem);
+
+			comboBoxItem->background = Color::Clear();
+			comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
+			comboBoxItem->selectedBackground = Color::Clear();
+			comboBoxItem->selectedShape = FShapeType::RoundedRect;
+			comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
+			comboBoxItem->selectedBorderColor = Color::RGBA(0, 112, 224);
+			comboBoxItem->borderWidth = 1.0f;
+
+			GetDefaultWidget<FComboBox>()
+				.ItemStyle(comboBoxItem)
+				.Style(comboBox);
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
-	mainWindow->Show();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
@@ -301,9 +461,36 @@ TEST(FusionCore, Rendering)
 
 	nativeContext->SetOwningWidget(mainWidget);
 
+	mainWidget->OnAdd([]
+	{
+		AddRect();
+	});
+	mainWidget->OnRemove([]
+	{
+		clock_t prev = clock();
+
+		RemoveRect();
+		root->Defragment();
+
+		CE_LOG(Info, All, "Remove Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
+	});
+	mainWidget->OnDefragment([]
+	{
+		clock_t prev = clock();
+
+		//root->Defragment();
+		root->DefragmentSlow();
+
+		CE_LOG(Info, All, "Defragment Time: {} ms", ((f64)(clock() - prev) * 1000.0 / CLOCKS_PER_SEC));
+	});
+
 	auto exposedTick = [&]
 		{
-			FusionApplication::Get()->Tick(true);
+			FusionApplication::Get()->SetExposed();
+
+			FusionApplication::Get()->Tick();
+
+			RendererSystem::Get().Render();
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
@@ -313,23 +500,53 @@ TEST(FusionCore, Rendering)
 		mainWidget->comboBox->ApplyStyle();
 	}
 
+	mainWindow->Show();
+
 	int frameCounter = 0;
+
+	root = new FImageAtlas::BinaryNode;
+	root->rect = Rect(0, 0, 680, 460);
+	
+	for (int i = 0; i < rects.GetSize(); ++i)
+	{
+		auto node = root->Insert(rects[i]);
+		if (node != nullptr)
+		{
+			node->imageId = i;
+			node->imageName = "Valid";
+			root->usedArea += rects[i].x * rects[i].y;
+		}
+		else
+		{
+			String::IsAlphabet('a');
+		}
+	}
+
+	for (int i = 0; i < 92; ++i)
+	{
+		AddRect();
+	}
+
+	for (int i = 0; i < 92; ++i)
+	{
+		RemoveRect();
+	}
+
+	root->Defragment();
+	//root->DefragmentSlow();
 
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
-		if (frameCounter == 1 && mainWidget->model)
-		{
-			mainWidget->model->UpdateMemoryFootprint();
-		}
+		FusionApplication::Get()->ResetExposed();
 
 		// App & Input Tick
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
-		FusionApplication::Get()->Tick();
+		RendererSystem::Get().Render();
 
 		previousTime = curTime;
 		frameCounter++;

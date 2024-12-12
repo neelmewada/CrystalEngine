@@ -161,6 +161,7 @@ namespace CE::Vulkan
                         break;
                     case RHI::ShaderResourceType::Texture1D:
                     case RHI::ShaderResourceType::Texture2D:
+                    case RHI::ShaderResourceType::Texture2DArray:
                     case RHI::ShaderResourceType::Texture3D:
                     case RHI::ShaderResourceType::TextureCube:
                         layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -219,6 +220,59 @@ namespace CE::Vulkan
         pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
         pipelineLayoutCI.pSetLayouts = setLayouts.GetData();
         pipelineLayoutCI.pushConstantRangeCount = 0;
+        pipelineLayoutCI.pPushConstantRanges = nullptr;
+
+        if (desc.rootConstantLayout.NotEmpty())
+        {
+            VkPushConstantRange range{};
+            range.offset = 0;
+            range.size = 0;
+
+            for (const auto& memberType: desc.rootConstantLayout)
+            {
+	            switch (memberType)
+	            {
+	            case ShaderStructMemberType::None: // Should never happen
+		            break;
+	            case ShaderStructMemberType::UInt:
+                    range.size += sizeof(u32);
+		            break;
+	            case ShaderStructMemberType::Int:
+                    range.size += sizeof(s32);
+		            break;
+	            case ShaderStructMemberType::Float:
+                    range.size += sizeof(f32);
+		            break;
+	            case ShaderStructMemberType::Float2:
+                    range.size += sizeof(Vec2);
+		            break;
+	            case ShaderStructMemberType::Float3:
+                    range.size += sizeof(Vec3);
+		            break;
+	            case ShaderStructMemberType::Float4:
+                    range.size += sizeof(Vec4);
+		            break;
+	            case ShaderStructMemberType::Float4x4:
+                    range.size += sizeof(Matrix4x4);
+		            break;
+	            case ShaderStructMemberType::Struct: // Should never happen
+		            break;
+	            }
+            }
+
+            if (EnumHasFlag(desc.rootConstantShaderStages, ShaderStage::Vertex))
+                range.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
+            if (EnumHasFlag(desc.rootConstantShaderStages, ShaderStage::Fragment))
+                range.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
+            if (range.size > 0)
+	        {
+		        pipelineLayoutCI.pushConstantRangeCount = 1;
+            	pipelineLayoutCI.pPushConstantRanges = &range;
+
+                pushConstantRanges.Add(range);
+	        }
+        }
 
         result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &pipelineLayout);
         if (result != VK_SUCCESS)

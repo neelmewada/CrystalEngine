@@ -36,7 +36,7 @@ namespace CE
 
     protected:
 
-        Array<Rect> charRects;
+        Array<Rect> underlineRects;
 
         FUSION_WIDGET;
     };

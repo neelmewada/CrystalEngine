@@ -10,6 +10,8 @@ namespace CE
 
         static u32 GetDpiForWindow(SDLPlatformWindow* sdlWindow);
 
+        static void SetupBorderlessWindow(SDLPlatformWindow* window, bool borderless) {}
+
     };
 
     typedef LinuxWindowMisc PlatformWindowMisc;

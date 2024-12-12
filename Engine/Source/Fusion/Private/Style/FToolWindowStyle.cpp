@@ -5,7 +5,7 @@ namespace CE
 
 	FToolWindowStyle::FToolWindowStyle()
 	{
-		
+		borderWidth = 3;
 	}
 
 	SubClass<FWidget> FToolWindowStyle::GetWidgetClass() const

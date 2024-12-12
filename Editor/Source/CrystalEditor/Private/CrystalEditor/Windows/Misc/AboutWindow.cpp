@@ -16,8 +16,7 @@ namespace CE::Editor
         titleBar->Height(30);
         titleBarLabel->FontSize(13);
 
-        constexpr auto splashImage = "/Editor/Assets/Images/Splash";
-        constexpr auto gridImage = "/Editor/Assets/Images/GridSmall";
+        constexpr auto splashImage = "/Editor/Assets/UI/Splash";
 
         instance = this;
 
@@ -42,22 +41,22 @@ namespace CE::Editor
                 .Margin(Vec4(0, 0, 0, 10)),
 
                 FNew(FLabel)
-                .FontSize(15)
+                .FontSize(13)
                 .Text("CrystalEditor")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Version: " CE_ENGINE_VERSION_STRING_SHORT " pre-alpha [Build " CE_TOSTRING(CE_VERSION_BUILD) "]")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Platform: " + PlatformMisc::GetOSVersionString())
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(10)
                 .Text("Icons by flaticon.com")
                 .HAlign(HAlign::Left)
 	        )
@@ -93,7 +92,13 @@ namespace CE::Editor
 			.windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
         };
 
-        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("About", 600, 500, info);
+        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+    	scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
+#if PLATFORM_MAC
+    	scaling = 1;
+#endif
+
+        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow("About", (u32)(600 * scaling), (u32)(500 * scaling), info);
         window->SetAlwaysOnTop(true);
         window->SetBorderless(true);
 

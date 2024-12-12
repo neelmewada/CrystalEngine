@@ -34,8 +34,18 @@ namespace CE::RHI
 		delete frameGraph; frameGraph = nullptr;
 	}
 
+	void FrameScheduler::ResetFramesInFlight()
+	{
+		if (executer)
+		{
+			executer->ResetFramesInFlight();
+		}
+	}
+
 	void FrameScheduler::BeginFrameGraph()
 	{
+		ZoneScoped;
+
 		GetAttachmentDatabase().Clear();
 		scopeProducers.Clear();
 
@@ -44,6 +54,8 @@ namespace CE::RHI
 
     void FrameScheduler::Compile()
     {
+		ZoneScoped;
+
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
 			numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
@@ -53,7 +65,7 @@ namespace CE::RHI
         compileRequest.frameGraph = frameGraph;
         compileRequest.transientPool = transientMemoryPool;
 		compileRequest.numFramesInFlight = numFramesInFlight;
-		compileRequest.shrinkPool = true;
+		compileRequest.shrinkPool = false;
 		
         compiler->Compile(compileRequest);
     }

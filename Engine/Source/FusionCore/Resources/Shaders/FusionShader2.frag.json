@@ -1,0 +1,302 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "FragMain",
+            "mode" : "frag"
+        }
+    ],
+    "types" : {
+        "_99" : {
+            "name" : "type._PerViewData",
+            "members" : [
+                {
+                    "name" : "viewMatrix",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 64,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "projectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 128,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewPosition",
+                    "type" : "vec4",
+                    "offset" : 192
+                },
+                {
+                    "name" : "pixelResolution",
+                    "type" : "vec2",
+                    "offset" : 208
+                }
+            ]
+        },
+        "_102" : {
+            "name" : "ObjectData",
+            "members" : [
+                {
+                    "name" : "transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                }
+            ]
+        },
+        "_101" : {
+            "name" : "type.StructuredBuffer.ObjectData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_102",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 64
+                }
+            ]
+        },
+        "_105" : {
+            "name" : "ClipRect",
+            "members" : [
+                {
+                    "name" : "clipRectTransform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "clipRectSize",
+                    "type" : "vec2",
+                    "offset" : 64
+                }
+            ]
+        },
+        "_104" : {
+            "name" : "type.StructuredBuffer.ClipRect",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_105",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 80
+                }
+            ]
+        },
+        "_108" : {
+            "name" : "DrawData",
+            "members" : [
+                {
+                    "name" : "rectSize",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "uvMin",
+                    "type" : "vec2",
+                    "offset" : 8
+                },
+                {
+                    "name" : "uvMax",
+                    "type" : "vec2",
+                    "offset" : 16
+                },
+                {
+                    "name" : "brushPos",
+                    "type" : "vec2",
+                    "offset" : 24
+                },
+                {
+                    "name" : "brushSize",
+                    "type" : "vec2",
+                    "offset" : 32
+                },
+                {
+                    "name" : "index",
+                    "type" : "int",
+                    "offset" : 40
+                },
+                {
+                    "name" : "imageFit",
+                    "type" : "int",
+                    "offset" : 44
+                }
+            ]
+        },
+        "_107" : {
+            "name" : "type.StructuredBuffer.DrawData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_108",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 48
+                }
+            ]
+        },
+        "_110" : {
+            "name" : "type.PushConstant.RootConstants",
+            "members" : [
+                {
+                    "name" : "transparentUV",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "numClipRects",
+                    "type" : "uint",
+                    "offset" : 8
+                },
+                {
+                    "name" : "clipRectIndices",
+                    "type" : "uint",
+                    "array" : [
+                        24
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 12,
+                    "array_stride" : 4
+                }
+            ]
+        }
+    },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD1",
+            "location" : 1
+        },
+        {
+            "type" : "vec4",
+            "name" : "in.var.TEXCOORD2",
+            "location" : 2
+        },
+        {
+            "type" : "int",
+            "name" : "in.var.TEXCOORD3",
+            "location" : 3
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD4",
+            "location" : 4
+        },
+        {
+            "type" : "int",
+            "name" : "in.var.TEXCOORD5",
+            "location" : 5
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec4",
+            "name" : "out.var.SV_TARGET",
+            "location" : 0
+        }
+    ],
+    "separate_images" : [
+        {
+            "type" : "texture2D",
+            "name" : "_FontAtlas",
+            "set" : 4,
+            "binding" : 0
+        },
+        {
+            "type" : "texture2DArray",
+            "name" : "_Texture",
+            "set" : 6,
+            "binding" : 0
+        }
+    ],
+    "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_FontAtlasSampler",
+            "set" : 4,
+            "binding" : 1
+        },
+        {
+            "type" : "sampler",
+            "name" : "_TextureSampler",
+            "set" : 6,
+            "binding" : 1
+        }
+    ],
+    "ssbos" : [
+        {
+            "type" : "_101",
+            "name" : "type.StructuredBuffer.ObjectData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 0
+        },
+        {
+            "type" : "_104",
+            "name" : "type.StructuredBuffer.ClipRect",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 1
+        },
+        {
+            "type" : "_107",
+            "name" : "type.StructuredBuffer.DrawData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 2
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_99",
+            "name" : "type._PerViewData",
+            "block_size" : 216,
+            "set" : 1,
+            "binding" : 0
+        }
+    ],
+    "push_constants" : [
+        {
+            "type" : "_110",
+            "name" : "_RootConstants",
+            "push_constant" : true
+        }
+    ]
+}

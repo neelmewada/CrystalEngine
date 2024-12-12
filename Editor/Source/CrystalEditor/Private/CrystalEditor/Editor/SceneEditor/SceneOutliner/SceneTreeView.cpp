@@ -23,17 +23,15 @@ namespace CE::Editor
     {
         FTreeViewRow& row = FNew(FTreeViewRow);
 
-        u32 numColumns = m_Model->GetColumnCount();
-
         row.Cells(
             FNew(FTreeViewCell)
             .Text("Name")
             .ArrowEnabled(true)
-            .FontSize(13),
+            .FontSize(11),
 
             FNew(FTreeViewCell)
             .Text("Type")
-            .FontSize(13)
+            .FontSize(11)
             .Foreground(Color::RGBA(255, 255, 255, 140))
             .ArrowEnabled(false)
         );

@@ -8,6 +8,7 @@ namespace CE
         m_BackgroundShape = FRectangle();
         m_Opacity = 1.0f;
         m_ClipShape = FShapeType::None;
+        m_BorderStyle = FPenStyle::SolidLine;
     }
 
     void FStyledWidget::CalculateIntrinsicSize()
@@ -17,7 +18,7 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
-        if (m_Opacity < 0.0001f)
+        if (m_Opacity < 0.001f)
             return;
 
         if (m_Opacity < 1.0f)
@@ -27,15 +28,7 @@ namespace CE
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {
-            painter->PushClipShape(localTransform, computedSize, m_ClipShape);
-        }
-
-        bool transformChanged = false;
-
-        if (m_Translation.GetSqrMagnitude() > 0 || abs(m_Angle) > 0 || m_Scale.GetSqrMagnitude() != 2)
-        {
-            painter->SetItemTransform(Matrix4x4::Translation(m_Translation) * Matrix4x4::Angle(m_Angle) * Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1)));
-            transformChanged = true;
+            painter->PushClipRect(localTransform, computedSize);
         }
 
 	    if ((m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None) ||
@@ -45,7 +38,7 @@ namespace CE
 
             if (m_BorderWidth > 0 && m_BorderColor.a > 0)
             {
-                painter->SetPen(FPen(m_BorderColor, m_BorderWidth));
+                painter->SetPen(FPen(m_BorderColor, m_BorderWidth, m_BorderStyle));
             }
             else
             {
@@ -64,16 +57,11 @@ namespace CE
                 break;
             }
 
-            isCulled = !painter->DrawShape(Rect::FromSize(computedPosition, computedSize), m_BackgroundShape);
+            isCulled = !painter->DrawShape(Rect::FromSize(Vec2(), computedSize), m_BackgroundShape);
 	    }
         else
         {
-            isCulled = painter->IsCulled(computedPosition, computedSize);
-        }
-
-        if (transformChanged)
-        {
-	        painter->SetItemTransform(Matrix4x4::Identity());
+            isCulled = painter->IsCulled(Vec2(), computedSize);
         }
 
         OnPaintContent(painter);
@@ -85,7 +73,7 @@ namespace CE
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {
-            painter->PopClipShape();
+            painter->PopClipRect();
         }
 
         if (m_Opacity < 1.0f)

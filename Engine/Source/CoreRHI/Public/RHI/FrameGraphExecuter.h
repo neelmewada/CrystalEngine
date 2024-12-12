@@ -27,6 +27,8 @@ namespace CE::RHI
 
 		virtual void EndExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
 
+		virtual void ResetFramesInFlight() = 0;
+
 	protected:
 		FrameGraphExecuter() = default;
 

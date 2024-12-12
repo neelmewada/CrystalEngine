@@ -1,0 +1,294 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "VertMain",
+            "mode" : "vert"
+        }
+    ],
+    "types" : {
+        "_72" : {
+            "name" : "type._PerViewData",
+            "members" : [
+                {
+                    "name" : "viewMatrix",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 64,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "projectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 128,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "viewPosition",
+                    "type" : "vec4",
+                    "offset" : 192
+                },
+                {
+                    "name" : "pixelResolution",
+                    "type" : "vec2",
+                    "offset" : 208
+                }
+            ]
+        },
+        "_75" : {
+            "name" : "ObjectData",
+            "members" : [
+                {
+                    "name" : "transform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                }
+            ]
+        },
+        "_74" : {
+            "name" : "type.StructuredBuffer.ObjectData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_75",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 64
+                }
+            ]
+        },
+        "_78" : {
+            "name" : "ClipRect",
+            "members" : [
+                {
+                    "name" : "clipRectTransform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "clipRectSize",
+                    "type" : "vec2",
+                    "offset" : 64
+                }
+            ]
+        },
+        "_77" : {
+            "name" : "type.StructuredBuffer.ClipRect",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_78",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 80
+                }
+            ]
+        },
+        "_81" : {
+            "name" : "DrawData",
+            "members" : [
+                {
+                    "name" : "rectSize",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "uvMin",
+                    "type" : "vec2",
+                    "offset" : 8
+                },
+                {
+                    "name" : "uvMax",
+                    "type" : "vec2",
+                    "offset" : 16
+                },
+                {
+                    "name" : "brushPos",
+                    "type" : "vec2",
+                    "offset" : 24
+                },
+                {
+                    "name" : "brushSize",
+                    "type" : "vec2",
+                    "offset" : 32
+                },
+                {
+                    "name" : "index",
+                    "type" : "int",
+                    "offset" : 40
+                },
+                {
+                    "name" : "imageFit",
+                    "type" : "int",
+                    "offset" : 44
+                }
+            ]
+        },
+        "_80" : {
+            "name" : "type.StructuredBuffer.DrawData",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_81",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 48
+                }
+            ]
+        },
+        "_83" : {
+            "name" : "type.PushConstant.RootConstants",
+            "members" : [
+                {
+                    "name" : "transparentUV",
+                    "type" : "vec2",
+                    "offset" : 0
+                },
+                {
+                    "name" : "numClipRects",
+                    "type" : "uint",
+                    "offset" : 8
+                },
+                {
+                    "name" : "clipRectIndices",
+                    "type" : "uint",
+                    "array" : [
+                        24
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 12,
+                    "array_stride" : 4
+                }
+            ]
+        }
+    },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.POSITION",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 1
+        },
+        {
+            "type" : "vec4",
+            "name" : "in.var.COLOR0",
+            "location" : 2
+        },
+        {
+            "type" : "int",
+            "name" : "in.var.TEXCOORD1",
+            "location" : 3
+        },
+        {
+            "type" : "int",
+            "name" : "in.var.TEXCOORD2",
+            "location" : 4
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD0",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD1",
+            "location" : 1
+        },
+        {
+            "type" : "vec4",
+            "name" : "out.var.TEXCOORD2",
+            "location" : 2
+        },
+        {
+            "type" : "int",
+            "name" : "out.var.TEXCOORD3",
+            "location" : 3
+        },
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD4",
+            "location" : 4
+        },
+        {
+            "type" : "int",
+            "name" : "out.var.TEXCOORD5",
+            "location" : 5
+        }
+    ],
+    "ssbos" : [
+        {
+            "type" : "_74",
+            "name" : "type.StructuredBuffer.ObjectData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 0
+        },
+        {
+            "type" : "_77",
+            "name" : "type.StructuredBuffer.ClipRect",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 1
+        },
+        {
+            "type" : "_80",
+            "name" : "type.StructuredBuffer.DrawData",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 2
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_72",
+            "name" : "type._PerViewData",
+            "block_size" : 216,
+            "set" : 1,
+            "binding" : 0
+        }
+    ],
+    "push_constants" : [
+        {
+            "type" : "_83",
+            "name" : "_RootConstants",
+            "push_constant" : true
+        }
+    ]
+}

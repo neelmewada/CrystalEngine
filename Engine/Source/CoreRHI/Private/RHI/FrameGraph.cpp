@@ -34,6 +34,8 @@ namespace CE::RHI
 
 	bool FrameGraph::Build()
 	{
+		ZoneScoped;
+
 		lastWrittenAttachmentToScope.Clear();
 		attachmentReadSchedule.Clear();
 		nodeDependencies.Clear();
@@ -101,6 +103,8 @@ namespace CE::RHI
 
 	void FrameGraph::FinalizeGraph()
 	{
+		ZoneScoped;
+
 		producers.Clear();
 		nodes.Clear();
 		endScopes.Clear();
@@ -167,7 +171,7 @@ namespace CE::RHI
 				endScopes.Add(scope);
 		}
 
-#if CE_DEBUG
+#if false
 
 		// For debugging
 		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/FrameGraph.json", Stream::Permissions::WriteOnly);

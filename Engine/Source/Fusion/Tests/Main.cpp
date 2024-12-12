@@ -1,12 +1,12 @@
 
-#include "FusionCore.h"
+#include "Fusion.h"
 #include "VulkanRHI.h"
 
 #include "FusionCoreTest.h"
 
 #include <gtest/gtest.h>
 
-#include "FusionCore_Test.private.h"
+#include "Fusion_Test.private.h"
 
 #define TEST_BEGIN TestBegin(false)
 #define TEST_END TestEnd(false)
@@ -18,6 +18,10 @@ static CE::JobManager* gJobManager = nullptr;
 static CE::JobContext* gJobContext = nullptr;
 
 using namespace CE;
+using namespace WidgetTests;
+
+static int windowWidth = 0;
+static int windowHeight = 0;
 
 static void TestBegin(bool gui)
 {
@@ -33,6 +37,7 @@ static void TestBegin(bool gui)
 	ModuleManager::Get().LoadModule("VulkanRHI");
 	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("FusionCore");
+	ModuleManager::Get().LoadModule("Fusion");
 	CERegisterModuleTypes();
 
 	PlatformApplication* app = PlatformApplication::Get();
@@ -44,33 +49,49 @@ static void TestBegin(bool gui)
 		PlatformWindowInfo windowInfo{};
 		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
 		windowInfo.resizable = true;
-		windowInfo.hidden = false;
+		windowInfo.hidden = true;
 		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;
 
-		PlatformWindow* window = app->InitMainWindow("MainWindow", 1024, 768, windowInfo);
+		f32 scaleFactor = GetDefaults<FusionApplication>()->GetDefaultScalingFactor();
+
+#if PLATFORM_MAC
+		u32 w = 540, h = 400;
+#elif PLATFORM_LINUX
+		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
+#elif PLATFORM_WINDOWS
+		u32 w = 1024, h = 768;
+#endif
+
+		windowWidth = w;
+		windowHeight = h;
+
+		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
 		window->SetBorderless(true);
 
 		InputManager::Get().Initialize(app);
 	}
 
-	gDynamicRHI = new Vulkan::VulkanRHI();
+	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 
-	gDynamicRHI->Initialize();
-	gDynamicRHI->PostInitialize();
+	RHI::gDynamicRHI->Initialize();
+	RHI::gDynamicRHI->PostInitialize();
 
 	if (gui)
 	{
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
-		FrameScheduler::Create(desc);
+		RHI::FrameScheduler::Create(desc);
 	}
 
-	RPISystem::Get().Initialize();
+	RPI::RPISystem::Get().Initialize();
 
 	FusionApplication* fApp = FusionApplication::Get();
 
 	FusionInitInfo initInfo = {};
+	initInfo.assetLoader = nullptr;
 	fApp->Initialize(initInfo);
+
+	RendererSystem::Get().Init();
 
 	JobManagerDesc desc{};
 	desc.defaultTag = JOB_THREAD_WORKER;
@@ -95,22 +116,24 @@ static void TestEnd(bool gui)
 	delete gJobManager;
 	gJobManager = nullptr;
 
+	RendererSystem::Get().Shutdown();
+
 	FusionApplication* fApp = FusionApplication::Get();
 
 	fApp->PreShutdown();
 	fApp->Shutdown();
-	delete fApp;
+	fApp->BeginDestroy();
 
 	if (gui)
 	{
-		delete FrameScheduler::Get();
+		delete RHI::FrameScheduler::Get();
 	}
 
-	RPISystem::Get().Shutdown();
+	RPI::RPISystem::Get().Shutdown();
 
-	gDynamicRHI->PreShutdown();
-	gDynamicRHI->Shutdown();
-	delete gDynamicRHI; gDynamicRHI = nullptr;
+	RHI::gDynamicRHI->PreShutdown();
+	RHI::gDynamicRHI->Shutdown();
+	delete RHI::gDynamicRHI; RHI::gDynamicRHI = nullptr;
 
 	PlatformApplication* app = PlatformApplication::Get();
 
@@ -125,6 +148,8 @@ static void TestEnd(bool gui)
 
 	CEDeregisterModuleTypes();
 	ModuleManager::Get().UnloadModule("CoreRPI");
+	ModuleManager::Get().UnloadModule("FusionCore");
+	ModuleManager::Get().UnloadModule("Fusion");
 	ModuleManager::Get().UnloadModule("VulkanRHI");
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreShader");
@@ -134,10 +159,10 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-TEST(FusionCore, Rendering)
+TEST(Fusion, TreeView)
 {
 	TEST_BEGIN_GUI;
-	using namespace RenderingTests;
+	using namespace WidgetTests;
 
 	f32 deltaTime = 0;
 	clock_t previousTime = {};
@@ -162,7 +187,8 @@ TEST(FusionCore, Rendering)
 			primaryBtn->pressedBackground = Color::RGBA(50, 50, 50);
 			primaryBtn->cornerRadius = Vec4(1, 1, 1, 1) * 5;
 			primaryBtn->borderColor = Color::RGBA(24, 24, 24);
-			primaryBtn->borderWidth = 1.0f;
+			primaryBtn->hoveredBorderColor = primaryBtn->pressedBorderColor = primaryBtn->borderColor;
+			primaryBtn->borderWidth = 1.5f;
 
 			GetDefaultWidget<FButton>()
 				.Padding(Vec4(10, 5, 10, 5))
@@ -175,7 +201,8 @@ TEST(FusionCore, Rendering)
 
 			GetDefaultWidget<FScrollBox>()
 				.ScrollBarBackground(Color::RGBA(50, 50, 50))
-				.ScrollBarBrush(Color::RGBA(60, 60, 60))
+				.ScrollBarBrush(Color::RGBA(130, 130, 130))
+				.ScrollBarHoverBrush(Color::RGBA(160, 160, 160))
 				;
 		}
 
@@ -203,12 +230,12 @@ TEST(FusionCore, Rendering)
 			windowControlBtn->cornerRadius = Vec4();
 			windowControlBtn->contentMoveY = 0;
 		}
-		
+
 		{
 			auto primaryTextInput = CreateObject<FTextInputPlainStyle>(rootStyle, "PrimaryTextInput");
 			rootStyle->Add("TextInput.Primary", primaryTextInput);
 
-			primaryTextInput->background = Color::RGBA(15, 15, 15);
+			primaryTextInput->background = primaryTextInput->hoverBackground = primaryTextInput->editingBackground = Color::RGBA(15, 15, 15);
 			primaryTextInput->borderColor = Color::RGBA(60, 60, 60);
 			primaryTextInput->editingBorderColor = Color::RGBA(0, 112, 224);
 			primaryTextInput->hoverBorderColor = Color::RGBA(74, 74, 74);
@@ -220,7 +247,7 @@ TEST(FusionCore, Rendering)
 		}
 
 		{
-			auto primaryComboBox = CreateObject<FComboBoxPlainStyle>(rootStyle, "PrimaryComboBoxStyle");
+			auto primaryComboBox = CreateObject<FComboBoxStyle>(rootStyle, "PrimaryComboBoxStyle");
 			rootStyle->Add("ComboBox.Primary", primaryComboBox);
 
 			primaryComboBox->background = Color::RGBA(15, 15, 15);
@@ -229,7 +256,7 @@ TEST(FusionCore, Rendering)
 			primaryComboBox->borderWidth = 1.0f;
 			primaryComboBox->cornerRadius = Vec4(5, 5, 5, 5);
 
-			auto primaryComboBoxItem = CreateObject<FComboBoxItemPlainStyle>(rootStyle, "PrimaryComboBoxItemStyle");
+			auto primaryComboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "PrimaryComboBoxItemStyle");
 			rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
 
 			primaryComboBoxItem->background = Color::Clear();
@@ -237,14 +264,14 @@ TEST(FusionCore, Rendering)
 			primaryComboBoxItem->selectedBackground = Color::Clear();
 			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
-			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground;
+			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground.GetFillColor();
 			primaryComboBoxItem->borderWidth = 1.0f;
 
 			GetDefaultWidget<FComboBox>()
 				.ItemStyle(primaryComboBoxItem)
 				.Style(rootStyle, "ComboBox.Primary");
 
-			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupPlainStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
+			auto primaryComboBoxPopup = CreateObject<FComboBoxPopupStyle>(rootStyle, "PrimaryComboBoxPopupStyle");
 			rootStyle->Add("ComboBoxPopup.Primary", primaryComboBoxPopup);
 
 			primaryComboBoxPopup->background = Color::RGBA(26, 26, 26);
@@ -288,10 +315,53 @@ TEST(FusionCore, Rendering)
 			GetDefaultWidget<FMenuBar>()
 				.Style(rootStyle, "MenuBar.Primary");
 		}
+
+		{
+
+			auto comboBox = CreateObject<FComboBoxStyle>(rootStyle, "ComboBox");
+			rootStyle->Add("ComboBox", comboBox);
+
+			comboBox->background = Color::RGBA(15, 15, 15);
+			comboBox->borderColor = Color::RGBA(60, 60, 60);
+			comboBox->pressedBorderColor = comboBox->hoverBorderColor = Color::RGBA(74, 74, 74);
+			comboBox->borderWidth = 1.0f;
+			comboBox->cornerRadius = Vec4(5, 5, 5, 5);
+
+			auto comboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "ComboBoxItem");
+			rootStyle->Add("ComboBoxItem", comboBoxItem);
+
+			comboBoxItem->background = Color::Clear();
+			comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
+			comboBoxItem->selectedBackground = Color::Clear();
+			comboBoxItem->selectedShape = FShapeType::RoundedRect;
+			comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
+			comboBoxItem->selectedBorderColor = Color::RGBA(0, 112, 224);
+			comboBoxItem->borderWidth = 1.0f;
+
+			GetDefaultWidget<FComboBox>()
+				.ItemStyle(comboBoxItem)
+				.Style(comboBox);
+		}
+
+		{
+			auto treeView = CreateObject<FTreeViewStyle>(rootStyle, "TreeView");
+			rootStyle->Add(treeView);
+
+			GetDefaultWidget<FTreeView>()
+				.Style(rootStyle, treeView->GetName());
+		}
+
+		{
+			auto expandCaretButton = CreateObject<FImageButtonStyle>(rootStyle, "ExpandCaretButton");
+			rootStyle->Add(expandCaretButton);
+
+			expandCaretButton->tintColor = Color::RGBA(134, 134, 134);
+			expandCaretButton->hoverTintColor = Color::RGBA(190, 190, 190);
+			expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();
-	mainWindow->Show();
 
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
@@ -303,7 +373,11 @@ TEST(FusionCore, Rendering)
 
 	auto exposedTick = [&]
 		{
-			FusionApplication::Get()->Tick(true);
+			FusionApplication::Get()->SetExposed();
+
+			FusionApplication::Get()->Tick();
+
+			RendererSystem::Get().Render();
 		};
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
@@ -313,6 +387,8 @@ TEST(FusionCore, Rendering)
 		mainWidget->comboBox->ApplyStyle();
 	}
 
+	mainWindow->Show();
+
 	int frameCounter = 0;
 
 	while (!IsEngineRequestingExit())
@@ -320,16 +396,13 @@ TEST(FusionCore, Rendering)
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
 
-		if (frameCounter == 1 && mainWidget->model)
-		{
-			mainWidget->model->UpdateMemoryFootprint();
-		}
+		FusionApplication::Get()->ResetExposed();
 
 		// App & Input Tick
 		PlatformApplication::Get()->Tick();
 		InputManager::Get().Tick();
 
-		FusionApplication::Get()->Tick();
+		RendererSystem::Get().Render();
 
 		previousTime = curTime;
 		frameCounter++;

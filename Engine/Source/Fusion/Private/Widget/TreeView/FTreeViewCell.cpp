@@ -22,14 +22,19 @@ namespace CE
             .HAlign(HAlign::Fill)
             .Padding(Vec4(1.5f, 2, 1.5f, 2) * 3)
             (
-                FAssignNew(FImage, arrowIcon)
-                .Background(downwardArrow)
+                FAssignNew(FImageButton, arrowIcon)
+                .Image(downwardArrow)
+                .OnClicked([this]
+                {
+                    m_OnToggleExpansion();
+                })
                 .Width(10)
                 .Height(10)
                 .VAlign(VAlign::Center)
                 .Enabled(true)
                 .Visible(false)
-                .Margin(Vec4(0, 0, 5, 0)),
+                .Margin(Vec4(0, 0, 5, 0))
+                .Style("ExpandCaretButton"),
 
                 FAssignNew(FLabel, label)
                 .HAlign(HAlign::Left)

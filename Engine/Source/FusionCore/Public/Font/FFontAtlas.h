@@ -27,15 +27,20 @@ namespace CE
         u32 fontSize = 0; // Font size used when baking this glyph
         u32 index = 0; // User specific data: Stores the index of the glyph into the character buffer
 
+        u32 atlasSize = 0;
+        f32 scalingFactor = 1;
+
         inline int GetWidth() const { return x1 - x0; }
         inline int GetHeight() const { return y1 - y0; }
     };
 
     CLASS()
-        class FUSIONCORE_API FFontAtlas : public Object
+    class FUSIONCORE_API FFontAtlas : public Object
     {
         CE_CLASS(FFontAtlas, Object)
     public:
+
+        static constexpr const char* ImageNamePrefix = "__FontAtlas_";
 
         FFontAtlas();
 
@@ -44,12 +49,23 @@ namespace CE
         //! @brief Font metrics calculated for a unit font size. Multiply each field with the actual font size
         const FFontMetrics& GetMetrics() const { return metrics; }
 
+        u32 GetArrayLayerCount() const { return atlasImageMips.GetSize(); }
+
         // - Public API -
+
+        u32 GetAtlasSize() const;
+
+        RHI::ShaderResourceGroup* GetFontSrg() const { return fontSrg; }
+        RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
 
         FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
 
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
+
+        // - Model -
+
+        MODEL_PROPERTY(Array<String>, Pages);
 
     private:
 
@@ -105,6 +121,7 @@ namespace CE
 
         RPI::Texture* atlasTexture = nullptr;
         RHI::ShaderResourceGroup* fontSrg = nullptr;
+        RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FFontMetrics metrics{};
 

@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewHeaderColumn::FTreeViewHeaderColumn()
     {
-
+        m_ClipChildren = true;
     }
 
     void FTreeViewHeaderColumn::Construct()
@@ -20,7 +20,7 @@ namespace CE
             .Padding(Vec4(1.5f, 2, 1.5f, 2) * 3)
             (
                 FAssignNew(FLabel, label)
-                .FontSize(15)
+                .FontSize(10)
                 .HAlign(HAlign::Left)
             )
         );

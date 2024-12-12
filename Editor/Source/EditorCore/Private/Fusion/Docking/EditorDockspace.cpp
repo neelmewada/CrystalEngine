@@ -198,7 +198,7 @@ namespace CE::Editor
                             .Enabled(false)
                             (
                                 FAssignNew(FLabel, projectLabel)
-                                .FontSize(14)
+                                .FontSize(11)
                                 .Text("Project Name")
                                 .VAlign(VAlign::Center)
                             ),
@@ -217,8 +217,8 @@ namespace CE::Editor
                             (
                                 FAssignNew(FImage, minimizeIcon)
                                 .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
-                                .Width(11)
-                                .Height(11)
+                                .Width(9)
+                                .Height(9)
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
                             ),
@@ -243,8 +243,8 @@ namespace CE::Editor
                             (
                                 FAssignNew(FImage, maximizeIcon)
                                 .Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"))
-                                .Width(11)
-                                .Height(11)
+                                .Width(9)
+                                .Height(9)
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
                             ),
@@ -261,8 +261,8 @@ namespace CE::Editor
                             (
                                 FNew(FImage)
                                 .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
-                                .Width(10)
-                                .Height(10)
+                                .Width(9)
+                                .Height(9)
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
                             )
@@ -290,5 +290,27 @@ namespace CE::Editor
         
     }
 
+    void EditorDockspace::OnMaximized()
+    {
+	    Super::OnMaximized();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
+
+#if PLATFORM_WINDOWS
+        // This is needed on Windows to prevent things from rendering outside the screen edges when maximized
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 7);
+#endif
+    }
+
+    void EditorDockspace::OnRestored()
+    {
+        Super::OnRestored();
+
+        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
+
+#if PLATFORM_WINDOWS
+        borderWidget->Padding(Vec4(1, 1, 1, 1) * 1);
+#endif
+    }
 }
 

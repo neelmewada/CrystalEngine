@@ -28,6 +28,8 @@ namespace CE::RHI
     void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, 
 		bool* bufferPoolRecreated, bool* imagePoolRecreated, bool allowShrink)
     {
+		ZoneScoped;
+
 		MemoryHeapDescriptor bufferHeapDesc{};
 		bufferHeapDesc.allocationSize = allocInfo.bufferPool.size;
 		bufferHeapDesc.flags = allocInfo.bufferPool.flags;
@@ -83,6 +85,8 @@ namespace CE::RHI
 
 	RHI::Buffer* TransientMemoryPool::AllocateBuffer(const RHI::BufferDescriptor& descriptor, u64 memoryOffset)
 	{
+		ZoneScoped;
+
 		ResourceMemoryDescriptor memoryDesc{};
 		memoryDesc.memoryHeap = bufferPool;
 		memoryDesc.memoryOffset = memoryOffset;
@@ -93,6 +97,8 @@ namespace CE::RHI
 
 	RHI::Texture* TransientMemoryPool::AllocateImage(const RHI::ImageDescriptor& descriptor, u64 memoryOffset)
 	{
+		ZoneScoped;
+
 		ResourceMemoryDescriptor memoryDesc{};
 		memoryDesc.memoryHeap = imagePool;
 		memoryDesc.memoryOffset = memoryOffset;

@@ -22,6 +22,8 @@ namespace CE
 
         void Shutdown() override;
 
+        f32 GetSystemDpiScaling() override;
+
         PlatformBackend GetBackend() override
         {
             return PlatformBackend::SDL;
@@ -39,7 +41,7 @@ namespace CE
 
         PlatformWindow* GetMainWindow() override;
 
-        virtual PlatformWindow* FindWindow(u64 windowId) override;
+        virtual PlatformWindow* FindPlatformWindow(u64 windowId) override;
 
         virtual PlatformWindow* CreatePlatformWindow(const String& title) override;
         virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen = false, bool hidden = false) override;

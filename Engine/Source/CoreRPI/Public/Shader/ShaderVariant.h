@@ -10,6 +10,7 @@ namespace CE::RPI
 		Array<ShaderTagEntry> tags{};
 		Array<RHI::ShaderModuleDescriptor> moduleDesc{};
 		Array<Name> entryPoints{};
+		bool interleaveVertexData = false;
 
 		inline bool TagExists(const Name& key) const
 		{

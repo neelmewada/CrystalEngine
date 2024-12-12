@@ -555,7 +555,6 @@ TEST(RHI, FrameScheduler)
 			scheduler->EndDrawListSubmission();
 		}
 
-		scheduler->Execute();
 	}
     
 	delete scheduler;

@@ -54,4 +54,10 @@ namespace CE
 
         XCloseDisplay (dpy);
     }
+
+    int SDLWindowEventWatch(void* data, SDL_Event* event)
+    {
+        
+        return 0;
+    }
 }

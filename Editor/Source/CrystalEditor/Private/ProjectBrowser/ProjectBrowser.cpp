@@ -47,7 +47,7 @@ namespace CE::Editor
                     // - Recent Projects -
 
 	                FNew(FLabelTabItem)
-                    .FontSize(16)
+                    .FontSize(14)
                     .Bold(true)
 	                .Text("Recent Projects")
                     .ContentWidget(
@@ -82,7 +82,7 @@ namespace CE::Editor
                             (
                                 FNew(FLabel)
                                 .Text("Project Location")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .Width(200)
                                 .VAlign(VAlign::Center),
 
@@ -139,7 +139,7 @@ namespace CE::Editor
                                 FAssignNew(FTextButton, openButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Open")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .OnClicked([this]
                                 {
                                     OpenProject();
@@ -149,7 +149,7 @@ namespace CE::Editor
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .OnClicked([this]
                                 {
                                     CloseWindow();
@@ -163,7 +163,7 @@ namespace CE::Editor
                     // - New Project -
 
 	                FNew(FLabelTabItem)
-                    .FontSize(16)
+                    .FontSize(14)
                     .Bold(true)
 	                .Text("New Project")
                     .ContentWidget(
@@ -189,7 +189,7 @@ namespace CE::Editor
                             (
                                 FNew(FLabel)
                                 .Text("Project Location")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .Width(200)
                                 .VAlign(VAlign::Center),
 
@@ -220,7 +220,7 @@ namespace CE::Editor
                             (
 								FNew(FLabel)
                                 .Text("Project Name")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .Width(200)
                                 .VAlign(VAlign::Center),
 
@@ -260,7 +260,7 @@ namespace CE::Editor
                                 FAssignNew(FTextButton, createButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Create")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .OnClicked([this]
                                 {
                                     CreateProject();
@@ -270,7 +270,7 @@ namespace CE::Editor
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
-                                .FontSize(13)
+                                .FontSize(10)
                                 .OnClicked([this]
                                 {
                                     CloseWindow();
@@ -314,7 +314,7 @@ namespace CE::Editor
                 (
                     FNew(FLabel)
                     .Text(projectItem->title)
-                    .FontSize(15)
+                    .FontSize(14)
                     .Margin(Vec4(0, 0, 0, 2.5f)),
 
                     FNew(FLabel)
@@ -334,7 +334,7 @@ namespace CE::Editor
                 (
                     FNew(FLabel)
                     .Text(item->title)
-                    .FontSize(15)
+                    .FontSize(14)
                     .Margin(Vec4(0, 0, 0, 2.5f)),
 
                     FNew(FLabel)

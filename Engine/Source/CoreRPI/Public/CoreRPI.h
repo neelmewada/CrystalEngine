@@ -39,6 +39,7 @@ namespace CE::RPI
 #include "RPISystem.h"
 #include "Buffer.h"
 #include "DynamicStructuredBuffer.h"
+#include "DynamicMultiBuffer.h"
 
 // View
 #include "View.h"

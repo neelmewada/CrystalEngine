@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewStyle::FTreeViewStyle()
     {
-        
+        separatorWidth = 1.5f;
     }
 
     FTreeViewStyle::~FTreeViewStyle()
@@ -48,15 +48,18 @@ namespace CE
             }
         }
 
-        if (treeView.container)
+        if (treeView.container && treeView.SelectionModel() != nullptr)
         {
             for (FTreeViewRow* child : treeView.container->children)
             {
                 FBrush rowBg = rowBackground;
                 if (child->IsAlternate())
                     rowBg = rowAlternateBackground;
+
                 if (treeView.SelectionModel()->IsSelected(child->GetIndex()))
-                    rowBg = rowSelectionBackground;
+                {
+	                rowBg = rowSelectionBackground;
+                }
                 else if (child->IsHovered())
                     rowBg = rowHoverBackground;
 

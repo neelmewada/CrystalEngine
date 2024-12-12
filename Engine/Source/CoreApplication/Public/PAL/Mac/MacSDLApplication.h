@@ -14,6 +14,8 @@ namespace CE
 
         void Initialize() override;
 
+        u32 GetSystemDpi() override;
+
     private:
 
         MacSDLApplication();

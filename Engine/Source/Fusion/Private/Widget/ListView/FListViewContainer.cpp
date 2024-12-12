@@ -107,7 +107,7 @@ namespace CE
         painter->PushChildCoordinateSpace(localTransform);
         if (m_ClipChildren)
         {
-            painter->PushClipShape(Matrix4x4::Identity(), computedSize);
+            painter->PushClipRect(Matrix4x4::Identity(), computedSize);
         }
 
         for (const auto& child : children)
@@ -120,7 +120,7 @@ namespace CE
 
         if (m_ClipChildren)
         {
-            painter->PopClipShape();
+            painter->PopClipRect();
         }
         painter->PopChildCoordinateSpace();
     }

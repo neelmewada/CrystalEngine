@@ -174,6 +174,7 @@ namespace CE::Editor
         ConstructDockspaces();
 
         LoadSandboxScene();
+
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -357,6 +358,39 @@ namespace CE::Editor
                     )
                 )
                 .Name("EditMenuItem"),
+
+                FNew(FMenuItem)
+                .Text("Tools")
+                .SubMenu(
+                    FNew(EditorMenuPopup)
+                    .Name("ToolsMenu")
+                    .As<EditorMenuPopup>()
+                    .Gap(0)
+                    .Content(
+                        FNew(FMenuItem)
+                        .Text("Debug")
+                        .SubMenu(
+                            FNew(EditorMenuPopup)
+                            .Name("ToolsDebugMenu")
+                            .As<EditorMenuPopup>()
+                            .Content(
+                                FNew(FMenuItem)
+                                .Text("Fusion Image Atlas")
+                                .OnClick([this]
+                                {
+                                    FusionImageAtlasWindow::Show();
+                                }),
+
+                                FNew(FMenuItem)
+                                .Text("Fusion Font Atlas")
+                                .OnClick([this]
+                                {
+                                    FusionFontAtlasWindow::Show();
+                                })
+                            )
+                        )
+                    )
+                ),
 
                 FNew(FMenuItem)
                 .Text("Help")

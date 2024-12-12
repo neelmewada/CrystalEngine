@@ -9,9 +9,15 @@
 // Test Classes
 class FusionCore_Construction_Test;
 class FusionCore_Layout_Test;
+namespace RenderingTests
+{
+    class RendererSystem;
+}
+
 #define FUSION_TESTS \
     friend class FusionCore_Construction_Test;\
-    friend class FusionCore_Layout_Test;
+    friend class FusionCore_Layout_Test;\
+    friend class RenderingTests::RendererSystem;
 
 #else
 
@@ -56,7 +62,9 @@ namespace CE
 
 #include "Application/FTimer.h"
 #include "Application/FusionApplication.h"
+#include "Rendering/FImageAtlas.h"
 #include "Rendering/FusionRenderer.h"
+#include "Rendering/FusionRenderer2.h"
 #include "Rendering/FPainter.h"
 #include "Context/FFusionContext.h"
 #include "Context/FRootContext.h"

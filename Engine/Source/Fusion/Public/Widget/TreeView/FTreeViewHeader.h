@@ -23,12 +23,12 @@ namespace CE
 
         void Construct() override;
 
+        void HandleEvent(FEvent* event) override;
+
         FStyledWidget* CreateSeparator();
 
-        FHorizontalStack* contentStack = nullptr;
-
+        FSplitBox* contentStack = nullptr;
         Array<FStyledWidget*> separators;
-
         FTreeView* treeView = nullptr;
 
     public: // - Fusion Properties - 
@@ -54,8 +54,8 @@ namespace CE
                 contentStack->AddChild(widget);
                 if (i < size - 1)
                 {
-                    separators.Add(CreateSeparator());
-                    contentStack->AddChild(separators.Top());
+                    //separators.Add(CreateSeparator());
+                    //contentStack->AddChild(separators.Top());
                 }
             }
 

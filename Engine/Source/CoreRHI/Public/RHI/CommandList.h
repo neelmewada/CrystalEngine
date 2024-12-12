@@ -143,6 +143,8 @@ namespace CE::RHI
 
 		virtual void ClearShaderResourceGroups() = 0;
 
+		virtual void SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData) = 0;
+
 		virtual void SetViewports(u32 count, ViewportState* viewports) = 0;
 		virtual void SetScissors(u32 count, ScissorState* scissors) = 0;
 

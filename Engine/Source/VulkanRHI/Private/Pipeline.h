@@ -27,6 +27,15 @@ namespace CE::Vulkan
 			return IsCompatibleWith(static_cast<PipelineLayout*>(other));
 		}
 
+		bool HasPushConstants() const { return pushConstantRanges.GetSize() > 0; }
+
+		VkPushConstantRange GetPushConstant() const
+		{
+			if (pushConstantRanges.IsEmpty())
+				return {};
+			return pushConstantRanges[0];
+		}
+
 	protected:
 		VulkanDevice* device = nullptr;
 		VkPipelineLayout pipelineLayout = nullptr;

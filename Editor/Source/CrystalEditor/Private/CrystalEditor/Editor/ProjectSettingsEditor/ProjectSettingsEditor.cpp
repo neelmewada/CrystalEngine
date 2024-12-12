@@ -56,6 +56,7 @@ namespace CE::Editor
                         .ContentHAlign(HAlign::Fill)
                         .VAlign(VAlign::Top)
                         .HAlign(HAlign::Fill)
+                        .Name("ProjectSettingsContentStack")
                     )
                 )
                 .HAlign(HAlign::Fill)
@@ -69,12 +70,11 @@ namespace CE::Editor
         left->AddChild(
             FNew(FTextButton)
             .Text("All Settings")
-            .FontSize(14)
-            .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+            .FontSize(11)
             .Cursor(SystemCursor::Hand)
             .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
             .ClipChildren(true)
-            .Style("Button.Clear")
+            .Style("TextButton.Underline")
             .Margin(Vec4(0, 0, 0, headerGap))
         );
 
@@ -86,15 +86,14 @@ namespace CE::Editor
             left->AddChild(
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
-                .FontSize(14)
-                .Underline(FPen(Color::White(), 1, FPenStyle::DottedLine))
+                .FontSize(11)
                 .Cursor(SystemCursor::Hand)
                 .OnClicked([this, index]
                 {
                     OnSettingsItemClicked(index);
                 })
                 .ClipChildren(true)
-                .Style("Button.Clear")
+                .Style("TextButton.Underline")
             );
         }
     }
@@ -109,7 +108,7 @@ namespace CE::Editor
         }
     }
 
-    void ProjectSettingsEditor::Show()
+    ProjectSettingsEditor* ProjectSettingsEditor::Show()
     {
         CrystalEditorWindow* editor = CrystalEditorWindow::Get();
 
@@ -120,6 +119,8 @@ namespace CE::Editor
         }
 
         editor->SelectTab(instance);
+
+        return instance;
     }
 
     void ProjectSettingsEditor::ShowAllSettings()
@@ -149,6 +150,13 @@ namespace CE::Editor
 
             curEditor->FixedInputWidth(180);
             curEditor->SetSplitRatio(splitRatio);
+
+            right->AddChild(
+                FNew(FLabel)
+                .FontSize(15)
+                .Text(target->GetTitleName())
+                .Margin(Vec4(10, 10, 0, 15))
+            );
 
             right->AddChild(curEditor);
         }
@@ -180,7 +188,7 @@ namespace CE::Editor
 
         right->AddChild(
             FNew(FLabel)
-            .FontSize(18)
+            .FontSize(15)
             .Text(target->GetTitleName())
             .Margin(Vec4(10, 10, 0, 15))
         );

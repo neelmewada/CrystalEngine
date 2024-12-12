@@ -105,6 +105,19 @@ namespace CE
             data[count++] = item;
         }
 
+        void InsertRange(int numItems, const T& value = {})
+        {
+	        while (data == nullptr || this->count + numItems >= capacity)
+	        {
+                Grow();
+	        }
+
+            for (int i = 0; i < numItems; i++)
+            {
+                data[count++] = value;
+            }
+        }
+
         void RemoveAll()
         {
             if constexpr (CallDestructor)

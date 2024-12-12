@@ -23,6 +23,9 @@ namespace CE
                 delete frames[i]; frames[i] = nullptr;
             }
         }
+
+        RPISystem::Get().QueueDestroy(textureSrg);
+        textureSrg = nullptr;
     }
 
     void FViewport::OnBeginDestroy()
@@ -41,11 +44,21 @@ namespace CE
     {
         Super::Construct();
 
+        auto app = FusionApplication::Get();
+
+        RHI::ShaderResourceGroupLayout textureSrgLayout = app->GetFusionShader2()->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
+        if (textureSrg == nullptr)
+        {
+            textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgLayout);
+        }
+
         FusionApplication::Get()->RegisterViewport(this);
     }
 
     void FViewport::OnFusionPropertyModified(const CE::Name& propertyName)
     {
+        ZoneScoped;
+
 	    Super::OnFusionPropertyModified(propertyName);
 
         static const CE::Name imageFormat = "ImageFormat";
@@ -71,8 +84,12 @@ namespace CE
 
     void FViewport::RecreateFrameBuffer()
     {
+        ZoneScoped;
+
         if (currentSize.x <= 0 || currentSize.y <= 0)
-            return;
+        {
+            currentSize = Vec2i(512, 512);
+        }
 
         for (int i = 0; i < frames.GetSize(); ++i)
         {
@@ -84,6 +101,8 @@ namespace CE
 
         RPI::TextureDescriptor textureDescriptor{};
 
+        f32 scaling = GetContext()->GetScaling();
+
         textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer";
         textureDescriptor.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
         textureDescriptor.texture.arrayLayers = 1;
@@ -91,10 +110,10 @@ namespace CE
         textureDescriptor.texture.sampleCount = m_SampleCount;
         textureDescriptor.texture.format = m_ImageFormat;
         textureDescriptor.texture.defaultHeapType = MemoryHeapType::Default;
-        textureDescriptor.texture.width = currentSize.x;
-        textureDescriptor.texture.height = currentSize.y;
+        textureDescriptor.texture.width = (u32)(currentSize.x * scaling);
+        textureDescriptor.texture.height = (u32)(currentSize.y * scaling);
         textureDescriptor.texture.depth = 1;
-        textureDescriptor.texture.dimension = Dimension::Dim2D;
+        textureDescriptor.texture.dimension = Dimension::Dim2DArray;
 
         textureDescriptor.samplerDesc.addressModeU =
             textureDescriptor.samplerDesc.addressModeV =
@@ -111,24 +130,13 @@ namespace CE
 
         auto app = FusionApplication::Get();
 
-        if (imageIndex < 0)
+        for (int i = 0; i < frames.GetSize(); ++i)
         {
-            for (int i = 0; i < frames.GetSize(); ++i)
-            {
-	            const int idx = app->RegisterImage(String::Format("FViewport_{}_{}", GetUuid(), i), frames[i]->GetRhiTexture());
-                if (i == 0)
-                {
-                    imageIndex = idx;
-                }
-            }
+            textureSrg->Bind(i, "_Texture", frames[i]->GetRhiTexture());
+            textureSrg->Bind(i, "_TextureSampler", frames[i]->GetSamplerState());
         }
-        else
-        {
-            for (int i = 0; i < frames.GetSize(); ++i)
-            {
-                app->ReplaceImage(imageIndex + i, frames[i]->GetRhiTexture());
-            }
-        }
+
+        textureSrg->FlushBindings();
 
         MarkDirty();
 
@@ -144,7 +152,7 @@ namespace CE
 
         if (frames[0] != nullptr)
         {
-            painter->DrawFrameBuffer(Rect::FromSize(computedPosition, computedSize), frames);
+            painter->DrawViewport(Rect::FromSize(computedPosition, computedSize), this);
         }
     }
 

@@ -37,6 +37,9 @@ namespace CE::Editor
 
         void OnBeginDestroy() override;
 
+        void OnMaximized() override;
+        void OnRestored() override;
+
         FStyledWidget* borderWidget = nullptr;
         FVerticalStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;

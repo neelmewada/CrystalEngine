@@ -32,6 +32,8 @@ namespace CE::RHI
 
 		u32 GetFramesInFlight() const { return numFramesInFlight; }
 
+		void ResetFramesInFlight();
+
 		void BeginFrameGraph();
 
 		//! @brief Compile the transient attachments, and everything.

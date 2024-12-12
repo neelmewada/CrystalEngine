@@ -56,7 +56,30 @@ namespace CE
 
         //! @brief The amount of distance the content of button should move in +Y direction when pressed
         FIELD()
-        f32 contentMoveY = 2.5f;
+        f32 contentMoveY = 1.0f;
+    };
+
+    CLASS()
+    class FUSIONCORE_API FTextButtonStyle : public FCustomButtonStyle
+    {
+        CE_CLASS(FTextButtonStyle, FCustomButtonStyle)
+    public:
+
+        FTextButtonStyle();
+
+        SubClass<FWidget> GetWidgetClass() const override;
+
+        void MakeStyle(FWidget& widget) override;
+
+        FIELD()
+        FPen underline;
+
+        FIELD()
+        FPen hoverUnderline;
+
+        FIELD()
+        FPen pressedUnderline;
+
     };
     
 } // namespace CE

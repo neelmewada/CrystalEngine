@@ -160,7 +160,7 @@ namespace CE
             (
                 FAssignNew(FLabel, selectionText)
                 .Text("[Select]")
-                .FontSize(13)
+                .FontSize(10)
                 .Name("SelectionText")
                 .Margin(Vec4(0, 0, 5, 0)),
 

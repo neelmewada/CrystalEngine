@@ -14,6 +14,7 @@ namespace CE::Editor
 
         Child(
             FNew(FHorizontalStack)
+            .Gap(1)
             .ContentVAlign(VAlign::Fill)
             .ContentHAlign(HAlign::Fill)
             (

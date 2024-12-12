@@ -3,6 +3,7 @@ ce_set(PAL_EXECUTABLE_APPLICATION_FLAG MACOSX_BUNDLE)
 ce_set(CMAKE_DEBUG_POSTFIX "")
 
 enable_language(OBJC)
+enable_language(OBJCXX)
 
 if(${CE_STANDALONE})
     ce_set(PAL_TRAIT_BUILD_EDITOR 0)

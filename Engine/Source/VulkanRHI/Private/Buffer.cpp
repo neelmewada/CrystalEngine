@@ -100,9 +100,13 @@ namespace CE::Vulkan
 			if (heapType == RHI::MemoryHeapType::ReadBack && device->SupportsHostCachedMemory() && 
 				!device->IsUnifiedMemoryArchitecture() &&
 				!device->SupportsReBar())
+			{
 				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+			}
 			if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar())
+			{
 				memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			}
 		}
 		else
 		{
@@ -297,6 +301,11 @@ namespace CE::Vulkan
 	{
 		if (isMapped)
 			return false;
+
+		if (size == 0)
+		{
+			size = bufferSize;
+		}
 
 		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{

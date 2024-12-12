@@ -6,6 +6,7 @@ namespace CE
     FWidget::FWidget()
     {
         m_Scale = Vec2(1, 1);
+        m_Anchor = Vec2(0.5f, 0.5f);
         m_MaxHeight = NumericLimits<f32>::Infinity();
         m_MaxWidth = NumericLimits<f32>::Infinity();
 
@@ -31,12 +32,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (GetName() == "DebugSplitBox")
-        {
-            String::IsAlphabet('a');
-        }
-
-        globalPosition = painter->GetTopCoordinateSpace() * Vec4(computedPosition.x, computedPosition.y, 0, 1);
+        globalPosition = painter->GetTopCoordinateSpace() * Vec4(0, 0, 0, 1);
     }
 
     void FWidget::HandleEvent(FEvent* event)
@@ -76,6 +72,46 @@ namespace CE
         }
     }
 
+    void FWidget::UpdateLocalTransform()
+    {
+        isTranslationOnly = false;
+
+        if (Math::ApproxEquals(m_Angle, 0) &&
+            Math::ApproxEquals(m_Scale.x, 1) &&
+            Math::ApproxEquals(m_Scale.y, 1))
+        {
+            isTranslationOnly = true;
+
+            localTransform = Matrix4x4::Translation(computedPosition + m_Translation);
+
+            mouseTransform = Matrix4x4::Translation(Vec2());
+        }
+        else
+        {
+            localTransform =
+                Matrix4x4::Translation(GetComputedPosition() + m_Translation + GetComputedSize() * m_Anchor) *
+                Matrix4x4::Angle(m_Angle) *
+                Matrix4x4::Scale(m_Scale) *
+                Matrix4x4::Translation(-GetComputedSize() * m_Anchor);
+
+            Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
+
+            mouseTransform = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
+                Matrix4x4::Angle(-m_Angle) *
+                Matrix4x4::Scale(invScale) *
+                Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor);
+        }
+
+        if (parent != nullptr)
+        {
+            globalTransform = parent->globalTransform * localTransform;
+        }
+        else
+        {
+            globalTransform = localTransform;
+        }
+    }
+
     FWidget* FWidget::HitTest(Vec2 localMousePos)
     {
         ZoneScoped;
@@ -83,10 +119,17 @@ namespace CE
         if (!Enabled())
             return nullptr;
 
-        Vec2 rectPos = computedPosition;
+        Vec2 rectPos = computedPosition + m_Translation;
         Vec2 rectSize = computedSize;
+        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
 
-        // TODO: Implement matrix transformation support for input handling
+        /*localMousePos = Matrix4x4::Translation(computedPosition + m_Translation + computedSize * m_Anchor) *
+            Matrix4x4::Angle(-m_Angle) *
+            Matrix4x4::Scale(invScale) *
+            Matrix4x4::Translation(-computedPosition - m_Translation - computedSize * m_Anchor) *
+            Vec4(localMousePos.x, localMousePos.y, 0, 1);*/
+
+        localMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         Rect rect = Rect::FromSize(rectPos, rectSize);
 
@@ -283,25 +326,9 @@ namespace CE
             m_MaxHeight + m_Padding.bottom + m_Padding.top);
     }
 
-    void FWidget::UpdateLocalTransform()
-    {
-        localTransform =
-            Matrix4x4::Translation(computedPosition + m_Translation) *
-            Matrix4x4::Angle(m_Angle) *
-            Matrix4x4::Scale(Vec3(m_Scale.x, m_Scale.y, 1));
-    }
-
     void FWidget::OnPostComputeLayout()
     {
-        if (IsOfType<FTitleBar>())
-        {
-            FTitleBar* titleBar = static_cast<FTitleBar*>(this);
 
-            Vec2 pos = GetComputedPosition();
-            Vec2 size = GetComputedSize();
-
-            GetName();
-        }
     }
 
     bool FWidget::AddChild(FWidget* child)

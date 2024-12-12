@@ -270,7 +270,9 @@ namespace CE::Vulkan
 		// TODO: Temporary code
 		// Using ReBar and skipping staging buffers leads to crash ONLY when using Nsight frame debugger.
 		// Should be enabled for production code.
+#if CE_DEBUG
 		supportsReBar = false;
+#endif
 
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);

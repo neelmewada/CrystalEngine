@@ -270,26 +270,29 @@ namespace CE::Vulkan
         CombineHash(instanceHash, variant);
 
         VkResult result;
-        
-        LockGuard<SharedMutex> lock{ pipelineMutex };
 
         VkPipelineCache pipelineCache = nullptr;
-        if (pipelineCaches[variant] == nullptr)
-        {
-            VkPipelineCacheCreateInfo cacheCI{};
-            cacheCI.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-            cacheCI.initialDataSize = 0;
-            cacheCI.pInitialData = nullptr;
 
-            result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, VULKAN_CPU_ALLOCATOR, &pipelineCache);
-            if (result == VK_SUCCESS)
-            {
-                pipelineCaches[variant] = pipelineCache;
-                pipelineCachesByHash[instanceHash] = pipelineCache;
-            }
-        }
+	    {
+		    LockGuard lock{ pipelineMutex };
 
-        pipelineCache = pipelineCaches[variant];
+        	if (pipelineCaches[variant] == nullptr)
+        	{
+        		VkPipelineCacheCreateInfo cacheCI{};
+        		cacheCI.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+        		cacheCI.initialDataSize = 0;
+        		cacheCI.pInitialData = nullptr;
+
+        		result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, VULKAN_CPU_ALLOCATOR, &pipelineCache);
+        		if (result == VK_SUCCESS)
+        		{
+        			pipelineCaches[variant] = pipelineCache;
+        			pipelineCachesByHash[instanceHash] = pipelineCache;
+        		}
+        	}
+
+        	pipelineCache = pipelineCaches[variant];
+	    }
 
         VkPipeline pipeline = nullptr;
         result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, VULKAN_CPU_ALLOCATOR, &pipeline);
@@ -300,8 +303,12 @@ namespace CE::Vulkan
             return nullptr;
         }
 
-        pipelines[variant] = pipeline;
-        pipelinesByHash[instanceHash] = pipeline;
+	    {
+		    LockGuard lock{ pipelineMutex };
+
+        	pipelines[variant] = pipeline;
+        	pipelinesByHash[instanceHash] = pipeline;
+	    }
 
         return pipeline;
     }
@@ -473,7 +480,7 @@ namespace CE::Vulkan
             break;
         }
 
-        rasterState.frontFace = VK_FRONT_FACE_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
+        rasterState.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterState.depthBiasEnable = VK_FALSE;
         rasterState.depthBiasClamp = 0;
         rasterState.depthBiasConstantFactor = 0;
@@ -544,6 +551,14 @@ namespace CE::Vulkan
             case VertexAttributeDataType::UInt4:
                 attrib.format = VK_FORMAT_R32G32B32A32_UINT;
                 break;
+			case VertexAttributeDataType::Undefined:
+				break;
+			case VertexAttributeDataType::Char4:
+                attrib.format = VK_FORMAT_R8G8B8A8_SNORM;
+				break;
+			case VertexAttributeDataType::UChar4:
+                attrib.format = VK_FORMAT_R8G8B8A8_UNORM;
+				break;
             }
 
             vertexInputDescriptions.Add(attrib);

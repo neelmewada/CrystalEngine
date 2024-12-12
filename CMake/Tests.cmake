@@ -114,10 +114,15 @@ function(ce_add_test NAME)
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Generated")
         list(APPEND include_dirs "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 
-        add_custom_command(TARGET ${NAME} PRE_BUILD
+        add_custom_target(${NAME}_AutoRtti
             COMMAND "AutoRTTI" -m ${NAME} --noapi -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
+
+        set_target_properties(${NAME}_AutoRtti PROPERTIES FOLDER "AutoRTTI")
+
+        add_dependencies(${NAME} ${NAME}_AutoRtti)
+
     endif()
 
     # RESOURCES

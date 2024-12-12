@@ -118,5 +118,15 @@ namespace CE
 		return new RPI::Texture(desc);
 	}
 
+	CMImage Texture2D::GetCMImage()
+	{
+		RHI::Format rhiFormat = ToRHIFormat(GetPixelFormat());
+		
+		CMImage result = CMImage::LoadRawImageFromMemory(source.GetDataPtr(), width, height, GetCMPixelFormat(), 
+			CMImageSourceFormat::None, 8, GetBitsPerPixelForFormat(rhiFormat));
+
+		return result;
+	}
+
 } // namespace CE
 

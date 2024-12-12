@@ -22,25 +22,32 @@ namespace CE
         if (children.IsEmpty() || !Enabled())
             return;
 
-        painter->PushChildCoordinateSpace(localTransform);
-        //if (m_ClipChildren)
-        {
-            //painter->PushClipShape(Matrix4x4::Identity(), computedSize);
-        }
+        FScrollBox* parentScroll = static_cast<FScrollBox*>(GetParent());
+        Vec2 translation = Translation();
+        Rect visibleRect = Rect::FromSize(-translation, GetComputedSize());
 
         for (FTreeViewRow* child : children)
         {
             if (!child->Enabled() || !child->Visible())
                 continue;
 
-            child->OnPaint(painter);
-        }
+            Rect childRect = Rect::FromSize(child->GetComputedPosition(), child->GetComputedSize());
+            if (!childRect.Overlaps(visibleRect))
+                continue;
 
-        //if (m_ClipChildren)
-        {
-            //painter->PopClipShape();
+            if (child->IsTranslationOnly())
+            {
+                painter->PushChildCoordinateSpace(child->GetComputedPosition() + child->Translation());
+            }
+            else
+            {
+                painter->PushChildCoordinateSpace(child->GetLocalTransform());
+            }
+
+            child->OnPaint(painter);
+
+            painter->PopChildCoordinateSpace();
         }
-        painter->PopChildCoordinateSpace();
     }
 
     void FTreeViewContainer::OnPostComputeLayout()
@@ -68,12 +75,7 @@ namespace CE
         if (children.IsEmpty())
             return thisHitTest;
 
-        Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
-
-        Vec2 transformedMousePos = (Matrix4x4::Translation(-computedPosition - m_Translation) *
-            Matrix4x4::Angle(-m_Angle) *
-            Matrix4x4::Scale(invScale)) *
-            Vec4(localMousePos.x, localMousePos.y, 0, 1);
+        Vec2 transformedMousePos = mouseTransform * Matrix4x4::Translation(-Translation()) * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         for (int i = children.GetCount() - 1; i >= 0; --i)
         {
@@ -197,13 +199,13 @@ namespace CE
 
                     if (bottomY < scrollY)
                     {
-                        curPosY += rowHeight; // We are above the scroll view
-                        globalRowIdx++;
-                        continue;
+                        //curPosY += rowHeight; // We are above the scroll view
+                        //globalRowIdx++;
+                        //continue;
                     }
                     else if (topY > scrollY + computedSize.y)
                     {
-                        break; // We are below the scroll view
+                        //break; // We are below the scroll view
                     }
 
                     FTreeViewRow* rowWidget = nullptr;
@@ -245,7 +247,19 @@ namespace CE
                         cell
 							.ArrowVisible(treeView->m_ExpandableColumn == c && childrenCount > 0)
 							.ArrowEnabled(treeView->m_ExpandableColumn == c)
-							.ArrowExpanded(treeView->m_SelectionModel->IsSelected(index))
+							.ArrowExpanded(expandedRows.Exists(index))
+							.OnToggleExpansion([index, this]
+							{
+                                if (!expandedRows.Exists(index))
+                                {
+	                                expandedRows.Add(index);
+                                }
+                                else
+                                {
+                                    expandedRows.Remove(index);
+                                }
+                                MarkLayoutDirty();
+							})
                         ;
 
                         if (treeView->m_ExpandableColumn == c && indentLevel > 0)
@@ -263,6 +277,8 @@ namespace CE
                         }
                         else
                         {
+                            // Reset indentation
+                            cell.Margin(Vec4(0, 0, 0, 0));
                             cell.Width(minWidth);
                         }
                     }
@@ -289,6 +305,27 @@ namespace CE
         MarkDirty();
     }
 
+    FTreeViewContainer::Self& FTreeViewContainer::NormalizedScrollY(f32 value)
+    {
+        value = Math::Clamp01(value);
+
+        Vec2 translation = Translation();
+        translation.y = -value * (totalRowHeight - computedSize.y);
+        if (totalRowHeight < computedSize.y)
+        {
+            translation.y = 0;
+        }
+        Translation(translation);
+        return *this;
+    }
+
+    f32 FTreeViewContainer::NormalizedScrollY()
+    {
+        if (totalRowHeight < computedSize.y - 1)
+            return 0;
+        return -Translation().y / (totalRowHeight - computedSize.y);
+    }
+
     void FTreeViewContainer::CalculateIntrinsicSize()
     {
         ZoneScoped;
@@ -306,7 +343,7 @@ namespace CE
 
         auto model = treeView->m_Model;
 
-        f32 totalRowHeight = 0;
+        totalRowHeight = 0;
 
         Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
             {
@@ -334,9 +371,9 @@ namespace CE
                 }
             };
 
+        visitor(FModelIndex());
         if (treeView->AutoHeight())
         {
-            visitor(FModelIndex());
             contentSize.height = totalRowHeight;
         }
 
@@ -352,6 +389,15 @@ namespace CE
             {
                 contentSize.height += children[i]->GetIntrinsicSize().height;
             }
+        }
+
+        if (totalRowHeight >= computedSize.y)
+        {
+            Padding(Vec4(0, 0, treeView->m_ScrollBarWidth + treeView->m_ScrollBarMargin, 0));
+        }
+        else
+        {
+            Padding(Vec4(0, 0, 0, 0));
         }
 
         intrinsicSize.width += contentSize.width;
@@ -396,14 +442,12 @@ namespace CE
             }
 
             child->SetComputedPosition(curPos);
-            child->SetComputedSize(Vec2(availableSize.x, rowHeight));
+            child->SetComputedSize(Vec2(availableSize.x, Math::Max(rowHeight, child->GetIntrinsicSize().y)));
 
         	child->PlaceSubWidgets();
 
-            curPos.y += rowHeight;
+            curPos.y += child->computedSize.y;
         }
-
-        // TODO: Place sub-widgets
     }
     
 }

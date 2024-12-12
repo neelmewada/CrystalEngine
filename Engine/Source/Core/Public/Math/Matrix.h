@@ -73,6 +73,16 @@ namespace CE
         //! @brief 3D euler angles in radians
         static Matrix4x4 RotationRadians(const Vec3& eulerRadians);
 
+        inline static Matrix4x4 Scale(const Vec2& scale)
+        {
+            return Matrix4x4({
+                { scale.x,  0,       0,     0 },
+                { 0,        scale.y, 0,     0 },
+                { 0,        0,     1,     0 },
+                { 0,        0,     0,     1 }
+                });
+        }
+
         inline static Matrix4x4 Scale(const Vec3& scale)
         {
             return Matrix4x4({

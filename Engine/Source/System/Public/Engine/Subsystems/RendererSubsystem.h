@@ -74,6 +74,7 @@ namespace CE
 		SceneSubsystem* sceneSubsystem = nullptr;
 
 		HashMap<ClassType*, SubClass<RPI::FeatureProcessor>> componentClassToFeatureProcessorClass{};
+		HashMap<u64, Vec2i> windowSizesById;
 		
 		u32 curImageIndex = 0;
 

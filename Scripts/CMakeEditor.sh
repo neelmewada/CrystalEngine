@@ -1,7 +1,7 @@
 #!/bin/bash
 
 base_dir=$(pwd)
-num_cores=$(nproc --all)
+#num_cores=$(nproc --all)
 DefaultGenerator="Ninja Multi-Config"
 Compiler=""
 
@@ -34,5 +34,5 @@ else
     exit 1
 fi
 
-cmake -B "${base_dir}/Build/${platform}" -S "${base_dir}" -G "${DefaultGenerator}" ${Compiler} -Wno-dev
+cmake -B "${base_dir}/Build/${platform}" -S "${base_dir}" -G "${DefaultGenerator}" ${Compiler} -Wno-dev "$@"
 

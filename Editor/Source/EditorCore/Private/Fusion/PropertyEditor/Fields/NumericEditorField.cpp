@@ -15,7 +15,7 @@ namespace CE::Editor
 			FAssignNew(FTextInput, input)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
-            .Padding(Vec4(10, 4, 8, 4))
+            .Padding(Vec4(11, 4, 8, 4))
         );
 
         NumericType<f32>();
@@ -99,7 +99,7 @@ namespace CE::Editor
 
         constexpr f32 padding = 5.0f;
         constexpr f32 width = 2.0f;
-        Vec2 pos = computedPosition + Vec2(padding, padding);
+        Vec2 pos = Vec2(padding, padding);
         Vec2 size = Vec2(width, computedSize.height - padding * 2);
 
         painter->SetBrush(m_ColorTag);

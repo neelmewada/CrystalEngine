@@ -30,6 +30,9 @@ namespace CE
 
 		f32 GetScaling() const override;
 
+		int GetMultisamplingCount() const { return sampleCount; }
+		void SetMultisamplingCount(int msaa);
+
 		bool IsFocused() const override;
 
 		bool IsShown() const override;
@@ -81,6 +84,10 @@ namespace CE
 		void OnWindowMoved(PlatformWindow* window, int x, int y) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;
 
+		void OnWindowMaximized(PlatformWindow* window) override;
+		void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowMinimized(PlatformWindow* window) override;
+
 		void UpdateViewConstants();
 
 		PlatformWindow* platformWindow = nullptr;
@@ -88,17 +95,20 @@ namespace CE
 
 		RHI::SwapChain* swapChain = nullptr;
 		RHI::DrawListTag drawListTag = 0;
+		int sampleCount = 1;
 		Name attachmentId;
 
 		Array<ImageScopeAttachmentDescriptor> shaderReadOnlyAttachmentDependencies;
 		Array<ImageScopeAttachmentDescriptor> shaderWriteAttachmentDependencies;
 
-		FusionRenderer* renderer = nullptr;
+		
+		FusionRenderer2* renderer2 = nullptr;
 		FPainter* painter = nullptr;
 		int windowId = -1;
 
 		FUSION_FRIENDS;
 		friend class CE::RendererSubsystem;
+		friend class RenderingTests::RendererSystem;
 	};
 
 } // namespace CE

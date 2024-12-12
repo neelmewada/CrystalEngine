@@ -17,12 +17,25 @@ namespace CE
 
 		u32 GetDefaultFontSize() const;
 
+		FFontAtlas* GetDefaultFontAtlas();
+
 		bool RegisterFont(const Name& fontName, const Array<CharRange>& characterSets, 
 			Stream* regularFontFile, Stream* italicFontFile = nullptr, Stream* boldFontFile = nullptr, Stream* boldItalicFontFile = nullptr);
 
 		bool DeregisterFont(const Name& fontName);
 
 		FFontAtlas* FindFont(const Name& fontName);
+
+		template<typename Func>
+		void IterateFontAtlases(const Func& func)
+		{
+			for (const auto& [fontFamily, fontAtlas] : fontAtlases)
+			{
+				func(fontAtlas);
+			}
+		}
+
+		u32 GetFontAtlasCount() const { return fontAtlases.GetSize(); }
 
 		//! @brief Flushes all the changes to GPU
 		void Flush(u32 imageIndex);

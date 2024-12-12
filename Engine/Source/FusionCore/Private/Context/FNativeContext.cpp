@@ -8,10 +8,6 @@ namespace CE
 	FNativeContext::FNativeContext()
 	{
 		isIsolatedContext = true;
-
-#if PLATFORM_LINUX
-		scaleFactor = 1.25f;
-#endif
 	}
 
 	FNativeContext::~FNativeContext()
@@ -39,6 +35,7 @@ namespace CE
 		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
 		nativeContext->platformWindow = platformWindow;
 		nativeContext->windowDpi = platformWindow->GetWindowDpi();
+		nativeContext->scaleFactor = FusionApplication::Get()->GetDefaultScalingFactor();
 
 		if (parentContext)
 		{
@@ -71,27 +68,27 @@ namespace CE
 		RHI::SwapChainDescriptor desc{};
 		desc.imageCount = RHI::FrameScheduler::Get()->GetFramesInFlight();
 		desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+		desc.useMailboxMode = FusionApplication::Get()->IsMailboxPresentationPreferred();
 		platformWindow->GetDrawableWindowSize(&desc.preferredWidth, &desc.preferredHeight);
 
 		swapChain = RHI::gDynamicRHI->CreateSwapChain(platformWindow, desc);
 
 		PlatformApplication::Get()->AddMessageHandler(this);
 
-		renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
+		//renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
+		renderer2 = CreateObject<FusionRenderer2>(this, "FusionRenderer2");
 
 		UpdateViewConstants();
 
 		FusionRendererInitInfo rendererInfo;
-		rendererInfo.fusionShader = FusionApplication::Get()->GetFusionShader();
+		rendererInfo.fusionShader = FusionApplication::Get()->fusionShader2;
 		rendererInfo.multisampling.sampleCount = 1;
-		
-		renderer->SetScreenSize(Vec2i(desc.preferredWidth, desc.preferredHeight));
-		renderer->SetDrawListTag(drawListTag);
 
-		renderer->Init(rendererInfo);
+		renderer2->SetDrawListTag(drawListTag);
+		renderer2->Init(rendererInfo);
 
 		painter = CreateObject<FPainter>(this, "FusionPainter");
-		painter->renderer = renderer;
+		painter->renderer2 = renderer2;
 
 		FusionApplication::Get()->nativeWindows.Add(this);
 	}
@@ -145,7 +142,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
@@ -154,7 +151,7 @@ namespace CE
 
 		if (swapChain)
 		{
-			swapChain->Rebuild();
+			//swapChain->Rebuild();
 		}
 
 		UpdateViewConstants();
@@ -167,14 +164,14 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
 
 		const Vec2 newSize = platformWindow->GetDrawableWindowSize().ToVec2();
 
-		if (newSize / GetScaling() != availableSize || childContexts.IsEmpty())
+		if (newSize / GetScaling() != availableSize)
 		{
 			availableSize = newSize / GetScaling();
 
@@ -194,7 +191,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (!platformWindow || !renderer)
+		if (!platformWindow || !renderer2)
 			return;
 		if (platformWindow != window)
 			return;
@@ -207,6 +204,54 @@ namespace CE
 		if (platformWindow == window)
 		{
 			platformWindow = nullptr;
+		}
+	}
+
+	void FNativeContext::OnWindowMaximized(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnMaximized();
+		}
+	}
+
+	void FNativeContext::OnWindowRestored(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnRestored();
+		}
+	}
+
+	void FNativeContext::OnWindowMinimized(PlatformWindow* window)
+	{
+		ZoneScoped;
+
+		if (!platformWindow || !renderer2)
+			return;
+		if (platformWindow != window)
+			return;
+
+		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
+		{
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			windowWidget->OnMinimized();
 		}
 	}
 
@@ -230,15 +275,34 @@ namespace CE
 		viewConstants.viewPosition = Vec4(0, 0, 0, 0);
 		viewConstants.pixelResolution = Vec2(screenWidth, screenHeight);
 
-		if (renderer)
+		if (renderer2)
 		{
-			renderer->SetViewConstants(viewConstants);
+			renderer2->SetViewConstants(viewConstants);
 		}
 	}
 
 	f32 FNativeContext::GetScaling() const
 	{
+        //return 1.0f;
 		return (f32)windowDpi / 96.0f * scaleFactor;
+	}
+
+	void FNativeContext::SetMultisamplingCount(int msaa)
+	{
+		if (sampleCount == msaa)
+			return;
+
+		if (msaa == 1 || msaa == 2 || msaa == 4)
+		{
+			sampleCount = msaa;
+
+			if (renderer2)
+			{
+				renderer2->multisampling.sampleCount = sampleCount;
+			}
+
+			FusionApplication::Get()->RequestFrameGraphUpdate();
+		}
 	}
 
 	bool FNativeContext::IsFocused() const
@@ -275,9 +339,9 @@ namespace CE
 
 		Super::DoPaint();
 
-		if (renderer && dirty)
+		if (renderer2 && dirty)
 		{
-			renderer->Begin();
+			renderer2->Begin();
 
 			if (painter && owningWidget && owningWidget->Visible())
 			{
@@ -286,13 +350,26 @@ namespace CE
 
 			for (int i = 0; i < localPopupStack.GetSize(); ++i)
 			{
-				if (localPopupStack[i]->Visible())
+				Ref<FPopup> popup = localPopupStack[i];
+
+				if (popup->Visible())
 				{
-					localPopupStack[i]->OnPaint(painter);
+					if (popup->IsTranslationOnly())
+					{
+						renderer2->PushChildCoordinateSpace(popup->computedPosition + popup->Translation());
+					}
+					else
+					{
+						renderer2->PushChildCoordinateSpace(popup->GetLocalTransform());
+					}
+
+					popup->OnPaint(painter);
+
+					renderer2->PopChildCoordinateSpace();
 				}
 			}
 
-			renderer->End();
+			renderer2->End();
 
 			dirty = false;
 		}
@@ -393,7 +470,7 @@ namespace CE
 				}
 				
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
+				swapChainAttachment.multisampleState.sampleCount = sampleCount;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
 				for (const auto& shaderReadOnlyAttachmentDependency : shaderReadOnlyAttachmentDependencies)
@@ -428,11 +505,14 @@ namespace CE
 
 		Super::EnqueueDrawPackets(drawList, imageIndex);
 
-		const auto& drawPackets = renderer->FlushDrawPackets(imageIndex);
 
-		for (RHI::DrawPacket* drawPacket : drawPackets)
 		{
-			drawList.AddDrawPacket(drawPacket);
+			const auto& drawPackets = renderer2->FlushDrawPackets(imageIndex);
+
+			for (RHI::DrawPacket* drawPacket : drawPackets)
+			{
+				drawList.AddDrawPacket(drawPacket);
+			}
 		}
 	}
 
@@ -467,12 +547,22 @@ namespace CE
 
 	Vec2 FNativeContext::GlobalToScreenSpacePosition(Vec2 pos)
 	{
+#if PLATFORM_MAC
+		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
+		return platformWindow->GetWindowPosition().ToVec2() + pos / scaling;
+#else
 		return platformWindow->GetWindowPosition().ToVec2() + pos * GetScaling();
+#endif
 	}
 
 	Vec2 FNativeContext::ScreenToGlobalSpacePosition(Vec2 pos)
 	{
+#if PLATFORM_MAC
+		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
+		return (pos - platformWindow->GetWindowPosition().ToVec2()) * scaling;
+#else
 		return (pos - platformWindow->GetWindowPosition().ToVec2()) / GetScaling();
+#endif
 	}
 
 	void FNativeContext::Maximize()
@@ -520,7 +610,12 @@ namespace CE
 		if (!window->IsBorderless() || IsPopupWindow())
 			return false;
 
+#if PLATFORM_MAC
+		f32 macScaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
+		position *= macScaling;
+#else
 		position /= GetScaling();
+#endif
 
 		FWidget* hitWidget = HitTest(position);
 

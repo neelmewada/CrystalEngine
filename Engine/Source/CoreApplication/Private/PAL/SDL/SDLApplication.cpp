@@ -2,13 +2,11 @@
 #include "CoreApplication.h"
 
 #include <SDL.h>
-
-
+#include <SDL_syswm.h>
 
 namespace CE
 {
 	int SDLWindowEventWatch(void* data, SDL_Event* event);
-
 
 	SDLApplication* SDLApplication::Get()
 	{
@@ -28,11 +26,6 @@ namespace CE
 	void SDLApplication::Initialize()
 	{
 		Super::Initialize();
-		
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
-		{
-			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
-		}
 
 		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
 
@@ -48,6 +41,11 @@ namespace CE
 		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 #endif
+
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
+		{
+			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
+		}
 	}
 
 	void SDLApplication::PreShutdown()
@@ -72,6 +70,15 @@ namespace CE
 		}
 
 		SDL_Quit();
+	}
+
+	f32 SDLApplication::GetSystemDpiScaling()
+	{
+#if PLATFORM_MAC
+		return PlatformApplication::Get()->GetSystemDpi() / 72.0f;
+#else
+		return PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#endif
 	}
 
 	bool SDLApplication::IsFocused()
@@ -146,7 +153,7 @@ namespace CE
 		return mainWindow;
 	}
 
-	PlatformWindow* SDLApplication::FindWindow(u64 windowId)
+	PlatformWindow* SDLApplication::FindPlatformWindow(u64 windowId)
 	{
 		for (auto window : windowList)
 		{
@@ -466,33 +473,4 @@ namespace CE
 		
 	}
 
-	int SDLWindowEventWatch(void* data, SDL_Event* event)
-	{
-#if PLATFORM_WINDOWS
-		if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
-		{
-			auto app = SDLApplication::Get();
-
-			for (const auto& tickHandler : app->tickHanders)
-			{
-				tickHandler.InvokeIfValid();
-			}
-
-			for (SDLPlatformWindow* window : app->windowList)
-			{
-				if (window->GetWindowId() == event->window.windowID)
-				{
-					for (ApplicationMessageHandler* messageHandler : app->messageHandlers)
-					{
-						messageHandler->OnWindowExposed(window);
-					}
-
-					break;
-				}
-			}
-		}
-		
-#endif
-		return 0;
-	}
 }

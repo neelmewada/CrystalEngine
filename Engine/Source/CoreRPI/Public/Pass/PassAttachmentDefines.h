@@ -82,9 +82,9 @@ namespace CE::RPI
 	};
 
 	STRUCT()
-	struct CORERPI_API ImageDescriptor
+	struct CORERPI_API ImageAttachmentDescriptor
 	{
-		CE_STRUCT(ImageDescriptor)
+		CE_STRUCT(ImageAttachmentDescriptor)
 	public:
 
 		FIELD()
@@ -107,9 +107,9 @@ namespace CE::RPI
 	};
 
 	STRUCT()
-	struct CORERPI_API BufferDescriptor
+	struct CORERPI_API BufferAttachmentDescriptor
 	{
-		CE_STRUCT(BufferDescriptor)
+		CE_STRUCT(BufferAttachmentDescriptor)
 	public:
 
 		FIELD()
@@ -148,7 +148,7 @@ namespace CE::RPI
 	public:
 
 		FIELD()
-		ImageDescriptor imageDescriptor{};
+		ImageAttachmentDescriptor imageDescriptor{};
 
 		FIELD()
 		Name formatSource;
@@ -165,7 +165,7 @@ namespace CE::RPI
 	public:
 
 		FIELD()
-		BufferDescriptor bufferDescriptor{};
+		BufferAttachmentDescriptor bufferDescriptor{};
 
 
 	};
@@ -178,14 +178,14 @@ namespace CE::RPI
 			type = RHI::AttachmentType::None;
         }
 
-		UnifiedAttachmentDescriptor(const ImageDescriptor& imageDesc)
+		UnifiedAttachmentDescriptor(const ImageAttachmentDescriptor& imageDesc)
 			: type(RHI::AttachmentType::Image)
 			, imageDesc(imageDesc)
 		{
 
 		}
 
-		UnifiedAttachmentDescriptor(const BufferDescriptor& bufferDesc)
+		UnifiedAttachmentDescriptor(const BufferAttachmentDescriptor& bufferDesc)
 			: type(RHI::AttachmentType::Buffer)
 			, bufferDesc(bufferDesc)
 		{
@@ -201,8 +201,8 @@ namespace CE::RPI
 		RHI::AttachmentType type = RHI::AttachmentType::None;
 
 		union {
-			ImageDescriptor imageDesc;
-			BufferDescriptor bufferDesc;
+			ImageAttachmentDescriptor imageDesc;
+			BufferAttachmentDescriptor bufferDesc;
 		};
 	};
 

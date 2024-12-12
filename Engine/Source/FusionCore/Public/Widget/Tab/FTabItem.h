@@ -37,7 +37,7 @@ namespace CE
 
     public: // - Fusion Properties - 
 
-        FUSION_PROPERTY(FWidget*, ContentWidget);
+        FUSION_PROPERTY(Ref<FWidget>, ContentWidget);
 
         Self& ContentWidget(FWidget& value)
         {

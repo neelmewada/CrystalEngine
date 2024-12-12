@@ -102,8 +102,16 @@ namespace CE
             mouseDelta = Vec2i(event->motion.xrel, event->motion.yrel);
             break;
         case SDL_MOUSEWHEEL:
+        {
             windowId = event->wheel.windowID;
-            wheelDelta = Vec2(event->wheel.preciseX, event->wheel.preciseY);
+#if PLATFORM_MAC
+            f32 flipX = event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1;
+            f32 flipY = event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? 1 : -1;
+#else
+            f32 flipX = 1.0f, flipY = 1.0f;
+#endif
+            wheelDelta = Vec2(event->wheel.preciseX * flipX, event->wheel.preciseY * flipY);
+        }
             break;
         }
 

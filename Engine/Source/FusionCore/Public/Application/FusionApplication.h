@@ -4,6 +4,7 @@
 namespace CE
 {
 	class FViewport;
+    class FImageAtlas;
 	class FNativeContext;
     class FFusionContext;
     class FLayoutManager;
@@ -11,12 +12,15 @@ namespace CE
     class FRootContext;
     class FStyleManager;
     class FGameWindow;
+    class FWindow;
 
     struct IFusionAssetLoader
     {
         virtual ~IFusionAssetLoader() = default;
 
         virtual RHI::Texture* LoadTextureAtPath(const Name& path) = 0;
+
+        virtual CMImage LoadImageAssetAtPath(const Name& path) = 0;
 
     };
 
@@ -25,7 +29,7 @@ namespace CE
         IFusionAssetLoader* assetLoader = nullptr;
     };
 
-    CLASS()
+    CLASS(Config = Engine)
     class FUSIONCORE_API FusionApplication : public Object, protected ApplicationMessageHandler
     {
         CE_CLASS(FusionApplication, Object)
@@ -43,6 +47,12 @@ namespace CE
 
         FRootContext* GetRootContext() const { return rootContext.Get(); }
 
+        FImageAtlas* GetImageAtlas() const { return imageAtlas.Get(); }
+
+        f32 GetDefaultScalingFactor() const { return defaultScalingFactor; }
+
+        bool IsMailboxPresentationPreferred() const { return preferMailboxPresentMode; }
+
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();
@@ -54,7 +64,7 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
-        int LoadImageAsset(const Name& assetPath);
+        CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
         int RegisterImage(const Name& imageName, RHI::Texture* image);
         void DeregisterImage(const Name& imageName);
@@ -74,9 +84,10 @@ namespace CE
 
         void Tick();
 
-        void RebuildFrameGraph();
+        void RequestFrameGraphUpdate();
 
         RPI::Shader* GetFusionShader() const { return fusionShader; }
+        RPI::Shader* GetFusionShader2() const { return fusionShader2; }
 
         RHI::ShaderResourceGroupLayout GetPerViewSrgLayout() const { return perViewSrgLayout; }
         RHI::ShaderResourceGroupLayout GetPerObjectSrgLayout() const { return perObjectSrgLayout; }
@@ -94,7 +105,13 @@ namespace CE
 
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
 
+        Ref<FWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+            const SubClass<FWindow>& windowClass, 
+            const PlatformWindowInfo& info = {});
+
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
+
+        ScriptEvent<void(void)> onFrameGraphUpdateRequested;
 
     protected:
 
@@ -110,15 +127,11 @@ namespace CE
 
     protected:
 
-        void InitializeShaders();
-
-        void BuildFrameGraph();
-        void CompileFrameGraph();
+        void InitializeShader();
+        void InitializeShader2();
 
         void PrepareDrawList();
 
-        bool rebuildFrameGraph = true;
-        bool recompileFrameGraph = true;
         int curImageIndex = 0;
         bool isExposed = false;
 
@@ -130,6 +143,15 @@ namespace CE
 
         FIELD()
         Ref<FStyleManager> styleManager = nullptr;
+
+        FIELD()
+        Ref<FImageAtlas> imageAtlas = nullptr;
+
+        FIELD(Config)
+        f32 defaultScalingFactor = 1.0f;
+
+        FIELD(Config)
+        bool preferMailboxPresentMode = false;
 
         IFusionAssetLoader* assetLoader = nullptr;
 
@@ -154,6 +176,7 @@ namespace CE
         Array<FTimer*> timers;
 
         RPI::Shader* fusionShader = nullptr;
+        RPI::Shader* fusionShader2 = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
         RHI::ShaderResourceGroupLayout perObjectSrgLayout{};

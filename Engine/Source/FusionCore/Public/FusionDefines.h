@@ -6,7 +6,5 @@ namespace CE
     struct FEvent;
 
     typedef ScriptEvent<> FVoidEvent;
-
-
     
 } // namespace CE

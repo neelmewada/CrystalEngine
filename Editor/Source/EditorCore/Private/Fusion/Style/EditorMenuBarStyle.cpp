@@ -5,7 +5,7 @@ namespace CE
 
     EditorMenuBarStyle::EditorMenuBarStyle()
     {
-        itemFontSize = 14;
+        itemFontSize = 10;
     }
 
     SubClass<FWidget> EditorMenuBarStyle::GetWidgetClass() const

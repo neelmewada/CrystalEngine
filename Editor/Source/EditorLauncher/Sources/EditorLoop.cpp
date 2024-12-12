@@ -201,10 +201,6 @@ void EditorLoop::PostInit()
 
 	RPI::RPISystem::Get().PostInitialize(rpiInitInfo);
 
-	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
-	this->tickDelegateHandle = tickDelegate.GetHandle();
-	app->AddTickHandler(tickDelegate);
-
 	auto rootContext = fApp->GetRootContext();
 
 	if (!projectPath.Exists())
@@ -239,7 +235,13 @@ void EditorLoop::PostInit()
 
 		mainWindow->SetResizable(true);
 		mainWindow->Show();
+
+		ProjectSettingsEditor::Show();
 	}
+
+	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
+	this->tickDelegateHandle = tickDelegate.GetHandle();
+	app->AddTickHandler(tickDelegate);
 }
 
 void EditorLoop::InitStyles()
@@ -413,10 +415,10 @@ void EditorLoop::AppInit()
 	gDefaultWindowHeight = 768;
 
 	Vec2i screenSize = app->GetMainScreenSize();
-	if (screenSize.x >= 2560 && screenSize.y >= 1440)
+	if (screenSize.x > 2560 && screenSize.y > 1440)
 	{
-		gDefaultWindowWidth = 1920;
-		gDefaultWindowHeight = 1080;
+		gDefaultWindowWidth = 2560 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowHeight = 1440 * FusionApplication::Get()->GetDefaultScalingFactor();
 	}
 
 	PlatformWindowInfo windowInfo{};
@@ -431,8 +433,8 @@ void EditorLoop::AppInit()
 	{
 		isProjectBrowsingMode = true;
 		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
-		gDefaultWindowWidth = 1024;
-		gDefaultWindowHeight = 640;
+		gDefaultWindowWidth = 1366 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowHeight = 1000 * FusionApplication::Get()->GetDefaultScalingFactor();
 	}
 
 	mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);

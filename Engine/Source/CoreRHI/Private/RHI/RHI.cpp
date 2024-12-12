@@ -102,7 +102,7 @@ namespace CE::RHI
 		case VertexInputAttribute::UV:
 			return sizeof(Vec2);
 		case VertexInputAttribute::Normal:
-			return sizeof(Vec3);
+		case VertexInputAttribute::Binormal:
 		case VertexInputAttribute::Tangent:
 			return sizeof(Vec3);
 		case VertexInputAttribute::Color:

@@ -20,6 +20,8 @@ namespace CE
 
         void Release();
 
+        RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
+
     protected:
 
         FViewport();
@@ -39,6 +41,8 @@ namespace CE
         Vec2i currentSize = Vec2i(0, 0);
 
         StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> frames{};
+
+        RHI::ShaderResourceGroup* textureSrg = nullptr;
 
         int imageIndex = -1;
 

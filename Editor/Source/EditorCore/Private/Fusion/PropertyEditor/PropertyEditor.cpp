@@ -35,7 +35,7 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FNew(FButton)
+                FNew(DetailsRow)
                 .OnDoubleClicked(FUNCTION_BINDING(this, ToggleExpansion))
                 .HAlign(HAlign::Fill)
                 .Padding(Vec4())
@@ -77,6 +77,7 @@ namespace CE::Editor
 
                             FAssignNew(FLabel, fieldNameLabel)
                             .Text("Field Name")
+                            .FontSize(10)
                         ),
 
                         FAssignNew(FHorizontalStack, right)
@@ -160,7 +161,7 @@ namespace CE::Editor
             {
                 right->AddChild(
                     FNew(FLabel)
-                    .FontSize(12)
+                    .FontSize(10)
                     .Text("Error: " + msg)
                     .Foreground(Color::Red())
                 );
@@ -267,7 +268,7 @@ namespace CE::Editor
         painter->SetBrush(FBrush());
 
         constexpr f32 height = 1.0f;
-        Vec2 pos = computedPosition + Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height);
+        Vec2 pos = Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height + 1);
         Vec2 size = Vec2(computedSize.width, height);
 
         painter->DrawLine(pos, pos + Vec2(size.x, 0));

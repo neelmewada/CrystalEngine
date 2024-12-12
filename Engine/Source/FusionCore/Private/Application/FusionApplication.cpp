@@ -12,11 +12,21 @@ namespace CE
     extern RawData GetFusionShaderVertJson();
     extern RawData GetFusionShaderFragJson();
 
+    extern RawData GetFusionShader2Vert();
+    extern RawData GetFusionShader2Frag();
+    extern RawData GetFusionShader2VertJson();
+    extern RawData GetFusionShader2FragJson();
+
     FusionApplication::FusionApplication()
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
         styleManager = CreateDefaultSubobject<FStyleManager>("StyleManager");
         rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
+        imageAtlas = CreateDefaultSubobject<FImageAtlas>("ImageAtlas");
+
+#if PLATFORM_LINUX || PLATFORM_MAC
+        defaultScalingFactor = 96.0f / 72.0f;
+#endif
     }
 
     FusionApplication::~FusionApplication()
@@ -45,20 +55,34 @@ namespace CE
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
-        InitializeShaders();
+        InitializeShader();
+        InitializeShader2();
 
         fontManager->Init();
+        imageAtlas->Init();
 
-        IO::Path engineResourceDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
-        engineResourceDir.RecursivelyIterateChildren([this](const IO::Path& path)
+        IO::Path iconResourcesDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Icons";
+        iconResourcesDir.RecursivelyIterateChildren([this](const IO::Path& path)
             {
                 if (path.IsDirectory())
                     return;
 
-				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg")
+				if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg" || path.GetExtension() == ".jpeg")
 				{
                     LoadImageResource(path, "/Engine/Resources/Icons/" + path.GetFileName().RemoveExtension().GetString());
 				}
+            });
+
+        IO::Path imagesResourcesDir = PlatformDirectories::GetEngineRootDir() / "Engine/Resources/Images";
+        imagesResourcesDir.RecursivelyIterateChildren([this](const IO::Path& path)
+            {
+                if (path.IsDirectory())
+                    return;
+
+                if (path.GetExtension() == ".png" || path.GetExtension() == ".jpg" || path.GetExtension() == ".jpeg")
+                {
+                    LoadImageResource(path, "/Engine/Resources/Images/" + path.GetFileName().RemoveExtension().GetString());
+                }
             });
 
         imageRegistryUpdated = true;
@@ -86,6 +110,8 @@ namespace CE
         delete textureSrg; textureSrg = nullptr;
         fontManager->Shutdown();
 
+        imageAtlas->Shutdown();
+
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
             destructionQueue[i].object->BeginDestroy();
@@ -96,6 +122,7 @@ namespace CE
     void FusionApplication::Shutdown()
     {
         delete fusionShader; fusionShader = nullptr;
+        delete fusionShader2; fusionShader2 = nullptr;
     }
 
     void FusionApplication::RegisterViewport(FViewport* viewport)
@@ -138,16 +165,12 @@ namespace CE
         }
     }
 
-    int FusionApplication::LoadImageAsset(const Name& assetPath)
+    CMImage FusionApplication::LoadImageAsset(const Name& assetPath)
     {
         if (!assetPath.IsValid() || !assetLoader)
-            return -1;
+            return {};
 
-        RHI::Texture* texture = assetLoader->LoadTextureAtPath(assetPath);
-        if (!texture)
-            return -1;
-
-        return RegisterImage(assetPath, texture);
+        return assetLoader->LoadImageAssetAtPath(assetPath);
     }
 
     int FusionApplication::LoadImageResource(const IO::Path& resourcePath, const Name& imageName)
@@ -160,7 +183,10 @@ namespace CE
             CMImage image = CMImage::LoadFromFile(resourcePath);
             if (image.IsValid())
             {
+                imageAtlas->AddImage(imageName, image);
+
                 RPI::Texture* texture = new RPI::Texture(image);
+
                 image.Free();
 
                 if (texture->GetRhiTexture() != nullptr)
@@ -323,49 +349,6 @@ namespace CE
         {
             rootContext->Tick();
         }
-
-        return;
-
-        int submittedFrameIdx = -1;
-
-        if (rebuildFrameGraph)
-        {
-            rebuildFrameGraph = false;
-            recompileFrameGraph = true;
-
-            BuildFrameGraph();
-            submittedFrameIdx = curImageIndex;
-        }
-
-        if (recompileFrameGraph)
-        {
-            recompileFrameGraph = false;
-
-            CompileFrameGraph();
-        }
-
-        if (rootContext)
-        {
-            rootContext->Tick();
-        }
-
-        auto scheduler = FrameScheduler::Get();
-
-        int imageIndex = scheduler->BeginExecution();
-
-        if (imageIndex >= RHI::Limits::MaxSwapChainImageCount)
-        {
-            rebuildFrameGraph = recompileFrameGraph = true;
-            return;
-        }
-
-        curImageIndex = imageIndex;
-        
-        RPISystem::Get().SimulationTick(curImageIndex);
-
-        PrepareDrawList();
-
-        scheduler->EndExecution();
     }
 
     void FusionApplication::EmplaceFrameAttachments()
@@ -395,6 +378,7 @@ namespace CE
     void FusionApplication::FlushDrawPackets(DrawListContext& drawList, u32 imageIndex)
     {
         fontManager->Flush(imageIndex);
+        imageAtlas->Flush(imageIndex);
 
         if (imageRegistryUpdated)
         {
@@ -413,34 +397,44 @@ namespace CE
         rootContext->SetDrawPackets(drawList);
     }
 
-    void FusionApplication::BuildFrameGraph()
+    Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 
+        const SubClass<FWindow>& windowClass, 
+        const PlatformWindowInfo& info)
     {
-        ZoneScoped;
+        if (windowClass == nullptr || !windowClass->CanBeInstantiated())
+            return nullptr;
 
-        FrameScheduler* scheduler = FrameScheduler::Get();
+        ClassType* clazz = windowClass;
 
-        rebuildFrameGraph = false;
-        recompileFrameGraph = true;
-
-        scheduler->BeginFrameGraph();
+        FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
+        FFusionContext* parentContext = rootContext;
+        if (rootContext->GetChildContexts().NotEmpty())
         {
-            EmplaceFrameAttachments();
-
-            EnqueueScopes();
+            // FRootContext should have only 1 NativeContext which is the primary Native Window
+            parentContext = rootContext->GetChildContexts().GetFirst();
         }
-        scheduler->EndFrameGraph();
+
+        f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+        scaling = 1;
+#elif PLATFORM_LINUX
+        scaling *= defaultScalingFactor;
+#endif
+
+        PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(title, (u32)(width * scaling), (u32)(height * scaling), info);
+        window->SetBorderless(true);
+
+        FNativeContext* context = FNativeContext::Create(window, windowName.GetString(), parentContext);
+        parentContext->AddChildContext(context);
+
+        Ref<FWindow> outWindow = nullptr;
+
+        FAssignNewOwnedDynamic(FWindow, outWindow, context, clazz);
+        context->SetOwningWidget(outWindow.Get());
+
+        return outWindow;
     }
 
-    void FusionApplication::CompileFrameGraph()
-    {
-        ZoneScoped;
-
-        FrameScheduler* scheduler = FrameScheduler::Get();
-
-        recompileFrameGraph = false;
-
-        scheduler->Compile();
-    }
 
     void FusionApplication::PrepareDrawList()
     {
@@ -471,9 +465,9 @@ namespace CE
         FlushDrawPackets(drawList, curImageIndex);
     }
 
-    void FusionApplication::RebuildFrameGraph()
+    void FusionApplication::RequestFrameGraphUpdate()
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        onFrameGraphUpdateRequested.Broadcast();
     }
 
     // - Application Callbacks -
@@ -496,12 +490,11 @@ namespace CE
 
     void FusionApplication::OnWindowRestored(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+        
     }
 
     void FusionApplication::OnWindowDestroyed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
         rootContext->MarkLayoutDirty();
 
         for (int i = rootContext->childContexts.GetSize() - 1; i >= 0; i--)
@@ -530,29 +523,28 @@ namespace CE
 
     void FusionApplication::OnWindowClosed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
-        RebuildFrameGraph();
+
         rootContext->MarkLayoutDirty();
     }
 
     void FusionApplication::OnWindowMinimized(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowCreated(PlatformWindow* window)
     {
-        RebuildFrameGraph();
+
     }
 
     void FusionApplication::OnWindowExposed(PlatformWindow* window)
     {
-        RebuildFrameGraph();
-        rootContext->MarkLayoutDirty();
+
     }
 
     void FusionApplication::OnRenderViewportDestroyed(FGameWindow* renderViewport)
@@ -562,7 +554,7 @@ namespace CE
 
     // - Shader Resources -
 
-    void FusionApplication::InitializeShaders()
+    void FusionApplication::InitializeShader()
     {
         RawData vertexShader = GetFusionShaderVert();
         RawData fragmentShader = GetFusionShaderFrag();
@@ -700,10 +692,140 @@ namespace CE
         textureSrg->Bind("_TextureSamplers", samplerArray.GetCount(), samplerArray.GetData());
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
 
         fusionShader = new RPI::Shader();
         fusionShader->AddVariant(variantDesc);
+    }
+
+    void FusionApplication::InitializeShader2()
+    {
+        RawData vertexShader = GetFusionShader2Vert();
+        RawData fragmentShader = GetFusionShader2Frag();
+
+        String vertexShaderJson = (char*)GetFusionShader2VertJson().data;
+        String fragmentShaderJson = (char*)GetFusionShader2FragJson().data;
+
+        JValue vertexReflection{};
+        JValue fragmentReflection{};
+
+        JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
+        JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
+
+        RPI::ShaderVariantDescriptor2 variantDesc{};
+        variantDesc.interleaveVertexData = true;
+        variantDesc.shaderName = "FusionShader";
+        variantDesc.entryPoints.Resize(2);
+        variantDesc.entryPoints[0] = "VertMain";
+        variantDesc.entryPoints[1] = "FragMain";
+
+        variantDesc.moduleDesc.Resize(2);
+        variantDesc.moduleDesc[0].byteCode = vertexShader.data;
+        variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
+        variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
+        variantDesc.moduleDesc[0].name = "VertMain";
+
+        variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
+        variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
+        variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
+        variantDesc.moduleDesc[1].name = "FragMain";
+
+        RHI::SRGVariableDescriptor perViewData{};
+        perViewData.name = "_PerViewData";
+        perViewData.bindingSlot = (u32)vertexReflection["ubos"][0]["binding"].GetNumberValue();
+        perViewData.shaderStages = ShaderStage::Vertex | ShaderStage::Fragment;
+        perViewData.type = ShaderResourceType::ConstantBuffer;
+
+        variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView)
+            .TryAdd(perViewData);
+
+        perViewSrgLayout = variantDesc.reflectionInfo.FindOrAdd(SRGType::PerView);
+
+        {
+            variantDesc.reflectionInfo.rootConstantStages = ShaderStage::Vertex | ShaderStage::Fragment;
+            variantDesc.reflectionInfo.rootConstantLayout = { ShaderStructMemberType::Float2, ShaderStructMemberType::UInt };
+            for (int i = 0; i < FusionRenderer2::MaxClipRectStack; ++i)
+            {
+                variantDesc.reflectionInfo.rootConstantLayout.Add(ShaderStructMemberType::UInt);
+            }
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerObject)
+                .TryAdd(SRGVariableDescriptor(
+                    "_Objects",
+                    (u32)vertexReflection["ssbos"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_ClipRects",
+                    (u32)vertexReflection["ssbos"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_DrawData",
+                    (u32)vertexReflection["ssbos"][2]["binding"].GetNumberValue(),
+                    ShaderResourceType::StructuredBuffer,
+                    ShaderStage::Vertex | ShaderStage::Fragment
+                ))
+            ;
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
+				.TryAdd(SRGVariableDescriptor(
+					"_FontAtlas",
+                    (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2D,
+                    ShaderStage::Fragment
+                ))
+				.TryAdd(SRGVariableDescriptor(
+					"_FontAtlasSampler",
+                    (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment
+                ))
+            ;
+
+            variantDesc.reflectionInfo.FindOrAdd(SRGType::PerDraw)
+                .TryAdd(SRGVariableDescriptor(
+                    "_Texture",
+                    (u32)fragmentReflection["separate_images"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::Texture2DArray,
+                    ShaderStage::Fragment
+                ))
+                .TryAdd(SRGVariableDescriptor(
+                    "_TextureSampler",
+                    (u32)fragmentReflection["separate_samplers"][1]["binding"].GetNumberValue(),
+                    ShaderResourceType::SamplerState,
+                    ShaderStage::Fragment
+                ))
+            ;
+        }
+
+        variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("COLOR0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD1");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD2");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
+
+        ShaderTagEntry cullMode{};
+        cullMode.key = "Cull";
+        cullMode.value = "Off";
+        variantDesc.tags.Add(cullMode);
+
+        fusionShader2 = new RPI::Shader();
+        fusionShader2->AddVariant(variantDesc);
     }
 
 } // namespace CE

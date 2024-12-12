@@ -37,7 +37,6 @@ namespace CE
 			// Fetch vertex stage inputs
 			for (const spirv_cross::Resource& input : resources.stage_inputs)
 			{
-				u32 vecSize = reflection->get_type(input.base_type_id).vecsize;
 				String name = input.name;
 				if (!name.StartsWith("in.var."))
 				{
@@ -47,6 +46,66 @@ namespace CE
 				String shaderSemanticName = name.GetSubstring(7);
 				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(shaderSemanticName);
 				outReflection.vertexInputs.Add(semantic.ToString());
+
+				if (semantic.attribute == VertexInputAttribute::Color)
+				{
+					outReflection.vertexInputTypes.Add(VertexAttributeDataType::UChar4);
+				}
+				else
+				{
+					auto baseType = reflection->get_type(input.type_id);
+					switch (baseType.basetype)
+					{
+					case spirv_cross::SPIRType::Int:
+						switch (baseType.vecsize)
+						{
+						case 1:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Int4);
+							break;
+						}
+						break;
+					case spirv_cross::SPIRType::UInt:
+						switch (baseType.vecsize)
+						{
+						case 1:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::UInt4);
+							break;
+						}
+						break;
+					case spirv_cross::SPIRType::Float:
+						switch (baseType.vecsize)
+						{
+						case 1:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float);
+							break;
+						case 2:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+							break;
+						case 3:
+						case 4:
+							outReflection.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+							break;
+						}
+						break;
+					default:
+						outReflection.vertexInputTypes.Add(VertexAttributeDataType::Undefined);
+						break;
+					}
+				}
 			}
 		}
 
@@ -272,7 +331,10 @@ namespace CE
 			
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.type = RHI::ShaderResourceType::Texture2D;
+				if (type.image.arrayed)
+					variable.type = RHI::ShaderResourceType::Texture2DArray;
+				else
+					variable.type = RHI::ShaderResourceType::Texture2D;
 			}
 			else if (type.image.dim == spv::Dim1D)
 			{

@@ -2,13 +2,21 @@
 
 #define FNewOwned(WidgetClass, Parent)\
 	(*CreateObject<WidgetClass>(Parent, #WidgetClass))
+#define FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass)\
+	(*CreateObject<WidgetClass>(Parent, #WidgetClass, OF_NoFlags, WidgetDynamicClass))
 
 #define FNew(WidgetClass)\
-	(*CreateObject<WidgetClass>(this, #WidgetClass))
+	(*CreateObject<WidgetClass>(this, #WidgetClass, OF_NoFlags))
+
+#define FNewDynamic(WidgetClass, WidgetDynamicClass)\
+	(*CreateObject<WidgetClass>(this, #WidgetClass, OF_NoFlags, WidgetDynamicClass))
 
 #define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
+#define FAssignNewDynamic(WidgetClass, VariableName, WidgetDynamicClass) FNewDynamic(WidgetClass, WidgetDynamicClass).Assign(VariableName)
 
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
+#define FAssignNewOwnedDynamic(WidgetClass, VariableName, Parent, WidgetDynamicClass) FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass).Assign(VariableName)
+
 
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	protected:\
@@ -22,8 +30,9 @@
 			}\
 			this->m_##PropertyName = value;\
 			thread_local const CE::Name nameValue = #PropertyName;\
+			if ((GetFlags() & OF_InsideConstructor) == 0) {\
 			OnFusionPropertyModified(nameValue);\
-			DirtyFunc;\
+			DirtyFunc;}\
 			return *this;\
 		}\
 		const auto& PropertyName() const { return this->m_##PropertyName; }
@@ -57,7 +66,7 @@
 
 #define BIND_PROPERTY_RW(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
 	FUNCTION_BINDING(model, Get##propertyName),\
-	FUNCTION_BINDING(model, Set##propertyName##),\
+	FUNCTION_BINDING(model, Set##propertyName),\
 	modelPtr->On##propertyName##Updated())
 
 #define BIND_PROPERTY_R(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\

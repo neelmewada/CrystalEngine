@@ -10,6 +10,17 @@ namespace CE::Vulkan
 		maxConstantBufferRange = gpuProps.limits.maxUniformBufferRange;
 		maxStructuredBufferRange = gpuProps.limits.maxStorageBufferRange;
 
+		VkPhysicalDeviceFeatures features;
+		vkGetPhysicalDeviceFeatures(device->gpu, &features);
+
+		sparseBinding = features.sparseBinding;
+		sparseResidency2D = features.sparseResidencyImage2D;
+		sparseResidency2DSample2 = features.sparseResidency2Samples;
+		sparseResidency2DSample4 = features.sparseResidency4Samples;
+		sparseResidency2DSample8 = features.sparseResidency8Samples;
+		sparseResidency2DSample16 = features.sparseResidency16Samples;
+		sparseResidency3D = features.sparseResidencyImage3D;
+
 		for (int i = 0; formatEnum != nullptr && i < formatEnum->GetConstantsCount(); i++)
 		{
 			RHI::Format rhiFormat = (RHI::Format)formatEnum->GetConstant(i)->GetValue();

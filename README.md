@@ -10,9 +10,9 @@ A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based rende
 
 ## Requirements
 
-The engine compiles on **Windows**, Linux (Ubuntu) and Mac (Apple Silicon). However, Windows is the main platform of focus.
+The engine and editor compiles and runs on **Windows (x64)**, Linux (Ubuntu) and Mac (Apple Silicon). However, Windows is the main platform of focus.
 
-Even though the engine & editor compiles and runs on Mac (Apple Silicon), it is however unusable at this time with mutliple issues.
+Even though the engine & editor compiles and runs on Mac (Apple Silicon), it is however unusable at this time with multiple issues, like incorrect mouse input. etc.
 
 ## Building
 

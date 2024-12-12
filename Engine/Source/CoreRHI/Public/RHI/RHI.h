@@ -14,7 +14,6 @@ namespace CE::RHI
 {
     class RenderTarget;
     class Viewport;
-    class RenderPass;
     class CommandList;
 	class CommandQueue;
     class GraphicsCommandList;

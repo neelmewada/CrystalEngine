@@ -27,7 +27,6 @@ namespace CE::RHI
 		MemoryHeap,
         RenderTarget,
         RenderTargetBuffer,
-        RenderPass,
         Viewport,
 		SwapChain,
         DeviceLimits,
@@ -126,7 +125,8 @@ namespace CE::RHI
         //! Exactly same as Dim2D but is reserved for CubeMaps.
         DimCUBE,
         Dim3D,
-        Dim1D
+        Dim1D,
+        Dim2DArray
     };
 
 	ENUM()
@@ -346,7 +346,8 @@ namespace CE::RHI
 		StructuredBuffer, // A storage buffer in vulkan
 		RWStructuredBuffer, // A RW storage buffer in vulkan
 		Texture1D, // A texture1D in vulkan
-		Texture2D, // A texture2D in vulkan
+        Texture2D, // A texture2D in vulkan
+        Texture2DArray, // A texture2D in vulkan
 		Texture3D, // A texture3D in vulkan
 		TextureCube, // A textureCube in vulkan
 		RWTexture2D, // An image2D in vulkan
