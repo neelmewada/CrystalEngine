@@ -17,7 +17,7 @@ namespace CE
 
     FTreeViewHeaderColumn* FTreeViewHeader::GetColumn(u32 index)
     {
-        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index * 2).Get());
+        return static_cast<FTreeViewHeaderColumn*>(contentStack->GetChild(index).Get());
     }
 
     void FTreeViewHeader::Construct()
@@ -25,12 +25,23 @@ namespace CE
         Super::Construct();
 
         Child(
-            FAssignNew(FHorizontalStack, contentStack)
+            FAssignNew(FSplitBox, contentStack)
+            .Direction(FSplitDirection::Horizontal)
+            .SplitterSize(10)
+            .SplitterDrawRatio(0.1f)
+            .SplitterBackground(Color::Black())
+            .SplitterHoverBackground(Color::RGBA(160, 160, 160))
             .ContentHAlign(HAlign::Fill)
             .ContentVAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
         );
+    }
+
+    void FTreeViewHeader::HandleEvent(FEvent* event)
+    {
+
+	    Super::HandleEvent(event);
     }
 
     FStyledWidget* FTreeViewHeader::CreateSeparator()

@@ -22,9 +22,17 @@ namespace CE
         if (children.IsEmpty() || !Enabled())
             return;
 
+        FScrollBox* parentScroll = static_cast<FScrollBox*>(GetParent());
+        Vec2 translation = Translation();
+        Rect visibleRect = Rect::FromSize(-translation, GetComputedSize());
+
         for (FTreeViewRow* child : children)
         {
             if (!child->Enabled() || !child->Visible())
+                continue;
+
+            Rect childRect = Rect::FromSize(child->GetComputedPosition(), child->GetComputedSize());
+            if (!childRect.Overlaps(visibleRect))
                 continue;
 
             if (child->IsTranslationOnly())

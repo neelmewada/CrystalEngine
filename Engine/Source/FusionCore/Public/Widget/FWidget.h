@@ -100,6 +100,7 @@ namespace CE
         Vec2 GetComputedSize() const { return computedSize; }
 
         const Matrix4x4& GetLocalTransform() const { return localTransform; }
+        const Matrix4x4& GetGlobalTransform() const { return globalTransform; }
 
         void SetComputedPosition(Vec2 pos) { computedPosition = pos; }
 

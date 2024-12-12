@@ -303,9 +303,10 @@ namespace CE
 
                 Matrix4x4 clipTransform = clipRectArray[clipIndex].clipTransform.GetInverse();
                 Vec2 clipPos = clipTransform * Vec4(0, 0, 0, 1);
+                Vec2 clipBottomRight = clipTransform * Vec4(clipRectArray[clipIndex].size.x, clipRectArray[clipIndex].size.y, 0, 1);
 
                 Rect shapeRect = Rect(globalTopLeft, globalBottomRight);
-                Rect clipRect = Rect::FromSize(clipPos, clipRectArray[clipIndex].size);
+                Rect clipRect = Rect(clipPos, clipBottomRight);
 
                 if (!shapeRect.Overlaps(clipRect))
                 {

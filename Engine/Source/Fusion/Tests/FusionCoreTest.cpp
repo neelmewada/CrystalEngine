@@ -353,7 +353,7 @@ namespace WidgetTests
                     // Window Content Begins
 
                     FAssignNew(FVerticalStack, windowContent)
-                    .Padding(Vec4(10, 10, 10, 10))
+                    .Padding(Vec4(1, 1, 1, 1) * 20)
                     .Name("ContentVStack")
                     .FillRatio(1.0f)
                     (
@@ -414,11 +414,11 @@ namespace WidgetTests
 		                    .Columns(
 		                        FNew(FTreeViewHeaderColumn)
 		                        .Title("Name")
-		                        .FillRatio(1.0f),
+		                        .FillRatio(0.8f),
 
 		                        FNew(FTreeViewHeaderColumn)
 		                        .Title("Type")
-		                        .FillRatio(1.0f)
+		                        .FillRatio(0.2f)
 		                    )
 		                )
                         .Height(150)

@@ -81,14 +81,6 @@ namespace CE
 		UpdateViewConstants();
 
 		FusionRendererInitInfo rendererInfo;
-		rendererInfo.fusionShader = FusionApplication::Get()->GetFusionShader();
-		rendererInfo.multisampling.sampleCount = 1;
-		
-		//renderer->SetScreenSize(Vec2i(swapChain->GetWidth(), swapChain->GetHeight()));
-		//renderer->SetDrawListTag(drawListTag);
-
-		//renderer->Init(rendererInfo);
-
 		rendererInfo.fusionShader = FusionApplication::Get()->fusionShader2;
 		rendererInfo.multisampling.sampleCount = 1;
 
@@ -96,7 +88,6 @@ namespace CE
 		renderer2->Init(rendererInfo);
 
 		painter = CreateObject<FPainter>(this, "FusionPainter");
-		//painter->renderer = renderer;
 		painter->renderer2 = renderer2;
 
 		FusionApplication::Get()->nativeWindows.Add(this);
