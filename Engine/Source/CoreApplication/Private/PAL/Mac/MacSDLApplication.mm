@@ -36,4 +36,10 @@ namespace CE
 
     }
 
+    int SDLWindowEventWatch(void* data, SDL_Event* event)
+    {
+        
+        return 0;
+    }
+
 }

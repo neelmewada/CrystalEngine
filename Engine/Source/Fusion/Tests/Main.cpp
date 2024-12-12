@@ -341,6 +341,14 @@ TEST(Fusion, TreeView)
 				.ItemStyle(comboBoxItem)
 				.Style(comboBox);
 		}
+
+		{
+			auto treeView = CreateObject<FTreeViewStyle>(rootStyle, "TreeView");
+			rootStyle->Add(treeView);
+
+			GetDefaultWidget<FTreeView>()
+				.Style(rootStyle, treeView->GetName());
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

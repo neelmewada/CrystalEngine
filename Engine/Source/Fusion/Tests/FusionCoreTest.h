@@ -68,10 +68,6 @@ namespace WidgetTests
 
 		void OnPaint(FPainter* painter) override;
 
-		FUSION_EVENT(ScriptEvent<void()>, OnAdd);
-		FUSION_EVENT(ScriptEvent<void()>, OnRemove);
-		FUSION_EVENT(ScriptEvent<void()>, OnDefragment);
-
 		FSplitBox* splitBox = nullptr;
 		FStackBox* rootBox = nullptr;
 		FButton* button = nullptr;

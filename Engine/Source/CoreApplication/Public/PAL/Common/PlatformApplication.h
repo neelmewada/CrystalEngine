@@ -117,7 +117,7 @@ namespace CE
 
         virtual PlatformWindow* GetMainWindow() = 0;
 
-        virtual PlatformWindow* FindWindow(u64 windowId) = 0;
+        virtual PlatformWindow* FindPlatformWindow(u64 windowId) = 0;
 
         virtual PlatformWindow* CreatePlatformWindow(const String& title) = 0;
         virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen = false, bool hidden = false) = 0;

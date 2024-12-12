@@ -18,10 +18,6 @@ namespace CE
 
         virtual ~FTreeViewModel();
 
-        virtual void SetData(u32 row, FTreeViewRow& rowWidget, const FModelIndex& parent = {}) = 0;
-
-        virtual void SetHeaderData(FTreeViewHeader& header) {}
-
         friend class FTreeView;
     };
 

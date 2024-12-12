@@ -67,6 +67,10 @@ namespace CE
         virtual u32 GetRowCount(const FModelIndex& parent = {}) = 0;
         virtual u32 GetColumnCount(const FModelIndex& parent = {}) = 0;
 
+        virtual void SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent = {}) = 0;
+
+        virtual void SetHeaderData(FWidget& header) {}
+
         ScriptEvent<void(FAbstractItemModel*)> onModelUpdated;
 
     };

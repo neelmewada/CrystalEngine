@@ -2,13 +2,11 @@
 #include "CoreApplication.h"
 
 #include <SDL.h>
-
-
+#include <SDL_syswm.h>
 
 namespace CE
 {
 	int SDLWindowEventWatch(void* data, SDL_Event* event);
-
 
 	SDLApplication* SDLApplication::Get()
 	{
@@ -155,7 +153,7 @@ namespace CE
 		return mainWindow;
 	}
 
-	PlatformWindow* SDLApplication::FindWindow(u64 windowId)
+	PlatformWindow* SDLApplication::FindPlatformWindow(u64 windowId)
 	{
 		for (auto window : windowList)
 		{
@@ -475,33 +473,4 @@ namespace CE
 		
 	}
 
-	int SDLWindowEventWatch(void* data, SDL_Event* event)
-	{
-#if PLATFORM_WINDOWS
-		if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
-		{
-			auto app = SDLApplication::Get();
-
-			for (SDLPlatformWindow* window : app->windowList)
-			{
-				if (window->GetWindowId() == event->window.windowID)
-				{
-					for (ApplicationMessageHandler* messageHandler : app->messageHandlers)
-					{
-						messageHandler->OnWindowExposed(window);
-					}
-
-					break;
-				}
-			}
-
-			for (const auto& tickHandler : app->tickHanders)
-			{
-				tickHandler.InvokeIfValid();
-			}
-		}
-		
-#endif
-		return 0;
-	}
 }

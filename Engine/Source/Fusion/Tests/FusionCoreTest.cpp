@@ -378,7 +378,7 @@ namespace WidgetTests
                             })
                         .Name("Button")
                         .Scale(Vec2(0.75f, 0.75f))
-                        .Angle(15)
+                        .Angle(0)
                         (
                             FAssignNew(FLabel, buttonLabel)
                             .FontSize(10)
@@ -386,6 +386,8 @@ namespace WidgetTests
                         ),
 
                         FNew(FTreeView)
+                        .Height(100)
+                        .HAlign(HAlign::Fill)
                     )
                 )
             )
