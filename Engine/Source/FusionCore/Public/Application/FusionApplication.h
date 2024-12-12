@@ -51,6 +51,8 @@ namespace CE
 
         f32 GetDefaultScalingFactor() const { return defaultScalingFactor; }
 
+        bool IsMailboxPresentationPreferred() const { return preferMailboxPresentMode; }
+
         void Initialize(const FusionInitInfo& initInfo);
         void PreShutdown();
         void Shutdown();
@@ -147,6 +149,9 @@ namespace CE
 
         FIELD(Config)
         f32 defaultScalingFactor = 1.0f;
+
+        FIELD(Config)
+        bool preferMailboxPresentMode = false;
 
         IFusionAssetLoader* assetLoader = nullptr;
 

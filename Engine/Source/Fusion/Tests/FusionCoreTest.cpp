@@ -418,7 +418,7 @@ namespace WidgetTests
 
 		                        FNew(FTreeViewHeaderColumn)
 		                        .Title("Type")
-		                        .Width(200)
+		                        .FillRatio(1.0f)
 		                    )
 		                )
                         .Height(150)

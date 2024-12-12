@@ -68,6 +68,7 @@ namespace CE
 		RHI::SwapChainDescriptor desc{};
 		desc.imageCount = RHI::FrameScheduler::Get()->GetFramesInFlight();
 		desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+		desc.useMailboxMode = FusionApplication::Get()->IsMailboxPresentationPreferred();
 		platformWindow->GetDrawableWindowSize(&desc.preferredWidth, &desc.preferredHeight);
 
 		swapChain = RHI::gDynamicRHI->CreateSwapChain(platformWindow, desc);
