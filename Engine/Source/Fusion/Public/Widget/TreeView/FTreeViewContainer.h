@@ -31,11 +31,17 @@ namespace CE
 
         bool SupportsKeyboardEvents() const override { return true; }
 
+        bool CapturesMouseWheel() const override { return true; }
+
     protected:
 
         FTreeViewContainer();
 
         void Construct() override;
+
+        Rect GetVerticalScrollBarRect();
+
+        bool IsVerticalScrollVisible();
 
     	void OnPaint(FPainter* painter) override;
 
@@ -56,20 +62,14 @@ namespace CE
         HashSet<FModelIndex> expandedRows;
         Vec2 modelUpdateComputedSize;
         f32 totalRowHeight = 0;
+        bool isScrollHovered = false;
 
     public: // - Fusion Properties -
 
         // - ScrollBar -
 
-        FUSION_PROPERTY(FBrush, ScrollBarBackground);
-        FUSION_PROPERTY(FPen, ScrollBarBackgroundPen);
-        FUSION_PROPERTY(FBrush, ScrollBarBrush);
-        FUSION_PROPERTY(FBrush, ScrollBarHoverBrush);
-        FUSION_PROPERTY(FPen, ScrollBarPen);
-        FUSION_PROPERTY(FPen, ScrollBarHoverPen);
-        FUSION_PROPERTY(FShape, ScrollBarShape);
-        FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
-        FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
+        Self& NormalizedScrollY(f32 value);
+        f32 NormalizedScrollY();
 
         FUSION_WIDGET;
         friend class FTreeView;

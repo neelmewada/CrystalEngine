@@ -3,16 +3,15 @@
 # Setup variables
 
 base_dir=$(pwd)
-cmake_subdir=$2
-cmake_args=$3
-num_cores=$(nproc --all)
 DefaultGenerator="Ninja Multi-Config"
+Compiler=""
 
 cd $1
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     platform="Linux"
     SystemName="Linux"
+    Compiler="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     platform="Mac"
     DefaultGenerator="Xcode"
@@ -32,10 +31,11 @@ elif [[ "$OSTYPE" == "win32" ]]; then
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     platform="Linux"
     SystemName="Linux"
+    Compiler="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 else
     echo "Unknown Operating System"
     exit 1
 fi
 
-cmake -B "${base_dir}/Build/${platform}-Standalone" -S "${base_dir}" -G "${DefaultGenerator}" -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="Build/${platform}/Debug" -Wno-dev #-DCMAKE_SYSTEM_NAME="${SystemName}"
+cmake -B "${base_dir}/Build/${platform}-Standalone" -S "${base_dir}" -G "${DefaultGenerator}" -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="Build/${platform}/Debug" -Wno-dev "$@" #-DCMAKE_SYSTEM_NAME="${SystemName}"
 

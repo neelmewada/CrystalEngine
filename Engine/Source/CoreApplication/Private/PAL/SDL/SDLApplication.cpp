@@ -28,11 +28,6 @@ namespace CE
 	void SDLApplication::Initialize()
 	{
 		Super::Initialize();
-		
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
-		{
-			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
-		}
 
 		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
 
@@ -48,6 +43,11 @@ namespace CE
 		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 #endif
+
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
+		{
+			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
+		}
 	}
 
 	void SDLApplication::PreShutdown()

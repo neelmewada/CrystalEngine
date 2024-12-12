@@ -5,13 +5,7 @@ namespace CE
 
     FTreeViewContainer::FTreeViewContainer()
     {
-        m_ScrollBarWidth = 8;
-        m_ScrollBarShape = FRoundedRectangle(4);
-        m_ScrollBarMargin = 2.5f;
-
-        m_ScrollBarBackground = Color::RGBA(50, 50, 50);
-        m_ScrollBarBrush = Color::RGBA(255, 255, 255, 100);
-        m_ScrollBarHoverBrush = Color::RGBA(255, 255, 255, 140);
+        
     }
 
     void FTreeViewContainer::Construct()
@@ -19,6 +13,23 @@ namespace CE
         Super::Construct();
 
         
+    }
+
+    Rect FTreeViewContainer::GetVerticalScrollBarRect()
+    {
+        f32 normalizedScrollY = NormalizedScrollY();
+        f32 scrollBarHeight = computedSize.y * (computedSize.y / totalRowHeight);
+        scrollBarHeight = Math::Max(scrollBarHeight, 10.0f);
+
+        f32 posX = computedSize.x - treeView->m_ScrollBarWidth;
+        f32 posY = -Translation().y + normalizedScrollY * (computedSize.y - scrollBarHeight);
+
+        return  Rect::FromSize(posX, posY, treeView->m_ScrollBarWidth, scrollBarHeight);
+    }
+
+    bool FTreeViewContainer::IsVerticalScrollVisible()
+    {
+        return totalRowHeight >= computedSize.y;
     }
 
     void FTreeViewContainer::OnPaint(FPainter* painter)
@@ -49,19 +60,12 @@ namespace CE
 
         if (totalRowHeight >= computedSize.y)
         {
-            f32 normalizedScrollY = -Translation().y / (totalRowHeight - computedSize.y);
-            f32 scrollBarHeight = computedSize.y * (computedSize.y / totalRowHeight);
-            scrollBarHeight = Math::Max(scrollBarHeight, 10.0f);
+            Rect scrollBar = GetVerticalScrollBarRect();
 
-            f32 posX = computedSize.x - m_ScrollBarWidth;
-            f32 posY = -Translation().y + normalizedScrollY * (computedSize.y - scrollBarHeight);
+            painter->SetPen(isScrollHovered ? treeView->m_ScrollBarHoverPen : treeView->m_ScrollBarPen);
+            painter->SetBrush(isScrollHovered ? treeView->m_ScrollBarHoverBrush : treeView->m_ScrollBarBrush);
 
-            painter->SetPen(m_ScrollBarPen);
-            painter->SetBrush(m_ScrollBarBrush);
-
-            Rect scrollBar = Rect::FromSize(posX, posY, m_ScrollBarWidth, scrollBarHeight);
-
-            painter->DrawRoundedRect(scrollBar, Vec4(1, 1, 1, 1) * m_ScrollBarWidth / 2.0f);
+            painter->DrawRoundedRect(scrollBar, Vec4(1, 1, 1, 1) * treeView->m_ScrollBarWidth / 2.0f);
         }
     }
 
@@ -90,7 +94,7 @@ namespace CE
         if (children.IsEmpty())
             return thisHitTest;
 
-        Vec2 transformedMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+        Vec2 transformedMousePos = mouseTransform * Matrix4x4::Translation(-Translation()) * Vec4(localMousePos.x, localMousePos.y, 0, 1);
 
         for (int i = children.GetCount() - 1; i >= 0; --i)
         {
@@ -156,6 +160,53 @@ namespace CE
         if (event->IsMouseEvent() && event->sender == this)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+            Vec2 localMousePos = mouseEvent->mousePosition;
+            localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+
+            if (IsVerticalScrollVisible())
+            {
+                Rect scrollBar = GetVerticalScrollBarRect();
+
+                if (mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter)
+                {
+                    bool isInside = scrollBar.Contains(localMousePos);
+                    if (isInside != isScrollHovered)
+                    {
+                        isScrollHovered = isInside;
+                        MarkDirty();
+                    }
+                }
+                else if (mouseEvent->type == FEventType::MouseLeave)
+                {
+                    if (isScrollHovered)
+                    {
+                        isScrollHovered = false;
+                        MarkDirty();
+                    }
+                }
+
+                if (mouseEvent->type == FEventType::MouseWheel)
+                {
+                    Vec2 wheelDelta = mouseEvent->wheelDelta;
+
+                    if (EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Shift))
+                    {
+                        wheelDelta.x = wheelDelta.y;
+                        wheelDelta.y = 0;
+                    }
+
+                    f32 normalizedScrollY = NormalizedScrollY();
+                    normalizedScrollY += -wheelDelta.y * treeView->m_VerticalScrollSensitivity / (totalRowHeight - computedSize.y) * GetContext()->GetScaling();
+                    NormalizedScrollY(normalizedScrollY);
+
+                    OnModelUpdate();
+                }
+
+                if (mouseEvent->type == FEventType::DragBegin && mouseEvent->sender == this && isScrollHovered)
+                {
+
+                }
+            }
 
             if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
             {
@@ -306,6 +357,27 @@ namespace CE
         MarkDirty();
     }
 
+    FTreeViewContainer::Self& FTreeViewContainer::NormalizedScrollY(f32 value)
+    {
+        value = Math::Clamp01(value);
+
+        Vec2 translation = Translation();
+        translation.y = -value * (totalRowHeight - computedSize.y);
+        if (totalRowHeight < computedSize.y)
+        {
+            translation.y = 0;
+        }
+        Translation(translation);
+        return *this;
+    }
+
+    f32 FTreeViewContainer::NormalizedScrollY()
+    {
+        if (totalRowHeight < computedSize.y - 1)
+            return 0;
+        return -Translation().y / (totalRowHeight - computedSize.y);
+    }
+
     void FTreeViewContainer::CalculateIntrinsicSize()
     {
         ZoneScoped;
@@ -373,7 +445,7 @@ namespace CE
 
         if (totalRowHeight >= computedSize.y)
         {
-            Padding(Vec4(0, 0, m_ScrollBarWidth + m_ScrollBarMargin, 0));
+            Padding(Vec4(0, 0, treeView->m_ScrollBarWidth + treeView->m_ScrollBarMargin, 0));
         }
         else
         {

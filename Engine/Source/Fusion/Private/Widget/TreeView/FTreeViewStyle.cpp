@@ -55,6 +55,7 @@ namespace CE
                 FBrush rowBg = rowBackground;
                 if (child->IsAlternate())
                     rowBg = rowAlternateBackground;
+
                 if (treeView.SelectionModel()->IsSelected(child->GetIndex()))
                     rowBg = rowSelectionBackground;
                 else if (child->IsHovered())
