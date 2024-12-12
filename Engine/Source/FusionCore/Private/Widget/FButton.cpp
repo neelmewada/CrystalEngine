@@ -33,7 +33,7 @@ namespace CE
 
     void FButton::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent() && !IsInteractionDisabled())
+        if (event->IsMouseEvent() && !IsInteractionDisabled() && IsVisible())
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 

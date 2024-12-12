@@ -15,23 +15,6 @@ namespace CE
         
     }
 
-    Rect FTreeViewContainer::GetVerticalScrollBarRect()
-    {
-        f32 normalizedScrollY = NormalizedScrollY();
-        f32 scrollBarHeight = computedSize.y * (computedSize.y / totalRowHeight);
-        scrollBarHeight = Math::Max(scrollBarHeight, 10.0f);
-
-        f32 posX = computedSize.x - treeView->m_ScrollBarWidth;
-        f32 posY = -Translation().y + normalizedScrollY * (computedSize.y - scrollBarHeight);
-
-        return  Rect::FromSize(posX, posY, treeView->m_ScrollBarWidth, scrollBarHeight);
-    }
-
-    bool FTreeViewContainer::IsVerticalScrollVisible()
-    {
-        return totalRowHeight >= computedSize.y;
-    }
-
     void FTreeViewContainer::OnPaint(FPainter* painter)
     {
         Super::OnPaint(painter);
@@ -56,16 +39,6 @@ namespace CE
             child->OnPaint(painter);
 
             painter->PopChildCoordinateSpace();
-        }
-
-        if (totalRowHeight >= computedSize.y)
-        {
-            Rect scrollBar = GetVerticalScrollBarRect();
-
-            painter->SetPen(isScrollHovered ? treeView->m_ScrollBarHoverPen : treeView->m_ScrollBarPen);
-            painter->SetBrush(isScrollHovered ? treeView->m_ScrollBarHoverBrush : treeView->m_ScrollBarBrush);
-
-            painter->DrawRoundedRect(scrollBar, Vec4(1, 1, 1, 1) * treeView->m_ScrollBarWidth / 2.0f);
         }
     }
 
@@ -160,53 +133,6 @@ namespace CE
         if (event->IsMouseEvent() && event->sender == this)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
-            Vec2 localMousePos = mouseEvent->mousePosition;
-            localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
-
-            if (IsVerticalScrollVisible())
-            {
-                Rect scrollBar = GetVerticalScrollBarRect();
-
-                if (mouseEvent->type == FEventType::MouseMove || mouseEvent->type == FEventType::MouseEnter)
-                {
-                    bool isInside = scrollBar.Contains(localMousePos);
-                    if (isInside != isScrollHovered)
-                    {
-                        isScrollHovered = isInside;
-                        MarkDirty();
-                    }
-                }
-                else if (mouseEvent->type == FEventType::MouseLeave)
-                {
-                    if (isScrollHovered)
-                    {
-                        isScrollHovered = false;
-                        MarkDirty();
-                    }
-                }
-
-                if (mouseEvent->type == FEventType::MouseWheel)
-                {
-                    Vec2 wheelDelta = mouseEvent->wheelDelta;
-
-                    if (EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Shift))
-                    {
-                        wheelDelta.x = wheelDelta.y;
-                        wheelDelta.y = 0;
-                    }
-
-                    f32 normalizedScrollY = NormalizedScrollY();
-                    normalizedScrollY += -wheelDelta.y * treeView->m_VerticalScrollSensitivity / (totalRowHeight - computedSize.y) * GetContext()->GetScaling();
-                    NormalizedScrollY(normalizedScrollY);
-
-                    OnModelUpdate();
-                }
-
-                if (mouseEvent->type == FEventType::DragBegin && mouseEvent->sender == this && isScrollHovered)
-                {
-
-                }
-            }
 
             if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
             {
@@ -265,13 +191,13 @@ namespace CE
 
                     if (bottomY < scrollY)
                     {
-                        curPosY += rowHeight; // We are above the scroll view
-                        globalRowIdx++;
-                        continue;
+                        //curPosY += rowHeight; // We are above the scroll view
+                        //globalRowIdx++;
+                        //continue;
                     }
                     else if (topY > scrollY + computedSize.y)
                     {
-                        break; // We are below the scroll view
+                        //break; // We are below the scroll view
                     }
 
                     FTreeViewRow* rowWidget = nullptr;
@@ -313,7 +239,19 @@ namespace CE
                         cell
 							.ArrowVisible(treeView->m_ExpandableColumn == c && childrenCount > 0)
 							.ArrowEnabled(treeView->m_ExpandableColumn == c)
-							.ArrowExpanded(treeView->m_SelectionModel->IsSelected(index))
+							.ArrowExpanded(expandedRows.Exists(index))
+							.OnToggleExpansion([index, this]
+							{
+                                if (!expandedRows.Exists(index))
+                                {
+	                                expandedRows.Add(index);
+                                }
+                                else
+                                {
+                                    expandedRows.Remove(index);
+                                }
+                                MarkLayoutDirty();
+							})
                         ;
 
                         if (treeView->m_ExpandableColumn == c && indentLevel > 0)
@@ -331,6 +269,8 @@ namespace CE
                         }
                         else
                         {
+                            // Reset indentation
+                            cell.Margin(Vec4(0, 0, 0, 0));
                             cell.Width(minWidth);
                         }
                     }
@@ -494,11 +434,11 @@ namespace CE
             }
 
             child->SetComputedPosition(curPos);
-            child->SetComputedSize(Vec2(availableSize.x, rowHeight));
+            child->SetComputedSize(Vec2(availableSize.x, Math::Max(rowHeight, child->GetIntrinsicSize().y)));
 
         	child->PlaceSubWidgets();
 
-            curPos.y += rowHeight;
+            curPos.y += child->computedSize.y;
         }
     }
     

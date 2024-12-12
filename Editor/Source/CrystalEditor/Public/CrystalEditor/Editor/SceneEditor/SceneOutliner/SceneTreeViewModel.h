@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneTreeViewModel : public FTreeViewModel
+    class CRYSTALEDITOR_API SceneTreeViewModel : public FAbstractItemModel
     {
-        CE_CLASS(SceneTreeViewModel, FTreeViewModel)
+        CE_CLASS(SceneTreeViewModel, FAbstractItemModel)
     public:
 
         virtual ~SceneTreeViewModel();
@@ -26,7 +26,7 @@ namespace CE
 
         u32 GetColumnCount(const FModelIndex& parent) override;
 
-        void SetData(u32 row, FTreeViewRow& rowWidget, const FModelIndex& parent) override;
+        void SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent) override;
 
         void SetScene(CE::Scene* scene);
 

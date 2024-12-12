@@ -10,6 +10,8 @@ namespace WidgetTests
     void RendererSystem::Init()
     {
         PlatformApplication::Get()->AddMessageHandler(this);
+
+        scheduler = RHI::FrameScheduler::Get();
     }
 
     void RendererSystem::Shutdown()
@@ -56,11 +58,17 @@ namespace WidgetTests
 
         auto scheduler = FrameScheduler::Get();
 
+        if (rebuildFrameGraph || recompileFrameGraph)
+        {
+            RebuildFrameGraph();
+            return;
+        }
+
         int imageIndex = scheduler->BeginExecution();
 
         if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
         {
-            rebuildFrameGraph = recompileFrameGraph = true;
+            RebuildFrameGraph();
             return;
         }
 
@@ -196,7 +204,17 @@ namespace WidgetTests
 
     void RendererSystem::OnWindowExposed(PlatformWindow* window)
     {
-        rebuildFrameGraph = recompileFrameGraph = true;
+        auto id = window->GetWindowId();
+        Vec2i windowSize = window->GetWindowSize();
+
+        if (!windowSizesById.KeyExists(id) || windowSize != windowSizesById[id])
+        {
+            RebuildFrameGraph();
+
+            scheduler->ResetFramesInFlight();
+        }
+
+        windowSizesById[id] = windowSize;
     }
 
 #pragma endregion
@@ -213,6 +231,8 @@ namespace WidgetTests
         FTextButton* nativePopupBtn = nullptr;
 
         PlatformApplication::Get()->AddMessageHandler(this);
+
+        treeViewModel = CreateObject<TreeViewModel>(this, "TreeViewModel");
 
         Child(
             FAssignNew(FStyledWidget, borderWidget)
@@ -386,7 +406,22 @@ namespace WidgetTests
                         ),
 
                         FNew(FTreeView)
-                        .Height(100)
+                        .GenerateRowDelegate(MemberDelegate(&Self::GenerateTreeViewRow, this))
+                        .Model(treeViewModel)
+                        .RowHeight(25)
+                        .Header(
+		                    FNew(FTreeViewHeader)
+		                    .Columns(
+		                        FNew(FTreeViewHeaderColumn)
+		                        .Title("Name")
+		                        .FillRatio(1.0f),
+
+		                        FNew(FTreeViewHeaderColumn)
+		                        .Title("Type")
+		                        .Width(200)
+		                    )
+		                )
+                        .Height(150)
                         .HAlign(HAlign::Fill)
                     )
                 )
@@ -394,6 +429,26 @@ namespace WidgetTests
         );
 
         //windowContent->Enabled(false);
+    }
+
+    FTreeViewRow& RenderingTestWidget::GenerateTreeViewRow()
+    {
+        FTreeViewRow& row = FNew(FTreeViewRow);
+
+        row.Cells(
+            FNew(FTreeViewCell)
+            .Text("Name")
+            .ArrowEnabled(true)
+            .FontSize(10),
+
+            FNew(FTreeViewCell)
+            .Text("Type")
+            .FontSize(10)
+            .Foreground(Color::RGBA(255, 255, 255, 140))
+            .ArrowEnabled(false)
+        );
+
+        return row;
     }
 
     void RenderingTestWidget::OnPaint(FPainter* painter)

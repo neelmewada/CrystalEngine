@@ -391,7 +391,9 @@ namespace CE
 
 	template <typename T>
 	struct TFunctionTraits : public TFunctionTraits<decltype(&T::operator())>
-	{};
+	{
+		static constexpr bool Value = false;
+	};
 
 	// For generic types, directly use the result of the signature of its 'operator()'
 
@@ -399,6 +401,8 @@ namespace CE
 	struct TFunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to const member function
 	{
 		enum { NumArgs = sizeof...(Args) };
+
+		static constexpr bool Value = true;
 
 		typedef TReturnType ReturnType;
 		typedef TClassType ClassType;
@@ -419,6 +423,8 @@ namespace CE
 	{
 		enum { NumArgs = sizeof...(Args) };
 
+		static constexpr bool Value = true;
+
 		typedef TReturnType ReturnType;
 		typedef TClassType ClassType;
 
@@ -437,6 +443,8 @@ namespace CE
 	struct TFunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to global functions
 	{
 		enum { NumArgs = sizeof...(Args) };
+
+		static constexpr bool Value = true;
 
 		typedef TReturnType ReturnType;
 		typedef void ClassType;

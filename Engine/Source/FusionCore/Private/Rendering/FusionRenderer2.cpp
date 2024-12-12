@@ -387,10 +387,19 @@ namespace CE
                 if (drawCmdList[i].numIndices == 0)
                     continue;
 
-                if (oldPackets.NotEmpty())
+                if (oldPackets.NotEmpty() || freePackets.NotEmpty())
                 {
-                    RHI::DrawPacket* drawPacket = oldPackets[0];
-                    oldPackets.RemoveAt(0);
+                    RHI::DrawPacket* drawPacket = nullptr;
+                    if (oldPackets.NotEmpty())
+                    {
+                        drawPacket = oldPackets[0];
+                        oldPackets.RemoveAt(0);
+                    }
+                    else
+                    {
+                        drawPacket = freePackets[0];
+                        freePackets.RemoveAt(0);
+                    }
 
                     RHI::DrawIndexedArguments drawArgs{};
                     drawArgs.firstIndex = drawCmdList[i].indexOffset;

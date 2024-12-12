@@ -39,10 +39,6 @@ namespace CE
 
         void Construct() override;
 
-        Rect GetVerticalScrollBarRect();
-
-        bool IsVerticalScrollVisible();
-
     	void OnPaint(FPainter* painter) override;
 
         void OnPostComputeLayout() override;

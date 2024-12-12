@@ -111,7 +111,7 @@ namespace CE
 			return false;
 
 		Array<String> components = {};
-		pathStr.Split(Array<String>{ "/" , "\\"}, components);
+		pathStr.Split(Array<String>{ "/" , "\\" }, components);
 
 		PathTreeNode* curNode = rootNode;
 

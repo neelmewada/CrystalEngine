@@ -43,6 +43,9 @@ namespace WidgetTests
 
 	public:
 
+		HashMap<u64, Vec2i> windowSizesById;
+		RHI::FrameScheduler* scheduler = nullptr;
+
 		bool rebuildFrameGraph = true;
 		bool recompileFrameGraph = true;
 		int curImageIndex = 0;
@@ -51,7 +54,7 @@ namespace WidgetTests
 	};
 
 	CLASS()
-		class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
+	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
 	{
 		CE_CLASS(RenderingTestWidget, FWindow)
 	public:
@@ -59,6 +62,8 @@ namespace WidgetTests
 		RenderingTestWidget() = default;
 
 		void Construct() override;
+
+		FTreeViewRow& GenerateTreeViewRow();
 
 		void OnBeginDestroy() override;
 
@@ -81,10 +86,125 @@ namespace WidgetTests
 		FStyledWidget* borderWidget = nullptr;
 		FTextInput* modelTextInput = nullptr;
 		FVerticalStack* windowContent = nullptr;
+		class TreeViewModel* treeViewModel = nullptr;
 
 		int hitCounter = 0;
 
 		FUSION_WIDGET;
+	};
+
+	CLASS()
+	class TreeViewModel : public FAbstractItemModel
+	{
+		CE_CLASS(TreeViewModel, FAbstractItemModel)
+	public:
+
+		TreeViewModel()
+		{
+			model = new PathTree;
+
+			model->AddPath("/Assets");
+			model->AddPath("/Assets/Samples");
+			model->AddPath("/Assets/Samples/Splash");
+			model->AddPath("/Assets/Samples/Icon");
+			model->AddPath("/Assets/Textures");
+			model->AddPath("/Assets/Sprites");
+			model->AddPath("/Scripts");
+			model->AddPath("/Engine");
+			model->AddPath("/Editor");
+			model->AddPath("/Game");
+			model->AddPath("/Temp");
+			model->AddPath("/Cache");
+			model->AddPath("/Library");
+			model->AddPath("/Materials");
+			model->AddPath("/Shaders");
+		}
+
+		virtual ~TreeViewModel()
+		{
+			delete model; model = nullptr;
+		}
+
+		FModelIndex GetParent(const FModelIndex& index) override
+		{
+			if (!index.IsValid() || index.GetDataPtr() == nullptr)
+				return {};
+
+			PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
+			if (node->parent == nullptr)
+				return {};
+
+			PathTreeNode* parentsParent = node->parent->parent;
+			if (parentsParent == nullptr)
+				parentsParent = model->GetRootNode();
+
+			int indexOfParent = parentsParent->children.IndexOf(node->parent);
+			if (indexOfParent < 0)
+				return {};
+
+			return CreateIndex(indexOfParent, index.GetColumn(), node->parent);
+		}
+
+		FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent) override
+		{
+			if (!parent.IsValid())
+			{
+				return CreateIndex(row, column, model->GetRootNode()->children[row]);
+			}
+
+			PathTreeNode* node = (PathTreeNode*)parent.GetDataPtr();
+			if (node == nullptr)
+				return {};
+
+			return CreateIndex(row, column, node->children[row]);
+		}
+
+		u32 GetRowCount(const FModelIndex& parent) override
+		{
+			if (!parent.IsValid())
+			{
+				return model->GetRootNode()->children.GetSize();
+			}
+
+			PathTreeNode* node = (PathTreeNode*)parent.GetDataPtr();
+			if (node == nullptr)
+				return 0;
+
+			return node->children.GetSize();
+		}
+
+		u32 GetColumnCount(const FModelIndex& parent) override
+		{
+			return 2;
+		}
+
+		void SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent) override
+		{
+			PathTreeNode* node = nullptr;
+			if (!parent.IsValid())
+			{
+				node = model->GetRootNode()->children[row];
+			}
+			else
+			{
+				PathTreeNode* parentNode = (PathTreeNode*)parent.GetDataPtr();
+
+				if (parentNode != nullptr)
+				{
+					node = parentNode->children[row];
+				}
+			}
+
+			if (node == nullptr)
+				return;
+
+			FTreeViewRow& treeRow = rowWidget.As<FTreeViewRow>();
+
+			treeRow.GetCell(0)->Text(node->name.GetString());
+			treeRow.GetCell(1)->Text(node->nodeType == PathTreeNodeType::Directory ? "Directory" : "File");
+		}
+
+		PathTree* model = nullptr;
 	};
 
 }

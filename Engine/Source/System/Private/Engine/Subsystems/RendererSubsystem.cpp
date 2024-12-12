@@ -25,11 +25,6 @@ namespace CE
 
     void RendererSubsystem::OnWindowDestroyed(PlatformWindow* window)
     {
-		if (window && window->IsMainWindow())
-		{
-			CE_LOG(Info, All, "Main Window Destroyed");
-		}
-
 		RebuildFrameGraph();
     }
 

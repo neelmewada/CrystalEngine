@@ -21,6 +21,7 @@ namespace CE
         m_AutoHeight = false;
         m_MinHeight = 30;
         m_Indentation = 10;
+        m_RowHeight = 25;
     }
 
     void FTreeView::Construct()
@@ -36,14 +37,20 @@ namespace CE
                 .HAlign(HAlign::Fill),
 
                 FAssignNew(FStyledWidget, containerStyle)
-                .ClipChildren(true)
                 .HAlign(HAlign::Fill)
                 .FillRatio(1.0f)
                 (
-                    FAssignNew(FTreeViewContainer, container)
-                    .TreeView(this)
+                    FNew(FScrollBox)
+                    .VerticalScroll(true)
+                    .HorizontalScroll(false)
+                    .Child(
+                        FAssignNew(FTreeViewContainer, container)
+                        .TreeView(this)
+                        .HAlign(HAlign::Left)
+                        .VAlign(VAlign::Top)
+                    )
                     .HAlign(HAlign::Fill)
-                    .FillRatio(1.0f)
+                    .VAlign(VAlign::Fill)
                 )
             )
         );
@@ -58,9 +65,6 @@ namespace CE
 
         if (propertyName == model)
         {
-            // TODO: Do model loading
-            //container->OnModelUpdate();
-            
             MarkLayoutDirty();
         }
     }

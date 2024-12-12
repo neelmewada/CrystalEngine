@@ -52,6 +52,8 @@ namespace CE
         virtual void CopyFrom(IScriptDelegate* other) = 0;
 
         virtual void Bind(const Ref<Object>& object, FunctionType* function) = 0;
+        virtual void Bind(const FunctionBinding& binding) = 0;
+        virtual void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) = 0;
 
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
@@ -233,7 +235,43 @@ namespace CE
             isBound = true;
         }
 
+		void Bind(const FunctionBinding& binding) override
+        {
+            Bind(binding.object.Lock(), binding.function);
+        }
+
+		void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) override
+        {
+            this->lambda = lambda;
+            isBound = this->lambda.IsValid();
+        }
+
+        template<typename TLambda>
+        DelegateHandle Bind(const TLambda& lambda)
+        {
+            return BindInternal(lambda, std::make_index_sequence<sizeof...(TArgs)>());
+        }
+
     private:
+
+        template<typename TLambda, std::size_t... Is>
+        DelegateHandle BindInternal(const TLambda& lambda, std::index_sequence<Is...>)
+        {
+            Delegate<Variant(const Array<Variant>&)> delegate = [lambda](const Array<Variant>& variantArgs) -> Variant
+                {
+                    if constexpr (TFunctionTraits<TLambda>::NumArgs == 0)
+                    {
+                        lambda();
+                    }
+                    else
+                    {
+                        lambda((variantArgs.begin() + Is)->GetValue<TArgs>()...);
+                    }
+                    return nullptr;
+                };
+            Bind(delegate);
+            return delegate.GetHandle();
+        }
 
         void CopyFrom(const ScriptDelegate& copy)
         {

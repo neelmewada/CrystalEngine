@@ -84,10 +84,15 @@ namespace CE
         return 2; // Name, Type
     }
 
-    void SceneTreeViewModel::SetData(u32 row, FTreeViewRow& rowWidget, const FModelIndex& parent)
+    void SceneTreeViewModel::SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent)
     {
         if (!scene)
             return;
+        FTreeViewRow* rowCast = Object::CastTo<FTreeViewRow>(&rowWidget);
+        if (rowCast == nullptr)
+            return;
+
+        FTreeViewRow& treeRow = *rowCast;
 
         FModelIndex index = GetIndex(row, 0, parent);
         if (!index.IsValid() || index.GetDataPtr() == nullptr)
@@ -96,8 +101,8 @@ namespace CE
         Actor* actor = (Actor*)index.GetDataPtr();
         String actorType = actor->GetType()->GetName().GetLastComponent();
 
-        rowWidget.GetCell(0)->Text(actor->GetName().GetString());
-        rowWidget.GetCell(1)->Text(actorType);
+        treeRow.GetCell(0)->Text(actor->GetName().GetString());
+        treeRow.GetCell(1)->Text(actorType);
     }
 
     void SceneTreeViewModel::SetScene(CE::Scene* scene)

@@ -16,7 +16,7 @@ namespace CE
 
         void Construct() override;
 
-        FImage* arrowIcon = nullptr;
+        FImageButton* arrowIcon = nullptr;
         FLabel* label = nullptr;
 
     public: // - Fusion Properties -
@@ -28,6 +28,8 @@ namespace CE
 
         FUSION_PROPERTY_WRAPPER2(Enabled, arrowIcon, ArrowEnabled);
         FUSION_PROPERTY_WRAPPER2(Visible, arrowIcon, ArrowVisible);
+
+        FUSION_EVENT(ScriptDelegate<void()>, OnToggleExpansion);
 
         bool ArrowExpanded();
         Self& ArrowExpanded(bool expanded);

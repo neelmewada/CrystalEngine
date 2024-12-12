@@ -5,7 +5,7 @@ namespace CE
 
     FTreeViewHeaderColumn::FTreeViewHeaderColumn()
     {
-
+        m_ClipChildren = true;
     }
 
     void FTreeViewHeaderColumn::Construct()

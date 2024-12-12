@@ -201,7 +201,8 @@ TEST(Fusion, TreeView)
 
 			GetDefaultWidget<FScrollBox>()
 				.ScrollBarBackground(Color::RGBA(50, 50, 50))
-				.ScrollBarBrush(Color::RGBA(60, 60, 60))
+				.ScrollBarBrush(Color::RGBA(130, 130, 130))
+				.ScrollBarHoverBrush(Color::RGBA(160, 160, 160))
 				;
 		}
 
@@ -348,6 +349,15 @@ TEST(Fusion, TreeView)
 
 			GetDefaultWidget<FTreeView>()
 				.Style(rootStyle, treeView->GetName());
+		}
+
+		{
+			auto expandCaretButton = CreateObject<FImageButtonStyle>(rootStyle, "ExpandCaretButton");
+			rootStyle->Add(expandCaretButton);
+
+			expandCaretButton->tintColor = Color::RGBA(134, 134, 134);
+			expandCaretButton->hoverTintColor = Color::RGBA(190, 190, 190);
+			expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
 		}
 	}
 
