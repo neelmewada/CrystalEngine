@@ -13,9 +13,9 @@ Fusion lets you create widgets in C++ using declarative syntax and apply flexibl
 * Fast 2D renderer with GPU side 2D clipping, and CPU side 2D draw culling.
 * Styling: Flexible styling using `FStyle` and `FStyleSet`.
 * Flexible layout: Use layouts like FStackBox, FOverlayStack, FCompoundWidget, FSplitBox, etc to create complex layouts.
-* Simple data binding between widget and model classes, using MODEL_PROPERTY() and BIND_PROPERTY_R/RW() macros.
+* Simple data binding between widget and model classes, using `MODEL_PROPERTY()` and `BIND_PROPERTY_R/RW()` macros.
 * Create custom widgets with your own declarative properties with `FUSION_PROPERTY()` and other macros.
-* Apply layout-independent transformations with Translation(), Angle() and Scale() to individual widgets and they'll still work with mouse input hit-test:
+* Apply layout-independent transformations with Translation(), Angle() and Scale() to individual widgets and have them still work with mouse input hit-test:
 <br><img src="../Screenshots/Widget Transformations.gif" height=300/>
 
 
