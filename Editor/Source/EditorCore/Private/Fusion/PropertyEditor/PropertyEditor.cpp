@@ -77,7 +77,7 @@ namespace CE::Editor
 
                             FAssignNew(FLabel, fieldNameLabel)
                             .Text("Field Name")
-                            .FontSize(9)
+                            .FontSize(10)
                         ),
 
                         FAssignNew(FHorizontalStack, right)

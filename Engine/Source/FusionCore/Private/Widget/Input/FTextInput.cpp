@@ -818,7 +818,7 @@ namespace CE
                     FAssignNew(FTextInputLabel, inputLabel)
                     .Text("")
                     .WordWrap(FWordWrap::NoWrap)
-                    .FontSize(9)
+                    .FontSize(10)
                     .Foreground(Color::White())
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
