@@ -16,6 +16,8 @@ namespace CE::Editor
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool SupportsDragEvents() const override { return true; }
+
         EditorField& FixedInputWidth(f32 width) override;
 
         void HandleEvent(FEvent* event) override;
@@ -40,11 +42,15 @@ namespace CE::Editor
         FTextInput* input = nullptr;
         bool isCursorPushed = false;
         bool isDragging = false;
+        bool isMouseInside = false;
+        f32 startMouseX = 0;
+        f64 startValue = 0;
 
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(bool, ColorTagVisible);
         FUSION_PROPERTY(Color, ColorTag);
+        FUSION_PROPERTY(f32, ScrollAmount);
 
         FUSION_PROPERTY_WRAPPER(Text, input);
 

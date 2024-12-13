@@ -520,6 +520,19 @@ namespace CE
 					dragEvent.prevMousePosition = prevMousePos;
 					dragEvent.buttons = (MouseButtonMask)BIT((int)mouseButton);
 					dragEvent.keyModifiers = keyModifierStates;
+					dragEvent.isInside = false;
+
+					if (hoveredWidgetStack.NotEmpty())
+					{
+						for (int j = hoveredWidgetStack.GetSize() - 1; j >= 0; --j)
+						{
+							if (hoveredWidgetStack[j] == draggedWidget)
+							{
+								dragEvent.isInside = true;
+								break;
+							}
+						}
+					}
 
 					dragEvent.sender = draggedWidget.Get();
 					dragEvent.draggedWidget = draggedWidget.Get();

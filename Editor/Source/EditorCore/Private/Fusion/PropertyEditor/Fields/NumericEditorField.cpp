@@ -5,6 +5,7 @@ namespace CE::Editor
 
     NumericEditorField::NumericEditorField()
     {
+        m_ScrollAmount = 0.5f;
     }
 
     void NumericEditorField::Construct()
@@ -28,6 +29,27 @@ namespace CE::Editor
         return *this;
     }
 
+#define FIELD_START_VALUE_IF(type)\
+	if (numericType == TYPEID(type))\
+	{\
+	    type value = 0;\
+	    if (String::TryParse(input->Text(), value))\
+	    {\
+	        startValue = (f64)value;\
+	    }\
+	}
+
+#define FIELD_DRAG_IF(type)\
+	if (numericType == TYPEID(type))\
+	{\
+	    type value = 0;\
+	    if (String::TryParse(input->Text(), value))\
+	    {\
+	        value = (type)(startValue + amount);\
+	        input->Text(String::Format("{}", value));\
+	    }\
+	}
+
     void NumericEditorField::HandleEvent(FEvent* event)
     {
         if (event->IsMouseEvent() && event->sender == this)
@@ -36,8 +58,11 @@ namespace CE::Editor
 
             if (event->type == FEventType::MouseEnter)
             {
-                isCursorPushed = true;
-                FusionApplication::Get()->PushCursor(SystemCursor::SizeHorizontal);
+                if (!isCursorPushed)
+	            {
+		            isCursorPushed = true;
+	            	FusionApplication::Get()->PushCursor(SystemCursor::SizeHorizontal);
+	            }
 
                 input->SetHoveredInternal(true);
                 event->Consume(this);
@@ -67,24 +92,79 @@ namespace CE::Editor
                     input->StartEditing(true);
                 }
             }
-            else if (event->type == FEventType::DragBegin)
-            {
-                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+        }
 
+        if (event->IsDragEvent())
+        {
+            FDragEvent* drag = static_cast<FDragEvent*>(event);
+
+	        if (event->type == FEventType::DragBegin)
+            {
                 if (!input->IsEditing())
                 {
-	                
+                    isDragging = true;
+                    startMouseX = drag->mousePosition.x;
+
+                    FIELD_START_VALUE_IF(u8)
+					else FIELD_START_VALUE_IF(s8)
+					else FIELD_START_VALUE_IF(u16)
+					else FIELD_START_VALUE_IF(s16)
+                    else FIELD_START_VALUE_IF(u32)
+					else FIELD_START_VALUE_IF(s32)
+					else FIELD_START_VALUE_IF(u64)
+                    else FIELD_START_VALUE_IF(s32)
+                    else FIELD_START_VALUE_IF(f32)
+                    else FIELD_START_VALUE_IF(f64)
+
+                    drag->draggedWidget = this;
+                    drag->Consume(this);
                 }
             }
             else if (event->type == FEventType::DragMove)
             {
-                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+                if (isDragging)
+                {
+                    //Vec2 deltaPos = drag->mousePosition - drag->prevMousePosition;
+                    f64 amount = (drag->mousePosition.x - startMouseX) * m_ScrollAmount;
 
+                    FIELD_DRAG_IF(u8)
+	                else FIELD_DRAG_IF(s8)
+					else FIELD_DRAG_IF(u16)
+					else FIELD_DRAG_IF(s16)
+                    else FIELD_DRAG_IF(u32)
+					else FIELD_DRAG_IF(s32)
+                    else FIELD_DRAG_IF(u64)
+                    else FIELD_DRAG_IF(s64)
+                    else FIELD_DRAG_IF(f32)
+                    else FIELD_DRAG_IF(f64)
+
+                    if (field != nullptr)
+                    {
+	                    OnTextFieldEdited(nullptr);
+                    }
+                    else
+                    {
+                        m_OnTextEdited(this);
+                    }
+
+                    drag->draggedWidget = this;
+                    drag->Consume(this);
+                }
             }
             else if (event->type == FEventType::DragEnd)
             {
-                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+                if (isDragging)
+                {
+                    if (isCursorPushed && !drag->isInside)
+                    {
+                        isCursorPushed = false;
+                        FusionApplication::Get()->PopCursor();
+                    }
 
+                    drag->draggedWidget = this;
+                    drag->Consume(this);
+	                isDragging = false;
+                }
             }
         }
 
