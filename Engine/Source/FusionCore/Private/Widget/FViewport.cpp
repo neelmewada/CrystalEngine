@@ -2,6 +2,20 @@
 
 namespace CE
 {
+	u64 FViewport::ComputeMemoryFootprint()
+	{
+		u64 size = Super::ComputeMemoryFootprint();
+
+		for (int i = 0; i < frames.GetSize(); ++i)
+		{
+			if (frames[i] != nullptr)
+			{
+				size += frames[i]->GetWidth() * frames[i]->GetHeight() * sizeof(u32);
+			}
+		}
+
+        return size;
+	}
 
     FViewport::FViewport()
     {

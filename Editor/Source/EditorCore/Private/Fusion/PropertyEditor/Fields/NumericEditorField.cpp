@@ -28,6 +28,79 @@ namespace CE::Editor
         return *this;
     }
 
+    void NumericEditorField::HandleEvent(FEvent* event)
+    {
+        if (event->IsMouseEvent() && event->sender == this)
+        {
+            FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+
+            if (event->type == FEventType::MouseEnter)
+            {
+                isCursorPushed = true;
+                FusionApplication::Get()->PushCursor(SystemCursor::SizeHorizontal);
+
+                input->SetHoveredInternal(true);
+                event->Consume(this);
+            }
+            else if (event->type == FEventType::MouseMove)
+            {
+                event->Consume(this);
+            }
+            else if (event->type == FEventType::MouseLeave)
+            {
+                if (isCursorPushed && !isDragging)
+                {
+                    isCursorPushed = false;
+                    FusionApplication::Get()->PopCursor();
+                }
+
+                input->SetHoveredInternal(false);
+
+                event->Consume(this);
+            }
+            else if (event->type == FEventType::MousePress)
+            {
+                event->Consume(this);
+
+                if (mouseEvent->isDoubleClick)
+                {
+                    input->StartEditing(true);
+                }
+            }
+            else if (event->type == FEventType::DragBegin)
+            {
+                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+
+                if (!input->IsEditing())
+                {
+	                
+                }
+            }
+            else if (event->type == FEventType::DragMove)
+            {
+                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+
+            }
+            else if (event->type == FEventType::DragEnd)
+            {
+                FDragEvent* drag = static_cast<FDragEvent*>(mouseEvent);
+
+            }
+        }
+
+	    Super::HandleEvent(event);
+    }
+
+    FWidget* NumericEditorField::HitTest(Vec2 localMousePos)
+    {
+	    FWidget* thisHitTest = Super::HitTest(localMousePos);
+        if (thisHitTest != nullptr && !input->IsEditing())
+        {
+            return this;
+        }
+        return thisHitTest;
+    }
+
 #define FIELD_SET_IF(type)\
 	if (fieldDeclId == TYPEID(type))\
 	{\
@@ -44,7 +117,6 @@ namespace CE::Editor
         const String& text = input->Text();
         String lowerText = text.ToLower();
 
-        // TODO: Add support for other numeric types
         if (!text.IsEmpty())
         {
             f32 value = 0;
@@ -116,8 +188,6 @@ namespace CE::Editor
     {
         if (!IsBound())
             return;
-
-        Object* target = targets[0];
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 

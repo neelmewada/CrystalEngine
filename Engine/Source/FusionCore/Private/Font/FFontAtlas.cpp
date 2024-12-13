@@ -156,6 +156,24 @@ namespace CE
 	    }
     }
 
+    u64 FFontAtlas::ComputeMemoryFootprint()
+    {
+	    u64 size = Super::ComputeMemoryFootprint();
+
+        for (const auto& atlasImageMip : atlasImageMips)
+        {
+            size += atlasImageMip->atlasSize * atlasImageMip->atlasSize;
+            size += sizeof(FAtlasImage);
+        }
+
+        size += glyphDataList.GetCapacity() * sizeof(FGlyphData);
+        size += glyphBuffer.GetElementCount() * sizeof(FGlyphData) * RHI::Limits::MaxSwapChainImageCount;
+
+        size += mipIndicesByCharacter.GetSize() * sizeof(Pair<CharCode, FontSize>);
+
+        return size;
+    }
+
     void FFontAtlas::Flush(u32 imageIndex)
     {
         ZoneScoped;

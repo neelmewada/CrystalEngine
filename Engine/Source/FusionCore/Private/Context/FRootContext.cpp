@@ -93,12 +93,9 @@ namespace CE
 			}
 		}
 
-		PlatformWindow* window = nativeContext->GetPlatformWindow();
-
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
-			//(hoveredWidget == nullptr || !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget)))
 			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{
 			FMouseEvent event{};
@@ -110,7 +107,6 @@ namespace CE
 			event.isInside = true;
 			event.keyModifiers = keyModifierStates;
 
-			//while (hoveredWidgetStack.NonEmpty() && !hoveredWidgetStack.Top()->ChildExistsRecursive(hoveredWidget))
 			while (hoveredWidgetStack.NotEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get()))
 			{
 				event.sender = hoveredWidgetStack.Top().Get();
@@ -132,7 +128,6 @@ namespace CE
 
 		if (hoveredWidget != nullptr &&
 			(hoveredWidgetStack.IsEmpty() || hoveredWidgetStack.Top() != hoveredWidget) &&
-			//(hoveredWidgetStack.IsEmpty() || !hoveredWidget->ChildExistsRecursive(hoveredWidgetStack.Top())))
 			(hoveredWidgetStack.IsEmpty() || !hoveredWidgetStack.Top()->ParentExistsRecursive(hoveredWidget.Get())))
 		{
 			FMouseEvent event{};

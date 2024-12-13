@@ -22,6 +22,8 @@ namespace CE
 
         RHI::ShaderResourceGroup* GetTextureSrg() const { return textureSrg; }
 
+        u64 ComputeMemoryFootprint() override;
+
     protected:
 
         FViewport();

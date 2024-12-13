@@ -14,9 +14,15 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        bool SupportsMouseEvents() const override { return true; }
+
         EditorField& FixedInputWidth(f32 width) override;
 
+        void HandleEvent(FEvent* event) override;
+
     protected: // - Internal -
+
+        FWidget* HitTest(Vec2 localMousePos) override;
 
         void OnPaint(FPainter* painter) override;
 
@@ -32,6 +38,8 @@ namespace CE::Editor
 
         TypeId numericType = 0;
         FTextInput* input = nullptr;
+        bool isCursorPushed = false;
+        bool isDragging = false;
 
     public: // - Fusion Properties - 
 

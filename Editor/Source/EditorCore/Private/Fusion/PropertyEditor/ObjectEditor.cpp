@@ -42,7 +42,11 @@ namespace CE::Editor
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
 	    {
-            propertyEditor->UpdateValue();
+            if (propertyEditor->field->GetName() == fieldName)
+            {
+	            propertyEditor->UpdateValue();
+                break;
+            }
 	    }
     }
 

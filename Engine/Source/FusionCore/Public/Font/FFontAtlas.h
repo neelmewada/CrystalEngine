@@ -59,6 +59,8 @@ namespace CE
 
         FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
 
+        u64 ComputeMemoryFootprint() override;
+
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 

@@ -134,6 +134,13 @@ namespace CE
 
         FHorizontalStack* GetContentStack() const { return contentStack; }
 
+        void StartEditing(bool selectAll);
+
+        void HandleEvent(FEvent* event) override;
+
+        // Internal use only!
+        void SetHoveredInternal(bool hovered);
+
     protected:
 
         void OnLostFocus() override;
@@ -143,8 +150,6 @@ namespace CE
         virtual void OnFinishEdit() {}
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
-
-        void HandleEvent(FEvent* event) override;
 
         void SetEditingInternal(bool editing);
 
