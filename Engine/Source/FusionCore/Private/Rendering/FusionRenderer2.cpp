@@ -1209,6 +1209,9 @@ namespace CE
         const f32 fontDpiScaling = dpi / 72.0f;
         const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
         const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+#if PLATFORM_MAC
+        fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
@@ -1437,6 +1440,9 @@ namespace CE
         const f32 fontDpiScaling = dpi / 72.0f;
         const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
         const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+#if PLATFORM_MAC
+        fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
@@ -1542,6 +1548,10 @@ namespace CE
             fontFamily = fontManager->GetDefaultFontFamily();
 
         fontSize = Math::Max(fontSize, 6);
+
+#if PLATFORM_MAC
+        fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
 
         FFontAtlas* fontAtlas = fontManager->FindFont(fontFamily);
         if (fontAtlas == nullptr)

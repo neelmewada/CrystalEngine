@@ -209,6 +209,17 @@ namespace CE::Editor
         }\
 	}
 
+#define FIELD_FINISH_IF(type)\
+    if (numericType == TYPEID(type))\
+    {\
+        type value = 0;\
+        if (String::TryParse(text, value))\
+        {\
+            if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
+            input->Text(String::Format("{}", value));\
+        }\
+    }
+
     void NumericEditorField::OnFinishEdit(FTextInput*)
     {
         const String& text = input->Text();
@@ -216,19 +227,28 @@ namespace CE::Editor
 
         if (!text.IsEmpty())
         {
-            f32 value = 0;
-            if (String::TryParse(text, value))
-            {
-                input->Text(String::Format("{}", value));
-            }
+            FIELD_FINISH_IF(u8)
+            else FIELD_FINISH_IF(s8)
+            else FIELD_FINISH_IF(u16)
+            else FIELD_FINISH_IF(s16)
+            else FIELD_FINISH_IF(u32)
+            else FIELD_FINISH_IF(s32)
+            else FIELD_FINISH_IF(u64)
+            else FIELD_FINISH_IF(s64)
+            else FIELD_FINISH_IF(f32)
+            else FIELD_FINISH_IF(f64)
             else
             {
-                input->Text("0");
+                int value = 0;
+                if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
+                input->Text(String::Format("{}", value));
             }
         }
         else
         {
-            input->Text("0");
+            int value = 0;
+            if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
+            input->Text(String::Format("{}", value));
         }
 
         m_OnTextEditingFinished(this);
@@ -255,7 +275,7 @@ namespace CE::Editor
 
             if (ratio > 0.01f)
 	        {
-                constexpr f32 PaddingAmount = 4;
+                constexpr f32 PaddingAmount = 2.5f;
                 Vec4 cornerRadius = input->CornerRadius() * 0.7f;
 
 		        painter->SetBrush(input->BorderColor());
