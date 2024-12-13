@@ -110,7 +110,7 @@ namespace CE
 #if PLATFORM_MAC
             ctrl = ctrl || gui;
 #endif
-
+            
             bool isUpperCase = (shiftPressed != capslock);
             char c = 0;
 

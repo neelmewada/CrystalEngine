@@ -234,6 +234,17 @@ namespace WidgetTests
 
         treeViewModel = CreateObject<TreeViewModel>(this, "TreeViewModel");
 
+        FGradient gradient = FGradient();
+        gradient.stops = {
+            FGradientKey(0.00f, Color::Red()),
+            FGradientKey(0.25f, Color::Yellow()),
+            FGradientKey(0.50f, Color::Green()),
+            FGradientKey(0.75f, Color::Cyan()),
+            FGradientKey(1.00f, Color::Blue()),
+        };
+
+        FBrush gradientBrush = FBrush(gradient);
+
         Child(
             FAssignNew(FStyledWidget, borderWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
@@ -422,7 +433,11 @@ namespace WidgetTests
 		                    )
 		                )
                         .Height(150)
-                        .HAlign(HAlign::Fill)
+                        .HAlign(HAlign::Fill),
+
+                        FNew(FStyledWidget)
+                        .Background(gradientBrush)
+                        .Height(40)
                     )
                 )
             )

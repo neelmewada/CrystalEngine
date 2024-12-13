@@ -214,6 +214,17 @@ namespace RenderingTests
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
+        FGradient gradient = FGradient();
+        gradient.stops = {
+            FGradientKey(0.00f, Color::Red()),
+            FGradientKey(0.25f, Color::Yellow()),
+            FGradientKey(0.50f, Color::Green()),
+            FGradientKey(0.75f, Color::Cyan()),
+            FGradientKey(1.00f, Color::Blue()),
+        };
+
+        FBrush gradientBrush = FBrush(gradient);
+
         Child(
             FAssignNew(FStyledWidget, borderWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
@@ -385,11 +396,9 @@ namespace RenderingTests
                             .Text("Click Count 0")
                         ),
 
-                        FNew(FComboBox)
-                        .Items("Item 0", "Item 1", "Item 2", "Item 3"),
-
-                        FNew(FTextInput)
-                        .Text("Type here...")
+                        FNew(FStyledWidget)
+                        .Background(gradientBrush)
+                        .Height(40)
                     )
                 )
             )

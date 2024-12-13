@@ -66,15 +66,6 @@ namespace CE
 
         CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
-        int RegisterImage(const Name& imageName, RHI::Texture* image);
-        void DeregisterImage(const Name& imageName);
-        void DeregisterImage(RHI::Texture* image);
-        void ReplaceImage(int index, RHI::Texture* newImage);
-        RHI::Texture* FindImage(const Name& imageName);
-        int FindImageIndex(const Name& imageName);
-        int FindImageIndex(RHI::Texture* image);
-
-        int FindOrRegisterImage(const Name& imageName, RHI::Texture* image);
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
@@ -127,7 +118,6 @@ namespace CE
 
     protected:
 
-        void InitializeShader();
         void InitializeShader2();
 
         void PrepareDrawList();
@@ -161,13 +151,6 @@ namespace CE
         using FTextureArray = StableDynamicArray<RPI::Texture*, 64, false>;
         using FSamplerArray = StableDynamicArray<RHI::Sampler*, 32, false>;
 
-        FImageArray registeredImages;
-        FTextureArray loadedTextures;
-        HashMap<Name, int> registeredImagesByName;
-        HashMap<RHI::Texture*, int> registeredImageIndices;
-        HashMap<RHI::Texture*, Name> registeredImageNames;
-        bool imageRegistryUpdated = true;
-
         FSamplerArray samplerArray;
         HashMap<RHI::Sampler*, int> samplerIndices;
         bool samplersUpdated = true;
@@ -180,7 +163,6 @@ namespace CE
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
         RHI::ShaderResourceGroupLayout perObjectSrgLayout{};
-        RHI::ShaderResourceGroup* textureSrg = nullptr;
 
         RHI::DrawListContext drawList{};
 

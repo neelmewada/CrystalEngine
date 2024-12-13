@@ -80,18 +80,6 @@ namespace CE
         RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
-        fontSrg = gDynamicRHI->CreateShaderResourceGroup(fusionShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
-
-        fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
-        fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
-
-        for (int i = 0; i < numFrames; ++i)
-        {
-            fontSrg->Bind(i, "_GlyphItems", glyphBuffer.GetBuffer(i));
-        }
-
-        fontSrg->FlushBindings();
-
         fontSrg2 = gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial));
 
         fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
@@ -199,9 +187,6 @@ namespace CE
 
             atlasTexture = new RPI::Texture(images, fontSampler);
 
-            fontSrg->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
-            fontSrg->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
-
             fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
             fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
         }
@@ -214,13 +199,10 @@ namespace CE
         {
             u64 totalCount = (u64)((f32)glyphBuffer.GetElementCount() * (1.0f + GlyphBufferGrowRatio));
             glyphBuffer.GrowToFit(Math::Max((u64)(numGlyphs)+64, totalCount));
-
-            fontSrg->Bind(imageIndex, "_GlyphItems", glyphBuffer.GetBuffer(imageIndex));
         }
 
         glyphBuffer.GetBuffer(imageIndex)->UploadData(glyphDataList.GetData(), numGlyphs * sizeof(FGlyphData));
 
-        fontSrg->FlushBindings();
         fontSrg2->FlushBindings();
     }
 
@@ -231,7 +213,6 @@ namespace CE
         glyphBuffer.Shutdown();
 
         delete atlasTexture; atlasTexture = nullptr;
-        delete fontSrg; fontSrg = nullptr;
         delete fontSrg2; fontSrg2 = nullptr;
 
         atlasImageMips.Clear();

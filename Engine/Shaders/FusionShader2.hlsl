@@ -15,7 +15,8 @@ enum FDrawType : int
     DRAW_TextureTileXY,
     DRAW_Viewport,
     DRAW_TextureAtlas,
-    DRAW_FontAtlas
+    DRAW_FontAtlas,
+    DRAW_LinearGradient
 };
 
 enum class FImageFit : int
@@ -32,7 +33,7 @@ struct VSInput
     float2  uv : TEXCOORD0;
     float4  color : COLOR0;
     int     drawType : TEXCOORD1;
-    int     index	 : TEXCOORD2;
+    int     index	 : TEXCOORD2; // index to DrawData
     uint    instanceId : SV_INSTANCEID;
 };
 
@@ -67,14 +68,23 @@ struct DrawData
     float2 uvMax;
     float2 brushPos;
     float2 brushSize;
-    // Index into texture Array
+    float userAngle;
+    // Index into texture Array or first gradient stop
     int index;
+    int endIndex; // Index to last gradient stop
     FImageFit imageFit;
+};
+
+struct GradientKey
+{
+	float4 color;
+    float position;
 };
 
 StructuredBuffer<ObjectData> _Objects : SRG_PerObject(t0);
 StructuredBuffer<ClipRect> _ClipRects : SRG_PerObject(t1);
 StructuredBuffer<DrawData> _DrawData : SRG_PerObject(t2);
+StructuredBuffer<GradientKey> _GradientKeys : SRG_PerObject(t3);
 
 BEGIN_ROOT_CONSTANTS()
 float2 transparentUV;
@@ -164,13 +174,37 @@ float4 FragMain(PSInput input) : SV_TARGET
 			color = float4(input.color.rgb, input.color.a * alpha);
 		}
         break;
+    case DRAW_LinearGradient:
+	    {
+		    const DrawData drawData = _DrawData[input.index];
+            const float2 brushPos = drawData.brushPos;
+            const int startIndex = drawData.index;
+            const int endIndex = drawData.endIndex;
+            float samplePos = inputUV.x;
+            //samplePos = (inputUV - brushPos);
+
+		    for (int i = startIndex; i <= endIndex; ++i)
+		    {
+                if ((i == startIndex && samplePos < _GradientKeys[i].position) || i == endIndex)
+                {
+                    color *= _GradientKeys[i].color;
+	                break;
+                }
+		    	else if (samplePos >= _GradientKeys[i].position && samplePos <= _GradientKeys[i + 1].position)
+                {
+                    float t = clamp01((samplePos - _GradientKeys[i].position) / (_GradientKeys[i + 1].position - _GradientKeys[i].position));
+                    color *= lerp(_GradientKeys[i].color, _GradientKeys[i + 1].color, t);
+	                break;
+                }
+		    }
+	    }
+        break;
     case DRAW_TextureNoTile: // Draw texture
     case DRAW_TextureTileX:
     case DRAW_TextureTileY:
     case DRAW_TextureTileXY:
     case DRAW_FontAtlas:
 	    {
-            // TODO: Add tiling support
 			const DrawData drawData = _DrawData[input.index];
             const int layerIndex = drawData.index;
 

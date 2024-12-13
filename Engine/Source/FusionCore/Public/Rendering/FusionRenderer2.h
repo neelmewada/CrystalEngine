@@ -25,6 +25,7 @@ namespace CE
         static constexpr u32 ObjectDataArrayIncrement = 128;
         static constexpr u32 ClipRectArrayIncrement = 32;
         static constexpr u32 DrawDataArrayIncrement = 128;
+        static constexpr u32 GradientKeyArrayIncrement = 128;
         static constexpr u32 OpacityStackIncrement = 64;
 
         static constexpr u32 ArcFastTableSize = 48;
@@ -58,6 +59,8 @@ namespace CE
         void CalculateUnderlinePositions(Array<Rect>& outLines, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);
+
+        u64 ComputeMemoryFootprint() override;
 
         // - State API -
 
@@ -135,7 +138,9 @@ namespace CE
             DRAW_TextureTileXY,
             DRAW_Viewport,
             DRAW_TextureAtlas,
-            DRAW_FontAtlas
+            DRAW_FontAtlas,
+            DRAW_LinearGradient,
+            DRAW_RadialGradient
         };
 
         // - Internal Draw API -
@@ -196,6 +201,12 @@ namespace CE
         f32 drawDataGrowRatio = 0.3f;
 
         FIELD(Config)
+        u32 initialGradientCount = 512;
+
+        FIELD(Config)
+        f32 gradientGrowRatio = 0.3f;
+
+        FIELD(Config)
         f32 circleSegmentMaxError = 0.3f;
 
         FIELD(Config)
@@ -220,8 +231,10 @@ namespace CE
             float2 uvMax;
             float2 brushPos;
             float2 brushSize;
+            float userAngle = 0;
             // Index into texture Array
             int index = 0;
+            int endIndex = 0;
             int imageFit = 0;
         };
 
@@ -258,6 +271,12 @@ namespace CE
             Vec2 size = Vec2();
         };
 
+        struct alignas(16) FColorStop
+        {
+            float4 color;
+            float position = 0;
+        };
+
         struct FVertex
         {
             Vec2 position;
@@ -288,6 +307,7 @@ namespace CE
         using FClipRectStack = StableDynamicArray<int, ClipRectArrayIncrement, false>;
         using FDrawDataArray = StableDynamicArray<FDrawData, DrawDataArrayIncrement, false>;
         using FOpacityStack = StableDynamicArray<f32, OpacityStackIncrement, false>;
+        using FGradientKeyArray = StableDynamicArray<FColorStop, GradientKeyArrayIncrement, false>;
 
         // - Draw Data -
 
@@ -307,6 +327,7 @@ namespace CE
 
         FDrawCmdArray drawCmdList;
         FObjectDataArray objectDataArray;
+        FGradientKeyArray gradientKeyArray;
 
         FDrawDataArray drawDataArray;
 
@@ -352,6 +373,7 @@ namespace CE
         DynamicStructuredBuffer<FObjectData> objectDataBuffer{};
         DynamicStructuredBuffer<FClipRect> clipRectBuffer{};
         DynamicStructuredBuffer<FDrawData> drawDataBuffer{};
+        DynamicStructuredBuffer<FColorStop> gradientBuffer{};
 
         // - Draw List -
 

@@ -46,6 +46,7 @@ namespace CE
         objectDataBuffer.Init("ObjectData", initialObjectCount, numFrames);
         clipRectBuffer.Init("ClipRects", initialClipRectCount, numFrames);
         drawDataBuffer.Init("DrawData", initialDrawDataCount, numFrames);
+        gradientBuffer.Init("GradientBuffer", initialGradientCount, numFrames);
 
         for (int i = 0; i < numFrames; ++i)
         {
@@ -78,6 +79,7 @@ namespace CE
             perObjectSrg->Bind(i, "_Objects", objectDataBuffer.GetBuffer(i));
             perObjectSrg->Bind(i, "_ClipRects", clipRectBuffer.GetBuffer(i));
             perObjectSrg->Bind(i, "_DrawData", drawDataBuffer.GetBuffer(i));
+            perObjectSrg->Bind(i, "_GradientKeys", gradientBuffer.GetBuffer(i));
         }
 
         perViewSrg->FlushBindings();
@@ -99,6 +101,7 @@ namespace CE
         objectDataBuffer.Shutdown();
         clipRectBuffer.Shutdown();
         drawDataBuffer.Shutdown();
+        gradientBuffer.Shutdown();
 
         while (freePackets.NotEmpty())
         {
@@ -221,6 +224,18 @@ namespace CE
                 }
             }
 
+            if (gradientKeyArray.GetCount() > gradientBuffer.GetElementCount())
+            {
+                u32 totalElementsRequired = Math::Max<u32>(gradientKeyArray.GetCount(), 
+                    Math::RoundToInt(gradientBuffer.GetElementCount() * (1 + gradientGrowRatio)));
+                gradientBuffer.GrowToFit(totalElementsRequired);
+
+                for (int i = 0; i < numFrames; ++i)
+                {
+                    perObjectSrg->Bind(i, "_GradientKeys", gradientBuffer.GetBuffer(i));
+                }
+            }
+
             if (objectDataArray.GetCount() > 0)
 	        {
 		        void* data;
@@ -234,6 +249,11 @@ namespace CE
             if (clipRectArray.GetCount() > 0)
             {
                 clipRectBuffer.GetBuffer(imageIndex)->UploadData(clipRectArray.GetData(), clipRectArray.GetCount() * sizeof(FClipRect));
+            }
+
+            if (gradientKeyArray.GetCount() > 0)
+            {
+                gradientBuffer.GetBuffer(imageIndex)->UploadData(gradientKeyArray.GetData(), gradientKeyArray.GetCount() * sizeof(FColorStop));
             }
 
             if (drawDataArray.GetCount() > 0)
@@ -339,6 +359,33 @@ namespace CE
         return fontAtlas->GetMetrics();
     }
 
+    u64 FusionRenderer2::ComputeMemoryFootprint()
+    {
+	    u64 footprint = Object::ComputeMemoryFootprint();
+
+        footprint += vertexArray.GetCapacity() * sizeof(FVertex);
+        footprint += indexArray.GetCapacity() * sizeof(FDrawIndex);
+        footprint += path.GetCapacity() * sizeof(Vec2);
+        footprint += temporaryPoints.GetCapacity() * sizeof(Vec2);
+        footprint += drawCmdList.GetCapacity() * sizeof(FDrawCmd);
+        footprint += drawPacketsPerImage[0].GetSize() * sizeof(RHI::DrawPacket) * numFrames;
+        footprint += freePackets.GetSize() * sizeof(RHI::DrawPacket);
+        footprint += clipStack.GetCapacity() * sizeof(int);
+        footprint += clipRectArray.GetCapacity() * sizeof(FClipRect);
+        footprint += coordinateSpaceStack.GetCapacity() * sizeof(FCoordinateSpace);
+        footprint += opacityStack.GetCapacity() * sizeof(f32);
+        footprint += objectDataArray.GetCapacity() * sizeof(FObjectData);
+        footprint += gradientKeyArray.GetCapacity() * sizeof(FColorStop);
+
+        footprint += viewConstantsBuffer[0]->GetBufferSize() * numFrames;
+        footprint += quadsBuffer[0]->GetBufferSize() * numFrames;
+        footprint += objectDataBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
+        footprint += clipRectBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
+        footprint += drawDataBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
+
+        return footprint;
+    }
+
     void FusionRenderer2::Begin()
     {
         ZoneScoped;
@@ -359,6 +406,7 @@ namespace CE
         clipStack.RemoveAll();
         opacityStack.RemoveAll();
         drawDataArray.RemoveAll();
+        gradientKeyArray.RemoveAll();
         indexWritePtr = nullptr;
         vertexWritePtr = nullptr;
         vertexCurrentIdx = 0;
@@ -850,7 +898,8 @@ namespace CE
         case FBrushStyle::Image:
             AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased, &minMax);
 	        break;
-        case FBrushStyle::LinearGradient:
+        case FBrushStyle::Gradient:
+            AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased, &minMax);
 	        break;
         }
 
@@ -1011,7 +1060,7 @@ namespace CE
         case FBrushStyle::Image:
             AddConvexPolyFilled(path.GetData(), (int)path.GetCount(), antiAliased, &minMax);
 	        break;
-        case FBrushStyle::LinearGradient:
+        case FBrushStyle::Gradient:
 	        break;
         }
 
@@ -1874,7 +1923,7 @@ namespace CE
 
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
-            Color tint = currentBrush.GetTintColor();
+            Color tint = currentBrush.GetFillColor();
             tint.a *= opacityStack.Last();
 
             color = tint.ToU32();
@@ -1931,13 +1980,13 @@ namespace CE
                 Vec2 imageSize = Vec2(image.width, image.height);
                 drawData.rectSize = minMaxPos->GetSize();
                 drawData.index = image.layerIndex;
-                drawData.imageFit = (int)currentBrush.GetImageFit();
+                drawData.imageFit = (int)imageFit;
                 drawData.uvMin = image.uvMin;
                 drawData.uvMax = image.uvMax;
 
-                switch (currentBrush.GetImageFit())
+                switch (imageFit)
                 {
-                case FImageFit::None:
+                case FImageFit::Default:
                 case FImageFit::Fill:
                     if (autoSizeX)
                         brushSize.x = drawData.rectSize.width;
@@ -2023,6 +2072,103 @@ namespace CE
                 drawDataArray.Insert(drawData);
             }
         }
+        else if (currentBrush.GetBrushStyle() == FBrushStyle::Gradient && minMaxPos != nullptr && 
+            currentBrush.GetGradient().stops.GetSize() >= 2)
+        {
+            const FGradient& gradient = currentBrush.GetGradient();
+
+            Color tint = currentBrush.GetFillColor();
+            tint.a *= opacityStack.Last();
+
+            color = tint.ToU32();
+            drawType = gradient.gradientType == FGradientType::Linear ? DRAW_LinearGradient : DRAW_RadialGradient;
+
+            Vec2 brushSize = currentBrush.GetBrushSize();
+            Vec2 brushPos = currentBrush.GetBrushPosition();
+            FImageFit imageFit = currentBrush.GetImageFit();
+            FBrushTiling tiling = currentBrush.GetBrushTiling();
+
+            bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
+            bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+            bool autoSizeX = brushSize.x < 0;
+            bool autoSizeY = brushSize.y < 0;
+
+            FDrawData drawData{};
+        	drawData.rectSize = minMaxPos->GetSize();
+            drawData.userAngle = gradient.singleValue * DEG_TO_RAD;
+
+            if (autoSizeX)
+                brushSize.x = drawData.rectSize.x;
+            if (autoSizeY)
+                brushSize.y = drawData.rectSize.y;
+
+            switch (imageFit)
+            {
+            case FImageFit::Default:
+                break;
+            case FImageFit::Fill:
+	            break;
+            case FImageFit::Contain:
+                if (autoSizeX && autoSizeY)
+                {
+                    float scale = Math::Min(drawData.rectSize.width / brushSize.width, drawData.rectSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+                else if (autoSizeX)
+                {
+                    float scale = Math::Min(drawData.rectSize.width / brushSize.width, brushSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+                else if (autoSizeY)
+                {
+                    float scale = Math::Min(brushSize.width / brushSize.width, drawData.rectSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+                else
+                {
+                    float scale = Math::Min(brushSize.width / brushSize.width, brushSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+	            break;
+            case FImageFit::Cover:
+                if (autoSizeX && autoSizeY)
+                {
+                    float scale = Math::Max(drawData.rectSize.width / brushSize.width, drawData.rectSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+                else if (autoSizeX)
+                {
+                    float scale = Math::Max(drawData.rectSize.width / brushSize.width, 1.0f);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+                else if (autoSizeY)
+                {
+                    float scale = Math::Max(1.0f, drawData.rectSize.height / brushSize.height);
+                    brushSize.x = brushSize.width * scale;
+                    brushSize.y = brushSize.height * scale;
+                }
+	            break;
+            }
+
+            drawData.brushPos = brushPos;
+            drawData.brushSize = brushSize;
+
+            drawData.index = (int)gradientKeyArray.GetCount();
+            drawData.endIndex = drawData.index + (int)gradient.stops.GetSize() - 1;
+
+            for (const auto& stop : gradient.stops)
+            {
+	            gradientKeyArray.Insert(FColorStop{ .color = stop.color.ToVec4(), .position = stop.position });
+            }
+
+            drawDataArray.Insert(drawData);
+        }
         else
         {
             minMaxPos = nullptr;
@@ -2032,7 +2178,7 @@ namespace CE
             color = fill.ToU32();
         }
 
-        auto calcUV = [this, minMaxPos](Vec2 pos) -> Vec2
+        auto calculateUV = [this, minMaxPos](Vec2 pos) -> Vec2
             {
                 if (minMaxPos != nullptr)
                 {
@@ -2103,9 +2249,9 @@ namespace CE
                 // Add vertices
 
                 // Inner
-                vertexWritePtr[0].position.x = pos0.x + offset.x; vertexWritePtr[0].position.y = pos0.y + offset.y; vertexWritePtr[0].uv = calcUV(pos0); vertexWritePtr[0].color = color;        // Inner
+                vertexWritePtr[0].position.x = pos0.x + offset.x; vertexWritePtr[0].position.y = pos0.y + offset.y; vertexWritePtr[0].uv = calculateUV(pos0); vertexWritePtr[0].color = color;        // Inner
                 // Outer
-            	vertexWritePtr[1].position.x = pos1.x + offset.x; vertexWritePtr[1].position.y = pos1.y + offset.y; vertexWritePtr[1].uv = calcUV(pos0); vertexWritePtr[1].color = transparentColor;  // Outer
+            	vertexWritePtr[1].position.x = pos1.x + offset.x; vertexWritePtr[1].position.y = pos1.y + offset.y; vertexWritePtr[1].uv = calculateUV(pos0); vertexWritePtr[1].color = transparentColor;  // Outer
                 vertexWritePtr[0].drawType = drawType; vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;
                 vertexWritePtr[1].drawType = drawType; vertexWritePtr[1].index = (int)drawDataArray.GetCount() - 1;
                 
@@ -2129,7 +2275,7 @@ namespace CE
             for (int i = 0; i < vertexCount; i++)
             {
                 vertexWritePtr[0].position = points[i] + offset;
-                vertexWritePtr[0].uv = calcUV(points[i]);
+                vertexWritePtr[0].uv = calculateUV(points[i]);
                 vertexWritePtr[0].color = color;
                 vertexWritePtr[0].drawType = drawType;
                 vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;

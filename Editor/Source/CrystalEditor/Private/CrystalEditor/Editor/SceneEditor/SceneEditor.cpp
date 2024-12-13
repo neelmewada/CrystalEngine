@@ -245,6 +245,18 @@ namespace CE::Editor
                         .DockTabs(
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
+                            .Content(
+                                FNew(FVerticalStack)
+                                (
+                                    FNew(FTextButton)
+                                    .Text("Print Fusion Memory FootPrint")
+                                    .OnClicked([]
+                                    {
+                                        u64 footprint = FusionApplication::Get()->ComputeMemoryFootprint();
+                                        CE_LOG(Info, All, "Memory Footprint: {} KB", footprint / 1024);
+                                    })
+                                )
+                            )
 
                         )
                         .HAlign(HAlign::Fill)

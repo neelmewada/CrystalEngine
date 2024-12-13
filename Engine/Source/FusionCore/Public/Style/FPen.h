@@ -42,9 +42,16 @@ namespace CE
 
     private:
 
+        FIELD()
         Color color;
+
+        FIELD()
         f32 thickness = 0.0f;
+
+        FIELD()
         f32 dashLength = 5.0f;
+
+        FIELD()
         FPenStyle style = FPenStyle::None;
 
     };
