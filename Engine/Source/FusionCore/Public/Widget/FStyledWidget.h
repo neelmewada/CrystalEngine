@@ -22,6 +22,7 @@ namespace CE
 
     protected:
 
+        //! @brief Called before the content is being painted but after the background and border of this widget.
         virtual void OnPaintContent(FPainter* painter) {}
 
         virtual void OnPaintContentOverlay(FPainter* painter) {}
@@ -35,6 +36,11 @@ namespace CE
         FUSION_PROPERTY(FBrush, Background);
         FUSION_PROPERTY(FShape, BackgroundShape);
         FUSION_PROPERTY(FShape, ClipShape);
+
+        const Vec4& CornerRadius() const
+        {
+            return m_BackgroundShape.GetCornerRadius();
+        }
 
         Self& CornerRadius(const Vec4& cornerRadius)
         {

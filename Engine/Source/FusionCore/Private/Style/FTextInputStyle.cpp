@@ -22,7 +22,7 @@ namespace CE
         FBrush background = this->background;
 
         Color border = borderColor;
-        if (input.IsEditing())
+        if (input.IsEditing() || input.IsHighlighted())
         {
 	        border = editingBorderColor;
             background = editingBackground;

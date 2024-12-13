@@ -4,6 +4,8 @@ namespace CE
 {
     class FWidget;
 
+    DECLARE_SCRIPT_EVENT(FPaintEvent, FPainter*);
+
     struct FWidgetBuilder
     {
         FWidgetBuilder() {}

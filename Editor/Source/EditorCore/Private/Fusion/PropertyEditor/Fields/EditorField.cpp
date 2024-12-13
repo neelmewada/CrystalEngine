@@ -31,6 +31,8 @@ namespace CE::Editor
         targets = { target };
         instances = { instance };
 
+        OnBind();
+
         UpdateValue();
 
         return *this;

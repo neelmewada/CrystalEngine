@@ -16,6 +16,7 @@ namespace CE::Editor
 			FAssignNew(FTextInput, input)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
+            .OnBeforeTextPaint(FUNCTION_BINDING(this, OnPaintBeforeText))
             .Padding(Vec4(11, 4, 8, 4))
         );
 
@@ -46,6 +47,7 @@ namespace CE::Editor
 	    if (String::TryParse(input->Text(), value))\
 	    {\
 	        value = (type)(startValue + amount);\
+            if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
 	        input->Text(String::Format("{}", value));\
 	    }\
 	}
@@ -102,6 +104,8 @@ namespace CE::Editor
             {
                 if (!input->IsEditing())
                 {
+                    input->SetHighlightedInternal(true);
+
                     isDragging = true;
                     startMouseX = drag->mousePosition.x;
 
@@ -155,6 +159,8 @@ namespace CE::Editor
             {
                 if (isDragging)
                 {
+                    input->SetHighlightedInternal(false);
+
                     if (isCursorPushed && !drag->isInside)
                     {
                         isCursorPushed = false;
@@ -187,8 +193,19 @@ namespace CE::Editor
 		type value = 0;\
 		if (String::TryParse(text, value))\
 		{\
+			if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
 			field->SetFieldValue<type>(instances[0], value);\
             target->OnFieldEdited(field->GetName());\
+        }\
+	}
+
+#define FIELD_RANGE_IF(type)\
+	if (numericType == TYPEID(type))\
+	{\
+		type value = 0;\
+		if (String::TryParse(text, value))\
+		{\
+			ratio = Math::Clamp01(((f32)value - min) / (max - min));\
         }\
 	}
 
@@ -217,6 +234,45 @@ namespace CE::Editor
         m_OnTextEditingFinished(this);
     }
 
+    void NumericEditorField::OnPaintBeforeText(FPainter* painter)
+    {
+        if (isRanged && !input->IsEditing())
+        {
+            Vec2 size = input->GetComputedSize();
+            f32 ratio = 0.0f;
+            const String& text = input->Text();
+
+            FIELD_RANGE_IF(u8)
+			else FIELD_RANGE_IF(s8)
+		    else FIELD_RANGE_IF(u16)
+		    else FIELD_RANGE_IF(s16)
+            else FIELD_RANGE_IF(u32)
+            else FIELD_RANGE_IF(s32)
+            else FIELD_RANGE_IF(u64)
+            else FIELD_RANGE_IF(s64)
+            else FIELD_RANGE_IF(f32)
+            else FIELD_RANGE_IF(f64)
+
+            if (ratio > 0.01f)
+	        {
+                constexpr f32 PaddingAmount = 4;
+                Vec4 cornerRadius = input->CornerRadius() * 0.7f;
+
+		        painter->SetBrush(input->BorderColor());
+            	painter->SetPen(FPen());
+
+                size.x = (size.x - PaddingAmount * 2) * ratio;
+                if (cornerRadius.GetMax() > size.x / 2)
+                {
+                    cornerRadius = Vec4(1, 1, 1, 1) * size.x / 2;
+                }
+
+            	painter->DrawRoundedRect(Rect::FromSize(Vec2(PaddingAmount, PaddingAmount), 
+					size - Vec2(0, PaddingAmount) * 2), cornerRadius);
+	        }
+        }
+    }
+
     void NumericEditorField::OnTextFieldEdited(FTextInput*)
     {
         m_OnTextEdited(this);
@@ -228,7 +284,7 @@ namespace CE::Editor
 
         Object* target = targets[0];
 
-        TypeId fieldDeclId = field->GetDeclarationTypeId();
+        TypeId fieldDeclId = numericType;
 
         FIELD_SET_IF(u8)
 		else FIELD_SET_IF(s8)
@@ -262,6 +318,29 @@ namespace CE::Editor
     bool NumericEditorField::CanBind(FieldType* field)
     {
         return field->IsNumericField();
+    }
+
+    void NumericEditorField::OnBind()
+    {
+	    Super::OnBind();
+
+        if (field == nullptr)
+            return;
+
+        isRanged = false;
+
+        if (field->HasAttribute("RangeMin") && field->HasAttribute("RangeMax"))
+        {
+            Attribute rangeMin = field->GetAttribute("RangeMin");
+            Attribute rangeMax = field->GetAttribute("RangeMax");
+            
+
+            if (String::TryParse(rangeMin.GetStringValue(), min) &&
+                String::TryParse(rangeMax.GetStringValue(), max))
+            {
+                isRanged = true;
+            }
+        }
     }
 
     void NumericEditorField::UpdateValue()

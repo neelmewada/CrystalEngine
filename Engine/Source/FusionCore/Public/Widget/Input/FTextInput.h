@@ -14,7 +14,8 @@ namespace CE
         None = 0,
         Hovered = BIT(0),
         Editing = BIT(1),
-        InteractionDisabled = BIT(2)
+        InteractionDisabled = BIT(2),
+        Highlighted = BIT(3)
     };
     ENUM_CLASS_FLAGS(FTextInputState);
 
@@ -122,6 +123,7 @@ namespace CE
 
         bool IsHovered() const { return EnumHasFlag(state, FTextInputState::Hovered); }
         bool IsEditing() const { return EnumHasFlag(state, FTextInputState::Editing); }
+        bool IsHighlighted() const { return EnumHasFlag(state, FTextInputState::Highlighted); }
         bool IsInteractionDisabled() const { return EnumHasFlag(state, FTextInputState::InteractionDisabled); }
 
         bool SupportsMouseEvents() const override { return true; }
@@ -141,7 +143,12 @@ namespace CE
         // Internal use only!
         void SetHoveredInternal(bool hovered);
 
+        // Internal use only!
+        void SetHighlightedInternal(bool highlighted);
+
     protected:
+
+        void OnPaintContent(FPainter* painter) override;
 
         void OnLostFocus() override;
 
@@ -167,8 +174,6 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        String DoThis() { return ""; }
-
         FUSION_PROPERTY_WRAPPER(SelectionColor, inputLabel);
         FUSION_PROPERTY_WRAPPER(Foreground, inputLabel);
         FUSION_PROPERTY_WRAPPER(FontSize, inputLabel);
@@ -179,6 +184,8 @@ namespace CE
 
         FUSION_EVENT(FTextInputEvent, OnTextEdited);
         FUSION_EVENT(FTextInputEvent, OnTextEditingFinished);
+
+        FUSION_EVENT(FPaintEvent, OnBeforeTextPaint);
 
         Self& LeftSlot(FWidget& content);
 

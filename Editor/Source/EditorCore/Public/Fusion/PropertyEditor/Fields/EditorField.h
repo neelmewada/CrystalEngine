@@ -27,6 +27,8 @@ namespace CE::Editor
 
         virtual EditorField& FixedInputWidth(f32 width);
 
+        virtual void OnBind() {}
+
         virtual void UpdateValue() = 0;
 
     protected: // - Internal -

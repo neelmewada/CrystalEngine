@@ -30,6 +30,8 @@ namespace CE::Editor
 
         bool CanBind(FieldType* field) override;
 
+        void OnBind() override;
+
         void UpdateValue() override;
 
         FUNCTION()
@@ -38,13 +40,20 @@ namespace CE::Editor
         FUNCTION()
         void OnFinishEdit(FTextInput* field);
 
+        FUNCTION()
+        void OnPaintBeforeText(FPainter* painter);
+
         TypeId numericType = 0;
         FTextInput* input = nullptr;
         bool isCursorPushed = false;
         bool isDragging = false;
         bool isMouseInside = false;
+        bool isRanged = false;
         f32 startMouseX = 0;
         f64 startValue = 0;
+
+        f32 min = -1;
+        f32 max = -1;
 
     public: // - Fusion Properties - 
 

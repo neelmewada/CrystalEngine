@@ -812,6 +812,13 @@ namespace CE
         }
     }
 
+    void FTextInput::OnPaintContent(FPainter* painter)
+    {
+        Super::OnPaintContent(painter);
+
+        m_OnBeforeTextPaint(painter);
+    }
+
     void FTextInput::OnLostFocus()
     {
 	    Super::OnLostFocus();
@@ -900,6 +907,19 @@ namespace CE
                 state |= FTextInputState::Hovered;
             else
                 state &= ~FTextInputState::Hovered;
+
+            ApplyStyle();
+	    }
+    }
+
+    void FTextInput::SetHighlightedInternal(bool highlighted)
+    {
+	    if (IsHighlighted() != highlighted)
+	    {
+            if (highlighted)
+                state |= FTextInputState::Highlighted;
+            else
+                state &= ~FTextInputState::Highlighted;
 
             ApplyStyle();
 	    }
