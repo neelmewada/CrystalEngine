@@ -432,12 +432,12 @@ namespace WidgetTests
 		                        .FillRatio(0.2f)
 		                    )
 		                )
-                        .Height(150)
+                        .Height(120)
                         .HAlign(HAlign::Fill),
 
-                        FNew(FStyledWidget)
-                        .Background(gradientBrush)
-                        .Height(40)
+                        FNew(FColorPicker)
+                        .Width(150)
+                        .Height(150)
                     )
                 )
             )

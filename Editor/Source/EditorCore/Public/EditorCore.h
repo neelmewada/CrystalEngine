@@ -69,6 +69,9 @@
 
 #include "Fusion/Docking/EditorMinorDockspace.h"
 
+// - Tools -
+#include "Fusion/Widget/Tools/ColorPickerTool.h"
+
 namespace CE::Editor
 {
     

@@ -431,8 +431,13 @@ void EditorLoop::AppInit()
 	{
 		isProjectBrowsingMode = true;
 		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
+#if PLATFORM_MAC
+		gDefaultWindowWidth = 800;
+		gDefaultWindowHeight = 650;
+#else
 		gDefaultWindowWidth = 1366 * FusionApplication::Get()->GetDefaultScalingFactor();
 		gDefaultWindowHeight = 1000 * FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
 	}
 
 	mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);

@@ -34,4 +34,5 @@
 
 // - Other Widgets -
 #include "Widget/FExpandableSection.h"
+#include "Widget/FColorPicker.h"
 
