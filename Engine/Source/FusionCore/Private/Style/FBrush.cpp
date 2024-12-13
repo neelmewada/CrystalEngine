@@ -14,7 +14,7 @@ namespace CE
 		{
 			CombineHash(hash, stop);
 		}
-		CombineHash(hash, singleValue);
+		CombineHash(hash, angle);
 		return hash;
 	}
 

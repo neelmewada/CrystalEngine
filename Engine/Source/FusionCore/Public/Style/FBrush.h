@@ -44,7 +44,7 @@ namespace CE
         Array<FGradientKey> stops;
 
         FIELD()
-        float singleValue = 0; // Degrees for linear grad.
+        float angle = 0;
 
         SIZE_T GetHash() const;
 

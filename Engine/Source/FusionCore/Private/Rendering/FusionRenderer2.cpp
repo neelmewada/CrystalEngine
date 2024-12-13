@@ -2095,7 +2095,7 @@ namespace CE
 
             FDrawData drawData{};
         	drawData.rectSize = minMaxPos->GetSize();
-            drawData.userAngle = gradient.singleValue * DEG_TO_RAD;
+            drawData.userAngle = gradient.angle * DEG_TO_RAD;
 
             if (autoSizeX)
                 brushSize.x = drawData.rectSize.x;

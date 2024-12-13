@@ -180,8 +180,9 @@ float4 FragMain(PSInput input) : SV_TARGET
             const float2 brushPos = drawData.brushPos;
             const int startIndex = drawData.index;
             const int endIndex = drawData.endIndex;
-            float samplePos = inputUV.x;
-            //samplePos = (inputUV - brushPos);
+            float2 gradientDir = float2(cos(drawData.userAngle), sin(drawData.userAngle));
+            float samplePos = dot(inputUV * 2 - 1, gradientDir);
+            samplePos = samplePos * 0.5 + 0.5;
 
 		    for (int i = startIndex; i <= endIndex; ++i)
 		    {
