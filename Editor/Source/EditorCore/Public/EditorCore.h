@@ -44,6 +44,7 @@
 #include "Fusion/PropertyEditor/Fields/BoolEditorField.h"
 #include "Fusion/PropertyEditor/Fields/NumericEditorField.h"
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
+#include "Fusion/PropertyEditor/Fields/ColorEditorField.h"
 #include "Fusion/PropertyEditor/Fields/ColorComponentField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"

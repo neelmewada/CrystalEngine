@@ -24,7 +24,7 @@ namespace CE::Editor
 
     EditorField::Self& EditorField::BindField(FieldType* field, Object* target, void* instance)
     {
-        if (!CanBind(field))
+        if (!field || !CanBind(field))
             return *this;
 
         this->field = field;
