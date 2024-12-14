@@ -126,6 +126,7 @@ namespace CE::Editor
             TYPEID(Vec2), TYPEID(Vec2i),
             TYPEID(Vec3), TYPEID(Vec3i),
             TYPEID(Vec4), TYPEID(Vec4i),
+            TYPEID(Color)
         };
 
         if (supportedFields.Exists(fieldTypeId))
@@ -228,6 +229,16 @@ namespace CE::Editor
         {
             right->AddChild(
 				FNew(BoolEditorField)
+                .Assign(editorField)
+                .BindField(field, targets[0], instances[0])
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
+        }
+        else if (fieldDeclId == TYPEID(Color))
+        {
+            right->AddChild(
+                FNew(ColorEditorField)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
                 .HAlign(HAlign::Left)

@@ -78,6 +78,11 @@ namespace CE::Editor
         if (!fieldDeclType)
             return nullptr;
 
+        if (field->GetDeclarationTypeId() == TYPEID(Color))
+        {
+            String::IsAlphabet('a');
+        }
+
         PropertyEditor* editor = nullptr;
         Object* transient = GetTransient(MODULE_NAME);
         ClassType* propertyEditorClass = nullptr;

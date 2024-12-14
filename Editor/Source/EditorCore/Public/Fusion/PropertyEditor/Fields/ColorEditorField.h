@@ -12,6 +12,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnPaint(FPainter* painter) override;
+
     public: // - Public API -
 
         bool CanBind(FieldType* field) override;

@@ -13,6 +13,10 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        FBrush gridBrush = FBrush("/Engine/Resources/Icons/TransparentPattern");
+        gridBrush.SetBrushTiling(FBrushTiling::TileXY);
+        gridBrush.SetBrushSize(Vec2(16, 16));
+
         Child(
             FNew(FStyledWidget)
             .Name("Border")
@@ -25,15 +29,37 @@ namespace CE::Editor
                     .Width(25)
                     .Height(10),
 
-                    FNew(FStyledWidget)
-                    .Background(value)
-                    .BackgroundShape(FRoundedRectangle(0, Rounding, Rounding, 0))
+                    FNew(FOverlayStack)
                     .Width(25)
-                    .Height(10)
+                    .Height(20)
+                    (
+                        FNew(FStyledWidget)
+                        .Background(gridBrush)
+                        .BackgroundShape(FRoundedRectangle(0, Rounding, Rounding, 0))
+                        .Width(25)
+                        .Height(10),
+
+                        FNew(FStyledWidget)
+                        .Background(value)
+                        .BackgroundShape(FRoundedRectangle(0, Rounding, Rounding, 0))
+                        .Width(25)
+                        .Height(10)
+                    )
                 )
             )
         );
     }
+
+    void ColorEditorField::OnPaint(FPainter* painter)
+    {
+        Super::OnPaint(painter);
+
+        painter->SetPen(FPen(Color::RGBA(56, 56, 56), 1));
+        painter->SetBrush(FBrush());
+
+        painter->DrawRect(Rect::FromSize(Vec2(), GetComputedSize()));
+    }
+
 
     bool ColorEditorField::CanBind(FieldType* field)
     {
