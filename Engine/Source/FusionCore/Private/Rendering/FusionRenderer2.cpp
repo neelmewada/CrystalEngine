@@ -1099,7 +1099,7 @@ namespace CE
         }
 
         thread_local Array<Rect> quads{};
-        const bool isFixedSize = !Math::ApproxEquals(size.x, 0) && !Math::ApproxEquals(size.y, 0);
+        const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
 
         if (isFixedSize && IsRectClipped(Rect::FromSize(textPos, size)))
         {

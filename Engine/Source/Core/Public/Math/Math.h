@@ -60,6 +60,7 @@ namespace CE
         }
 
         static bool ApproxEquals(f32 a, f32 b) { return fpclassify(a - b) == FP_ZERO; }
+        static bool ApproxEquals(s32 a, s32 b) { return a == b; }
 
         static constexpr f32 Infinity() { return NumericLimits<f32>::Infinity(); }
 

@@ -76,9 +76,9 @@ namespace CE
     {
         isTranslationOnly = false;
 
-        if (Math::ApproxEquals(m_Angle, 0) &&
-            Math::ApproxEquals(m_Scale.x, 1) &&
-            Math::ApproxEquals(m_Scale.y, 1))
+        if (Math::ApproxEquals(m_Angle, 0.0f) &&
+            Math::ApproxEquals(m_Scale.x, 1.0f) &&
+            Math::ApproxEquals(m_Scale.y, 1.0f))
         {
             isTranslationOnly = true;
 

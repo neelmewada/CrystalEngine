@@ -19,7 +19,7 @@ namespace CE
     {
         Super::OnPaint(painter);
 
-        static constexpr f32 CircleRadius = 2.5f;
+        static constexpr f32 CircleRadius = 3;
 
         {
             FBrush brush = FBrush("/Engine/Resources/Images/HSVColorMap");
@@ -54,27 +54,38 @@ namespace CE
 
     void FColorPicker::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
+        if (event->IsDragEvent())
         {
-            FMouseEvent* mouseEvent = (FMouseEvent*)event;
+            FDragEvent* dragEvent = (FDragEvent*)event;
 
-            if (event->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
+            if (event->type == FEventType::DragBegin && dragEvent->buttons == MouseButtonMask::Left)
             {
-                isMouseDown = true;
+                isDragged = true;
+
+                dragEvent->draggedWidget = this;
+                dragEvent->Consume(this);
             }
-            else if (event->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
+            else if (event->type == FEventType::DragMove)
             {
-                isMouseDown = false;
-            }
-            else if (event->type == FEventType::MouseMove)
-            {
-                if (isMouseDown)
+                if (isDragged)
                 {
-                    Vec2 localMousePos = mouseEvent->mousePosition;
+                    Vec2 localMousePos = dragEvent->mousePosition;
                     localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+                    Vec2 normalizedPos = Vec2(Math::Clamp01(localMousePos.x / computedSize.x), 
+                        Math::Clamp01(localMousePos.y / computedSize.y));
 
-                    NormalizedColorPosition(Vec2(localMousePos.x / computedSize.x, localMousePos.y / computedSize.y));
+                    NormalizedColorPosition(normalizedPos);
+
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
                 }
+            }
+            else if (event->type == FEventType::DragEnd)
+            {
+                isDragged = false;
+
+                dragEvent->draggedWidget = this;
+                dragEvent->Consume(this);
             }
         }
 

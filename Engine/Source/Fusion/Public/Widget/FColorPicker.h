@@ -16,13 +16,15 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
+        bool SupportsDragEvents() const override { return true; }
+
     protected: // - Internal -
 
         void OnPaint(FPainter* painter) override;
 
         void HandleEvent(FEvent* event) override;
 
-        bool isMouseDown = false;
+        bool isDragged = false;
 
     public: // - Fusion Properties - 
 
