@@ -46,7 +46,18 @@ namespace CE
         FIELD()
         float angle = 0;
 
+        Self& AddKey(f32 position, const Color& color)
+        {
+            stops.Add(FGradientKey(position, color));
+            return *this;
+        }
+
         SIZE_T GetHash() const;
+
+        bool IsValid() const
+        {
+            return stops.GetSize() >= 2;
+        }
 
         bool operator==(const FGradient& rhs) const
         {

@@ -45,7 +45,7 @@ namespace CE
 
                     FAssignNew(FTitleBar, titleBar)
                     .Background(FBrush(Color::RGBA(26, 26, 26)))
-                    .Height(40)
+                    .Height(35)
                     .HAlign(HAlign::Fill)
                     (
                         FNew(FOverlayStack)
@@ -61,7 +61,7 @@ namespace CE
                                 .FillRatio(1.0f),
 
                                 FAssignNew(FLabel, titleBarLabel)
-                                .FontSize(13)
+                                .FontSize(12)
                                 .Text("Tool Window")
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center),
@@ -85,7 +85,7 @@ namespace CE
                                 .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMinimizeButton")
                                 .Style("Button.WindowControl")
-                                .VAlign(VAlign::Top)
+                                .VAlign(VAlign::Fill)
                                 (
                                     FAssignNew(FImage, minimizeIcon)
                                     .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
@@ -111,7 +111,7 @@ namespace CE
                                 .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMaximizeButton")
                                 .Style("Button.WindowControl")
-                                .VAlign(VAlign::Top)
+                                .VAlign(VAlign::Fill)
                                 (
                                     FAssignNew(FImage, maximizeIcon)
                                     .Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"))
@@ -129,7 +129,7 @@ namespace CE
                                 .Padding(Vec4(18, 8, 18, 8))
                                 .Name("WindowCloseButton")
                                 .Style("Button.WindowClose")
-                                .VAlign(VAlign::Top)
+                                .VAlign(VAlign::Fill)
                                 (
                                     FNew(FImage)
                                     .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))

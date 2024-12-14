@@ -52,6 +52,18 @@ namespace CE
         }
     }
 
+    void FColorPicker::OnPositionEdited()
+    {
+        Vec2 normalizedPosition = NormalizedColorPosition();
+
+        f32 h = normalizedPosition.x * 360;
+        f32 s = Math::Clamp01(normalizedPosition.y / 0.5f);
+        f32 v = 1.0f - Math::Clamp01((normalizedPosition.y - 0.5f) / 0.5f);
+
+        m_OnHSVColorEdited(h, s, v);
+        m_OnColorEdited(Color::HSV(h, s, v));
+    }
+
     void FColorPicker::HandleEvent(FEvent* event)
     {
         if (event->IsDragEvent())
@@ -61,6 +73,15 @@ namespace CE
             if (event->type == FEventType::DragBegin && dragEvent->buttons == MouseButtonMask::Left)
             {
                 isDragged = true;
+
+                Vec2 localMousePos = dragEvent->mousePosition;
+                localMousePos = globalTransform.GetInverse() * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+                Vec2 normalizedPos = Vec2(Math::Clamp01(localMousePos.x / computedSize.x),
+                    Math::Clamp01(localMousePos.y / computedSize.y));
+
+                NormalizedColorPosition(normalizedPos);
+
+                OnPositionEdited();
 
                 dragEvent->draggedWidget = this;
                 dragEvent->Consume(this);
@@ -75,6 +96,8 @@ namespace CE
                         Math::Clamp01(localMousePos.y / computedSize.y));
 
                     NormalizedColorPosition(normalizedPos);
+
+                    OnPositionEdited();
 
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);

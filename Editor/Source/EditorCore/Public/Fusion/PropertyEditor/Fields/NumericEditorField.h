@@ -22,6 +22,8 @@ namespace CE::Editor
 
         void HandleEvent(FEvent* event) override;
 
+        void SetValue(f64 value);
+
     protected: // - Internal -
 
         FWidget* HitTest(Vec2 localMousePos) override;
@@ -41,7 +43,7 @@ namespace CE::Editor
         void OnFinishEdit(FTextInput* field);
 
         FUNCTION()
-        void OnPaintBeforeText(FPainter* painter);
+        virtual void OnPaintBeforeText(FPainter* painter);
 
         TypeId numericType = 0;
         FTextInput* input = nullptr;
@@ -51,6 +53,7 @@ namespace CE::Editor
         bool isRanged = false;
         f32 startMouseX = 0;
         f64 startValue = 0;
+        Vec4 rangeSliderPadding = Vec4(2.5f, 2.5f, 2.5f, 2.5f);
 
         f32 min = -1;
         f32 max = -1;
@@ -65,6 +68,8 @@ namespace CE::Editor
 
         FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEdited);
         FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEditingFinished);
+
+        Self& Range(f32 min, f32 max);
 
         template<typename T> requires TIsNumericType<T>::Value
         Self& NumericType()

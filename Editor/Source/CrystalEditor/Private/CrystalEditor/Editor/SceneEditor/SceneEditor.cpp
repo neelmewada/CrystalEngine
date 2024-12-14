@@ -380,6 +380,16 @@ namespace CE::Editor
                     .Gap(0)
                     .Content(
                         FNew(FMenuItem)
+                        .Text("Color Picker")
+                        .OnClick([]
+                        {
+                            ColorPickerTool::Open()->OnColorChanged([](Color color)
+                            {
+                                //CE_LOG(Info, All, "Color: {}", color.ToVec4());
+                            });
+                        }),
+
+                        FNew(FMenuItem)
                         .Text("Debug")
                         .SubMenu(
                             FNew(EditorMenuPopup)

@@ -44,6 +44,7 @@
 #include "Fusion/PropertyEditor/Fields/BoolEditorField.h"
 #include "Fusion/PropertyEditor/Fields/NumericEditorField.h"
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
+#include "Fusion/PropertyEditor/Fields/ColorComponentField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
@@ -70,6 +71,7 @@
 #include "Fusion/Docking/EditorMinorDockspace.h"
 
 // - Tools -
+#include "Fusion/Widget/Tools/ColorPickerPreview.h"
 #include "Fusion/Widget/Tools/ColorPickerTool.h"
 
 namespace CE::Editor

@@ -248,10 +248,10 @@ namespace CE
 					dragEvent.sender = hoveredWidgetStack.Top().Get();
 				dragEvent.draggedWidget = draggedWidget.Get();
 
-				if (dragEvent.sender->GetContext() != nativeContext)
+				if (draggedWidget->GetContext() != nativeContext)
 				{
-					dragEvent.mousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
-					dragEvent.prevMousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					dragEvent.mousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
+					dragEvent.prevMousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
 				}
 
 				draggedWidget->HandleEvent(&dragEvent);

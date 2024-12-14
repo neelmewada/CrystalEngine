@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+    static constexpr f32 MaxScrollDist = 512;
 
     NumericEditorField::NumericEditorField()
     {
@@ -128,7 +129,6 @@ namespace CE::Editor
             {
                 if (isDragging)
                 {
-                    //Vec2 deltaPos = drag->mousePosition - drag->prevMousePosition;
                     f64 amount = (drag->mousePosition.x - startMouseX) * m_ScrollAmount;
 
                     FIELD_DRAG_IF(u8)
@@ -275,22 +275,43 @@ namespace CE::Editor
 
             if (ratio > 0.01f)
 	        {
-                constexpr f32 PaddingAmount = 2.5f;
                 Vec4 cornerRadius = input->CornerRadius() * 0.7f;
 
 		        painter->SetBrush(input->BorderColor());
             	painter->SetPen(FPen());
 
-                size.x = (size.x - PaddingAmount * 2) * ratio;
+                size.x = (size.x - (rangeSliderPadding.left + rangeSliderPadding.right)) * ratio;
                 if (cornerRadius.GetMax() > size.x / 2)
                 {
                     cornerRadius = Vec4(1, 1, 1, 1) * size.x / 2;
                 }
 
-            	painter->DrawRoundedRect(Rect::FromSize(Vec2(PaddingAmount, PaddingAmount), 
-					size - Vec2(0, PaddingAmount) * 2), cornerRadius);
+            	painter->DrawRoundedRect(Rect::FromSize(Vec2(rangeSliderPadding.left, rangeSliderPadding.top),
+					size - Vec2(0, rangeSliderPadding.top + rangeSliderPadding.bottom)), cornerRadius);
 	        }
         }
+    }
+
+#define FIELD_SET_VALUE_IF(type)\
+    if (numericType == TYPEID(type))\
+    {\
+        input->Text(String::Format("{}", (type)value));\
+    }
+
+    void NumericEditorField::SetValue(f64 value)
+    {
+        FIELD_SET_VALUE_IF(u8)
+	    else FIELD_SET_VALUE_IF(s8)
+		else FIELD_SET_VALUE_IF(u16)
+        else FIELD_SET_VALUE_IF(s16)
+        else FIELD_SET_VALUE_IF(u32)
+        else FIELD_SET_VALUE_IF(s32)
+        else FIELD_SET_VALUE_IF(u64)
+        else FIELD_SET_VALUE_IF(s64)
+        else FIELD_SET_VALUE_IF(f32)
+        else FIELD_SET_VALUE_IF(f64)
+
+        OnTextFieldEdited(input);
     }
 
     void NumericEditorField::OnTextFieldEdited(FTextInput*)
@@ -353,7 +374,6 @@ namespace CE::Editor
         {
             Attribute rangeMin = field->GetAttribute("RangeMin");
             Attribute rangeMax = field->GetAttribute("RangeMax");
-            
 
             if (String::TryParse(rangeMin.GetStringValue(), min) &&
                 String::TryParse(rangeMax.GetStringValue(), max))
@@ -422,6 +442,16 @@ namespace CE::Editor
             f64 value = field->GetFieldValue<f64>(instances[0]);
             Text(String::Format("{}", value));
         }
+    }
+
+    NumericEditorField::Self& NumericEditorField::Range(f32 min, f32 max)
+    {
+        isRanged = true;
+        this->min = min;
+        this->max = max;
+        m_ScrollAmount = (max - min) / MaxScrollDist;
+
+        return *this;
     }
 
     NumericEditorField::Self& NumericEditorField::NumericType(TypeId type)

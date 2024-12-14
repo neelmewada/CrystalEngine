@@ -118,7 +118,7 @@ namespace CE
 
         f32 v = cmax * 100;
 
-        return Vec3(h, s, v);
+        return Vec3(h, s / 100.0f, v / 100.0f);
     }
 
 } // namespace CE
