@@ -23,7 +23,7 @@ namespace CE::Editor
 
         virtual Self& UnbindField();
 
-        bool IsBound() const { return field != nullptr && targets.NotEmpty(); }
+        bool IsBound() const { return field != nullptr && targets.NotEmpty() && instances.NotEmpty(); }
 
         virtual EditorField& FixedInputWidth(f32 width);
 

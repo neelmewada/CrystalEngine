@@ -14,15 +14,26 @@ namespace CE::Editor
 
         void OnPaint(FPainter* painter) override;
 
+        void HandleEvent(FEvent* event) override;
+
     public: // - Public API -
 
         bool CanBind(FieldType* field) override;
+
+        bool SupportsMouseEvents() const override { return true; }
+
+        void SetColorValue(const Color& color);
 
     protected: // - Internal -
 
         void UpdateValue() override;
 
         Color value;
+        bool isMouseInside = false;
+        bool isPressed = false;
+
+        FStyledWidget* left = nullptr;
+        FStyledWidget* right = nullptr;
 
     public: // - Fusion Properties - 
 

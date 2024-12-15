@@ -16,6 +16,8 @@ namespace CE::Editor
 		static void Initialize();
 		static void Shutdown();
 
+		static EditorStyle* Get();
+
 	private:
 
 		void InitializeDefault();

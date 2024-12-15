@@ -376,6 +376,7 @@ namespace CE::Editor
     void ColorPickerTool::OnClickOk()
     {
         m_OnColorChanged(value);
+        m_OnColorChanged.Unbind();
 
         HideWindow();
     }
@@ -383,8 +384,17 @@ namespace CE::Editor
     void ColorPickerTool::OnClickCancel()
     {
         m_OnColorChanged(original);
+        m_OnColorChanged.Unbind();
 
         HideWindow();
+    }
+
+    void ColorPickerTool::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
+        m_OnColorChanged(original);
+        m_OnColorChanged.Unbind();
     }
 
     void ColorPickerTool::OnHSVColorEdited(f32 h, f32 s, f32 v)

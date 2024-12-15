@@ -31,6 +31,8 @@ namespace CE::Editor
         FUNCTION()
         void OnClickCancel();
 
+        void OnBeginDestroy() override;
+
         FUNCTION()
         void OnHSVColorEdited(f32 h, f32 s, f32 v);
 

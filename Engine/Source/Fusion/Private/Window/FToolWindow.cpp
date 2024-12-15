@@ -124,6 +124,7 @@ namespace CE
                                 FNew(FButton)
                                 .OnClicked([this]
                                     {
+                                        OnClickClose();
                                         GetContext()->QueueDestroy();
                                     })
                                 .Padding(Vec4(18, 8, 18, 8))

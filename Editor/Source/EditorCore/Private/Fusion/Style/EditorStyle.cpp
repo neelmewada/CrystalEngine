@@ -36,6 +36,11 @@ namespace CE::Editor
 		}
     }
 
+    EditorStyle* EditorStyle::Get()
+    {
+		return gEditorStyle;
+    }
+
     void EditorStyle::InitializeDefault()
     {
         if (!button)
