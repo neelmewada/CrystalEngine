@@ -2,7 +2,8 @@
 
 namespace CE::Editor
 {
-    DECLARE_SCRIPT_DELEGATE(ColorPickerDelegate, void, Color color);
+    class ColorPickerTool;
+    DECLARE_SCRIPT_DELEGATE(ColorPickerDelegate, void, ColorPickerTool*);
 
     CLASS()
     class EDITORCORE_API ColorPickerTool : public FToolWindow
@@ -20,6 +21,9 @@ namespace CE::Editor
 
         void SetOriginalColor(const Color& color);
         void SetColor(const Color& color);
+
+        const Color& GetOriginalColor() const { return original; }
+        const Color& GetColor() const { return value; }
 
     protected: // - Internal -
 
@@ -65,6 +69,7 @@ namespace CE::Editor
     public: // - Fusion Properties - 
 
         FUSION_EVENT(ColorPickerDelegate, OnColorChanged);
+        FUSION_EVENT(ColorPickerDelegate, OnColorAccepted);
 
         FUSION_WIDGET;
     };

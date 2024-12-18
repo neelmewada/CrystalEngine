@@ -28,6 +28,10 @@
 #include "Asset/FontAssetDefinition.h"
 #include "Asset/FontAssetImporter.h"
 
+// History
+#include "History/EditorOperation.h"
+#include "History/EditorHistory.h"
+
 ///////////////////////////////////////////////////////
 /// Widgets
 
@@ -68,6 +72,7 @@
 #include "Fusion/Docking/EditorDockspace.h"
 #include "Fusion/Docking/EditorDockTabItem.h"
 #include "Fusion/Docking/EditorDockTab.h"
+#include "Fusion/Widget/Editor/EditorBase.h"
 
 #include "Fusion/Docking/EditorMinorDockspace.h"
 

@@ -375,16 +375,21 @@ namespace CE::Editor
 
     void ColorPickerTool::OnClickOk()
     {
-        m_OnColorChanged(value);
+        m_OnColorChanged(this);
         m_OnColorChanged.Unbind();
+
+        m_OnColorAccepted(this);
+        m_OnColorAccepted.Unbind();
 
         HideWindow();
     }
 
     void ColorPickerTool::OnClickCancel()
     {
-        m_OnColorChanged(original);
+        m_OnColorChanged(this);
         m_OnColorChanged.Unbind();
+
+        m_OnColorAccepted.Unbind();
 
         HideWindow();
     }
@@ -393,8 +398,10 @@ namespace CE::Editor
     {
 	    Super::OnBeginDestroy();
 
-        m_OnColorChanged(original);
+        m_OnColorChanged(this);
         m_OnColorChanged.Unbind();
+
+        m_OnColorAccepted.Unbind();
     }
 
     void ColorPickerTool::OnHSVColorEdited(f32 h, f32 s, f32 v)
@@ -480,7 +487,7 @@ namespace CE::Editor
 
         if (excludeField != nullptr || excludeColorPicker || excludeHexField)
         {
-            m_OnColorChanged(value);
+            m_OnColorChanged(this);
         }
     }
 
