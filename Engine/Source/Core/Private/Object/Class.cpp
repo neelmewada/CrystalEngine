@@ -16,6 +16,14 @@ namespace CE
 	//	cachedFields = copy.cachedFields;
 	//}
 
+	StructType::~StructType()
+	{
+        LockGuard lock{ cachedFieldsMutex };
+
+        cachedFields.Clear();
+        cachedFieldsMap.Clear();
+	}
+
 	bool StructType::IsAssignableTo(TypeId typeId)
     {
         if (typeId == this->GetTypeId())
@@ -121,14 +129,14 @@ namespace CE
         return hasEventFields;
 	}
 
-    FieldType* StructType::GetFirstField()
+    Ptr<FieldType> StructType::GetFirstField()
     {
         CacheAllFields();
 
         if (cachedFields.GetSize() == 0)
             return nullptr;
 
-        return &cachedFields[0];
+        return cachedFields[0].Get();
     }
 
     Array<FieldType*> StructType::FetchObjectFields()
@@ -156,14 +164,14 @@ namespace CE
         return cachedFields.GetSize();
     }
 
-    FieldType* StructType::GetFieldAt(u32 index)
+    Ptr<FieldType> StructType::GetFieldAt(u32 index)
     {
         CacheAllFields();
 
-        return index < GetFieldCount() ? &cachedFields[index] : nullptr;
+        return index < GetFieldCount() ? cachedFields[index].Get() : nullptr;
     }
 
-    FieldType* StructType::FindField(const Name& name)
+    Ptr<FieldType> StructType::FindField(const Name& name)
     {
         CacheAllFields();
 
@@ -175,6 +183,168 @@ namespace CE
 		}
 
         return nullptr;
+    }
+
+    bool StructType::FindFieldInstanceRelative(const Name& relativePath, 
+        const Ref<Object>& targetObject,
+        void* targetInstance,
+        StructType*& outFieldOwner,
+	    Ptr<FieldType>& outField,
+        Ref<Object>& outObject,
+        void*& outInstance)
+    {
+        CacheAllFields();
+
+        Array<String> split = relativePath.GetString().Split('.');
+
+        if (targetInstance == nullptr)
+        {
+            targetInstance = targetObject.Get();
+        }
+
+        StructType* curType = this;
+        Ptr<FieldType> curField = nullptr;
+        void* curInstance = targetInstance;
+        Ref<Object> curObject = targetObject;
+
+        for (int i = 0; i < split.GetSize(); i++)
+        {
+            const bool isLast = (i == (int)split.GetSize() - 1);
+            String fieldName = split[i];
+            int arrayIndex = -1;
+
+            if (curType == nullptr)
+            {
+	            return false;
+            }
+
+	        if (fieldName.Contains('['))
+	        {
+                Array<String> indexSplit;
+                fieldName.Split({ "[", "]" }, indexSplit);
+
+                fieldName = indexSplit[0];
+                String::TryParse(indexSplit[1], arrayIndex);
+	        }
+
+            curField = curType->FindField(fieldName);
+
+            if (curField == nullptr || curInstance == nullptr)
+            {
+	            return false;
+            }
+
+            if (curField->IsArrayField())
+            {
+                if (arrayIndex < 0)
+                {
+	                return false;
+                }
+
+                Array<Ptr<FieldType>> arrayFields = curField->GetArrayFieldListPtr(curInstance);
+
+                // TODO: Array
+
+                if (arrayIndex >= arrayFields.GetSize() || arrayFields.IsEmpty())
+                {
+	                return false;
+                }
+
+                const Array<u8>& rawArray = curField->GetFieldValue<Array<u8>>(curInstance);
+                curInstance = (void*)rawArray.GetData();
+                curField = arrayFields[arrayIndex];
+
+                if (curField->IsStructField())
+                {
+                    curInstance = curField->GetFieldInstance(curInstance);
+                    curType = (StructType*)curField->GetDeclarationType();
+                }
+                else if (curField->IsObjectField())
+                {
+                    Ref<Object> ref = nullptr;
+
+                    if (curField->IsStrongRefCounted())
+                    {
+                        ref = curField->GetFieldValue<Ref<Object>>(curInstance);
+                    }
+                    else if (curField->IsWeakRefCounted())
+                    {
+                        ref = curField->GetFieldValue<WeakRef<Object>>(curInstance).Lock();
+                    }
+                    else
+                    {
+                        ref = curField->GetFieldValue<Object*>(curInstance);
+                    }
+
+                    if (isLast)
+                    {
+                        break;
+                    }
+
+                    if (ref.IsValid())
+                    {
+                        curObject = ref;
+                        curInstance = ref.Get();
+                        curType = ref->GetClass();
+                    }
+                }
+                else // POD
+                {
+                    if (!isLast)
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (curField->IsStructField())
+            {
+                curInstance = curField->GetFieldInstance(curInstance);
+                curType = (StructType*)curField->GetDeclarationType();
+            }
+            else if (curField->IsObjectField())
+            {
+                Ref<Object> ref = nullptr;
+
+	            if (curField->IsStrongRefCounted())
+	            {
+                    ref = curField->GetFieldValue<Ref<Object>>(curInstance);
+	            }
+                else if (curField->IsWeakRefCounted())
+                {
+                    ref = curField->GetFieldValue<WeakRef<Object>>(curInstance).Lock();
+                }
+                else
+                {
+                    ref = curField->GetFieldValue<Object*>(curInstance);
+                }
+
+                if (isLast)
+                {
+                    break;
+                }
+
+                if (ref.IsValid())
+                {
+                    curObject = ref;
+                    curInstance = ref.Get();
+                    curType = ref->GetClass();
+                }
+            }
+            else // POD
+            {
+	            if (!isLast)
+	            {
+		            return false;
+	            }
+            }
+        }
+
+        outField = curField;
+        outFieldOwner = curType;
+        outInstance = curInstance;
+        outObject = curObject;
+
+        return true;
     }
 
     bool StructType::HasFunctions()
@@ -272,10 +442,15 @@ namespace CE
 
     void StructType::CacheAllFields()
     {
-        LockGuard lock{ cachedFieldsMutex };
-
         if (fieldsCached)
             return;
+
+        if (name == "ReflectionFieldTest")
+        {
+            String::IsAlphabet('a');
+        }
+
+        LockGuard lock{ cachedFieldsMutex };
 
         fieldsCached = true;
 
@@ -292,39 +467,51 @@ namespace CE
             {
                 auto structType = (StructType*)type;
                 structType->CacheAllFields();
-                cachedFields.AddRange(structType->cachedFields);
+
+                for (auto& cachedField : structType->cachedFields)
+                {
+                    cachedFields.Add(FieldType::Clone(cachedField));
+                }
             }
             else if (type->IsClass())
             {
                 auto classType = (ClassType*)type;
                 classType->CacheAllFields();
-                cachedFields.AddRange(classType->cachedFields);
+
+                for (auto& cachedField : classType->cachedFields)
+                {
+                    cachedFields.Add(FieldType::Clone(cachedField));
+                }
             }
         }
 
-        cachedFields.AddRange(localFields);
+        for (const auto& localField : localFields)
+        {
+            cachedFields.Add(FieldType::Clone(localField));
+        }
+
+        //cachedFields.AddRange(localFields);
 
         for (int i = 0; i < cachedFields.GetSize(); i++)
         {
-            cachedFields[i].instanceOwner = this;
+            cachedFields[i]->instanceOwner = this;
 
-            if (cachedFields[i].IsEventField())
+            if (cachedFields[i]->IsEventField())
             {
                 hasEventFields = true;
             }
 
             if (i == cachedFields.GetSize() - 1)
             {
-                cachedFields[i].next = nullptr;
+                cachedFields[i]->next = nullptr;
             }
             else
             {
-                cachedFields[i].next = &cachedFields[i + 1];
+                cachedFields[i]->next = cachedFields[i + 1];
             }
 
-			cachedFieldsMap[cachedFields[i].GetName()] = &cachedFields[i];
+			cachedFieldsMap[cachedFields[i]->GetName()] = cachedFields[i];
         }
-
 		
     }
 

@@ -15,9 +15,9 @@ namespace CE
 
 	private:
 
-		void SerializeField(FieldType* field, void* instance, Stream* stream);
+		void SerializeField(const Ptr<FieldType>& field, void* instance, Stream* stream);
 
-		void DeserializeField(FieldType* field, void* instance, Stream* stream, const Bundle::FieldSchema& fieldSchema);
+		void DeserializeField(const Ptr<FieldType>& field, void* instance, Stream* stream, const Bundle::FieldSchema& fieldSchema);
 
 		Ref<Object> LoadObjectReference(Uuid objectUuid, Uuid bundleUuid);
 

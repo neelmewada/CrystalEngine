@@ -120,7 +120,7 @@ namespace CE::Editor
 
         if (arraySize != arrayElements.GetSize())
         {
-	        arrayElements = field->GetArrayFieldList(instance);
+	        arrayElements = field->GetArrayFieldListPtr(instance);
         }
 
         bool newElementsCreated = false;
@@ -136,11 +136,11 @@ namespace CE::Editor
             if (i >= elementEditors.GetSize())
             {
 	            // Create editor
-                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(&arrayElements[i], objectEditor);
+                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(arrayElements[i], objectEditor);
 
                 propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
 
-                propertyEditor->InitTarget(&arrayElements[i], { target }, { arrayInstance });
+                propertyEditor->InitTarget(arrayElements[i], { target }, { arrayInstance });
 
                 FHorizontalStack& left = *propertyEditor->GetLeft();
             	FHorizontalStack& right = *propertyEditor->GetRight();
@@ -176,7 +176,7 @@ namespace CE::Editor
             }
 
             // Use editor
-	    	elementEditors[i]->UpdateTarget(&arrayElements[i], { target }, { arrayInstance });
+	    	elementEditors[i]->UpdateTarget(arrayElements[i], { target }, { arrayInstance });
 
 	    	elementEditors[i]->FieldNameText(String::Format("Index {}", i));
 

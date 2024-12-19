@@ -534,7 +534,7 @@ namespace CE
         return BundleSaveResult::Success;
     }
 
-    bool Bundle::IsFieldSerialized(FieldType* field, StructType* schemaType)
+    bool Bundle::IsFieldSerialized(const Ptr<FieldType>& field, StructType* schemaType)
     {
         if (field == nullptr || schemaType == nullptr || !field->IsSerialized())
             return false;
@@ -615,11 +615,11 @@ namespace CE
 
             *stream << (u32)0; // Class/struct version (unused)
 
-            Array<FieldType*> serializedFields;
+            Array<Ptr<FieldType>> serializedFields;
 
             for (int j = 0; j < schemaType->GetFieldCount(); ++j)
             {
-                FieldType* field = schemaType->GetFieldAt(j);
+                Ptr<FieldType> field = schemaType->GetFieldAt(j);
 
                 if (IsFieldSerialized(field, schemaType))
                 {
@@ -652,7 +652,7 @@ namespace CE
         }
     }
 
-    void Bundle::SerializeFieldSchema(FieldType* field, Stream* stream, 
+    void Bundle::SerializeFieldSchema(const Ptr<FieldType>& field, Stream* stream,
                                       const HashMap<StructType*, u32>& schemaTypeToIndex)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
@@ -771,7 +771,7 @@ namespace CE
 
         for (int i = 0; i < classType->GetFieldCount(); ++i)
         {
-            FieldType* field = classType->GetFieldAt(i);
+            Ptr<FieldType> field = classType->GetFieldAt(i);
             if (!Bundle::IsFieldSerialized(field, classType))
                 continue;
 
@@ -799,13 +799,13 @@ namespace CE
             const Bundle::FieldSchema& fieldSchema = schema.fields[i];
             const Name& fieldName = fieldSchema.fieldName;
 
-            FieldType* field = classType->FindField(fieldName);
+            Ptr<FieldType> field = classType->FindField(fieldName);
 
             DeserializeField(field, target, stream, fieldSchema);
         }
     }
 
-    void ObjectSerializer::DeserializeField(FieldType* field, void* instance, Stream* stream,
+    void ObjectSerializer::DeserializeField(const Ptr<FieldType>& field, void* instance, Stream* stream,
         const Bundle::FieldSchema& fieldSchema)
     {
         TypeId fieldTypeId = 0;
@@ -1047,7 +1047,7 @@ namespace CE
                 u32 numElements = 0;
                 *stream >> numElements;
 
-                Array<FieldType> elements;
+                Array<Ptr<FieldType>> elements;
                 void* arrayInstance = nullptr;
 
                 if (field != nullptr && field->GetUnderlyingType() != nullptr &&
@@ -1055,7 +1055,7 @@ namespace CE
                 {
                     field->ResizeArray(instance, numElements);
 
-                    elements = field->GetArrayFieldList(instance);
+                    elements = field->GetArrayFieldListPtr(instance);
 
                     if (numElements > 0)
                     {
@@ -1066,7 +1066,7 @@ namespace CE
 
                 for (int i = 0; i < numElements; ++i)
                 {
-                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream, Bundle::FieldSchema{ .typeByte = FieldTypeBytes[TYPEID(Object)] });
+                    DeserializeField(elements.NotEmpty() ? elements[i] : nullptr, arrayInstance, stream, Bundle::FieldSchema{ .typeByte = FieldTypeBytes[TYPEID(Object)] });
                 }
 
                 break;
@@ -1077,7 +1077,7 @@ namespace CE
                 u32 numElements = 0;
                 *stream >> numElements;
 
-                Array<FieldType> elements;
+                Array<Ptr<FieldType>> elements;
                 void* arrayInstance = nullptr;
 
                 if (field != nullptr && field->GetUnderlyingType() != nullptr &&
@@ -1085,7 +1085,7 @@ namespace CE
                 {
                     field->ResizeArray(instance, numElements);
 
-                    elements = field->GetArrayFieldList(instance);
+                    elements = field->GetArrayFieldListPtr(instance);
 
                     if (numElements > 0)
                     {
@@ -1096,7 +1096,7 @@ namespace CE
 
                 for (int i = 0; i < numElements; ++i)
                 {
-                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream,
+                    DeserializeField(elements.NotEmpty() ? elements[i] : nullptr, arrayInstance, stream,
                         Bundle::FieldSchema{ .typeByte = StructFieldType, .schemaIndexOfFieldType = fieldSchema.schemaIndexOfFieldType });
                 }
 
@@ -1107,14 +1107,14 @@ namespace CE
                 u32 numElements = 0;
                 *stream >> numElements;
 
-                Array<FieldType> elements;
+                Array<Ptr<FieldType>> elements;
                 void* arrayInstance = nullptr;
 
                 if (field != nullptr && (FieldTypeBytes.KeyExists(field->GetUnderlyingTypeId()) || field->IsEnumArrayField()))
                 {
                     field->ResizeArray(instance, numElements);
 
-                    elements = field->GetArrayFieldList(instance);
+                    elements = field->GetArrayFieldListPtr(instance);
 
                     if (numElements > 0)
                     {
@@ -1125,7 +1125,7 @@ namespace CE
 
                 for (int i = 0; i < numElements; ++i)
                 {
-                    DeserializeField(elements.NotEmpty() ? &elements[i] : nullptr, arrayInstance, stream,
+                    DeserializeField(elements.NotEmpty() ? elements[i] : nullptr, arrayInstance, stream,
                         Bundle::FieldSchema{ .typeByte = fieldSchema.underlyingTypeByte });
                 }
 
@@ -1273,7 +1273,7 @@ namespace CE
 
                 for (int i = 0; i < structSchema.fields.GetSize(); ++i)
                 {
-                    FieldType* structField = structType != nullptr
+                    Ptr<FieldType> structField = structType != nullptr
                         ? structType->FindField(structSchema.fields[i].fieldName)
                         : nullptr;
 
@@ -1403,7 +1403,7 @@ namespace CE
         *stream << field->GetFieldValue<PodType>(instance);\
     }
 
-    void ObjectSerializer::SerializeField(FieldType* field, void* instance, Stream* stream)
+    void ObjectSerializer::SerializeField(const Ptr<FieldType>& field, void* instance, Stream* stream)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
 
@@ -1616,7 +1616,7 @@ namespace CE
 
             for (int i = 0; i < structType->GetFieldCount(); ++i)
             {
-                FieldType* structField = structType->GetFieldAt(i);
+                Ptr<FieldType> structField = structType->GetFieldAt(i);
 
                 if (!Bundle::IsFieldSerialized(structField, structType))
                 {
@@ -1631,7 +1631,7 @@ namespace CE
             TypeId underlyingTypeId = field->GetUnderlyingTypeId();
             TypeInfo* underlyingType = field->GetUnderlyingType();
 
-            Array<FieldType> elementList = field->GetArrayFieldList(instance);
+            Array<Ptr<FieldType>> elementList = field->GetArrayFieldListPtr(instance);
 
             *stream << (u32)elementList.GetSize();
 
@@ -1644,28 +1644,28 @@ namespace CE
                 {
 	                for (int i = 0; i < elementList.GetSize(); ++i)
 	                {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(elementList[i], arrayInstance, stream);
 	                }
                 }
                 else if (FieldTypeBytes.KeyExists(underlyingTypeId))
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(elementList[i], arrayInstance, stream);
                     }
                 }
                 else if (underlyingType->IsStruct())
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(elementList[i], arrayInstance, stream);
                     }
                 }
                 else if (underlyingType->IsEnum())
                 {
                     for (int i = 0; i < elementList.GetSize(); ++i)
                     {
-                        SerializeField(&elementList[i], arrayInstance, stream);
+                        SerializeField(elementList[i], arrayInstance, stream);
                     }
                 }
                 else

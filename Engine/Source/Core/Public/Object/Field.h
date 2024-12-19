@@ -31,7 +31,7 @@ namespace CE
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
-    class CORE_API FieldType : public TypeInfo
+    class CORE_API FieldType : public TypeInfo, public IntrusiveBase
     {
     private:
         FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, 
@@ -48,9 +48,13 @@ namespace CE
             ConstructInternal();
         }
 
+        static Ptr<FieldType> Clone(const Ptr<FieldType>& copy);
+
         void ConstructInternal();
 
     public:
+
+        virtual ~FieldType();
 
 		virtual void InitializeDefaults(void* instance) override;
 		virtual void CallDestructor(void* instance) override;
@@ -191,7 +195,7 @@ namespace CE
 			*(T*)((SIZE_T)instance + offset) = value;
 		}
 
-		bool CopyTo(void* srcInstance, FieldType* destField, void* destInstance);
+		bool CopyTo(void* srcInstance, const Ptr<FieldType>& destField, void* destInstance);
 
         s64 GetFieldEnumValue(void* instance);
         void SetFieldEnumValue(void* instance, s64 value);
@@ -228,7 +232,8 @@ namespace CE
             array[index] = value;
         }
 
-		Array<FieldType> GetArrayFieldList(void* instance);
+        //Array<FieldType> GetArrayFieldList(void* instance);
+        Array<Ptr<FieldType>> GetArrayFieldListPtr(void* instance);
 
     private:
 
@@ -253,6 +258,7 @@ namespace CE
 
         friend class StructType;
         friend class ClassType;
+
     };
 
 	typedef FieldType Field;

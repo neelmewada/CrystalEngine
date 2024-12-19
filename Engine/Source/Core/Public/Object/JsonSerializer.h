@@ -9,7 +9,7 @@ namespace CE
     {
     public:
         JsonFieldSerializer(StructType* instanceType, void* instance);
-        JsonFieldSerializer(Array<FieldType*> fields, void* instance);
+        JsonFieldSerializer(Array<Ptr<FieldType>> fields, void* instance);
         
         bool HasNext();
 
@@ -28,12 +28,12 @@ namespace CE
 
 		bool WriteNext(JsonValue* json);
 
-        FieldType* GetNext();
+		Ptr<FieldType> GetNext();
 
 		PrettyJsonWriter writer;
         
 		StructType* structType = nullptr;
-        Array<FieldType*> fields{};
+        Array<Ptr<FieldType>> fields{};
         void* rawInstance = nullptr;
 
         bool isFirstWrite = true;
@@ -48,7 +48,7 @@ namespace CE
 	{
 	public:
 		JsonFieldDeserializer(StructType* instanceType, void* instance);
-		JsonFieldDeserializer(Array<FieldType*> fields, void* instance);
+		JsonFieldDeserializer(Array<Ptr<FieldType>> fields, void* instance);
 
 		~JsonFieldDeserializer();
 
@@ -69,12 +69,12 @@ namespace CE
 
 		bool ReadNextField(JsonValue* jsonValue);
 
-		bool ReadField(FieldType* field, JsonValue* jsonValue);
+		bool ReadField(const Ptr<FieldType>& field, JsonValue* jsonValue);
 
 		JsonValue* rootJson = nullptr;
 
 		StructType* structType = nullptr;
-		Array<FieldType*> fields{};
+		Array<Ptr<FieldType>> fields{};
 		void* rawInstance = nullptr;
 
 		bool isFirstRead = true;

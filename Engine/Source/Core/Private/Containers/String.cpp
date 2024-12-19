@@ -709,26 +709,60 @@ namespace CE
 
 			StringView view = StringView(Buffer + i);
 
-			bool isLast = (i == StringLength - 1);
+			const bool isLast = (i == StringLength - 1);
 
-			for (const auto& delimiter : delimiters)
-			{
-				if (view.StartsWith(delimiter) || isLast)
-				{
-					if (isLast)
-						i++;
+            if (isLast)
+            {
+                bool foundDelimiter = false;
 
-					if (startIdx != i)
-					{
-						outArray.Add(GetSubstringView(startIdx, i - startIdx));
-					}
+                for (const auto& delimiter : delimiters)
+                {
+                    if (view.StartsWith(delimiter))
+                    {
+                        if (startIdx != i)
+                        {
+                            outArray.Add(GetSubstringView(startIdx, i - startIdx));
+                        }
 
-					startIdx = i + delimiter.GetLength();
-					i += delimiter.GetLength() - 1;
-					break;
-				}
-			}
+                        startIdx = i + delimiter.GetLength();
+                        i += delimiter.GetLength() - 1;
+                        foundDelimiter = true;
+                        break;
+                    }
+                }
 
+                if (!foundDelimiter)
+                {
+                    i++;
+
+                    if (startIdx != i)
+                    {
+                        outArray.Add(GetSubstringView(startIdx, i - startIdx));
+                    }
+
+                    break;
+                }
+            }
+            else
+            {
+                for (const auto& delimiter : delimiters)
+                {
+                    if (view.StartsWith(delimiter) || isLast)
+                    {
+                        if (isLast)
+                            i++;
+
+                        if (startIdx != i)
+                        {
+                            outArray.Add(GetSubstringView(startIdx, i - startIdx));
+                        }
+
+                        startIdx = i + delimiter.GetLength();
+                        i += delimiter.GetLength() - 1;
+                        break;
+                    }
+                }
+            }
 		}
 	}
 

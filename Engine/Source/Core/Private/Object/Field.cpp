@@ -3,6 +3,28 @@
 
 namespace CE
 {
+	FieldType::~FieldType()
+	{
+		if (owner->GetName() == "array")
+		{
+			String::IsAlphabet('a');
+		}
+	}
+
+	Ptr<FieldType> FieldType::Clone(const Ptr<FieldType>& copy)
+	{
+		return new FieldType(
+			copy->GetName().GetString(),
+			copy->fieldTypeId,
+			copy->underlyingTypeId,
+			copy->size,
+			copy->offset,
+			copy->originalAttributes,
+			copy->owner,
+			copy->refType
+		);
+	}
+
     void FieldType::ConstructInternal()
     {
         fieldFlags = FIELD_NoFlags;
@@ -370,7 +392,7 @@ namespace CE
 				auto underlyingType = this->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsPOD() && !underlyingType->IsArrayType())
 				{
-					auto arrayList = GetArrayFieldList(instance);
+					auto arrayList = GetArrayFieldListPtr(instance);
 					u32 arraySize = arrayList.GetSize();
 					void* arrayFieldInstance = GetFieldInstance(instance);
 
@@ -379,7 +401,7 @@ namespace CE
 						String result = "[";
 						for (int i = 0; i < arraySize; i++)
 						{
-							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
+							auto str = arrayList[i]->GetFieldValueAsString(arrayFieldInstance);
 							if (result.NotEmpty())
 								result += ",";
 							result += str;
@@ -507,7 +529,7 @@ namespace CE
 		return 0;
 	}
 
-	bool FieldType::CopyTo(void* srcInstance, FieldType* destField, void* destInstance)
+	bool FieldType::CopyTo(void* srcInstance, const Ptr<FieldType>& destField, void* destInstance)
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
 			return false;
@@ -546,13 +568,13 @@ namespace CE
 
 					if (srcArraySize > 0)
 					{
-						Array<FieldType> arrayFields = this->GetArrayFieldList(srcInstance);
+						Array<Ptr<FieldType>> arrayFields = this->GetArrayFieldListPtr(srcInstance);
 						u8* srcArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(srcInstance)[0]);
 						u8* destArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(destInstance)[0]);
 
 						for (int i = 0; i < arrayFields.GetSize(); i++)
 						{
-							arrayFields[i].CopyTo(srcArrayInstance, &arrayFields[i], destArrayInstance);
+							arrayFields[i]->CopyTo(srcArrayInstance, arrayFields[i], destArrayInstance);
 						}
 					}
 				}
@@ -891,7 +913,7 @@ namespace CE
 		}
 	}
 
-	Array<FieldType> FieldType::GetArrayFieldList(void* instance)
+	/*Array<FieldType> FieldType::GetArrayFieldList(void* instance)
 	{
 		if (!IsArrayField())
 			return {};
@@ -925,6 +947,46 @@ namespace CE
 		for (int i = 0; i < arraySize; i++)
 		{
 			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 
+				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
+		}
+
+		return array;
+	}*/
+
+	Array<Ptr<FieldType>> FieldType::GetArrayFieldListPtr(void* instance)
+	{
+		if (!IsArrayField())
+			return {};
+
+		u32 arraySize = GetArraySize(instance);
+		if (arraySize == 0)
+			return {};
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return {};
+
+		auto underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
+		}
+
+		Array<Ptr<FieldType>> array{};
+
+		for (int i = 0; i < arraySize; i++)
+		{
+			array.Add(new FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(),
 				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
 		}
 

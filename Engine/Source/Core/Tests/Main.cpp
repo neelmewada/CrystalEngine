@@ -752,9 +752,9 @@ TEST(Containers, Defer)
 	
 	// Inner scope
 	{
-		defer(
+		defer(&) {
 			string = "modified";
-		);
+		};
 		EXPECT_EQ(string, "original");
 
 		string = "something";
@@ -1295,10 +1295,37 @@ CE_RTTI_STRUCT(,,ReflectionFieldTest,
 )
 CE_RTTI_STRUCT_IMPL(,,ReflectionFieldTest)
 
+class ReflectionFieldClass : public Object
+{
+	CE_CLASS(ReflectionFieldClass, Object)
+public:
+
+	Array<ReflectionFieldTest> structArray;
+
+	Array<Ref<Object>> objectArray;
+
+	Ref<Object> testObject;
+
+};
+
+CE_RTTI_CLASS(,,ReflectionFieldClass,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(structArray)
+		CE_FIELD(objectArray)
+		CE_FIELD(testObject)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
+CE_RTTI_CLASS_IMPL(,,ReflectionFieldClass)
+
 TEST(Reflection, Fields)
 {
 	TEST_BEGIN;
-	CE_REGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);
+	CE_REGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest, ReflectionFieldClass);
 	CERegisterModuleTypes();
 
 	// 1. Array field resize
@@ -1360,8 +1387,105 @@ TEST(Reflection, Fields)
 		ReflectionFieldElement::releaseCount = 0;
 	}
 
+	// 3. Simple field relative path
+	{
+		ReflectionFieldTest data{};
+		StructType* type = data.GetStruct();
+
+		data.array.Resize(3);
+		data.array[0].myText = "Data 0";
+		data.array[1].myText = "Data 1";
+		data.array[2].myText = "Data 2";
+		data.testString = "Test";
+
+		StructType* fieldOwner = nullptr;
+		Ptr<FieldType> outField = nullptr;
+		Ref<Object> outObject = nullptr;
+		void* outInstance = nullptr;
+
+		bool success = type->FindFieldInstanceRelative("array[2].myText", nullptr, &data, 
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+
+		String outValue = outField->GetFieldValue<String>(outInstance);
+		EXPECT_EQ(outValue, "Data 2");
+	}
+
+	// 4. Advanced field relative path
+	{
+		Ref<ReflectionFieldClass> mainObject = CreateObject<ReflectionFieldClass>(nullptr, "TestObjectClass");
+		ClassType* clazz = mainObject->GetClass();
+
+		mainObject->structArray.Resize(2);
+		mainObject->structArray[0].testString = "Item 0";
+		{
+			mainObject->structArray[0].array.Resize(2);
+			mainObject->structArray[0].array[0].myText = "Item 0 Text 0";
+			mainObject->structArray[0].array[1].myText = "Item 0 Text 1";
+		}
+
+		mainObject->structArray[1].testString = "Item 1";
+		{
+			mainObject->structArray[1].array.Resize(2);
+			mainObject->structArray[1].array[0].myText = "Item 1 Text 0";
+			mainObject->structArray[1].array[1].myText = "Item 1 Text 1";
+		}
+
+		mainObject->objectArray.Resize(2);
+		mainObject->objectArray[0] = CreateObject<Object>(mainObject.Get(), "SubObject_1");
+		mainObject->objectArray[1] = nullptr;
+
+		mainObject->testObject = CreateObject<Object>(mainObject.Get(), "TestObject");
+
+		StructType* fieldOwner = nullptr;
+		Ptr<FieldType> outField = nullptr;
+		Ref<Object> outObject = nullptr;
+		void* outInstance = nullptr;
+
+		bool success = clazz->FindFieldInstanceRelative("structArray[1].array[0].myText", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+		EXPECT_EQ(outField->GetFieldValue<String>(outInstance), "Item 1 Text 0");
+
+		success = clazz->FindFieldInstanceRelative("structArray[1].array[1].myText", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+		EXPECT_EQ(outField->GetFieldValue<String>(outInstance), "Item 1 Text 1");
+
+		success = clazz->FindFieldInstanceRelative("objectArray[0].name", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+		EXPECT_EQ(outField->GetFieldValue<Name>(outInstance), mainObject->objectArray[0]->GetName());
+
+		success = clazz->FindFieldInstanceRelative("objectArray[20].name", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_FALSE(success);
+
+		success = clazz->FindFieldInstanceRelative("structArray[1].array[3].myText", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_FALSE(success);
+
+		success = clazz->FindFieldInstanceRelative("objectArray[0]", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+		EXPECT_TRUE(outField->GetFieldValue<Ref<Object>>(outInstance).IsValid());
+
+		success = clazz->FindFieldInstanceRelative("objectArray[1]", mainObject.Get(), mainObject.Get(),
+			fieldOwner, outField, outObject, outInstance);
+
+		EXPECT_TRUE(success);
+		EXPECT_TRUE(outField->GetFieldValue<Ref<Object>>(outInstance).IsNull());
+	}
+
 	CEDeregisterModuleTypes();
-	CE_DEREGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);
+	CE_DEREGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest, ReflectionFieldClass);
 	TEST_END;
 }
 
@@ -1468,9 +1592,9 @@ TEST(Object, TransientLifecycle)
 	WeakRef<Object> weakRef = nullptr;
 	lifecycleClassDestroyed = false;
 
-	{
-		Ref<Bundle> transient = GetGlobalTransient();
+	Ref<Bundle> transient = GetGlobalTransient();
 
+	{
 		Ref<LifecycleClass> object = CreateObject<LifecycleClass>(transient.Get(), "TestObject");
 		weakRef = object;
 	}
@@ -2798,7 +2922,7 @@ public:
 };
 
 CE_RTTI_CLASS(,,BinaryBlobTest,
-	CE_SUPER(Object),
+	CE_SUPER(CE::Object),
 	CE_NOT_ABSTRACT,
 	CE_ATTRIBS(),
 	CE_FIELD_LIST(

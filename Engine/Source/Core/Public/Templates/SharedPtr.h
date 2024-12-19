@@ -44,5 +44,11 @@ namespace CE
 		
 		std::shared_ptr<T> impl = nullptr;
 	};
+
+	template<typename T, typename... TArgs>
+	SharedPtr<T> MakeShared(TArgs&&... args)
+	{
+		return SharedPtr<T>(new T(args...));
+	}
     
 } // namespace CE

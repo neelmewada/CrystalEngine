@@ -66,7 +66,7 @@ namespace CE
 
 		if (clazz->HasEventFields())
 		{
-			for (Field* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+			for (Ptr<FieldType> field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
 			{
 				if (!field->IsEventField())
 					continue;
@@ -615,10 +615,10 @@ namespace CE
 			}
 			else if (field->IsStructField())
 			{
-				auto structType = (StructType*)field->GetDeclarationType();
-				if (structType != nullptr)
+				auto fieldStructType = (StructType*)field->GetDeclarationType();
+				if (fieldStructType != nullptr)
 				{
-					FetchObjectReferencesInStructField(outReferences, structType, field->GetFieldInstance(structInstance));
+					FetchObjectReferencesInStructField(outReferences, fieldStructType, field->GetFieldInstance(structInstance));
 				}
 			}
 		}
@@ -648,7 +648,7 @@ namespace CE
             return;
 
         ConfigSection& configSection = config->Get(classTypeName);
-        FieldType* configField = configClass->GetFirstField();
+		Ptr<FieldType> configField = configClass->GetFirstField();
         
         while (configField != nullptr)
         {
@@ -821,14 +821,14 @@ namespace CE
                         }
                         else
                         {
-							Array<FieldType> arrayFieldList = field->GetArrayFieldList(this);
+							Array<Ptr<FieldType>> arrayFieldList = field->GetArrayFieldListPtr(this);
 
 							void* arrayInstance = arrayValue.Begin();
 
 							for (int i = 0; i < arrayFieldList.GetSize(); i++)
 							{
-								FieldType* field = &arrayFieldList[i];
-								ConfigParseField(array[i], arrayInstance, field);
+								Ptr<FieldType> arrayField = arrayFieldList[i];
+								ConfigParseField(array[i], arrayInstance, arrayField);
 							}
                         }
                     }
@@ -910,7 +910,7 @@ namespace CE
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			auto destField = thisClass->FindField(field->GetName());
-			if (destField == nullptr || (SIZE_T)destField == 0xdddddddddddddddd)
+			if (destField == nullptr)
 			{
 				destField = thisClass->FindField(field->GetName());
 			}
@@ -963,15 +963,15 @@ namespace CE
 
 				if (arraySize > 0)
 				{
-					Array<FieldType> srcElements = field->GetArrayFieldList(templateObject);
-					Array<FieldType> destElements = destField->GetArrayFieldList(this);
+					Array<Ptr<FieldType>> srcElements = field->GetArrayFieldListPtr(templateObject);
+					Array<Ptr<FieldType>> destElements = destField->GetArrayFieldListPtr(this);
 					void* srcInstance = (void*)&srcArray[0];
 					void* destInstance = (void*)&destArray[0];
 
 					for (int i = 0; i < arraySize; i++)
 					{
-						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], srcInstance,
-							&destElements[i], destInstance);
+						LoadFromTemplateFieldHelper(originalToClonedObjectMap, srcElements[i], srcInstance,
+							destElements[i], destInstance);
 					}
 				}
 			}
@@ -1031,7 +1031,7 @@ namespace CE
 	}
 
 	void Object::LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, 
-		Field* srcField, void* srcInstance, Field* dstField, void* dstInstance)
+		const Ptr<FieldType>& srcField, void* srcInstance, const Ptr<FieldType>& dstField, void* dstInstance)
 	{
 		if (dstField == nullptr || dstField->GetDeclarationTypeId() != srcField->GetDeclarationTypeId() || srcInstance == nullptr || dstInstance == nullptr)
 			return;
@@ -1086,15 +1086,15 @@ namespace CE
 
 				if (arraySize > 0)
 				{
-					Array<FieldType> srcElements = srcField->GetArrayFieldList(srcInstance);
-					Array<FieldType> destElements = dstField->GetArrayFieldList(dstInstance);
+					Array<Ptr<FieldType>> srcElements = srcField->GetArrayFieldListPtr(srcInstance);
+					Array<Ptr<FieldType>> destElements = dstField->GetArrayFieldListPtr(dstInstance);
 					void* sourceInstance = (void*)&srcArray[0];
 					void* destinationInstance = (void*)&destArray[0];
 
 					for (int i = 0; i < arraySize; i++)
 					{
-						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], sourceInstance,
-							&destElements[i], destinationInstance);
+						LoadFromTemplateFieldHelper(originalToClonedObjectMap, srcElements[i], sourceInstance,
+							destElements[i], destinationInstance);
 					}
 				}
 			}
@@ -1231,7 +1231,7 @@ namespace CE
 				if (rhs.EndsWith("\""))
 					rhs = rhs.GetSubstringView(0, rhs.GetLength() - 1);
                 
-                FieldType* field = structType->FindField(lhs);
+				Ptr<FieldType> field = structType->FindField(lhs);
                 if (field == nullptr)
                     continue;
 
@@ -1244,7 +1244,7 @@ namespace CE
         }
     }
 
-    void Object::ConfigParseField(const String& value, void* instance, FieldType* field)
+    void Object::ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field)
     {
         if (field == nullptr || instance == nullptr)
             return;

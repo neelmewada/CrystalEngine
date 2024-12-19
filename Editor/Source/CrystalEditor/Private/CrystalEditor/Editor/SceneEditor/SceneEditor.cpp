@@ -383,7 +383,7 @@ namespace CE::Editor
                         .Text("Color Picker")
                         .OnClick([]
                         {
-                            ColorPickerTool::Open()->OnColorChanged([](Color color)
+                            ColorPickerTool::Open()->OnColorChanged([](ColorPickerTool* colorPickerTool)
                             {
                                 //CE_LOG(Info, All, "Color: {}", color.ToVec4());
                             });

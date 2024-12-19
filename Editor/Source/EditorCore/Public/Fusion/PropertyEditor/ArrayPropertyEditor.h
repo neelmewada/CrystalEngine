@@ -50,7 +50,7 @@ namespace CE::Editor
         Object* target = nullptr;
         void* instance = nullptr;
 
-        Array<FieldType> arrayElements;
+        Array<Ptr<FieldType>> arrayElements;
         Array<PropertyEditor*> elementEditors;
 
     public: // - Fusion Properties - 

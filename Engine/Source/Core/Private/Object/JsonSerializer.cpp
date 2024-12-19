@@ -18,7 +18,7 @@ namespace CE
         }
     }
 
-    JsonFieldSerializer::JsonFieldSerializer(Array<FieldType*> fields, void* instance)
+    JsonFieldSerializer::JsonFieldSerializer(Array<Ptr<FieldType>> fields, void* instance)
         : rawInstance(instance), fields(fields), writer(PrettyJsonWriter::Create(nullptr))
     {
         isArray = true;
@@ -298,8 +298,7 @@ namespace CE
 		}
 		else if (field->IsArrayField())
 		{
-			Array<FieldType> fieldsList = field->GetArrayFieldList(rawInstance);
-			Array<FieldType*> fieldListPtr = fieldsList.Transform<FieldType*>([](FieldType& in) { return &in; });
+			Array<Ptr<FieldType>> fieldListPtr = field->GetArrayFieldListPtr(rawInstance);
 
 			Array<u8> array = field->GetFieldValue<Array<u8>>(rawInstance);
 
@@ -504,8 +503,7 @@ namespace CE
 				parentJson->GetArrayValue().Add(json);
 			}
 
-			Array<FieldType> fieldsList = field->GetArrayFieldList(rawInstance);
-			Array<FieldType*> fieldListPtr = fieldsList.Transform<FieldType*>([](FieldType& in) { return &in; });
+			Array<Ptr<FieldType>> fieldListPtr = field->GetArrayFieldListPtr(rawInstance);
 
 			Array<u8> array = field->GetFieldValue<Array<u8>>(rawInstance);
 
@@ -758,8 +756,7 @@ namespace CE
 				json = &parentJson.GetArrayValue().Top();
 			}
 
-			Array<FieldType> fieldsList = field->GetArrayFieldList(rawInstance);
-			Array<FieldType*> fieldListPtr = fieldsList.Transform<FieldType*>([](FieldType& in) { return &in; });
+			Array<Ptr<FieldType>> fieldListPtr = field->GetArrayFieldListPtr(rawInstance);
 
 			Array<u8> array = field->GetFieldValue<Array<u8>>(rawInstance);
 
@@ -789,7 +786,7 @@ namespace CE
 		return true;
 	}
 
-    FieldType* JsonFieldSerializer::GetNext()
+	Ptr<FieldType> JsonFieldSerializer::GetNext()
 	{
         if (!HasNext())
             return nullptr;
@@ -814,7 +811,7 @@ namespace CE
 		}
 	}
 
-	JsonFieldDeserializer::JsonFieldDeserializer(Array<FieldType*> fields, void* instance)
+	JsonFieldDeserializer::JsonFieldDeserializer(Array<Ptr<FieldType>> fields, void* instance)
 		: rawInstance(instance), fields(fields)
 	{
 		isArray = true;
@@ -1116,8 +1113,7 @@ namespace CE
 			}
 
 			field->ResizeArray(rawInstance, json.GetArrayValue().GetSize());
-			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
-			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& f) { return &f; });
+			Array<Ptr<FieldType>> fieldListPtr = field->GetArrayFieldListPtr(rawInstance);
 
 			u8* arrayInstance = const_cast<u8*>(&field->GetFieldValue<Array<u8>>(rawInstance)[0]);
 
@@ -1216,7 +1212,7 @@ namespace CE
 		return ReadField(field, jsonValue);
 	}
 
-	bool JsonFieldDeserializer::ReadField(FieldType* field, JsonValue* jsonValue)
+	bool JsonFieldDeserializer::ReadField(const Ptr<FieldType>& field, JsonValue* jsonValue)
 	{
 		if (field == nullptr || jsonValue == nullptr || field->GetDeclarationType() == nullptr)
 			return false;
@@ -1330,8 +1326,7 @@ namespace CE
 			}
 
 			field->ResizeArray(rawInstance, jsonValue->GetArrayValue().GetSize());
-			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
-			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& f) { return &f; });
+			Array<Ptr<FieldType>> fieldListPtr = field->GetArrayFieldListPtr(rawInstance);
 
 			u8* arrayInstance = const_cast<u8*>(&field->GetFieldValue<Array<u8>>(rawInstance)[0]);
 

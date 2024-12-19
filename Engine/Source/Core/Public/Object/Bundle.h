@@ -129,12 +129,12 @@ namespace CE
 
         void OnObjectUnloaded(Object* object);
 
-        static bool IsFieldSerialized(FieldType* field, StructType* schemaType);
+        static bool IsFieldSerialized(const Ptr<FieldType>& field, StructType* schemaType);
 
         static void SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes, 
             const HashMap<StructType*, u32>& schemaTypeToIndex);
 
-        static void SerializeFieldSchema(FieldType* field, Stream* stream, const HashMap<StructType*, u32>& schemaTypeToIndex);
+        static void SerializeFieldSchema(const Ptr<FieldType>& field, Stream* stream, const HashMap<StructType*, u32>& schemaTypeToIndex);
 
         void FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs);
 

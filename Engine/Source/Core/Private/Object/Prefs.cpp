@@ -116,7 +116,7 @@ namespace CE
 
 		JValue& root = prefsJson[prefsName][classTypeName.GetString()];
 
-		for (FieldType* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+		for (Ptr<FieldType> field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			if (!field->HasAttribute("Prefs"))
 				continue;
@@ -147,7 +147,7 @@ namespace CE
 		prefsJson[prefsName][classTypeName.GetString()] = JObject();
 		JValue& root = prefsJson[prefsName][classTypeName.GetString()];
 
-		for (FieldType* field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
+		for (Ptr<FieldType> field = clazz->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			if (!field->HasAttribute("Prefs"))
 				continue;
@@ -156,7 +156,7 @@ namespace CE
 		}
 	}
 	
-	void Prefs::SerializeField(FieldType* field, void* instance, JValue& parent)
+	void Prefs::SerializeField(const Ptr<FieldType>& field, void* instance, JValue& parent)
 	{
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
@@ -212,7 +212,7 @@ namespace CE
 		{
 			Array<u8>& array = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(instance));
 
-			Array<FieldType> fieldList = field->GetArrayFieldList(instance);
+			Array<Ptr<FieldType>> fieldList = field->GetArrayFieldListPtr(instance);
 			if (parent.IsObjectValue())
 				parent.GetObjectValue()[fieldName] = JArray();
 			else if (parent.IsArrayValue())
@@ -229,7 +229,7 @@ namespace CE
 
 				for (int i = 0; i < fieldList.GetSize(); ++i)
 				{
-					SerializeField(&fieldList[i], arrayInstance, arrayParent);
+					SerializeField(fieldList[i], arrayInstance, arrayParent);
 				}
 			}
 		}
@@ -247,7 +247,7 @@ namespace CE
 
 			JValue& objectParent = parent.IsObjectValue() ? parent[fieldName] : parent.GetArrayValue().Top();
 
-			for (FieldType* structField = structType->GetFirstField(); structField != nullptr; structField = structField->GetNext())
+			for (Ptr<FieldType> structField = structType->GetFirstField(); structField != nullptr; structField = structField->GetNext())
 			{
 				SerializeField(structField, structInstance, objectParent);
 			}
@@ -257,7 +257,7 @@ namespace CE
 #define DESERIALIZE_FIELD(type) if (fieldTypeId == TYPEID(type))\
 	field->SetFieldValue<type>(instance, static_cast<type>(value));
 
-	void Prefs::DeserializeField(FieldType* field, void* instance, JValue& parent, int index)
+	void Prefs::DeserializeField(const Ptr<FieldType>& field, void* instance, JValue& parent, int index)
 	{
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
@@ -367,7 +367,7 @@ namespace CE
 
 			Array<u8>& array = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(instance));
 
-			Array<FieldType> fieldList = field->GetArrayFieldList(instance);
+			Array<Ptr<FieldType>> fieldList = field->GetArrayFieldListPtr(instance);
 
 			if (!fieldList.IsEmpty())
 			{
@@ -375,7 +375,7 @@ namespace CE
 
 				for (int i = 0; i < fieldList.GetSize(); ++i)
 				{
-					DeserializeField(&fieldList[i], arrayInstance, arrayValue, i);
+					DeserializeField(fieldList[i], arrayInstance, arrayValue, i);
 				}
 			}
 		}
@@ -391,7 +391,7 @@ namespace CE
 			void* structInstance = field->GetFieldInstance(instance);
 			StructType* structType = (StructType*)field->GetDeclarationType();
 
-			for (FieldType* structField = structType->GetFirstField(); structField != nullptr; structField = structField->GetNext())
+			for (Ptr<FieldType> structField = structType->GetFirstField(); structField != nullptr; structField = structField->GetNext())
 			{
 				DeserializeField(structField, structInstance, objectParent, 0);
 			}
