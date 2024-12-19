@@ -225,6 +225,13 @@ void EditorLoop::PostInit()
 	{
 		gEditorMode = EditorMode::Default;
 
+		auto editorHistoryFolder = projectPath.GetParentPath() / "Temp/EditorHistory";
+		if (editorHistoryFolder.Exists()) // Clear editor history
+		{
+			IO::Path::RemoveRecursively(editorHistoryFolder);
+			IO::Path::CreateDirectories(editorHistoryFolder);
+		}
+
 		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
 		rootContext->AddChildContext(crystalEditorCtx);
 

@@ -8,7 +8,7 @@ namespace CE::Editor
 
     }
 
-    static void Example()
+    void Example()
     {
         // Operation scenarios:
         // - Delete component from an actor
@@ -18,16 +18,18 @@ namespace CE::Editor
         // - Create an actor and attach it as a child to another actor
         // - Modify field of a class/struct
 
-        Name operation = "Create Object";
+        Name operation = "Delete Object";
 
-        auto execute = [](Ref<EditorOperation> self)
+        auto execute = [](const Ref<EditorOperation>& self)
             {
+                // Serialize the object to disk before deleting
 
+                self->target->BeginDestroy();
             };
 
-        auto unexecute = [](Ref<EditorOperation> self)
+        auto unexecute = [](const Ref<EditorOperation>& self)
             {
-
+                // Deserialize the object back
             };
     }
     
