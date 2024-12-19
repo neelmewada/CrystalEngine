@@ -29,7 +29,7 @@ namespace CE::Editor
         EditorOperationDelegate execute;
         EditorOperationDelegate unexecute;
 
-        friend static void Example();
+        friend void Example();
 
         friend class EditorHistory;
     };

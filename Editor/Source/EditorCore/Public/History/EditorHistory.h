@@ -15,12 +15,16 @@ namespace CE::Editor
         void PerformOperation(const String& name, const Ref<Object>& target, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
         void PerformOperation(const String& name, const Array<Ref<Object>>& targets, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
 
+        void Undo();
+        void Redo();
+
     protected: // - Internal -
 
         static constexpr u32 OperationStackSize = 512;
-        using OperationStack = FixedArray<Ref<EditorOperation>, OperationStackSize>;
+        using OperationStack = Array<Ref<EditorOperation>>;
         
         OperationStack historyStack;
+        int topIndex = -1;
 
     };
     

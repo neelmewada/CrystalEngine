@@ -5,14 +5,14 @@ namespace CE::Editor
 
     EditorHistory::EditorHistory()
     {
-        
+        historyStack.Reserve(OperationStackSize);
     }
 
     void EditorHistory::PerformOperation(const String& name, const Ref<Object>& target,
         const EditorOperationDelegate& execute,
 	    const EditorOperationDelegate& unexecute)
     {
-        Array<Ref<Object>> targets = { target };
+        Array targets = { target };
         PerformOperation(name, targets, execute, unexecute);
     }
 
@@ -30,8 +30,35 @@ namespace CE::Editor
 
         execute.Invoke(operation);
 
+        while (topIndex < historyStack.GetSize() - 1)
+        {
+            historyStack[topIndex - 1]->BeginDestroy();
+            historyStack.RemoveAt(topIndex + 1);
+        }
+
         historyStack.Add(operation);
+
+        topIndex = historyStack.GetSize() - 1;
     }
+
+    void EditorHistory::Undo()
+    {
+        if (topIndex >= 0)
+        {
+            historyStack[topIndex]->unexecute.Invoke(historyStack[topIndex]);
+            topIndex--;
+        }
+    }
+
+    void EditorHistory::Redo()
+    {
+        if (topIndex < historyStack.GetSize() - 1)
+        {
+            historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
+            topIndex++;
+        }
+    }
+
 
 }
 

@@ -18,18 +18,59 @@ namespace CE::Editor
         // - Create an actor and attach it as a child to another actor
         // - Modify field of a class/struct
 
-        Name operation = "Delete Object";
+        Name operation = "Delete_Object";
 
-        auto execute = [](const Ref<EditorOperation>& self)
+        [[maybe_unused]]
+        auto execute = [operation](const Ref<EditorOperation>& self)
             {
-                // Serialize the object to disk before deleting
+                if (Ref<EditorHistory> history = self->history.Lock())
+                {
+                    // Serialize the object to disk before deleting
 
-                self->target->BeginDestroy();
+                    String bundleName = String::Format("{}-{}", operation, self->GetUuid());
+                    self->bundleSavePath = "/Temp/EditorHistory/" + history->GetUuid().ToString() + "/" + bundleName;
+
+                    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, bundleName);
+
+                    for (const auto& objectWeakRef : self->targets)
+                    {
+                        if (auto lock = objectWeakRef.Lock())
+                        {
+                            bundle->AttachSubobject(lock.Get());
+                        }
+                    }
+
+                    Bundle::SaveToDisk(bundle, nullptr, self->bundleSavePath);
+
+                    for (const auto& objectWeakRef : self->targets)
+                    {
+                        if (auto lock = objectWeakRef.Lock())
+                        {
+                            lock->BeginDestroy();
+                        }
+                    }
+                }
             };
 
+        [[maybe_unused]]
         auto unexecute = [](const Ref<EditorOperation>& self)
             {
-                // Deserialize the object back
+                // Deserialize the object back from disk
+
+                if (Ref<EditorHistory> history = self->history.Lock())
+                {
+                    Ref<Bundle> bundle = Bundle::LoadBundle(nullptr, self->bundleSavePath,
+                        { .loadFully = true, .forceReload = true, .destroyOutdatedObjects = true});
+
+                    for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
+                    {
+                        self->targets.Add(bundle->GetSubObject(i));
+                        if (i == 0)
+                        {
+                            self->target = bundle->GetSubObject(i);
+                        }
+                    }
+                }
             };
     }
     

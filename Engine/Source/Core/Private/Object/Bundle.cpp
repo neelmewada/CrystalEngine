@@ -203,6 +203,24 @@ namespace CE
         return SaveToDisk(bundle, asset, absolutePath);
     }
 
+    BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const CE::Name& bundlePath)
+    {
+        if (bundle == nullptr)
+        {
+            CE_LOG(Error, All, "SaveToDisk() with a NULL bundle!");
+            return BundleSaveResult::InvalidBundle;
+        }
+
+        if (bundle->IsTransient())
+        {
+            CE_LOG(Error, All, "SaveToDisk() passed with a transient bundle named: {}", bundle->GetName());
+            return BundleSaveResult::InvalidBundle;
+        }
+
+        IO::Path absolutePath = GetAbsoluteBundlePath(bundlePath);
+        return SaveToDisk(bundle, asset, absolutePath);
+    }
+
     BundleSaveResult Bundle::SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath)
     {
         auto path = fullPath;

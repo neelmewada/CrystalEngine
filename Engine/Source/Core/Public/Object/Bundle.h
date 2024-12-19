@@ -87,6 +87,7 @@ namespace CE
         static Ref<Bundle> LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath, BundleLoadResult& outResult, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset = nullptr);
+        static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const CE::Name& bundlePath);
         static BundleSaveResult SaveToDisk(const Ref<Bundle>& bundle, Ref<Object> asset, const IO::Path& fullPath);
 
         // - Public API -
