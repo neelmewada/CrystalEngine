@@ -12,9 +12,13 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void HandleEvent(FEvent* event) override;
+
     public: // - Public API -
 
         const Ref<EditorHistory>& GetHistory() const { return history; }
+
+        bool SupportsKeyboardEvents() const override { return true; }
 
     protected: // - Internal -
 

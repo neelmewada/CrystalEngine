@@ -8,30 +8,30 @@ namespace CE
 	static SharedMutex gRootObjectsMutex{};
 
 	SharedMutex ObjectListener::mutex{};
-	HashMap<Object*, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
+	HashMap<Uuid, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
 
-	void ObjectListener::AddListener(Object* target, IObjectUpdateListener* listener)
+	void ObjectListener::AddListener(Uuid target, IObjectUpdateListener* listener)
 	{
 		LockGuard lock{ mutex };
 
 		listeners[target].Add(listener);
 	}
 
-	void ObjectListener::RemoveListener(Object* target, IObjectUpdateListener* listener)
+	void ObjectListener::RemoveListener(Uuid target, IObjectUpdateListener* listener)
 	{
 		LockGuard lock{ mutex };
 
 		listeners[target].Remove(listener);
 	}
 
-	void ObjectListener::RemoveAllListeners(Object* target)
+	void ObjectListener::RemoveAllListeners(Uuid target)
 	{
 		LockGuard lock{ mutex };
 
 		listeners[target].Clear();
 	}
 
-	void ObjectListener::Trigger(Object* object, const Name& fieldName)
+	void ObjectListener::Trigger(Uuid object, const Name& fieldName)
 	{
 		LockGuard lock{ mutex };
 

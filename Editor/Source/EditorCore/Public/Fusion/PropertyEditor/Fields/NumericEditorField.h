@@ -43,6 +43,9 @@ namespace CE::Editor
         void OnFinishEdit(FTextInput* field);
 
         FUNCTION()
+        void ApplyOperation();
+
+        FUNCTION()
         virtual void OnPaintBeforeText(FPainter* painter);
 
         TypeId numericType = 0;

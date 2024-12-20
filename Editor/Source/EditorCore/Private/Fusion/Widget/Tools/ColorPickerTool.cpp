@@ -491,10 +491,12 @@ namespace CE::Editor
         }
     }
 
-    Ref<ColorPickerTool> ColorPickerTool::Open()
+    Ref<ColorPickerTool> ColorPickerTool::Open(const Ref<EditorHistory>& history)
     {
         if (auto lock = instance.Lock())
         {
+            lock->history = history;
+
             FNativeContext* nativeContext = static_cast<FNativeContext*>(lock->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->SetAlwaysOnTop(true);
@@ -514,6 +516,8 @@ namespace CE::Editor
             "ColorPickerTool", "Color Picker Tool",
             450, 535,
             Self::StaticClass(), info);
+
+        colorPickerTool->history = history;
 
         PlatformWindow* platformWindow = static_cast<FNativeContext*>(colorPickerTool->GetContext())->GetPlatformWindow();
         platformWindow->SetAlwaysOnTop(true);

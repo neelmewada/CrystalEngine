@@ -143,6 +143,8 @@ namespace CE::Editor
             ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target.Get());
             editors.Add(curEditor);
 
+            curEditor->SetEditorHistory(GetHistory());
+
             if (this->editor == nullptr)
             {
                 this->editor = curEditor;

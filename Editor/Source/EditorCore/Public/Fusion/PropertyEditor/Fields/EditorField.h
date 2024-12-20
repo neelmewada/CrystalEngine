@@ -39,6 +39,7 @@ namespace CE::Editor
 
     public: // - Fusion Properties - 
 
+        FUSION_PROPERTY(WeakRef<EditorHistory>, History);
 
         FUSION_WIDGET;
         friend class PropertyEditor;

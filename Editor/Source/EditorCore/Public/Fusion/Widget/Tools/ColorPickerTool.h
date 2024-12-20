@@ -17,7 +17,7 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        static Ref<ColorPickerTool> Open();
+        static Ref<ColorPickerTool> Open(const Ref<EditorHistory>& history = nullptr);
 
         void SetOriginalColor(const Color& color);
         void SetColor(const Color& color);
@@ -65,6 +65,8 @@ namespace CE::Editor
         Ref<ColorComponentField> inputV;
 
         Ref<FTextInput> hexInput;
+
+        WeakRef<EditorHistory> history;
 
     public: // - Fusion Properties - 
 

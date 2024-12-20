@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API ProjectSettingsEditor : public EditorDockTab
+    class CRYSTALEDITOR_API ProjectSettingsEditor : public EditorBase
     {
-        CE_CLASS(ProjectSettingsEditor, EditorDockTab)
+        CE_CLASS(ProjectSettingsEditor, EditorBase)
     protected:
 
         ProjectSettingsEditor();

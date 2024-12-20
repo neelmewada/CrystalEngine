@@ -114,7 +114,7 @@ namespace CE::Editor
 
         int arraySize = field->GetArraySize(target);
 
-        countLabel->Text(String::Format("{} Array elements", arraySize));
+        countLabel->Text(String::Format("{} array elements", arraySize));
 
         CE::Name fieldFullName = field->GetTypeName();
 
@@ -213,6 +213,8 @@ namespace CE::Editor
 
     void ArrayPropertyEditor::InsertElement()
     {
+        WeakRef<Self> self = this;
+
         field->InsertArrayElement(instance);
 
         UpdateValue();

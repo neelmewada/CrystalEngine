@@ -94,6 +94,7 @@ namespace CE::Editor
         FUSION_WIDGET;
         friend class PropertyEditorRegistry;
         friend class ObjectEditor;
+        friend class ArrayPropertyEditor;
     };
     
 }

@@ -92,6 +92,17 @@ namespace CE::Editor
 
                 if (mouseEvent->isDoubleClick)
                 {
+                    FIELD_START_VALUE_IF(u8)
+					else FIELD_START_VALUE_IF(s8)
+					else FIELD_START_VALUE_IF(u16)
+					else FIELD_START_VALUE_IF(s16)
+                    else FIELD_START_VALUE_IF(u32)
+					else FIELD_START_VALUE_IF(s32)
+					else FIELD_START_VALUE_IF(u64)
+                    else FIELD_START_VALUE_IF(s32)
+                    else FIELD_START_VALUE_IF(f32)
+                    else FIELD_START_VALUE_IF(f64)
+
                     input->StartEditing(true);
                 }
             }
@@ -187,18 +198,6 @@ namespace CE::Editor
         return thisHitTest;
     }
 
-#define FIELD_SET_IF(type)\
-	if (fieldDeclId == TYPEID(type))\
-	{\
-		type value = 0;\
-		if (String::TryParse(text, value))\
-		{\
-			if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
-			field->SetFieldValue<type>(instances[0], value);\
-            target->OnFieldEdited(field->GetName());\
-        }\
-	}
-
 #define FIELD_RANGE_IF(type)\
 	if (numericType == TYPEID(type))\
 	{\
@@ -208,51 +207,6 @@ namespace CE::Editor
 			ratio = Math::Clamp01(((f32)value - min) / (max - min));\
         }\
 	}
-
-#define FIELD_FINISH_IF(type)\
-    if (numericType == TYPEID(type))\
-    {\
-        type value = 0;\
-        if (String::TryParse(text, value))\
-        {\
-            if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
-            input->Text(String::Format("{}", value));\
-        }\
-    }
-
-    void NumericEditorField::OnFinishEdit(FTextInput*)
-    {
-        const String& text = input->Text();
-        String lowerText = text.ToLower();
-
-        if (!text.IsEmpty())
-        {
-            FIELD_FINISH_IF(u8)
-            else FIELD_FINISH_IF(s8)
-            else FIELD_FINISH_IF(u16)
-            else FIELD_FINISH_IF(s16)
-            else FIELD_FINISH_IF(u32)
-            else FIELD_FINISH_IF(s32)
-            else FIELD_FINISH_IF(u64)
-            else FIELD_FINISH_IF(s64)
-            else FIELD_FINISH_IF(f32)
-            else FIELD_FINISH_IF(f64)
-            else
-            {
-                int value = 0;
-                if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
-                input->Text(String::Format("{}", value));
-            }
-        }
-        else
-        {
-            int value = 0;
-            if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
-            input->Text(String::Format("{}", value));
-        }
-
-        m_OnTextEditingFinished(this);
-    }
 
     void NumericEditorField::OnPaintBeforeText(FPainter* painter)
     {
@@ -313,6 +267,116 @@ namespace CE::Editor
 
         OnTextFieldEdited(input);
     }
+
+    
+#define FIELD_FINISH_IF(type)\
+    if (numericType == TYPEID(type))\
+    {\
+        type value = 0;\
+        if (String::TryParse(text, value))\
+        {\
+            if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
+            input->Text(String::Format("{}", value));\
+        }\
+    }
+
+    void NumericEditorField::OnFinishEdit(FTextInput*)
+    {
+        const String& text = input->Text();
+        String lowerText = text.ToLower();
+
+        if (!text.IsEmpty())
+        {
+            FIELD_FINISH_IF(u8)
+            else FIELD_FINISH_IF(s8)
+            else FIELD_FINISH_IF(u16)
+            else FIELD_FINISH_IF(s16)
+            else FIELD_FINISH_IF(u32)
+            else FIELD_FINISH_IF(s32)
+            else FIELD_FINISH_IF(u64)
+            else FIELD_FINISH_IF(s64)
+            else FIELD_FINISH_IF(f32)
+            else FIELD_FINISH_IF(f64)
+            else
+            {
+                int value = 0;
+                if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
+                input->Text(String::Format("{}", value));
+            }
+        }
+        else
+        {
+            int value = 0;
+            if (isRanged) { value = Math::Clamp(value, (int)min, (int)max); }
+            input->Text(String::Format("{}", value));
+        }
+
+        ApplyOperation();
+
+        m_OnTextEditingFinished(this);
+    }
+
+    void NumericEditorField::ApplyOperation()
+    {
+        if (!IsBound())
+            return;
+
+        const String& text = input->Text();
+        Object* target = targets[0];
+        void* instance = instances[0];
+
+        WeakRef<Self> self = this;
+
+        if (numericType == TYPEID(f32))
+        {
+            f32 value = 0;
+            if (String::TryParse(text, value))
+            {
+                if (isRanged) { value = Math::Clamp<f32>(value, (f32)min, (f32)max); }
+
+                if (auto history = m_History.Lock())
+                {
+                    f32 originalValue = static_cast<f32>(startValue);
+                    auto field = this->field;
+
+                    history->PerformOperation("Edit Numeric Field", target,
+                        [self, value](const Ref<EditorOperation>& operation)
+                        {
+                            if (auto thisPtr = self.Lock())
+                            {
+                                thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], value);
+                                thisPtr->targets[0]->OnFieldEdited(thisPtr->field->GetName());
+                            }
+                        },
+                        [self, originalValue](const Ref<EditorOperation>& operation)
+                        {
+                            if (auto thisPtr = self.Lock())
+                            {
+                                thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], originalValue);
+                                thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
+                            }
+                        });
+                }
+                else
+                {
+                    field->SetFieldValue<f32>(instances[0], value);
+                    target->OnFieldEdited(field->GetName());
+                }
+            }
+        }
+    }
+
+#define FIELD_SET_IF(type)\
+	if (fieldDeclId == TYPEID(type))\
+	{\
+		type value = 0;\
+		if (String::TryParse(text, value))\
+		{\
+			if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
+			field->SetFieldValue<type>(instances[0], value);\
+            target->OnFieldEdited(field->GetName());\
+        }\
+	}
 
     void NumericEditorField::OnTextFieldEdited(FTextInput*)
     {

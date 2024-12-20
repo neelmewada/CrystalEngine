@@ -23,10 +23,24 @@ namespace CE::Editor
         if (!execute.IsValid() || !unexecute.IsValid())
             return;
 
-        Ref<EditorOperation> operation = CreateObject<EditorOperation>(this, name);
+        String fixedName = name;
+
+        if (!IsValidObjectName(fixedName))
+        {
+            fixedName = FixObjectName(fixedName);
+        }
+
+        Ref<EditorOperation> operation = CreateObject<EditorOperation>(this, fixedName);
+
+        operation->history = this;
 
         operation->execute = execute;
         operation->unexecute = unexecute;
+
+        for (const auto& target : targets)
+        {
+            operation->targets.Add(target);
+        }
 
         execute.Invoke(operation);
 
@@ -54,8 +68,8 @@ namespace CE::Editor
     {
         if (topIndex < historyStack.GetSize() - 1)
         {
-            historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
             topIndex++;
+            historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
         }
     }
 

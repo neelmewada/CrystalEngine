@@ -105,7 +105,7 @@ namespace CE::Editor
 
                 WeakRef<ColorEditorField> self = this;
 
-                Ref<ColorPickerTool> colorPicker = ColorPickerTool::Open();
+                Ref<ColorPickerTool> colorPicker = ColorPickerTool::Open(m_History.Lock());
 
                 if (IsBound())
                 {

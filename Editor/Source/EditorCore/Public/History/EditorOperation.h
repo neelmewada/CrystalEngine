@@ -16,8 +16,6 @@ namespace CE::Editor
 
     public:
 
-        
-
     protected:
 
         WeakRef<EditorHistory> history = nullptr;

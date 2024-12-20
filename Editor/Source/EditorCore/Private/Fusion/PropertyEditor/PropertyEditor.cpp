@@ -202,6 +202,7 @@ namespace CE::Editor
                 .VectorType(fieldDeclType->GetTypeId())
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .FillRatio(1.0f)
             );
         }
@@ -213,6 +214,7 @@ namespace CE::Editor
                 .ColorTagVisible(false)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .Width(100)
             );
         }
@@ -222,6 +224,7 @@ namespace CE::Editor
 				FNew(EnumEditorField)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .FillRatio(1.0f)
             );
         }
@@ -231,6 +234,7 @@ namespace CE::Editor
 				FNew(BoolEditorField)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
             );
@@ -241,6 +245,7 @@ namespace CE::Editor
                 FNew(ColorEditorField)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
             );
@@ -251,6 +256,7 @@ namespace CE::Editor
                 FNew(TextEditorField)
                 .Assign(editorField)
                 .BindField(field, targets[0], instances[0])
+                .History(objectEditor->GetEditorHistory())
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Center)
             );

@@ -8,7 +8,7 @@ namespace CE
     {
         virtual ~IObjectUpdateListener() {}
 
-        virtual void OnObjectFieldChanged(Object* object, const Name& fieldName) {}
+        virtual void OnObjectFieldChanged(Uuid object, const Name& fieldName) {}
     };
 
     class CORE_API ObjectListener
@@ -16,17 +16,17 @@ namespace CE
         CE_STATIC_CLASS(ObjectListener)
     public:
 
-        static void AddListener(Object* target, IObjectUpdateListener* listener);
+        static void AddListener(Uuid target, IObjectUpdateListener* listener);
 
-        static void RemoveListener(Object* target, IObjectUpdateListener* listener);
-        static void RemoveAllListeners(Object* target);
+        static void RemoveListener(Uuid target, IObjectUpdateListener* listener);
+        static void RemoveAllListeners(Uuid target);
 
     private:
 
-        static void Trigger(Object* object, const Name& fieldName);
+        static void Trigger(Uuid object, const Name& fieldName);
 
         static SharedMutex mutex;
-        static HashMap<Object*, Array<IObjectUpdateListener*>> listeners;
+        static HashMap<Uuid, Array<IObjectUpdateListener*>> listeners;
 
         friend class Object;
     };

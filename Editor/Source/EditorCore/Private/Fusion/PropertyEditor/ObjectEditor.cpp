@@ -13,6 +13,11 @@ namespace CE::Editor
         
     }
 
+    void ObjectEditor::SetEditorHistory(const Ref<EditorHistory>& history)
+    {
+        this->history = history;
+    }
+
     void ObjectEditor::Construct()
     {
 	    Super::Construct();
@@ -22,7 +27,6 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
         );
-
     }
 
     void ObjectEditor::OnBeginDestroy()
@@ -31,13 +35,13 @@ namespace CE::Editor
 
         if (target)
         {
-            ObjectListener::RemoveListener(target, this);
+            ObjectListener::RemoveListener(target->GetUuid(), this);
         }
     }
 
-    void ObjectEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
+    void ObjectEditor::OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName)
     {
-        if (object != target)
+        if (objectUuid != target->GetUuid())
             return;
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
@@ -113,7 +117,7 @@ namespace CE::Editor
         if (target == nullptr)
             return;
 
-        ObjectListener::AddListener(target, this);
+        ObjectListener::AddListener(target->GetUuid(), this);
         
         content->DestroyAllChildren();
 
@@ -230,8 +234,6 @@ namespace CE::Editor
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(field, this);
                 if (propertyEditor == nullptr)
                     continue;
-
-                propertyEditor->objectEditor = this;
                 
                 expandContent->AddChild(propertyEditor);
 

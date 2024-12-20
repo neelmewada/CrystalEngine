@@ -288,6 +288,10 @@ namespace CE::Editor
             )
     		.Padding(Vec4(0, 5, 0, 0));
 
+        detailsTab->SetOwnerEditor(this);
+        sceneOutlinerTab->SetOwnerEditor(this);
+        viewportTab->SetOwnerEditor(this);
+
         sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged));
     }
 
