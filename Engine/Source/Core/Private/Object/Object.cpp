@@ -83,7 +83,7 @@ namespace CE
 		{
 			objectFlags |= OF_PendingDestroy;
 
-			ObjectListener::RemoveAllListeners(this);
+			ObjectListener::RemoveAllListeners(GetUuid());
 
 			OnBeginDestroy();
 
@@ -135,7 +135,7 @@ namespace CE
 		// destroy this object while we are in this function.
 		Ref<Object> strongRef = this;
 
-		ObjectListener::RemoveAllListeners(this);
+		ObjectListener::RemoveAllListeners(GetUuid());
 
 		OnBeginDestroy();
 
@@ -844,7 +844,7 @@ namespace CE
 		if (EnumHasFlag(objectFlags, OF_InsideConstructor))
 			return;
 
-		ObjectListener::Trigger(this, fieldName);
+		ObjectListener::Trigger(GetUuid(), fieldName);
     }
 
     void Object::OnFieldEdited(const Name& fieldName)
