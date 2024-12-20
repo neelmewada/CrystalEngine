@@ -32,6 +32,7 @@ namespace CE::Editor
 
         Ref<EditorOperation> operation = CreateObject<EditorOperation>(this, fixedName);
 
+        operation->title = name;
         operation->history = this;
 
         operation->execute = execute;
@@ -44,9 +45,9 @@ namespace CE::Editor
 
         execute.Invoke(operation);
 
-        while (topIndex < historyStack.GetSize() - 1)
+        while (topIndex < (int)historyStack.GetSize() - 1)
         {
-            historyStack[topIndex - 1]->BeginDestroy();
+            historyStack[topIndex + 1]->BeginDestroy();
             historyStack.RemoveAt(topIndex + 1);
         }
 
@@ -66,7 +67,7 @@ namespace CE::Editor
 
     void EditorHistory::Redo()
     {
-        if (topIndex < historyStack.GetSize() - 1)
+        if (topIndex < (int)historyStack.GetSize() - 1)
         {
             topIndex++;
             historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);

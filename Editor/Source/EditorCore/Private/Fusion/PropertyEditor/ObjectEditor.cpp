@@ -33,15 +33,15 @@ namespace CE::Editor
     {
 	    Super::OnBeginDestroy();
 
-        if (target)
+        for (const auto& targetObjectUuid : targetObjectUuids)
         {
-            ObjectListener::RemoveListener(target->GetUuid(), this);
+            ObjectListener::RemoveListener(targetObjectUuid, this);
         }
     }
 
     void ObjectEditor::OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName)
     {
-        if (objectUuid != target->GetUuid())
+        if (!targetObjectUuids.Exists(objectUuid))
             return;
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
@@ -116,8 +116,6 @@ namespace CE::Editor
         // Default ObjectEditor doesn't support multi-object editing yet.
         if (target == nullptr)
             return;
-
-        ObjectListener::AddListener(target->GetUuid(), this);
         
         content->DestroyAllChildren();
 
@@ -139,6 +137,9 @@ namespace CE::Editor
         std::function<void(Object*,bool)> visitor = [&](Object* target, bool recurseComponents)
             {
                 Class* clazz = target->GetClass();
+
+                ObjectListener::AddListener(target->GetUuid(), this);
+                targetObjectUuids.Add(target->GetUuid());
 
                 u32 numFields = clazz->GetFieldCount();
 

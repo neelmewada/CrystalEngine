@@ -20,6 +20,7 @@ namespace CE::Editor
 
         WeakRef<EditorHistory> history = nullptr;
         Name bundleSavePath;
+        String title;
 
         WeakRef<Object> target;
         Array<WeakRef<Object>> targets;

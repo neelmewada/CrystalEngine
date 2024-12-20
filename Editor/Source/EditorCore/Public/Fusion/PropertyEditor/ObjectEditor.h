@@ -58,6 +58,7 @@ namespace CE::Editor
         WeakRef<EditorHistory> history = nullptr;
 
         Array<ObjectEditor*> editorGroup;
+        HashSet<Uuid> targetObjectUuids;
 
     public:
 

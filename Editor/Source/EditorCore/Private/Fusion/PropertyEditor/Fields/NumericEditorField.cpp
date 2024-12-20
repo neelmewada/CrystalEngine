@@ -178,6 +178,8 @@ namespace CE::Editor
                         FusionApplication::Get()->PopCursor();
                     }
 
+                    ApplyOperation();
+
                     drag->draggedWidget = this;
                     drag->Consume(this);
 	                isDragging = false;
@@ -332,12 +334,11 @@ namespace CE::Editor
             f32 value = 0;
             if (String::TryParse(text, value))
             {
-                if (isRanged) { value = Math::Clamp<f32>(value, (f32)min, (f32)max); }
+                if (isRanged) { value = Math::Clamp<f32>(value, min, max); }
 
                 if (auto history = m_History.Lock())
                 {
                     f32 originalValue = static_cast<f32>(startValue);
-                    auto field = this->field;
 
                     history->PerformOperation("Edit Numeric Field", target,
                         [self, value](const Ref<EditorOperation>& operation)
@@ -345,7 +346,7 @@ namespace CE::Editor
                             if (auto thisPtr = self.Lock())
                             {
                                 thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], value);
-                                thisPtr->targets[0]->OnFieldEdited(thisPtr->field->GetName());
+                                thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
                             }
                         },
                         [self, originalValue](const Ref<EditorOperation>& operation)
