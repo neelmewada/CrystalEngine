@@ -115,29 +115,33 @@ namespace CE::Editor
 
                 colorPicker->OnColorChanged([self](ColorPickerTool* tool)
                     {
-                        if (Ref<ColorEditorField> ref = self.Lock())
+                        if (Ref<ColorEditorField> lock = self.Lock())
                         {
-	                        if (ref->IsBound())
+	                        if (self->IsBound())
 	                        {
-                                ref->field->SetFieldValue<Color>(ref->instances[0], tool->GetColor());
-                                ref->targets[0]->OnFieldEdited(ref->field->GetName());
+                                self->field->SetFieldValue<Color>(self->instances[0], tool->GetColor());
+                                self->targets[0]->OnFieldEdited(self->field->GetName());
 
-                                ref->UpdateValue();
+                                self->UpdateValue();
 	                        }
                             else
                             {
-                                ref->SetColorValue(tool->GetColor());
+                                self->SetColorValue(tool->GetColor());
                             }
                         }
                     });
 
                 colorPicker->OnColorAccepted([self](ColorPickerTool* tool)
                     {
-                        if (Ref<ColorEditorField> ref = self.Lock())
+                        if (auto lock = self.Lock())
                         {
-                            if (ref->IsBound())
+                            if (self->IsBound())
                             {
                                 
+                            }
+                            else
+                            {
+	                            
                             }
                         }
                     });

@@ -27,18 +27,28 @@ namespace CE::Editor
         FUNCTION()
         void OnTextEditingFinished(NumericEditorField* input);
 
+        FUNCTION()
+        void OnEndEditing(NumericEditorField* input);
+
+        FUNCTION()
+        void OnBeginEditing(NumericEditorField* input);
+
         void SetFieldValue();
 
         NumericEditorField* fieldX = nullptr;
         NumericEditorField* fieldY = nullptr;
         NumericEditorField* fieldZ = nullptr;
         NumericEditorField* fieldW = nullptr;
+        TypeId vectorTypeId = 0;
+        Vec4 initialValue;
 
     public: // - Fusion Properties - 
 
         template<typename T> requires TContainsType<T, Vec2, Vec3, Vec4, Vec2i, Vec3i, Vec4i>::Value
         Self& VectorType()
         {
+            vectorTypeId = TYPEID(T);
+
             fieldX->Enabled(true);
             fieldY->Enabled(true);
             fieldZ->Enabled(false);

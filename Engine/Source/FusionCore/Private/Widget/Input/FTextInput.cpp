@@ -576,6 +576,11 @@ namespace CE
 
     void FTextInputLabel::StartEditing()
     {
+        if (!textInput->IsEditing())
+        {
+            textInput->m_OnBeginEditing(textInput);
+        }
+
         originalText = m_Text;
 
         cursorTimer->Reset();

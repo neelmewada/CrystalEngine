@@ -18,6 +18,7 @@ namespace CE::Editor
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
             .OnBeforeTextPaint(FUNCTION_BINDING(this, OnPaintBeforeText))
+            .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEdit))
             .Padding(Vec4(11, 4, 8, 4))
         );
 
@@ -132,6 +133,8 @@ namespace CE::Editor
                     else FIELD_START_VALUE_IF(f32)
                     else FIELD_START_VALUE_IF(f64)
 
+                    OnBeginEdit();
+
                     drag->draggedWidget = this;
                     drag->Consume(this);
                 }
@@ -178,7 +181,7 @@ namespace CE::Editor
                         FusionApplication::Get()->PopCursor();
                     }
 
-                    ApplyOperation();
+                    OnEndEdit();
 
                     drag->draggedWidget = this;
                     drag->Consume(this);
@@ -313,13 +316,60 @@ namespace CE::Editor
             input->Text(String::Format("{}", value));
         }
 
-        ApplyOperation();
+        OnEndEdit();
 
         m_OnTextEditingFinished(this);
     }
 
-    void NumericEditorField::ApplyOperation()
+#define FIELD_APPLY_OPERATION_IF(type)\
+    if (numericType == TYPEID(type))\
+    {\
+        type value = 0;\
+        if (String::TryParse(text, value))\
+        {\
+            if (isRanged) { value = Math::Clamp<type>(value, min, max); }\
+            type originalValue = static_cast<type>(startValue);\
+            if (auto history = m_History.Lock())\
+            {\
+                history->PerformOperation("Edit Numeric Field", target,\
+                    [self, value](const Ref<EditorOperation>& operation)\
+                    {\
+                        if (auto thisPtr = self.Lock())\
+                        {\
+                            thisPtr->field->SetFieldValue<type>(thisPtr->instances[0], value);\
+                            thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());\
+                            return true;\
+                        }\
+                        return false;\
+                    },\
+                    [self, originalValue](const Ref<EditorOperation>& operation)\
+                    {\
+                        if (auto thisPtr = self.Lock())\
+                        {\
+                            thisPtr->field->SetFieldValue<type>(thisPtr->instances[0], originalValue);\
+                            thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());\
+                            return true;\
+                        }\
+                        return false;\
+                    });\
+            }\
+            else\
+            {\
+                field->SetFieldValue<type>(instances[0], value);\
+                target->OnFieldEdited(field->GetName());\
+            }\
+        }\
+    }
+
+    void NumericEditorField::OnBeginEdit()
     {
+        m_OnBeginEditing(this);
+    }
+
+    void NumericEditorField::OnEndEdit()
+    {
+        m_OnEndEditing(this);
+
         if (!IsBound())
             return;
 
@@ -327,44 +377,31 @@ namespace CE::Editor
         Object* target = targets[0];
         void* instance = instances[0];
 
-        WeakRef<Self> self = this;
-
-        if (numericType == TYPEID(f32))
         {
-            f32 value = 0;
-            if (String::TryParse(text, value))
+            f64 curValue = 0;
+            if (String::TryParse(text, curValue))
             {
-                if (isRanged) { value = Math::Clamp<f32>(value, min, max); }
+                if (isRanged) { curValue = Math::Clamp<f64>(curValue, min, max); }
 
-                if (auto history = m_History.Lock())
-                {
-                    f32 originalValue = static_cast<f32>(startValue);
-
-                    history->PerformOperation("Edit Numeric Field", target,
-                        [self, value](const Ref<EditorOperation>& operation)
-                        {
-                            if (auto thisPtr = self.Lock())
-                            {
-                                thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], value);
-                                thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
-                            }
-                        },
-                        [self, originalValue](const Ref<EditorOperation>& operation)
-                        {
-                            if (auto thisPtr = self.Lock())
-                            {
-                                thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], originalValue);
-                                thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
-                            }
-                        });
-                }
-                else
-                {
-                    field->SetFieldValue<f32>(instances[0], value);
-                    target->OnFieldEdited(field->GetName());
-                }
+	            if (Math::ApproxEquals(curValue, startValue))
+	            {
+		            return; // No change in value
+	            }
             }
         }
+
+        WeakRef<Self> self = this;
+
+        FIELD_APPLY_OPERATION_IF(u8)
+        else FIELD_APPLY_OPERATION_IF(s8)
+		else FIELD_APPLY_OPERATION_IF(u16)
+		else FIELD_APPLY_OPERATION_IF(s16)
+        else FIELD_APPLY_OPERATION_IF(u32)
+        else FIELD_APPLY_OPERATION_IF(s32)
+        else FIELD_APPLY_OPERATION_IF(u64)
+        else FIELD_APPLY_OPERATION_IF(s64)
+        else FIELD_APPLY_OPERATION_IF(f32)
+        else FIELD_APPLY_OPERATION_IF(f64)
     }
 
 #define FIELD_SET_IF(type)\

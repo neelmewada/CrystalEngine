@@ -4,7 +4,7 @@ namespace CE::Editor
 {
     class EditorHistory;
     class EditorOperation;
-    typedef Delegate<void(const Ref<EditorOperation>&)> EditorOperationDelegate;
+    typedef Delegate<bool(const Ref<EditorOperation>&)> EditorOperationDelegate;
 
     CLASS()
     class EDITORCORE_API EditorOperation : public Object

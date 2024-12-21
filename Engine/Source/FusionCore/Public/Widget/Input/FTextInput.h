@@ -182,6 +182,7 @@ namespace CE
 
         FUSION_DATA_PROPERTY_WRAPPER(Text, inputLabel);
 
+        FUSION_EVENT(FTextInputEvent, OnBeginEditing);
         FUSION_EVENT(FTextInputEvent, OnTextEdited);
         FUSION_EVENT(FTextInputEvent, OnTextEditingFinished);
 

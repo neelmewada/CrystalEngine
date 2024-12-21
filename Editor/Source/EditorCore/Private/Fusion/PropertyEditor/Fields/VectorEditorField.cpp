@@ -21,6 +21,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldX)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Red())
                 .VAlign(VAlign::Fill)
@@ -29,6 +31,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldY)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Green())
                 .VAlign(VAlign::Fill)
@@ -37,6 +41,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldZ)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Blue())
                 .VAlign(VAlign::Fill)
@@ -45,6 +51,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldW)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::White())
                 .VAlign(VAlign::Fill)
@@ -129,6 +137,323 @@ namespace CE::Editor
             return;
 
         SetFieldValue();
+    }
+
+    void VectorEditorField::OnEndEditing(NumericEditorField* input)
+    {
+        if (!IsBound())
+            return;
+
+        Object* target = targets[0];
+
+        TypeId fieldDeclId = field->GetDeclarationTypeId();
+        WeakRef<Self> self = this;
+
+        if (fieldDeclId == TYPEID(Vec2))
+        {
+            Vec2 value;
+            Vec2 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec2i))
+        {
+            Vec2i value;
+            Vec2i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec3))
+        {
+            Vec3 value;
+            Vec3 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec3i))
+        {
+            Vec3i value;
+            Vec3i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec4))
+        {
+            Vec4 value;
+            Vec4 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            const String& w = fieldW->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z) &&
+                String::TryParse(w, value.w))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec4i))
+        {
+            Vec4i value;
+            Vec4i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            const String& w = fieldW->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z) &&
+                String::TryParse(w, value.w))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target,
+                            [self, value](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    return true;
+                                }
+                                return false;
+                            },
+                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            {
+                                if (auto lock = self.Lock())
+                                {
+                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                }
+                                return false;
+                            });
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instances[0], value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+    }
+
+    void VectorEditorField::OnBeginEditing(NumericEditorField* input)
+    {
+        if (!IsBound())
+            return;
+
+        Object* target = targets[0];
+
+        TypeId fieldDeclId = field->GetDeclarationTypeId();
+
+        if (fieldDeclId == TYPEID(Vec2))
+        {
+	        initialValue = field->GetFieldValue<Vec2>(instances[0]);
+        }
+        else if (fieldDeclId == TYPEID(Vec2i))
+        {
+            initialValue = field->GetFieldValue<Vec2i>(instances[0]).ToVec2();
+        }
+        else if (fieldDeclId == TYPEID(Vec3))
+        {
+            initialValue = field->GetFieldValue<Vec3>(instances[0]);
+        }
+        else if (fieldDeclId == TYPEID(Vec3i))
+        {
+            initialValue = field->GetFieldValue<Vec3i>(instances[0]).ToVec3();
+        }
+        else if (fieldDeclId == TYPEID(Vec4))
+        {
+            initialValue = field->GetFieldValue<Vec4>(instances[0]);
+        }
+        else if (fieldDeclId == TYPEID(Vec4i))
+        {
+            initialValue = field->GetFieldValue<Vec4i>(instances[0]).ToVec4();
+        }
     }
 
     void VectorEditorField::SetFieldValue()
@@ -230,6 +555,8 @@ namespace CE::Editor
     {
         thread_local HashSet floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
         thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
+
+        vectorTypeId = type;
 
         if (floatVectors.Exists(type))
         {

@@ -24,6 +24,8 @@ namespace CE::Editor
 
         void SetValue(f64 value);
 
+        f64 GetInitialValue() const { return startValue; }
+
     protected: // - Internal -
 
         FWidget* HitTest(Vec2 localMousePos) override;
@@ -43,7 +45,10 @@ namespace CE::Editor
         void OnFinishEdit(FTextInput* field);
 
         FUNCTION()
-        void ApplyOperation();
+        void OnEndEdit();
+
+        FUNCTION()
+        void OnBeginEdit();
 
         FUNCTION()
         virtual void OnPaintBeforeText(FPainter* painter);
@@ -58,8 +63,8 @@ namespace CE::Editor
         f64 startValue = 0;
         Vec4 rangeSliderPadding = Vec4(2.5f, 2.5f, 2.5f, 2.5f);
 
-        f32 min = -1;
-        f32 max = -1;
+        f32 min = -NumericLimits<f32>::Infinity();
+        f32 max = NumericLimits<f32>::Infinity();
 
     public: // - Fusion Properties - 
 
@@ -69,6 +74,8 @@ namespace CE::Editor
 
         FUSION_PROPERTY_WRAPPER(Text, input);
 
+        FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnBeginEditing);
+        FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnEndEditing);
         FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEdited);
         FUSION_EVENT(ScriptEvent<void(NumericEditorField*)>, OnTextEditingFinished);
 
