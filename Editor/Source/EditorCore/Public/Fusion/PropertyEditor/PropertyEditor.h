@@ -20,6 +20,8 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        virtual void InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
+
         virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
 
         virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
@@ -81,9 +83,10 @@ namespace CE::Editor
         EditorField* editorField = nullptr;
         ObjectEditor* objectEditor = nullptr;
 
-        FieldType* field = nullptr;
-        Object* target = nullptr;
-        void* instance = nullptr;
+        //FieldType* field = nullptr;
+        String relativeFieldPath;
+        Array<WeakRef<Object>> targets;
+        WeakRef<Object> target = nullptr;
 
     public: // - Fusion Properties - 
 

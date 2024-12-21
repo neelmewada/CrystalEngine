@@ -152,6 +152,147 @@ namespace CE::Editor
         }
     }
 
+    void PropertyEditor::InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
+    {
+        right->DestroyAllChildren();
+
+        auto printError = [&](const String& msg)
+            {
+                right->AddChild(
+                    FNew(FLabel)
+                    .FontSize(10)
+                    .Text("Error: " + msg)
+                    .Foreground(Color::Red())
+                );
+            };
+
+        if (targets.GetSize() > 1)
+        {
+            printError("Multiple objects selected!");
+	        return;
+        }
+        if (targets.GetSize() == 0)
+        {
+            printError("No objects selected!");
+            return;
+        }
+
+        Ref<Object> target;
+
+        for (const auto& object : targets)
+        {
+            if (auto lock = object.Lock())
+            {
+                target = lock;
+            }
+        }
+
+        if (target.IsNull())
+        {
+            printError("No objects selected!");
+            return;
+        }
+
+        StructType* outFieldOwner = nullptr;
+        Ptr<FieldType> field = nullptr;
+        Ref<Object> outObject = nullptr;
+        void* outInstance = nullptr;
+
+        bool foundField = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            outFieldOwner, field, outObject, outInstance);
+
+        if (!foundField)
+        {
+            printError("Cannot find field!");
+            return;
+        }
+
+        FieldNameText(field->GetDisplayName());
+
+        TypeInfo* fieldDeclType = field->GetDeclarationType();
+        if (fieldDeclType == nullptr)
+        {
+            printError("Cannot find field type!");
+	        return;
+        }
+
+        //this->field = field;
+        this->target = targets[0];
+        this->targets = targets;
+
+        isExpanded = PropertyEditorRegistry::Get()->IsExpanded(field);
+        UpdateExpansion();
+
+        TypeId fieldDeclId = fieldDeclType->GetTypeId();
+
+        if (fieldDeclType->IsVectorType())
+        {
+            right->AddChild(
+				FNew(VectorEditorField)
+                .VectorType(fieldDeclType->GetTypeId())
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .FillRatio(1.0f)
+            );
+        }
+        else if (field->IsNumericField())
+        {
+            right->AddChild(
+                FNew(NumericEditorField)
+                .NumericType(fieldDeclType->GetTypeId())
+                .ColorTagVisible(false)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .Width(100)
+            );
+        }
+        else if (fieldDeclType->IsEnum())
+        {
+            right->AddChild(
+				FNew(EnumEditorField)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .FillRatio(1.0f)
+            );
+        }
+        else if (field->GetDeclarationTypeId() == TYPEID(bool))
+        {
+            right->AddChild(
+				FNew(BoolEditorField)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
+        }
+        else if (fieldDeclId == TYPEID(Color))
+        {
+            right->AddChild(
+                FNew(ColorEditorField)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
+        }
+        else if (fieldDeclId == TYPEID(String) || fieldDeclId == TYPEID(CE::Name))
+        {
+            right->AddChild(
+                FNew(TextEditorField)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
+        }
+    }
+
     void PropertyEditor::InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
     {
         FieldNameText(field->GetDisplayName());
@@ -186,9 +327,9 @@ namespace CE::Editor
 	        return;
         }
 
-        this->field = field;
+        //this->field = field;
         this->target = targets[0];
-        this->instance = instances[0];
+        //this->instance = instances[0];
 
         isExpanded = PropertyEditorRegistry::Get()->IsExpanded(field);
         UpdateExpansion();
@@ -265,14 +406,14 @@ namespace CE::Editor
 
     void PropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
     {
-        this->field = field;
+        //this->field = field;
         this->target = targets[0];
-        this->instance = instances[0];
+        //this->instance = instances[0];
 
         if (editorField)
         {
             editorField->field = field;
-            editorField->targets = targets;
+            //editorField->targets = targets;
             editorField->instances = instances;
         }
     }
@@ -339,12 +480,12 @@ namespace CE::Editor
 
         if (isExpanded)
         {
-            PropertyEditorRegistry::Get()->ExpandField(field);
+            //PropertyEditorRegistry::Get()->ExpandField(field);
             OnExpand();
         }
         else
         {
-            PropertyEditorRegistry::Get()->CollapseField(field);
+            //PropertyEditorRegistry::Get()->CollapseField(field);
             OnCollapse();
         }
     }
