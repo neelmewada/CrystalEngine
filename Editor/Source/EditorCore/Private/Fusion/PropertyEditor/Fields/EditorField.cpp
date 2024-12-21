@@ -43,6 +43,12 @@ namespace CE::Editor
         this->targets = Array<WeakRef<Object>>{ target };
         this->relativeFieldPath = relativeFieldPath;
 
+        // TODO
+
+        isBound = true;
+        OnBind();
+        UpdateValue();
+
         return *this;
     }
 

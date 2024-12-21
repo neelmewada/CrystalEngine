@@ -84,6 +84,7 @@ namespace CE::Editor
         ObjectEditor* objectEditor = nullptr;
 
         //FieldType* field = nullptr;
+        CE::Name fieldName;
         String relativeFieldPath;
         Array<WeakRef<Object>> targets;
         WeakRef<Object> target = nullptr;

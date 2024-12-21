@@ -35,6 +35,7 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        bool isBound = false;
         Array<WeakRef<Object>> targets;
         FieldType* field = nullptr;
         CE::Name relativeFieldPath;

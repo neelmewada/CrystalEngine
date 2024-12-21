@@ -374,7 +374,7 @@ namespace CE::Editor
             return;
 
         const String& text = input->Text();
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
         void* instance = instances[0];
 
         {
@@ -425,7 +425,7 @@ namespace CE::Editor
 
         const String& text = input->Text();
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
 
         TypeId fieldDeclId = numericType;
 

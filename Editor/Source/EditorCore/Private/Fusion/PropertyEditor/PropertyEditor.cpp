@@ -207,6 +207,9 @@ namespace CE::Editor
             return;
         }
 
+        fieldName = field->GetName();
+        this->relativeFieldPath = relativeFieldPath;
+
         FieldNameText(field->GetDisplayName());
 
         TypeInfo* fieldDeclType = field->GetDeclarationType();
