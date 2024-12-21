@@ -19,6 +19,8 @@ namespace CE::Editor
         virtual bool CanBind(FieldType* field) = 0;
 
         virtual Self& BindField(FieldType* field, Object* target, void* instance);
+        virtual Self& BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath);
+
         Self& BindField(FieldType* field, Object* target);
 
         virtual Self& UnbindField();
@@ -33,8 +35,12 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        Array<WeakRef<Object>> targets;
         FieldType* field = nullptr;
-        Array<Object*> targets;
+        CE::Name relativeFieldPath;
+
+        // TODO: We should NOT be storing raw void pointer to instances.
+        // Make a way to fetch relative instance from field and target Object every time it's needed.
         Array<void*> instances;
 
     public: // - Fusion Properties - 

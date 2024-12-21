@@ -38,6 +38,14 @@ namespace CE::Editor
         return *this;
     }
 
+    EditorField::Self& EditorField::BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath)
+    {
+        this->targets = Array<WeakRef<Object>>{ target };
+        this->relativeFieldPath = relativeFieldPath;
+
+        return *this;
+    }
+
     EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
     {
         return BindField(field, target, target);

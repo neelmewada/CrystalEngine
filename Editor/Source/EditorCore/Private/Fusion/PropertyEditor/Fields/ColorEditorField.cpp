@@ -137,7 +137,18 @@ namespace CE::Editor
                         {
                             if (self->IsBound())
                             {
-                                
+                                Color original = tool->GetOriginalColor();
+                                Color newColor = tool->GetColor();
+
+                                self->m_History->PerformOperation("Edit Color Field", self->targets[0],
+                                    [newColor](const Ref<EditorOperation>& operation)
+                                    {
+                                        return false;
+                                    },
+                                    [self](const Ref<EditorOperation>& operation)
+                                    {
+                                        return false;
+                                    });
                             }
                             else
                             {
