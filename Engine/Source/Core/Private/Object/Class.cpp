@@ -185,13 +185,25 @@ namespace CE
         return nullptr;
     }
 
+    bool StructType::FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
+        StructType*& outFieldOwner, Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance)
+    {
+        if (targetObject.IsNull())
+        {
+            return false;
+        }
+
+	    return FindFieldInstanceRelative(relativeInstancePath, targetObject, targetObject.Get(),
+	        outFieldOwner, outField, outObject, outInstance);
+    }
+
     bool StructType::FindFieldInstanceRelative(const Name& relativePath, 
-        const Ref<Object>& targetObject,
-        void* targetInstance,
-        StructType*& outFieldOwner,
-	    Ptr<FieldType>& outField,
-        Ref<Object>& outObject,
-        void*& outInstance)
+                                               const Ref<Object>& targetObject,
+                                               void* targetInstance,
+                                               StructType*& outFieldOwner,
+                                               Ptr<FieldType>& outField,
+                                               Ref<Object>& outObject,
+                                               void*& outInstance)
     {
         CacheAllFields();
 
@@ -242,8 +254,6 @@ namespace CE
                 }
 
                 Array<Ptr<FieldType>> arrayFields = curField->GetArrayFieldListPtr(curInstance);
-
-                // TODO: Array
 
                 if (arrayIndex >= arrayFields.GetSize() || arrayFields.IsEmpty())
                 {
@@ -517,10 +527,10 @@ namespace CE
 
     void StructType::CacheAllFunctions()
     {
-        LockGuard lock{ cachedFunctionsMutex };
-
         if (functionsCached)
             return;
+
+	    LockGuard lock{ cachedFunctionsMutex };
 
         functionsCached = true;
 

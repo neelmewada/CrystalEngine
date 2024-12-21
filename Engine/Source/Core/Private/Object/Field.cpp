@@ -1,14 +1,25 @@
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 namespace CE
 {
 	FieldType::~FieldType()
 	{
-		if (owner->GetName() == "array")
-		{
-			String::IsAlphabet('a');
-		}
+
+	}
+
+	FieldType::FieldType(const String& name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset,
+		String attributes, const TypeInfo* owner, RefType refType, const String& relativePathToParent)
+			: TypeInfo(name, attributes)
+			, fieldTypeId(fieldTypeId)
+			, underlyingTypeId(underlyingTypeId)
+			, offset(offset), size(size)
+			, owner(const_cast<TypeInfo*>(owner))
+			, instanceOwner(const_cast<TypeInfo*>(owner))
+			, refType(refType)
+			, relativePathToParent(relativePathToParent)
+	{
+		ConstructInternal();
 	}
 
 	Ptr<FieldType> FieldType::Clone(const Ptr<FieldType>& copy)
@@ -21,7 +32,8 @@ namespace CE
 			copy->offset,
 			copy->originalAttributes,
 			copy->owner,
-			copy->refType
+			copy->refType,
+			copy->relativePathToParent
 		);
 	}
 
@@ -61,9 +73,21 @@ namespace CE
 		auto fieldInstance = GetFieldInstance(instance);
 		if (declType == nullptr || fieldInstance == nullptr)
 			return;
-		if (declType->IsClass())
+
+		if (declType->IsObject())
 		{
-			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			if (IsStrongRefCounted())
+			{
+				(*static_cast<Ref<Object>*>(fieldInstance)) = nullptr;
+			}
+			else if (IsWeakRefCounted())
+			{
+				(*static_cast<WeakRef<Object>*>(fieldInstance)) = nullptr;
+			}
+			else
+			{
+				memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			}
 			return;
 		}
 
@@ -72,16 +96,33 @@ namespace CE
 
 	void FieldType::CallDestructor(void* instance)
 	{
+		// Ideally, this function should NEVER be called!
+
 		auto declType = GetDeclarationType();
 		auto fieldInstance = GetFieldInstance(instance);
 		if (declType == nullptr || fieldInstance == nullptr)
 			return;
-		if (declType->IsClass())
+		if (declType->IsObject())
 		{
-			Object* object = (Object*)fieldInstance;
-			if (object != nullptr)
-				object->BeginDestroy();
-			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			if (IsStrongRefCounted())
+			{
+				Ref<Object>& object = const_cast<Ref<Object>&>(GetFieldValue<Ref<Object>>(fieldInstance));
+				object.~Ref<Object>();
+			}
+			else if (IsWeakRefCounted())
+			{
+				WeakRef<Object>& object = const_cast<WeakRef<Object>&>(GetFieldValue<WeakRef<Object>>(fieldInstance));
+				object.~WeakRef<Object>();
+			}
+			else
+			{
+				if (Object* object = *static_cast<Object**>(fieldInstance))
+				{
+					object->BeginDestroy();
+				}
+				memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			}
+
 			return;
 		}
 

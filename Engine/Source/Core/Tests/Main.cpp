@@ -1484,6 +1484,8 @@ TEST(Reflection, Fields)
 		EXPECT_TRUE(outField->GetFieldValue<Ref<Object>>(outInstance).IsNull());
 	}
 
+
+
 	CEDeregisterModuleTypes();
 	CE_DEREGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest, ReflectionFieldClass);
 	TEST_END;

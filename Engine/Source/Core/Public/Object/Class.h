@@ -199,6 +199,9 @@ namespace CE
         
         Ptr<FieldType> FindField(const Name& name);
 
+		bool FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
+			StructType*& outFieldOwner, Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance);
+
 		bool FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject, void* targetInstance,
 			StructType*& outFieldOwner, Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance);
 

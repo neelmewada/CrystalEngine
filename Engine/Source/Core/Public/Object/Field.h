@@ -34,19 +34,10 @@ namespace CE
     class CORE_API FieldType : public TypeInfo, public IntrusiveBase
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, 
+        FieldType(const String& name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes,
             const TypeInfo* owner = nullptr, 
-            RefType refType = RefType::None) 
-			: TypeInfo(name, attributes)
-            , fieldTypeId(fieldTypeId)
-            , underlyingTypeId(underlyingTypeId)
-            , size(size), offset(offset)
-			, owner(const_cast<TypeInfo*>(owner))
-			, instanceOwner(const_cast<TypeInfo*>(owner))
-			, refType(refType)
-        {
-            ConstructInternal();
-        }
+            RefType refType = RefType::None,
+            const String& relativePathToParent = "");
 
         static Ptr<FieldType> Clone(const Ptr<FieldType>& copy);
 
@@ -255,6 +246,7 @@ namespace CE
         TypeInfo* owner = nullptr;
 		TypeInfo* instanceOwner = nullptr;
         RefType refType = RefType::None;
+    	String relativePathToParent;
 
         friend class StructType;
         friend class ClassType;
