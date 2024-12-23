@@ -131,7 +131,11 @@ namespace CE::Editor
                         }
                     });
 
-                colorPicker->OnColorAccepted([self](ColorPickerTool* tool)
+                CE::Name fieldPath = this->relativeFieldPath;
+
+                WeakRef<Object> target = self->targets[0];
+
+                colorPicker->OnColorAccepted([self, fieldPath, target](ColorPickerTool* tool)
                     {
                         if (auto lock = self.Lock())
                         {
@@ -140,13 +144,53 @@ namespace CE::Editor
                                 Color original = tool->GetOriginalColor();
                                 Color newColor = tool->GetColor();
 
-                                self->m_History->PerformOperation("Edit Color Field", self->targets[0],
-                                    [newColor](const Ref<EditorOperation>& operation)
+                                self->m_History->PerformOperation("Edit Color Field", self->targets[0].Lock(),
+                                    [target, newColor, fieldPath](const Ref<EditorOperation>& operation)
                                     {
+                                        if (auto lock2 = target.Lock())
+                                        {
+                                            StructType* outStruct = nullptr;
+                                            Ptr<FieldType> outField = nullptr;
+                                            Ref<Object> outObject = nullptr;
+                                            void* outInstance = nullptr;
+
+                                            bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, target.Lock(), outStruct,
+                                                outField, outObject, outInstance);
+                                            if (!success)
+                                            {
+	                                            return false;
+                                            }
+
+                                            outField->SetFieldValue(outInstance, newColor);
+                                            outObject->OnFieldChanged(outField->GetName());
+
+                                            return true;
+                                        }
+
                                         return false;
                                     },
-                                    [self](const Ref<EditorOperation>& operation)
+                                    [target, original, fieldPath](const Ref<EditorOperation>& operation)
                                     {
+                                        if (auto lock2 = target.Lock())
+                                        {
+                                            StructType* outStruct = nullptr;
+                                            Ptr<FieldType> outField = nullptr;
+                                            Ref<Object> outObject = nullptr;
+                                            void* outInstance = nullptr;
+
+                                            bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, target.Lock(), outStruct,
+                                                outField, outObject, outInstance);
+                                            if (!success)
+                                            {
+                                                return false;
+                                            }
+
+                                            outField->SetFieldValue(outInstance, original);
+                                            outObject->OnFieldChanged(outField->GetName());
+
+                                            return true;
+                                        }
+
                                         return false;
                                     });
                             }
