@@ -18,14 +18,13 @@ namespace CE::Editor
 
         virtual bool CanBind(FieldType* field) = 0;
 
-        virtual Self& BindField(FieldType* field, Object* target, void* instance);
-        virtual Self& BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath);
+        virtual bool CanBind(const Ref<Object>& target, const CE::Name& relativeFieldPath) = 0;
 
-        Self& BindField(FieldType* field, Object* target);
+        virtual Self& BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath);
 
         virtual Self& UnbindField();
 
-        bool IsBound() const { return field != nullptr && targets.NotEmpty() && instances.NotEmpty(); }
+        bool IsBound() const { return isBound && relativeFieldPath.IsValid(); }
 
         virtual EditorField& FixedInputWidth(f32 width);
 
@@ -37,12 +36,11 @@ namespace CE::Editor
 
         bool isBound = false;
         Array<WeakRef<Object>> targets;
-        FieldType* field = nullptr;
         CE::Name relativeFieldPath;
 
         // TODO: We should NOT be storing raw void pointer to instances.
         // Make a way to fetch relative instance from field and target Object every time it's needed.
-        Array<void*> instances;
+        //Array<void*> instances;
 
     public: // - Fusion Properties - 
 

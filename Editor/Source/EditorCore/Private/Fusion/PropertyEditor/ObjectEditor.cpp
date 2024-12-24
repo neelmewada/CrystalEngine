@@ -46,7 +46,7 @@ namespace CE::Editor
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
 	    {
-            if (propertyEditor->field->GetName() == fieldName)
+            if (fieldName == propertyEditor->relativeFieldPath)
             {
 	            propertyEditor->UpdateValue();
                 break;
@@ -238,13 +238,9 @@ namespace CE::Editor
                 
                 expandContent->AddChild(propertyEditor);
 
-                thread_local Array targetsArray = { target };
-                targetsArray[0] = target;
+                Array<WeakRef<Object>> targetsArray = { target };
 
-                thread_local Array<void*> instancesArray = { target };
-                instancesArray[0] = target;
-
-                propertyEditor->InitTarget(field, targetsArray, instancesArray);
+                propertyEditor->InitTarget(targetsArray, field->GetName().GetString());
 
                 propertyEditors.Add(propertyEditor);
             }

@@ -77,7 +77,8 @@ namespace CE::Editor
         thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
-        Object* target = targets[0];
+
+        Ref<Object> target = targets[0].Lock();
 
         if (fieldDeclId == TYPEID(Vec2))
         {
@@ -144,7 +145,7 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
         WeakRef<Self> self = this;
@@ -461,7 +462,7 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0];
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 

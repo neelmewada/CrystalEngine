@@ -22,7 +22,9 @@ namespace CE::Editor
 
         virtual void InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
 
-        virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+        virtual void UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
+
+        //virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
 
         virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
 
@@ -85,7 +87,7 @@ namespace CE::Editor
 
         //FieldType* field = nullptr;
         CE::Name fieldName;
-        String relativeFieldPath;
+        CE::Name relativeFieldPath;
         Array<WeakRef<Object>> targets;
         WeakRef<Object> target = nullptr;
 

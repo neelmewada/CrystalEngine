@@ -22,24 +22,13 @@ namespace CE::Editor
         UnbindField();
     }
 
-    EditorField::Self& EditorField::BindField(FieldType* field, Object* target, void* instance)
-    {
-        if (!field || !CanBind(field))
-            return *this;
-
-        this->field = field;
-        targets = { target };
-        instances = { instance };
-
-        OnBind();
-
-        UpdateValue();
-
-        return *this;
-    }
-
     EditorField::Self& EditorField::BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath)
     {
+        if (!CanBind(target, relativeFieldPath))
+        {
+            return *this;
+        }
+
         this->targets = Array<WeakRef<Object>>{ target };
         this->relativeFieldPath = relativeFieldPath;
 
@@ -52,16 +41,11 @@ namespace CE::Editor
         return *this;
     }
 
-    EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
-    {
-        return BindField(field, target, target);
-    }
-
     EditorField::Self& EditorField::UnbindField()
     {
-        field = nullptr;
-        targets.Clear();
-        instances.Clear();
+        isBound = false;
+    	targets.Clear();
+        
         return *this;
     }
 

@@ -156,7 +156,7 @@ namespace CE::Editor
                     else FIELD_DRAG_IF(f32)
                     else FIELD_DRAG_IF(f64)
 
-                    if (field != nullptr)
+                    if (IsBound())
                     {
 	                    OnTextFieldEdited(nullptr);
                     }
@@ -375,7 +375,6 @@ namespace CE::Editor
 
         const String& text = input->Text();
         Ref<Object> target = targets[0].Lock();
-        void* instance = instances[0];
 
         {
             f64 curValue = 0;
@@ -392,16 +391,44 @@ namespace CE::Editor
 
         WeakRef<Self> self = this;
 
-        FIELD_APPLY_OPERATION_IF(u8)
-        else FIELD_APPLY_OPERATION_IF(s8)
-		else FIELD_APPLY_OPERATION_IF(u16)
-		else FIELD_APPLY_OPERATION_IF(s16)
-        else FIELD_APPLY_OPERATION_IF(u32)
-        else FIELD_APPLY_OPERATION_IF(s32)
-        else FIELD_APPLY_OPERATION_IF(u64)
-        else FIELD_APPLY_OPERATION_IF(s64)
-        else FIELD_APPLY_OPERATION_IF(f32)
-        else FIELD_APPLY_OPERATION_IF(f64)
+        if (numericType == CE::GetTypeId<f32>())
+        {
+	        f32 value = 0;
+	        if (String::TryParse(text, value))
+	        {
+		        if (isRanged) { value = Math::Clamp<f32>(value, min, max); }
+		        f32 originalValue = static_cast<f32>(startValue);
+		        if (auto history = m_History.Lock())
+		        {
+			        history->PerformOperation("Edit Numeric Field", target,
+			                                  [self, value](const Ref<EditorOperation>& operation)
+			                                  {
+				                                  if (auto thisPtr = self.Lock())
+				                                  {
+					                                  thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], value);
+					                                  thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
+					                                  return true;
+				                                  }
+				                                  return false;
+			                                  }, [self, originalValue](const Ref<EditorOperation>& operation)
+			                                  {
+				                                  if (auto thisPtr = self.Lock())
+				                                  {
+					                                  thisPtr->field->SetFieldValue<f32>(
+						                                  thisPtr->instances[0], originalValue);
+					                                  thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
+					                                  return true;
+				                                  }
+				                                  return false;
+			                                  });
+		        }
+		        else
+		        {
+			        field->SetFieldValue<f32>(instances[0], value);
+			        target->OnFieldEdited(field->GetName());
+		        }
+	        }
+        }
     }
 
 #define FIELD_SET_IF(type)\
@@ -426,19 +453,21 @@ namespace CE::Editor
         const String& text = input->Text();
 
         Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
 
         TypeId fieldDeclId = numericType;
 
-        FIELD_SET_IF(u8)
-		else FIELD_SET_IF(s8)
-        else FIELD_SET_IF(u16)
-        else FIELD_SET_IF(s16)
-        else FIELD_SET_IF(u32)
-        else FIELD_SET_IF(s32)
-        else FIELD_SET_IF(u64)
-        else FIELD_SET_IF(s64)
-        else FIELD_SET_IF(f32)
-        else FIELD_SET_IF(f64)
+        if (fieldDeclId == CE::GetTypeId<f32>())
+        {
+	        f32 value = 0;
+	        if (String::TryParse(text, value))
+	        {
+		        if (isRanged) { value = Math::Clamp<f32>(value, (f32)min, (f32)max); }
+		        field->SetFieldValue<f32>(instances[0], value);
+		        target->OnFieldEdited(field->GetName());
+	        }
+        }
     }
 
     void NumericEditorField::OnPaint(FPainter* painter)
@@ -467,20 +496,36 @@ namespace CE::Editor
     {
 	    Super::OnBind();
 
-        if (field == nullptr)
+        if (!IsBound())
             return;
 
         isRanged = false;
 
-        if (field->HasAttribute("RangeMin") && field->HasAttribute("RangeMax"))
+        if (Ref<Object> target = targets[0].Lock())
         {
-            Attribute rangeMin = field->GetAttribute("RangeMin");
-            Attribute rangeMax = field->GetAttribute("RangeMax");
+            StructType* outClass = nullptr;
+            Ptr<FieldType> field = nullptr;
+            Ref<Object> outOwner;
+            void* outInstance = nullptr;
 
-            if (String::TryParse(rangeMin.GetStringValue(), min) &&
-                String::TryParse(rangeMax.GetStringValue(), max))
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, outClass,
+                field, outOwner, outInstance);
+
+            if (!success)
             {
-                isRanged = true;
+	            return;
+            }
+
+            if (field->HasAttribute("RangeMin") && field->HasAttribute("RangeMax"))
+            {
+                Attribute rangeMin = field->GetAttribute("RangeMin");
+                Attribute rangeMax = field->GetAttribute("RangeMax");
+
+                if (String::TryParse(rangeMin.GetStringValue(), min) &&
+                    String::TryParse(rangeMax.GetStringValue(), max))
+                {
+                    isRanged = true;
+                }
             }
         }
     }
@@ -490,58 +535,70 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        StructType* outClass = nullptr;
+        Ptr<FieldType> field = nullptr;
+        Ref<Object> outOwner;
+        void* outInstance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, outClass,
+            field, outOwner, outInstance);
+
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
         NumericType(fieldDeclId);
 
         if (fieldDeclId == TYPEID(u8))
         {
-            u8 value = field->GetFieldValue<u8>(instances[0]);
+            u8 value = field->GetFieldValue<u8>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s8))
         {
-            s8 value = field->GetFieldValue<s8>(instances[0]);
+            s8 value = field->GetFieldValue<s8>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u16))
         {
-            u16 value = field->GetFieldValue<u16>(instances[0]);
+            u16 value = field->GetFieldValue<u16>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s16))
         {
-            s16 value = field->GetFieldValue<s16>(instances[0]);
+            s16 value = field->GetFieldValue<s16>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u32))
         {
-            u32 value = field->GetFieldValue<u32>(instances[0]);
+            u32 value = field->GetFieldValue<u32>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s32))
         {
-            s32 value = field->GetFieldValue<s32>(instances[0]);
+            s32 value = field->GetFieldValue<s32>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(u64))
         {
-            u64 value = field->GetFieldValue<u64>(instances[0]);
+            u64 value = field->GetFieldValue<u64>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(s64))
         {
-            s64 value = field->GetFieldValue<s64>(instances[0]);
+            s64 value = field->GetFieldValue<s64>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(f32))
         {
-            f32 value = field->GetFieldValue<f32>(instances[0]);
+            f32 value = field->GetFieldValue<f32>(outInstance);
             Text(String::Format("{}", value));
         }
         else if (fieldDeclId == TYPEID(f64))
         {
-            f64 value = field->GetFieldValue<f64>(instances[0]);
+            f64 value = field->GetFieldValue<f64>(outInstance);
             Text(String::Format("{}", value));
         }
     }
