@@ -195,17 +195,19 @@ namespace CE
 
         StructType* outFieldOwner = nullptr;
         Ref<Object> outObject;
-        return FindFieldInstanceRelative(relativeInstancePath, targetObject, outFieldOwner, 
-            outField, outObject, outInstance);
+        return FindFieldInstanceRelative(relativeInstancePath, targetObject, targetObject.Get(),
+            outFieldOwner, outField, outObject, outInstance);
     }
 
     bool StructType::FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
-                                               StructType*& outFieldOwner, Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance)
+                                               Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance)
     {
         if (targetObject.IsNull())
         {
             return false;
         }
+
+	    StructType* outFieldOwner = nullptr;
 
 	    return FindFieldInstanceRelative(relativeInstancePath, targetObject, targetObject.Get(),
 	        outFieldOwner, outField, outObject, outInstance);

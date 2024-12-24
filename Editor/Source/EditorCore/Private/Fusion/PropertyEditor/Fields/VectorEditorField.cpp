@@ -76,39 +76,48 @@ namespace CE::Editor
         thread_local HashSet floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
         thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
 
-        TypeId fieldDeclId = field->GetDeclarationTypeId();
-
         Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
+
+        TypeId fieldDeclId = field->GetDeclarationTypeId();
 
         if (fieldDeclId == TYPEID(Vec2))
         {
-            Vec2 value = field->GetFieldValue<Vec2>(instances[0]);
+            Vec2 value = field->GetFieldValue<Vec2>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec2i))
         {
-            Vec2i value = field->GetFieldValue<Vec2i>(instances[0]);
+            Vec2i value = field->GetFieldValue<Vec2i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec3))
         {
-            Vec3 value = field->GetFieldValue<Vec3>(instances[0]);
+            Vec3 value = field->GetFieldValue<Vec3>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec3i))
         {
-            Vec3i value = field->GetFieldValue<Vec3i>(instances[0]);
+            Vec3i value = field->GetFieldValue<Vec3i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec4))
         {
-            Vec4 value = field->GetFieldValue<Vec4>(instances[0]);
+            Vec4 value = field->GetFieldValue<Vec4>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -116,7 +125,7 @@ namespace CE::Editor
         }
         else if (fieldDeclId == TYPEID(Vec4i))
         {
-            Vec4i value = field->GetFieldValue<Vec4i>(instances[0]);
+            Vec4i value = field->GetFieldValue<Vec4i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -146,9 +155,19 @@ namespace CE::Editor
             return;
 
         Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
-        WeakRef<Self> self = this;
+        CE::Name relativePath = relativeFieldPath;
+        WeakRef<Object> targetRef = target;
 
         if (fieldDeclId == TYPEID(Vec2))
         {
@@ -165,29 +184,46 @@ namespace CE::Editor
                     if (auto history = m_History.Lock())
                     {
                         history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
+                            [targetRef, relativePath, value](const Ref<EditorOperation>& operation)
                             {
-                                if (auto lock = self.Lock())
+                                if (auto target = targetRef.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
+                                    Ptr<FieldType> field;
+                                    void* instance = nullptr;
+                                    bool success = targetRef->GetClass()->FindFieldInstanceRelative(relativePath, target,
+                                        field, instance);
+                                    if (success)
+                                    {
+                                        field->SetFieldValue(instance, value);
+                                        target->OnFieldChanged(field->GetName());
+                                        return true;
+                                    }
+                                    return false;
                                 }
                                 return false;
                             },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
+                            [targetRef, relativePath, initialValue](const Ref<EditorOperation>& operation)
                             {
-                                if (auto lock = self.Lock())
+                                if (auto target = targetRef.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
+                                    Ptr<FieldType> field;
+                                    void* instance = nullptr;
+                                    bool success = targetRef->GetClass()->FindFieldInstanceRelative(relativePath, target,
+                                        field, instance);
+                                    if (success)
+                                    {
+                                        field->SetFieldValue(instance, initialValue);
+                                        target->OnFieldChanged(field->GetName());
+                                        return true;
+                                    }
+                                    return false;
                                 }
                                 return false;
                             });
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -212,7 +248,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->field->SetFieldValue(self->instance, value);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                     return true;
                                 }
@@ -222,7 +258,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->field->SetFieldValue(self->instance, initialValue);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                 }
                                 return false;
@@ -230,7 +266,7 @@ namespace CE::Editor
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -257,7 +293,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->field->SetFieldValue(self->instance, value);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                     return true;
                                 }
@@ -267,7 +303,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->field->SetFieldValue(self->instance, initialValue);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                 }
                                 return false;
@@ -275,7 +311,7 @@ namespace CE::Editor
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -302,7 +338,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->field->SetFieldValue(self->instance, value);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                     return true;
                                 }
@@ -312,7 +348,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->field->SetFieldValue(self->instance, initialValue);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                 }
                                 return false;
@@ -320,7 +356,7 @@ namespace CE::Editor
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -349,7 +385,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->field->SetFieldValue(self->instance, value);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                     return true;
                                 }
@@ -359,7 +395,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->field->SetFieldValue(self->instance, initialValue);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                 }
                                 return false;
@@ -367,7 +403,7 @@ namespace CE::Editor
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -396,7 +432,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], value);
+                                    self->field->SetFieldValue(self->instance, value);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                     return true;
                                 }
@@ -406,7 +442,7 @@ namespace CE::Editor
                             {
                                 if (auto lock = self.Lock())
                                 {
-                                    self->field->SetFieldValue(self->instances[0], initialValue);
+                                    self->field->SetFieldValue(self->instance, initialValue);
                                     self->targets[0]->OnFieldChanged(self->field->GetName());
                                 }
                                 return false;
@@ -414,7 +450,7 @@ namespace CE::Editor
                     }
                     else
                     {
-                        field->SetFieldValue(instances[0], value);
+                        field->SetFieldValue(instance, value);
                         target->OnFieldChanged(field->GetName());
                     }
                 }
@@ -433,27 +469,27 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(Vec2))
         {
-	        initialValue = field->GetFieldValue<Vec2>(instances[0]);
+	        initialValue = field->GetFieldValue<Vec2>(instance);
         }
         else if (fieldDeclId == TYPEID(Vec2i))
         {
-            initialValue = field->GetFieldValue<Vec2i>(instances[0]).ToVec2();
+            initialValue = field->GetFieldValue<Vec2i>(instance).ToVec2();
         }
         else if (fieldDeclId == TYPEID(Vec3))
         {
-            initialValue = field->GetFieldValue<Vec3>(instances[0]);
+            initialValue = field->GetFieldValue<Vec3>(instance);
         }
         else if (fieldDeclId == TYPEID(Vec3i))
         {
-            initialValue = field->GetFieldValue<Vec3i>(instances[0]).ToVec3();
+            initialValue = field->GetFieldValue<Vec3i>(instance).ToVec3();
         }
         else if (fieldDeclId == TYPEID(Vec4))
         {
-            initialValue = field->GetFieldValue<Vec4>(instances[0]);
+            initialValue = field->GetFieldValue<Vec4>(instance);
         }
         else if (fieldDeclId == TYPEID(Vec4i))
         {
-            initialValue = field->GetFieldValue<Vec4i>(instances[0]).ToVec4();
+            initialValue = field->GetFieldValue<Vec4i>(instance).ToVec4();
         }
     }
 
@@ -474,7 +510,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2>(instances[0], value);
+                field->SetFieldValue<Vec2>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -486,7 +522,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2i>(instances[0], value);
+                field->SetFieldValue<Vec2i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -500,7 +536,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3>(instances[0], value);
+                field->SetFieldValue<Vec3>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -514,7 +550,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3i>(instances[0], value);
+                field->SetFieldValue<Vec3i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -530,7 +566,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4>(instances[0], value);
+                field->SetFieldValue<Vec4>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -546,7 +582,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4i>(instances[0], value);
+                field->SetFieldValue<Vec4i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }

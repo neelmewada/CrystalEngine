@@ -374,7 +374,11 @@ namespace CE::Editor
             return;
 
         const String& text = input->Text();
-        Ref<Object> target = targets[0].Lock();
+        WeakRef<Object> target = targets[0].Lock();
+        Ref<Object> targetObject = target.Lock();
+
+        if (targetObject.IsNull())
+            return;
 
         {
             f64 curValue = 0;
@@ -389,7 +393,7 @@ namespace CE::Editor
             }
         }
 
-        WeakRef<Self> self = this;
+        CE::Name fieldPath = relativeFieldPath;
 
         if (numericType == CE::GetTypeId<f32>())
         {
@@ -400,48 +404,70 @@ namespace CE::Editor
 		        f32 originalValue = static_cast<f32>(startValue);
 		        if (auto history = m_History.Lock())
 		        {
-			        history->PerformOperation("Edit Numeric Field", target,
-			                                  [self, value](const Ref<EditorOperation>& operation)
-			                                  {
-				                                  if (auto thisPtr = self.Lock())
-				                                  {
-					                                  thisPtr->field->SetFieldValue<f32>(thisPtr->instances[0], value);
-					                                  thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
-					                                  return true;
-				                                  }
-				                                  return false;
-			                                  }, [self, originalValue](const Ref<EditorOperation>& operation)
-			                                  {
-				                                  if (auto thisPtr = self.Lock())
-				                                  {
-					                                  thisPtr->field->SetFieldValue<f32>(
-						                                  thisPtr->instances[0], originalValue);
-					                                  thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());
-					                                  return true;
-				                                  }
-				                                  return false;
-			                                  });
+			        history->PerformOperation("Edit Numeric Field", targetObject,
+			              [target, fieldPath, value](const Ref<EditorOperation>& operation)
+			              {
+				              if (auto targetObject = target.Lock())
+				              {
+				                  Ptr<FieldType> field;
+				                  void* instance = nullptr;
+				                  bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
+				                      field, instance);
+				                  if (!success)
+				                  {
+				                      return false;
+				                  }
+				                  field->SetFieldValue<f32>(instance, value);
+					              targetObject->OnFieldEdited(field->GetName());
+					              return true;
+				              }
+				              return false;
+			              }, [target, fieldPath, originalValue](const Ref<EditorOperation>& operation)
+			              {
+			                  if (auto targetObject = target.Lock())
+			                  {
+                                  Ptr<FieldType> field;
+                                  void* instance = nullptr;
+                                  bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
+                                      field, instance);
+                                  if (!success)
+                                  {
+                                      return false;
+                                  }
+                                  field->SetFieldValue<f32>(instance, originalValue);
+                                  targetObject->OnFieldEdited(field->GetName());
+                                  return true;
+                              }
+				              return false;
+			              });
 		        }
 		        else
 		        {
-			        field->SetFieldValue<f32>(instances[0], value);
-			        target->OnFieldEdited(field->GetName());
+		            Ptr<FieldType> field;
+		            void* instance = nullptr;
+		            bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
+                        field, instance);
+		            if (success)
+		            {
+		                field->SetFieldValue<f32>(instance, value);
+		                targetObject->OnFieldEdited(field->GetName());
+		            }
 		        }
 	        }
         }
     }
 
 #define FIELD_SET_IF(type)\
-	if (fieldDeclId == TYPEID(type))\
-	{\
-		type value = 0;\
-		if (String::TryParse(text, value))\
-		{\
-			if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
-			field->SetFieldValue<type>(instances[0], value);\
+    if (fieldDeclId == CE::GetTypeId<type>())\
+    {\
+        type value = 0;\
+        if (String::TryParse(text, value))\
+        {\
+            if (isRanged) { value = Math::Clamp<type>(value, (type)min, (type)max); }\
+            field->SetFieldValue<type>(instance, value);\
             target->OnFieldEdited(field->GetName());\
         }\
-	}
+    }
 
     void NumericEditorField::OnTextFieldEdited(FTextInput*)
     {
@@ -458,16 +484,25 @@ namespace CE::Editor
 
         TypeId fieldDeclId = numericType;
 
-        if (fieldDeclId == CE::GetTypeId<f32>())
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, instance);
+        if (!success)
         {
-	        f32 value = 0;
-	        if (String::TryParse(text, value))
-	        {
-		        if (isRanged) { value = Math::Clamp<f32>(value, (f32)min, (f32)max); }
-		        field->SetFieldValue<f32>(instances[0], value);
-		        target->OnFieldEdited(field->GetName());
-	        }
+            return;
         }
+
+        FIELD_SET_IF(u8)
+        else FIELD_SET_IF(s8)
+        else FIELD_SET_IF(u16)
+        else FIELD_SET_IF(s16)
+        else FIELD_SET_IF(u32)
+        else FIELD_SET_IF(s32)
+        else FIELD_SET_IF(u64)
+        else FIELD_SET_IF(s64)
+        else FIELD_SET_IF(f32)
+        else FIELD_SET_IF(f64)
     }
 
     void NumericEditorField::OnPaint(FPainter* painter)
@@ -503,12 +538,11 @@ namespace CE::Editor
 
         if (Ref<Object> target = targets[0].Lock())
         {
-            StructType* outClass = nullptr;
             Ptr<FieldType> field = nullptr;
             Ref<Object> outOwner;
             void* outInstance = nullptr;
 
-            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, outClass,
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
                 field, outOwner, outInstance);
 
             if (!success)
@@ -539,12 +573,11 @@ namespace CE::Editor
         if (target.IsNull())
             return;
 
-        StructType* outClass = nullptr;
         Ptr<FieldType> field = nullptr;
         Ref<Object> outOwner;
         void* outInstance = nullptr;
 
-        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, outClass,
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
             field, outOwner, outInstance);
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();

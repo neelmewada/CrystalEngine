@@ -26,7 +26,7 @@ namespace CE::Editor
 
         //virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
 
-        virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+        //virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
 
         FHorizontalStack* GetLeft() const { return left; }
         FHorizontalStack* GetRight() const { return right; }

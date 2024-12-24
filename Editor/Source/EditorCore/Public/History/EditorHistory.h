@@ -15,6 +15,23 @@ namespace CE::Editor
         void PerformOperation(const String& name, const Ref<Object>& target, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
         void PerformOperation(const String& name, const Array<Ref<Object>>& targets, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
 
+        template<typename T>
+        void PerformOperation(const String& name, const Ref<Object>& target, const CE::Name& relativeFieldPath,
+            const T& initialValue, const T& newValue)
+        {
+            WeakRef<Object> targetRef = target;
+
+            PerformOperation(name, target,
+                [targetRef, newValue](const Ref<EditorOperation>& operation)
+                {
+
+                },
+                [targetRef, initialValue](const Ref<EditorOperation>& operation)
+                {
+
+                });
+        }
+
         void Undo();
         void Redo();
 

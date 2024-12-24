@@ -184,6 +184,7 @@ namespace CE::Editor
             if (auto lock = object.Lock())
             {
                 target = lock;
+                break;
             }
         }
 
@@ -193,13 +194,12 @@ namespace CE::Editor
             return;
         }
 
-        StructType* outFieldOwner = nullptr;
         Ptr<FieldType> field = nullptr;
         Ref<Object> outObject = nullptr;
         void* outInstance = nullptr;
 
         bool foundField = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
-            outFieldOwner, field, outObject, outInstance);
+            field, outObject, outInstance);
 
         if (!foundField)
         {
@@ -296,17 +296,30 @@ namespace CE::Editor
         }
     }
 
-    void PropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
+    void PropertyEditor::UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
     {
-        //this->field = field;
-        this->target = targets[0];
-        //this->instance = instances[0];
+        Ref<Object> target;
 
-        if (editorField)
+        for (const auto& object : targets)
         {
-            editorField->field = field;
-            //editorField->targets = targets;
-            editorField->instances = instances;
+            if (auto lock = object.Lock())
+            {
+                target = lock;
+                break;
+            }
+        }
+
+        Ptr<FieldType> field = nullptr;
+        Ref<Object> outObject = nullptr;
+        void* outInstance = nullptr;
+
+        bool foundField = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, outObject, outInstance);
+
+        if (!foundField)
+        {
+            editorField->targets = targets;
+            editorField->relativeFieldPath = relativeFieldPath;
         }
     }
 

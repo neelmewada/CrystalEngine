@@ -29,10 +29,18 @@ namespace CE::Editor
             return *this;
         }
 
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        isBound = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+
+        if (!isBound)
+        {
+            return *this;
+        }
+
         this->targets = Array<WeakRef<Object>>{ target };
         this->relativeFieldPath = relativeFieldPath;
-
-        // TODO
 
         isBound = true;
         OnBind();
