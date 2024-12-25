@@ -516,6 +516,9 @@ namespace CE::Editor
         bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
             field, outOwner, outInstance);
 
+        if (!success)
+            return;
+
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
         NumericType(fieldDeclId);

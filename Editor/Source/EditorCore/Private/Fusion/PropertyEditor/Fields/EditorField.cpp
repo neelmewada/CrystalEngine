@@ -22,6 +22,20 @@ namespace CE::Editor
         UnbindField();
     }
 
+    bool EditorField::CanBind(const Ref<Object>& target, const CE::Name& relativeFieldPath)
+    {
+        if (target.IsNull())
+            return false;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+        bool result = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!result)
+            return false;
+
+        return CanBind(field);
+    }
+
     EditorField::Self& EditorField::BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath)
     {
         if (!CanBind(target, relativeFieldPath))

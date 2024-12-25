@@ -16,6 +16,7 @@ namespace CE::Editor
             FAssignNew(FTextInput, input)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
+            .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
             .Width(100)
             .VAlign(VAlign::Center)
         );
@@ -39,11 +40,20 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
 
-        TypeId fieldDeclId = field->GetDeclarationTypeId();
+        Ptr<FieldType> field = nullptr;
+        void* instance = nullptr;
 
-        const String& string = field->GetFieldValueAsString(instances[0]);
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, instance);
+
+        if (!success)
+            return;
+
+        const String& string = field->GetFieldValueAsString(instance);
 
         input->Text(string);
     }
@@ -53,7 +63,18 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field = nullptr;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, instance);
+
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
@@ -61,14 +82,19 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(String))
         {
-            field->SetFieldValue<String>(instances[0], string);
+            field->SetFieldValue<String>(instance, string);
             target->OnFieldEdited(field->GetName());
         }
         else if (fieldDeclId == TYPEID(CE::Name))
         {
-            field->SetFieldValue<CE::Name>(instances[0], string);
+            field->SetFieldValue<CE::Name>(instance, string);
             target->OnFieldEdited(field->GetName());
         }
+    }
+
+    void TextEditorField::OnBeginEditing(FTextInput*)
+    {
+        initialValue = input->Text();
     }
 
     void TextEditorField::OnFinishEdit(FTextInput*)
@@ -76,7 +102,18 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field = nullptr;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, instance);
+
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
@@ -84,13 +121,27 @@ namespace CE::Editor
 
         if (fieldDeclId == TYPEID(String))
         {
-            field->SetFieldValue<String>(instances[0], string);
-            target->OnFieldEdited(field->GetName());
+            if (auto history = m_History.Lock())
+            {
+                history->PerformOperation<String>("Edit Text Field", target, relativeFieldPath,
+                    initialValue, string);
+            }
+            else
+            {
+                SetValueDirect<String>(string);
+            }
         }
         else if (fieldDeclId == TYPEID(CE::Name))
         {
-            field->SetFieldValue<CE::Name>(instances[0], string);
-            target->OnFieldEdited(field->GetName());
+            if (auto history = m_History.Lock())
+            {
+                history->PerformOperation<CE::Name>("Edit Text Field", target, relativeFieldPath,
+                                    initialValue, string);
+            }
+            else
+            {
+                SetValueDirect<CE::Name>(string);
+            }
         }
     }
 

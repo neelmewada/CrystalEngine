@@ -18,7 +18,7 @@ namespace CE::Editor
 
         virtual bool CanBind(FieldType* field) = 0;
 
-        virtual bool CanBind(const Ref<Object>& target, const CE::Name& relativeFieldPath) = 0;
+        bool CanBind(const Ref<Object>& target, const CE::Name& relativeFieldPath);
 
         virtual Self& BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath);
 
