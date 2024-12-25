@@ -322,7 +322,7 @@ namespace CE::Editor
     }
 
 #define FIELD_APPLY_OPERATION_IF(type)\
-    if (numericType == TYPEID(type))\
+    if (numericType == CE::GetTypeId<type>())\
     {\
         type value = 0;\
         if (String::TryParse(text, value))\
@@ -331,32 +331,12 @@ namespace CE::Editor
             type originalValue = static_cast<type>(startValue);\
             if (auto history = m_History.Lock())\
             {\
-                history->PerformOperation("Edit Numeric Field", target,\
-                    [self, value](const Ref<EditorOperation>& operation)\
-                    {\
-                        if (auto thisPtr = self.Lock())\
-                        {\
-                            thisPtr->field->SetFieldValue<type>(thisPtr->instances[0], value);\
-                            thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());\
-                            return true;\
-                        }\
-                        return false;\
-                    },\
-                    [self, originalValue](const Ref<EditorOperation>& operation)\
-                    {\
-                        if (auto thisPtr = self.Lock())\
-                        {\
-                            thisPtr->field->SetFieldValue<type>(thisPtr->instances[0], originalValue);\
-                            thisPtr->targets[0]->OnFieldChanged(thisPtr->field->GetName());\
-                            return true;\
-                        }\
-                        return false;\
-                    });\
+                history->PerformOperation<type>("Edit Numeric Field", targetObject, relativeFieldPath,\
+                    originalValue, value);\
             }\
             else\
             {\
-                field->SetFieldValue<type>(instances[0], value);\
-                target->OnFieldEdited(field->GetName());\
+                SetValueDirect<type>(value);\
             }\
         }\
     }
@@ -393,8 +373,6 @@ namespace CE::Editor
             }
         }
 
-        CE::Name fieldPath = relativeFieldPath;
-
         if (numericType == CE::GetTypeId<f32>())
         {
 	        f32 value = 0;
@@ -404,54 +382,12 @@ namespace CE::Editor
 		        f32 originalValue = static_cast<f32>(startValue);
 		        if (auto history = m_History.Lock())
 		        {
-			        history->PerformOperation("Edit Numeric Field", targetObject,
-			              [target, fieldPath, value](const Ref<EditorOperation>& operation)
-			              {
-				              if (auto targetObject = target.Lock())
-				              {
-				                  Ptr<FieldType> field;
-				                  void* instance = nullptr;
-				                  bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
-				                      field, instance);
-				                  if (!success)
-				                  {
-				                      return false;
-				                  }
-				                  field->SetFieldValue<f32>(instance, value);
-					              targetObject->OnFieldEdited(field->GetName());
-					              return true;
-				              }
-				              return false;
-			              }, [target, fieldPath, originalValue](const Ref<EditorOperation>& operation)
-			              {
-			                  if (auto targetObject = target.Lock())
-			                  {
-                                  Ptr<FieldType> field;
-                                  void* instance = nullptr;
-                                  bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
-                                      field, instance);
-                                  if (!success)
-                                  {
-                                      return false;
-                                  }
-                                  field->SetFieldValue<f32>(instance, originalValue);
-                                  targetObject->OnFieldEdited(field->GetName());
-                                  return true;
-                              }
-				              return false;
-			              });
+                    history->PerformOperation<f32>("Edit Numeric Field", targetObject, relativeFieldPath,
+                        originalValue, value);
 		        }
 		        else
 		        {
-		            Ptr<FieldType> field;
-		            void* instance = nullptr;
-		            bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, targetObject,
-                        field, instance);
-		            if (success)
-		            {
-		                field->SetFieldValue<f32>(instance, value);
-		                targetObject->OnFieldEdited(field->GetName());
-		            }
+                    SetValueDirect<f32>(value);
 		        }
 	        }
         }

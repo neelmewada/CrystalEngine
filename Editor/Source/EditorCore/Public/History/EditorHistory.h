@@ -22,13 +22,41 @@ namespace CE::Editor
             WeakRef<Object> targetRef = target;
 
             PerformOperation(name, target,
-                [targetRef, newValue](const Ref<EditorOperation>& operation)
+                [targetRef, relativeFieldPath, newValue](const Ref<EditorOperation>& operation)
                 {
+                    if (auto target = targetRef.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                            field, instance);
+                        if (!success)
+                        {
+                            return false;
+                        }
+                        field->SetFieldValue<T>(instance, newValue);
+                        target->OnFieldEdited(field->GetName());
+                    }
 
+                    return false;
                 },
-                [targetRef, initialValue](const Ref<EditorOperation>& operation)
+                [targetRef, relativeFieldPath, initialValue](const Ref<EditorOperation>& operation)
                 {
+                    if (auto target = targetRef.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                            field, instance);
+                        if (!success)
+                        {
+                            return false;
+                        }
+                        field->SetFieldValue<T>(instance, initialValue);
+                        target->OnFieldEdited(field->GetName());
+                    }
 
+                    return false;
                 });
         }
 

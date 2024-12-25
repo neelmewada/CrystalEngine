@@ -42,43 +42,93 @@ namespace CE::Editor
         return fieldTypeId == TYPEID(Array<>);
     }
 
-    void ArrayPropertyEditor::InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
+    void ArrayPropertyEditor::InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
     {
-        FieldNameText(field->GetDisplayName());
-
-        this->field = field;
-        target = targets[0];
-        instance = instances[0];
-
         right->DestroyAllChildren();
+
+        auto printError = [&](const String& msg)
+            {
+                right->AddChild(
+                    FNew(FLabel)
+                    .FontSize(10)
+                    .Text("Error: " + msg)
+                    .Foreground(Color::Red())
+                );
+            };
+
+        if (targets.GetSize() > 1)
+        {
+            printError("Multiple objects selected!");
+            return;
+        }
+        if (targets.GetSize() == 0)
+        {
+            printError("No objects selected!");
+            return;
+        }
+
+        Ref<Object> target;
+
+        for (const auto& object : targets)
+        {
+            if (auto lock = object.Lock())
+            {
+                target = lock;
+                break;
+            }
+        }
+
+        if (target.IsNull())
+        {
+            printError("No objects selected!");
+            return;
+        }
+
+        Ptr<FieldType> field = nullptr;
+        Ref<Object> outObject = nullptr;
+        void* outInstance = nullptr;
+
+        bool foundField = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, outObject, outInstance);
+
+        if (!foundField)
+        {
+            printError("Cannot find field!");
+            return;
+        }
+
+        fieldName = field->GetName();
+        this->relativeFieldPath = relativeFieldPath;
+
+        FieldNameText(field->GetDisplayName());
 
         static FBrush deleteIcon = FBrush("/Engine/Resources/Icons/Delete");
         static FBrush addIcon = FBrush("/Engine/Resources/Icons/Add");
         constexpr f32 iconSize = 16;
 
         (*right)
-        .Gap(10)
-        (
-            FAssignNew(FLabel, countLabel),
+            .Gap(10)
+            (
+                FAssignNew(FLabel, countLabel),
 
-            FNew(FImageButton)
-            .Image(addIcon)
-            .OnClicked(FUNCTION_BINDING(this, InsertElement))
-            .Width(iconSize)
-            .Height(iconSize)
-            .VAlign(VAlign::Center)
-            .Padding(Vec4(1, 1, 1, 1) * 3)
-            .Style("Button.Icon"),
+                FNew(FImageButton)
+                .Image(addIcon)
+                .OnClicked(FUNCTION_BINDING(this, InsertElement))
+                .Width(iconSize)
+                .Height(iconSize)
+                .VAlign(VAlign::Center)
+                .Padding(Vec4(1, 1, 1, 1) * 3)
+                .Style("Button.Icon"),
 
-            FNew(FImageButton)
-            .Image(deleteIcon)
-            .OnClicked(FUNCTION_BINDING(this, DeleteAllElements))
-            .Width(iconSize)
-            .Height(iconSize)
-            .VAlign(VAlign::Center)
-            .Padding(Vec4(1, 1, 1, 1) * 3)
-            .Style("Button.Icon")
-        );
+                FNew(FImageButton)
+                .Image(deleteIcon)
+                .OnClicked(FUNCTION_BINDING(this, DeleteAllElements))
+                .Width(iconSize)
+                .Height(iconSize)
+                .VAlign(VAlign::Center)
+                .Padding(Vec4(1, 1, 1, 1) * 3)
+                .Style("Button.Icon")
+                );
 
         UpdateValue();
 
@@ -86,11 +136,10 @@ namespace CE::Editor
         UpdateExpansion();
     }
 
-    void ArrayPropertyEditor::UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances)
+    void ArrayPropertyEditor::UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
     {
-        this->field = field;
-        target = targets[0];
-        instance = instances[0];
+        this->targets = targets;
+        this->relativeFieldPath = relativeFieldPath;
     }
 
     void ArrayPropertyEditor::SetSplitRatio(f32 ratio, FSplitBox* excluding)
@@ -112,11 +161,35 @@ namespace CE::Editor
     {
 	    Super::UpdateValue();
 
-        int arraySize = field->GetArraySize(target);
+        Ref<Object> target;
+
+        for (const auto& object : targets)
+        {
+            if (auto lock = object.Lock())
+            {
+                target = lock;
+                break;
+            }
+        }
+
+        if (target.IsNull())
+        {
+            return;
+        }
+
+        Ref<Object> targetObject;
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, targetObject, field, instance);
+        if (!success)
+        {
+	        return;
+        }
+
+        int arraySize = field->GetArraySize(instance);
 
         countLabel->Text(String::Format("{} array elements", arraySize));
-
-        CE::Name fieldFullName = field->GetTypeName();
 
         if (arraySize != arrayElements.GetSize())
         {
@@ -132,6 +205,7 @@ namespace CE::Editor
 	    {
             const Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(instance);
             auto arrayInstance = (void*)arrayValue.GetData();
+            String arrayElementFieldPath = String::Format("{}[{}]", field->GetName(), i);
 
             if (i >= elementEditors.GetSize())
             {
@@ -140,7 +214,7 @@ namespace CE::Editor
 
                 propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
 
-                propertyEditor->InitTarget(arrayElements[i], { target }, { arrayInstance });
+                propertyEditor->InitTarget({ target }, arrayElementFieldPath);
 
                 FHorizontalStack& left = *propertyEditor->GetLeft();
             	FHorizontalStack& right = *propertyEditor->GetRight();
@@ -176,7 +250,7 @@ namespace CE::Editor
             }
 
             // Use editor
-	    	elementEditors[i]->UpdateTarget(arrayElements[i], { target }, { arrayInstance });
+	    	elementEditors[i]->UpdateTarget({ target }, arrayElementFieldPath);
 
 	    	elementEditors[i]->FieldNameText(String::Format("Index {}", i));
 
@@ -215,27 +289,27 @@ namespace CE::Editor
     {
         WeakRef<Self> self = this;
 
-        field->InsertArrayElement(instance);
+        //field->InsertArrayElement(instance);
 
         UpdateValue();
     }
 
     void ArrayPropertyEditor::DeleteAllElements()
     {
-        while (field->GetArraySize(instance) > 0)
+        /*while (field->GetArraySize(instance) > 0)
         {
             field->DeleteArrayElement(instance, 0);
-        }
+        }*/
 
         UpdateValue();
     }
 
     void ArrayPropertyEditor::DeleteElement(u32 index)
     {
-        if (index < field->GetArraySize(instance))
+        /*if (index < field->GetArraySize(instance))
         {
             field->DeleteArrayElement(instance, index);
-        }
+        }*/
 
         UpdateValue();
     }

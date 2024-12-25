@@ -34,6 +34,46 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        template<typename T>
+        bool SetValueDirect(const T& value)
+        {
+            if (auto target = targets[0].Lock())
+            {
+                Ptr<FieldType> field;
+                void* instance = nullptr;
+                bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                    field, instance);
+                if (success)
+                {
+                    field->SetFieldValue<T>(instance, value);
+                    target->OnFieldEdited(field->GetName());
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        template<typename T>
+        const T& GetValueDirect() const
+        {
+            static T empty{};
+
+            if (auto target = targets[0].Lock())
+            {
+                Ptr<FieldType> field;
+                void* instance = nullptr;
+                bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                    field, instance);
+                if (success)
+                {
+                    return field->GetFieldValue<T>(instance);
+                }
+            }
+
+            return empty;
+        }
+
         bool isBound = false;
         Array<WeakRef<Object>> targets;
         CE::Name relativeFieldPath;

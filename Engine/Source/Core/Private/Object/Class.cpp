@@ -246,7 +246,7 @@ namespace CE
 	            return false;
             }
 
-	        if (fieldName.Contains('['))
+	        if (fieldName.Contains('[')) // It's an array
 	        {
                 Array<String> indexSplit;
                 fieldName.Split({ "[", "]" }, indexSplit);
@@ -280,6 +280,11 @@ namespace CE
                 curInstance = (void*)rawArray.GetData();
                 curField = arrayFields[arrayIndex];
 
+                if (isLast)
+                {
+	                break;
+                }
+
                 if (curField->IsStructField())
                 {
                     curInstance = curField->GetFieldInstance(curInstance);
@@ -300,11 +305,6 @@ namespace CE
                     else
                     {
                         ref = curField->GetFieldValue<Object*>(curInstance);
-                    }
-
-                    if (isLast)
-                    {
-                        break;
                     }
 
                     if (ref.IsValid())
