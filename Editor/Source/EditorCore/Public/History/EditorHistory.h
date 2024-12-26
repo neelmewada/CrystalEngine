@@ -35,7 +35,7 @@ namespace CE::Editor
                             return false;
                         }
                         field->SetFieldValue<T>(instance, newValue);
-                        target->OnFieldEdited(field->GetName());
+                        target->OnFieldChanged(field->GetName());
                     }
 
                     return false;
@@ -53,7 +53,7 @@ namespace CE::Editor
                             return false;
                         }
                         field->SetFieldValue<T>(instance, initialValue);
-                        target->OnFieldEdited(field->GetName());
+                        target->OnFieldChanged(field->GetName());
                     }
 
                     return false;

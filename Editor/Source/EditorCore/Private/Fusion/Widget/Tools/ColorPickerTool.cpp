@@ -386,6 +386,8 @@ namespace CE::Editor
 
     void ColorPickerTool::OnClickCancel()
     {
+        value = original;
+
         m_OnColorChanged(this);
         m_OnColorChanged.Unbind();
 

@@ -183,43 +183,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [targetRef, relativePath, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto target = targetRef.Lock())
-                                {
-                                    Ptr<FieldType> field;
-                                    void* instance = nullptr;
-                                    bool success = targetRef->GetClass()->FindFieldInstanceRelative(relativePath, target,
-                                        field, instance);
-                                    if (success)
-                                    {
-                                        field->SetFieldValue(instance, value);
-                                        target->OnFieldChanged(field->GetName());
-                                        return true;
-                                    }
-                                    return false;
-                                }
-                                return false;
-                            },
-                            [targetRef, relativePath, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto target = targetRef.Lock())
-                                {
-                                    Ptr<FieldType> field;
-                                    void* instance = nullptr;
-                                    bool success = targetRef->GetClass()->FindFieldInstanceRelative(relativePath, target,
-                                        field, instance);
-                                    if (success)
-                                    {
-                                        field->SetFieldValue(instance, initialValue);
-                                        target->OnFieldChanged(field->GetName());
-                                        return true;
-                                    }
-                                    return false;
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -243,26 +207,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
-                                }
-                                return false;
-                            },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -288,26 +233,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
-                                }
-                                return false;
-                            },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -333,26 +259,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
-                                }
-                                return false;
-                            },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -380,26 +287,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
-                                }
-                                return false;
-                            },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -427,26 +315,7 @@ namespace CE::Editor
                 {
                     if (auto history = m_History.Lock())
                     {
-                        history->PerformOperation("Edit Vector Field", target,
-                            [self, value](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, value);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                    return true;
-                                }
-                                return false;
-                            },
-                            [self, initialValue](const Ref<EditorOperation>& operation)
-                            {
-                                if (auto lock = self.Lock())
-                                {
-                                    self->field->SetFieldValue(self->instance, initialValue);
-                                    self->targets[0]->OnFieldChanged(self->field->GetName());
-                                }
-                                return false;
-                            });
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
                     }
                     else
                     {
@@ -463,7 +332,16 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
@@ -498,7 +376,16 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Ref<Object> target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
