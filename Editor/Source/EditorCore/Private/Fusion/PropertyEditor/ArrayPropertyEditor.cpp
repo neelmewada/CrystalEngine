@@ -287,15 +287,85 @@ namespace CE::Editor
 
     void ArrayPropertyEditor::InsertElement()
     {
-        WeakRef<Self> self = this;
+        Ref<EditorHistory> history = objectEditor->GetEditorHistory();
+        Ref<Object> target = this->target.Lock();
+        WeakRef<Object> targetWeak = target;
+        CE::Name arrayFieldPath = relativeFieldPath;
 
-        //field->InsertArrayElement(instance);
+        if (history.IsValid())
+        {
+            history->PerformOperation("Insert Array Element", target,
+                [arrayFieldPath, targetWeak](const Ref<EditorOperation>& operation)
+                {
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> arrayField;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                            arrayField, instance);
+                        if (!success || !arrayField->IsArrayField())
+                        {
+                            return false;
+                        }
+
+                        arrayField->InsertArrayElement(instance);
+                        operation->SetArrayIndex(arrayField->GetArraySize(instance) - 1);
+
+                        return true;
+                    }
+
+                    return false;
+                },
+                [arrayFieldPath, targetWeak](const Ref<EditorOperation>& operation)
+                {
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> arrayField;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                            arrayField, instance);
+                        if (!success || !arrayField->IsArrayField())
+                        {
+                            return false;
+                        }
+
+                        int index = operation->GetArrayIndex();
+
+                        if (index < 0 || index >= (int)arrayField->GetArraySize(instance))
+                        {
+	                        return false;
+                        }
+
+                        arrayField->DeleteArrayElement(instance, index);
+
+                        return true;
+                    }
+
+                    return false;
+                });
+        }
+        else
+        {
+            Ptr<FieldType> field;
+            void* instance = nullptr;
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                field, instance);
+            if (!success)
+            {
+                return;
+            }
+
+            field->InsertArrayElement(instance);
+        }
 
         UpdateValue();
     }
 
     void ArrayPropertyEditor::DeleteAllElements()
     {
+        // TODO: Delete elements in a way that they can be re-created back to the same state.
+        // Use serialization
+
         /*while (field->GetArraySize(instance) > 0)
         {
             field->DeleteArrayElement(instance, 0);
@@ -306,12 +376,263 @@ namespace CE::Editor
 
     void ArrayPropertyEditor::DeleteElement(u32 index)
     {
-        /*if (index < field->GetArraySize(instance))
+        Ref<EditorHistory> history = objectEditor->GetEditorHistory();
+        Ref<Object> target = this->target.Lock();
+        WeakRef<Object> targetWeak = target;
+        CE::Name arrayFieldPath = relativeFieldPath;
+
+        if (history.IsValid())
         {
-            field->DeleteArrayElement(instance, index);
-        }*/
+            // TODO: Delete elements in a way that they can be re-created back to the same state.
+			// Use serialization
+
+            Ptr<FieldType> field;
+            void* instance = nullptr;
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                field, instance);
+            if (!success || !field->IsArrayField())
+                return;
+
+            Ptr<FieldType> elementField = field->GetArrayFieldElementPtr(instance, index);
+
+            if (elementField == nullptr)
+                return;
+
+            TypeInfo* declType = elementField->GetDeclarationType();
+            if (declType == nullptr)
+                return;
+
+            TypeId declId = declType->GetTypeId();
+
+            void* arrayInstance = field->GetArrayInstance(instance);
+
+            if (declType->IsObject())
+            {
+                Ref<Object> object = nullptr;
+
+	            if (elementField->IsStrongRefCounted())
+	            {
+                    object = elementField->GetFieldValue<Ref<Object>>(arrayInstance);
+	            }
+                else if (elementField->IsWeakRefCounted())
+                {
+                    object = elementField->GetFieldValue<WeakRef<Object>>(arrayInstance).Lock();
+                }
+                else
+                {
+                    object = elementField->GetFieldValue<Object*>(arrayInstance);
+                }
+
+                // TODO: Delete object reference
+            }
+            else if (declType->IsStruct())
+            {
+                StructType* structType = static_cast<StructType*>(declType);
+                void* structInstance = elementField->GetFieldInstance(arrayInstance);
+
+                MemoryStream jsonData = MemoryStream(1024, true);
+                jsonData.SetAsciiMode(true);
+                jsonData.SetAutoResizeIncrement(1024);
+
+                JsonFieldSerializer serializer{ structType, structInstance };
+                serializer.Serialize(&jsonData);
+
+                history->PerformOperation("Delete Array Element", target,
+                    [targetWeak, index, arrayFieldPath](const Ref<EditorOperation>& operation)
+                    {
+                        if (auto target = targetWeak.Lock())
+                        {
+                            Ptr<FieldType> field;
+                            void* instance = nullptr;
+                            bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                field, instance);
+                            if (!success)
+                                return false;
+
+                            field->DeleteArrayElement(instance, index);
+
+                            target->OnFieldChanged(field->GetName());
+
+                            return true;
+                        }
+
+                        return false;
+                    },
+                    [targetWeak, jsonData, index, arrayFieldPath, structType](const Ref<EditorOperation>& operation)
+                    {
+                        if (auto target = targetWeak.Lock())
+                        {
+                            Ptr<FieldType> field;
+                            void* instance = nullptr;
+                            bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                field, instance);
+                            if (!success)
+                                return false;
+
+                            field->InsertArrayElement(instance, index);
+                            void* arrayInstance = field->GetArrayInstance(instance);
+                            Ptr<FieldType> elementField = field->GetArrayFieldElementPtr(instance, index);
+
+                            const_cast<MemoryStream&>(jsonData).Seek(0, SeekMode::Begin);
+
+                            JsonFieldDeserializer deserializer{ structType, elementField->GetFieldInstance(arrayInstance) };
+                            deserializer.Deserialize(const_cast<MemoryStream*>(&jsonData));
+
+                            target->OnFieldChanged(field->GetName());
+
+                            return true;
+                        }
+
+                        return false;
+                    });
+            }
+            else if (declType->IsEnum())
+            {
+                s64 enumValue = elementField->GetFieldEnumValue(arrayInstance);
+
+                history->PerformOperation("Delete Array Element", target,
+                    [targetWeak, index, arrayFieldPath, enumValue](const Ref<EditorOperation>& operation)
+                    {
+                        if (auto target = targetWeak.Lock())
+                        {
+                            Ptr<FieldType> field;
+                            void* instance = nullptr;
+                            bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                field, instance);
+                            if (!success)
+                                return false;
+                            if (index >= field->GetArraySize(instance))
+                                return false;
+
+                            field->DeleteArrayElement(instance, index);
+
+                            target->OnFieldChanged(field->GetName());
+
+                            return true;
+                        }
+                        
+                        return false;
+                    },
+                    [targetWeak, index, arrayFieldPath, enumValue](const Ref<EditorOperation>& operation)
+                    {
+                        if (auto target = targetWeak.Lock())
+                        {
+                            Ptr<FieldType> field;
+                            void* instance = nullptr;
+                            bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                field, instance);
+                            if (!success)
+                                return false;
+                            if (index >= field->GetArraySize(instance) + 1)
+                                return false;
+
+                            field->InsertArrayElement(instance, index);
+                            void* arrayInstance = field->GetArrayInstance(instance);
+
+                            Ptr<FieldType> elementField = field->GetArrayFieldElementPtr(instance, index);
+                            elementField->SetFieldEnumValue(arrayInstance, enumValue);
+
+                            target->OnFieldChanged(field->GetName());
+
+                            return true;
+                        }
+
+                        return false;
+                    });
+            }
+            else if (declId == TYPEID(ScriptEvent<>))
+            {
+	            
+            }
+            else if (declId == TYPEID(ScriptDelegate<>))
+            {
+	            
+            }
+            else // POD/Opaque type
+            {
+                if (declId == TYPEID(String))
+                {
+                    String value = field->GetArrayElementValueAt<String>(index, instance);
+
+
+                }
+                if (declId == TYPEID(f32))
+                {
+                	f32 value = field->GetArrayElementValueAt<f32>(index, instance);
+
+                    history->PerformOperation("Delete Array Element", target,
+                        [targetWeak, index, arrayFieldPath]
+                        (const Ref<EditorOperation>& operation)
+                        {
+                            if (auto target = targetWeak.Lock())
+                            {
+                                Ptr<FieldType> field;
+                                void* instance = nullptr;
+                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                    field, instance);
+                                if (!success)
+                                    return false;
+                                if (index >= field->GetArraySize(instance))
+                                    return false;
+
+                                field->DeleteArrayElement(instance, index);
+
+                                target->OnFieldChanged(field->GetName());
+
+                                return true;
+                            }
+
+                            return false;
+                        },
+                        [targetWeak, index, arrayFieldPath, value]
+                        (const Ref<EditorOperation>& operation)
+                        {
+                            if (auto target = targetWeak.Lock())
+                            {
+                                Ptr<FieldType> field;
+                                void* instance = nullptr;
+                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                    field, instance);
+                                if (!success)
+                                    return false;
+                                if (index >= field->GetArraySize(instance))
+                                    return false;
+
+                                field->InsertArrayElement(instance, index);
+                                void* arrayInstance = field->GetArrayInstance(instance);
+
+                                Ptr<FieldType> elementField = field->GetArrayFieldElementPtr(instance, index);
+                                elementField->SetFieldValue<f32>(arrayInstance, value);
+
+                                target->OnFieldChanged(field->GetName());
+
+                                return true;
+                            }
+
+                            return false;
+                        });
+                }
+            }
+        }
+        else
+        {
+            Ptr<FieldType> field;
+            void* instance = nullptr;
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                field, instance);
+            if (!success)
+            {
+                return;
+            }
+
+            if (index < field->GetArraySize(instance))
+            {
+                field->DeleteArrayElement(instance, index);
+            }
+        }
 
         UpdateValue();
     }
+
 }
 

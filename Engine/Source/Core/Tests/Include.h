@@ -98,22 +98,7 @@ namespace VariantTests
 
 		virtual ~VariantStruct() {}
 
-		VariantStruct(const VariantStruct& copy)
-		{
-			CopyFrom(copy);
-		}
-
-		VariantStruct& operator=(const VariantStruct& copy)
-		{
-			CopyFrom(copy);
-			return *this;
-		}
-
-		void CopyFrom(const VariantStruct& copy)
-		{
-			stringData = copy.stringData;
-			stringArray = copy.stringArray;
-		}
+		
 
 		String stringData;
 		Array<String> stringArray;

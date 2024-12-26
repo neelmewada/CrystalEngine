@@ -13,6 +13,7 @@ namespace CE
         virtual ~MemoryStream();
 
 		MemoryStream(MemoryStream&& move) noexcept;
+        MemoryStream& operator=(MemoryStream&& move) noexcept;
         
         bool IsOpen() override;
         void Close() override;

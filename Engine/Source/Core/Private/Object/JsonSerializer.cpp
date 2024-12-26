@@ -326,6 +326,50 @@ namespace CE
 				this->writer = serializer.writer;
 			}
 		}
+		else if (field->IsObjectField())
+		{
+			Ref<Object> object;
+
+			if (field->IsStrongRefCounted())
+			{
+				object = field->GetFieldValue<Ref<Object>>(rawInstance);
+			}
+			else if (field->IsWeakRefCounted())
+			{
+				object = field->GetFieldValue<WeakRef<Object>>(rawInstance).Lock();
+			}
+			else
+			{
+				object = field->GetFieldValue<Object*>(rawInstance);
+			}
+
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			if (object.IsNull())
+			{
+				writer.WriteNull();
+			}
+			else
+			{
+				Ref<Bundle> bundle = object->GetBundle();
+				Uuid bundleUuid = {};
+				if (bundle.IsValid())
+				{
+					bundleUuid = bundle->GetUuid();
+				}
+
+				writer.WriteObjectStart();
+				{
+					writer.WriteIdentifier("bundle");
+					writer.WriteValue(bundleUuid);
+
+					writer.WriteIdentifier("object");
+					writer.WriteValue(object->GetUuid());
+				}
+				writer.WriteObjectClose();
+			}
+		}
         
         if (fields.IsEmpty())
         {
@@ -947,7 +991,7 @@ namespace CE
 			isVectorField = true;
 		}
 		
-		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid) || field->IsEnumField()))
+		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || field->IsEnumField()))
 		{
 			if (fieldTypeId == TYPEID(s8))
 				field->SetFieldValue<s8>(rawInstance, (s8)json.GetNumberValue());
@@ -1016,7 +1060,9 @@ namespace CE
 				EnumType* enumType = (EnumType*)fieldDeclType;
 				EnumConstant* enumConstant = enumType->FindConstantWithName(json.GetStringValue());
 				if (enumConstant != nullptr)
+				{
 					field->SetFieldEnumValue(rawInstance, enumConstant->GetValue());
+				}
 			}
 			else
 			{
@@ -1024,6 +1070,10 @@ namespace CE
 			}
 
 			return true;
+		}
+		else if (json.IsStringValue() && fieldTypeId == TYPEID(Uuid))
+		{
+			field->SetFieldValue<Uuid>(rawInstance, Uuid::FromString(json.GetStringValue()));
 		}
 		else if (json.IsObjectValue() && fieldDeclType->IsStruct())
 		{
@@ -1049,20 +1099,25 @@ namespace CE
 
 			return true;
 		}
-		else if (json.IsObjectValue() && fieldDeclType->IsObject())
+		else if (json.IsObjectValue() && fieldDeclType->IsObject() && 
+			json.GetObjectValue().KeyExists("bundle") && 
+			json.GetObjectValue().KeyExists("object"))
 		{
-			Object* object = field->GetFieldValue<Object*>(rawInstance);
-			if (object == nullptr)
-				return false;
+			String bundleUuidStr = json.GetObjectValue().Get("bundle").GetStringValue();
+			String objectUuidStr = json.GetObjectValue().Get("object").GetStringValue();
 
-			JsonFieldDeserializer deserializer{ (ClassType*)fieldDeclType, object };
-			deserializer.isMap = true;
-			deserializer.isArray = false;
+			Uuid bundleUuid = Uuid::FromString(bundleUuidStr);
+			Uuid objectUuid = Uuid::FromString(objectUuidStr);
 
-			while (deserializer.HasNext())
+			Ref<Bundle> bundle = Bundle::LoadBundle(nullptr, bundleUuid, { .loadFully = false, .forceReload = false });
+			Ref<Object> object = nullptr;
+
+			if (bundle.IsValid())
 			{
-				deserializer.ReadNext(json);
+				object = bundle->LoadObject(objectUuid);
 			}
+
+			field->SetFieldObjectValue(rawInstance, object);
 
 			return true;
 		}
@@ -1220,8 +1275,7 @@ namespace CE
 		auto fieldDeclType = field->GetDeclarationType();
 		auto fieldTypeId = field->GetDeclarationTypeId();
 
-		if (jsonValue->IsNumberValue() &&
-			(field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid)))
+		if (jsonValue->IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField()))
 		{
 			if (fieldTypeId == TYPEID(s8))
 				field->SetFieldValue<s8>(rawInstance, (s8)jsonValue->GetNumberValue());

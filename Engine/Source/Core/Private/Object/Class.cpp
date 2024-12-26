@@ -266,6 +266,11 @@ namespace CE
             {
                 if (arrayIndex < 0)
                 {
+                    if (isLast)
+                    {
+	                    break;
+                    }
+
 	                return false;
                 }
 

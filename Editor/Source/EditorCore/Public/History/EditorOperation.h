@@ -16,7 +16,21 @@ namespace CE::Editor
 
     public:
 
+        void SetArrayIndex(int arrayIndex) { this->arrayIndex = arrayIndex; }
+        int GetArrayIndex() const { return arrayIndex; }
+
+        void SetEnumValue(s64 value) { this->enumValue = value; }
+        s64 GetEnumValue() const { return enumValue; }
+
+        MemoryStream& GetJsonStream() { return jsonStream; }
+
     protected:
+
+        int arrayIndex = -1;
+        s64 enumValue = 0;
+        MemoryStream jsonStream;
+
+        Variant userData;
 
         WeakRef<EditorHistory> history = nullptr;
         Name bundleSavePath;

@@ -570,6 +570,30 @@ namespace CE
 		return 0;
 	}
 
+	void FieldType::SetFieldObjectValue(void* instance, const Ref<Object>& object)
+	{
+		if (IsReadOnly() || !IsObjectField())
+			return;
+
+		if (IsStrongRefCounted())
+		{
+			SetFieldValue<Ref<Object>>(instance, object);
+		}
+		else if (IsWeakRefCounted())
+		{
+			SetFieldValue<WeakRef<Object>>(instance, object);
+		}
+		else
+		{
+			SetFieldValue<Object*>(instance, object.Get());
+		}
+
+		if (instanceOwner && instanceOwner->IsObject())
+		{
+			NotifyObjectFieldUpdate((Object*)instance);
+		}
+	}
+
 	bool FieldType::CopyTo(void* srcInstance, const Ptr<FieldType>& destField, void* destInstance)
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
@@ -954,46 +978,6 @@ namespace CE
 		}
 	}
 
-	/*Array<FieldType> FieldType::GetArrayFieldList(void* instance)
-	{
-		if (!IsArrayField())
-			return {};
-		
-		u32 arraySize = GetArraySize(instance);
-		if (arraySize == 0)
-			return {};
-
-		TypeInfo* underlyingType = GetUnderlyingType();
-		if (underlyingType == nullptr)
-			return {};
-
-		auto underlyingTypeSize = underlyingType->GetSize();
-
-		if (underlyingType->IsClass())
-		{
-			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
-
-			if (IsStrongRefCounted())
-			{
-				underlyingTypeSize = sizeof(Ref<>);
-			}
-			else if (IsWeakRefCounted())
-			{
-				underlyingTypeSize = sizeof(WeakRef<>);
-			}
-		}
-
-		Array<FieldType> array{};
-
-		for (int i = 0; i < arraySize; i++)
-		{
-			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 
-				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
-		}
-
-		return array;
-	}*/
-
 	Array<Ptr<FieldType>> FieldType::GetArrayFieldListPtr(void* instance)
 	{
 		if (!IsArrayField())
@@ -1027,11 +1011,57 @@ namespace CE
 
 		for (int i = 0; i < arraySize; i++)
 		{
-			array.Add(new FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(),
+			// TODO: We need to add ref counting Ptr<> to "owner: this" part too.
+			array.Add(new FieldType(name.GetString() + "[" + i + "]", underlyingType->GetTypeId(),
 				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
 		}
 
 		return array;
+	}
+
+	Ptr<FieldType> FieldType::GetArrayFieldElementPtr(void* instance, u32 position)
+	{
+		if (!IsArrayField())
+			return {};
+
+		u32 arraySize = GetArraySize(instance);
+		if (arraySize == 0)
+			return {};
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return {};
+
+		int underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
+		}
+
+		int i = position;
+
+		return new FieldType(name.GetString() + "[" + i + "]", underlyingType->GetTypeId(),
+			0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType);
+	}
+
+	void* FieldType::GetArrayInstance(void* instance)
+	{
+		if (!IsArrayField())
+			return nullptr;
+
+		const Array<u8>& array = GetFieldValue<Array<u8>>(instance);
+
+		return (void*)array.GetData();
 	}
 
 	void FieldType::NotifyObjectFieldUpdate(Object* instance)

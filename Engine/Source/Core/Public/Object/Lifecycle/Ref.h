@@ -229,6 +229,7 @@ namespace CE
             return object == nullptr;
         }
 
+        //! @brief Returns true if the pointer is neither a nullptr nor a destroyed object. 
         bool IsValid() const
         {
             return !IsNull();

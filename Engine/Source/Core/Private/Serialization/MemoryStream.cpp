@@ -61,8 +61,32 @@ namespace CE
 		move.dataSize = move.bufferSize = 0;
 		move.offset = 0;
 		move.autoResize = false;
+        move.permissions = Permissions::None;
+        move.autoResizeIncrement = 0;
     }
-    
+
+    MemoryStream& MemoryStream::operator=(MemoryStream&& move) noexcept
+    {
+        isAllocated = move.isAllocated;
+        data = move.data;
+        dataSize = move.dataSize;
+        bufferSize = move.bufferSize;
+        autoResize = move.autoResize;
+        permissions = move.permissions;
+        offset = move.offset;
+        autoResizeIncrement = move.autoResizeIncrement;
+
+        move.isAllocated = false;
+        move.data = nullptr;
+        move.dataSize = move.bufferSize = 0;
+        move.offset = 0;
+        move.autoResize = false;
+        move.permissions = Permissions::None;
+        move.autoResizeIncrement = 0;
+
+        return *this;
+    }
+
     bool MemoryStream::IsOpen()
     {
         return data != nullptr;

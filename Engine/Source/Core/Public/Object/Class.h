@@ -59,6 +59,10 @@ namespace CE
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
 			virtual void CallDestructor(void* instance) const = 0;
+
+			virtual Variant CreateVariant(void* instance) const = 0;
+			virtual void LoadFromVariant(const Variant& srcVariant, void* dstInstance) const = 0;
+
 			virtual void CopyConstructor(void* srcInstance, void* dstInstance) = 0;
 
 			virtual const CE::Name& GetTypeName() const = 0;
@@ -261,6 +265,20 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->CallDestructor(instance);
+		}
+
+		virtual Variant CreateVariant(void* instance)
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return Variant();
+			return Impl->CreateVariant(instance);
+		}
+
+		virtual void LoadFromVariant(const Variant& srcVariant, void* dstInstance)
+		{
+			if (Impl == nullptr || dstInstance == nullptr)
+				return;
+			Impl->LoadFromVariant(srcVariant, dstInstance);
 		}
 
 		void CopyConstructor(void* source, void* destination) override

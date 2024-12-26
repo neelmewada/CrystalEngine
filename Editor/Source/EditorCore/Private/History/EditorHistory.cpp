@@ -9,16 +9,18 @@ namespace CE::Editor
     }
 
     void EditorHistory::PerformOperation(const String& name, const Ref<Object>& target,
-        const EditorOperationDelegate& execute,
-	    const EditorOperationDelegate& unexecute)
+                                         const EditorOperationDelegate& execute,
+                                         const EditorOperationDelegate& unexecute,
+                                         const SubClass<EditorOperation>& operationClass)
     {
         Array targets = { target };
-        PerformOperation(name, targets, execute, unexecute);
+        PerformOperation(name, targets, execute, unexecute, operationClass);
     }
 
     void EditorHistory::PerformOperation(const String& name, const Array<Ref<Object>>& targets,
 	    const EditorOperationDelegate& execute,
-        const EditorOperationDelegate& unexecute)
+        const EditorOperationDelegate& unexecute,
+        const SubClass<EditorOperation>& operationClass)
     {
         if (!execute.IsValid() || !unexecute.IsValid())
             return;
@@ -30,7 +32,7 @@ namespace CE::Editor
             fixedName = FixObjectName(fixedName);
         }
 
-        Ref<EditorOperation> operation = CreateObject<EditorOperation>(this, fixedName);
+        Ref<EditorOperation> operation = CreateObject<EditorOperation>(this, fixedName, OF_NoFlags, operationClass);
 
         operation->title = name;
         operation->history = this;
@@ -58,19 +60,23 @@ namespace CE::Editor
 
     void EditorHistory::Undo()
     {
-        if (topIndex >= 0)
+        bool success = false;
+
+        while (!success && topIndex >= 0)
         {
-            historyStack[topIndex]->unexecute.Invoke(historyStack[topIndex]);
+            success = historyStack[topIndex]->unexecute.Invoke(historyStack[topIndex]);
             topIndex--;
         }
     }
 
     void EditorHistory::Redo()
     {
-        if (topIndex < (int)historyStack.GetSize() - 1)
+        bool success = false;
+
+        while (!success && topIndex < (int)historyStack.GetSize() - 1)
         {
             topIndex++;
-            historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
+            success = historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
         }
     }
 

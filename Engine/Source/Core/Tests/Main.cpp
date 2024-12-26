@@ -424,6 +424,22 @@ TEST(Containers, String)
     TEST_END;
 }
 
+TEST(Containers, Uuid)
+{
+	TEST_BEGIN;
+
+	Uuid uuid = Uuid::Random();
+
+	String uuidString = uuid.ToString();
+
+	Uuid fromString = Uuid::FromString(uuidString);
+
+	EXPECT_EQ(uuid, fromString);
+
+
+	TEST_END;
+}
+
 TEST(Containers, Path)
 {
 	TEST_BEGIN;
@@ -545,30 +561,67 @@ TEST(Containers, Variant)
 	testObject->BeginDestroy(); testObject = nullptr;
 
 	// Struct
-	VariantStruct testStruct{};
-	testStruct.stringArray = { "Item0", "Item1", "Item2" };
-	testStruct.stringData = "Test String";
+	{
+		VariantStruct testStruct{};
+		testStruct.stringArray = { "Item0", "Item1", "Item2" };
+		testStruct.stringData = "Test String";
 
-	value = testStruct;
-	EXPECT_TRUE(value.IsStruct());
+		value = testStruct;
+		EXPECT_TRUE(value.IsStruct());
 
-	testStruct.stringData = "New String";
-	testStruct.stringArray = { "NewItem0", "NewItem1" };
+		testStruct.stringData = "New String";
+		testStruct.stringArray = { "NewItem0", "NewItem1" };
 
-	VariantStruct copyStruct = value.GetValue<VariantStruct>();
-	EXPECT_EQ(copyStruct.stringData, "Test String");
-	EXPECT_EQ(copyStruct.stringArray.GetSize(), 3);
-	EXPECT_EQ(copyStruct.stringArray[0], "Item0");
-	EXPECT_EQ(copyStruct.stringArray[1], "Item1");
-	EXPECT_EQ(copyStruct.stringArray[2], "Item2");
+		VariantStruct copyStruct = value.GetValue<VariantStruct>();
+		EXPECT_EQ(copyStruct.stringData, "Test String");
+		EXPECT_EQ(copyStruct.stringArray.GetSize(), 3);
+		EXPECT_EQ(copyStruct.stringArray[0], "Item0");
+		EXPECT_EQ(copyStruct.stringArray[1], "Item1");
+		EXPECT_EQ(copyStruct.stringArray[2], "Item2");
 
-	Variant variant2 = value;
-	VariantStruct variant2Struct = variant2.GetValue<VariantStruct>();
-	EXPECT_EQ(variant2Struct.stringData, "Test String");
-	EXPECT_EQ(variant2Struct.stringArray.GetSize(), 3);
-	EXPECT_EQ(variant2Struct.stringArray[0], "Item0");
-	EXPECT_EQ(variant2Struct.stringArray[1], "Item1");
-	EXPECT_EQ(variant2Struct.stringArray[2], "Item2");
+		Variant variant2 = value;
+		VariantStruct variant2Struct = variant2.GetValue<VariantStruct>();
+		EXPECT_EQ(variant2Struct.stringData, "Test String");
+		EXPECT_EQ(variant2Struct.stringArray.GetSize(), 3);
+		EXPECT_EQ(variant2Struct.stringArray[0], "Item0");
+		EXPECT_EQ(variant2Struct.stringArray[1], "Item1");
+		EXPECT_EQ(variant2Struct.stringArray[2], "Item2");
+
+		value = Variant();
+		EXPECT_FALSE(value.HasValue());
+	}
+
+	// Struct RTTI
+	{
+		EXPECT_FALSE(value.HasValue());
+
+		StructType* type = VariantStruct::StaticStruct();
+
+		{
+			VariantStruct testStruct{};
+			testStruct.stringArray = { "Item 0", "Item 1", "Item 2" };
+			testStruct.stringData = "Some String";
+
+			value = type->CreateVariant(&testStruct);
+		}
+
+		EXPECT_TRUE(value.HasValue());
+		EXPECT_TRUE(value.IsStruct());
+		EXPECT_TRUE(value.IsOfType<VariantStruct>());
+		EXPECT_EQ(value.GetValueTypeId(), type->GetTypeId());
+
+		{
+			VariantStruct testStruct{};
+
+			type->LoadFromVariant(value, &testStruct);
+
+			EXPECT_EQ(testStruct.stringArray.GetSize(), 3);
+			EXPECT_EQ(testStruct.stringArray[0], "Item 0");
+			EXPECT_EQ(testStruct.stringArray[1], "Item 1");
+			EXPECT_EQ(testStruct.stringArray[2], "Item 2");
+			EXPECT_EQ(testStruct.stringData, "Some String");
+		}
+	}
 
 	CEDeregisterModuleTypes();
 	TEST_END;

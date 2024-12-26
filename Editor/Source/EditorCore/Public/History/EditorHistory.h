@@ -12,8 +12,15 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        void PerformOperation(const String& name, const Ref<Object>& target, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
-        void PerformOperation(const String& name, const Array<Ref<Object>>& targets, const EditorOperationDelegate& execute, const EditorOperationDelegate& unexecute);
+        void PerformOperation(const String& name, const Ref<Object>& target, 
+            const EditorOperationDelegate& execute, 
+            const EditorOperationDelegate& unexecute,
+            const SubClass<EditorOperation>& operationClass = EditorOperation::StaticClass());
+
+        void PerformOperation(const String& name, const Array<Ref<Object>>& targets, 
+            const EditorOperationDelegate& execute, 
+            const EditorOperationDelegate& unexecute,
+            const SubClass<EditorOperation>& operationClass = EditorOperation::StaticClass());
 
         template<typename T>
         void PerformOperation(const String& name, const Ref<Object>& target, const CE::Name& relativeFieldPath,

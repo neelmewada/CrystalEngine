@@ -177,6 +177,8 @@ namespace CE
             }
         }
 
+        void SetFieldObjectValue(void* instance, const Ref<Object>& object);
+
 		template<typename T>
 		INLINE void ForceSetFieldValue(void* instance, const T& value)
 		{
@@ -223,8 +225,11 @@ namespace CE
             array[index] = value;
         }
 
-        //Array<FieldType> GetArrayFieldList(void* instance);
         Array<Ptr<FieldType>> GetArrayFieldListPtr(void* instance);
+
+        Ptr<FieldType> GetArrayFieldElementPtr(void* instance, u32 position);
+
+        void* GetArrayInstance(void* instance);
 
     private:
 
