@@ -141,7 +141,7 @@ namespace CE::Editor
 
     bool PropertyEditor::IsExpandable()
     {
-        return false;
+        return fieldDeclType != nullptr && fieldDeclType->IsStruct();
     }
 
     void PropertyEditor::UpdateValue()
@@ -212,7 +212,7 @@ namespace CE::Editor
 
         FieldNameText(field->GetDisplayName());
 
-        TypeInfo* fieldDeclType = field->GetDeclarationType();
+        fieldDeclType = field->GetDeclarationType();
         if (fieldDeclType == nullptr)
         {
             printError("Cannot find field type!");
@@ -230,6 +230,8 @@ namespace CE::Editor
         if (fieldDeclType->IsStruct())
         {
             printError("Struct not supported!");
+
+            expansionArrow->Visible(true);
         }
         else if (fieldDeclType->IsVectorType())
         {

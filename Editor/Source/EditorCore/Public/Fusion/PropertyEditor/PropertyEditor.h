@@ -67,6 +67,7 @@ namespace CE::Editor
 
         bool isExpanded = false;
         int indentation = 0;
+        TypeInfo* fieldDeclType = nullptr;
 
         FSplitBox* splitBox = nullptr;
 
