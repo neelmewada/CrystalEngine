@@ -41,10 +41,16 @@ namespace CE
         FBrush itemHoverBackground;
 
         FIELD()
+        FBrush itemActiveBackground;
+
+        FIELD()
         Color itemBorderColor;
 
         FIELD()
         Color itemHoverBorderColor;
+
+        FIELD()
+        Color itemActiveBorderColor;
 
         FIELD()
         f32 itemBorderWidth = 0;

@@ -8,6 +8,11 @@ namespace CE
 
     }
 
+    bool FMenuItem::IsActive() const
+    {
+        return subMenu != nullptr && subMenu->IsShown();
+    }
+
     void FMenuItem::OpenSubMenu()
     {
         if (!subMenu)
@@ -16,12 +21,18 @@ namespace CE
         if (menuOwner == nullptr || menuOwner->IsOfType<FMenuItem>())
         {
             GetContext()->PushLocalPopup(subMenu, globalPosition + Vec2(computedSize.x, 0));
+
+            if (menuOwner)
+                menuOwner->ApplyStyle();
         }
         else if (menuOwner != nullptr && menuOwner->IsOfType<FMenuBar>())
         {
             Vec2 offset = Vec2(0, computedSize.y);
 
             GetContext()->PushLocalPopup(subMenu, globalPosition + offset);
+
+            if (menuOwner)
+                menuOwner->ApplyStyle();
         }
     }
 
@@ -90,6 +101,9 @@ namespace CE
                     Vec2 offset = Vec2(0, computedSize.y);
 
                     GetContext()->PushLocalPopup(subMenu, globalPosition + offset);
+
+                    if (menuOwner)
+                        menuOwner->ApplyStyle();
                 }
 
                 if (menuOwner && !subMenu)

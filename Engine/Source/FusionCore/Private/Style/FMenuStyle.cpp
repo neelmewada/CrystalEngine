@@ -30,6 +30,11 @@ namespace CE
             FMenuItem& item = *menuBar.GetMenuItem(i);
 
             FBrush itemBg = item.IsHovered() ? itemHoverBackground : itemBackground;
+        	if (item.GetSubMenu() != nullptr &&
+        		item.GetSubMenu()->IsShown())
+        	{
+        		itemBg = itemActiveBackground;
+        	}
 
             Color borderColor = item.IsHovered() ? this->itemBorderColor : this->itemHoverBorderColor;
 

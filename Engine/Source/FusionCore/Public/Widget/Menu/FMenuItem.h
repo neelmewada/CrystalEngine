@@ -14,11 +14,15 @@ namespace CE
 
         bool IsHovered() const { return isHovered; }
 
+        bool IsActive() const;
+
         bool SupportsMouseEvents() const override { return true; }
 
         bool SupportsFocusEvents() const override { return true; }
 
         void OpenSubMenu();
+
+        FMenuPopup* GetSubMenu() const { return subMenu; }
 
     protected:
 

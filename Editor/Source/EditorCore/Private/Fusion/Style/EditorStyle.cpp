@@ -477,7 +477,8 @@ namespace CE::Editor
 		editorMenuBar->borderWidth = 0.0f;
 
     	editorMenuBar->itemBackground = Color::Clear();
-		editorMenuBar->itemHoverBackground = highlightColor;
+    	editorMenuBar->itemHoverBackground = Color::RGBA(64, 64, 64);
+		editorMenuBar->itemActiveBackground = highlightColor;
 		editorMenuBar->itemBorderColor = Color::Clear();
 		editorMenuBar->itemHoverBorderColor = Color::Clear();
 		editorMenuBar->itemPadding = Vec4(2, 1, 2, 1) * 5;
