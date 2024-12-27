@@ -2,10 +2,24 @@
 
 namespace CE
 {
-	
+	SIZE_T FGradientKey::GetHash() const
+	{
+		return GetCombinedHash(CE::GetHash(position), CE::GetHash(color));
+	}
+
+	SIZE_T FGradient::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(gradientType);
+		for (const auto& stop : stops)
+		{
+			CombineHash(hash, stop);
+		}
+		CombineHash(hash, angle);
+		return hash;
+	}
 
 	FBrush::FBrush()
-		: tintColor(Color::Clear())
+		: fillColor(Color::Clear())
 		, imageName(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
@@ -22,11 +36,20 @@ namespace CE
 
 	}
 
-	FBrush::FBrush(const Name& imageName, const Color& tintColor)
-		: tintColor(tintColor)
+	FBrush::FBrush(const Name& imageName, const Color& fillColor)
+		: fillColor(fillColor)
 		, imageName(imageName)
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::Image)
+		, imageFit(FImageFit::Fill)
+	{
+		
+	}
+
+	FBrush::FBrush(const FGradient& gradient, const Color& tintColor)
+		: fillColor(Color::White())
+		, gradient(gradient)
+		, brushStyle(FBrushStyle::Gradient)
 		, imageFit(FImageFit::Fill)
 	{
 		
@@ -44,28 +67,6 @@ namespace CE
 		}
 	}
 
-	FBrush::FBrush(const FBrush& copy)
-	{
-		CopyFrom(copy);
-	}
-
-	FBrush& FBrush::operator=(const FBrush& copy)
-	{
-		CopyFrom(copy);
-		return *this;
-	}
-
-	FBrush::FBrush(FBrush&& move) noexcept
-	{
-		MoveFrom(move);
-	}
-
-	FBrush& FBrush::operator=(FBrush&& move) noexcept
-	{
-		MoveFrom(move);
-		return *this;
-	}
-
 	bool FBrush::IsValidBrush()
 	{
 		switch (brushStyle)
@@ -73,11 +74,11 @@ namespace CE
 		case FBrushStyle::None:
 			return false;
 		case FBrushStyle::SolidFill:
-			return fillColor.a > 0;
+			return fillColor.a > 0.001f;
 		case FBrushStyle::Image:
-			return tintColor.a > 0 && imageName.IsValid();
-		case FBrushStyle::LinearGradient:
-			break;
+			return fillColor.a > 0.001f && imageName.IsValid();
+		case FBrushStyle::Gradient:
+			return gradient.stops.GetSize() >= 2 && fillColor.a > 0.001f;
 		}
 
 		return true;
@@ -100,10 +101,10 @@ namespace CE
 		{
 		case FBrushStyle::SolidFill:
 			return fillColor == rhs.fillColor;
-		case FBrushStyle::LinearGradient:
-			break;
+		case FBrushStyle::Gradient:
+			return fillColor == rhs.fillColor && gradient == rhs.gradient;
 		case FBrushStyle::Image:
-			return tintColor == rhs.tintColor && imageName == rhs.imageName;
+			return fillColor == rhs.fillColor && imageName == rhs.imageName;
 		case FBrushStyle::None:
 			break;
 		}
@@ -111,66 +112,11 @@ namespace CE
 		return true;
 	}
 
-	FBrush FBrush::WithTint(const Color& tintColor) const
+	FBrush FBrush::WithTint(const Color& fillColor) const
 	{
 		FBrush result = *this;
-		result.tintColor = tintColor;
+		result.fillColor = fillColor;
 		return result;
 	}
-
-	void FBrush::CopyFrom(const FBrush& from)
-    {
-	    if (brushStyle != from.brushStyle)
-	    {
-		    switch (brushStyle)
-		    {
-		    case FBrushStyle::None:
-			    break;
-		    case FBrushStyle::SolidFill:
-			    break;
-		    case FBrushStyle::LinearGradient:
-			    break;
-		    case FBrushStyle::Image:
-				imageName.~Name();
-			    break;
-		    }
-	    }
-
-		brushSize = from.brushSize;
-		imageFit = from.imageFit;
-		brushPos = from.brushPos;
-		brushStyle = from.brushStyle;
-		tiling = from.tiling;
-
-	    switch (brushStyle)
-	    {
-		case FBrushStyle::None:
-			break;
-		case FBrushStyle::SolidFill:
-			fillColor = from.fillColor;
-			break;
-		case FBrushStyle::LinearGradient:
-			break;
-		case FBrushStyle::Image:
-			tintColor = from.tintColor;
-			imageName = from.imageName;
-			break;
-	    }
-    }
-
-    void FBrush::MoveFrom(FBrush& move)
-    {
-		CopyFrom(move);
-
-		move.brushStyle = FBrushStyle::None;
-		move.fillColor = {};
-		move.tintColor = {};
-		move.tiling = {};
-		move.brushPos = {};
-		move.brushSize = {};
-		move.imageFit = {};
-		move.imageName.~Name();
-    }
-
     
 } // namespace CE

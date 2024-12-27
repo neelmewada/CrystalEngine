@@ -23,6 +23,8 @@ namespace CE
         void OnMinimized() override;
         void OnRestored() override;
 
+        virtual void OnClickClose() {}
+
         FStyledWidget* borderWidget = nullptr;
         FVerticalStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;

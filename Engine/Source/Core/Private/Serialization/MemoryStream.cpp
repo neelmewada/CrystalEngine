@@ -8,6 +8,19 @@ namespace CE
      *  Memory Ascii Stream
      */
 
+    MemoryStream::MemoryStream()
+    {
+        dataSize = 0;
+        bufferSize = 0;
+        data = nullptr;
+
+        isAllocated = false;
+        this->autoResize = true;
+        autoResizeIncrement = 512;
+        permissions = Permissions::ReadWrite;
+        offset = 0;
+    }
+
     MemoryStream::MemoryStream(u32 sizeToAllocate, b8 autoResize)
     {
         ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support size up to 2 GB.");
@@ -45,6 +58,37 @@ namespace CE
         MemoryStream::Close();
     }
 
+    MemoryStream::MemoryStream(const MemoryStream& copy) : MemoryStream()
+    {
+        CloneFrom(copy);
+    }
+
+    MemoryStream& MemoryStream::operator=(const MemoryStream& copy)
+    {
+        if (this != &copy)
+        {
+	        CloneFrom(copy);
+        }
+        return *this;
+    }
+
+    void MemoryStream::CloneFrom(const MemoryStream& copy)
+    {
+        isAllocated = copy.isAllocated;
+        dataSize = copy.dataSize;
+        bufferSize = copy.bufferSize;
+        autoResize = copy.autoResize;
+        permissions = copy.permissions;
+        offset = copy.offset;
+        autoResizeIncrement = copy.autoResizeIncrement;
+
+        if (isAllocated && bufferSize > 0)
+        {
+	        data = new u8[bufferSize];
+            memcpy(data, copy.data, bufferSize);
+        }
+    }
+
     MemoryStream::MemoryStream(MemoryStream&& move) noexcept
     {
 		isAllocated = move.isAllocated;
@@ -61,8 +105,32 @@ namespace CE
 		move.dataSize = move.bufferSize = 0;
 		move.offset = 0;
 		move.autoResize = false;
+        move.permissions = Permissions::None;
+        move.autoResizeIncrement = 0;
     }
-    
+
+    MemoryStream& MemoryStream::operator=(MemoryStream&& move) noexcept
+    {
+        isAllocated = move.isAllocated;
+        data = move.data;
+        dataSize = move.dataSize;
+        bufferSize = move.bufferSize;
+        autoResize = move.autoResize;
+        permissions = move.permissions;
+        offset = move.offset;
+        autoResizeIncrement = move.autoResizeIncrement;
+
+        move.isAllocated = false;
+        move.data = nullptr;
+        move.dataSize = move.bufferSize = 0;
+        move.offset = 0;
+        move.autoResize = false;
+        move.permissions = Permissions::None;
+        move.autoResizeIncrement = 0;
+
+        return *this;
+    }
+
     bool MemoryStream::IsOpen()
     {
         return data != nullptr;
@@ -72,9 +140,11 @@ namespace CE
     {
         if (isAllocated)
             delete[] data;
+
         data = nullptr;
         dataSize = bufferSize = 0;
         offset = 0;
+        isAllocated = false;
     }
 
     bool MemoryStream::CanRead()

@@ -55,7 +55,7 @@ static void TestBegin(bool gui)
 		f32 scaleFactor = GetDefaults<FusionApplication>()->GetDefaultScalingFactor();
 
 #if PLATFORM_MAC
-		u32 w = 540, h = 400;
+		u32 w = 600, h = 500;
 #elif PLATFORM_LINUX
 		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
 #elif PLATFORM_WINDOWS

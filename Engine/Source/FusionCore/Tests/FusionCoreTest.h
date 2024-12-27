@@ -297,6 +297,9 @@ namespace RenderingTests
 
 		RenderingTestWidget() = default;
 
+		FUNCTION()
+		void OnTimeOut();
+
 		void Construct() override;
 
 		void OnBeginDestroy() override;
@@ -324,6 +327,9 @@ namespace RenderingTests
 		FStyledWidget* borderWidget = nullptr;
 		FTextInput* modelTextInput = nullptr;
 		FVerticalStack* windowContent = nullptr;
+
+		FTimer* timer = nullptr;
+		f32 gradientAngle = 0;
 
 		int hitCounter = 0;
 

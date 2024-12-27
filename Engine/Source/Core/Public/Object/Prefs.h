@@ -24,8 +24,8 @@ namespace CE
 		void LoadPrefs(Object* object);
 		void SavePrefs(Object* object);
 
-		void SerializeField(FieldType* field, void* instance, JValue& parent);
-		void DeserializeField(FieldType* field, void* instance, JValue& parent, int index = 0);
+		void SerializeField(const Ptr<FieldType>& field, void* instance, JValue& parent);
+		void DeserializeField(const Ptr<FieldType>& field, void* instance, JValue& parent, int index = 0);
 
 		Prefs() = default;
 

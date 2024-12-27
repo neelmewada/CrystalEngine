@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	// This class is only for an example!
+
     CLASS(Settings = "TagAndLayerSettings", DisplayName = "Tags and Layer Settings", SettingsCategory = "Project")
 	class CORESETTINGS_API TagAndLayerSettings : public Settings
 	{

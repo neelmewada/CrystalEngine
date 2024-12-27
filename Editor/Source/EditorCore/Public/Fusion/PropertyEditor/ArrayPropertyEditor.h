@@ -14,9 +14,9 @@ namespace CE::Editor
 
         void ConstructEditor() override;
 
-        void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances) override;
+        void InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath) override;
 
-        void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances) override;
+        void UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath) override;
 
     public: // - Public API -
 
@@ -47,10 +47,7 @@ namespace CE::Editor
         FLabel* countLabel = nullptr;
         f32 fixedInputWidth = -1;
 
-        Object* target = nullptr;
-        void* instance = nullptr;
-
-        Array<FieldType> arrayElements;
+        Array<Ptr<FieldType>> arrayElements;
         Array<PropertyEditor*> elementEditors;
 
     public: // - Fusion Properties - 

@@ -13,6 +13,11 @@ namespace CE::Editor
         
     }
 
+    void ObjectEditor::SetEditorHistory(const Ref<EditorHistory>& history)
+    {
+        this->history = history;
+    }
+
     void ObjectEditor::Construct()
     {
 	    Super::Construct();
@@ -22,27 +27,36 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
         );
-
     }
 
     void ObjectEditor::OnBeginDestroy()
     {
 	    Super::OnBeginDestroy();
 
-        if (target)
+        for (const auto& targetObjectUuid : targetObjectUuids)
         {
-            ObjectListener::RemoveListener(target, this);
+            ObjectListener::RemoveListener(targetObjectUuid, this);
         }
     }
 
-    void ObjectEditor::OnObjectFieldChanged(Object* object, const CE::Name& fieldName)
+    void ObjectEditor::OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName)
     {
-        if (object != target)
+        if (!targetObjectUuids.Exists(objectUuid))
             return;
+
+        String fieldNameStr = fieldName.GetString();
+        if (fieldNameStr.Contains('['))
+        {
+            fieldNameStr = fieldNameStr.Split('[')[0];
+        }
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
 	    {
-            propertyEditor->UpdateValue();
+            if (propertyEditor->relativeFieldPath.GetString().Contains(fieldNameStr))
+            {
+	            propertyEditor->UpdateValue();
+                break;
+            }
 	    }
     }
 
@@ -108,8 +122,6 @@ namespace CE::Editor
         // Default ObjectEditor doesn't support multi-object editing yet.
         if (target == nullptr)
             return;
-
-        ObjectListener::AddListener(target, this);
         
         content->DestroyAllChildren();
 
@@ -131,6 +143,9 @@ namespace CE::Editor
         std::function<void(Object*,bool)> visitor = [&](Object* target, bool recurseComponents)
             {
                 Class* clazz = target->GetClass();
+
+                ObjectListener::AddListener(target->GetUuid(), this);
+                targetObjectUuids.Add(target->GetUuid());
 
                 u32 numFields = clazz->GetFieldCount();
 
@@ -226,18 +241,12 @@ namespace CE::Editor
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(field, this);
                 if (propertyEditor == nullptr)
                     continue;
-
-                propertyEditor->objectEditor = this;
                 
                 expandContent->AddChild(propertyEditor);
 
-                thread_local Array targetsArray = { target };
-                targetsArray[0] = target;
+                Array<WeakRef<Object>> targetsArray = { target };
 
-                thread_local Array<void*> instancesArray = { target };
-                instancesArray[0] = target;
-
-                propertyEditor->InitTarget(field, targetsArray, instancesArray);
+                propertyEditor->InitTarget(targetsArray, field->GetName().GetString());
 
                 propertyEditors.Add(propertyEditor);
             }

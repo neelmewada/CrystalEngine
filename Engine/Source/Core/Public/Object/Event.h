@@ -55,6 +55,8 @@ namespace CE
         virtual void Bind(const FunctionBinding& binding) = 0;
         virtual void Bind(const Delegate<Variant(const Array<Variant>&)>& lambda) = 0;
 
+        virtual void Unbind() = 0;
+
         virtual bool IsBound() const = 0;
         virtual bool IsFunction() const = 0;
         virtual bool IsLambda() const = 0;
@@ -244,6 +246,14 @@ namespace CE
         {
             this->lambda = lambda;
             isBound = this->lambda.IsValid();
+        }
+
+		void Unbind() override
+        {
+            this->lambda = nullptr;
+            dstObject = nullptr;
+            dstFunction = nullptr;
+            isBound = false;
         }
 
         template<typename TLambda>

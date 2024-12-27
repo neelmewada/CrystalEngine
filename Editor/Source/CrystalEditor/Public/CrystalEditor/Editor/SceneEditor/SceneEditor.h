@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneEditor : public EditorDockTab, public ISceneSubsystemCallbacks
+    class CRYSTALEDITOR_API SceneEditor : public EditorBase, public ISceneSubsystemCallbacks
     {
-        CE_CLASS(SceneEditor, EditorDockTab)
+        CE_CLASS(SceneEditor, EditorBase)
     public:
 
         // - Public API -

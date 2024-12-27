@@ -112,12 +112,12 @@ namespace CE
 
         inline bool operator==(const TVector2& rhs) const
         {
-            return x == rhs.x && y == rhs.y;
+            return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y);
         }
 
         inline bool operator!=(const TVector2& rhs) const
         {
-            return x != rhs.x || y != rhs.y;
+            return !operator==(rhs);
         }
 
         inline TVector2 operator*(s32 value) const
@@ -323,12 +323,12 @@ namespace CE
 
         inline bool operator==(const TVector3& rhs) const
         {
-            return x == rhs.x && y == rhs.y && z == rhs.z;
+            return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y) && Math::ApproxEquals(z, rhs.z);
         }
 
         inline bool operator!=(const TVector3& rhs) const
         {
-            return x != rhs.x || y != rhs.y || z != rhs.z;
+            return !operator==(rhs);
         }
 
         inline TVector3 operator*(s32 value) const
@@ -568,12 +568,13 @@ namespace CE
 
         inline bool operator==(const TVector4& rhs) const
         {
-            return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
+            return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y) && Math::ApproxEquals(z, rhs.z) &&
+                Math::ApproxEquals(w, rhs.w);
         }
 
         inline bool operator!=(const TVector4& rhs) const
         {
-            return x != rhs.x || y != rhs.y || z != rhs.z || w != rhs.w;
+            return !operator==(rhs);
         }
 
         inline TVector4 operator*(s32 value) const
@@ -851,12 +852,12 @@ namespace CE
 
         inline bool operator==(const Rect& rhs) const
         {
-            return (left == rhs.left) && (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom);
+            return min == rhs.min && max == rhs.max;
         }
 
         inline bool operator!=(const Rect& rhs) const
         {
-            return !(*this == rhs);
+            return !operator==(rhs);
         }
 
         inline Rect operator+(const Rect& rhs)

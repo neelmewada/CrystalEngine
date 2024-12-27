@@ -110,7 +110,7 @@ namespace CE
 #if PLATFORM_MAC
             ctrl = ctrl || gui;
 #endif
-
+            
             bool isUpperCase = (shiftPressed != capslock);
             char c = 0;
 
@@ -576,6 +576,11 @@ namespace CE
 
     void FTextInputLabel::StartEditing()
     {
+        if (!textInput->IsEditing())
+        {
+            textInput->m_OnBeginEditing(textInput);
+        }
+
         originalText = m_Text;
 
         cursorTimer->Reset();
@@ -796,6 +801,29 @@ namespace CE
         m_Padding = Vec4(7.5f, 5, 7.5f, 5);
     }
 
+    void FTextInput::StartEditing(bool selectAll)
+    {
+        if (!IsEditing())
+        {
+            inputLabel->cursorPos = 0;
+            inputLabel->StartEditing();
+
+            if (selectAll)
+            {
+                inputLabel->SelectAll();
+            }
+            
+            FusionApplication::Get()->GetRootContext()->SetFocusWidget(inputLabel);
+        }
+    }
+
+    void FTextInput::OnPaintContent(FPainter* painter)
+    {
+        Super::OnPaintContent(painter);
+
+        m_OnBeforeTextPaint(painter);
+    }
+
     void FTextInput::OnLostFocus()
     {
 	    Super::OnLostFocus();
@@ -858,10 +886,12 @@ namespace CE
             
             if (mouseEvent->type == FEventType::MouseEnter)
             {
+                SetHoveredInternal(true);
                 app->PushCursor(SystemCursor::IBeam);
             }
             else if (mouseEvent->type == FEventType::MouseLeave)
             {
+                SetHoveredInternal(false);
                 app->PopCursor();
             }
             else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
@@ -872,6 +902,32 @@ namespace CE
         }
 
 	    Super::HandleEvent(event);
+    }
+
+    void FTextInput::SetHoveredInternal(bool hovered)
+    {
+	    if (IsHovered() != hovered)
+	    {
+            if (hovered)
+                state |= FTextInputState::Hovered;
+            else
+                state &= ~FTextInputState::Hovered;
+
+            ApplyStyle();
+	    }
+    }
+
+    void FTextInput::SetHighlightedInternal(bool highlighted)
+    {
+	    if (IsHighlighted() != highlighted)
+	    {
+            if (highlighted)
+                state |= FTextInputState::Highlighted;
+            else
+                state &= ~FTextInputState::Highlighted;
+
+            ApplyStyle();
+	    }
     }
 
     void FTextInput::SetEditingInternal(bool editing)

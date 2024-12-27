@@ -45,14 +45,14 @@ namespace CE::Editor
         customEditorRegistry[targetClass->GetTypeId()] = nullptr;
     }
 
-    ObjectEditor* ObjectEditorRegistry::Create(Object* targetObject)
+    ObjectEditor* ObjectEditorRegistry::Create(Object* targetObject, const Ref<EditorHistory>& history)
     {
         thread_local Array<Object*> singleArray = { targetObject };
         singleArray[0] = targetObject;
-        return Create(singleArray);
+        return Create(singleArray, history);
     }
 
-    ObjectEditor* ObjectEditorRegistry::Create(const Array<Object*>& targetObjects)
+    ObjectEditor* ObjectEditorRegistry::Create(const Array<Object*>& targetObjects, const Ref<EditorHistory>& history)
     {
         if (targetObjects.IsEmpty())
             return nullptr;
@@ -110,6 +110,7 @@ namespace CE::Editor
         }
 
         editor->targets = targetObjects;
+        editor->SetEditorHistory(history);
 
         editor->CreateGUI();
 

@@ -2,6 +2,26 @@
 
 namespace CE
 {
+    STRUCT()
+    struct CORESETTINGS_API ProjectSettingsAdvanced final
+    {
+        CE_STRUCT(ProjectSettingsAdvanced)
+    public:
+
+        FIELD(EditAnywhere)
+        bool useBorderlessWindow = false;
+
+        FIELD(EditAnywhere)
+        bool useFullscreen = true;
+
+        FIELD(EditAnywhere)
+        bool allowMinimize = false;
+
+        FIELD(EditAnywhere)
+        String signingKey;
+
+    };
+
     CLASS(Settings = "ProjectSettings", DisplayName = "Project Settings", SettingsCategory = "Project")
     class CORESETTINGS_API ProjectSettings : public Settings
     {
@@ -28,6 +48,12 @@ namespace CE
 
         FIELD(EditAnywhere, Category = "Legal", DisplayName = "Privacy Policy URL")
 		String privacyPolicyUrl = "";
+
+        // Advanced
+
+        FIELD(EditAnywhere, Category = "Settings")
+        ProjectSettingsAdvanced advanced;
+
     };
 }
 

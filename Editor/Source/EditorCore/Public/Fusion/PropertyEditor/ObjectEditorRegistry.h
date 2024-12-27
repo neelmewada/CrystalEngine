@@ -33,11 +33,11 @@ namespace CE::Editor
             UnregisterCustomEditor(TClass::StaticType());
         }
 
-        ObjectEditor* Create(Object* targetObject);
-        ObjectEditor* Create(const Array<Object*>& targetObjects);
+        ObjectEditor* Create(Object* targetObject, const Ref<EditorHistory>& history = nullptr);
+        ObjectEditor* Create(const Array<Object*>& targetObjects, const Ref<EditorHistory>& history = nullptr);
 
         template<typename T> requires (not TIsSameType<Object, T>::Value) and TIsBaseClassOf<Object, T>::Value
-        ObjectEditor* Create(const Array<T*>& targetObjects)
+        ObjectEditor* Create(const Array<T*>& targetObjects, const Ref<EditorHistory>& history = nullptr)
         {
             Array<Object*> objects;
             objects.Resize(targetObjects.GetSize());
@@ -45,7 +45,7 @@ namespace CE::Editor
             {
                 objects[i] = targetObjects[i];
             }
-            return Create(objects);
+            return Create(objects, history);
         }
 
     private:

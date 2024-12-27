@@ -179,15 +179,13 @@ namespace CE::Vulkan
 		presentationModes.Resize(presentationCount);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
 
-		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-        //presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+		presentMode = VK_PRESENT_MODE_FIFO_KHR;
+        //presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR; // vsync off
 
 		if (desc.useMailboxMode && presentationModes.Exists(VK_PRESENT_MODE_MAILBOX_KHR))
 		{
 			presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 		}
-
-		this->presentMode = presentMode;
 
 		// - Select PreTransform
 

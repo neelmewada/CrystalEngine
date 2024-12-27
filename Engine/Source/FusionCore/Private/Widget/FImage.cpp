@@ -24,13 +24,13 @@ namespace CE
 
         if (imageName.IsValid())
         {
-            auto image = app->FindImage(imageName);
-            if (image)
+            auto image = app->GetImageAtlas()->FindImage(imageName);
+            if (image.IsValid())
             {
                 if (brushSize.x < 0)
-                    brushSize.x = image->GetWidth();
+                    brushSize.x = image.width;
                 if (brushSize.y < 0)
-                    brushSize.y = image->GetHeight();
+                    brushSize.y = image.height;
             }
         }
 

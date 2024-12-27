@@ -36,6 +36,11 @@ namespace CE::Editor
 		}
     }
 
+    EditorStyle* EditorStyle::Get()
+    {
+		return gEditorStyle;
+    }
+
     void EditorStyle::InitializeDefault()
     {
         if (!button)
@@ -48,7 +53,7 @@ namespace CE::Editor
 		button->hoveredBackground = Color::RGBA(95, 95, 95);
 		button->pressedBackground = Color::RGBA(50, 50, 50);
 		button->disabledBackground = Color::RGBA(40, 40, 40);
-		button->cornerRadius = Vec4(1, 1, 1, 1) * 5;
+		button->cornerRadius = Vec4(1, 1, 1, 1) * 2.5f;
 		button->borderColor = 
 			button->hoveredBorderColor = 
 			button->pressedBorderColor = Color::RGBA(24, 24, 24);

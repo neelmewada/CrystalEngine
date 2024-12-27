@@ -59,6 +59,10 @@ namespace CE
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
 			virtual void CallDestructor(void* instance) const = 0;
+
+			virtual Variant CreateVariant(void* instance) const = 0;
+			virtual void LoadFromVariant(const Variant& srcVariant, void* dstInstance) const = 0;
+
 			virtual void CopyConstructor(void* srcInstance, void* dstInstance) = 0;
 
 			virtual const CE::Name& GetTypeName() const = 0;
@@ -76,7 +80,7 @@ namespace CE
 	protected:
 		StructType(String name, Internal::IStructTypeImpl* impl, u32 size, String attributes = "") : TypeInfo(name, attributes), Impl(impl), size(size)
 		{}
-		virtual ~StructType() {}
+		virtual ~StructType();
 
 		template<typename T>
 		friend TypeInfo* GetStaticType();
@@ -141,9 +145,9 @@ namespace CE
 			return localFields.GetSize();
 		}
 
-		FieldType* GetLocalFieldAt(u32 index)
+		Ptr<FieldType> GetLocalFieldAt(u32 index)
 		{
-			return &localFields[index];
+			return localFields[index];
 		}
 
 		u32 GetFunctionCount()
@@ -189,15 +193,24 @@ namespace CE
 
 		bool HasEventFields();
 
-		FieldType* GetFirstField();
+		Ptr<FieldType> GetFirstField();
 
 		// Returns a list of all fields that are an Object Pointer
 		Array<FieldType*> FetchObjectFields();
 
 		u32 GetFieldCount();
-		FieldType* GetFieldAt(u32 index);
+		Ptr<FieldType> GetFieldAt(u32 index);
         
-        FieldType* FindField(const Name& name);
+        Ptr<FieldType> FindField(const Name& name);
+
+		bool FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject, 
+			Ptr<FieldType>& outField, void*& outInstance);
+
+		bool FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
+			Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance);
+
+		bool FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject, void* targetInstance,
+			StructType*& outFieldOwner, Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance);
 
 		bool HasFunctions();
 
@@ -252,6 +265,20 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->CallDestructor(instance);
+		}
+
+		virtual Variant CreateVariant(void* instance)
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return Variant();
+			return Impl->CreateVariant(instance);
+		}
+
+		virtual void LoadFromVariant(const Variant& srcVariant, void* dstInstance)
+		{
+			if (Impl == nullptr || dstInstance == nullptr)
+				return;
+			Impl->LoadFromVariant(srcVariant, dstInstance);
 		}
 
 		void CopyConstructor(void* source, void* destination) override
@@ -342,7 +369,7 @@ namespace CE
 
 			RefType refType = RefCounted::GetRefType();
 
-			localFields.Add(FieldType(name,
+			localFields.Add(new FieldType(name,
                                       CE::GetTypeId<Field>(),
                                       underlyingTypeId,
                                       sizeof(Field), offset, attributes, this, refType));
@@ -435,8 +462,8 @@ namespace CE
 
 		// Inherited + Local fields
 		SharedMutex cachedFieldsMutex{};
-		CE::Array<FieldType> cachedFields{};
-		CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
+		CE::Array<Ptr<FieldType>> cachedFields{};
+		CE::HashMap<CE::Name, Ptr<FieldType>> cachedFieldsMap{};
         
 		SharedMutex cachedFunctionsMutex{};
 		CE::Array<FunctionType> cachedFunctions{};
@@ -445,7 +472,7 @@ namespace CE
 		SharedMutex cachedAttributesMutex{};
         Attribute cachedAttributes{};
 
-		CE::Array<FieldType> localFields{};
+		CE::Array<Ptr<FieldType>> localFields{};
 		CE::Array<TypeId> superTypeIds{};
 		CE::Array<FunctionType> localFunctions{};
 		Atomic<bool> fieldsCached = false;

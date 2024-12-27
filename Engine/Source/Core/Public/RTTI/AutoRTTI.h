@@ -10,6 +10,12 @@ enum AttributeSpecifiers
 
 	SettingsCategory,
 
+	//! @brief Set the minimum numeric value of the field.
+	RangeMin,
+
+	//! @brief Set the maximum numeric value of the field.
+	RangeMax,
+
 	//! @brief Set the category of the field.
 	Category,
 

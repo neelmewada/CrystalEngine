@@ -140,8 +140,10 @@ namespace CE::Editor
             if (!target)
                 continue;
 
-            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target.Get());
+            ObjectEditor* curEditor = ObjectEditorRegistry::Get().Create(target.Get(), history);
             editors.Add(curEditor);
+
+            curEditor->SetEditorHistory(GetHistory());
 
             if (this->editor == nullptr)
             {
@@ -181,7 +183,7 @@ namespace CE::Editor
 
         Ref<Settings> target = Settings::LoadSettings(settingsClasses[index]);
 
-        editor = ObjectEditorRegistry::Get().Create(target.Get());
+        editor = ObjectEditorRegistry::Get().Create(target.Get(), history);
 
         editor->FixedInputWidth(180);
         editor->SetSplitRatio(splitRatio);

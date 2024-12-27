@@ -191,7 +191,7 @@ namespace CE
 		void LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject);
 
 		void LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap,
-			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
+            const Ptr<FieldType>& srcField, void* srcInstance, const Ptr<FieldType>& dstField, void* dstInstance);
 
 		// Lifecycle
 
@@ -228,7 +228,7 @@ namespace CE
 
         void ConfigParseStruct(const String& value, void* instance, StructType* structType);
         
-        void ConfigParseField(const String& value, void* instance, FieldType* field);
+        void ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field);
         
         virtual void OnAfterConfigLoad() {}
 

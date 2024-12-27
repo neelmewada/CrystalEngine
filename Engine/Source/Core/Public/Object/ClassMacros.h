@@ -259,6 +259,14 @@ namespace CE\
 			{\
 				new(dstInstance) Namespace::Struct(*(Namespace::Struct*)srcInstance);\
 			}\
+			virtual CE::Variant CreateVariant(void* instance) const override\
+			{\
+				return CE::Variant(*(Namespace::Struct*)instance);\
+			}\
+			virtual void LoadFromVariant(const Variant& srcVariant, void* dstInstance) const override\
+			{\
+				if (srcVariant.IsOfType<Namespace::Struct>()) { *(Namespace::Struct*)dstInstance = srcVariant.GetValue<Namespace::Struct>(); }\
+			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 			virtual String GetStructBundle() const override\
 			{\

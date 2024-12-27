@@ -245,6 +245,18 @@ namespace CE::Editor
                         .DockTabs(
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
+                            .Content(
+                                FNew(FVerticalStack)
+                                (
+                                    FNew(FTextButton)
+                                    .Text("Print Fusion Memory FootPrint")
+                                    .OnClicked([]
+                                    {
+                                        u64 footprint = FusionApplication::Get()->ComputeMemoryFootprint();
+                                        CE_LOG(Info, All, "Memory Footprint: {} KB", footprint / 1024);
+                                    })
+                                )
+                            )
 
                         )
                         .HAlign(HAlign::Fill)
@@ -266,7 +278,10 @@ namespace CE::Editor
 
                         FAssignNew(EditorMinorDockspace, rightBottom)
                         .DockTabs(
-                            FAssignNew(DetailsTab, detailsTab)
+                            FAssignNew(DetailsTab, detailsTab),
+
+                            FNew(EditorMinorDockTab)
+                            .Title("History")
 
                         )
                         .HAlign(HAlign::Fill)
@@ -275,6 +290,10 @@ namespace CE::Editor
                 )
             )
     		.Padding(Vec4(0, 5, 0, 0));
+
+        detailsTab->SetOwnerEditor(this);
+        sceneOutlinerTab->SetOwnerEditor(this);
+        viewportTab->SetOwnerEditor(this);
 
         sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged));
     }
@@ -367,6 +386,16 @@ namespace CE::Editor
                     .As<EditorMenuPopup>()
                     .Gap(0)
                     .Content(
+                        FNew(FMenuItem)
+                        .Text("Color Picker")
+                        .OnClick([]
+                        {
+                            ColorPickerTool::Open()->OnColorChanged([](ColorPickerTool* colorPickerTool)
+                            {
+                                //CE_LOG(Info, All, "Color: {}", color.ToVec4());
+                            });
+                        }),
+
                         FNew(FMenuItem)
                         .Text("Debug")
                         .SubMenu(

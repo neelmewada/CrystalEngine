@@ -55,10 +55,11 @@ namespace CE
 
         u32 GetAtlasSize() const;
 
-        RHI::ShaderResourceGroup* GetFontSrg() const { return fontSrg; }
         RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
 
         FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
+
+        u64 ComputeMemoryFootprint() override;
 
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
@@ -120,7 +121,7 @@ namespace CE
         bool atlasUpdateRequired = false;
 
         RPI::Texture* atlasTexture = nullptr;
-        RHI::ShaderResourceGroup* fontSrg = nullptr;
+        //RHI::ShaderResourceGroup* fontSrg = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FFontMetrics metrics{};

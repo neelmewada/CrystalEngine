@@ -28,6 +28,10 @@
 #include "Asset/FontAssetDefinition.h"
 #include "Asset/FontAssetImporter.h"
 
+// History
+#include "History/EditorOperation.h"
+#include "History/EditorHistory.h"
+
 ///////////////////////////////////////////////////////
 /// Widgets
 
@@ -44,6 +48,8 @@
 #include "Fusion/PropertyEditor/Fields/BoolEditorField.h"
 #include "Fusion/PropertyEditor/Fields/NumericEditorField.h"
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
+#include "Fusion/PropertyEditor/Fields/ColorEditorField.h"
+#include "Fusion/PropertyEditor/Fields/ColorComponentField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
@@ -66,8 +72,13 @@
 #include "Fusion/Docking/EditorDockspace.h"
 #include "Fusion/Docking/EditorDockTabItem.h"
 #include "Fusion/Docking/EditorDockTab.h"
+#include "Fusion/Widget/Editor/EditorBase.h"
 
 #include "Fusion/Docking/EditorMinorDockspace.h"
+
+// - Tools -
+#include "Fusion/Widget/Tools/ColorPickerPreview.h"
+#include "Fusion/Widget/Tools/ColorPickerTool.h"
 
 namespace CE::Editor
 {

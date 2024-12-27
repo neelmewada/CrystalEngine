@@ -28,7 +28,11 @@ namespace CE::Editor
         FUNCTION()
         void OnFinishEdit(FTextInput* input);
 
+        FUNCTION()
+        void OnBeginEditing(FTextInput* input);
+
         FTextInput* input = nullptr;
+        String initialValue;
 
     public: // - Fusion Properties - 
 

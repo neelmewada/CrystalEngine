@@ -1,8 +1,42 @@
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 namespace CE
 {
+	FieldType::~FieldType()
+	{
+
+	}
+
+	FieldType::FieldType(const String& name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset,
+		String attributes, const TypeInfo* owner, RefType refType, const String& relativePathToParent)
+			: TypeInfo(name, attributes)
+			, fieldTypeId(fieldTypeId)
+			, underlyingTypeId(underlyingTypeId)
+			, offset(offset), size(size)
+			, owner(const_cast<TypeInfo*>(owner))
+			, instanceOwner(const_cast<TypeInfo*>(owner))
+			, refType(refType)
+			, relativePathToParent(relativePathToParent)
+	{
+		ConstructInternal();
+	}
+
+	Ptr<FieldType> FieldType::Clone(const Ptr<FieldType>& copy)
+	{
+		return new FieldType(
+			copy->GetName().GetString(),
+			copy->fieldTypeId,
+			copy->underlyingTypeId,
+			copy->size,
+			copy->offset,
+			copy->originalAttributes,
+			copy->owner,
+			copy->refType,
+			copy->relativePathToParent
+		);
+	}
+
     void FieldType::ConstructInternal()
     {
         fieldFlags = FIELD_NoFlags;
@@ -39,9 +73,21 @@ namespace CE
 		auto fieldInstance = GetFieldInstance(instance);
 		if (declType == nullptr || fieldInstance == nullptr)
 			return;
-		if (declType->IsClass())
+
+		if (declType->IsObject())
 		{
-			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			if (IsStrongRefCounted())
+			{
+				(*static_cast<Ref<Object>*>(fieldInstance)) = nullptr;
+			}
+			else if (IsWeakRefCounted())
+			{
+				(*static_cast<WeakRef<Object>*>(fieldInstance)) = nullptr;
+			}
+			else
+			{
+				memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			}
 			return;
 		}
 
@@ -50,16 +96,33 @@ namespace CE
 
 	void FieldType::CallDestructor(void* instance)
 	{
+		// Ideally, this function should NEVER be called!
+
 		auto declType = GetDeclarationType();
 		auto fieldInstance = GetFieldInstance(instance);
 		if (declType == nullptr || fieldInstance == nullptr)
 			return;
-		if (declType->IsClass())
+		if (declType->IsObject())
 		{
-			Object* object = (Object*)fieldInstance;
-			if (object != nullptr)
-				object->BeginDestroy();
-			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			if (IsStrongRefCounted())
+			{
+				Ref<Object>& object = const_cast<Ref<Object>&>(GetFieldValue<Ref<Object>>(fieldInstance));
+				object.~Ref<Object>();
+			}
+			else if (IsWeakRefCounted())
+			{
+				WeakRef<Object>& object = const_cast<WeakRef<Object>&>(GetFieldValue<WeakRef<Object>>(fieldInstance));
+				object.~WeakRef<Object>();
+			}
+			else
+			{
+				if (Object* object = *static_cast<Object**>(fieldInstance))
+				{
+					object->BeginDestroy();
+				}
+				memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			}
+
 			return;
 		}
 
@@ -370,7 +433,7 @@ namespace CE
 				auto underlyingType = this->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType->IsPOD() && !underlyingType->IsArrayType())
 				{
-					auto arrayList = GetArrayFieldList(instance);
+					auto arrayList = GetArrayFieldListPtr(instance);
 					u32 arraySize = arrayList.GetSize();
 					void* arrayFieldInstance = GetFieldInstance(instance);
 
@@ -379,7 +442,7 @@ namespace CE
 						String result = "[";
 						for (int i = 0; i < arraySize; i++)
 						{
-							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
+							auto str = arrayList[i]->GetFieldValueAsString(arrayFieldInstance);
 							if (result.NotEmpty())
 								result += ",";
 							result += str;
@@ -507,7 +570,31 @@ namespace CE
 		return 0;
 	}
 
-	bool FieldType::CopyTo(void* srcInstance, FieldType* destField, void* destInstance)
+	void FieldType::SetFieldObjectValue(void* instance, const Ref<Object>& object)
+	{
+		if (IsReadOnly() || !IsObjectField())
+			return;
+
+		if (IsStrongRefCounted())
+		{
+			SetFieldValue<Ref<Object>>(instance, object);
+		}
+		else if (IsWeakRefCounted())
+		{
+			SetFieldValue<WeakRef<Object>>(instance, object);
+		}
+		else
+		{
+			SetFieldValue<Object*>(instance, object.Get());
+		}
+
+		if (instanceOwner && instanceOwner->IsObject())
+		{
+			NotifyObjectFieldUpdate((Object*)instance);
+		}
+	}
+
+	bool FieldType::CopyTo(void* srcInstance, const Ptr<FieldType>& destField, void* destInstance)
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
 			return false;
@@ -546,13 +633,13 @@ namespace CE
 
 					if (srcArraySize > 0)
 					{
-						Array<FieldType> arrayFields = this->GetArrayFieldList(srcInstance);
+						Array<Ptr<FieldType>> arrayFields = this->GetArrayFieldListPtr(srcInstance);
 						u8* srcArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(srcInstance)[0]);
 						u8* destArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(destInstance)[0]);
 
 						for (int i = 0; i < arrayFields.GetSize(); i++)
 						{
-							arrayFields[i].CopyTo(srcArrayInstance, &arrayFields[i], destArrayInstance);
+							arrayFields[i]->CopyTo(srcArrayInstance, arrayFields[i], destArrayInstance);
 						}
 					}
 				}
@@ -891,11 +978,11 @@ namespace CE
 		}
 	}
 
-	Array<FieldType> FieldType::GetArrayFieldList(void* instance)
+	Array<Ptr<FieldType>> FieldType::GetArrayFieldListPtr(void* instance)
 	{
 		if (!IsArrayField())
 			return {};
-		
+
 		u32 arraySize = GetArraySize(instance);
 		if (arraySize == 0)
 			return {};
@@ -920,15 +1007,61 @@ namespace CE
 			}
 		}
 
-		Array<FieldType> array{};
+		Array<Ptr<FieldType>> array{};
 
 		for (int i = 0; i < arraySize; i++)
 		{
-			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 
+			// TODO: We need to add ref counting Ptr<> to "owner: this" part too.
+			array.Add(new FieldType(name.GetString() + "[" + i + "]", underlyingType->GetTypeId(),
 				0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType));
 		}
 
 		return array;
+	}
+
+	Ptr<FieldType> FieldType::GetArrayFieldElementPtr(void* instance, u32 position)
+	{
+		if (!IsArrayField())
+			return {};
+
+		u32 arraySize = GetArraySize(instance);
+		if (arraySize == 0)
+			return {};
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return {};
+
+		int underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
+
+			if (IsStrongRefCounted())
+			{
+				underlyingTypeSize = sizeof(Ref<>);
+			}
+			else if (IsWeakRefCounted())
+			{
+				underlyingTypeSize = sizeof(WeakRef<>);
+			}
+		}
+
+		int i = position;
+
+		return new FieldType(name.GetString() + "[" + i + "]", underlyingType->GetTypeId(),
+			0, underlyingTypeSize, i * underlyingTypeSize, "", this, refType);
+	}
+
+	void* FieldType::GetArrayInstance(void* instance)
+	{
+		if (!IsArrayField())
+			return nullptr;
+
+		const Array<u8>& array = GetFieldValue<Array<u8>>(instance);
+
+		return (void*)array.GetData();
 	}
 
 	void FieldType::NotifyObjectFieldUpdate(Object* instance)

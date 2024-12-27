@@ -6,6 +6,7 @@ namespace CE
     FCheckboxStyle::FCheckboxStyle()
     {
         contentMoveY = 0;
+        cornerRadius = Vec4(1, 1, 1, 1) * 2.5f;
     }
 
     SubClass<FWidget> FCheckboxStyle::GetWidgetClass() const

@@ -41,8 +41,6 @@ namespace CE
         };
         
         Stream() = default;
-        Stream(const Stream&) = default;
-        Stream& operator=(const Stream&) = default;
         virtual ~Stream() = default;
 
         virtual Stream& operator++()

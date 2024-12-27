@@ -52,11 +52,11 @@ namespace CE
 
 		if (m_Direction == FSplitDirection::Horizontal)
 		{
-			contentSize.width += m_SplitterSize * children.GetSize();
+			contentSize.width += m_SplitterSize * (children.GetSize() - 1);
 		}
 		else if (m_Direction == FSplitDirection::Vertical)
 		{
-			contentSize.height += m_SplitterSize * children.GetSize();
+			contentSize.height += m_SplitterSize * (children.GetSize() - 1);
 		}
 
 		intrinsicSize.width += contentSize.width;
@@ -93,7 +93,7 @@ namespace CE
 			remainingSize = availableSize.height;
 		}
 
-		remainingSize -= m_SplitterSize * children.GetSize();
+		remainingSize -= m_SplitterSize * (children.GetSize() - 1);
 
 		for (const auto& child : children)
 		{

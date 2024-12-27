@@ -204,7 +204,7 @@ namespace CE
 
 		INLINE bool HasValue() const
 		{
-			return valueTypeId > 0;
+			return valueTypeId != 0;
 		}
 
 		template<typename T>

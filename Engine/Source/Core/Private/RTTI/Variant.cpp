@@ -96,6 +96,8 @@ namespace CE
 			}
 			free(StructValue);
 			StructValue = nullptr;
+			structType = nullptr;
+			isStruct = false;
 		}
 
 		memset(this, 0, sizeof(Variant));

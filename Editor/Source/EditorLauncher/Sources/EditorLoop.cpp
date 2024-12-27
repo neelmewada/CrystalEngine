@@ -225,6 +225,13 @@ void EditorLoop::PostInit()
 	{
 		gEditorMode = EditorMode::Default;
 
+		auto editorHistoryFolder = projectPath.GetParentPath() / "Temp/EditorHistory";
+		if (editorHistoryFolder.Exists()) // Clear editor history
+		{
+			IO::Path::RemoveRecursively(editorHistoryFolder);
+			IO::Path::CreateDirectories(editorHistoryFolder);
+		}
+
 		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
 		rootContext->AddChildContext(crystalEditorCtx);
 
@@ -431,8 +438,13 @@ void EditorLoop::AppInit()
 	{
 		isProjectBrowsingMode = true;
 		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
+#if PLATFORM_MAC
+		gDefaultWindowWidth = 800;
+		gDefaultWindowHeight = 650;
+#else
 		gDefaultWindowWidth = 1366 * FusionApplication::Get()->GetDefaultScalingFactor();
 		gDefaultWindowHeight = 1000 * FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
 	}
 
 	mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, windowInfo);

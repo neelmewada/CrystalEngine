@@ -2,6 +2,9 @@
 
 namespace CE::Editor
 {
+    class EditorBase;
+
+
     ENUM()
     enum class EditorDockTabRole
     {
@@ -67,6 +70,17 @@ namespace CE::Editor
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void Construct() override;
+
+    public:
+
+        void SetOwnerEditor(const Ref<EditorBase>& editor) { this->ownerEditor = editor; }
+
+        Ref<EditorBase> GetOwnerEditor() const { return ownerEditor.Lock(); }
+
+    protected:
+
+        FIELD()
+        WeakRef<EditorBase> ownerEditor;
 
         friend class EditorDockspace;
         friend class EditorMinorDockspace;

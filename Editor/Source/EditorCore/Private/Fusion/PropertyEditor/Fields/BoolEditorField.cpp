@@ -31,7 +31,21 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        checkbox->Checked(field->GetFieldValue<bool>(instances[0]));
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field = nullptr;
+        Ref<Object> outOwner;
+        void* outInstance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+            field, outOwner, outInstance);
+
+        if (!success)
+            return;
+
+        checkbox->Checked(field->GetFieldValue<bool>(outInstance));
     }
 
     void BoolEditorField::OnCheckChanged(FCheckbox* checkbox)
@@ -39,10 +53,19 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        if (auto history = m_History.Lock())
+        {
+            Ref<Object> target = targets[0].Lock();
+            if (target.IsNull())
+                return;
 
-        field->SetFieldValue<bool>(instances[0], checkbox->Checked());
-        target->OnFieldEdited(field->GetName());
+            history->PerformOperation<bool>("Edit Bool Field", target, relativeFieldPath,
+                !checkbox->Checked(), checkbox->Checked());
+        }
+        else
+        {
+            SetValueDirect(checkbox->Checked());
+        }
     }
 }
 

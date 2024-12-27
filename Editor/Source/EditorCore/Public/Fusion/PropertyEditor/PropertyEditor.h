@@ -20,9 +20,9 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        virtual void InitTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+        virtual void InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
 
-        virtual void UpdateTarget(FieldType* field, const Array<Object*>& targets, const Array<void*>& instances);
+        virtual void UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
 
         FHorizontalStack* GetLeft() const { return left; }
         FHorizontalStack* GetRight() const { return right; }
@@ -81,9 +81,11 @@ namespace CE::Editor
         EditorField* editorField = nullptr;
         ObjectEditor* objectEditor = nullptr;
 
-        FieldType* field = nullptr;
-        Object* target = nullptr;
-        void* instance = nullptr;
+        //FieldType* field = nullptr;
+        CE::Name fieldName;
+        CE::Name relativeFieldPath;
+        Array<WeakRef<Object>> targets;
+        WeakRef<Object> target = nullptr;
 
     public: // - Fusion Properties - 
 
@@ -94,6 +96,7 @@ namespace CE::Editor
         FUSION_WIDGET;
         friend class PropertyEditorRegistry;
         friend class ObjectEditor;
+        friend class ArrayPropertyEditor;
     };
     
 }

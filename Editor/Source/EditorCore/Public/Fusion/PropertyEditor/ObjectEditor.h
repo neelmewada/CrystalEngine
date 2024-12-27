@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     class PropertyEditor;
+    class EditorHistory;
 
     CLASS()
     class EDITORCORE_API ObjectEditor : public FStyledWidget, IObjectUpdateListener
@@ -18,7 +19,7 @@ namespace CE::Editor
 
         void OnBeginDestroy() override;
 
-        void OnObjectFieldChanged(Object* object, const CE::Name& fieldName) override;
+        void OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName) override;
 
         void SetSplitRatioInternal(f32 ratio, FSplitBox* excluding = nullptr);
 
@@ -36,6 +37,10 @@ namespace CE::Editor
 
         void ApplySplitRatio(FSplitBox* excluding = nullptr);
 
+        void SetEditorHistory(const Ref<EditorHistory>& history);
+
+        Ref<EditorHistory> GetEditorHistory() const { return history.Lock(); }
+
     protected:
 
         virtual void CreateGUI();
@@ -50,7 +55,10 @@ namespace CE::Editor
         FIELD(ReadOnly)
         Object* target = nullptr;
 
+        WeakRef<EditorHistory> history = nullptr;
+
         Array<ObjectEditor*> editorGroup;
+        HashSet<Uuid> targetObjectUuids;
 
     public:
 

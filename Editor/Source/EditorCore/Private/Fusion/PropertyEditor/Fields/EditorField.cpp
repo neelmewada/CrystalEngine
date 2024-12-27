@@ -22,30 +22,52 @@ namespace CE::Editor
         UnbindField();
     }
 
-    EditorField::Self& EditorField::BindField(FieldType* field, Object* target, void* instance)
+    bool EditorField::CanBind(const Ref<Object>& target, const CE::Name& relativeFieldPath)
     {
-        if (!CanBind(field))
+        if (target.IsNull())
+            return false;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+        bool result = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!result)
+            return false;
+
+        return CanBind(field);
+    }
+
+    EditorField::Self& EditorField::BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath)
+    {
+        if (!CanBind(target, relativeFieldPath))
+        {
             return *this;
+        }
 
-        this->field = field;
-        targets = { target };
-        instances = { instance };
+        Ptr<FieldType> field;
+        void* instance = nullptr;
 
+        isBound = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+
+        if (!isBound)
+        {
+            return *this;
+        }
+
+        this->targets = Array<WeakRef<Object>>{ target };
+        this->relativeFieldPath = relativeFieldPath;
+
+        isBound = true;
+        OnBind();
         UpdateValue();
 
         return *this;
     }
 
-    EditorField::Self& EditorField::BindField(FieldType* field, Object* target)
-    {
-        return BindField(field, target, target);
-    }
-
     EditorField::Self& EditorField::UnbindField()
     {
-        field = nullptr;
-        targets.Clear();
-        instances.Clear();
+        isBound = false;
+    	targets.Clear();
+        
         return *this;
     }
 

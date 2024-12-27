@@ -21,6 +21,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldX)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Red())
                 .VAlign(VAlign::Fill)
@@ -29,6 +31,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldY)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Green())
                 .VAlign(VAlign::Fill)
@@ -37,6 +41,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldZ)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::Blue())
                 .VAlign(VAlign::Fill)
@@ -45,6 +51,8 @@ namespace CE::Editor
                 FAssignNew(NumericEditorField, fieldW)
                 .OnTextEdited(FUNCTION_BINDING(this, OnTextEdited))
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
+                .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
+                .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
                 .ColorTag(Color::White())
                 .VAlign(VAlign::Fill)
@@ -68,38 +76,48 @@ namespace CE::Editor
         thread_local HashSet floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
         thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
 
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
+
         TypeId fieldDeclId = field->GetDeclarationTypeId();
-        Object* target = targets[0];
 
         if (fieldDeclId == TYPEID(Vec2))
         {
-            Vec2 value = field->GetFieldValue<Vec2>(instances[0]);
+            Vec2 value = field->GetFieldValue<Vec2>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec2i))
         {
-            Vec2i value = field->GetFieldValue<Vec2i>(instances[0]);
+            Vec2i value = field->GetFieldValue<Vec2i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec3))
         {
-            Vec3 value = field->GetFieldValue<Vec3>(instances[0]);
+            Vec3 value = field->GetFieldValue<Vec3>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec3i))
         {
-            Vec3i value = field->GetFieldValue<Vec3i>(instances[0]);
+            Vec3i value = field->GetFieldValue<Vec3i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec4))
         {
-            Vec4 value = field->GetFieldValue<Vec4>(instances[0]);
+            Vec4 value = field->GetFieldValue<Vec4>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -107,7 +125,7 @@ namespace CE::Editor
         }
         else if (fieldDeclId == TYPEID(Vec4i))
         {
-            Vec4i value = field->GetFieldValue<Vec4i>(instances[0]);
+            Vec4i value = field->GetFieldValue<Vec4i>(instance);
             fieldX->Text(String::Format("{}", value.x));
             fieldY->Text(String::Format("{}", value.y));
             fieldZ->Text(String::Format("{}", value.z));
@@ -131,12 +149,243 @@ namespace CE::Editor
         SetFieldValue();
     }
 
+    void VectorEditorField::OnEndEditing(NumericEditorField* input)
+    {
+        if (!IsBound())
+            return;
+
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
+
+        TypeId fieldDeclId = field->GetDeclarationTypeId();
+        CE::Name relativePath = relativeFieldPath;
+        WeakRef<Object> targetRef = target;
+
+        if (fieldDeclId == TYPEID(Vec2))
+        {
+            Vec2 value;
+            Vec2 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec2i))
+        {
+            Vec2i value;
+            Vec2i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec3))
+        {
+            Vec3 value;
+            Vec3 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec3i))
+        {
+            Vec3i value;
+            Vec3i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec4))
+        {
+            Vec4 value;
+            Vec4 initialValue = this->initialValue;
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            const String& w = fieldW->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z) &&
+                String::TryParse(w, value.w))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+        else if (fieldDeclId == TYPEID(Vec4i))
+        {
+            Vec4i value;
+            Vec4i initialValue = this->initialValue.ToVec4i();
+
+            const String& x = fieldX->Text();
+            const String& y = fieldY->Text();
+            const String& z = fieldZ->Text();
+            const String& w = fieldW->Text();
+            if (String::TryParse(x, value.x) &&
+                String::TryParse(y, value.y) &&
+                String::TryParse(z, value.z) &&
+                String::TryParse(w, value.w))
+            {
+                if (value != initialValue)
+                {
+                    if (auto history = m_History.Lock())
+                    {
+                        history->PerformOperation("Edit Vector Field", target, relativePath, initialValue, value);
+                    }
+                    else
+                    {
+                        field->SetFieldValue(instance, value);
+                        target->OnFieldChanged(field->GetName());
+                    }
+                }
+            }
+        }
+    }
+
+    void VectorEditorField::OnBeginEditing(NumericEditorField* input)
+    {
+        if (!IsBound())
+            return;
+
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
+
+        TypeId fieldDeclId = field->GetDeclarationTypeId();
+
+        if (fieldDeclId == TYPEID(Vec2))
+        {
+	        initialValue = field->GetFieldValue<Vec2>(instance);
+        }
+        else if (fieldDeclId == TYPEID(Vec2i))
+        {
+            initialValue = field->GetFieldValue<Vec2i>(instance).ToVec2();
+        }
+        else if (fieldDeclId == TYPEID(Vec3))
+        {
+            initialValue = field->GetFieldValue<Vec3>(instance);
+        }
+        else if (fieldDeclId == TYPEID(Vec3i))
+        {
+            initialValue = field->GetFieldValue<Vec3i>(instance).ToVec3();
+        }
+        else if (fieldDeclId == TYPEID(Vec4))
+        {
+            initialValue = field->GetFieldValue<Vec4>(instance);
+        }
+        else if (fieldDeclId == TYPEID(Vec4i))
+        {
+            initialValue = field->GetFieldValue<Vec4i>(instance).ToVec4();
+        }
+    }
+
     void VectorEditorField::SetFieldValue()
     {
         if (!IsBound())
             return;
 
-        Object* target = targets[0];
+        Ref<Object> target = targets[0].Lock();
+        if (target.IsNull())
+            return;
+
+        Ptr<FieldType> field;
+        void* instance = nullptr;
+
+        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target, field, instance);
+        if (!success)
+            return;
 
         TypeId fieldDeclId = field->GetDeclarationTypeId();
 
@@ -148,7 +397,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2>(instances[0], value);
+                field->SetFieldValue<Vec2>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -160,7 +409,7 @@ namespace CE::Editor
             if (String::TryParse(x, value.x) &&
                 String::TryParse(y, value.y))
             {
-                field->SetFieldValue<Vec2i>(instances[0], value);
+                field->SetFieldValue<Vec2i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -174,7 +423,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3>(instances[0], value);
+                field->SetFieldValue<Vec3>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -188,7 +437,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y) &&
                 String::TryParse(z, value.z))
             {
-                field->SetFieldValue<Vec3i>(instances[0], value);
+                field->SetFieldValue<Vec3i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -204,7 +453,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4>(instances[0], value);
+                field->SetFieldValue<Vec4>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -220,7 +469,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z) &&
                 String::TryParse(w, value.w))
             {
-                field->SetFieldValue<Vec4i>(instances[0], value);
+                field->SetFieldValue<Vec4i>(instance, value);
                 target->OnFieldEdited(field->GetName());
             }
         }
@@ -230,6 +479,8 @@ namespace CE::Editor
     {
         thread_local HashSet floatVectors = { TYPEID(Vec2), TYPEID(Vec3), TYPEID(Vec4) };
         thread_local HashSet intVectors = { TYPEID(Vec2i), TYPEID(Vec3i), TYPEID(Vec4i) };
+
+        vectorTypeId = type;
 
         if (floatVectors.Exists(type))
         {

@@ -155,7 +155,7 @@ namespace CE
 				drawPacket->shaderResourceGroups[0] = drawItemSrg;
 				drawPacket->shaderResourceGroups[1] = perViewSrg;
 				drawPacket->shaderResourceGroups[2] = drawBatch.fontSrg;
-				drawPacket->shaderResourceGroups[3] = app->textureSrg;
+				//drawPacket->shaderResourceGroups[3] = app->textureSrg;
 
 				this->drawPackets.Add(drawPacket);
 			}
@@ -170,7 +170,7 @@ namespace CE
 				builder.AddShaderResourceGroup(drawItemSrg);
 				builder.AddShaderResourceGroup(perViewSrg);
 				builder.AddShaderResourceGroup(drawBatch.fontSrg);
-				builder.AddShaderResourceGroup(app->textureSrg);
+				//builder.AddShaderResourceGroup(app->textureSrg);
 
 				// UI Item
 				{
@@ -228,7 +228,7 @@ namespace CE
 			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemList.GetCount();
-			drawBatches.Top().fontSrg = fontAtlas != nullptr ? fontAtlas->fontSrg : nullptr;
+			drawBatches.Top().fontSrg = fontAtlas != nullptr ? fontAtlas->fontSrg2 : nullptr;
 		}
 
 		FDrawItem2D drawItem{};
@@ -512,7 +512,7 @@ namespace CE
 			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemList.GetCount();
-			drawBatches.Top().fontSrg = fontAtlas->fontSrg;
+			drawBatches.Top().fontSrg = fontAtlas->fontSrg2;
 		}
 
 		Vec2 finalSize;
@@ -681,7 +681,7 @@ namespace CE
 		ZoneScoped;
 
 		auto app = FusionApplication::Get();
-		int imageIndex = app->FindImageIndex(frames[0]->GetRhiTexture());
+		int imageIndex = -1;//app->FindImageIndex(frames[0]->GetRhiTexture());
 		if (imageIndex < 0)
 			return;
 
@@ -754,140 +754,10 @@ namespace CE
 			const Name& imageName = currentBrush.GetImageName();
 			if (imageName.IsValid())
 			{
-				shapeItem.brushColor = currentBrush.GetTintColor().ToVec4();
-
-				RHI::Texture* image = app->FindImage(imageName);
-
-				int imageIndex = app->FindImageIndex(imageName);
-
-				if (image && imageIndex >= 0)
-				{
-					shapeItem.brushType = BRUSH_Texture;
-					shapeItem.textureOrGradientIndex = imageIndex;
-
-					Vec2 imageSize = Vec2(image->GetWidth(), image->GetHeight());
-					Vec2 brushSize = currentBrush.GetBrushSize();
-					FImageFit imageFit = currentBrush.GetImageFit();
-					Vec2 brushPos = currentBrush.GetBrushPosition();
-					FBrushTiling tiling = currentBrush.GetBrushTiling();
-
-					bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
-					bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
-					bool autoSizeX = brushSize.x < 0;
-					bool autoSizeY = brushSize.y < 0;
-
-					switch (imageFit)
-					{
-					case FImageFit::None:
-						if (autoSizeX)
-							brushSize.x = imageSize.x;
-						if (autoSizeY)
-							brushSize.y = imageSize.y;
-
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
-
-						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
-						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
-						break;
-					case FImageFit::Fill:
-						if (autoSizeX)
-							brushSize.x = quadSize.x;
-						if (autoSizeY)
-							brushSize.y = quadSize.y;
-
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
-
-						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
-						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
-						break;
-					case FImageFit::Contain:
-						if (autoSizeX && autoSizeY)
-						{
-							float scale = Math::Min(quadSize.width / imageSize.width, quadSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else if (autoSizeX)
-						{
-							float scale = Math::Min(quadSize.width / imageSize.width, brushSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else if (autoSizeY)
-						{
-							float scale = Math::Min(brushSize.width / imageSize.width, quadSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else
-						{
-							float scale = Math::Min(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
-
-						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
-						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
-						break;
-					case FImageFit::Cover:
-						if (autoSizeX && autoSizeY)
-						{
-							float scale = Math::Max(quadSize.width / imageSize.width, quadSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else if (autoSizeX)
-						{
-							float scale = Math::Max(quadSize.width / imageSize.width, brushSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else if (autoSizeY)
-						{
-							float scale = Math::Max(brushSize.width / imageSize.width, quadSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-						else
-						{
-							float scale = Math::Max(brushSize.width / imageSize.width, brushSize.height / imageSize.height);
-							brushSize.x = imageSize.width * scale;
-							brushSize.y = imageSize.height * scale;
-						}
-
-						shapeItem.uvMin.x = (quadSize.x - brushSize.x) * brushPos.x / quadSize.x;
-						shapeItem.uvMin.y = (quadSize.y - brushSize.y) * brushPos.y / quadSize.y;
-
-						shapeItem.uvMax.x = shapeItem.uvMin.x + brushSize.x / quadSize.x;
-						shapeItem.uvMax.y = shapeItem.uvMin.y + brushSize.y / quadSize.y;
-						break;
-					}
-
-					RHI::SamplerDescriptor sampler{};
-					sampler.addressModeU = sampler.addressModeV = SamplerAddressMode::ClampToBorder;
-					sampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
-					sampler.enableAnisotropy = false;
-					sampler.samplerFilterMode = FilterMode::Linear;
-
-					if (tiledX)
-					{
-						sampler.addressModeU = SamplerAddressMode::Repeat;
-					}
-					if (tiledY)
-					{
-						sampler.addressModeV = SamplerAddressMode::Repeat;
-					}
-
-					shapeItem.samplerIndex = app->FindOrCreateSampler(sampler);
-				}
+				shapeItem.brushColor = currentBrush.GetFillColor().ToVec4();
 			}
 		}
-		else if (currentBrush.GetBrushStyle() == FBrushStyle::LinearGradient)
+		else if (currentBrush.GetBrushStyle() == FBrushStyle::Gradient)
 		{
 			shapeItem.brushType = BRUSH_LinearGradient;
 		}

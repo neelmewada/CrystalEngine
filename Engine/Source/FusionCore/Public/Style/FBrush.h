@@ -4,12 +4,80 @@
 namespace CE
 {
     ENUM()
+    enum class FGradientType : u8
+    {
+	    Linear
+    };
+    ENUM_CLASS(FGradientType);
+
+    STRUCT()
+    struct FUSIONCORE_API FGradientKey final
+    {
+        CE_STRUCT(FGradientKey)
+    public:
+
+        FGradientKey() {}
+
+        FGradientKey(f32 position, const Color& color) : position(position), color(color)
+		{}
+
+        FIELD()
+        f32 position = 0;
+
+        FIELD()
+        Color color;
+
+        SIZE_T GetHash() const;
+
+    };
+
+    STRUCT()
+    struct FUSIONCORE_API FGradient final
+    {
+        CE_STRUCT(FGradient)
+    public:
+
+        FIELD()
+        FGradientType gradientType = FGradientType::Linear;
+
+        FIELD()
+        Array<FGradientKey> stops;
+
+        FIELD()
+        float angle = 0;
+
+        Self& AddKey(f32 position, const Color& color)
+        {
+            stops.Add(FGradientKey(position, color));
+            return *this;
+        }
+
+        SIZE_T GetHash() const;
+
+        bool IsValid() const
+        {
+            return stops.GetSize() >= 2;
+        }
+
+        bool operator==(const FGradient& rhs) const
+        {
+            return GetHash() == rhs.GetHash();
+        }
+
+        bool operator!=(const FGradient& rhs) const
+        {
+            return !operator==(rhs);
+        }
+
+    };
+
+    ENUM()
     enum class FBrushStyle : u8
     {
 	    None = 0,
         SolidFill,
         Image,
-        LinearGradient
+        Gradient
     };
     ENUM_CLASS(FBrushStyle);
 
@@ -26,7 +94,7 @@ namespace CE
     ENUM()
     enum class FImageFit : u8
     {
-        None = 0,
+        Default = 0,
 	    Fill,
         Contain,
         Cover
@@ -44,25 +112,21 @@ namespace CE
 
         FBrush(const Name& imageName, const Color& tintColor = Color::White());
 
+        FBrush(const FGradient& gradient, const Color& tintColor = Color::White());
+
         ~FBrush();
-
-        FBrush(const FBrush& copy);
-        FBrush& operator=(const FBrush& copy);
-
-        FBrush(FBrush&& move) noexcept;
-        FBrush& operator=(FBrush&& move) noexcept;
 
         bool IsValidBrush();
 
         FBrushStyle GetBrushStyle() const { return brushStyle; }
         FBrushTiling GetBrushTiling() const { return tiling; }
+        const FGradient& GetGradient() const { return gradient; }
 
         void SetBrushStyle(FBrushStyle brushStyle) { this->brushStyle = brushStyle; }
         void SetBrushTiling(FBrushTiling tiling) { this->tiling = tiling; }
 
         const Color& GetFillColor() const { return fillColor; }
 
-        const Color& GetTintColor() const { return tintColor; }
         const Name& GetImageName() const { return imageName; }
 
         FImageFit GetImageFit() const { return imageFit; }
@@ -85,30 +149,29 @@ namespace CE
 
     private:
 
-        void CopyFrom(const FBrush& from);
-        void MoveFrom(FBrush& move);
+        FIELD()
+        FGradient gradient;
 
-        union 
-        {
-            // Solid Fill
-            struct
-            {
-                Color fillColor;
-            };
+    	FIELD()
+    	Color fillColor;
 
-            // Texture
-            struct
-            {
-                Color tintColor;
-                Name imageName;
-            };
-        };
+    	FIELD()
+    	Name imageName;
 
-        Vec2 brushSize = Vec2(-1, -1); // -1 means auto size
-        Vec2 brushPos = Vec2(0.5f, 0.5f); // 50% means centered
-        FBrushTiling tiling = FBrushTiling::None;
+        FIELD()
+    	Vec2 brushSize = Vec2(-1, -1); // -1 means auto size
+
+        FIELD()
+    	Vec2 brushPos = Vec2(0.5f, 0.5f); // 50% means centered
+
+        FIELD()
+    	FBrushTiling tiling = FBrushTiling::None;
+
+        FIELD()
         FBrushStyle brushStyle = FBrushStyle::None;
-        FImageFit imageFit = FImageFit::None;
+
+        FIELD()
+        FImageFit imageFit = FImageFit::Default;
 
         friend class FPainter;
         friend class FusionRenderer;

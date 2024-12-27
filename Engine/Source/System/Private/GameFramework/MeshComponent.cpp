@@ -21,8 +21,8 @@ namespace CE
         {
 	        for (int meshIndex = 0; meshIndex < materialsPerLod[lodIndex].materials.GetSize(); ++meshIndex)
 	        {
-                MaterialInterface* materialInterface = materialsPerLod[lodIndex].materials[meshIndex];
-                if (materialInterface == nullptr)
+                Ref<MaterialInterface> materialInterface = materialsPerLod[lodIndex].materials[meshIndex];
+                if (materialInterface.IsNull())
                     continue;
                 RPI::Material* material = materialInterface->GetRpiMaterial();
                 if (material == nullptr)
@@ -36,7 +36,7 @@ namespace CE
         return materialMap;
     }
 
-    MaterialInterface* MeshComponent::GetMaterial(u32 subMeshIndex)
+    Ref<MaterialInterface> MeshComponent::GetMaterial(u32 subMeshIndex)
     {
         return GetMaterial(0, subMeshIndex);
     }
@@ -62,7 +62,7 @@ namespace CE
         }
     }
 
-    MaterialInterface* MeshComponent::GetMaterial(u32 lodIndex, u32 subMeshIndex)
+    Ref<MaterialInterface> MeshComponent::GetMaterial(u32 lodIndex, u32 subMeshIndex)
     {
         if (subMeshIndex > RPI::Limits::MaxSubMeshCount)
             return nullptr;

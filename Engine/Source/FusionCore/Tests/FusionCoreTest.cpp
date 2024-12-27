@@ -201,18 +201,47 @@ namespace RenderingTests
 
 #pragma endregion
 
+	void RenderingTestWidget::OnTimeOut()
+	{
+        gradientAngle += 0.1f;
+
+        FGradient gradient = FGradient();
+        gradient.angle = 90;
+        gradient.stops = {
+            FGradientKey(0.00f, Color::Red()),
+            FGradientKey(0.25f, Color::Yellow()),
+            FGradientKey(0.50f, Color::Green()),
+            FGradientKey(0.75f, Color::Cyan()),
+            FGradientKey(1.00f, Color::Blue()),
+        };
+	}
+
     void RenderingTestWidget::Construct()
     {
         Super::Construct();
+
+        timer = CreateObject<FTimer>(this, "Timer");
+        timer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
+        timer->Start(16);
 
         FBrush transparentPattern = FBrush("/Engine/Resources/Icons/TransparentPattern", Color::White());
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
         transparentPattern.SetBrushSize(Vec2(16, 16));
 
-        FButton* openPopupBtn = nullptr;
-        FTextButton* nativePopupBtn = nullptr;
-
         PlatformApplication::Get()->AddMessageHandler(this);
+
+        FGradient gradient = FGradient();
+        gradient.angle = 0;
+        gradient.stops = {
+            FGradientKey(0.00f, Color::Red()),
+            FGradientKey(0.25f, Color::Yellow()),
+            FGradientKey(0.50f, Color::Green()),
+            FGradientKey(0.75f, Color::Cyan()),
+            FGradientKey(1.00f, Color::Blue()),
+        };
+
+        FBrush gradientBrush = FBrush(gradient);
+        gradientBrush.SetBrushTiling(FBrushTiling::TileXY);
 
         Child(
             FAssignNew(FStyledWidget, borderWidget)
@@ -385,11 +414,9 @@ namespace RenderingTests
                             .Text("Click Count 0")
                         ),
 
-                        FNew(FComboBox)
-                        .Items("Item 0", "Item 1", "Item 2", "Item 3"),
-
-                        FNew(FTextInput)
-                        .Text("Type here...")
+                        FNew(FStyledWidget)
+                        .Background(gradientBrush)
+                        .Height(40)
                     )
                 )
             )

@@ -63,7 +63,7 @@ namespace CE
 		FIELD(EditAnywhere, Category = "Camera")
 		float farPlane = 1000;
 
-		FIELD(EditAnywhere, Category = "Camera")
+		FIELD(EditAnywhere, Category = "Camera", RangeMin = 10, RangeMax = 120)
 		float fieldOfView = 60;
     
 		FIELD()

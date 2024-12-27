@@ -80,16 +80,19 @@ namespace CE::Editor
     void DetailsTab::OnComponentSelectionChanged(ComponentTreeItem* item)
     {
         editorContainer->RemoveChildWidget();
+        f32 splitRatio = -1;
 
         if (editor.IsValid())
         {
+            splitRatio = editor->GetSplitRatio();
             editor->BeginDestroy();
             editor = nullptr;
         }
 
         if (item && item->GetActor())
         {
-            editor = ObjectEditorRegistry::Get().Create(item->GetActor());
+            editor = ObjectEditorRegistry::Get().Create(item->GetActor(), GetOwnerEditor()->GetHistory());
+
             editorContainer->Child(*editor);
         }
     }

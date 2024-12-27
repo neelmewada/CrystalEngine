@@ -141,7 +141,7 @@ namespace CE
 			break;
 		case FShapeType::Circle:
 		{
-			Vec2 center = (fillRect.max - fillRect.min) / 2.0f;
+			Vec2 center = (fillRect.min + fillRect.max) / 2.0f;
 			f32 radius = Math::Min((center - fillRect.min).x, (center - fillRect.min).y);
 			isDrawn |= renderer2->FillCircle(center, radius);
 			isDrawn |= renderer2->StrokeCircle(center, radius + borderOffset);

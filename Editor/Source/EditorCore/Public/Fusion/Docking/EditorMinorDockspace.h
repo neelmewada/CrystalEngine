@@ -38,7 +38,7 @@ namespace CE::Editor
         FHorizontalStack* tabWell = nullptr;
         FStyledWidget* content = nullptr;
 
-        Array<EditorDockTab*> dockedEditors;
+        Array<Ref<EditorDockTab>> dockedEditors;
         Array<EditorDockTabItem*> tabItems;
         int selectedTab = -1;
 
