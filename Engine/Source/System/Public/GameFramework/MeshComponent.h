@@ -5,14 +5,14 @@ namespace CE
 	class MaterialInterface;
 
 	STRUCT()
-    struct SYSTEM_API LodMaterial
+    struct SYSTEM_API LodMaterial final
     {
         CE_STRUCT(LodMaterial)
     public:
 
         //! @brief Materials per sub-mesh.
         FIELD()
-        Array<MaterialInterface*> materials{};
+        Array<Ref<MaterialInterface>> materials{};
     };
 
 	CLASS(Abstract)
@@ -30,11 +30,11 @@ namespace CE
 
 		RPI::CustomMaterialMap GetRpiMaterialMap();
 
-		MaterialInterface* GetMaterial(u32 subMeshIndex = 0);
+		Ref<MaterialInterface> GetMaterial(u32 subMeshIndex = 0);
 
 		void SetMaterial(MaterialInterface* material, u32 subMeshIndex = 0);
 
-		MaterialInterface* GetMaterial(u32 lodIndex, u32 subMeshIndex);
+		Ref<MaterialInterface> GetMaterial(u32 lodIndex, u32 subMeshIndex);
 
 		void SetMaterial(MaterialInterface* material, u32 lodIndex, u32 subMeshIndex);
 

@@ -45,7 +45,7 @@ namespace CE::Editor
 
         if (selectedTab < dockedEditors.GetSize() && selectedTab >= 0)
         {
-            SelectTab(dockedEditors[selectedTab]);
+            SelectTab(dockedEditors[selectedTab].Get());
         }
     }
 
@@ -64,7 +64,7 @@ namespace CE::Editor
             {
                 tabItems[i]->isActive = false;
 
-                AttachSubobject(dockedEditors[i]);
+                AttachSubobject(dockedEditors[i].Get());
             }
         }
 
@@ -86,7 +86,7 @@ namespace CE::Editor
             {
                 tabItems[i]->isActive = false;
 
-                AttachSubobject(dockedEditors[i]);
+                AttachSubobject(dockedEditors[i].Get());
             }
         }
 

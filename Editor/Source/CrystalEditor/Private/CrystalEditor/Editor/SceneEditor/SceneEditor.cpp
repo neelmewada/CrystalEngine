@@ -278,7 +278,10 @@ namespace CE::Editor
 
                         FAssignNew(EditorMinorDockspace, rightBottom)
                         .DockTabs(
-                            FAssignNew(DetailsTab, detailsTab)
+                            FAssignNew(DetailsTab, detailsTab),
+
+                            FNew(EditorMinorDockTab)
+                            .Title("History")
 
                         )
                         .HAlign(HAlign::Fill)
