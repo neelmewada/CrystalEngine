@@ -55,11 +55,6 @@ namespace CE::Editor
             historyStack.RemoveAt(topIndex + 1);
         }
 
-        /*while (historyStack.GetSize() >= OperationStackSize)
-        {
-            historyStack.RemoveAt(0);
-        }*/
-
         historyStack.Add(operation);
 
         topIndex = historyStack.GetSize() - 1;
@@ -74,7 +69,7 @@ namespace CE::Editor
             success = historyStack[topIndex]->unexecute.Invoke(historyStack[topIndex]);
             topIndex--;
 
-            break;
+            break; // FIXME: skip invalid operations
         }
     }
 
@@ -87,7 +82,7 @@ namespace CE::Editor
             topIndex++;
             success = historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
 
-            break;
+            break; // FIXME: skip invalid operations
         }
     }
 
