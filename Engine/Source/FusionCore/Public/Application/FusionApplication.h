@@ -170,7 +170,7 @@ namespace CE
 
         struct DestroyItem
         {
-            Object* object = nullptr;
+            Ref<Object> object = nullptr;
             int frameCounter = 0;
         };
         Array<DestroyItem> destructionQueue{};

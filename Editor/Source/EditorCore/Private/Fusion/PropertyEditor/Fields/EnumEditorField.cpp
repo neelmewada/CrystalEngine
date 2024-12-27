@@ -113,8 +113,70 @@ namespace CE::Editor
         if (selectedIndex < 0 || selectedIndex >= enumType->GetConstantsCount())
             return;
 
-        field->SetFieldEnumValue(outInstance, enumType->GetConstant(selectedIndex)->GetValue());
-        target->OnFieldEdited(field->GetName());
+        CE::Name fieldPath = relativeFieldPath;
+
+        if (auto history = m_History.Lock())
+        {
+            Ref<Object> target = targets[0].Lock();
+            if (target.IsNull())
+                return;
+
+            WeakRef<Object> targetWeak = target;
+
+            s64 initialValue = field->GetFieldEnumValue(outInstance);
+            s64 newValue = enumType->GetConstant(selectedIndex)->GetValue();
+
+            history->PerformOperation("Edit Enum Field", target, 
+                [targetWeak, fieldPath, newValue]
+				(const Ref<EditorOperation>& operation)
+                {
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, target,
+                            field, instance);
+                        if (!success)
+                        {
+                            return false;
+                        }
+
+                        field->SetFieldEnumValue(instance, newValue);
+                        target->OnFieldChanged(field->GetName());
+
+                        return true;
+                    }
+
+                    return false;
+                },
+                [targetWeak, fieldPath, initialValue]
+                (const Ref<EditorOperation>& operation)
+                {
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(fieldPath, target,
+                            field, instance);
+                        if (!success)
+                        {
+                            return false;
+                        }
+
+                        field->SetFieldEnumValue(instance, initialValue);
+                        target->OnFieldChanged(field->GetName());
+
+                        return true;
+                    }
+
+                    return false;
+                });
+        }
+        else
+        {
+            field->SetFieldEnumValue(outInstance, enumType->GetConstant(selectedIndex)->GetValue());
+            target->OnFieldChanged(field->GetName());
+        }
     }
 }
 

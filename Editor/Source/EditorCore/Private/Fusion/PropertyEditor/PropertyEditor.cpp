@@ -136,7 +136,7 @@ namespace CE::Editor
         if (type == nullptr)
             return false;
 
-        return type->IsEnum();
+        return type->IsEnum() || type->IsStruct();
     }
 
     bool PropertyEditor::IsExpandable()
@@ -219,7 +219,6 @@ namespace CE::Editor
 	        return;
         }
 
-        //this->field = field;
         this->target = targets[0];
         this->targets = targets;
 
@@ -228,7 +227,11 @@ namespace CE::Editor
 
         TypeId fieldDeclId = fieldDeclType->GetTypeId();
 
-        if (fieldDeclType->IsVectorType())
+        if (fieldDeclType->IsStruct())
+        {
+            printError("Struct not supported!");
+        }
+        else if (fieldDeclType->IsVectorType())
         {
             right->AddChild(
 				FNew(VectorEditorField)

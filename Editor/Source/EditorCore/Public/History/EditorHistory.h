@@ -42,7 +42,11 @@ namespace CE::Editor
                             return false;
                         }
                         field->SetFieldValue<T>(instance, newValue);
-                        target->OnFieldChanged(field->GetName());
+
+                        if (!operation->IsEditorGui())
+                        {
+	                        target->OnFieldChanged(field->GetName());
+                        }
                     }
 
                     return false;

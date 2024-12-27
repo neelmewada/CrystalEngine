@@ -44,9 +44,15 @@ namespace CE::Editor
         if (!targetObjectUuids.Exists(objectUuid))
             return;
 
+        String fieldNameStr = fieldName.GetString();
+        if (fieldNameStr.Contains('['))
+        {
+            fieldNameStr = fieldNameStr.Split('[')[0];
+        }
+
 	    for (PropertyEditor* propertyEditor : propertyEditors)
 	    {
-            if (fieldName == propertyEditor->relativeFieldPath)
+            if (propertyEditor->relativeFieldPath.GetString().Contains(fieldNameStr))
             {
 	            propertyEditor->UpdateValue();
                 break;

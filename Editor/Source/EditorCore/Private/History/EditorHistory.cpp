@@ -45,13 +45,20 @@ namespace CE::Editor
             operation->targets.Add(target);
         }
 
+        operation->isEditorGui = true;
         execute.Invoke(operation);
+        operation->isEditorGui = false;
 
         while (topIndex < (int)historyStack.GetSize() - 1)
         {
             historyStack[topIndex + 1]->BeginDestroy();
             historyStack.RemoveAt(topIndex + 1);
         }
+
+        /*while (historyStack.GetSize() >= OperationStackSize)
+        {
+            historyStack.RemoveAt(0);
+        }*/
 
         historyStack.Add(operation);
 
@@ -66,6 +73,8 @@ namespace CE::Editor
         {
             success = historyStack[topIndex]->unexecute.Invoke(historyStack[topIndex]);
             topIndex--;
+
+            break;
         }
     }
 
@@ -77,6 +86,8 @@ namespace CE::Editor
         {
             topIndex++;
             success = historyStack[topIndex]->execute.Invoke(historyStack[topIndex]);
+
+            break;
         }
     }
 

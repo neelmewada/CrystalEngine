@@ -7,10 +7,15 @@ namespace CE
     class CORE_API MemoryStream : public Stream
     {
     public:
+        MemoryStream();
+
         MemoryStream(u32 sizeToAllocate, b8 autoResize = true);
         MemoryStream(void* data, u32 length, Permissions permissions = Permissions::ReadOnly);
 
         virtual ~MemoryStream();
+
+        MemoryStream(const MemoryStream& copy);
+        MemoryStream& operator=(const MemoryStream& copy);
 
 		MemoryStream(MemoryStream&& move) noexcept;
         MemoryStream& operator=(MemoryStream&& move) noexcept;
@@ -53,6 +58,9 @@ namespace CE
         bool Resize(u32 newSize);
 
     private:
+
+        void CloneFrom(const MemoryStream& other);
+
         u8* data = nullptr;
         u32 bufferSize = 0;
         u32 dataSize = 0;

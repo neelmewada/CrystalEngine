@@ -104,7 +104,11 @@ namespace CE
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
-            destructionQueue[i].object->BeginDestroy();
+            if (destructionQueue[i].object.IsValid())
+            {
+	            destructionQueue[i].object->BeginDestroy();
+            }
+
             destructionQueue.RemoveAt(i);
         }
     }

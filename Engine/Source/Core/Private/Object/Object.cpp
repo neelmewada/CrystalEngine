@@ -33,12 +33,18 @@ namespace CE
 
 	void ObjectListener::Trigger(Uuid object, const Name& fieldName)
 	{
-		LockGuard lock{ mutex };
+		Array<IObjectUpdateListener*> listenerArray;
 
-		if (!listeners.KeyExists(object))
-			return;
+		{
+			LockGuard lock{ mutex };
 
-		for (IObjectUpdateListener* listener : listeners[object])
+			if (!listeners.KeyExists(object))
+				return;
+
+			listenerArray = listeners[object];
+		}
+
+		for (IObjectUpdateListener* listener : listenerArray)
 		{
 			listener->OnObjectFieldChanged(object, fieldName);
 		}

@@ -373,24 +373,17 @@ namespace CE::Editor
             }
         }
 
-        if (numericType == CE::GetTypeId<f32>())
-        {
-	        f32 value = 0;
-	        if (String::TryParse(text, value))
-	        {
-		        if (isRanged) { value = Math::Clamp<f32>(value, min, max); }
-		        f32 originalValue = static_cast<f32>(startValue);
-		        if (auto history = m_History.Lock())
-		        {
-                    history->PerformOperation<f32>("Edit Numeric Field", targetObject, relativeFieldPath,
-                        originalValue, value);
-		        }
-		        else
-		        {
-                    SetValueDirect<f32>(value);
-		        }
-	        }
-        }
+        FIELD_APPLY_OPERATION_IF(u8)
+        else FIELD_APPLY_OPERATION_IF(s8)
+		else FIELD_APPLY_OPERATION_IF(u16)
+        else FIELD_APPLY_OPERATION_IF(s16)
+        else FIELD_APPLY_OPERATION_IF(u32)
+        else FIELD_APPLY_OPERATION_IF(s32)
+        else FIELD_APPLY_OPERATION_IF(u64)
+        else FIELD_APPLY_OPERATION_IF(s64)
+        else FIELD_APPLY_OPERATION_IF(f32)
+        else FIELD_APPLY_OPERATION_IF(f64)
+        
     }
 
 #define FIELD_SET_IF(type)\

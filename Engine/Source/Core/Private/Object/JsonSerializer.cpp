@@ -39,6 +39,11 @@ namespace CE
 			WriteNext(stream);
 		}
 
+		if (stream->IsAsciiMode())
+		{
+			stream->Write('\0');
+		}
+
 		return 0;
 	}
 

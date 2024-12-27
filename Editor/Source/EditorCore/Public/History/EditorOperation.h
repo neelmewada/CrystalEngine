@@ -22,13 +22,13 @@ namespace CE::Editor
         void SetEnumValue(s64 value) { this->enumValue = value; }
         s64 GetEnumValue() const { return enumValue; }
 
-        MemoryStream& GetJsonStream() { return jsonStream; }
+        bool IsEditorGui() const { return isEditorGui; }
 
     protected:
 
         int arrayIndex = -1;
         s64 enumValue = 0;
-        MemoryStream jsonStream;
+        bool isEditorGui = false;
 
         Variant userData;
 
