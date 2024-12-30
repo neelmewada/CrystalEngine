@@ -221,6 +221,7 @@ namespace CE::Editor
 
         this->target = targets[0];
         this->targets = targets;
+        structProperties.Clear();
 
         isExpanded = PropertyEditorRegistry::Get()->IsExpanded(field);
         UpdateExpansion();
@@ -229,7 +230,29 @@ namespace CE::Editor
 
         if (fieldDeclType->IsStruct())
         {
-            printError("Struct not supported!");
+            StructType* structType = (StructType*)fieldDeclType;
+
+            right->AddChild(
+                FNew(FLabel)
+                .FontSize(10)
+                .Text(structType->GetName().GetString())
+            );
+
+            for (int i = 0; i < structType->GetFieldCount(); ++i)
+            {
+                Ptr<FieldType> structField = structType->GetFieldAt(i);
+
+                // Create editor
+                PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(structField, objectEditor);
+
+                propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
+                
+                propertyEditor->InitTarget(this->targets, relativeFieldPath + "." + structField->GetName().GetString());
+
+                expansionStack->AddChild(propertyEditor);
+
+                structProperties.Add(propertyEditor);
+            }
 
             expansionArrow->Visible(true);
         }
@@ -366,6 +389,11 @@ namespace CE::Editor
         if (splitBox != excluding)
         {
             SetSplitRatio(ratio);
+        }
+
+        for (const auto& structProp : structProperties)
+        {
+            structProp->SetSplitRatio(ratio, excluding);
         }
     }
 

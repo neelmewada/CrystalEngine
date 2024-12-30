@@ -88,6 +88,8 @@ namespace CE::Editor
         Array<WeakRef<Object>> targets;
         WeakRef<Object> target = nullptr;
 
+        Array<Ref<PropertyEditor>> structProperties;
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY_WRAPPER2(Text, fieldNameLabel, FieldNameText);

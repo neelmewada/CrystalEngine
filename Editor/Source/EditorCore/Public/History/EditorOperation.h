@@ -42,8 +42,6 @@ namespace CE::Editor
         EditorOperationDelegate execute;
         EditorOperationDelegate unexecute;
 
-        friend void Example();
-
         friend class EditorHistory;
     };
 
