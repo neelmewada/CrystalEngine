@@ -44,6 +44,8 @@ namespace CE::Editor
         if (!targetObjectUuids.Exists(objectUuid))
             return;
 
+        // TODO: Fix this for nested struct fields
+
         String fieldNameStr = fieldName.GetString();
         if (fieldNameStr.Contains('['))
         {

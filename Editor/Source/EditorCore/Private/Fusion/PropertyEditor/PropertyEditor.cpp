@@ -150,6 +150,11 @@ namespace CE::Editor
         {
             editorField->UpdateValue();
         }
+
+        for (const auto& property : structProperties)
+        {
+            property->UpdateValue();
+        }
     }
 
     void PropertyEditor::InitTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
