@@ -45,7 +45,7 @@ namespace CE::Editor
 
                         if (!operation->IsEditorGui())
                         {
-	                        target->OnFieldChanged(field->GetName());
+	                        target->OnFieldChanged(relativeFieldPath);
                         }
                     }
 
@@ -64,7 +64,7 @@ namespace CE::Editor
                             return false;
                         }
                         field->SetFieldValue<T>(instance, initialValue);
-                        target->OnFieldChanged(field->GetName());
+                        target->OnFieldChanged(relativeFieldPath);
                     }
 
                     return false;

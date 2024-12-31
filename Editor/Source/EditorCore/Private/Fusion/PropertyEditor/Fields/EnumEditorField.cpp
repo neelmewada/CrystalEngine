@@ -142,7 +142,7 @@ namespace CE::Editor
                         }
 
                         field->SetFieldEnumValue(instance, newValue);
-                        target->OnFieldChanged(field->GetName());
+                        target->OnFieldChanged(fieldPath);
 
                         return true;
                     }
@@ -164,7 +164,7 @@ namespace CE::Editor
                         }
 
                         field->SetFieldEnumValue(instance, initialValue);
-                        target->OnFieldChanged(field->GetName());
+                        target->OnFieldChanged(fieldPath);
 
                         return true;
                     }
@@ -175,7 +175,7 @@ namespace CE::Editor
         else
         {
             field->SetFieldEnumValue(outInstance, enumType->GetConstant(selectedIndex)->GetValue());
-            target->OnFieldChanged(field->GetName());
+            target->OnFieldChanged(fieldPath);
         }
     }
 }
