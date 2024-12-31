@@ -39,17 +39,19 @@ namespace CE::Editor
         }
     }
 
-    void ObjectEditor::OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName)
+    void ObjectEditor::OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldPath)
     {
         if (!targetObjectUuids.Exists(objectUuid))
             return;
 
         // TODO: Fix this for nested struct fields
 
-        String fieldNameStr = fieldName.GetString();
-        if (fieldNameStr.Contains('['))
+        String fieldNameStr = fieldPath.GetString();
+        if (fieldNameStr.Contains('[') || fieldNameStr.Contains('.'))
         {
-            fieldNameStr = fieldNameStr.Split('[')[0];
+            Array<String> splits;
+            fieldNameStr.Split({"[", "."}, splits);
+            fieldNameStr = splits[0];
         }
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
@@ -57,7 +59,6 @@ namespace CE::Editor
             if (propertyEditor->relativeFieldPath.GetString().Contains(fieldNameStr))
             {
 	            propertyEditor->UpdateValue();
-                break;
             }
 	    }
     }
