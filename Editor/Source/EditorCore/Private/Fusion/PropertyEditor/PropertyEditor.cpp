@@ -332,6 +332,10 @@ namespace CE::Editor
                 .VAlign(VAlign::Center)
             );
         }
+        else if (field->IsObjectField())
+        {
+            // TODO: Object reference editor
+        }
     }
 
     void PropertyEditor::UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)

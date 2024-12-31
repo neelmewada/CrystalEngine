@@ -23,7 +23,8 @@ namespace CE::Editor
             const SubClass<EditorOperation>& operationClass = EditorOperation::StaticClass());
 
         template<typename T>
-        void PerformOperation(const String& name, const Ref<Object>& target, const CE::Name& relativeFieldPath,
+        void PerformOperation(const String& name, const Ref<Object>& target,
+            const CE::Name& relativeFieldPath,
             const T& initialValue, const T& newValue)
         {
             WeakRef<Object> targetRef = target;

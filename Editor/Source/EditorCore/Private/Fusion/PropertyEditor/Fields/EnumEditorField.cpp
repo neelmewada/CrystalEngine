@@ -142,7 +142,11 @@ namespace CE::Editor
                         }
 
                         field->SetFieldEnumValue(instance, newValue);
-                        target->OnFieldChanged(fieldPath);
+
+                        if (!operation->IsEditorGui())
+                        {
+                            target->OnFieldChanged(fieldPath);
+                        }
 
                         return true;
                     }
