@@ -83,12 +83,12 @@ namespace CE::Editor
         if (fieldDeclId == TYPEID(String))
         {
             field->SetFieldValue<String>(instance, string);
-            target->OnFieldEdited(field->GetName());
+            target->OnFieldEdited(relativeFieldPath);
         }
         else if (fieldDeclId == TYPEID(CE::Name))
         {
             field->SetFieldValue<CE::Name>(instance, string);
-            target->OnFieldEdited(field->GetName());
+            target->OnFieldEdited(relativeFieldPath);
         }
     }
 

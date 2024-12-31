@@ -249,10 +249,15 @@ namespace CE::Editor
 
                 // Create editor
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(structField, objectEditor);
+                if (propertyEditor == nullptr)
+                {
+                    continue;
+                }
 
                 propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
                 
-                propertyEditor->InitTarget(this->targets, relativeFieldPath + "." + structField->GetName().GetString());
+                propertyEditor->InitTarget(this->targets,
+                    relativeFieldPath + "." + structField->GetName().GetString());
 
                 expansionStack->AddChild(propertyEditor);
 

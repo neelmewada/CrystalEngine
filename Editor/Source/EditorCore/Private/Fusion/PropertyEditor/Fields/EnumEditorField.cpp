@@ -84,7 +84,7 @@ namespace CE::Editor
         {
             comboBox->SelectItem(0);
             field->SetFieldEnumValue(outInstance, enumType->GetConstant(0)->GetValue());
-            target->OnFieldEdited(field->GetName());
+            target->OnFieldEdited(relativeFieldPath);
         }
     }
 

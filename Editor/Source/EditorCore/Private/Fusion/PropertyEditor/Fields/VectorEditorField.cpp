@@ -398,7 +398,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y))
             {
                 field->SetFieldValue<Vec2>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (fieldDeclId == TYPEID(Vec2i))
@@ -410,7 +410,7 @@ namespace CE::Editor
                 String::TryParse(y, value.y))
             {
                 field->SetFieldValue<Vec2i>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (fieldDeclId == TYPEID(Vec3))
@@ -424,7 +424,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z))
             {
                 field->SetFieldValue<Vec3>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (fieldDeclId == TYPEID(Vec3i))
@@ -438,7 +438,7 @@ namespace CE::Editor
                 String::TryParse(z, value.z))
             {
                 field->SetFieldValue<Vec3i>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (fieldDeclId == TYPEID(Vec4))
@@ -454,7 +454,7 @@ namespace CE::Editor
                 String::TryParse(w, value.w))
             {
                 field->SetFieldValue<Vec4>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (fieldDeclId == TYPEID(Vec4i))
@@ -470,7 +470,7 @@ namespace CE::Editor
                 String::TryParse(w, value.w))
             {
                 field->SetFieldValue<Vec4i>(instance, value);
-                target->OnFieldEdited(field->GetName());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
     }
