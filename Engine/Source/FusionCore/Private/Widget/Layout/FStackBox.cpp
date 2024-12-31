@@ -248,7 +248,12 @@ namespace CE
 		
 		if (m_ClipChildren)
 		{
-			painter->PushClipRect(Matrix4x4::Identity(), computedSize);
+			Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
+
+			painter->PushClipRect(Matrix4x4::Translation(computedPosition + GetComputedSize() * m_Anchor) *
+				Matrix4x4::Angle(-m_Angle) *
+				Matrix4x4::Scale(invScale) *
+				Matrix4x4::Translation(-computedPosition - m_Translation - GetComputedSize() * m_Anchor), computedSize);
 		}
 
 		for (const auto& child : children)

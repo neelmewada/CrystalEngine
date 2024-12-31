@@ -3,6 +3,20 @@
 namespace CE
 {
     STRUCT()
+    struct CORESETTINGS_API ProjectSettingsSigning final
+    {
+        CE_STRUCT(ProjectSettingsSigning)
+    public:
+
+        FIELD(EditAnywhere)
+        String signingKey;
+
+        FIELD(EditAnywhere)
+        bool enabled = false;
+
+    };
+
+    STRUCT()
     struct CORESETTINGS_API ProjectSettingsAdvanced final
     {
         CE_STRUCT(ProjectSettingsAdvanced)
@@ -18,7 +32,7 @@ namespace CE
         bool allowMinimize = false;
 
         FIELD(EditAnywhere)
-        String signingKey;
+        ProjectSettingsSigning signing;
 
     };
 

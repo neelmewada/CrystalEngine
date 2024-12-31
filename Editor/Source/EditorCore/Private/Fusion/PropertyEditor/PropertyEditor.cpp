@@ -423,12 +423,10 @@ namespace CE::Editor
 
         if (isExpanded)
         {
-            //PropertyEditorRegistry::Get()->ExpandField(field);
             OnExpand();
         }
         else
         {
-            //PropertyEditorRegistry::Get()->CollapseField(field);
             OnCollapse();
         }
     }
