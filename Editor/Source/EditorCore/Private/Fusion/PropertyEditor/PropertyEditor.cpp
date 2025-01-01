@@ -372,8 +372,14 @@ namespace CE::Editor
         painter->SetPen(FPen(Color::RGBA(26, 26, 26), 1));
         painter->SetBrush(FBrush());
 
+        f32 expansionHeight = 0;
+        if (expansionStack->Enabled())
+        {
+            expansionHeight = expansionStack->GetComputedSize().height;
+        }
+
         constexpr f32 height = 1.0f;
-        Vec2 pos = Vec2(0, computedSize.height - height - expansionStack->GetComputedSize().height + 1);
+        Vec2 pos = Vec2(0, computedSize.height - height - expansionHeight + 1);
         Vec2 size = Vec2(computedSize.width, height);
 
         painter->DrawLine(pos, pos + Vec2(size.x, 0));

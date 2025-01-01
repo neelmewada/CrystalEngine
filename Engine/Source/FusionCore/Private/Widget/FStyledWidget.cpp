@@ -34,10 +34,6 @@ namespace CE
 	    if ((m_BackgroundShape.GetShapeType() != FShapeType::None && m_Background.GetBrushStyle() != FBrushStyle::None) ||
             (m_BorderWidth > 0 && m_BorderColor.a > 0))
 	    {
-            if (m_Background.GetBrushStyle() == FBrushStyle::Gradient)
-            {
-                String::IsAlphabet('a');
-            }
             painter->SetBrush(m_Background);
 
             if (m_BorderWidth > 0 && m_BorderColor.a > 0)
