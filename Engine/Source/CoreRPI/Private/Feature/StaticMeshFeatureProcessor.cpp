@@ -125,10 +125,17 @@ namespace CE::RPI
 
 	void ModelDataInstance::UpdateDrawPackets(StaticMeshFeatureProcessor* fp, bool forceUpdate)
 	{
-		for (int i = 0; i < drawPacketsListByLod.GetSize(); ++i)
+		for (MaterialLodIndex i = 0; i < drawPacketsListByLod.GetSize(); ++i)
 		{
-			for (int j = 0; j < drawPacketsListByLod[i].GetSize(); ++j)
+			for (MaterialMeshIndex j = 0; j < drawPacketsListByLod[i].GetSize(); ++j)
 			{
+				CustomMaterialId materialId = CustomMaterialId(i, j);
+				
+				if (drawPacketsListByLod[i][j].GetMaterial() != materialMap[materialId])
+				{
+					drawPacketsListByLod[i][j].SetMaterial(materialMap[materialId]);
+				}
+
 				drawPacketsListByLod[i][j].Update(scene, forceUpdate);
 			}
 		}

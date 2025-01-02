@@ -25,6 +25,10 @@ namespace CE::RPI
 
         RPI::ModelLod* GetLodModel() const { return modelLod; }
 
+        void SetMaterial(RPI::Material* material);
+
+        RPI::Material* GetMaterial() const { return material; }
+
     private:
         void DoUpdate(RPI::Scene* scene);
 

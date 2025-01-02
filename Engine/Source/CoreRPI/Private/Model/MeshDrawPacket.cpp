@@ -31,6 +31,13 @@ namespace CE::RPI
 		return false;
 	}
 
+	void MeshDrawPacket::SetMaterial(RPI::Material* material)
+	{
+		this->material = material;
+
+		needsUpdate = true;
+	}
+
 	void MeshDrawPacket::DoUpdate(RPI::Scene* scene)
 	{
 		needsUpdate = false;
@@ -73,7 +80,7 @@ namespace CE::RPI
 		{
 			const ShaderCollection::Item& shaderItem = shaderCollection->At(i);
 
-			DrawListTag drawListTag = shaderItem.drawListOverride;
+			RHI::DrawListTag drawListTag = shaderItem.drawListOverride;
 			if (!drawListTag.IsValid())
 			{
 				drawListTag = shaderItem.shader->GetDrawListTag();
@@ -98,14 +105,14 @@ namespace CE::RPI
 
 			RHI::ShaderResourceGroup* perDrawSrg = nullptr;
 
-			DrawPacketBuilder::DrawItemRequest drawItem{};
-			drawItem.drawFilterMask = DrawFilterMask::ALL;
+			RHI::DrawPacketBuilder::DrawItemRequest drawItem{};
+			drawItem.drawFilterMask = RHI::DrawFilterMask::ALL;
 			drawItem.drawItemTag = drawListTag;
 			drawItem.stencilRef = stencilRef;
 
-			if (variant->HasSrgLayout(SRGType::PerDraw))
+			if (variant->HasSrgLayout(RHI::SRGType::PerDraw))
 			{
-				const ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
+				const RHI::ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
 				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
 				perDrawSrgs.Add(perDrawSrg);
 				drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
@@ -128,7 +135,7 @@ namespace CE::RPI
 			{
 				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(vertexInputName.GetString());
 
-				if (semantic.attribute != VertexInputAttribute::None)
+				if (semantic.attribute != RHI::VertexInputAttribute::None)
 				{
 					for (const auto& vertInfo : mesh->vertexBufferInfos)
 					{
