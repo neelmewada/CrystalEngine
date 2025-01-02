@@ -36,18 +36,17 @@ namespace CE::Editor
         Ref<CE::Texture> woodMetallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/metallic");
         Ref<CE::Texture> woodRoughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/WoodFloor/roughness");
 
-
         scene->SetSkyboxCubeMap(skybox.Get());
 
         {
-            CE::Material* material = CreateObject<CE::Material>(scene, "Material");
-            material->SetShader(standardShader.Get());
+            CE::Material* aluminumMaterial = CreateObject<CE::Material>(scene, "AluminumMaterial");
+            aluminumMaterial->SetShader(standardShader.Get());
 
-            material->SetProperty("_AlbedoTex", albedoTex);
-            material->SetProperty("_NormalTex", normalTex);
-            material->SetProperty("_MetallicTex", metallicTex);
-            material->SetProperty("_RoughnessTex", roughnessTex);
-            material->ApplyProperties();
+            aluminumMaterial->SetProperty("_AlbedoTex", albedoTex);
+            aluminumMaterial->SetProperty("_NormalTex", normalTex);
+            aluminumMaterial->SetProperty("_MetallicTex", metallicTex);
+            aluminumMaterial->SetProperty("_RoughnessTex", roughnessTex);
+            aluminumMaterial->ApplyProperties();
 
             CE::Material* plasticMaterial = CreateObject<CE::Material>(scene, "PlasticMaterial");
             plasticMaterial->SetShader(standardShader.Get());
@@ -71,7 +70,7 @@ namespace CE::Editor
 
             StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
             {
-                RPI::ModelAsset* sphereModel = CreateObject<ModelAsset>(sphereMesh, "SphereModel");
+                RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh, "SphereModel");
                 RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
                 sphereModel->AddModelLod(sphereLodAsset);
 
@@ -80,7 +79,7 @@ namespace CE::Editor
 
             StaticMesh* cubeMesh = CreateObject<StaticMesh>(scene, "CubeMesh");
             {
-                RPI::ModelAsset* cubeModel = CreateObject<ModelAsset>(cubeMesh, "CubeModel");
+                RPI::ModelAsset* cubeModel = CreateObject<RPI::ModelAsset>(cubeMesh, "CubeModel");
                 RPI::ModelLodAsset* cubeLodAsset = RPI::ModelLodAsset::CreateCubeAsset(cubeModel);
                 cubeModel->AddModelLod(cubeLodAsset);
 
@@ -94,7 +93,7 @@ namespace CE::Editor
             	meshComponent->SetStaticMesh(sphereMesh);
             	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
             	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
-            	meshComponent->SetMaterial(material, 0, 0);
+            	meshComponent->SetMaterial(aluminumMaterial, 0, 0);
 	        }
 
             StaticMeshActor* groundActor = CreateObject<StaticMeshActor>(scene, "Ground");

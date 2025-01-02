@@ -15,7 +15,7 @@ namespace CE
 	    {
             CE::Scene* scene = GetScene();
             RPI::Scene* rpiScene = scene->GetRpiScene();
-            StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+            RPI::StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 
             fp->ReleaseMesh(meshHandle);
 	    }
@@ -74,7 +74,7 @@ namespace CE
             return;
 
         RPI::Scene* rpiScene = scene->GetRpiScene();
-        StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
+	    RPI::StaticMeshFeatureProcessor* fp = rpiScene->GetFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
         if (!fp)
             return;
 
@@ -89,6 +89,13 @@ namespace CE
         RPI::Model* model = staticMesh->GetModelAsset()->GetModel();
         if (!model)
             return;
+
+        if (IsMaterialDirty() && !meshChanged && meshHandle.IsValid())
+        {
+            SetMaterialDirty(false);
+
+            meshHandle->materialMap = GetRpiMaterialMap();
+        }
 
         if (meshChanged)
         {

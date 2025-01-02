@@ -15,7 +15,7 @@ namespace CE
 
     RPI::CustomMaterialMap MeshComponent::GetRpiMaterialMap()
     {
-        CustomMaterialMap materialMap{};
+	    RPI::CustomMaterialMap materialMap{};
 
         for (int lodIndex = 0; lodIndex < GetLodCount(); ++lodIndex)
         {
@@ -28,7 +28,7 @@ namespace CE
                 if (material == nullptr)
                     continue;
 
-                CustomMaterialId materialId = CustomMaterialId(lodIndex, meshIndex);
+                RPI::CustomMaterialId materialId = RPI::CustomMaterialId(lodIndex, meshIndex);
                 materialMap[materialId] = material;
 	        }
         }
@@ -95,6 +95,16 @@ namespace CE
         }
 
         materialsPerLod[lodIndex].materials[subMeshIndex] = material;
+    }
+
+    void MeshComponent::OnFieldEdited(const Name& fieldName)
+    {
+	    Super::OnFieldEdited(fieldName);
+
+        if (fieldName.GetString().Contains("materials"))
+        {
+            SetMaterialDirty(true);
+        }
     }
 
 } // namespace CE

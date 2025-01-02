@@ -442,8 +442,8 @@ void EditorLoop::AppInit()
 		gDefaultWindowWidth = 800;
 		gDefaultWindowHeight = 650;
 #else
-		gDefaultWindowWidth = 1366 * FusionApplication::Get()->GetDefaultScalingFactor();
-		gDefaultWindowHeight = 1000 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowWidth = 800 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowHeight = 650 * FusionApplication::Get()->GetDefaultScalingFactor();
 #endif
 	}
 
@@ -451,7 +451,6 @@ void EditorLoop::AppInit()
 
 	mainWindow->SetMinimumSize(isProjectBrowsingMode ? Vec2i(gDefaultWindowWidth, gDefaultWindowHeight) : Vec2i(1280, 720));
 	mainWindow->SetBorderless(true);
-
 }
 
 void EditorLoop::AppPreShutdown()

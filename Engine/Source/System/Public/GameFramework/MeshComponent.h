@@ -38,12 +38,24 @@ namespace CE
 
 		void SetMaterial(MaterialInterface* material, u32 lodIndex, u32 subMeshIndex);
 
+		bool IsMaterialDirty() const { return materialDirty; }
+
+		void SetMaterialDirty(bool set = true) { materialDirty = set; }
+
+	protected:
+
+		void OnFieldEdited(const Name& fieldName) override;
+
 	protected:
 
 		//! @brief Materials per LOD mesh
 		FIELD(EditAnywhere, Category = "Materials")
         Array<LodMaterial> materialsPerLod{};
 
+
+	private:
+
+		b8 materialDirty = false;
 	};
     
 } // namespace CE
