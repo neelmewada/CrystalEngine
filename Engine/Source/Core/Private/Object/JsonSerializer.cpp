@@ -375,6 +375,78 @@ namespace CE
 				writer.WriteObjectClose();
 			}
 		}
+		else if (field->IsEventField())
+		{
+			IScriptEvent* event = field->GetFieldEventValue(rawInstance);
+			Array<FunctionBinding> bindings = event->GetSerializableBindings();
+
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			writer.WriteArrayStart();
+
+			for (const auto& binding : bindings)
+			{
+				Ref<Object> boundObject = binding.object.Lock();
+
+				if (boundObject.IsNull())
+				{
+					writer.WriteNull();
+					continue;
+				}
+
+				Ref<Bundle> bundle = boundObject->GetBundle();
+
+				if (bundle.IsNull())
+				{
+					writer.WriteNull();
+					continue;
+				}
+
+				writer.WriteObjectStart();
+				{
+					writer.WriteIdentifier("bundle");
+					writer.WriteValue(bundle->GetUuid());
+
+					writer.WriteIdentifier("object");
+					writer.WriteValue(boundObject->GetUuid());
+				}
+				writer.WriteObjectClose();
+			}
+
+			writer.WriteArrayClose();
+		}
+		else if (field->IsDelegateField())
+		{
+			IScriptDelegate* delegate = field->GetFieldDelegateValue(rawInstance);
+
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			FunctionBinding binding = delegate->GetBinding();
+
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			Ref<Object> boundObject = binding.object.Lock();
+
+			if (boundObject.IsValid() && boundObject->GetBundle() != nullptr)
+			{
+				writer.WriteObjectStart();
+				{
+					writer.WriteIdentifier("bundle");
+					writer.WriteValue(boundObject->GetBundle()->GetUuid());
+
+					writer.WriteIdentifier("object");
+					writer.WriteValue(boundObject->GetUuid());
+				}
+				writer.WriteObjectClose();
+			}
+			else
+			{
+				writer.WriteNull();
+			}
+		}
         
         if (fields.IsEmpty())
         {
@@ -1060,6 +1132,24 @@ namespace CE
 					value = nullptr;
 				}
 			}
+			else if (fieldTypeId == TYPEID(ClassType))
+			{
+				ClassType* classType = ClassType::FindClass(json.GetStringValue());
+
+				field->SetFieldValue<ClassType*>(rawInstance, classType);
+			}
+			else if (fieldTypeId == TYPEID(StructType))
+			{
+				StructType* structType = StructType::FindStruct(json.GetStringValue());
+
+				field->SetFieldValue<StructType*>(rawInstance, structType);
+			}
+			else if (fieldTypeId == TYPEID(EnumType))
+			{
+				EnumType* enumType = EnumType::FindEnum(json.GetStringValue());
+
+				field->SetFieldValue<EnumType*>(rawInstance, enumType);
+			}
 			else if (field->IsEnumField()) // Deserialize enum from string
 			{
 				EnumType* enumType = (EnumType*)fieldDeclType;
@@ -1079,6 +1169,8 @@ namespace CE
 		else if (json.IsStringValue() && fieldTypeId == TYPEID(Uuid))
 		{
 			field->SetFieldValue<Uuid>(rawInstance, Uuid::FromString(json.GetStringValue()));
+
+			return true;
 		}
 		else if (json.IsObjectValue() && fieldDeclType->IsStruct())
 		{
@@ -1163,6 +1255,8 @@ namespace CE
 				val.top    = lround(value.top);
 				val.bottom = lround(value.bottom);
 			}
+
+			return true;
 		}
 		else if (json.IsArrayValue() && fieldDeclType->IsArrayType())
 		{

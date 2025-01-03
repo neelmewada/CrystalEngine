@@ -23,12 +23,14 @@ namespace CE::Editor
         s64 GetEnumValue() const { return enumValue; }
 
         bool IsEditorGui() const { return isEditorGui; }
+        bool IsFirstTime() const { return isFirstTime; }
 
     protected:
 
         int arrayIndex = -1;
         s64 enumValue = 0;
         bool isEditorGui = false;
+        bool isFirstTime = false;
 
         Variant userData;
 

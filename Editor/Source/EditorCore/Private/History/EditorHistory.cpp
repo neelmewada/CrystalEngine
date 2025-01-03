@@ -46,8 +46,12 @@ namespace CE::Editor
         }
 
         operation->isEditorGui = true;
+        operation->isFirstTime = true;
+
         execute.Invoke(operation);
-        operation->isEditorGui = false;
+
+    	operation->isEditorGui = false;
+        operation->isFirstTime = false;
 
         while (topIndex < (int)historyStack.GetSize() - 1)
         {

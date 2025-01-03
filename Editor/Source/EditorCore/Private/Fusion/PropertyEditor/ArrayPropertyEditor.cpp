@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+    static constexpr const char OperationName[] = "Delete Array Element";
+
     static HashSet<TypeId> serializableOpaqueTypes = {
         TYPEID(u8), TYPEID(s8),
         TYPEID(u16), TYPEID(s16),
@@ -125,28 +127,28 @@ namespace CE::Editor
         constexpr f32 iconSize = 16;
 
         (*right)
-            .Gap(10)
-            (
-                FAssignNew(FLabel, countLabel),
+        .Gap(10)
+        (
+            FAssignNew(FLabel, countLabel),
 
-                FNew(FImageButton)
-                .Image(addIcon)
-                .OnClicked(FUNCTION_BINDING(this, InsertElement))
-                .Width(iconSize)
-                .Height(iconSize)
-                .VAlign(VAlign::Center)
-                .Padding(Vec4(1, 1, 1, 1) * 3)
-                .Style("Button.Icon"),
+            FNew(FImageButton)
+            .Image(addIcon)
+            .OnClicked(FUNCTION_BINDING(this, InsertElement))
+            .Width(iconSize)
+            .Height(iconSize)
+            .VAlign(VAlign::Center)
+            .Padding(Vec4(1, 1, 1, 1) * 3)
+            .Style("Button.Icon"),
 
-                FNew(FImageButton)
-                .Image(deleteIcon)
-                .OnClicked(FUNCTION_BINDING(this, DeleteAllElements))
-                .Width(iconSize)
-                .Height(iconSize)
-                .VAlign(VAlign::Center)
-                .Padding(Vec4(1, 1, 1, 1) * 3)
-                .Style("Button.Icon")
-            );
+            FNew(FImageButton)
+            .Image(deleteIcon)
+            .OnClicked(FUNCTION_BINDING(this, DeleteAllElements))
+            .Width(iconSize)
+            .Height(iconSize)
+            .VAlign(VAlign::Center)
+            .Padding(Vec4(1, 1, 1, 1) * 3)
+            .Style("Button.Icon")
+        );
 
         UpdateValue();
 
@@ -387,10 +389,133 @@ namespace CE::Editor
         // TODO: Delete elements in a way that they can be re-created back to the same state.
         // Use serialization
 
-        /*while (field->GetArraySize(instance) > 0)
+        Ref<EditorHistory> history = objectEditor->GetEditorHistory();
+        Ref<Object> target = this->target.Lock();
+        WeakRef<Object> targetWeak = target;
+        CE::Name arrayFieldPath = relativeFieldPath;
+
+        if (history.IsValid())
         {
-            field->DeleteArrayElement(instance, 0);
-        }*/
+            Ptr<FieldType> field;
+            void* instance = nullptr;
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                field, instance);
+            if (!success)
+            {
+                return;
+            }
+
+            TypeInfo* underlyingType = field->GetUnderlyingType();
+            if (underlyingType == nullptr)
+            {
+	            return;
+            }
+
+            TypeId underlyingTypeId = underlyingType->GetTypeId();
+
+            if (underlyingType->IsObject())
+            {
+	            
+            }
+            else if (underlyingType->IsStruct())
+            {
+	            
+            }
+            else if (underlyingType->IsEnum())
+            {
+	            
+            }
+            else if (underlyingType->GetTypeId() == TYPEID(ScriptEvent<>))
+            {
+	            
+            }
+            else if (underlyingType->GetTypeId() == TYPEID(ScriptDelegate<>))
+            {
+
+            }
+            else // POD/Opaque types
+            {
+                if (serializableOpaqueTypes.Exists(underlyingTypeId))
+                {
+                    // Serialize entire array as a 'snapshot'
+
+                    MemoryStream jsonData = MemoryStream(1024, true);
+                    jsonData.SetAsciiMode(true);
+                    jsonData.SetAutoResizeIncrement(1024);
+
+                    JsonFieldSerializer serializer{ { field }, instance };
+                    serializer.Serialize(&jsonData);
+                    jsonData.Seek(0);
+
+                    history->PerformOperation(OperationName, target,
+                        [targetWeak, arrayFieldPath]
+                        (const Ref<EditorOperation>& operation)
+                        {
+                            if (auto target = targetWeak.Lock())
+                            {
+                                Ptr<FieldType> field;
+                                void* instance = nullptr;
+                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                    field, instance);
+                                if (!success)
+                                    return false;
+
+                                while (field->GetArraySize(instance) > 0)
+                                {
+                                    field->DeleteArrayElement(instance, 0);
+                                }
+
+                                target->OnFieldChanged(field->GetName());
+
+                                return true;
+                            }
+
+                            return false;
+                        },
+                        [targetWeak, arrayFieldPath, jsonData]
+                        (const Ref<EditorOperation>& operation)
+                        {
+                            if (auto target = targetWeak.Lock())
+                            {
+                                Ptr<FieldType> field;
+                                void* instance = nullptr;
+                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                    field, instance);
+                                if (!success)
+                                    return false;
+
+                                MemoryStream& json = const_cast<MemoryStream&>(jsonData);
+                                json.Seek(0);
+
+                                JsonFieldDeserializer deserializer{ { field }, instance };
+                                deserializer.Deserialize(&json);
+
+                                target->OnFieldChanged(field->GetName());
+
+                                return true;
+                            }
+
+                            return false;
+                        });
+                }
+            }
+        }
+        else
+        {
+            Ptr<FieldType> field;
+            void* instance = nullptr;
+            bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                field, instance);
+            if (!success)
+            {
+                return;
+            }
+
+            while (field->GetArraySize(instance) > 0)
+            {
+                field->DeleteArrayElement(instance, 0);
+            }
+        }
 
         UpdateValue();
     }
@@ -404,9 +529,6 @@ namespace CE::Editor
 
         if (history.IsValid())
         {
-            // TODO: Delete elements in a way that they can be re-created back to the same state.
-			// Use serialization
-
             Ptr<FieldType> field;
             void* instance = nullptr;
             bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
@@ -429,24 +551,17 @@ namespace CE::Editor
 
             if (declType->IsObject())
             {
-                Ref<Object> object = nullptr;
+                // Serialize entire array as a 'snapshot'
 
-	            if (elementField->IsStrongRefCounted())
-	            {
-                    object = elementField->GetFieldValue<Ref<Object>>(arrayInstance);
-	            }
-                else if (elementField->IsWeakRefCounted())
-                {
-                    object = elementField->GetFieldValue<WeakRef<Object>>(arrayInstance).Lock();
-                }
-                else
-                {
-                    object = elementField->GetFieldValue<Object*>(arrayInstance);
-                }
+                MemoryStream jsonData = MemoryStream(1024, true);
+                jsonData.SetAsciiMode(true);
+                jsonData.SetAutoResizeIncrement(1024);
 
-                WeakRef<Object> objectWeakRef = object;
+                JsonFieldSerializer serializer{ { field }, instance };
+                serializer.Serialize(&jsonData);
+                jsonData.Seek(0);
 
-                history->PerformOperation("Delete Array Element", target,
+                history->PerformOperation(OperationName, target,
                     [targetWeak, index, arrayFieldPath]
                     (const Ref<EditorOperation>& operation)
                     {
@@ -464,16 +579,33 @@ namespace CE::Editor
                             field->DeleteArrayElement(instance, index);
 
                             target->OnFieldChanged(field->GetName());
+
+                            return true;
                         }
 
                         return false;
                     },
-                    [targetWeak, index, arrayFieldPath, objectWeakRef]
+                    [targetWeak, jsonData, arrayFieldPath]
                     (const Ref<EditorOperation>& operation)
                     {
                         if (auto target = targetWeak.Lock())
                         {
+                            Ptr<FieldType> field;
+                            void* instance = nullptr;
+                            bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                                field, instance);
+                            if (!success)
+                                return false;
 
+                            MemoryStream& json = const_cast<MemoryStream&>(jsonData);
+                            json.Seek(0);
+
+                            JsonFieldDeserializer deserializer{ { field }, instance };
+                            deserializer.Deserialize(&json);
+
+                            target->OnFieldChanged(field->GetName());
+
+                            return true;
                         }
 
                         return false;
@@ -492,7 +624,7 @@ namespace CE::Editor
                 serializer.Serialize(&jsonData);
                 jsonData.Seek(0);
 
-                history->PerformOperation("Delete Array Element", target,
+                history->PerformOperation(OperationName, target,
                     [targetWeak, index, arrayFieldPath](const Ref<EditorOperation>& operation)
                     {
                         if (auto target = targetWeak.Lock())
@@ -542,7 +674,7 @@ namespace CE::Editor
             {
                 s64 enumValue = elementField->GetFieldEnumValue(arrayInstance);
 
-                history->PerformOperation("Delete Array Element", target,
+                history->PerformOperation(OperationName, target,
                     [targetWeak, index, arrayFieldPath, enumValue](const Ref<EditorOperation>& operation)
                     {
                         if (auto target = targetWeak.Lock())
@@ -614,7 +746,7 @@ namespace CE::Editor
                     serializer.Serialize(&jsonData);
                     jsonData.Seek(0);
 
-                    history->PerformOperation("Delete Array Element", target,
+                    history->PerformOperation(OperationName, target,
                         [targetWeak, index, arrayFieldPath]
                         (const Ref<EditorOperation>& operation)
                         {
