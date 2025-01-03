@@ -413,92 +413,65 @@ namespace CE::Editor
 
             TypeId underlyingTypeId = underlyingType->GetTypeId();
 
-            if (underlyingType->IsObject())
-            {
-	            
-            }
-            else if (underlyingType->IsStruct())
-            {
-	            
-            }
-            else if (underlyingType->IsEnum())
-            {
-	            
-            }
-            else if (underlyingType->GetTypeId() == TYPEID(ScriptEvent<>))
-            {
-	            
-            }
-            else if (underlyingType->GetTypeId() == TYPEID(ScriptDelegate<>))
-            {
+            
+            MemoryStream jsonData = MemoryStream(1024, true);
+            jsonData.SetAsciiMode(true);
+            jsonData.SetAutoResizeIncrement(1024);
 
-            }
-            else // POD/Opaque types
-            {
-                if (serializableOpaqueTypes.Exists(underlyingTypeId))
+            JsonFieldSerializer serializer{ { field }, instance };
+            serializer.Serialize(&jsonData);
+            jsonData.Seek(0);
+
+            history->PerformOperation(OperationName, target,
+                [targetWeak, arrayFieldPath]
+                (const Ref<EditorOperation>& operation)
                 {
-                    // Serialize entire array as a 'snapshot'
-
-                    MemoryStream jsonData = MemoryStream(1024, true);
-                    jsonData.SetAsciiMode(true);
-                    jsonData.SetAutoResizeIncrement(1024);
-
-                    JsonFieldSerializer serializer{ { field }, instance };
-                    serializer.Serialize(&jsonData);
-                    jsonData.Seek(0);
-
-                    history->PerformOperation(OperationName, target,
-                        [targetWeak, arrayFieldPath]
-                        (const Ref<EditorOperation>& operation)
-                        {
-                            if (auto target = targetWeak.Lock())
-                            {
-                                Ptr<FieldType> field;
-                                void* instance = nullptr;
-                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
-                                    field, instance);
-                                if (!success)
-                                    return false;
-
-                                while (field->GetArraySize(instance) > 0)
-                                {
-                                    field->DeleteArrayElement(instance, 0);
-                                }
-
-                                target->OnFieldChanged(field->GetName());
-
-                                return true;
-                            }
-
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                            field, instance);
+                        if (!success)
                             return false;
-                        },
-                        [targetWeak, arrayFieldPath, jsonData]
-                        (const Ref<EditorOperation>& operation)
+
+                        while (field->GetArraySize(instance) > 0)
                         {
-                            if (auto target = targetWeak.Lock())
-                            {
-                                Ptr<FieldType> field;
-                                void* instance = nullptr;
-                                bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
-                                    field, instance);
-                                if (!success)
-                                    return false;
+                            field->DeleteArrayElement(instance, 0);
+                        }
 
-                                MemoryStream& json = const_cast<MemoryStream&>(jsonData);
-                                json.Seek(0);
+                        target->OnFieldChanged(field->GetName());
 
-                                JsonFieldDeserializer deserializer{ { field }, instance };
-                                deserializer.Deserialize(&json);
+                        return true;
+                    }
 
-                                target->OnFieldChanged(field->GetName());
-
-                                return true;
-                            }
-
+                    return false;
+                },
+                [targetWeak, arrayFieldPath, jsonData]
+                (const Ref<EditorOperation>& operation)
+                {
+                    if (auto target = targetWeak.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(arrayFieldPath, target,
+                            field, instance);
+                        if (!success)
                             return false;
-                        });
-                }
-            }
+
+                        MemoryStream& json = const_cast<MemoryStream&>(jsonData);
+                        json.Seek(0);
+
+                        JsonFieldDeserializer deserializer{ { field }, instance };
+                        deserializer.Deserialize(&json);
+
+                        target->OnFieldChanged(field->GetName());
+
+                        return true;
+                    }
+
+                    return false;
+                });
         }
         else
         {

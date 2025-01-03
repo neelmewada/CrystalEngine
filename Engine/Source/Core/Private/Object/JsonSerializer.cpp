@@ -410,6 +410,9 @@ namespace CE
 
 					writer.WriteIdentifier("object");
 					writer.WriteValue(boundObject->GetUuid());
+
+					writer.WriteIdentifier("function");
+					writer.WriteValue(binding.function->GetName().GetString());
 				}
 				writer.WriteObjectClose();
 			}
@@ -439,6 +442,9 @@ namespace CE
 
 					writer.WriteIdentifier("object");
 					writer.WriteValue(boundObject->GetUuid());
+
+					writer.WriteIdentifier("function");
+					writer.WriteValue(binding.function->GetName().GetString());
 				}
 				writer.WriteObjectClose();
 			}
@@ -1345,6 +1351,91 @@ namespace CE
 				field->SetFieldValue<Vec4i>(rawInstance, vec4i);
 			else if (fieldTypeId == TYPEID(Color))
 				field->SetFieldValue<Color>(rawInstance, Color(vec4.x, vec4.y, vec4.z, vec4.w));
+
+			return true;
+		}
+		else if (json.IsArrayValue() && field->IsEventField())
+		{
+			IScriptEvent* event = field->GetFieldEventValue(rawInstance);
+			event->UnbindAll();
+
+			for (int i = 0; i < json.GetArrayValue().GetSize(); ++i)
+			{
+				const JValue& element = json.GetArrayValue()[i];
+				if (!element.IsObjectValue())
+					continue;
+
+				const JObject& objectValue = element.GetObjectValue();
+				if (!objectValue.KeyExists("object") || 
+					!objectValue.KeyExists("bundle") ||
+					!objectValue.KeyExists("function") ||
+					!objectValue.Get("object").IsStringValue() ||
+					!objectValue.Get("bundle").IsStringValue() ||
+					!objectValue.Get("function").IsStringValue())
+					continue;
+
+				Uuid objectUuid = Uuid::FromString(objectValue.Get("object").GetStringValue());
+				Uuid bundleUuid = Uuid::FromString(objectValue.Get("bundle").GetStringValue());
+				String functionName = objectValue.Get("function").GetStringValue();
+
+				Ref<Bundle> bundle = Bundle::LoadBundle(nullptr, bundleUuid, {
+					.loadFully = true,
+					.forceReload = false,
+				});
+
+				if (bundle.IsValid())
+				{
+					Ref<Object> objectRef = bundle->LoadObject(objectUuid);
+					if (objectRef.IsValid())
+					{
+						FunctionType* function = objectRef->GetClass()->FindFunctionWithName(functionName);
+						if (function != nullptr)
+						{
+							event->Bind(objectRef, function);
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+		else if (json.IsObjectValue() && field->IsDelegateField())
+		{
+			IScriptDelegate* delegate = field->GetFieldDelegateValue(rawInstance);
+			delegate->Unbind();
+
+			const JObject& objectValue = json.GetObjectValue();
+			if (!objectValue.KeyExists("object") ||
+				!objectValue.KeyExists("bundle") ||
+				!objectValue.KeyExists("function") ||
+				!objectValue.Get("object").IsStringValue() ||
+				!objectValue.Get("bundle").IsStringValue() ||
+				!objectValue.Get("function").IsStringValue())
+			{
+				return false;
+			}
+
+			Uuid objectUuid = Uuid::FromString(objectValue.Get("object").GetStringValue());
+			Uuid bundleUuid = Uuid::FromString(objectValue.Get("bundle").GetStringValue());
+			String functionName = objectValue.Get("function").GetStringValue();
+
+			Ref<Bundle> bundle = Bundle::LoadBundle(nullptr, bundleUuid, {
+				.loadFully = true,
+				.forceReload = false,
+			});
+
+			if (bundle.IsValid())
+			{
+				Ref<Object> objectRef = bundle->LoadObject(objectUuid);
+				if (objectRef.IsValid())
+				{
+					FunctionType* function = objectRef->GetClass()->FindFunctionWithName(functionName);
+					if (function != nullptr)
+					{
+						delegate->Bind(objectRef, function);
+					}
+				}
+			}
 
 			return true;
 		}
