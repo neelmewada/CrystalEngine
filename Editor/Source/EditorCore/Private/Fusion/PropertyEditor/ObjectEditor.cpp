@@ -249,7 +249,9 @@ namespace CE::Editor
 
                 Array<WeakRef<Object>> targetsArray = { target };
 
-                propertyEditor->InitTarget(targetsArray, field->GetName().GetString());
+                String fieldName = field->GetName().GetString();
+
+                propertyEditor->InitTarget(targetsArray, fieldName);
 
                 propertyEditors.Add(propertyEditor);
             }

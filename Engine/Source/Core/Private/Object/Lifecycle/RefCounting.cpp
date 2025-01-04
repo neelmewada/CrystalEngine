@@ -14,7 +14,7 @@ namespace CE::Internal
 
 		if (refCount == 0) // If no strong references are remaining
 		{
-			bool destroyThis = false;
+			bool destroyThis;
 
 			{
 				LockGuard guard{ lock };
