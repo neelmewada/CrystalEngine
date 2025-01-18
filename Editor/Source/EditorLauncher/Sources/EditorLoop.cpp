@@ -438,12 +438,14 @@ void EditorLoop::AppInit()
 	{
 		isProjectBrowsingMode = true;
 		//windowInfo.windowFlags |= PlatformWindowFlags::Utility;
+		f32 systemScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+
 #if PLATFORM_MAC
 		gDefaultWindowWidth = 800;
 		gDefaultWindowHeight = 650;
 #else
-		gDefaultWindowWidth = 800 * FusionApplication::Get()->GetDefaultScalingFactor();
-		gDefaultWindowHeight = 650 * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowWidth = 800 * systemScaling * FusionApplication::Get()->GetDefaultScalingFactor();
+		gDefaultWindowHeight = 650 * systemScaling * FusionApplication::Get()->GetDefaultScalingFactor();
 #endif
 	}
 
